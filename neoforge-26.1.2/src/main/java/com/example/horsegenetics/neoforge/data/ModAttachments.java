@@ -216,6 +216,27 @@ public final class ModAttachments {
                     .serialize(net.minecraft.core.GlobalPos.CODEC.optionalFieldOf("realm_return"))
                     .build());
 
+    // WHO TIED THE LEAD ON. Read at exactly one moment - when vanilla is about
+    // to drop an Items.LEAD on the ground - so that the lead can go to them
+    // instead. See server/HorseLeads and mixin/LeashPlacerMixin.
+    //
+    // It has to be stored rather than derived because a lead on a fence knot has
+    // no player anywhere in it: the knot is the holder, and by the time the lead
+    // is dropped vanilla has already cleared the leash data. Serialized, because
+    // a horse can stand tied to a fence across a restart and the lead is still
+    // somebody's. Not synced - nothing on the client reads it. Not copyOnDeath:
+    // a horse that died was not wearing anybody's lead afterwards.
+    //
+    // It is deliberately NOT cleared when the lead comes off, because the drop
+    // reads it after vanilla has untied the horse. A stale value is harmless -
+    // it is only ever consulted while a lead is being dropped, and the next
+    // player to tie one on overwrites it.
+    public static final Supplier<AttachmentType<java.util.Optional<java.util.UUID>>> LEASH_PLACER =
+            ATTACHMENT_TYPES.register("leash_placer", () -> AttachmentType
+                    .<java.util.Optional<java.util.UUID>>builder(java.util.Optional::empty)
+                    .serialize(net.minecraft.core.UUIDUtil.CODEC.optionalFieldOf("leash_placer"))
+                    .build());
+
     private ModAttachments() {
     }
 }

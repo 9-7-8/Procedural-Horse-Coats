@@ -201,9 +201,11 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue LAST_STAND_REARM_FRACTION;
 
     /**
-     * <b>Does a lead come back to you when this mod teleports the horse wearing
-     * it?</b> Off, it falls on the ground where the horse was, which is vanilla's
-     * rule for a broken leash. See {@code server/HorseLeads}.
+     * <b>Does a lead come back to you rather than falling on the ground?</b>
+     * Covers both halves: the leads this mod causes to be dropped by teleporting
+     * a horse, and the ones vanilla drops on its own - a snapped leash, a broken
+     * knot. Off, every one of them falls where vanilla would put it. See
+     * {@code server/HorseLeads}.
      */
     public static final ModConfigSpec.BooleanValue LEADS_RETURN;
 
@@ -575,20 +577,28 @@ public final class ServerConfig {
                 .defineInRange("behaviour.last_stand_rearm_fraction",
                         com.example.horsegenetics.common.care.LastStand.DEFAULT_REARM_FRACTION, 0.0, 1.0);
         LEADS_RETURN = builder
-                .comment("Whether a lead comes back to you when this mod teleports the horse wearing it. (default: true)",
-                        "A whistle, an ender whistle and a ticket all have to untie a horse",
-                        "before moving it, and vanilla's rule for an untied leash is to drop the",
-                        "lead where the animal was standing. That is right for a leash that",
-                        "snapped and wrong for one you deliberately cut: the horse lands beside",
-                        "you and the lead stays where it was - up to 64 blocks off for an echo",
-                        "whistle, and in another dimension entirely for an ender whistle or an",
-                        "interdimensional ticket, where it is simply lost.",
-                        "On, the lead goes to the player who blew the whistle or used the ticket,",
-                        "or drops at their feet if their inventory is full.",
-                        "Off restores vanilla's behaviour exactly.",
-                        "The two portal paths are not covered either way: a horse that walked",
+                .comment("Whether a lead comes back to you rather than falling on the ground. (default: true)",
+                        "Two things are covered, and they used to be one.",
+                        "First, this mod's own teleports. A whistle, an ender whistle and a",
+                        "ticket all have to untie a horse before moving it, and vanilla's rule",
+                        "for an untied leash is to drop the lead where the animal was standing.",
+                        "The horse lands beside you and the lead stays where it was - up to 64",
+                        "blocks off for an echo whistle, and in another dimension entirely for",
+                        "an ender whistle or an interdimensional ticket, where it is simply lost.",
+                        "On, that lead goes to the player who blew the whistle or used the ticket.",
+                        "Second, the leads VANILLA drops: a leash that snapped because the horse",
+                        "got too far away, a fence knot broken by hand, or a holder that stopped",
+                        "existing. On, that lead goes to whoever tied it on, wherever they are -",
+                        "another dimension included - rather than falling at the horse's feet.",
+                        "Either way it drops at the recipient's own feet if their pack is full,",
+                        "and nothing is ever deleted.",
+                        "Off restores vanilla's behaviour exactly, for both halves.",
+                        "Three cases stay vanilla's whatever this is set to. A horse that walked",
                         "into a portal was untied next to whoever was holding it, so the lead is",
-                        "already at their feet.")
+                        "at their feet already. A lead nobody was recorded as tying on - a horse",
+                        "leashed by a command, or before this shipped - has no one to send it to.",
+                        "And a lead whose owner is offline falls on the ground rather than being",
+                        "held for them.")
                 .define("behaviour.leads_return", true);
         MOUNTED_MINING_PENALTY_REMOVED = builder
                 .comment("Whether a rider mines at full speed. (default: true)",

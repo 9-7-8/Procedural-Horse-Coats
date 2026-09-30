@@ -1194,6 +1194,8 @@ public final class ModGameTests {
         register(event, environment, OLD_PAPERS_STILL_READ, 100);
         // Leash, untie, then five ticks for a ground drop to become visible.
         register(event, environment, WHISTLED_LEAD_COMES_BACK, 100);
+        // One horse, two mock players, all synchronous - nothing is dropped.
+        register(event, environment, VANILLA_LEAD_COMES_BACK, 100);
         // One chunk generated and decorated, then six block reads, in one tick.
         register(event, environment, HORSE_REALM_IS_BUILT, 200);
         // Four thousand hashes; no world touched at all.
@@ -1389,6 +1391,144 @@ public final class ModGameTests {
             helper.assertItemEntityNotPresent(Items.LEAD, BlockPos.ZERO, 16.0);
             helper.succeed();
         });
+    }
+
+    /**
+     * <b>A lead that <i>vanilla</i> drops goes back to whoever tied it on.</b>
+     * The other half of {@link #WHISTLED_LEAD_COMES_BACK}, and a much less
+     * direct piece of machinery: two mixins and a stored UUID, where that one
+     * was a method call.
+     *
+     * <p>Four things are asserted, and three of them are about the parts that
+     * are <b>invisible when they break</b>.
+     *
+     * <ol>
+     *   <li><b>The placer is recorded at all.</b> If {@code LeashPlacerMixin}
+     *       never fires there is nobody to give anything to and the whole
+     *       feature is silently absent - which looks exactly like vanilla,
+     *       because it <i>is</i> vanilla.</li>
+     *   <li><b>Tying to a fence does not erase it.</b> This is the load-bearing
+     *       claim in {@code LeashPlacerMixin}'s javadoc and it is a claim about
+     *       vanilla's control flow, not about this mod: that
+     *       {@code Leashable.setLeashedTo} reaches {@code setLeashData} only on
+     *       a <i>first</i> attachment and takes a {@code setLeashHolder} branch
+     *       afterwards. If that is wrong, the fence case - the one the whole
+     *       design exists for, since a knot has no player in it - loses its
+     *       placer at the moment of tying.</li>
+     *   <li><b>An unreachable placer is refused</b>, so vanilla drops the lead
+     *       where it always did. The rule is never hold a lead for later, and
+     *       a lead that goes nowhere is worse than doing nothing at all.</li>
+     *   <li><b>The right player gets it, the record is cleared, and a
+     *       different player is refused</b> - a lead handed to whoever happens
+     *       to ask would be a quiet theft, and a record left behind would mint
+     *       a second lead on the next drop.</li>
+     * </ol>
+     *
+     * <p><b>It drops nothing on the ground, deliberately.</b> The first draft
+     * asserted case 3 by really calling {@code dropLeash()} and finding the
+     * lead on the floor - and it broke {@code whistled_lead_comes_back}, whose
+     * own {@code assertItemEntityNotPresent} reaches sixteen blocks and found
+     * this test's lead in the neighbouring plot. A test that litters the shared
+     * world is a test that fails its neighbours.
+     *
+     * <p><b>Nor does it make a real player.</b> A gametest server has nobody on
+     * it, so the only player {@code getPlayerList()} could find is one built by
+     * {@code makeMockServerPlayerInLevel} - {@code @Deprecated(forRemoval)},
+     * and it really joins the player list, which fires this mod's join payloads
+     * down an {@code EmbeddedChannel} that has negotiated nothing and takes the
+     * run down with <i>"Payload horsegenetics:gene_database_sync may not be
+     * sent to the client"</i>. So the test drives
+     * {@link HorseLeads#giveRecordedLeadTo} and leaves the one line above it,
+     * the player-list lookup, to the in-game check.
+     *
+     * <p><b>That the mixins are applied is not this test's job.</b> The mixin
+     * config's {@code defaultRequire} of 1 is a stronger guarantee than a
+     * gametest could give: a target that stops matching refuses to boot the
+     * game rather than quietly doing nothing. What is asserted here is
+     * everything that would still be wrong with both mixins happily applied.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> VANILLA_LEAD_COMES_BACK =
+            TEST_FUNCTIONS.register("vanilla_lead_comes_back", () -> ModGameTests::vanillaLeadComesBack);
+
+    private static void vanillaLeadComesBack(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.leadsReturn()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.leads_return is off in this run's server config, so this test"
+                            + " asserts the wrong branch - turn it back on rather than deleting"
+                            + " the test"), 0);
+        }
+
+        net.minecraft.world.entity.player.Player placer =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.player.Player stranger =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        if (placer.getUUID().equals(stranger.getUUID())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the two mock players share a UUID, so the wrong-player case below would"
+                            + " pass whatever the code did - the premise is broken"), 0);
+        }
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+
+        // --- 1. the placer is written down when the lead goes on -------------
+        horse.setLeashedTo(placer, true);
+        if (!horse.isLeashed()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the test horse would not take a leash at all - the premise is broken,"
+                            + " not the mixin"), 0);
+        }
+        if (!HorseLeads.placerOf(horse).filter(placer.getUUID()::equals).isPresent()) {
+            throw new GameTestAssertException(Component.literal(
+                    "nobody was recorded as tying the lead on, so there would be nobody to"
+                            + " give it back to and the feature is silently absent."
+                            + " LeashPlacerMixin is not firing on Mob.setLeashData."), 0);
+        }
+
+        // --- 2. and moving that lead onto a fence knot does not wipe it ------
+        net.minecraft.world.entity.decoration.LeashFenceKnotEntity knot =
+                net.minecraft.world.entity.decoration.LeashFenceKnotEntity.getOrCreateKnot(
+                        helper.getLevel(), helper.absolutePos(BlockPos.ZERO));
+        horse.setLeashedTo(knot, true);
+        if (!HorseLeads.placerOf(horse).filter(placer.getUUID()::equals).isPresent()) {
+            throw new GameTestAssertException(Component.literal(
+                    "tying the horse to a fence erased who tied the lead on. A knot has no"
+                            + " player in it anywhere, so that is precisely the case the stored"
+                            + " UUID exists for - vanilla's setLeashedTo is no longer taking the"
+                            + " setLeashHolder branch this rests on."), 0);
+        }
+
+        // --- 3. a placer nobody can reach is refused, so vanilla drops it ----
+        if (HorseLeads.divertLeadDrop(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the lead was taken off the ground for a placer who is not on the server"
+                            + " - it has gone nowhere at all, which is worse than the ground"
+                            + " drop this replaces"), 0);
+        }
+
+        // --- 4. the right player gets it; the wrong one does not -------------
+        if (HorseLeads.giveRecordedLeadTo(horse, stranger)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a player who did not tie the lead on was handed it anyway"), 0);
+        }
+        if (!HorseLeads.giveRecordedLeadTo(horse, placer)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the player who tied the lead on was refused it"), 0);
+        }
+        if (!placer.getInventory().contains(st -> st.is(Items.LEAD))) {
+            throw new GameTestAssertException(Component.literal(
+                    "giveRecordedLeadTo said yes but no lead reached the pack - it has been"
+                            + " destroyed rather than returned"), 0);
+        }
+        if (HorseLeads.placerOf(horse).isPresent()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the placer was not cleared after the lead was handed over, so a second"
+                            + " drop would mint a second lead out of nothing"), 0);
+        }
+        if (HorseLeads.giveRecordedLeadTo(horse, placer)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a second lead was handed out for the same leash - this is a dupe"), 0);
+        }
+        helper.succeed();
     }
 
     /**
