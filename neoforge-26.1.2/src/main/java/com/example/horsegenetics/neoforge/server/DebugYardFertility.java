@@ -21,7 +21,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
- * <b>Row O of the test yard, and MET NATURAL in R: breeding and fertility, one
+ * <b>Row O of the test yard: breeding and fertility, one
  * scenario per pen</b> (2026-09-13, packed 2026-09-14).
  *
  * <p>Every pen is a single claim with its expected outcome on the sign, and every
@@ -46,8 +46,7 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *
  * <table>
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>O</td><td>THE CAP, HURT MARE</td><td>MATERNITY</td></tr>
- *   <tr><td>R</td><td>(herd rows)</td><td>MET NATURAL</td></tr>
+ *   <tr><td>O</td><td>THE CAP, HURT MARE</td><td>MET NATURAL</td></tr>
  * </table>
  *
  * <p>Timings assume {@code debug.tools} is on, the dev default: a reproductive
@@ -79,15 +78,57 @@ final class DebugYardFertility {
     // Row O
     // ------------------------------------------------------------------
 
+    /**
+     * <b>THE CAP, at the cap the world actually has</b> (rebuilt 2026-09-30). It was eight mares and a stud
+     * under a hard-coded cap of eight; the cap became {@code fertility.nearby_horse_cap}, fifty by default,
+     * and the same nine horses bred to fifty-five in forty minutes before a mare logged "54 other horses
+     * within 16 blocks, the cap is 50". So it is stocked from the setting: {@code cap} mares in heat and
+     * one stud, which puts exactly {@code cap} other horses around every mare - the smallest crowd that
+     * refuses ({@code NaturalCover.Crowd.tooMany} is {@code nearby >= cap}). All of them must stand within
+     * {@code ReproRules.NATURAL_CAP_RADIUS} of each other or a corner mare counts short and is covered for
+     * the wrong reason, which is why the pen is square and small (its inside is 10 x 11, a 15-block
+     * diagonal) and the horses are packed on a grid. At five minutes the verdict counts pregnant mares.
+     */
     private static void theCap(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 11, ROW_O_D, "THE CAP",
-                List.of("THE CAP", "8 mares + 1 stud,", "all in heat: NOBODY", "is covered"));
-        for (int i = 0; i < 8; i++) {
-            inHeat(horse(level, gy, x0 + 2.0 + (i % 4) * 2.0, z0 + 2.5 + (i / 4) * 3.0, Sex.FEMALE,
-                    FERT + "n/n", true, "CAP MARE " + (i + 1)));
+        int cap = ServerConfig.nearbyHorseCap();
+        if (cap > CAP_MAX_STOCK) {
+            ActionTrace.log("test yard", "THE CAP: fertility.nearby_horse_cap is " + cap + ", more than this pen"
+                    + " can hold (" + CAP_MAX_STOCK + ") - not built");
+            return;
         }
-        horse(level, gy, x0 + 9.2, z0 + 6, Sex.MALE, FERT + "n/n", true, "CAP STUD");
+        pen(level, gy, x0, z0, 11, ROW_O_D, "THE CAP",
+                List.of("THE CAP", cap + " mares + 1 stud,", "all in heat: NOBODY", "is covered"));
+        List<UUID> mares = new java.util.ArrayList<>();
+        for (int i = 0; i < cap; i++) {
+            Horse h = horse(level, gy, x0 + 1.5 + (i % 7) * 1.35, z0 + 1.5 + (i / 7) * 1.35, Sex.FEMALE,
+                    FERT + "n/n", true, "CAP MARE " + (i + 1));
+            inHeat(h);
+            if (h != null) {
+                mares.add(h.getUUID());
+            }
+        }
+        horse(level, gy, x0 + 1.5 + (cap % 7) * 1.35, z0 + 1.5 + (cap / 7) * 1.35, Sex.MALE, FERT + "n/n",
+                true, "CAP STUD");
+        DebugYardHerd.after(level, 5 * 60 * 20, () -> {
+            int pregnant = 0;
+            int present = 0;
+            for (UUID id : mares) {
+                if (level.getEntity(id) instanceof Horse h && h.isAlive()) {
+                    present++;
+                    if (ReproHandler.of(h).pregnant()) {
+                        pregnant++;
+                    }
+                }
+            }
+            boolean full = present == mares.size();
+            ActionTrace.log("test yard", "THE CAP at 5 min: " + pregnant + " of " + present + " mares pregnant, cap "
+                    + cap + " - " + (!full ? "INCONCLUSIVE (a mare is gone, so the crowd is short)"
+                    : pregnant == 0 ? "PASS" : "FAIL"));
+        });
     }
+
+    /** The most horses THE CAP will stock; a world with a higher cap gets a log line instead. */
+    private static final int CAP_MAX_STOCK = 55;
 
     private static void hurtMare(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 5, ROW_O_D, "HURT MARE",
@@ -116,13 +157,40 @@ final class DebugYardFertility {
     // Row R east
     // ------------------------------------------------------------------
 
-    /** Deeper than the others: it breeds on its own until it holds nine horses. */
+    /**
+     * <b>A packed stable breeds again</b> (rebuilt 2026-09-30). Two MET carriers left to breed. Under the old
+     * cap of eight this levelled off at nine horses, which is what it used to check; a level at fifty would
+     * take most of a day and a pile of horses the server feels (585 horses ran it at 55 ms a tick). So the
+     * question is now the one {@code fertility.html}'s cap entry asks - does a stable past the old limit
+     * still breed - and it is answered once the pen holds {@link #MET_TARGET} horses, more than the old cap
+     * ever allowed. Then every mare in it is switched off ({@link #noNaturalCoversIn}) so the pen stops.
+     */
     private static void metNatural(ServerLevel level, int gy, int x0, int z0) {
         pen(level, gy, x0, z0, 9, ROW_O_D, "MET NATURAL",
-                List.of("MET CARRIERS", "left to breed:", "count levels off", "at the cap (9)"));
+                List.of("MET CARRIERS", "left to breed: past", MET_TARGET + " horses, the old", "cap is gone"));
         Horse mare = horse(level, gy, x0 + 3.0, z0 + 5, Sex.FEMALE, MET_CARRIER, true, "MET MARE");
         horse(level, gy, x0 + 6.0, z0 + 5, Sex.MALE, MET_CARRIER, true, "MET STUD");
         inHeat(mare);
+        metCount(level, DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_O_D), 1);
+    }
+
+    /** Nine was the old ceiling; three past it is a stable the old cap would have stopped. */
+    private static final int MET_TARGET = 12;
+
+    private static void metCount(ServerLevel level, AABB box, int check) {
+        DebugYardHerd.after(level, 2 * 60 * 20, () -> {
+            int horses = level.getEntitiesOfClass(Horse.class, box.inflate(0.0, 2.0, 0.0), Horse::isAlive).size();
+            if (horses >= MET_TARGET) {
+                noNaturalCoversIn(level, box);
+                ActionTrace.log("test yard", "MET NATURAL at " + check * 2 + " min: " + horses + " horses, past the"
+                        + " old cap's nine - PASS; its mares are switched off now");
+            } else if (check >= 45) {
+                ActionTrace.log("test yard", "MET NATURAL at 90 min: " + horses + " horses, short of "
+                        + MET_TARGET + " - FAIL");
+            } else {
+                metCount(level, box, check + 1);
+            }
+        });
     }
 
     // ------------------------------------------------------------------

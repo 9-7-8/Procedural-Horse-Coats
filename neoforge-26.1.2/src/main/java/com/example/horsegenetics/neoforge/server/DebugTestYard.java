@@ -137,7 +137,7 @@ final class DebugTestYard {
     /** THE CAP, HURT MARE | MET NATURAL ({@link DebugYardFertility}). Twelve deep for MET NATURAL's growing herd. */
     static final int ROW_O = 3;
     static final int ROW_O_D = 12;
-    /** DRYAD FLOWER | DRYAD OAK+BIRCH, SPLICE PERFORMANCE - on stone, so a sapling over a fence cannot live ({@link DebugYardLong}). */
+    /** DRYAD FLOWER | DRYAD OAK+BIRCH - on stone, so a sapling over a fence cannot live ({@link DebugYardLong}). */
     static final int ROW_T = ROW_O + ROW_O_D + PACKED_AISLE;
     static final int ROW_T_D = 10;
     /** Four inheritance-ratio pens that breed all day and tally their foals ({@link DebugYardLong}). */
@@ -146,13 +146,13 @@ final class DebugTestYard {
     /** Four more: two impossible genotypes, a milk clash and a knob-carrying colour gene. */
     static final int ROW_W = ROW_U + ROW_U_D + PACKED_AISLE;
     static final int ROW_W_D = 10;
-    /** NIGHT SHY | LYCAN DOOMED, DEATH DIAMONDS ({@link DebugYardUnattended}, {@link DebugYardEffects}). */
+    /** NIGHT SHY | (empty) ({@link DebugYardUnattended}). */
     static final int ROW_X = ROW_W + ROW_W_D + PACKED_AISLE;
     static final int ROW_X_D = 12;
-    /** REACH WALL, REACH FENCE | STATS, LETHAL FOALS. */
+    /** REACH WALL, REACH FENCE | STATS. */
     static final int ROW_Y = ROW_X + ROW_X_D + PACKED_AISLE;
     static final int ROW_Y_D = 12;
-    /** KICK HUNTER, KICK PLAIN | BLOOD ONLY ({@link DebugYardDhampir}), SUNTOUCHED. */
+    /** KICK HUNTER, KICK PLAIN (lidded) | SUNTOUCHED. */
     static final int ROW_AA = ROW_Y + ROW_Y_D + PACKED_AISLE;
     static final int ROW_AA_D = 12;
     /** The arcane dealer and the string he founds ({@link DebugYardArcane}). Deeper, because he places his own herd. */
@@ -233,12 +233,9 @@ final class DebugTestYard {
         DebugYardLong.build(level, gy, cx, mouthZ);
         // Rows X, Y and AA: open tests that need nobody at the keyboard.
         DebugYardUnattended.build(level, gy, cx, mouthZ);
-        // Row X east: DEATH DIAMONDS.
-        DebugYardEffects.build(level, gy, cx, mouthZ);
-        // Row T east: SPLICE PERFORMANCE.
-        DebugYardBirths.build(level, gy, cx, mouthZ);
-        // Row AA east: BLOOD ONLY.
-        DebugYardDhampir.build(level, gy, cx, mouthZ);
+        // DEATH DIAMONDS, SPLICE PERFORMANCE and BLOOD ONLY (DebugYardEffects, -Births, -Dhampir) went on
+        // their own PASS lines on 2026-09-30, with LYCAN DOOMED and LETHAL FOALS: the owner ruled an automatic
+        // yard PASS closes a check the way a clockwork one does.
         // Row AL west: the arcane dealer, founded on the spot with his own string.
         DebugYardArcane.build(level, gy, cx, mouthZ);
 
@@ -651,6 +648,41 @@ final class DebugTestYard {
         DebugPenManager.penWalls(level, gy + 1, x0, x1, z0, z1,
                 (x0 + x1) / 2, z0, Direction.NORTH);
         penWater(level, gy, x0 + 1, z0 + 1);
+    }
+
+    /**
+     * <b>A glass cage over a {@link #fencedPlot}, for a pen whose horse will be brought low.</b>
+     *
+     * <p>Last Stand is doing its job when a horse near death bolts: {@code HorseEscapeGoal} adds
+     * {@code Escape.JUMP_BOOST} to its jump and presses jump at whatever blocks it, so a fence is no
+     * wall to it. KICK HUNTER found this on 2026-09-30 - at 3/22 it bolted from the husks and was out
+     * of the pen within twenty seconds, and the census read "horses 0" for the rest of the run (owner:
+     * "this is the Last Stand firing as intended ... You have to raise the walls"). A boosted jump
+     * clears more than any wall this yard would build, so the pen gets a lid: glass two high on the
+     * walls and a roof at {@code gy + 4}, above the lamps. The gate column is left open at
+     * {@code gy + 2} so a person can still walk in; a one-high gap is no way out for a horse. The corner
+     * torches stay, and so does any lamp a wall line crosses - a one-block hole is no way out either.
+     */
+    static void lidded(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+        BlockState glass = Blocks.GLASS.defaultBlockState();
+        int gateX = (x0 + x1) / 2;
+        for (int x = x0; x <= x1; x++) {
+            for (int z = z0; z <= z1; z++) {
+                boolean edge = x == x0 || x == x1 || z == z0 || z == z1;
+                boolean corner = (x == x0 || x == x1) && (z == z0 || z == z1);
+                boolean gate = z == z0 && (x == gateX || x == gateX + 1);
+                if (edge && !corner && !gate) {
+                    DebugPenManager.fastSet(level, new BlockPos(x, gy + 2, z), glass);
+                }
+                // Not over a lamp: the yard's light blocks stand at gy + 3, four apart, and a wall that
+                // ate one would leave the pen dark enough to spawn in.
+                BlockPos wall = new BlockPos(x, gy + 3, z);
+                if (edge && !level.getBlockState(wall).is(Blocks.LIGHT)) {
+                    DebugPenManager.fastSet(level, wall, glass);
+                }
+                DebugPenManager.fastSet(level, new BlockPos(x, gy + 4, z), glass);
+            }
+        }
     }
 
     /**

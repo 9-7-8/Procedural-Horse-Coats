@@ -2,7 +2,6 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
-import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -12,16 +11,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.Horse;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
@@ -29,14 +24,14 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Y;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Y_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AA;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AA_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
  * <b>Rows X, Y and AA</b>, since 2026-09-30 minus every pen whose question was answered (BONE MEAL, GELDING BAND,
- * LYCAN ROUND TRIP, WERE-COW, WATERBORN), with LYCAN DOOMED moved up from row Z into X east.
+ * LYCAN ROUND TRIP, WERE-COW, WATERBORN; then LYCAN DOOMED and LETHAL FOALS, on their own PASS lines the same
+ * day - owner: an automatic yard PASS closes a check "same as clockwork").
  *
  * <p><b>Rows X and Y: open tests that need nobody at the keyboard</b> (owner, 2026-09-15: "put
  * everything which can be tested unattended into the yard"). Each pen logs what to expect beside
@@ -44,10 +39,10 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *
  * <table>
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>X</td><td>NIGHT SHY - a night-shy horse, a band and two cows</td>
- *       <td>BONE MEAL - a bone-meal dryad beside a fenced wheat patch; GELDING BAND</td></tr>
+ *   <tr><td>X</td><td>NIGHT SHY - a night-shy horse, a band and two cows</td><td>(empty)</td></tr>
  *   <tr><td>Y</td><td>REACH WALL, REACH FENCE - cover reach and courtship</td>
- *       <td>STATS - speed and health floors and stacking; LETHAL FOALS - on a clock</td></tr>
+ *       <td>STATS - speed and health floors and stacking</td></tr>
+ *   <tr><td>AA</td><td>KICK HUNTER, KICK PLAIN - lidded</td><td>SUNTOUCHED</td></tr>
  * </table>
  */
 final class DebugYardUnattended {
@@ -65,13 +60,10 @@ final class DebugYardUnattended {
             reachWall(level, gy, west, mouthZ + ROW_Y);
             reachFence(level, gy, west + 9, mouthZ + ROW_Y);
             stats(level, gy, east, mouthZ + ROW_Y);
-            lethalFoals(level, gy, east + 9, mouthZ + ROW_Y);
-            // Row X east since 2026-09-30, beside DEATH DIAMONDS: row Z held only this once the answered pens went.
-            lycanDoomed(level, gy, east, mouthZ + ROW_X);
             kick(level, gy, west, mouthZ + ROW_AA, "KICK HUNTER", "horsegenetics.aggression=Aah/Aah");
             kick(level, gy, west + 9, mouthZ + ROW_AA, "KICK PLAIN", PLAIN);
             suntouched(level, gy, east + 10, mouthZ + ROW_AA);
-            ActionTrace.log("test yard", "unattended pens built (rows X, Y, AA: night shy, lycan doomed, reach, stats, lethal foals, kick, suntouched)");
+            ActionTrace.log("test yard", "unattended pens built (rows X, Y, AA: night shy, reach, stats, kick, suntouched)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: rows X-AA failed to build", e);
         }
@@ -156,112 +148,6 @@ final class DebugYardUnattended {
                 + " STAT FRAIL at or above the floor and alive");
     }
 
-    /** Gap 23: every lethal foal dies despite healing beside water; survivable controls and an adult do not. */
-    private static void lethalFoals(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 9, ROW_Y_D, "LETHAL FOALS", Blocks.STONE.defaultBlockState(),
-                List.of("LETHAL FOALS", "every 20 min: seven", "lethal foals die by", "water; controls live"));
-        water(level, gy, x0 + 4, z0 + 6);    // two clear of every wall, between the foal rows (gap 247)
-        Horse adult = horse(level, gy, x0 + 7.5, z0 + 6.5, Sex.FEMALE, "horsegenetics.plod1=ffs/ffs", true,
-                "LF ADULT PLOD1");
-        wave(level, gy, x0, z0, adult, 1);
-    }
-
-    private static final String[] LETHAL = {
-            "horsegenetics.plod1=ffs/ffs", "horsegenetics.prkdc=scid/scid", "horsegenetics.gbe1=gbed/gbed",
-            "horsegenetics.st14=nfs/nfs", "horsegenetics.rapgef5=efih/efih", "horsegenetics.myo5a=lfs/lfs",
-            "horsegenetics.scn4a=H/H"};
-    private static final String[] CONTROL = {"horsegenetics.ppib=herda/herda", "horsegenetics.toe1=ca/ca"};
-
-    private static void wave(ServerLevel level, int gy, int x0, int z0, @Nullable Horse adult, int n) {
-        DebugYardHerd.after(level, n == 1 ? 60 : 24_000, () -> {
-            List<Horse> lethal = new ArrayList<>();
-            List<Horse> controls = new ArrayList<>();
-            for (int i = 0; i < LETHAL.length; i++) {
-                Horse f = foal(level, gy, x0 + 1.5 + i, z0 + 3.5, LETHAL[i], "LF LETHAL " + gene(LETHAL[i]));
-                if (f != null) {
-                    lethal.add(f);
-                }
-            }
-            for (int i = 0; i < CONTROL.length; i++) {
-                Horse f = foal(level, gy, x0 + 2.5 + i * 3, z0 + 8.5, CONTROL[i], "LF CONTROL " + gene(CONTROL[i]));
-                if (f != null) {
-                    controls.add(f);
-                }
-            }
-            ActionTrace.log("test yard", "LETHAL FOALS wave " + n + ": " + lethal.size() + " lethal foals and "
-                    + controls.size() + " controls beside water; expect '[trace] horse died | ... genetic_defect"
-                    + " viability=LETHAL_AT_BIRTH (FOAL)' for each lethal one, none for the controls or LF ADULT PLOD1");
-            DebugYardHerd.after(level, 1_800, () -> {
-                int dead = 0;
-                for (Horse f : lethal) {
-                    if (!f.isAlive()) {
-                        dead++;
-                    } else {
-                        f.discard();
-                    }
-                }
-                int alive = 0;
-                for (Horse f : controls) {
-                    if (f.isAlive()) {
-                        alive++;
-                        f.discard();       // counted; out of the way before the next wave
-                    }
-                }
-                boolean adultAlive = adult != null && adult.isAlive();
-                boolean pass = dead == lethal.size() && alive == controls.size() && adultAlive;
-                ActionTrace.log("test yard", "LETHAL FOALS wave " + n + " at 90 s: " + dead + "/" + lethal.size()
-                        + " lethal foals dead, " + alive + "/" + controls.size() + " controls alive, adult "
-                        + (adultAlive ? "alive" : "DEAD") + " - " + (pass ? "PASS" : "FAIL"));
-            });
-            wave(level, gy, x0, z0, adult, n + 1);
-        });
-    }
-
-    // ------------------------------------------------------------------
-    // Row Z
-    // ------------------------------------------------------------------
-
-    private static final String WOLF = "horsegenetics.lycan=Wlf/Wlf";
-    /** A lycan killed in animal form dies as the horse: a death line, its armour on the ground, nothing left alive. */
-    private static void lycanDoomed(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 8, ROW_X_D, "LYCAN DOOMED", Blocks.GRASS_BLOCK.defaultBlockState(),
-                List.of("LYCAN DOOMED", "an armoured wolf", "lycan, killed at", "night: it drops"));
-        Horse h = horse(level, gy, x0 + 4.5, z0 + 5.5, Sex.MALE, WOLF, true, "LYCAN DOOMED");
-        if (h != null) {
-            // setBodyArmorItem, not setItemSlot: it is what a player's equipBodyArmor calls, and it marks the slot a
-            // guaranteed drop. Plain setItemSlot leaves a mob's default drop chance, and the 07:10 run's
-            // armour never dropped for exactly that reason.
-            h.setBodyArmorItem(new ItemStack(Items.IRON_HORSE_ARMOR));
-        }
-        killWhenShifted(level, DebugTestYard.box(x0, gy, z0, x0 + 8, gy + 3, z0 + ROW_X_D));
-    }
-
-    private static void killWhenShifted(ServerLevel level, AABB box) {
-        DebugYardHerd.after(level, 100, () -> {
-            List<Mob> shifted = shiftedIn(level, box, "LYCAN DOOMED");
-            if (shifted.isEmpty()) {
-                killWhenShifted(level, box);
-                return;
-            }
-            Mob animal = shifted.get(0);
-            ActionTrace.log("test yard", "LYCAN DOOMED: killing the " + animal.getType().getDescriptionId()
-                    + " it became");
-            animal.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
-            DebugYardHerd.after(level, 40, () -> {
-                int armour = level.getEntitiesOfClass(ItemEntity.class, box.inflate(1.0, 3.0, 1.0),
-                        i -> i.getItem().is(Items.IRON_HORSE_ARMOR)).size();
-                int horses = level.getEntitiesOfClass(Horse.class, box.inflate(0.0, 2.0, 0.0), Horse::isAlive).size();
-                int animals = level.getEntitiesOfClass(Mob.class, box.inflate(0.0, 2.0, 0.0),
-                        m -> !(m instanceof Horse) && m.isAlive()).size();
-                boolean pass = armour > 0 && horses == 0 && animals == 0;
-                ActionTrace.log("test yard", "LYCAN DOOMED at 2 s: iron armour on the ground " + armour
-                        + ", live horses " + horses + ", live animals " + animals + " - " + (pass ? "PASS" : "FAIL")
-                        + "; also expect '[trace] lycan | ... died as a minecraft:wolf ... round trip SAME' and a"
-                        + " '[trace] horse died' line for LYCAN DOOMED");
-            });
-        });
-    }
-
     // ------------------------------------------------------------------
     // Row AA
     // ------------------------------------------------------------------
@@ -275,6 +161,8 @@ final class DebugYardUnattended {
         pen(level, gy, x0, z0, 9, ROW_AA_D, name, Blocks.STONE.defaultBlockState(),
                 List.of(name, code.equals(PLAIN) ? "a plain horse and" : "a monster-hunter and",
                         "two husks: blows", "every 10 ticks"));
+        // Lidded: at 3/22 Last Stand's bolt jumps any fence (DebugTestYard.lidded).
+        DebugTestYard.lidded(level, gy, x0, x0 + 9, z0, z0 + ROW_AA_D);
         horse(level, gy, x0 + 4.5, z0 + 3.5, Sex.MALE, code, true, name);
         AABB box = DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_AA_D);
         husks(level, gy, x0, z0, box, name, 1);
@@ -311,32 +199,6 @@ final class DebugYardUnattended {
                 + " reading; any increase is a FAIL");
     }
 
-    /**
-     * The shifted animals in {@code box} that came from the pen's <b>own</b> horse,
-     * matched on the label the shift carries over from it.
-     *
-     * <p>It used to return any shifted mob in the box and the callers took the
-     * first, which was safe only for as long as no shifter could leave its pen. A
-     * bat can: added to LYCAN ROUND TRIP on 2026-09-18, it flew next door within
-     * two seconds of dusk, was picked up as LYCAN DOOMED's victim and killed in
-     * place of the armoured wolf - so the doomed pen reported
-     * "iron armour on the ground 0, live horses 0 - FAIL" about an animal that was
-     * never its own. A pen must not be able to kill its neighbour's stock.
-     */
-    private static List<Mob> shiftedIn(ServerLevel level, AABB box, String label) {
-        return level.getEntitiesOfClass(Mob.class, box.inflate(0.0, 2.0, 0.0),
-                m -> !(m instanceof Horse) && m.isAlive()
-                        && m.getData(ModAttachments.LYCAN_SHIFT.get()).active()
-                        && m.getCustomName() != null
-                        && label.equals(m.getCustomName().getString()));
-    }
-
-    private static void bond(@Nullable Horse h, int bond) {
-        if (h != null) {
-            h.setData(ModAttachments.HORSE_CARE.get(), h.getData(ModAttachments.HORSE_CARE.get()).withBond(bond));
-        }
-    }
-
     // ------------------------------------------------------------------
     // helpers
     // ------------------------------------------------------------------
@@ -363,14 +225,6 @@ final class DebugYardUnattended {
         return h;
     }
 
-    private static @Nullable Horse foal(ServerLevel level, int gy, double x, double z, String code, String label) {
-        Horse h = horse(level, gy, x, z, Sex.FEMALE, code, true, label);
-        if (h != null) {
-            h.setAge(-24_000);
-        }
-        return h;
-    }
-
     static @Nullable Entity animal(ServerLevel level, EntityType<?> type, int gy, double x, double z) {
         Entity e = type.create(level, EntitySpawnReason.COMMAND);
         if (e == null) {
@@ -389,7 +243,4 @@ final class DebugYardUnattended {
                 Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3), 3);
     }
 
-    private static String gene(String code) {
-        return code.substring(code.indexOf('.') + 1, code.indexOf('=')).toUpperCase(java.util.Locale.ROOT);
-    }
 }

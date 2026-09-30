@@ -99,7 +99,9 @@ final class DebugYardLong {
 
             dryad(level, gy, west + 11, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD FLOWER", "Flwr/Flwr", 2,
                     List.of("DRYAD FLOWER", "Flwr/Flwr: flowers", "on grass only", "(all day)"),
-                    Blocks.DANDELION, Blocks.POPPY, Blocks.OAK_SAPLING);
+                    Blocks.DANDELION, Blocks.POPPY, Blocks.BLUE_ORCHID, Blocks.ALLIUM, Blocks.AZURE_BLUET,
+                    Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.OAK_SAPLING);
+            flowerVerdict(level, gy, west + 11, mouthZ + ROW_T, 6, ROW_T_D, 1);
             dryad(level, gy, east, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
                     List.of("DRYAD OAK+BIRCH", "both, each at half", "rate - and still", "no tree?"),
                     Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
@@ -208,6 +210,38 @@ final class DebugYardLong {
         YardPens.register(gy, x0, x1, z0, z1, name);
         // Four past the walls, which is as far as a planting can reach; tall enough for a tree.
         DebugWorldWatch.watch(name, DebugTestYard.box(x0 - 4, gy, z0 - 4, x1 + 4, gy + 10, z1 + 4), null, watched);
+    }
+
+    /**
+     * <b>DRYAD FLOWER answers by counting what its horses plant, not what is standing</b> (owner,
+     * 2026-09-30). The watch saw "none of its watched blocks" for forty minutes in two runs, and the
+     * floor was the wrong instrument twice over: it watched two of the eight flowers
+     * {@code GeneAbilityHandler.FLOWERS} draws from, and a horse eats a small flower
+     * ({@code HungerFoodGoal}) - the blight pen's lesson, where the ground grew back before a count could
+     * see it. So every twenty minutes this sums {@link DebugWorldWatch#spreadsPlacedBy} over the horses
+     * in the pen: PASS on the first flower, FAIL if an hour passes with none. The census's
+     * {@code spread attempts} line says how many tries there were, which tells a slow gene from one
+     * whose every try is refused.
+     */
+    private static void flowerVerdict(ServerLevel level, int gy, int x0, int z0, int width, int depth, int check) {
+        DebugYardHerd.after(level, 20 * 60 * 20, () -> {
+            AABB box = DebugTestYard.box(x0, gy, z0, x0 + width, gy + 3, z0 + depth);
+            int planted = 0;
+            for (Horse h : level.getEntitiesOfClass(Horse.class, box, Horse::isAlive)) {
+                planted += DebugWorldWatch.spreadsPlacedBy(h.getUUID());
+            }
+            int minutes = check * 20;
+            if (planted > 0) {
+                ActionTrace.log("test yard", "DRYAD FLOWER at " + minutes + " min: " + planted
+                        + " flower(s) planted by its horses - PASS");
+            } else if (check >= 3) {
+                ActionTrace.log("test yard", "DRYAD FLOWER at " + minutes + " min: nothing planted by its horses"
+                        + " - FAIL; read the census 'spread attempts' line for flower tries vs landings");
+            } else {
+                ActionTrace.log("test yard", "DRYAD FLOWER at " + minutes + " min: nothing planted yet");
+                flowerVerdict(level, gy, x0, z0, width, depth, check + 1);
+            }
+        });
     }
 
     // ------------------------------------------------------------------
