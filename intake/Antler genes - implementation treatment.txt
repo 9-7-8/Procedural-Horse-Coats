@@ -65,19 +65,27 @@ TIER 1 - the core, built together (needs stages 0-2 first)
    Epigenome schema (declared once, on each Ant / Antm copy). Each row names its tier and
    its consumer, because a declared value nothing draws is a broken promise
    (Attached model parts.txt 13.6 - a test must fail on it):
+     size       uniform 0-1 tier C+A HOW HUGE the rack is (see "Size" below): a class
+                                    step (yearling nub .. massive) plus a stretch within it
      rack       SEED        tier C   picks seedVariant 0..15, a different rack; drift
                                     never nudges a seed, at most a rare re-roll
      tines      uniform 1-6 tier B   how many tines are shown; fractional last tine
-     reach      uniform     tier A   beam-length scale, wild band roughly 0.8-1.25
-     girth      uniform     tier A   x/z scale, wild band roughly 0.8-1.25
-     asymmetry  uniform 0-1 tier C   below a threshold the left antler is the mirror of
-                                    the right; above it, a second seed for the mirror
-                                    only (draft note in 12.5 - this is that decision)
+     reach      uniform     tier A   fine beam-length scale on top of size, roughly 0.85-1.15
+     girth      uniform     tier A   fine x/z scale on top of size, roughly 0.85-1.15
+     asymmetry  uniform 0-1 tier C   SYMMETRIC BY DEFAULT: every founder rolls exactly 0 and
+                                    drift never moves it. Only a BREED FILE can pin it above
+                                    0 (D3); above a small threshold the left antler gets a
+                                    second seed instead of mirroring the right
      tint       colour      tier A   pale bone to dark umber; drifts as a lineage
    Every value carries .clampedTo(lo, hi) at the schema AND a min/max at the renderer
    (13.1: the epigenome's +/-8 design-span bound is a horn a chunk long otherwise).
    Which copy is read: the expressing copy's values, as CutieMarkGene does. (D3: no
    per-parent-copy sides.)
+   An `asymmetry` that drift and founder rolls cannot move needs a schema shape the
+   epigenome supports: UNVERIFIED whether EpiValue can be declared "fixed at 0, breed-pin
+   only" or whether it needs a zero-width founder distribution plus zero drift. Check
+   EpiValue / EpiDrift first; the decided fallback is a zero-width band clamped to 0 with
+   the breed band allowed to widen it.
    Inheritance of the numbers is generic and needs no antler code.
    Wild frequency: rare, hand-seeded, flying-style (D7). Proposal for the numbers: total Ant + Antm allele
    frequency around 1/500 (a few horses in a thousand antlered), Ant rarer than Antm,
@@ -93,9 +101,9 @@ TIER 1 - the core, built together (needs stages 0-2 first)
      Pal  palmate            - a broadened plate with marginal points (moose / fallow)
      Crn  crown              - a many-tined royal head
      n    spike              - simple spike or short fork (a yearling / brocket)
-   Series: codominant, so an Frk/Pal horse grows a different habit on each side.
-   That is asymmetry from genetics rather than from a number, and it is the one thing
-   in this roster that no hand-modelled antler could do. (Decided, D3.)
+   Series: a plain DOMINANCE series (order to settle at build time, e.g.
+   Pal > Crn > Brw > Frk > n), NOT codominant: antlers are symmetric, so one habit is
+   drawn on both sides. The gene never splits left from right (D3).
    Only expresses on a horse that already has `antlers`; on a horse without, it is a
    silent carrier, like any modifier with nothing to modify.
    BUILD NOTE: Brw / Pal / Crn are new generators. Only Frk exists today
@@ -113,6 +121,27 @@ granted; none can grant one - Attached model parts.txt 13.3, the CutieMark move)
 5. antler_bloom  (Blm, n)  family: magical - leaves / moss / blossom on the beams,
    a per-tine tint override plus a small
    second box set, so it costs boxes, not a new system.
+Size ("how huge") - the `size` epigenome value
+==================================================
+One number, following the HornSize precedent (Attached model parts.txt 13.2): the FLOOR
+of size picks a class (tier C, baked per class) and the remainder stretches within it
+(tier A), so the slide between classes has no seam. Proposed classes, each a distinct
+baked shape so a big rack is more segments and tines, not a stretched small one:
+     YEARLING (spike / short fork)  ->  SMALL  ->  STANDARD  ->  LARGE  ->  MASSIVE
+Design range = what a wild horse shows (proposal: the lower part of the scale, so most
+antlered horses are small to standard). Hard clamp = the largest the renderer ever draws
+(MASSIVE, with a maximum stretch). A line bred over generations can climb toward the
+clamp - that is the gameplay - but never past it, and the box count is capped
+structurally by MAX_NODES per class, not by a value someone remembers to clamp.
+Size scales with the horse (the part inherits the horse's genetic size scale only if the
+parent transform includes it - checked in 13.5), and is multiplied by the growth-stage
+scale so a foal shows nothing and a yearling grows in.
+UNVERIFIED and for stage 0: the absolute unit lengths of the classes (the draft's beam
+runs 8-18 units; a MASSIVE rack may be 2-3x that), how large a rack can get before it
+clips through a low ceiling, a doorway or the rider's view, and whether the head bone
+carries a big rack's weight visually (it does not animate, so it cannot lag). Tune the
+class table on a live horse; do not treat any length above as a spec.
+
 Why sex-limitation is a render gate, not a genotype rule
 =========================================================
 Making Antm "stallion only" inside expressionOf would make the gene read the sex locus,
@@ -169,7 +198,7 @@ and the first thing with a count (tier B). Suggested order once those hold:
 
 A. Generator refactor (common/, no game). build(kind, size, seed) becomes
    build(kind, PartParams, variant): it bakes the MAXIMUM antler for a habit and
-   variant, and PartParams (tines, reach, girth, asymmetry) is read at draw time.
+   variant, and PartParams (size, tines, reach, girth, asymmetry) is read at draw time.
    Tines ordered base-to-tip so "the first k" is always a sensible k. Asymmetry gets its
    own second seed. Extend Check.java into PartGeneratorTest: deterministic, parents
    precede children, no box thinner than the floor, never above MAX_NODES, and NEW:
@@ -184,7 +213,6 @@ C. Look at it in game: adult and foal, walk, gallop, rear, graze, two horses wit
    different tine counts in one frame, a tiny and a huge horse, a horse in a headstall
    or mask (the Head gear zone - antlers must clear it), invisible horse, 20-horse pen.
 D. `antler_form` with Frk + n, then the other habits one generator per slice;
-   the codominant left/right habits arrive here (D3).
 E. Tier 2 modifiers (glow, crystal, bloom), one per slice.
 F. The breed hook (stage 4), so a breed pins a band on `tines` and `antlers` and the
    reindeer breeds become content instead of code. Only then does the breed-book
@@ -204,7 +232,7 @@ the classes.
 What the Verification tab will need (written when built, not now)
 ==================================================================
 Antlers on adult and foal through every animation; the sex gate on a mare with Antm;
-left and right from two different habits (antler_form codominance); the 16 rack
+size across all five classes on a tiny and a huge horse, and the biggest rack against a ceiling; a breed-pinned asymmetric rack; the 16 rack
 variants reading as different; a fractional last tine crossing an integer with no pop;
 antlers under a headstall, mask and saddle-adjacent tack; a distance/LOD drop; 20 antlered
 horses against the same pen without; save, reload and breed - the numbers follow the
@@ -214,16 +242,19 @@ Decisions (owner, answered in session; route to wiki/decisions.html when built)
 ================================================================================
 D1. Both alleles: Ant (both sexes) and Antm (stallions only).
 D2. Procedural: the generator, not hand-modelled racks.
-D3. Asymmetry from a number now; codominant habits (antler_form) give different
-    habits per side later. No per-parent-copy sides.
+D3. SYMMETRIC by default. Asymmetry is a breed-pinned epigenome value only: founders
+    roll 0 and drift never moves it. antler_form is a plain dominance series, not
+    codominant, and there are no per-parent-copy sides.
+D9. Size ("how huge") is a single epigenome number, `size`, on the Ant / Antm copy - no
+    separate size locus. It is breedable (drifts, selectable) and a breed can pin a band.
 D4. NEVER: antlers are permanent. No cast-and-regrow, no velvet phase, no year clock,
     no antler_cycle locus.
 D5. Moot under D4: no shed-antler item.
 D6. Crystalline antlers are a modifier gene; the crystal-growths part stays separate.
 D7. Rare and hand-seeded like flying; final numbers when built.
 D8. Invented names; the science tab says the biology is analogous, not measured.
-Tier 2 modifiers kept: antler_glow, antler_crystal, antler_bloom. antler_gore (the
-charge attack) is DROPPED from the plan.
+Tier 2 modifiers kept: antler_glow, antler_crystal, antler_bloom. The charge attack (antler_gore) is OUT OF SCOPE for now: this work is cosmetics only.
+It may be added later as its own gene; nothing here should assume it.
 
 What this treatment deliberately does not decide
 =================================================
