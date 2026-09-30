@@ -2844,6 +2844,7 @@ wiki/horse-gear.html#attachment	coding	Why an attachment and not a container
 wiki/horse-gear.html#ceiling	coding	The two-slot ceiling
 wiki/horse-gear.html#click	coding	The click path
 wiki/horse-gear.html#doll	coding	The paper doll
+wiki/horse-gear.html#gear-inventory	coding	The Dress window — a real menu beside the doll
 wiki/horse-gear.html#roster	coding	The roster is the layout
 wiki/horse-gear.html#slots	gameplay	The nineteen slots
 wiki/horse-gear.html#tags	coding	What a slot accepts is a tag
