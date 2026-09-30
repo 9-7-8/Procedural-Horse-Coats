@@ -26,8 +26,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_S_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U;
@@ -36,7 +34,9 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_W;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
- * <b>Rows S-U: pens that only answer after a whole day</b> (owner, 2026-09-14: "I'm
+ * <b>Rows T, U and W</b> since 2026-09-30, when row S (DRYAD CARRIER) and DRYAD DARK SMALL went as answered.
+ *
+ * <p><b>Rows S-U: pens that only answer after a whole day</b> (owner, 2026-09-14: "I'm
  * going to leave this up all day, so add more pens which benefit from being run for a
  * very long time", and "add more dryad testing pens").
  *
@@ -89,7 +89,6 @@ final class DebugYardLong {
         int east = cx + EAST_MIN + 1;
         TALLIES.clear();
         try {
-            stoneBand(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
             stoneBand(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
 
             // DELETED 2026-09-15 (owner: "delete the dryad pens which have grown and haven't killed
@@ -97,9 +96,6 @@ final class DebugYardLong {
             // trees with its horses in it (spruce 18 logs, jungle 4, acacia 25, oak 18) and none took
             // inWall damage. Kept: the carrier control, flowers, oak+birch (no tree overnight), and
             // both dark oak pens - DRYAD DARK is where the branch killed a horse (gap 244).
-            dryad(level, gy, east + 11, mouthZ + ROW_S, 6, ROW_S_D, "DRYAD CARRIER", "Oak/n", 2,
-                    List.of("DRYAD CARRIER", "Oak/n: must plant", "NOTHING all day", "(the control)"),
-                    Blocks.OAK_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_SAPLING);
 
             dryad(level, gy, west + 11, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD FLOWER", "Flwr/Flwr", 2,
                     List.of("DRYAD FLOWER", "Flwr/Flwr: flowers", "on grass only", "(all day)"),
@@ -107,13 +103,9 @@ final class DebugYardLong {
             dryad(level, gy, east, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
                     List.of("DRYAD OAK+BIRCH", "both, each at half", "rate - and still", "no tree?"),
                     Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
-            // WIDENED 2026-09-15 (owner). Dark and pale oak now hold back for a horse two blocks out
-            // (gap 244), and at five by six the old pen's one horse was always inside that. Ten by
-            // nine leaves room for it to stand clear while a 2x2 grows.
-            dryad(level, gy, east + 8, mouthZ + ROW_T, 10, ROW_T_D, "DRYAD DARK SMALL", "Dark/Dark", 1,
-                    List.of("DARK, ONE HORSE", "widened 10x9", "for the 2-block", "branch check"),
-                    Blocks.DARK_OAK_SAPLING, Blocks.DARK_OAK_LOG, Blocks.DARK_OAK_LEAVES);
-            lightFromTheFloor(level, gy, cx, mouthZ + ROW_S, ROW_S_D);
+            // DRYAD CARRIER and DRYAD DARK SMALL deleted 2026-09-30 with every pen whose question was
+            // answered: the carrier planted nothing in three hours, and the dark oak grew a 99-log tree
+            // with its horse in the pen (gene-dryad.html#verified, #verified-no-tree-through-horse).
             lightFromTheFloor(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
 
             ratio(level, gy, west, mouthZ + ROW_U, "RATIO HYPP", "horsegenetics.scn4a", "H/N", "H/N", false,
@@ -145,8 +137,7 @@ final class DebugYardLong {
             ratio(level, gy, east + 9, mouthZ + ROW_W, "RATIO STARBURST", "horsegenetics.starburst", "W/n", "W/n", false,
                     List.of("RATIO: STARBURST", "W/n x W/n all day:", "1 W/W : 2 W/n : 1 n/n", "(knob inheritance)"),
                     "about 1 W/W : 2 W/n : 1 n/n");
-            ActionTrace.log("test yard", "all-day pens built (rows S-U: dryads, inheritance ratios; row W: impossible"
-                    + " genotypes, milk clash, starburst)");
+            ActionTrace.log("test yard", "all-day pens built (row T: dryads; rows U and W: inheritance ratios)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }

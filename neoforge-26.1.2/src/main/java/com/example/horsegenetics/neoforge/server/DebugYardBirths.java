@@ -33,18 +33,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AE;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AE_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AF;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AF_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AJ;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AJ_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AK;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AK_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T_D;
 
 /**
- * <b>Rows AE and AF-west: what a foal is handed at birth</b> - its dam's bond (a quarter of it), its breed label
+ * <b>Now only SPLICE PERFORMANCE, in row T east</b> (2026-09-30 - see {@link #build}). What follows is how the
+ * class began.
+ *
+ * <p><b>Rows AE and AF-west: what a foal is handed at birth</b> - its dam's bond (a quarter of it), its breed label
  * (the cross table), its starburst dial (drifted, not re-rolled) and its name (gap 8's pattern). Every foal of these
  * pens is read the moment it joins the world, matched to its pen by the record's mother, logged with PASS or FAIL, and
  * taken away a few seconds later so the pens do not fill.
@@ -70,39 +66,21 @@ final class DebugYardBirths {
     private static final Set<UUID> SEEN = new HashSet<>();
 
     static void build(ServerLevel level, int gy, int cx, int mouthZ) {
-        int west = cx + WEST_MIN;
         int east = cx + EAST_MIN + 1;
         BY_DAM_RECORD.clear();
         SEEN.clear();
         try {
-            pair(level, gy, west, mouthZ + ROW_AE, ROW_AE_D, "BOND", "bond", PLAIN, null, null, "",
-                    List.of("BOND", "a bond-80 mare:", "her foal starts at", "a quarter, 20"));
-            pair(level, gy, west + 9, mouthZ + ROW_AE, ROW_AE_D, "CROSS SAME", "breed", PLAIN, "arabian", "arabian",
-                    "arabian", List.of("CROSS SAME", "Arabian x Arabian:", "an Arabian foal", ""));
-            pair(level, gy, east, mouthZ + ROW_AE, ROW_AE_D, "CROSS TWO", "breed", PLAIN, "arabian", "friesian",
-                    "cross:arabian+friesian", List.of("CROSS TWO", "Arabian x Friesian:", "an Arabian x", "Friesian cross"));
-            pair(level, gy, east + 9, mouthZ + ROW_AE, ROW_AE_D, "CROSS BACK", "breed", PLAIN, "cross:arabian+friesian",
-                    "arabian", "cross:arabian+friesian", List.of("CROSS BACK", "cross x Arabian:", "the same cross", ""));
-            pair(level, gy, west, mouthZ + ROW_AF, ROW_AF_D, "CROSS OUT", "breed", PLAIN, "cross:arabian+friesian",
-                    "thoroughbred", "mixed", List.of("CROSS OUT", "cross x outsider", "(Thoroughbred):", "Mixed"));
-            pair(level, gy, west + 9, mouthZ + ROW_AF, ROW_AF_D, "STARBURST DRIFT", "drift", "horsegenetics.starburst=C/C",
-                    null, null, "", List.of("STARBURST DRIFT", "C/C x C/C: a foal's", "size and hue sit", "near its parents'"));
-            // Rows AJ-AK: one mare per splice carrot, armed as if she had eaten it and re-armed after every foal.
-            String[][] splices = {
-                    {"SPLICE DILUTION", "gene_splice:dilution"}, {"SPLICE WHITE", "gene_splice:white"},
-                    {"SPLICE MARKING", "gene_splice:marking"}, {"SPLICE PERFORMANCE", "gene_splice:performance"},
-                    {"SPLICE MAGICAL", "gene_splice:magical"}, {"SPLICE UNTHEMED", "gene_splice"}};
-            int[][] at = {{west, ROW_AJ, ROW_AJ_D}, {west + 9, ROW_AJ, ROW_AJ_D}, {east, ROW_AJ, ROW_AJ_D},
-                    {east + 9, ROW_AJ, ROW_AJ_D}, {west, ROW_AK, ROW_AK_D}, {west + 9, ROW_AK, ROW_AK_D}};
-            for (int i = 0; i < splices.length; i++) {
-                pair(level, gy, at[i][0], mouthZ + at[i][1], at[i][2], splices[i][0], "splice", PLAIN, null, null,
-                        splices[i][1], List.of(splices[i][0], "mare armed with", splices[i][1].replace("gene_splice", "splice"),
-                                "new allele: in theme"));
-            }
-            ActionTrace.log("test yard", "birth pens built (rows AE-AF: bond, cross same/two/back/out, starburst drift;"
-                    + " rows AJ-AK: the six splice carrots; every pen also logs foal names for gap 8)");
+            // Only SPLICE PERFORMANCE is left (2026-09-30): bond, the four cross labels, starburst drift and
+            // five of the six splice carrots are answered (horse-care.html#verified-foal-bond, breeds.html
+            // #verified-cross-labels, gene-starburst.html#verified-drift-foals, item-splice-carrots.html
+            // #verified-splice-theme). The performance carrot's baseline - never HMGA2, only the tall/fast
+            // LCORL copy - is still open, and this pen's foals are what answer it. Row T east, since.
+            pair(level, gy, east + 8, mouthZ + ROW_T, ROW_T_D, "SPLICE PERFORMANCE", "splice", PLAIN, null, null,
+                    "gene_splice:performance", List.of("SPLICE PERFORMANCE", "mare armed with",
+                            "splice:performance", "new allele: in theme"));
+            ActionTrace.log("test yard", "birth pen built (row T east: SPLICE PERFORMANCE)");
         } catch (RuntimeException e) {
-            HorseGenetics.LOGGER.warn("[Debug] test yard: rows AE-AF (births) failed to build", e);
+            HorseGenetics.LOGGER.warn("[Debug] test yard: the birth pen failed to build", e);
         }
     }
 

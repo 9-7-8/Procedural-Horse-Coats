@@ -602,30 +602,28 @@ public final class DebugTestWorldHandler {
                         + "right off the arrival road, and it runs in rows either side of "
                         + "the walkway all the way to the back wall.")
                 .withStyle(ChatFormatting.GOLD));
-        tell(player, Component.literal("  A  2 dryad pens | the 3 stat pens      "
-                        + "J  (empty) | the healer's control")
+        tell(player, Component.literal("  O  the cap, hurt mare | MET natural      "
+                        + "T  dryads on stone | splice performance")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  O  breeding, one scenario a pen        "
-                        + "Q-R  band life, on a clock (leave it)")
+        tell(player, Component.literal("  U, W  inheritance ratios (all day)       "
+                        + "X  night shy | lycan doomed, diamonds")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  S-T  dryads, on stone (all day)        "
-                        + "U  inheritance ratios, tallied (all day)")
+        tell(player, Component.literal("  Y  cover reach | stats, lethal foals    "
+                        + "AA  kick pens | blood only, suntouched")
                 .withStyle(ChatFormatting.WHITE));
-        tell(player, Component.literal("  V-AL  every other clocked test          "
-                        + "AM-AQ  the clockwork pens (grep CLOCKWORK)")
+        tell(player, Component.literal("  AL  the arcane dealer")
                 .withStyle(ChatFormatting.WHITE));
-        // G AND H ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - the growing
-        // row's last two pens moved into A's west block when oak/birch and bone
-        // meal were confirmed, and H had been depth zero since the retinue pen
-        // was deleted. The letters are deliberately NOT re-lettered: every sign
+        // MOST LETTERS ARE NOT MISSING FROM THIS LIST, THEY ARE GONE - answered
+        // rows deleted, the rest packed together. The letters are deliberately
+        // NOT re-lettered: every sign
         // in the yard, every open question on a Verification tab anywhere in
         // the wiki and a year of session notes say "row J west", and renaming
         // rows to close a gap would invalidate all of it to save two characters.
-        // B-N AND P ARE GONE TOO (2026-09-30): every pen that waited for a person was
-        // deleted, and what a pair of hands did for them is DebugYardClockwork's FakePlayer.
+        // 2026-09-30: every pen that waited for a person went, then every pen whose question was
+        // answered, and the survivors were packed together - so the letters skip, and are names.
         tell(player, Component.literal("Every pen runs itself - walk in, then leave it alone. "
-                        + "Nothing in the yard needs your hands any more; what does is batch 5. "
-                        + "(No B-I, K-N or P: emptied and deleted.)")
+                        + "Nothing in the yard needs your hands; what does is batch 5. The letters "
+                        + "skip because answered rows were deleted and the rest packed together.")
                 .withStyle(ChatFormatting.GOLD));
     }
 

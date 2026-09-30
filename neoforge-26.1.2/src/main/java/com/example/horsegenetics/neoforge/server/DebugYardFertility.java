@@ -1,15 +1,9 @@
 package com.example.horsegenetics.neoforge.server;
 
-import com.example.horsegenetics.common.genetics.Genome;
-import com.example.horsegenetics.common.genetics.Genotype;
-import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
-import com.example.horsegenetics.common.repro.Conception;
-import com.example.horsegenetics.common.repro.Pregnancy;
 import com.example.horsegenetics.common.repro.ReproRules;
 import com.example.horsegenetics.common.repro.ReproTiming;
 import com.example.horsegenetics.neoforge.HorseGenetics;
-import com.example.horsegenetics.neoforge.NeoRng;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,14 +13,11 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_R;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_R_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
@@ -77,9 +68,8 @@ final class DebugYardFertility {
         try {
             theCap(level, gy, west, mouthZ + ROW_O);
             hurtMare(level, gy, west + 14, mouthZ + ROW_O);
-            maternity(level, gy, east, mouthZ + ROW_O);
-            metNatural(level, gy, east, mouthZ + ROW_R);
-            ActionTrace.log("test yard", "fertility pens built (row O, and MET NATURAL in R)");
+            metNatural(level, gy, east, mouthZ + ROW_O);
+            ActionTrace.log("test yard", "fertility pens built (row O: the cap, hurt mare, MET natural)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: fertility rows failed to build", e);
         }
@@ -122,58 +112,13 @@ final class DebugYardFertility {
         });
     }
 
-    private static void maternity(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 9, ROW_O_D, "MATERNITY",
-                List.of("MATERNITY", "foals at 1, 2, 3 min", "TWINS mare: two;", "LOSS mare: none"));
-        ReproTiming t = ServerConfig.reproTiming();
-        long day = t.dayTicks();
-        NeoRng rng = new NeoRng(level.getRandom());
-
-        Genome plainSire = Genome.of(Genotype.parse(FERT + "n/n"), rng).withSex(Sex.MALE);
-        HorseRecord plainSireRecord = HorseRecord.founder(new UUID(0x51EL, 1L), "Yard", "Sire", plainSire);
-        Genome metSire = Genome.of(Genotype.parse(MET_CARRIER), rng).withSex(Sex.MALE);
-        HorseRecord metSireRecord = HorseRecord.founder(new UUID(0x51EL, 2L), "Carrier", "Sire", metSire);
-
-        Horse due1 = horse(level, gy, x0 + 2.0, z0 + 2.5, Sex.FEMALE, FERT + "n/n", true, "DUE 1 MIN");
-        Horse twins = horse(level, gy, x0 + 4.5, z0 + 4.5, Sex.FEMALE, FERT + "tw/tw", true, "TWINS DUE 2 MIN");
-        Horse loss = horse(level, gy, x0 + 7.0, z0 + 6.5, Sex.FEMALE, MET_CARRIER, true, "LOSS AT 1, DUE 3");
-        pregnant(due1, plainSire, plainSireRecord, false, false, day);
-        pregnant(twins, plainSire, plainSireRecord, true, false, 2 * day);
-        pregnant(loss, metSire, metSireRecord, false, true, 3 * day);
-        // THE VET'S KIT, READ WITHOUT HANDS (2026-09-15): the kit's examine is chat only, so the pen logs the same
-        // report the kit would print, before the first birth. And TWINS' speed early and late, for "15% lower".
-        DebugYardHerd.after(level, 200, () -> {
-            for (Horse h : new Horse[]{due1, twins, loss}) {
-                if (h != null && h.isAlive()) {
-                    ActionTrace.log("test yard", "MATERNITY vet: " + (h.getCustomName() == null ? "?" : h.getCustomName().getString())
-                            + " - " + String.join(" / ", ReproHandler.vetReport(h)));
-                }
-            }
-            ActionTrace.log("test yard", "MATERNITY vet: expect DUE 1 MIN one foal, TWINS DUE 2 MIN twins, LOSS AT 1, DUE 3"
-                    + " one foal");
-        });
-        // Three readings across the heavy window, not one at its edge. "Late" is the last third (ReproRules.LATE_FRACTION)
-        // and the watch line works it out on the spot, but the speed modifier is only put on at the horse's own SCAN
-        // tick - the 09:26 run read 1900 ticks five seconds after the line first said "heavy and slow", still at base.
-        for (long at : new long[]{200L, 2_000L, 2_150L, 2_300L}) {
-            DebugYardHerd.after(level, at, () -> {
-                if (twins != null && twins.isAlive()) {
-                    ActionTrace.log("test yard", String.format("MATERNITY speed at %d ticks: TWINS %.4f (base %.4f)%s", at,
-                            twins.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),
-                            twins.getAttributeBaseValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),
-                            at > 1_000 ? " - expect about 15% under base late in a twin pregnancy" : ""));
-                }
-            });
-        }
-    }
-
     // ------------------------------------------------------------------
     // Row R east
     // ------------------------------------------------------------------
 
     /** Deeper than the others: it breeds on its own until it holds nine horses. */
     private static void metNatural(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 9, ROW_R_D, "MET NATURAL",
+        pen(level, gy, x0, z0, 9, ROW_O_D, "MET NATURAL",
                 List.of("MET CARRIERS", "left to breed:", "count levels off", "at the cap (9)"));
         Horse mare = horse(level, gy, x0 + 3.0, z0 + 5, Sex.FEMALE, MET_CARRIER, true, "MET MARE");
         horse(level, gy, x0 + 6.0, z0 + 5, Sex.MALE, MET_CARRIER, true, "MET STUD");
@@ -244,38 +189,4 @@ final class DebugYardFertility {
         }
     }
 
-    /**
-     * <b>Make this mare pregnant with exactly the pregnancy the pen promises</b> -
-     * twins or not, an early loss or not - then set when it ends. Drawn through the
-     * real conception path, retried until the dice agree, so what is carried is an
-     * ordinary pregnancy rather than a hand-built one.
-     */
-    private static void pregnant(@Nullable Horse mare, Genome sire, HorseRecord sireRecord,
-                                 boolean twins, boolean loss, long dueIn) {
-        if (mare == null) {
-            return;
-        }
-        ReproTiming t = ServerConfig.reproTiming();
-        long now = mare.level().getGameTime();
-        HorseRecord mareRecord = HorseRecords.of(mare);
-        Genome mareGenome = HorseBreedingHandler.genomeOf(mare, mareRecord, HorseRecords.rng(mare));
-        for (int attempt = 0; attempt < 400; attempt++) {
-            ReproHandler.set(mare, ReproHandler.of(mare).withPregnancy(Optional.<Pregnancy>empty())
-                    .withCyclePhase(ReproRules.phaseFor(now, t.estrusTicks() * 3 / 4, t)));
-            Conception.Result result = ReproHandler.breed(mare, mareRecord, mareGenome, sire, sireRecord, null,
-                    List.of(), "test yard", null);
-            Optional<Pregnancy> p = result.pregnancy();
-            if (p.isEmpty() || p.get().twins() != twins || p.get().hasEarlyLoss() != loss) {
-                continue;
-            }
-            long lossTick = loss ? now + dueIn / 3 : Pregnancy.NO_LOSS;
-            ReproHandler.set(mare, ReproHandler.of(mare).withPregnancy(
-                    new Pregnancy(p.get().embryos(), now - 1, now + dueIn, lossTick)));
-            noNaturalCovers(mare);
-            return;
-        }
-        ReproHandler.set(mare, ReproHandler.of(mare).withPregnancy(Optional.<Pregnancy>empty()));
-        HorseGenetics.LOGGER.warn("[Debug] test yard: could not make {} pregnant as promised (twins={}, loss={})"
-                + " - is health.mode FULL?", mare.getName().getString(), twins, loss);
-    }
 }
