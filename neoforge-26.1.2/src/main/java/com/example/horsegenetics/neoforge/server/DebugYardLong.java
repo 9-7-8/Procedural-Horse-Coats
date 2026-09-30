@@ -26,15 +26,16 @@ import java.util.Set;
 import java.util.UUID;
 
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.EAST_MIN;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_T_D;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O;
+import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_O_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_U_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_W;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
- * <b>Rows T, U and W</b> since 2026-09-30, when row S (DRYAD CARRIER) and DRYAD DARK SMALL went as answered.
+ * <b>Row O east, rows U and W</b> since 2026-09-30, when row S (DRYAD CARRIER), DRYAD DARK SMALL and then DRYAD FLOWER
+ * went as answered, and the one dryad left moved into row O.
  *
  * <p><b>Rows S-U: pens that only answer after a whole day</b> (owner, 2026-09-14: "I'm
  * going to leave this up all day, so add more pens which benefit from being run for a
@@ -89,26 +90,13 @@ final class DebugYardLong {
         int east = cx + EAST_MIN + 1;
         TALLIES.clear();
         try {
-            stoneBand(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
-
-            // DELETED 2026-09-15 (owner: "delete the dryad pens which have grown and haven't killed
-            // anyone"): DRYAD SPRUCE, DRYAD JUNGLE, DRYAD ACACIA and DRYAD OAK. Overnight each grew
-            // trees with its horses in it (spruce 18 logs, jungle 4, acacia 25, oak 18) and none took
-            // inWall damage. Kept: the carrier control, flowers, oak+birch (no tree overnight), and
-            // both dark oak pens - DRYAD DARK is where the branch killed a horse (gap 244).
-
-            dryad(level, gy, west + 11, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD FLOWER", "Flwr/Flwr", 2,
-                    List.of("DRYAD FLOWER", "Flwr/Flwr: flowers", "on grass only", "(all day)"),
-                    Blocks.DANDELION, Blocks.POPPY, Blocks.BLUE_ORCHID, Blocks.ALLIUM, Blocks.AZURE_BLUET,
-                    Blocks.OXEYE_DAISY, Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.OAK_SAPLING);
-            flowerVerdict(level, gy, west + 11, mouthZ + ROW_T, 6, ROW_T_D, 1);
-            dryad(level, gy, east, mouthZ + ROW_T, 6, ROW_T_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
+            // THE DRYAD ROW IS ROW O EAST now (2026-09-30): DRYAD FLOWER passed and went, and its row held
+            // only this. Stone and floor light over the east half only - HURT MARE, west, eats the grass.
+            stoneBand(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
+            dryad(level, gy, east, mouthZ + ROW_O, 6, ROW_O_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
                     List.of("DRYAD OAK+BIRCH", "both, each at half", "rate - and still", "no tree?"),
                     Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
-            // DRYAD CARRIER and DRYAD DARK SMALL deleted 2026-09-30 with every pen whose question was
-            // answered: the carrier planted nothing in three hours, and the dark oak grew a 99-log tree
-            // with its horse in the pen (gene-dryad.html#verified, #verified-no-tree-through-horse).
-            lightFromTheFloor(level, gy, cx, mouthZ + ROW_T, ROW_T_D);
+            lightFromTheFloor(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
 
             ratio(level, gy, west, mouthZ + ROW_U, "RATIO HYPP", "horsegenetics.scn4a", "H/N", "H/N", false,
                     List.of("RATIO: HYPP", "H/N x H/N all day:", "1 in 4 H/H, and", "every H/H dies"),
@@ -139,7 +127,7 @@ final class DebugYardLong {
             ratio(level, gy, east + 9, mouthZ + ROW_W, "RATIO STARBURST", "horsegenetics.starburst", "W/n", "W/n", false,
                     List.of("RATIO: STARBURST", "W/n x W/n all day:", "1 W/W : 2 W/n : 1 n/n", "(knob inheritance)"),
                     "about 1 W/W : 2 W/n : 1 n/n");
-            ActionTrace.log("test yard", "all-day pens built (row T: dryads; rows U and W: inheritance ratios)");
+            ActionTrace.log("test yard", "all-day pens built (row O east: the dryad; rows U and W: inheritance ratios)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }
@@ -150,9 +138,9 @@ final class DebugYardLong {
     // ------------------------------------------------------------------
 
     /** Stone across the whole yard for a dryad row, from four blocks before it to four after. */
-    private static void stoneBand(ServerLevel level, int gy, int cx, int z0, int depth) {
+    private static void stoneBand(ServerLevel level, int gy, int xFrom, int xTo, int z0, int depth) {
         BlockState stone = Blocks.STONE.defaultBlockState();
-        for (int x = cx - 24; x <= cx + 24; x++) {
+        for (int x = xFrom; x <= xTo; x++) {
             for (int z = z0 - 4; z <= z0 + depth + 4; z++) {
                 DebugPenManager.groundColumn(level, x, gy, z, stone);
             }
@@ -171,10 +159,10 @@ final class DebugYardLong {
      *
      * <p>UNVERIFIED: that the lamps were the whole cause. The census's failed-grow count says.
      */
-    private static void lightFromTheFloor(ServerLevel level, int gy, int cx, int z0, int depth) {
+    private static void lightFromTheFloor(ServerLevel level, int gy, int xFrom, int xTo, int z0, int depth) {
         BlockState air = Blocks.AIR.defaultBlockState();
         BlockState glow = Blocks.GLOWSTONE.defaultBlockState();
-        for (int x = cx - 24; x <= cx + 24; x++) {
+        for (int x = xFrom; x <= xTo; x++) {
             for (int z = z0 - 4; z <= z0 + depth + 4; z++) {
                 for (int y = gy + 1; y <= gy + 8; y++) {
                     BlockPos at = new BlockPos(x, y, z);
@@ -210,38 +198,6 @@ final class DebugYardLong {
         YardPens.register(gy, x0, x1, z0, z1, name);
         // Four past the walls, which is as far as a planting can reach; tall enough for a tree.
         DebugWorldWatch.watch(name, DebugTestYard.box(x0 - 4, gy, z0 - 4, x1 + 4, gy + 10, z1 + 4), null, watched);
-    }
-
-    /**
-     * <b>DRYAD FLOWER answers by counting what its horses plant, not what is standing</b> (owner,
-     * 2026-09-30). The watch saw "none of its watched blocks" for forty minutes in two runs, and the
-     * floor was the wrong instrument twice over: it watched two of the eight flowers
-     * {@code GeneAbilityHandler.FLOWERS} draws from, and a horse eats a small flower
-     * ({@code HungerFoodGoal}) - the blight pen's lesson, where the ground grew back before a count could
-     * see it. So every twenty minutes this sums {@link DebugWorldWatch#spreadsPlacedBy} over the horses
-     * in the pen: PASS on the first flower, FAIL if an hour passes with none. The census's
-     * {@code spread attempts} line says how many tries there were, which tells a slow gene from one
-     * whose every try is refused.
-     */
-    private static void flowerVerdict(ServerLevel level, int gy, int x0, int z0, int width, int depth, int check) {
-        DebugYardHerd.after(level, 20 * 60 * 20, () -> {
-            AABB box = DebugTestYard.box(x0, gy, z0, x0 + width, gy + 3, z0 + depth);
-            int planted = 0;
-            for (Horse h : level.getEntitiesOfClass(Horse.class, box, Horse::isAlive)) {
-                planted += DebugWorldWatch.spreadsPlacedBy(h.getUUID());
-            }
-            int minutes = check * 20;
-            if (planted > 0) {
-                ActionTrace.log("test yard", "DRYAD FLOWER at " + minutes + " min: " + planted
-                        + " flower(s) planted by its horses - PASS");
-            } else if (check >= 3) {
-                ActionTrace.log("test yard", "DRYAD FLOWER at " + minutes + " min: nothing planted by its horses"
-                        + " - FAIL; read the census 'spread attempts' line for flower tries vs landings");
-            } else {
-                ActionTrace.log("test yard", "DRYAD FLOWER at " + minutes + " min: nothing planted yet");
-                flowerVerdict(level, gy, x0, z0, width, depth, check + 1);
-            }
-        });
     }
 
     // ------------------------------------------------------------------

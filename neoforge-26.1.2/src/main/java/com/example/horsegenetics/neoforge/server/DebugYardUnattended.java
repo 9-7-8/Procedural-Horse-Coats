@@ -12,7 +12,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -24,12 +23,10 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_X_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Y;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_Y_D;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AA;
-import static com.example.horsegenetics.neoforge.server.DebugTestYard.ROW_AA_D;
 import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
 
 /**
- * <b>Rows X, Y and AA</b>, since 2026-09-30 minus every pen whose question was answered (BONE MEAL, GELDING BAND,
+ * <b>Rows X and Y</b> (row AA emptied and went the same day), since 2026-09-30 minus every pen whose question was answered (BONE MEAL, GELDING BAND,
  * LYCAN ROUND TRIP, WERE-COW, WATERBORN; then LYCAN DOOMED and LETHAL FOALS, on their own PASS lines the same
  * day - owner: an automatic yard PASS closes a check "same as clockwork").
  *
@@ -39,10 +36,9 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *
  * <table>
  *   <tr><th>row</th><th>west</th><th>east</th></tr>
- *   <tr><td>X</td><td>NIGHT SHY - a night-shy horse, a band and two cows</td><td>(empty)</td></tr>
+ *   <tr><td>X</td><td>NIGHT SHY - a night-shy horse, a band and two cows</td><td>SUNTOUCHED</td></tr>
  *   <tr><td>Y</td><td>REACH WALL, REACH FENCE - cover reach and courtship</td>
  *       <td>STATS - speed and health floors and stacking</td></tr>
- *   <tr><td>AA</td><td>KICK HUNTER, KICK PLAIN - lidded</td><td>SUNTOUCHED</td></tr>
  * </table>
  */
 final class DebugYardUnattended {
@@ -60,10 +56,11 @@ final class DebugYardUnattended {
             reachWall(level, gy, west, mouthZ + ROW_Y);
             reachFence(level, gy, west + 9, mouthZ + ROW_Y);
             stats(level, gy, east, mouthZ + ROW_Y);
-            kick(level, gy, west, mouthZ + ROW_AA, "KICK HUNTER", "horsegenetics.aggression=Aah/Aah");
-            kick(level, gy, west + 9, mouthZ + ROW_AA, "KICK PLAIN", PLAIN);
-            suntouched(level, gy, east + 10, mouthZ + ROW_AA);
-            ActionTrace.log("test yard", "unattended pens built (rows X, Y, AA: night shy, reach, stats, kick, suntouched)");
+            // KICK HUNTER and KICK PLAIN went on their own verdicts, 2026-09-30: the hunter's blows 11, 12 and 17
+            // ticks apart (gap 222's ten-tick swing), the plain horse none. DebugWorldWatch.kicksBy and
+            // DebugTestYard.lidded, which that pen needed against Last Stand's jump, stay for the next fighter.
+            suntouched(level, gy, east, mouthZ + ROW_X);   // row X east since row AA emptied, 2026-09-30
+            ActionTrace.log("test yard", "unattended pens built (rows X and Y: night shy, suntouched, reach, stats)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: rows X-AA failed to build", e);
         }
@@ -152,41 +149,9 @@ final class DebugYardUnattended {
     // Row AA
     // ------------------------------------------------------------------
 
-    /**
-     * Gap 222: horses swing every 10 ticks, so a gladiator lands about two blows to a husk's one. Husks, because
-     * they do not burn in the yard's daylight. The plain horse is the control: husks ignore horses, so it should
-     * have no {@code [watch] kick} lines at all. The husk is replaced every half day.
-     */
-    private static void kick(ServerLevel level, int gy, int x0, int z0, String name, String code) {
-        pen(level, gy, x0, z0, 9, ROW_AA_D, name, Blocks.STONE.defaultBlockState(),
-                List.of(name, code.equals(PLAIN) ? "a plain horse and" : "a monster-hunter and",
-                        "one husk: blows", "every 10 ticks"));
-        // Lidded: at 3/22 Last Stand's bolt jumps any fence (DebugTestYard.lidded).
-        DebugTestYard.lidded(level, gy, x0, x0 + 9, z0, z0 + ROW_AA_D);
-        horse(level, gy, x0 + 4.5, z0 + 3.5, Sex.MALE, code, true, name);
-        AABB box = DebugTestYard.box(x0, gy, z0, x0 + 9, gy + 3, z0 + ROW_AA_D);
-        husks(level, gy, x0, z0, box, name, 1);
-        ActionTrace.log("test yard", name + ": expect '[watch] kick | ... \"" + name + "\" hit ... husk' lines "
-                + (code.equals(PLAIN) ? "NEVER - any is a FAIL" : "about 10 ticks apart, and 'horse hurt' from the"
-                + " husks about 20 apart (gap 222)"));
-    }
-
-    private static void husks(ServerLevel level, int gy, int x0, int z0, AABB box, String name, int wave) {
-        int alive = level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,
-                box.inflate(0.0, 2.0, 0.0), Mob::isAlive).size();
-        // ONE HUSK, NOT TWO (owner, 2026-09-30). Lidded in, the hunter could no longer bolt, and two husks
-        // killed it once Last Stand's save was spent - ending the pen after eight kicks. Alone against one
-        // it wins, as it did the run before, and every half day's refill is another round of kicks.
-        if (alive < 1) {
-            animal(level, EntityType.HUSK, gy, x0 + 4.5, z0 + 9.5);
-            ActionTrace.log("test yard", name + " husk wave " + wave + ": 1 husk in");
-        }
-        DebugYardHerd.after(level, 12_000, () -> husks(level, gy, x0, z0, box, name, wave + 1));
-    }
-
     /** Suntouched's light verb is skipped in the horse dimension on purpose: no light block should ever appear here. */
     private static void suntouched(ServerLevel level, int gy, int x0, int z0) {
-        pen(level, gy, x0, z0, 8, ROW_AA_D, "SUNTOUCHED", Blocks.GRASS_BLOCK.defaultBlockState(),
+        pen(level, gy, x0, z0, 8, ROW_X_D, "SUNTOUCHED", Blocks.GRASS_BLOCK.defaultBlockState(),
                 List.of("SUNTOUCHED", "adult and foal: no", "light blocks, ever,", "in this dimension"),
                 Blocks.LIGHT);
         horse(level, gy, x0 + 2.5, z0 + 4.5, Sex.MALE, "horsegenetics.suntouched=Sntch/Sntch", true, "SUNTOUCHED ADULT");

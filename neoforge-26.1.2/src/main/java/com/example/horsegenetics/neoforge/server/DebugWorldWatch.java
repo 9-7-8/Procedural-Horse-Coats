@@ -335,6 +335,7 @@ public final class DebugWorldWatch {
         stop(level);
         clearAreas();
         SOUNDS_BY_HORSE.clear();
+        KICKS_BY_HORSE.clear();
         SPREADS_BY_HORSE.clear();
         startedAtNanos = System.nanoTime();
         int cxLo = SectionPos.blockToSectionCoord((int) yard.minX);
@@ -922,6 +923,7 @@ public final class DebugWorldWatch {
             return;
         }
         LivingEntity victim = event.getEntity();
+        KICKS_BY_HORSE.computeIfAbsent(horse.getUUID(), k -> new java.util.ArrayList<>()).add(horse.level().getGameTime());
         note("kick", ActionTrace.describeShort(horse) + " hit " + ActionTrace.describeShort(victim) + " for "
                 + String.format("%.1f", event.getHealthDamage()) + " at tick " + horse.level().getGameTime()
                 + " - it has " + String.format("%.1f/%.1f", victim.getHealth(), victim.getMaxHealth()) + " left");
@@ -1098,6 +1100,13 @@ public final class DebugWorldWatch {
      * see it, so the floor is the wrong instrument for "did the gene convert anything".
      */
     private static final Map<java.util.UUID, Integer> SPREADS_BY_HORSE = new java.util.HashMap<>();
+
+    /** The game tick of every blow each horse has landed since the watch started; the KICK pens' verdict reads it. */
+    private static final Map<java.util.UUID, java.util.List<Long>> KICKS_BY_HORSE = new java.util.HashMap<>();
+
+    static java.util.List<Long> kicksBy(java.util.UUID horse) {
+        return java.util.List.copyOf(KICKS_BY_HORSE.getOrDefault(horse, java.util.List.of()));
+    }
 
     static int spreadsPlacedBy(java.util.UUID horse) {
         return SPREADS_BY_HORSE.getOrDefault(horse, 0);

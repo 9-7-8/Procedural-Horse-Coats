@@ -117,7 +117,7 @@ final class DebugTestYard {
      * <b>Row north walls, as offsets from the yard's mouth.</b> Each is the one before it plus its
      * depth plus an aisle, so deleting a row pulls everything behind it forward.
      *
-     * <h2>Eight rows, and no gaps (owner, 2026-09-30)</h2>
+     * <h2>Few rows, and no gaps (owner, 2026-09-30)</h2>
      * <i>"Also remove everything that's already been verified, and remove the empty space from the
      * debug yard left over from removing other pens."</i> Every pen whose own question the wiki records
      * as answered went - checked question by question against the Verification tabs, not by gene - and
@@ -126,37 +126,38 @@ final class DebugTestYard {
      * empty halves: MET NATURAL beside THE CAP, SPLICE PERFORMANCE into the dryad row, LYCAN DOOMED and
      * DEATH DIAMONDS beside NIGHT SHY, BLOOD ONLY where WATERBORN stood.
      *
+     * <p><b>Seven since the same afternoon.</b> The owner ruled an automatic yard PASS closes a check like a
+     * clockwork one, and ten more pens went on their own PASS lines (DEATH DIAMONDS, LYCAN DOOMED, LETHAL
+     * FOALS, BLOOD ONLY, SPLICE PERFORMANCE; then THE CAP, MET NATURAL and DRYAD FLOWER once re-aimed at
+     * the cap of fifty and at what a flower dryad plants). Row T's last pen, DRYAD OAK+BIRCH, moved into
+     * row O east beside HURT MARE.
+     *
      * <p><b>The letters are kept</b>, gaps and all: every sign and every Verification tab names a pen by
-     * its row, and closing the alphabet would invalidate all of it. So the yard runs O, T, U, W, X, Y,
-     * AA, AL - names, not positions.
+     * its row, and closing the alphabet would invalidate all of it. So the yard runs O, U, W, X, Y, AL -
+     * names, not positions. (KICK HUNTER and KICK PLAIN passed on their own verdicts the same day, and
+     * SUNTOUCHED moved up into row X, so row AA went too.)
      *
      * <p>Every pen registers with {@link YardPens}, so a horse's breeding and band checks see only its
      * own pen, which is what lets them share walls (packed since 2026-09-14).
      */
     static final int PACKED_AISLE = AISLE + 1;     // a chest and a sign in front of every pen
-    /** THE CAP, HURT MARE | MET NATURAL ({@link DebugYardFertility}). Twelve deep for MET NATURAL's growing herd. */
+    /** HURT MARE ({@link DebugYardFertility}) | DRYAD OAK+BIRCH on stone ({@link DebugYardLong}). */
     static final int ROW_O = 3;
     static final int ROW_O_D = 12;
-    /** DRYAD FLOWER | DRYAD OAK+BIRCH - on stone, so a sapling over a fence cannot live ({@link DebugYardLong}). */
-    static final int ROW_T = ROW_O + ROW_O_D + PACKED_AISLE;
-    static final int ROW_T_D = 10;
     /** Four inheritance-ratio pens that breed all day and tally their foals ({@link DebugYardLong}). */
-    static final int ROW_U = ROW_T + ROW_T_D + PACKED_AISLE;
+    static final int ROW_U = ROW_O + ROW_O_D + PACKED_AISLE;
     static final int ROW_U_D = 10;
     /** Four more: two impossible genotypes, a milk clash and a knob-carrying colour gene. */
     static final int ROW_W = ROW_U + ROW_U_D + PACKED_AISLE;
     static final int ROW_W_D = 10;
-    /** NIGHT SHY | (empty) ({@link DebugYardUnattended}). */
+    /** NIGHT SHY | SUNTOUCHED ({@link DebugYardUnattended}). */
     static final int ROW_X = ROW_W + ROW_W_D + PACKED_AISLE;
     static final int ROW_X_D = 12;
     /** REACH WALL, REACH FENCE | STATS. */
     static final int ROW_Y = ROW_X + ROW_X_D + PACKED_AISLE;
     static final int ROW_Y_D = 12;
-    /** KICK HUNTER, KICK PLAIN (lidded) | SUNTOUCHED. */
-    static final int ROW_AA = ROW_Y + ROW_Y_D + PACKED_AISLE;
-    static final int ROW_AA_D = 12;
     /** The arcane dealer and the string he founds ({@link DebugYardArcane}). Deeper, because he places his own herd. */
-    static final int ROW_AL = ROW_AA + ROW_AA_D + PACKED_AISLE;
+    static final int ROW_AL = ROW_Y + ROW_Y_D + PACKED_AISLE;
     static final int ROW_AL_D = 16;
 
     /**
