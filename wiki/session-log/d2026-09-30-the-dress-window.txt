@@ -49,6 +49,14 @@ Also moved
     The Gear tab's on-screen footnote said only the saddle and barding had anything to fit;
     the rescuing braid fills the mane and tail, so it now says four and fifteen.
 
+Released as 0.5.036
+
+    Cut the same session, with the jar on the GitHub release and the entry on releases.html.
+    The range since 0.5.035 was this window plus the modded-biome breeds
+    (d2026-09-30-a-breed-in-every-biome.txt). That session booted no server, so the runServer
+    boot above is also the first boot of the biome table. The note says plainly that neither
+    change has been played.
+
 Next
 
     intake/To do.txt is down to the two runtime-registry bullets, which the "Runtime registry
