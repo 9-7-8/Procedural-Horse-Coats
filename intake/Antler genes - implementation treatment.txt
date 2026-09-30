@@ -1,9 +1,9 @@
 Antler genes - implementation treatment
 
 Drafted in a session confined to intake/ (nothing outside this folder was touched).
-Nothing here is built or run. "Decided" would mean an owner call; there are none yet, so
-every design call below is a PROPOSAL with a recommendation, listed in section 7 for
-the owner to answer. "UNVERIFIED" lines are facts this file has not proved.
+Nothing here is built or run. The design calls D1-D8 were put to the owner and are
+DECIDED (see "Decisions" at the end); what stays open is numbers to tune when built.
+"UNVERIFIED" lines are facts this file has not proved.
 Source of truth once routed: wiki/model-parts.html (the part machinery) and one page per
 gene. This file is the handoff for the antler half of "Attached model parts.txt"
 (sections 11.x, 12 and 13, which already hold the generator draft and the tier A/B/C
@@ -76,10 +76,10 @@ TIER 1 - the core, built together (needs stages 0-2 first)
      tint       colour      tier A   pale bone to dark umber; drifts as a lineage
    Every value carries .clampedTo(lo, hi) at the schema AND a min/max at the renderer
    (13.1: the epigenome's +/-8 design-span bound is a horn a chunk long otherwise).
-   Which copy is read: the expressing copy's values, as CutieMarkGene does. If both
-   copies are Ant, see decision D3 (each side from one parent's copy).
+   Which copy is read: the expressing copy's values, as CutieMarkGene does. (D3: no
+   per-parent-copy sides.)
    Inheritance of the numbers is generic and needs no antler code.
-   Wild frequency: rare, hand-seeded, flying-style. Proposal: total Ant + Antm allele
+   Wild frequency: rare, hand-seeded, flying-style (D7). Proposal for the numbers: total Ant + Antm allele
    frequency around 1/500 (a few horses in a thousand antlered), Ant rarer than Antm,
    the pair table written out by hand and antlers.json added to the SKIP set in
    tools/founders.py. Numbers are for tuning when built. A breed can override (stage 4).
@@ -95,46 +95,24 @@ TIER 1 - the core, built together (needs stages 0-2 first)
      n    spike              - simple spike or short fork (a yearling / brocket)
    Series: codominant, so an Frk/Pal horse grows a different habit on each side.
    That is asymmetry from genetics rather than from a number, and it is the one thing
-   in this roster that no hand-modelled antler could do. (Proposal D3; if the owner
-   would rather have a plain dominance series, order it Pal > Crn > Brw > Frk > n.)
+   in this roster that no hand-modelled antler could do. (Decided, D3.)
    Only expresses on a horse that already has `antlers`; on a horse without, it is a
    silent carrier, like any modifier with nothing to modify.
    BUILD NOTE: Brw / Pal / Crn are new generators. Only Frk exists today
    (AntlerGenerator). Ship antler_form with just Frk + n if the others are not ready,
    and add alleles later - appending alleles is safe, reordering is not (see below).
 
-TIER 2 - the year (needs the tier 1 genes SEEN in game first)
-
-3. antler_cycle  (Cst, Prm)                                     family: natural
-   Cast-and-regrow versus permanent.
-     Cst  casts: antlers are hard in autumn/winter, shed, then regrow through a velvet
-          phase (a short, thicker, paler stage) - the growth stages are conditions on
-          the horse's record and the world clock, not animation
-     Prm  permanent (horn-like); the wild type, and what every horse has today
-   Recessive versus dominant is an owner call (D4). Needs a "year" that the mod does not
-   have: proposal is the world day count modulo a configurable length, kept in
-   common/ as plain arithmetic (a dayOfYear function), so the designer can preview the
-   phase. Shed antlers can drop as an item (D5) - that item is a separate intake bullet
-   and is NOT decided here.
-   UNVERIFIED: the mod's existing notion of time (horse-care's shared slow tick and any
-   age/season clock). Read wiki/text/horse-care.txt before designing the clock.
-
-TIER 3 - modifiers, cosmetic first (each folds over an antler part that `antlers`
+TIER 2 - modifiers, cosmetic only (each folds over an antler part that `antlers`
 granted; none can grant one - Attached model parts.txt 13.3, the CutieMark move)
 
-4. antler_glow   (Glw, n)  family: magical - the tips are emissive (one flag on the
+3. antler_glow   (Glw, n)  family: magical - the tips are emissive (one flag on the
    part; the second submit of the same model doubles the cost of that horse only).
-5. antler_crystal (Cry, n) family: magical - translucent, crystalline; shafts translucent
-   and cap/point opaque (section 12.5's two-pass split). Also a good candidate to be
-   the SAME gene as the crystal-growths part rather than a modifier; the owner may want
-   the two merged (D6). UNVERIFIED which translucent render type a layer is offered.
-6. antler_bloom  (Blm, n)  family: magical - leaves / moss / blossom on the beams,
-   following the season if antler_cycle exists; a per-tine tint override plus a small
+4. antler_crystal (Cry, n) family: magical - translucent, crystalline; shafts translucent
+   and cap/point opaque (section 12.5's two-pass split). The crystal-growths part stays its own
+   gene (D6). UNVERIFIED which translucent render type a layer is offered.
+5. antler_bloom  (Blm, n)  family: magical - leaves / moss / blossom on the beams,
+   a per-tine tint override plus a small
    second box set, so it costs boxes, not a new system.
-7. antler_gore   (optional, not cosmetic) - a riding charge whose damage scales with
-   tines x reach. Reuses the fighter effects machinery. Deliberately last: it changes
-   balance, and every other gene above is visual only.
-
 Why sex-limitation is a render gate, not a genotype rule
 =========================================================
 Making Antm "stallion only" inside expressionOf would make the gene read the sex locus,
@@ -205,10 +183,10 @@ B. The `antlers` locus (presence, Ant / Antm / n, the six epigenome rows) as a
 C. Look at it in game: adult and foal, walk, gallop, rear, graze, two horses with
    different tine counts in one frame, a tiny and a huge horse, a horse in a headstall
    or mask (the Head gear zone - antlers must clear it), invisible horse, 20-horse pen.
-D. `antler_form` with Frk + n, then the other habits one generator per slice.
-E. `antler_cycle` and the clock.
-F. Tier 3 modifiers, one per slice.
-G. The breed hook (stage 4), so a breed pins a band on `tines` and `antlers` and the
+D. `antler_form` with Frk + n, then the other habits one generator per slice;
+   the codominant left/right habits arrive here (D3).
+E. Tier 2 modifiers (glow, crystal, bloom), one per slice.
+F. The breed hook (stage 4), so a breed pins a band on `tines` and `antlers` and the
    reindeer breeds become content instead of code. Only then does the breed-book
    reindeer entry (breed-book.html) unblock.
 
@@ -232,30 +210,22 @@ antlers under a headstall, mask and saddle-adjacent tack; a distance/LOD drop; 2
 horses against the same pen without; save, reload and breed - the numbers follow the
 copy and a foal of two racks keeps a plausible one.
 
-Decisions for the owner (proposals, each with a recommendation)
-================================================================
-D1. Which sexes? Recommended: BOTH alleles (Ant and Antm), as above.
-D2. Are the antlers procedural (generator) or hand-modelled? Recommended: procedural;
-    the generator already exists and is checked, and it is rule 4 applied to geometry.
-D3. Asymmetry: from a number (`asymmetry`), from codominant habits (`antler_form`),
-    or from one parent's copy per side on an Ant/Ant horse? Recommended: the number
-    now, codominant habits when antler_form ships, and the per-side-copy idea only if
-    the first two feel too tame.
-D4. Is `Cst` (cast and regrow) dominant or recessive? Recommended: dominant if the
-    owner wants players to find it, recessive if it is to be a bred trait. Also whether
-    it exists at all before the year clock does.
-D5. Do shed antlers drop as an item, and is that item in scope? Recommended: yes, as a
-    separate intake bullet after antler_cycle is seen in game.
-D6. Are crystalline antlers a modifier of `antlers`, or the crystal-growths part reused
-    on the antler anchor? Recommended: a modifier, and let the crystal part stay its own
-    gene.
-D7. Founder rarity. Recommended: rare and hand-seeded like flying, common only in
-    a reindeer breed; final numbers when built.
-D8. Real-gene versus invented names for the natural genes. Recommended: invented, with
-    the science tab saying plainly that the biology is analogous, not measured.
+Decisions (owner, answered in session; route to wiki/decisions.html when built)
+================================================================================
+D1. Both alleles: Ant (both sexes) and Antm (stallions only).
+D2. Procedural: the generator, not hand-modelled racks.
+D3. Asymmetry from a number now; codominant habits (antler_form) give different
+    habits per side later. No per-parent-copy sides.
+D4. NEVER: antlers are permanent. No cast-and-regrow, no velvet phase, no year clock,
+    no antler_cycle locus.
+D5. Moot under D4: no shed-antler item.
+D6. Crystalline antlers are a modifier gene; the crystal-growths part stays separate.
+D7. Rare and hand-seeded like flying; final numbers when built.
+D8. Invented names; the science tab says the biology is analogous, not measured.
+Tier 2 modifiers kept: antler_glow, antler_crystal, antler_bloom. antler_gore (the
+charge attack) is DROPPED from the plan.
 
 What this treatment deliberately does not decide
 =================================================
 The shared layer (Attached model parts.txt stages 0-2), the designer preview (P6), the
-worn side (stage 5), wings (stage 6), the year clock beyond a proposal, the shed-antler
-item, the reindeer breed contents, and the exact founder weights.
+worn side (stage 5), wings (stage 6), the reindeer breed contents, and the exact founder weights.
