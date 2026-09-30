@@ -61,6 +61,81 @@
     </p>
 </div>
 
+<h2 id="v0-5-036">0.5.036 &mdash; horses in modded biomes, and a real inventory for dressing a horse</h2>
+
+<div class="note warn">
+    <p class="label">Neither change has been seen in a running game</p>
+    <p>
+        Both build cleanly, and a dedicated server starts with no errors. The biome mapping
+        is unit-tested. Nobody has walked into a modded biome to find a herd there, and
+        nobody has opened the new gear window. Where to look for each is on
+        <a href="verification.html">the verification index</a>.
+    </p>
+</div>
+
+<h3 id="v0-5-036-biomes">A breed in every modded biome</h3>
+<p>
+    If you play with <strong>Terralith</strong>, <strong>Regions Unexplored</strong> or
+    <strong>Nullscape</strong>, their biomes now have wild herds. Each modded biome takes the
+    whole breed list of the vanilla biome it stands in for, so a Terralith steppe gets the
+    plains breeds. That covers 161 biomes: 153 in the overworld, 5 in the Nether and 3 in
+    the End. See <a href="breeds.html">Breeds</a>.
+</p>
+<ul>
+    <li><strong>The End has horses now.</strong> Nullscape's End biomes are home to the
+        Enderpony, which can stand on end stone, dead coral, blackstone and basalt there.
+        The End has no other animal spawns, so how many turn up is the thing to watch.</li>
+    <li><strong>The Netherhorse and the Nightmare</strong> can now stand on Regions
+        Unexplored's nylium Nether floors.</li>
+    <li><strong>Caves and dimensions added by other mods get no horses.</strong> Horses
+        need lit grass, and dimensions such as the Aether and the Undergarden are left
+        alone.</li>
+    <li>Any breed you added yourself, or changed in <code>breed-spawning.toml</code>,
+        reaches the modded biomes automatically. An older <code>breed-spawning.toml</code>
+        still works.</li>
+</ul>
+
+<h3 id="v0-5-036-dress">Dress: your inventory beside the horse</h3>
+<p>
+    The Gear tab of the horse information screen has a new <strong>Dress</strong> button.
+    It appears on your own horse when you are within eight blocks. It opens the horse's
+    nineteen gear slots on a picture of the horse, with your inventory down the right,
+    and it works like a chest:
+</p>
+<ul>
+    <li>Pick a piece up and drop it on a slot, or drag it back off.</li>
+    <li>Shift-click to move a piece either way. A stack that every hoof takes puts one on
+        each hoof.</li>
+    <li>Drag the horse to turn it.</li>
+    <li>Escape goes back to the Gear tab.</li>
+    <li>Walking away, or the horse dying, closes the window. Anything you were holding
+        goes back to your inventory, or lands at your feet if it is full.</li>
+</ul>
+<p>
+    Only your own horse can be dressed, and a foal's slots stay closed. The click-a-slot
+    list on the Gear tab still works, and so does right-clicking gear onto a horse. See
+    <a href="horse-gear.html#gear-inventory">Horse gear</a>.
+</p>
+
+<h3 id="v0-5-036-world">What this does to a world you already have</h3>
+<ul>
+    <li>Nothing about an existing horse changes.</li>
+    <li>Animals mostly spawn when a chunk is first generated, so expect new herds in
+        modded biomes mainly in land you have not explored yet.</li>
+</ul>
+
+<h3 id="v0-5-036-rough">Not played yet, and known rough edges</h3>
+<ul>
+    <li><strong>The Dress window is 402 pixels wide</strong>, so it may not fit on a small
+        screen at GUI scale 4. The Dress button shares its corner with the Gear tab's
+        picture, and nobody has checked that it does not cover the top-right saddlebag slot
+        in a narrow window.</li>
+    <li><strong>The End's horse numbers are untested.</strong> They may be too many or too
+        few.</li>
+    <li>Everything waiting to be looked at is on
+        <a href="verification.html">the verification index</a>.</li>
+</ul>
+
 <h2 id="v0-5-035">0.5.035 &mdash; unicorns</h2>
 
 <div class="note warn">
