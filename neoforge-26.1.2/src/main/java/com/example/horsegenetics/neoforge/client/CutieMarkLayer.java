@@ -66,6 +66,24 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
         if (state.isInvisible || !(state instanceof GeneticHorseRenderState genetic)) {
             return;
         }
+        // THE ONE PIECE OF A HORSE THAT CANNOT FADE, so while the rest of the
+        // horse is see-through this is not drawn at all.
+        //
+        // The emblems are items, submitted through ItemStackRenderState.submit
+        // - and that method takes a light, an overlay and an outline colour
+        // and nothing else. There is no tint parameter anywhere on it, and an
+        // item picks its own render types out of the model it was baked from,
+        // so neither half of what fades a coat is reachable from here. The
+        // choice is therefore between a solid emblem on a ghost horse and no
+        // emblem, and a sticker floating in the fog is plainly the worse of
+        // the two.
+        //
+        // Cheap to revisit if the owner would rather see it: one line. Faded
+        // items would mean bypassing ItemStackRenderState entirely, which is
+        // a great deal more than this mark is worth.
+        if (genetic.isFading()) {
+            return;
+        }
         Optional<CutieMarkGene.Mark> maybe = Genes.CUTIE_MARK.markFor(
                 genetic.coatData.genotype(), genetic.coatData.epigenome());
         if (maybe.isEmpty()) {

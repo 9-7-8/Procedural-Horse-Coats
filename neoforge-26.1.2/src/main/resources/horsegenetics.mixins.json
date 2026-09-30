@@ -23,6 +23,7 @@
     "CartClientLevelMixin",
     "CartLocalPlayerMixin",
     "JumpBarCooldownMixin",
+    "FadingGearMixin",
     "CartModelManagerMixin",
     "CartModelPartMixin"
   ],

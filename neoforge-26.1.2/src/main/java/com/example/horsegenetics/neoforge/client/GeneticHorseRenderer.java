@@ -111,7 +111,55 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                     com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE);
             geneticState.braidTail = braidColour(horse,
                     com.example.horsegenetics.neoforge.entity.HorseTackSlot.TAIL);
+            // Once per frame per horse, and once only: every layer reads the
+            // field rather than asking again, so that the coat, the glow, a
+            // braid and the gear cannot disagree about how solid this horse is.
+            geneticState.fadeAlpha = RiderFade.alphaFor(horse);
         }
+    }
+
+    /**
+     * <b>A fading horse is drawn on a translucent pipeline, because a tint
+     * alone would not fade it.</b>
+     *
+     * <p>The model's own render type is a <i>cutout</i>
+     * ({@code RenderPipelines.ENTITY_CUTOUT_NO_CULL}), and a cutout pipeline
+     * carries no {@code BlendFunction} at all - it discards a fragment below
+     * an alpha of 0.1 and draws everything above it fully opaque. Feeding it a
+     * half-transparent tint does not make a faint horse; it makes an ordinary
+     * solid horse, and then at a low enough alpha a horse that vanishes
+     * outright. {@code ENTITY_TRANSLUCENT} is the same shader with
+     * {@code BlendFunction.TRANSLUCENT} on its colour target, and is already
+     * no-cull, which is what a see-through animal wants anyway.
+     *
+     * <p>Only swapped while actually fading. Translucent geometry is sorted and
+     * blended rather than depth-tested outright, so drawing every horse in the
+     * world that way would cost something and change how they look for no
+     * reason.
+     */
+    @Override
+    protected net.minecraft.client.renderer.rendertype.RenderType getRenderType(
+            HorseRenderState state, boolean isBodyVisible, boolean forceTransparent, boolean appearGlowing) {
+        if (isBodyVisible && !forceTransparent
+                && state instanceof GeneticHorseRenderState genetic && genetic.isFading()) {
+            return net.minecraft.client.renderer.rendertype.RenderTypes
+                    .entityTranslucent(this.getTextureLocation(state));
+        }
+        return super.getRenderType(state, isBodyVisible, forceTransparent, appearGlowing);
+    }
+
+    /**
+     * And the alpha itself. Vanilla multiplies this into the model colour
+     * ({@code ARGB.multiply(baseColor, getModelTint(state))}), so a white tint
+     * with a reduced alpha means "the same coat, fainter" - which is exactly
+     * right for a generated texture whose colours are the whole point of it.
+     */
+    @Override
+    protected int getModelTint(HorseRenderState state) {
+        if (state instanceof GeneticHorseRenderState genetic && genetic.isFading()) {
+            return RiderFade.tint(genetic.fadeAlpha);
+        }
+        return super.getModelTint(state);
     }
 
     /**

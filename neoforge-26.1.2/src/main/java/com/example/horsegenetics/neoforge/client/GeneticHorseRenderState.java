@@ -52,4 +52,28 @@ public class GeneticHorseRenderState extends HorseRenderState {
 
     /** The same for the tail. The two slots are independent - see the handler. */
     public int braidTail = 0;
+
+    /**
+     * <b>How solid to draw this horse this frame</b>, 1.0 for all but the one
+     * the camera's own player is sitting on. Computed by {@link RiderFade} in
+     * {@code extractRenderState}.
+     *
+     * <p>It lives on the render state rather than being asked for at each draw
+     * because <b>everything that draws a piece of this horse has to agree</b> -
+     * the coat, the emissive glow, a braid, the saddle and the barding. A value
+     * read twice in one frame could differ across a config reload or a camera
+     * move, and the visible result would be a saddle at one opacity floating
+     * over a horse at another.
+     *
+     * <p>It is also how {@code mixin/FadingGearMixin} knows to fade at all: the
+     * render state is the only thing that reaches vanilla's equipment renderer,
+     * so the mixin guards on this type and this field rather than on any state
+     * of its own.
+     */
+    public float fadeAlpha = RiderFade.OPAQUE;
+
+    /** Whether anything about this horse should be drawn see-through at all. */
+    public boolean isFading() {
+        return fadeAlpha < RiderFade.OPAQUE;
+    }
 }

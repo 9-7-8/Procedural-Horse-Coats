@@ -133,8 +133,32 @@ public final class ClientConfig {
      */
     public static final ModConfigSpec.EnumValue<NamingPolicy.ParentSource> NAMING_PARENT_SOURCE;
 
+    /**
+     * <b>Does the horse you are riding fade out as you look down at it?</b>
+     * A client setting and rightly so: it changes nothing but what this one
+     * player sees, and two people on a server may disagree about it freely.
+     * See {@code client/RiderFade}.
+     */
+    public static final ModConfigSpec.BooleanValue RIDE_FADE;
+
+    /**
+     * <b>How faint the ridden horse is allowed to get</b>, as a fraction of
+     * full. It never reaches zero: a mount you cannot see at all is a mount you
+     * forget you are on. (Owner's call.)
+     */
+    public static final ModConfigSpec.DoubleValue RIDE_FADE_MIN_OPACITY;
+
+    /** The downward pitch, in degrees, at which the fade begins. */
+    public static final ModConfigSpec.IntValue RIDE_FADE_START_PITCH;
+
+    /** The downward pitch at which it reaches {@link #RIDE_FADE_MIN_OPACITY}. */
+    public static final ModConfigSpec.IntValue RIDE_FADE_FULL_PITCH;
+
     private static final int DEFAULT_COAT_DETAIL_DISTANCE = 32;
     private static final int DEFAULT_COAT_BAKE_BUDGET_MS = 4;
+    private static final double DEFAULT_RIDE_FADE_MIN_OPACITY = 0.25;
+    private static final int DEFAULT_RIDE_FADE_START_PITCH = 30;
+    private static final int DEFAULT_RIDE_FADE_FULL_PITCH = 75;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -208,6 +232,34 @@ public final class ClientConfig {
                         "meanwhile. The first coat in each 50 ms always runs, so 0 means",
                         "\"one at a time\". Lower it on a slow machine, raise it on a fast one.")
                 .defineInRange("coats.bakeBudgetMs", DEFAULT_COAT_BAKE_BUDGET_MS, 0, 50);
+        RIDE_FADE = builder
+                .comment("Fade the horse you are riding out as you look down at it. (default: true)",
+                        "Looking at the ground from the saddle means looking through the horse,",
+                        "which is the one angle a mount is genuinely in the way at. This makes",
+                        "it see-through instead of moving the camera.",
+                        "Only the horse YOU are riding fades. Every other horse is solid, and",
+                        "nobody else sees yours fade - this is a drawing setting, not a rule.",
+                        "The saddle, the barding and a braid fade with the horse rather than",
+                        "hanging in the air on their own.")
+                .define("visual.rideFade", true);
+        RIDE_FADE_MIN_OPACITY = builder
+                .comment("How faint the ridden horse is allowed to get, 0 to 1. (default: 0.25)",
+                        "It never reaches 0. A mount you cannot see at all is a mount you",
+                        "forget you are on, so the lowest setting is still a ghost of a horse.",
+                        "1 disables the fade as surely as visual.rideFade = false does.")
+                .defineInRange("visual.rideFadeMinOpacity", DEFAULT_RIDE_FADE_MIN_OPACITY, 0.05, 1.0);
+        RIDE_FADE_START_PITCH = builder
+                .comment("The downward angle, in degrees, at which the fade starts. (default: 30)",
+                        "0 is straight ahead and 90 is straight down. Above this angle the",
+                        "horse is fully solid, so a rider looking at the horizon never sees",
+                        "any of this.")
+                .defineInRange("visual.rideFadeStartPitch", DEFAULT_RIDE_FADE_START_PITCH, 0, 90);
+        RIDE_FADE_FULL_PITCH = builder
+                .comment("The downward angle at which the fade reaches its floor. (default: 75)",
+                        "Between the two angles it ramps smoothly. Set at or below",
+                        "visual.rideFadeStartPitch and the fade becomes a hard switch at that",
+                        "angle rather than a ramp, which is allowed but looks like a glitch.")
+                .defineInRange("visual.rideFadeFullPitch", DEFAULT_RIDE_FADE_FULL_PITCH, 0, 90);
         DEBUG_TOOLS = builder
                 .comment("Whether this client's debug tools exist at all.",
                         "  The F6 debug-pen and F7 stall-overlay keys, the \"Spawn Test",
@@ -434,6 +486,46 @@ public final class ClientConfig {
             }
         } catch (IllegalStateException notLoaded) {
             // Config not up yet - it will simply be shown once more.
+        }
+    }
+
+    // The four ride-fade reads. Every one of them happens once per frame per
+    // horse on screen, so like coatDetailDistance they must never throw and
+    // must never be the expensive part of a frame.
+
+    /** Safe read. */
+    public static boolean rideFade() {
+        try {
+            return RIDE_FADE.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** Safe read, 0..1. */
+    public static double rideFadeMinOpacity() {
+        try {
+            return RIDE_FADE_MIN_OPACITY.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_RIDE_FADE_MIN_OPACITY;
+        }
+    }
+
+    /** Safe read, in degrees below the horizon. */
+    public static int rideFadeStartPitch() {
+        try {
+            return RIDE_FADE_START_PITCH.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_RIDE_FADE_START_PITCH;
+        }
+    }
+
+    /** Safe read, in degrees below the horizon. */
+    public static int rideFadeFullPitch() {
+        try {
+            return RIDE_FADE_FULL_PITCH.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_RIDE_FADE_FULL_PITCH;
         }
     }
 

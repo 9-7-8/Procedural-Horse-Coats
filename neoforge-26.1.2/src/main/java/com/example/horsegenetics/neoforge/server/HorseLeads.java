@@ -29,7 +29,7 @@ import java.util.UUID;
  * <p>So: untie without the ground drop ({@link Mob#removeLeash()}), and hand the
  * lead to the player who caused the move, falling back to dropping it at their
  * feet when their inventory is full. From
- * <a href="../../../../../../../../wiki/rider-comfort.html#roadmap">rider comfort</a>,
+ * <a href="../../../../../../../../wiki/rider-comfort.html">rider comfort</a>,
  * whose source for it is Horse Tweaks; gated on
  * {@code behaviour.leads_return} like the rest of that list.
  *
