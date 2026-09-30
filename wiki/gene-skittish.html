@@ -194,6 +194,20 @@
     else. <em>The allele is <code>Fnc</code> now</em>, and the exclusion it tests lives in <code>MobGroups</code>.
 </p>
 
+<p id="verified-night-shy-temper">
+    <strong>Gap 241 re-asked, and still closed, on the shared <code>temper</code> verb</strong> (2026-09-30, the
+    yard's NIGHT SHY pen, closed on its own PASS line). After the equine exclusion moved into
+    <code>MobGroups</code> and fleeing moved into <code>GeneAbilityHandler.flee</code>, the question was whether a
+    <code>Fnc/Fnc</code> horse still ran from cows and never from its band &mdash; and whether it ran at all, since
+    a silent no-op was the failure this move could have made. Run 11 put the mare in with a stallion, two mares
+    and two cows for a whole night; the verdict, which counts flees per horse and per quarry, read
+    <code>NIGHT SHY after a night of 11000 ticks: fled {minecraft:cow=58}, 11000 ticks of dark watched over
+    23600 - PASS</code>. The trace behind it was 80 <code>flee | ... "NIGHT SHY" from minecraft:cow - path
+    accepted</code> lines and 11 <code>NO PATH: nowhere to run to</code>, and not one from a horse. She was
+    covered by her band stallion twice in the same run, so the band was in reach the whole time. The pen was
+    then taken out of the yard.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -224,7 +238,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Gap 241 re-asked, after the equine exclusion moved into <code>MobGroups</code> and fleeing moved onto the shared <code>temper</code> verb: a <code>Fnc/Fnc</code> horse must flee <code>minecraft:cow</code> and never its own band &mdash; and a <strong>silent no-op</strong> is the failure to watch for; and since 2026-09-25 a horse that has been paid must stop running from <em>that</em> player and nobody else, dropping the leg it is already on rather than walking it out.</p>
+    <p>Since 2026-09-25 a shy horse that has been paid must stop running from <em>that</em> player and nobody else, dropping the leg it is already on rather than walking it out, while still bolting from everything else &mdash; and an untamed one must be reachable with its offering at all.</p>
 </div>
 
 <h3 id="calmable-0925">A shy horse can now be bought off (2026-09-25, NOT played)</h3>
@@ -256,11 +270,6 @@
         has measured.</li>
 </ul>
 
-<h3 id="open-older-gene-skittish">Still open from before 2026-09-13 (NOT played)</h3>
-<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
-<ul>
-    <li><strong>A shy horse still leaves its own band alone</strong> (yard: <code>Fnc/Fnc</code> with a band and two cows, row X). <strong>Pass:</strong> flee lines name <code>minecraft:cow</code> and never <code>minecraft:horse</code>. This is <a href="gene-skittish.html#verified-night-shy">gap 241</a> re-asked, because the equine exclusion moved out of the night handler into <code>MobGroups</code> when fleeing moved onto the shared <code>temper</code> verb &mdash; and because <code>temper</code> used to ignore <code>flee</code> outright, a silent no-op is the failure to watch for.</li>
-</ul>
 
 </section>
 

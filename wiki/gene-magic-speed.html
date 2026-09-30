@@ -254,6 +254,20 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     inheritance (<a href="horse-body.html#verification">the body stats verification tab</a>).
 </p>
 
+<p id="verified-multiplies">
+    <strong>Magic speed multiplies the natural sum, after the addition</strong> (2026-09-30, the yard&rsquo;s STATS
+    pen, closed on its own PASS line in runs 11 and 12). The old expectation &mdash; &ldquo;<code>Swift/Swift</code>
+    + <code>mstn=C/C</code> about <code>Swift/Swift</code> &times; MSTN <code>C/C</code> over base&rdquo; &mdash; was
+    never a fair test, and is why earlier runs seemed to show the two not stacking (run 10: SWIFT 0.271 against
+    SWIFT+CC 0.270). Each <code>Swift/Swift</code> horse&rsquo;s factor is rolled <em>per horse</em> from its own two
+    epigenome copies (<a href="#copies">above</a>), so two separately founded Swift horses carry two different
+    factors, and the naive ratio compared two different rolls. The verdict now reads each horse&rsquo;s own factor
+    off its epigenome, the way <code>HorseTraits.resolve</code> does, and checks the law per horse: SWIFT is base
+    &times; its factor, SWIFT+CC is (base + 2C) &times; <em>its</em> factor, both to 10<sup>&minus;6</sup>. Run 12:
+    <code>STATS at 1 min: SLUGGISH 0.1672 (floor 0.1125), SWIFT 0.2274 = 0.1875 x 1.2127, MSTN CC 0.2275, SWIFT+CC 0.2705 = 0.2275 x 1.1889 (its own Swift copies), MSTN CT 0.2075/0.2075/0.2075, FRAIL max health 9.31 (floor 1.0), 9.3 now; the naive SWIFT x CC / base = 0.2759 is not a fair expectation (f1 1.2127 vs f2 1.1889) - PASS</code>. Run 11 agreed on different rolls (factors 1.1792 and 1.0561). What is still
+    open is how it feels and whether it inherits, below.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -261,14 +275,13 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Past whether <code>Swift/Swift</code> simply feels a fifth faster, the quiet failures are <strong>multiplicative stacking</strong> with <code>mstn=C/C</code> &mdash; a ratio, not a flat bonus &mdash; and whether two carriers throw about a quarter homozygous, faster than either parent.</p>
+    <p>Past whether <code>Swift/Swift</code> simply feels a fifth faster, the quiet failure left is inheritance: whether two carriers throw about a quarter homozygous, faster than either parent, carrying the parents&rsquo; own percentages.</p>
 </div>
 
 <h3 id="open-older-gene-magic-speed">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
     <li><strong>Riding the magic stats.</strong> <code>magic_speed=Swift/Swift</code> feels about a fifth faster than an ordinary horse; <code>magic_jump=Springy/Springy</code> clears a higher wall and <code>Leaden/Leaden</code> struggles at one block; <code>magic_health=Hardy/Hardy</code> shows more hearts in the mounted GUI; and a wild herd reads as a spread without any one horse feeling wrong. <a href="gene-magic-speed.html">Magic speed</a>.</li>
-    <li><strong>Magic speed multiplies.</strong> A <code>Swift/Swift</code> + <code>mstn=C/C</code> horse is faster than <code>Swift/Swift</code> alone by the ratio, not a flat amount. Readable from a stat pen's attribute line.</li>
     <li><strong>Magic stats inherit.</strong> Two <code>Swift/n</code> carriers throw about a quarter <code>Swift/Swift</code>, faster than either parent, carrying the parent's percentage. A ratio pen, like row U's RATIO SIZE.</li>
 </ul>
 

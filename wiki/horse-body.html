@@ -879,6 +879,19 @@ public interface GeneEpigenetics {
     waiting for, so counting bites that way reported one when there were none.)</em>
 </p>
 
+<p id="verified-frail-stack-lives">
+    <strong>A <code>Frail/Frail</code> horse stacked with <code>b4galt7</code> lives</strong> (2026-09-30, the
+    yard&rsquo;s STATS pen, runs 11 and 12, both PASS). STAT FRAIL,
+    <code>magic_health=Frail/Frail</code> with <code>b4galt7=d/d</code>, was alive a minute in both times, at
+    13.93 and then 9.31 maximum health (<code>MIN_HEALTH</code> 1.0) &mdash; the reading is rolled, since
+    <code>Frail</code>&rsquo;s factor is per copy. That stack does not come near the floor, so the pen proved the
+    horse survives it, not that <code>MIN_HEALTH</code> catches anything; the floor itself is a unit test.
+    In the same pen STAT SLUGGISH, <code>magic_speed=Sluggish/Sluggish</code> on an otherwise default horse, read
+    0.1587 and 0.1672 &mdash; above the 0.1125 floor with room to spare, so the speed floor was never engaged
+    either, and its two checks stay open below. Run 12&rsquo;s line: <code>STATS at 1 min: SLUGGISH 0.1672 (floor 0.1125), SWIFT 0.2274 = 0.1875 x 1.2127, MSTN CC 0.2275, SWIFT+CC 0.2705 = 0.2275 x 1.1889 (its own Swift copies), MSTN CT 0.2075/0.2075/0.2075, FRAIL max health 9.31 (floor 1.0), 9.3 now; the naive SWIFT x CC / base = 0.2759 is not a fair expectation (f1 1.2127 vs f2 1.1889) - PASS</code>. The pen was then
+    taken out of the yard.
+</p>
+
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
          data-tab-hint="Open checks">
 
@@ -986,8 +999,7 @@ public interface GeneEpigenetics {
     <li><strong><code>health.mode</code></strong> in <code>run/phc/server.toml</code>: <code>NO_DEATHS</code> lets a lethal foal live on few hearts and a MET pairing foal; <code>OFF</code> gives a dwarf full size and hearts and shows no conditions, while a <code>Hardy/Hardy</code> horse keeps its extra hearts. The genetic code is identical in all three modes. <a href="horse-body.html">Horse body</a>.</li>
     <li><strong>Riding in water feels right.</strong> <code>HorseWaterRidingHandler</code>'s speed cap (0.09 blocks a tick) and submerged lift are first guesses.</li>
     <li><strong>Disorders off really is off</strong> (unit test or yard). With health genetics switched off in the server config, no founder carries HYPP or PSSM1, the two dominants that affect founders.</li>
-    <li><strong>The floor is on the attribute only</strong> (unit test plus a yard log line). A very slow genotype resolves under <code>0.1125</code> in <code>common/</code>, and the family tree and designer show that true number. The live attribute and the info panel never read below <code>0.113</code>.</li>
-    <li><strong>The health floor.</strong> <code>Frail/Frail</code> stacked with <code>b4galt7</code> keeps at least half a heart and does not die on spawn (<code>MIN_HEALTH</code>).</li>
+    <li><strong>The floor is on the attribute only</strong> (unit test, then a genotype that really resolves under it). A very slow genotype resolves under <code>0.1125</code> in <code>common/</code>, and the family tree and designer show that true number. The live attribute and the info panel never read below <code>0.113</code>. <code>Sluggish/Sluggish</code> alone is not slow enough to ask this (<a href="#verified-frail-stack-lives">0.159&ndash;0.167</a>); it needs slow natural loci stacked under it.</li>
     <li><strong>The Health tab and the breeding preview read as explanations.</strong> Each gene's own <code>+0.020</code> or <code>&times;1.42</code> reads as why the horse is fast; an <a href="gene-hmga2.html">HMGA2</a> horse appears under all four headings. Sixteen health loci on a carrier-heavy horse do not overflow. The preview's trait blocks, with <code>PATN</code> indented under LP, read as grouped, and All loci turns a readable page into a long one.</li>
     <li><strong>Scaled horses walk right</strong>: a large and a small horse plant their feet rather than sliding, an ordinary horse is unchanged, and the egg's preview resizes with a <code>size</code> readout (and <code>(preview capped)</code> past 2.5&times;) that frames well at both ends.</li>
 </ul>

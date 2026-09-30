@@ -399,11 +399,15 @@
         behaviour, emission, body-stat, ground and strong white, fields and regions,
         spots and rings, speckle and dust, lines and strokes, and mane and tail
         &mdash; plus a <strong>colour modifier on a quarter</strong> of them. So eleven
-        or twelve magical loci on every animal.</li>
+        or twelve magical loci that <em>he</em> put on every animal &mdash; a floor, not a
+        ceiling. The <code>feral_mixed</code> founder roll underneath is an ordinary wild
+        roll and can bring a natural magical allele of its own, so now and then a horse of
+        his shows thirteen. That is allowed (owner, 2026-09-30): the promise is that his
+        picks are all there, not that nothing else is.</li>
     <li><strong>Showing, never carried.</strong> Every one of those is an expressing
-        pair, so a player can see what they are paying for. The rest of the horse stays
-        wild type, which is what keeps eleven magical genes legible rather than a
-        smear.</li>
+        pair, so a player can see what they are paying for. He stocks nothing else: the
+        rest of the horse is whatever the wild founder roll gave it, which is what keeps
+        eleven magical genes legible rather than a smear.</li>
     <li><strong>No two horses in his string share an allele combination.</strong>
         Keyed on the <em>pair</em> and not the gene: two of his horses may both show
         galaxy if one is homozygous and the other is not, because those are two
@@ -1821,6 +1825,22 @@
     part most likely to have fallen back silently to a region table. Nothing in the server log warned.
 </p>
 
+<p id="verified-arcane-yard-verdict">
+    <strong>The yard now reads his string itself, and eleven is a floor</strong> (2026-09-30, the yard&rsquo;s
+    ARCANE DEALER pen, runs 11 and 12). The pen founds him in place and checks every horse five seconds in:
+    <code>BreedLineage.MIXED</code>, entire, and showing at least one magical combination per required family
+    (<code>ArcaneStock.REQUIRED_FAMILIES</code>). A combination seen on two horses is logged rather than failed,
+    because his own picks are distinct by construction (<code>ArcaneStock.rollHorse</code> writes each into
+    <code>taken</code>), so a repeat can only involve an extra.
+    Run 11 failed on the old reading of the rule &mdash; <code>8 horse(s), 96 distinct magical combinations -
+    FAIL: ... shows 13 magical combinations, not 11-12</code>, on two horses &mdash; and the extra one was a
+    natural magical allele from the <code>feral_mixed</code> founder roll under his picks, not a pick of his. The
+    owner&rsquo;s call was that <code>ArcaneStock</code>&rsquo;s picks are a floor and the founder roll may add to
+    them, so the verdict became &ldquo;at least eleven&rdquo;. Run 12: <code>ARCANE DEALER at 5 s: 8 horse(s), 95
+    distinct magical combinations - PASS</code>. The pen was then taken out of the yard. It is still the yard,
+    where he is founded by <code>foundArcaneInPlace</code>, so it narrows nothing in the note below.
+</p>
+
 <div class="note">
     <span class="label">Soft-verified, and the distinction matters</span>
     That was the <em>debug yard</em>, where he is placed deliberately and founded on the spot by
@@ -2264,9 +2284,10 @@
 
 <p>
     <strong>Soft-verified in the test yard on 2026-09-18</strong> &mdash; no geldings,
-    eleven or twelve magical genes a horse, no repeated allele pair, prices in band and
-    steady. That is written up on
-    <a href="villagers.html#verified-arcane-stock">the villagers page</a> and is not
+    at least eleven magical genes a horse, no repeated allele pair, prices in band and
+    steady &mdash; and read again by the yard&rsquo;s own verdict on 2026-09-30, which is
+    where eleven became a floor rather than a ceiling. That is written up on
+    <a href="villagers.html#verified-arcane-yard-verdict">the villagers page</a> and is not
     repeated here. <strong>What follows is only what the yard could not show.</strong>
 </p>
 

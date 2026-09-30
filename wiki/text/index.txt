@@ -1717,6 +1717,7 @@ wiki/gene-mstn.html#performance	science	Speed, stamina, jumping
 wiki/gene-mstn.html#real-inheritance	science	Inheritance
 wiki/gene-mstn.html#settled	science	What is settled, and what is not
 wiki/gene-mstn.html#variants	science	The two variants that matter
+wiki/gene-mstn.html#verified	coding	Verified
 wiki/gene-mstn.html#what-mstn-does	science	What myostatin does
 wiki/gene-mushroom.html#bases	science	What it looks like, base by base
 wiki/gene-mushroom.html#breeds	science	Breeds and frequency

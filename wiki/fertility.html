@@ -300,7 +300,9 @@
         owner as <code>bredBy</code>. Before that, the same stallion must stay in reach for
         <code>NaturalCover.COURTSHIP_TICKS</code> (a transient <code>Courtship</code> per mare),
         exactly as vanilla's <code>BreedGoal</code> waits out <code>loveTime &gt;= 60</code> inside
-        <code>distanceToSqr &lt; 9</code>. Like vanilla, there is no line of sight check. Cowboy-branded
+        <code>distanceToSqr &lt; 9</code>. Like vanilla, there is no line of sight check; unlike vanilla,
+        since 2026-09-25 a stallion she cannot <em>walk</em> to is dropped from the candidates
+        (<code>canMeet</code>, <a href="#fixed-path-beside">below</a>). Cowboy-branded
         horses are skipped. It is an entity tick, so only loaded chunks ever breed.
         <code>tell</code> turns the verdict into a <code>CoverNotice.Reason</code> for the
         mare&rsquo;s owner, behind <code>notices.owned_horse_breeding</code>; the
@@ -445,17 +447,56 @@
     lost fight did the same to any horse. It is now a fraction,
     <code>ReproRules.COVER_HEALTH</code>, tested by <code>ReproRulesTest</code> at exactly the health a
     miscarriage leaves her; and the refusal now logs once a minute per mare, naming her health.
-    <em>Not played yet</em> &mdash; <a href="fertility.html#fertility">&sect;0-DV</a>.
+    Seen working in the yard on 2026-09-30 &mdash; <a href="#verified-hurt-mare">below</a>.
+</p>
+
+<p id="verified-hurt-mare">
+    <strong>A hurt mare is refused, says so, and is covered at 90% rather than at full health</strong>
+    (2026-09-30, the yard&rsquo;s HURT MARE pen, closed on its own PASS line). The pen sets a mare in heat to
+    11/22 beside a stallion and lets her heal at the pen&rsquo;s water. Run 12: <code>not covered: hurt,
+    12.5/22.0 health - a natural cover needs 90%</code>, then healing a point and a half at a time, then
+    <code>HURT MARE at 20 s: covered at 20.0/22.0 - PASS (refused while hurt, covered once healed)</code>
+    &mdash; covered two points short of full, so a scratch no longer stops her, which is the whole of the
+    gap 258 change. Run 11 had shown the refusal&rsquo;s throttle: stuck at 18.5/22 for twenty minutes, she
+    logged the <code>hurt</code> line 22 times, about once a minute, not every scan. That run failed the pen
+    for a different reason &mdash; ten <code>no walkable path to ... "HURT PEN STUD" (2.1 blocks)</code>
+    refusals in an open pen, the path-test bug <a href="#fixed-path-beside">fixed the same day</a>. The pen
+    was then taken out of the yard. Still open on the same gap: a mare who <em>loses a pregnancy</em> being
+    covered again (<a href="?view=verification#fertility-yard">the audit</a>).
 </p>
 
 <p id="verified-cover-reach">
-    <strong>A natural cover needs the pair in reach, not merely near: never through a wall, and across one fence only
-    after courtship</strong> (2026-09-15, formerly gap 230). <em>The owner's call was to do what vanilla does.</em> There
-    is no line-of-sight check. The reach is strictly under three blocks, and the stallion must stay in reach for sixty
-    ticks (<code>NaturalCover.Courtship</code>) before he covers. The yard's REACH WALL pen puts a mare in heat and a
-    stallion either side of stone three blocks thick. Across the 06:49 and 08:01 runs, each a full game day, it logged no
-    <code>natural cover</code> line naming RW MARE. In REACH FENCE, one fence apart, RF MARE was covered 90 ticks after
-    the build and three times in the 06:49 run's first twenty minutes.
+    <strong>A natural cover needs the pair in reach and able to walk to each other: never through a wall, and,
+    since 2026-09-30, never across a fence either</strong> (formerly gap 230). The reach is strictly under three
+    blocks, the stallion must stay in reach for sixty ticks (<code>NaturalCover.Courtship</code>) before he covers,
+    and there is no line-of-sight check. On 2026-09-15, before any path test existed, the yard showed the wall
+    working by thickness alone &mdash; REACH WALL, stone three blocks thick, logged no cover across two full game
+    days &mdash; and REACH FENCE, one fence apart, was covered 90 ticks after the build. The path test of 2026-09-25
+    (<a href="?view=verification#cover-wall-check-0925">why</a>) changed the second answer, and the owner&rsquo;s call
+    on 2026-09-30 is that <strong>a fence blocks a cover like a wall</strong>. Run 11 could not say either: REACH
+    WALL&rsquo;s stud was <em>never</em> within <code>NATURAL_REACH</code> (0 of 225 polls), so the three-block wall
+    answered by distance and the path test was never asked; the wall was thinned to one block. Run 12 then read,
+    for both pens, <code>never covered in 5 heat(s) over 9000 ticks, 105 of 225 polls with a try left and the stud
+    within 3 blocks - PASS</code> &mdash; the pair in reach nearly half the time, and refused by the path test
+    every time (<code>no walkable path to ... "RW STUD" (3.6 blocks)</code>, <code>"RF STUD" (2.7
+    blocks)</code>). Both pens were then taken out of the yard.
+</p>
+
+<p id="fixed-path-beside">
+    <strong>The path test asked for the stallion&rsquo;s own block, and refused mares in open pens</strong>
+    (fixed 2026-09-30). <code>NaturalBreedingHandler.canMeet</code> called <code>createPath(stallion, 0)</code>
+    &mdash; a path ending <em>on</em> the block he stands in, which a horse-sized path very often cannot reach.
+    It showed only because the same day added a refusal line, <code>not covered: no walkable path to ...</code>,
+    logged inside yard pens only: run 11 wrote 70 of them, for mares whose stallion stood 1.5 to 4 blocks away
+    in the same open pen (<code>"HURT PEN STUD" (2.1 blocks)</code>, <code>"RATIO HYPP STUD" (2.4
+    blocks)</code>), and for wild horses, which outside the yard were refused silently. It is
+    <code>createPath(stallion, 1)</code> now, a path to within one block of him &mdash; standing beside him.
+    That does not open a fence, since two horses either side of one stand two blocks apart at the closest. In
+    run 12 the log held 174 <code>natural cover:</code> lines and 11 path refusals: ten from the two REACH pens,
+    which should refuse, and one stray <code>RATIO LETHAL WHITE MARE</code> at 2.6 blocks that did not recur.
+    <em>Outside the yard this is unverified</em>: nothing logs a path refusal there, so whether a real
+    stable&rsquo;s gates and corners now breed is <a href="?view=verification#cover-wall-check-0925">still
+    open</a>.
 </p>
 
 <p id="verified-gelding-band">
@@ -901,10 +942,10 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers now refuse to happen through a wall, which had never been checked at all and which the same cap change had been hiding.</p>
+    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers refusing through walls: the yard has seen a wall and a fence refuse, but the path test behind them was found refusing mares in open pens and loosened on 2026-09-30, so a gate, a corner, two horses touching and a crowded paddock are all still unseen in a real world.</p>
 </div>
 
-<h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25, NOT played)</h3>
+<h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25; the wall seen in the yard, the rest NOT played)</h3>
 
 <div class="note">
     <p>
@@ -925,13 +966,17 @@
     walk to rather than being blocked by the nearest one she cannot.
 </p>
 
+<p>
+    <strong>A wall stops it, and so does a fence</strong> &mdash; both
+    <a href="?view=coding#verified-cover-reach">seen in the yard</a> on 2026-09-30, and the fence
+    is the owner&rsquo;s call, not a fault. The same runs found the path test itself too strict
+    (<a href="?view=coding#fixed-path-beside">it asked for the stallion&rsquo;s own block</a>) and
+    loosened it to &ldquo;beside him&rdquo;, which makes the checks below more pressing, not less:
+    they are the ordinary stables that change could still be refusing, and outside the yard a
+    refusal logs nothing.
+</p>
+
 <ul>
-    <li><strong>A wall stops it.</strong> Put a mare in heat and a stallion in adjacent
-        stalls, sharing one solid wall. <strong>Pass:</strong> no cover, indefinitely.
-        <strong>Fail:</strong> a foal, which would mean the path test is passing &mdash;
-        check the wall is actually two blocks high and has no gap a horse could path
-        through, because the test asks whether she can <em>walk</em> there, not whether
-        she can see.</li>
     <li><strong>A gate does not.</strong> Same pair with an open gate between them.
         <strong>Pass:</strong> a cover, as before. This is the one that matters: the test
         must not have made ordinary penned breeding impossible.</li>
@@ -1122,9 +1167,9 @@
 
 <h4 id="fertility-yard">In the yard, in this order</h4>
 <ol>
-    <li><strong>Walk in and check the log first.</strong> Since 2026-09-30 the only fertility pen left
-        is HURT MARE, so expect <code>fertility pen built (row O west: hurt mare)</code> and nothing
-        from THE CAP, MET NATURAL or MATERNITY, which have all gone.</li>
+    <li><strong>The fertility rows are empty.</strong> Since 2026-09-30 the last fertility pen, HURT
+        MARE, is <a href="?view=coding#verified-hurt-mare">answered</a> and gone too, so expect no
+        <code>fertility pen built</code> line at all.</li>
     <li><strong>A mare who loses a pregnancy is covered again (2026-09-16, gap 258, NOT played).</strong>
         This is the one to do first, because until now she never was. Stand at <strong>row W</strong>'s
         ratio pens (RATIO KIT W5, RATIO MITF SW3, RATIO MILK CLASH) and leave them. Each loses
@@ -1134,11 +1179,6 @@
         quiet for the rest of the run while her readout still says <em>In heat</em>. Worth a census an
         hour in: row W should now be building a real sample for
         <a href="known-gaps.html#gap-225">gap 225</a>'s ratios.</li>
-    <li><strong>A badly hurt mare is refused, and says so (2026-09-16, NOT played).</strong> Hurt a mare
-        in heat below 90% health with a stallion beside her. Expect a
-        <code>not covered: hurt, N/N health</code> line, once a minute, not silence &mdash; that silence
-        is what hid gap 258. Then let her heal and she should be covered normally. A scratch (a point or
-        two) must <em>not</em> stop her at all.</li>
     <li><strong>Every pen has water now (2026-09-16, NOT played).</strong> A water cauldron is sunk flush
         into the floor of each pen's corner, from <code>DebugTestYard.fencedPlot</code>, so a hurt horse
         can heal anywhere in the yard. <em>Check:</em> no animal uses one as a step to leave its pen
