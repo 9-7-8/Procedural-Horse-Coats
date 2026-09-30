@@ -270,6 +270,19 @@
     <code>tree grew</code></em>, which fired zero times across the whole run and still under-reports.
 </p>
 
+<p id="verified-flowers">
+    <strong>A flower dryad plants flowers</strong> (2026-09-30, the test yard, unattended). DRYAD FLOWER, two
+    <code>Flwr/Flwr</code> mares on grass, logged <code>[watch] dryad planted | flower by DRYAD FLOWER at -4, 129,
+    57</code> at 14:30 and <code>DRYAD FLOWER at 60 min: 1 flower(s) planted by its horses - PASS</code>; a
+    cornflower was still standing at that census. The census's <code>spread attempts that landed</code> lines summed
+    to one landing in five flower tries over the hour. Two earlier runs the same day saw nothing standing in forty
+    minutes, and that was the check, not the gene: the old watch covered 2 of the 8 flowers
+    <code>GeneAbilityHandler.FLOWERS</code> draws from, and the pen's own horses eat small flowers. So the pen came
+    to count what its horses place (<code>DebugWorldWatch.spreadsPlacedBy</code>) rather than what is still in the
+    ground. The rate is as low as <a href="known-gaps.html#gap-208">gap 208</a> predicts. The pen was taken out of
+    the yard after this run.
+</p>
+
 <p id="verified-bonemeal-never-crops">
     <strong>The bone meal allele never touches a crop</strong> (2026-09-15, the 16:11 run, row X). Three
     <code>[watch] gene fertilised</code> lines in six hours: <code>minecraft:grass_block</code> twice and

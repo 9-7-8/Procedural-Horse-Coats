@@ -212,6 +212,19 @@
     <em>Earned while this was the gladiator locus</em>, on the same <code>temper</code> machinery this locus now uses.
 </p>
 
+<p id="verified-holds-ground">
+    <strong>The aggression locus holds its ground, and still swings every ten ticks</strong> (2026-09-30, the
+    yard's KICK HUNTER pen, an <code>Aah/Aah</code> horse with husks, closed on its own PASS line). The 12:21 run
+    killed its first husk in five blows (ticks 51, 66, 76, &hellip; 140) and turned straight on the second
+    (169, 190). It left its pen once, and not by chasing: at 3/22 Last Stand made it bolt, with a jump boost
+    that clears a fence, so the pen was lidded (<code>DebugTestYard.lidded</code>). With one husk a wave it then
+    won four waves running (nineteen blows) before the fifth wore it down, and the 14:43 run's verdict read
+    <code>KICK HUNTER at 3 min: 4 blow(s), in-fight gaps [11, 12, 17] ticks, median 12 - PASS</code> beside
+    <code>KICK PLAIN at 3 min: 0 blow(s) - PASS</code>, the plain control never striking. Both pens were then
+    taken out of the yard; <code>DebugWorldWatch.kicksBy</code>, which timed the blows, stays for the next
+    fighter.
+</p>
+
 <p id="verified-retarget">
     <strong>A horse that kills one attacker turns on the next</strong> (2026-09-15, formerly gap 248). In the 07:33
     run it killed the first husk at tick 130 and then never struck again. The second husk hit it four times in 3.6 seconds
@@ -303,7 +316,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Day temper inverts the night locus and exists only in unit tests &mdash; a <code>Flp/Flp</code> horse should run from you at noon and let you ride it at midnight; the older questions are whether <code>Aah/Aah</code> holds its ground instead of chasing, and whether <code>Aap/Aap</code> really throws its rider; and newest of all, a breed now pins <code>Aaa/Aaa</code> on a horse you are supposed to keep, so somebody has to find out what owning an animal that hunts its owner is actually like to play.</p>
+    <p>Day temper inverts the night locus and exists only in unit tests &mdash; a <code>Flp/Flp</code> horse should run from you at noon and let you ride it at midnight; the older question is whether <code>Aap/Aap</code> really throws its rider; and newest of all, a breed now pins <code>Aaa/Aaa</code> on a horse you are supposed to keep, so somebody has to find out what owning an animal that hunts its owner is actually like to play.</p>
 </div>
 
 <h3 id="evening-0913-day-temper">The day temper locus (built the evening of 2026-09-13, NOT played)</h3>
@@ -353,7 +366,6 @@
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
     <li><strong>Feel: the fighters.</strong> <a href="gene-aggression.html">Aggression</a> and <a href="gene-guardian.html">guardian</a> hold a radius and never chase. If they still die a lot in play, the radius is wrong, not the rule.</li>
-    <li><strong>The aggression locus holds its ground</strong> (yard: an <code>Aah/Aah</code> horse with two husks &mdash; the kick pen, renamed from KICK GLADIATOR). <strong>Pass:</strong> it kills what walks in, turns on the second one, and never leaves the pen chasing. This is the machinery <a href="gene-aggression.html#verified-swing-rate">two older records</a> already tested, on a locus that did not exist when they were taken, so it is a regression check rather than a new question.</li>
     <li><strong>A rider-hunting horse bucks you off</strong> (yard or creative: tame an <code>Aap/Aap</code> horse, mount it). <strong>Pass:</strong> you are ejected within a beat and it comes for you. <strong>Known half-failure:</strong> a horse aggressive toward anything <em>else</em> will not walk to its target while you are aboard &mdash; see <a href="known-gaps.html#gap-268">gap 268</a>. Do not read that as the gene being broken.</li>
 </ul>
 
