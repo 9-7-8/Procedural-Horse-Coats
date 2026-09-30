@@ -1,0 +1,55 @@
+2026-09-30, later - answered pens removed, the yard packed into eight rows (UNFINISHED: wiki half)
+
+    Owner: "Also remove everything that's already been verified, and remove the empty space
+    from the debug yard left over from removing other pens." Then, asked, "a clockwork pass
+    should be allowed to close a check", and "delete them, keep the machinery" for the
+    clockwork pens (all 45 checks had passed on the fifth launch).
+
+Done (code, commit d2fdb272, build green, one launch "built and walkable at z=4..170",
+formerly 4..518)
+
+    Three read-only audits took each pen's OWN question to the wiki. Survivors, 26:
+    O: THE CAP, HURT MARE | MET NATURAL.  T: DRYAD FLOWER | DRYAD OAK+BIRCH, SPLICE PERFORMANCE.
+    U, W: the eight ratio pens.  X: NIGHT SHY | LYCAN DOOMED, DEATH DIAMONDS.
+    Y: REACH WALL, REACH FENCE | STATS, LETHAL FOALS.  AA: KICK HUNTER, KICK PLAIN | BLOOD ONLY,
+    SUNTOUCHED.  AL: ARCANE DEALER.  Everything else was answered and is gone, clockwork included.
+    DebugYardHerd is now only the yard's clock (after/cancel). DebugYardClockwork builds nothing
+    and keeps Hands, use(), expect/verdict/summary, cell, caged.
+
+Blocked, for the owner
+
+    Deleting DebugYardCombat, DebugYardHunger and DebugYardHands (all answered) was refused by
+    the permission classifier as irreversible. They are unhooked, not deleted, and a zero-valued
+    block of ROW_J/V/AH/AI constants in DebugTestYard keeps them compiling. With the owner's
+    go-ahead: delete the three files and that block (also DebugTestYard.stock/PALE/dryPen, which
+    only DebugYardCombat still calls).
+
+NOT done - pick up here, in this order
+
+    1. Clockwork PASSes must MOVE (CLAUDE.md rule 9): off each Verification tab and onto that page's
+       Coding tab, as what became true, 2026-09-30, on the clockwork log. The pass lines are in
+       d2026-09-30-the-clockwork-yard.txt and on each tab now, marked "not owner-confirmed" - that
+       mark is now wrong. Pages: gene-cleansing-light, gene-base-alarm, gene-egg-layer,
+       gene-bird-boned, gene-blight, gene-potion-milk, gene-diet, gene-milk, gene-magic-milk-volume,
+       gene-healer (the control), item-seed-jars, item-vet-kit (gelding), item-breeding-carrots
+       (no-foal half; the message half stays open). Move only the checks a PASS answered.
+    2. wiki/horse-dimension.html #test-yard: the row table and the #clockwork note still describe
+       rows A, J, O-AL and AM-AQ. Rewrite to the eight rows above; the clockwork rows are gone.
+       Its row AA still says KICK GLADIATOR (the pen is KICK HUNTER).
+    3. Rebake: build-search-index, check-links, bake-agent-text, bake-verification-index,
+       bake-roadmap-index.
+    4. Launch once more (runClientTestWorld) and confirm every survivor's [watch] line shows its
+       horses - the census check was cut short by the end of the session. The trace lines were
+       corrected after that launch.
+
+Found by the audits, not acted on
+
+    - THE CAP and MET NATURAL were verified under a cap of 8; the cap is 50 now
+      (ReproRules.DEFAULT_NATURAL_CAP), so THE CAP's nine horses should now be covered and fail its
+      sign, and MET NATURAL cannot level off at 9. Both pens need rethinking (fertility.html
+      #crowd-cap-0924).
+    - SUNTOUCHED should now log FAIL by design: the horse-dimension skip is switched off
+      (GeneAbilityHandler, "RESTORE BEFORE 1.0", gap 204).
+    - REACH WALL is recorded verified (09-15) and re-opened (#cover-wall-check-0925); REACH FENCE
+      predates the walkable-path cover test and may now depend on the unplayed "touching" fallback.
+    - DEATH DIAMONDS: the pure Dia/Dia horse has no recorded run since Xpl was retired.
