@@ -1144,6 +1144,33 @@ wiki/gene-hood.html#finding	gameplay	Finding one
 wiki/gene-hood.html#inheritance	gameplay	Crossing two of them
 wiki/gene-hood.html#layers	coding	What it paints
 wiki/gene-hood.html#outcomes	gameplay	What it can come out as
+wiki/gene-horn-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-horn-colour.html#colours	gameplay	The colours
+wiki/gene-horn-colour.html#door	coding	How the colour reaches the horn
+wiki/gene-horn-colour.html#epigenetics	coding	The numbers on each copy
+wiki/gene-horn-colour.html#founders	coding	Founders
+wiki/gene-horn-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-horn-colour.html#hornless	gameplay	On a horse without a horn
+wiki/gene-horn-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-colour.html#real-horses	science	There is no real locus here
+wiki/gene-horn-colour.html#shades	gameplay	No two reds are the same red
+wiki/gene-horn-colour.html#two-tone	gameplay	Two colours make a two-tone horn
+wiki/gene-horn-dust.html#anchor	coding	The horn anchor
+wiki/gene-horn-dust.html#carrot	gameplay	Its gene carrot
+wiki/gene-horn-dust.html#emitter	coding	An emitter that asks the horn
+wiki/gene-horn-dust.html#finding	gameplay	Finding one
+wiki/gene-horn-dust.html#health	gameplay	Is it good for the horse?
+wiki/gene-horn-dust.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-dust.html#particle	coding	The particle falls
+wiki/gene-horn-dust.html#real-horses	science	There is no real locus here
+wiki/gene-horn-dust.html#what-it-does	gameplay	What it looks like
+wiki/gene-horn-glow.html#carrot	gameplay	Its gene carrot
+wiki/gene-horn-glow.html#door	coding	How it reaches the horn
+wiki/gene-horn-glow.html#finding	gameplay	Finding one
+wiki/gene-horn-glow.html#health	gameplay	Is it good for the horse?
+wiki/gene-horn-glow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-glow.html#real-horses	science	There is no real locus here
+wiki/gene-horn-glow.html#what-it-does	gameplay	What it looks like
 wiki/gene-hot-blooded.html#health	gameplay	Health
 wiki/gene-hot-blooded.html#lake	gameplay	On a frozen lake
 wiki/gene-hot-blooded.html#terrain	science	A gene that edits the world
@@ -2553,6 +2580,7 @@ wiki/gene-unicorn-horn.html#health	gameplay	Is it good for the horse?
 wiki/gene-unicorn-horn.html#inheritance	gameplay	Crossing two of them
 wiki/gene-unicorn-horn.html#numbers	coding	The epigenome, sorted by what it costs to change
 wiki/gene-unicorn-horn.html#pipeline	coding	It paints nothing, and that is the novelty
+wiki/gene-unicorn-horn.html#polygenic	gameplay	Four genes make a horn
 wiki/gene-unicorn-horn.html#real-horses	science	There is no real locus here
 wiki/gene-unicorn-horn.html#rendering	coding	How the horn reaches the screen
 wiki/gene-unicorn-horn.html#runtime-bake	coding	A layer definition can be baked at run time

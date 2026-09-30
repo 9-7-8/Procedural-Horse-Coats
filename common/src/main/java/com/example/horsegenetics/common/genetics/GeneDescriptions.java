@@ -442,9 +442,23 @@ public final class GeneDescriptions {
                     "A magical, recessive gene: Horn/Horn grows a single tapering horn on the "
                             + "forehead. It is a piece of the horse rather than a marking on it - "
                             + "the coat is unchanged, and the horn follows the head when the horse "
-                            + "grazes. Length, thickness, twist, lean and colour are all epigenetic "
-                            + "and inherited with the allele, and about one horned horse in eight "
-                            + "glows in the dark. One copy shows nothing."),
+                            + "grazes. Length, thickness, twist and lean are epigenetic and "
+                            + "inherited with the allele. Every horn it grows is white: its colour, "
+                            + "glow and dust are three more genes. One copy shows nothing."),
+            Map.entry("horsegenetics.horn_colour",
+                    "A magical, codominant gene that colours a unicorn's horn and does nothing "
+                            + "to a horse without one. White, the seven rainbow colours, pink, "
+                            + "black, grey, and chaos - a colour of its own on every copy. Two "
+                            + "different copies make a two-tone horn: one colour with a tip of "
+                            + "the other. Each copy's shade drifts a little."),
+            Map.entry("horsegenetics.horn_glow",
+                    "A magical, recessive gene: Glw/Glw makes a unicorn's horn glow in the "
+                            + "dark in whatever colour it is. Does nothing to a horse without a "
+                            + "horn. One copy shows nothing."),
+            Map.entry("horsegenetics.horn_dust",
+                    "A magical, recessive gene: Dst/Dst makes a unicorn's horn shed a fine "
+                            + "dust in its own colours, which falls past its face. Does nothing to "
+                            + "a horse without a horn. One copy shows nothing."),
             Map.entry("horsegenetics.mstn",
                     "MSTN (myostatin), the sprint / stamina trade-off. Codominant: each C copy "
                             + "adds a little speed and costs two hearts of health. Endurance is "

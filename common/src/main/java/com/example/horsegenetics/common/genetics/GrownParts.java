@@ -1,5 +1,6 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.parts.AttachedPart;
 
 import java.util.List;
@@ -54,25 +55,48 @@ public final class GrownParts {
         // an ArrayList; until then, returning the Optional's own list keeps the
         // common "no parts" answer free of an allocation.
         return Genes.UNICORN_HORN.hornFor(genotype, epigenome)
-                .<List<AttachedPart>>map(List::of).orElseGet(List::of);
+                .<List<AttachedPart>>map(horn -> List.of(dressHorn(horn, genotype, epigenome)))
+                .orElseGet(List::of);
     }
 
     /**
-     * Can {@code gene} grow a part on an otherwise wild horse - does <i>any</i> of
-     * its combinations put geometry on it?
+     * The horn is polygenic: the unicorn locus grows its shape, and two more loci
+     * give it its colours and its glow. (A fourth, {@code HornDustGene}, makes it
+     * shed, and asks this method's answer for the dust's colours rather than
+     * working them out again.)
+     */
+    private static AttachedPart dressHorn(AttachedPart horn, Genotype genotype, Epigenome epigenome) {
+        HornColourGene.Tints tints = Genes.HORN_COLOUR.tintsFor(genotype, epigenome);
+        return horn.dressed(tints.base(), tints.tip(),
+                Genes.HORN_GLOW.glows(genotype.pair(Genes.HORN_GLOW)));
+    }
+
+    /**
+     * Does {@code gene} grow a part, or change one - does <i>any</i> of its
+     * combinations put geometry on an otherwise wild horse, or alter the geometry
+     * already on a horse that has every part?
+     *
+     * <p>The second half is what counts the loci that only dress a part: horn
+     * colour and horn glow do nothing to a hornless horse, so asked only of a wild
+     * one they would look invisible. The baseline with "every part" is a horse
+     * with a horn today; a second granting locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way
-     * {@code DesignerApi.showsAs} asks the cutie mark, so the next granting locus
-     * answers {@code true} here by being added to {@link #of}. It is the other half
-     * of "does this gene change how the horse looks" beside
-     * {@link Genes#influencesCoat}: a horn paints nothing, so that question alone
-     * filed it with the invisible health genes, and the editors' randomize never
-     * moved it. See {@link EditorRules#changesLooks}.
+     * {@code DesignerApi.showsAs} asks the cutie mark. It is the other half of "does
+     * this gene change how the horse looks" beside {@link Genes#influencesCoat}: a
+     * horn paints nothing, so that question alone filed it with the invisible
+     * health genes, and the editors' randomize never moved it. See
+     * {@link EditorRules#changesLooks}.
      */
-    public static boolean grants(Gene gene) {
+    public static boolean shapes(Gene gene) {
         Epigenome epi = Epigenome.fromSeed(0x5EEDL);
+        Genotype wild = Genotype.wildType();
+        Genotype everyPart = wild.with(
+                new AllelePair(Genes.UNICORN_HORN.Horn, Genes.UNICORN_HORN.Horn));
+        List<AttachedPart> dressed = of(everyPart, epi);
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
-            if (!of(Genotype.wildType().with(pair), epi).isEmpty()) {
+            if (!of(wild.with(pair), epi).isEmpty()
+                    || !of(everyPart.with(pair), epi).equals(dressed)) {
                 return true;
             }
         }

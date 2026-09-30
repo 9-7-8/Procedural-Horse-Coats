@@ -57,16 +57,16 @@ import java.util.Optional;
  *       so nothing pops as a line's horns lengthen over generations.</li>
  *   <li><b>{@code girth}</b> and <b>{@code tilt}</b> are a transform on the finished
  *       mesh: continuous, free, and shared meshes stay shared.</li>
- *   <li><b>{@code tint}</b> and <b>{@code glow}</b> are arguments to the draw. One
- *       greyscale sheet therefore covers pearl, ivory, bone and gold, and a
- *       lineage's horn colour can wander over thirty generations without any new
- *       art - the same trick a dyed braid uses.</li>
  * </ul>
  *
- * <p>{@code glow} is a <b>category</b> rather than a magnitude on purpose. Drift
- * moves a magnitude a hair at every breeding and re-rolls a category only rarely,
- * so a glowing horn stays glowing down a line and is a real event when it appears,
- * instead of a horse fading imperceptibly into luminescence over ten foals.
+ * <h2>Shape only - the horn is polygenic</h2>
+ * This locus decides <i>whether</i> there is a horn and what shape it is, and
+ * nothing else: every horn it grows is white and dark. Its colour is
+ * {@link HornColourGene}, its glow {@link HornGlowGene} and the dust it sheds
+ * {@link HornDustGene} - three more loci, each silent on a horse with no horn,
+ * put together by {@code GrownParts.of}. (Owner's call, 2026-09-30: the colour and
+ * glow were epigenetic numbers here until the horn became a trait several genes
+ * build between them.)
  */
 public final class UnicornHornGene implements Gene {
 
@@ -100,7 +100,7 @@ public final class UnicornHornGene implements Gene {
 
     private final Expression UNICORN = Expression.wildType("unicorn", "Unicorn",
             "A single tapering horn on the forehead, growing out of the skull between the ears "
-                    + "and leaning forward. Its length, thickness, twist, lean and colour are all "
+                    + "and leaning forward. Its length, thickness, twist and lean are all "
                     + "epigenetic and inherited with the allele - so a horn you like breeds true, "
                     + "and a line selected for length keeps getting longer. It is a piece of the "
                     + "horse rather than a marking on it: nothing about the coat changes, and the "
@@ -123,17 +123,6 @@ public final class UnicornHornGene implements Gene {
     public static final String TWIST = "twist";
     /** Radians of forward lean off the skull. */
     public static final String TILT = "tilt";
-    /** Draws the horn full-bright when it lands on zero. */
-    public static final String GLOW = "glow";
-    /** Prefix of the three colour channels. */
-    public static final String TINT = "tint";
-
-    /**
-     * How many outcomes {@link #GLOW} has, of which exactly one glows. Eight, so
-     * about an eighth of unicorns are luminous - rare enough to be worth breeding
-     * for and common enough to have been seen.
-     */
-    public static final int GLOW_OUTCOMES = 8;
 
     @Override public String key() { return KEY; }
     @Override public String name() { return "Unicorn horn"; }
@@ -177,16 +166,13 @@ public final class UnicornHornGene implements Gene {
                         EpiValue.uniform(LENGTH, 0.0, 1.0).clampedTo(0.0, 1.0),
                         EpiValue.uniform(GIRTH, 0.75, 1.30).clampedTo(0.7, 1.6),
                         EpiValue.category(TWIST, HornGenerator.STYLES),
-                        EpiValue.uniform(TILT, -0.10, 0.50).clampedTo(-0.6, 1.0),
-                        EpiValue.category(GLOW, GLOW_OUTCOMES))
-                // Pale and bright rather than saturated: a horn is keratin, so the
-                // colour range is ivory through pearl to a warm gold, and the
-                // brightest thing about it should be that it is nearly white.
-                .and(EpiValue.colour(TINT, 0.04, 0.30, 0.82, 1.00));
+                        EpiValue.uniform(TILT, -0.10, 0.50).clampedTo(-0.6, 1.0));
     }
 
     /**
-     * The horn this horse grows, or empty if it is not {@code Horn/Horn}.
+     * The shape of the horn this horse grows - white and dark - or empty if it is
+     * not {@code Horn/Horn}. Colour and glow are other loci's; ask
+     * {@code GrownParts.of} for the finished horn.
      *
      * <p>Deterministic and heritable: every number comes off the expressing copy's
      * epigenetic values, so the same horse grows the same horn in every session and
@@ -201,9 +187,7 @@ public final class UnicornHornGene implements Gene {
                 epi.get(LENGTH),
                 epi.get(GIRTH),
                 epi.get(TILT),
-                epi.category(TWIST),
-                0xFF000000 | epi.rgb(TINT),
-                epi.category(GLOW) == 0));
+                epi.category(TWIST)));
     }
 
     /**

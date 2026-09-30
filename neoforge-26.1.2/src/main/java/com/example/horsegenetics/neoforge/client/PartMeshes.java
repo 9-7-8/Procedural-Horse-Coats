@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.parts.PartGenerators;
 import com.example.horsegenetics.common.parts.PartNode;
 import com.example.horsegenetics.common.parts.PartShape;
 import com.example.horsegenetics.common.parts.PartSheet;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -120,9 +121,17 @@ public final class PartMeshes {
                             node.rx(), node.ry(), node.rz()));
         }
 
-        return new PartModel(LayerDefinition
+        ModelPart baked = LayerDefinition
                 .create(mesh, PartSheet.SIZE,
                         PartSheet.SIZE)
-                .bakeRoot());
+                .bakeRoot();
+        // The same walk again, on the baked parts, so segment i is node i - the
+        // order a two-tone part is coloured in, root to tip.
+        ModelPart[] parts = new ModelPart[nodes.size()];
+        for (int i = 0; i < nodes.size(); i++) {
+            PartNode node = nodes.get(i);
+            parts[i] = (node.isRoot() ? baked : parts[node.parent()]).getChild("n" + i);
+        }
+        return new PartModel(baked, List.of(parts));
     }
 }

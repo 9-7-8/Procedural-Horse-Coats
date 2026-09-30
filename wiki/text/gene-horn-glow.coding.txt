@@ -1,0 +1,5 @@
+Horn glow
+(Magical gene / recessive / lights the horn, paints nothing)
+Two copies and a unicorn's horn glows in the dark — in whatever colour horn colour gives it, both colours of a two-tone horn included. On a horse without a horn this gene does nothing at all.
+
+Gene key horsegenetics.horn_glow Class HornGlowGene Priority 228 (magical band); only a code-order slot Family Grown parts , beside the unicorn horn Alleles Glw n Founders Glw/Glw 12.5%, n/n the rest — no wild carriers Coat effect none How it reaches the horn GrownParts.of asks HornGlowGene.glows(pair) and sets the part's emissive flag through AttachedPart.dressed . AttachedPartLayer then submits each slice a second time with entityTranslucentEmissive at full brightness and the same tint, so the glow is always the horn's own colour. It carries no epigenetic numbers. It replaced a one-in-eight glow category on the unicorn locus (2026-09-30), and the founder rate is set to that same one in eight, so the share of glowing wild unicorns did not change — what changed is that it can be bred for.

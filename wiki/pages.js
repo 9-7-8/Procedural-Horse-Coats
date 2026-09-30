@@ -281,6 +281,9 @@ window.HG.pages = {
         {
             title: "Magical grown parts",
             items: [
+                { href: "gene-horn-colour.html", text: "Horn colour", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-horn-dust.html", text: "Horn dust", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-horn-glow.html", text: "Horn glow", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-unicorn-horn.html", text: "Unicorn horn", kind: "magical", views: ["gameplay","coding","science"] }
             ]
         },

@@ -93,7 +93,10 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
      * skull is nearly the adult's, so matching the head would give a newborn a
      * full-length tusk. Just over half reads as a horn that has started.
      *
-     * <p>A first guess, and the most likely thing on this page to want a nudge.
+     * <p><b>Settled at half, 2026-09-30 (owner).</b> The adult's root carries a 1.1
+     * scale and the foal's none, so 0.55 here is exactly half the adult horn in
+     * world size. On a foal's near-adult-sized head that reads as comically small,
+     * and the owner looked at it and chose to keep it.
      */
     private static final float FOAL_SCALE = 0.55f;
 
@@ -136,38 +139,66 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             // change with it: a cutout pipeline carries no blend function, so a
             // half-transparent tint through it draws a fully solid horn and then, at
             // a low enough alpha, no horn at all.
-            int tint = RiderFade.fade(part.tint(), alpha);
-            submitNodeCollector.order(1).submitModel(
+            //
+            // A one-colour part is one submit. A two-tone one is one submit PER
+            // SEGMENT, each drawing only its own box in the colour tintAt gives
+            // that far along - see PartModel on why that has to be a Slice applied
+            // in setupAnim and not a skipDraw set here. Two-tone horns are the rare
+            // case (two different colour alleles on a horse that is already one in
+            // four hundred), so the common horn still costs one draw.
+            boolean glow = part.emissive() && genetic.drawPartGlow;
+            if (!part.twoTone()) {
+                submitSlice(submitNodeCollector, model, PartModel.Slice.ALL, poseStack, genetic,
+                        lightCoords, RiderFade.fade(part.baseTint(), alpha), glow);
+            } else {
+                int n = model.segmentCount();
+                for (int i = 0; i < n; i++) {
+                    float along = n == 1 ? 0f : (float) i / (n - 1);
+                    submitSlice(submitNodeCollector, model, new PartModel.Slice(i), poseStack,
+                            genetic, lightCoords, RiderFade.fade(part.tintAt(along), alpha), glow);
+                }
+            }
+            poseStack.popPose();
+        }
+    }
+
+    /**
+     * One slice of a part - the whole of it, or one segment - in one colour, plus
+     * its glow pass when it glows.
+     *
+     * <p>The glow is a second submit of the same slice at full brightness - the way
+     * EmissiveCoatLayer redraws a glowing mane - so only a glowing horn pays for it,
+     * it glows in its own colour whatever that is, and a player who cannot afford
+     * it can turn the pass off and keep the horn.
+     */
+    private static void submitSlice(SubmitNodeCollector collector, PartModel model,
+                                    PartModel.Slice slice, PoseStack poseStack,
+                                    GeneticHorseRenderState genetic, int lightCoords, int tint,
+                                    boolean glow) {
+        collector.order(1).submitModel(
+                model,
+                slice,
+                poseStack,
+                genetic.isFading() ? RenderTypes.entityTranslucent(SHEET)
+                        : RenderTypes.entityCutout(SHEET),
+                lightCoords,
+                OverlayTexture.NO_OVERLAY,
+                tint,
+                null,
+                genetic.outlineColor,
+                null);
+        if (glow) {
+            collector.order(2).submitModel(
                     model,
-                    part,
+                    slice,
                     poseStack,
-                    genetic.isFading() ? RenderTypes.entityTranslucent(SHEET)
-                            : RenderTypes.entityCutout(SHEET),
-                    lightCoords,
+                    RenderTypes.entityTranslucentEmissive(SHEET, false),
+                    FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY,
                     tint,
                     null,
-                    state.outlineColor,
+                    genetic.outlineColor,
                     null);
-
-            // The glow is a second submit of the same mesh at full brightness - the
-            // way EmissiveCoatLayer redraws a glowing mane - so only a glowing horn
-            // pays for it, and a player who cannot afford it can turn the pass off
-            // and keep the horn.
-            if (part.emissive() && genetic.drawPartGlow) {
-                submitNodeCollector.order(2).submitModel(
-                        model,
-                        part,
-                        poseStack,
-                        RenderTypes.entityTranslucentEmissive(SHEET, false),
-                        FULL_BRIGHT,
-                        OverlayTexture.NO_OVERLAY,
-                        tint,
-                        null,
-                        state.outlineColor,
-                        null);
-            }
-            poseStack.popPose();
         }
     }
 

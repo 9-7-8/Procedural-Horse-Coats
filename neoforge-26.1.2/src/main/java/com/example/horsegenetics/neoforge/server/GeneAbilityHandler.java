@@ -12,6 +12,7 @@ import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.particle.HoofprintOptions;
+import com.example.horsegenetics.neoforge.particle.HornDustOptions;
 import com.example.horsegenetics.neoforge.particle.ModParticles;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -872,6 +873,15 @@ public final class GeneAbilityHandler {
         return switch (anchor) {
             case "head" -> new Vec3(horse.getX() + fx * reach, horse.getEyeY(), horse.getZ() + fz * reach);
             case "eyes" -> new Vec3(horse.getX(), horse.getEyeY(), horse.getZ());
+            // Somewhere along a unicorn's horn: the head point, lifted by a random
+            // share of a horn's height. An estimate from the live box like every
+            // anchor here - the server knows nothing of the head's animated pose, so
+            // a grazing horse's dust starts where its horn would be if it looked up.
+            // Unverified in game against a drawn horn.
+            case "horn" -> {
+                double lift = horse.getBbHeight() * (0.12 + 0.18 * level.getRandom().nextDouble());
+                yield new Vec3(horse.getX() + fx * reach, horse.getEyeY() + lift, horse.getZ() + fz * reach);
+            }
             case "body" -> new Vec3(horse.getX(), horse.getY() + horse.getBbHeight() * 0.5, horse.getZ());
             case "tail" -> new Vec3(horse.getX() - fx * reach, back, horse.getZ() - fz * reach);
             case "spine" -> {
@@ -1010,6 +1020,8 @@ public final class GeneAbilityHandler {
             // through the ordinary path (a puff shape, a non-hoof anchor).
             case ModParticles.HOOFPRINT_ID ->
                     new HoofprintOptions(rgb, second, horse.getYRot(), horse.getScale(), data > 0.5);
+            // A unicorn's horn dust: vanilla's two-colour dust, but falling.
+            case ModParticles.HORN_DUST_ID -> new HornDustOptions(rgb, second);
             case "minecraft:effect" -> SpellParticleOption.create(ParticleTypes.EFFECT, argb, 1.0F);
             case "minecraft:instant_effect" ->
                     SpellParticleOption.create(ParticleTypes.INSTANT_EFFECT, argb, 1.0F);

@@ -51,6 +51,17 @@ public interface GeneEpigenetics {
     EpiValues copy(int slot);
 
     /**
+     * The <b>whole horse's</b> epigenome, or {@code null} when the question was
+     * asked about a genotype rather than a horse. For the rare gene whose effect is
+     * another locus's numbers: {@code HornDustGene} sheds dust in the colours
+     * {@code GrownParts} gives the horn, and those live on the horn-colour copies,
+     * not on its own.
+     */
+    default Epigenome epigenome() {
+        return null;
+    }
+
+    /**
      * The numbers for {@code gene} on the horse described by {@code genotype} +
      * {@code epigenome}.
      *
@@ -78,6 +89,11 @@ public interface GeneEpigenetics {
             @Override
             public EpiValues copy(int slot) {
                 return Epigenome.readable(gene, slot == 0 ? copies.first() : copies.second());
+            }
+
+            @Override
+            public Epigenome epigenome() {
+                return epigenome;
             }
         };
     }

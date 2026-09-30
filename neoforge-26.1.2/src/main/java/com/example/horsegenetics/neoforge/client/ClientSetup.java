@@ -84,11 +84,13 @@ public final class ClientSetup {
                 HorseStasisBankScreen::new);
     }
 
-    /** Molten hooves' glowing prints - see {@link HoofprintParticle}. */
+    /** Molten hooves' glowing prints ({@link HoofprintParticle}) and horn dust ({@link HornDustParticle}). */
     @SubscribeEvent
     static void registerParticles(net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent event) {
         event.registerSpriteSet(com.example.horsegenetics.neoforge.particle.ModParticles.HOOFPRINT.get(),
                 HoofprintParticle.Provider::new);
+        event.registerSpriteSet(com.example.horsegenetics.neoforge.particle.ModParticles.HORN_DUST.get(),
+                HornDustParticle.Provider::new);
     }
 
     /**

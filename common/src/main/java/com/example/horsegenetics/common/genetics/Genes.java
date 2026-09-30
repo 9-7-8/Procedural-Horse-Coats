@@ -127,6 +127,9 @@ import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.Toe1Gene;
 import com.example.horsegenetics.common.genetics.genes.UnicornHornGene;
+import com.example.horsegenetics.common.genetics.genes.HornColourGene;
+import com.example.horsegenetics.common.genetics.genes.HornDustGene;
+import com.example.horsegenetics.common.genetics.genes.HornGlowGene;
 import com.example.horsegenetics.common.genetics.genes.VerdantGene;
 import com.example.horsegenetics.common.genetics.spec.GeneSpec;
 import com.example.horsegenetics.common.genetics.spec.GeneSpecLoader;
@@ -555,6 +558,12 @@ public final class Genes {
      * on it and neither coat golden reads it.
      */
     public static final UnicornHornGene UNICORN_HORN = new UnicornHornGene();
+    /** Horn colour - codominant; two different copies make a two-tone horn. Silent without a horn. */
+    public static final HornColourGene HORN_COLOUR = new HornColourGene();
+    /** Horn glow - recessive; the horn glows in its own colour. Silent without a horn. */
+    public static final HornGlowGene HORN_GLOW = new HornGlowGene();
+    /** Horn dust - recessive; the horn sheds falling dust in its own colours. Silent without a horn. */
+    public static final HornDustGene HORN_DUST = new HornDustGene();
     public static final HealerGene HEALER = new HealerGene();
     /**
      * Magic sectoral heterochromia - two different colour alleles and the horse
@@ -679,6 +688,7 @@ public final class Genes {
             FOOD_PREFERENCE, POTION_MILK, EGG_LAYER, SINGER,
             PACK_LEADER, SPAWNER,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK, UNICORN_HORN,
+            HORN_COLOUR, HORN_GLOW, HORN_DUST,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

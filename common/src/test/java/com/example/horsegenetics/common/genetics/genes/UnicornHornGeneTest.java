@@ -102,7 +102,11 @@ class UnicornHornGeneTest {
         assertEquals(1, parts.size());
         assertEquals(PartKind.HORN, parts.get(0).kind());
         assertSame(PartAnchor.FOREHEAD, parts.get(0).kind().anchor());
-        assertEquals(GENE.hornFor(unicorn(), Epigenome.fromSeed(5)).orElseThrow(), parts.get(0));
+        AttachedPart shape = GENE.hornFor(unicorn(), Epigenome.fromSeed(5)).orElseThrow();
+        assertEquals(shape.shape(), parts.get(0).shape(), "the door dresses the horn, it does not reshape it");
+        assertEquals(shape.stretch(), parts.get(0).stretch());
+        assertEquals(shape.girth(), parts.get(0).girth());
+        assertEquals(shape.tilt(), parts.get(0).tilt());
     }
 
     @Test
@@ -124,8 +128,8 @@ class UnicornHornGeneTest {
      * unicorns, something upstream of it is being read. The mapping the names below
      * assert is the one written out on the gene:
      * {@code length} to the size bucket <i>and</i> the stretch, {@code twist} to
-     * the style, {@code girth}, {@code tilt} and {@code tint} to themselves, and
-     * {@code glow} to {@code emissive}.
+     * the style, and {@code girth} and {@code tilt} to themselves. Colour and glow
+     * are other loci's now - {@code HornGenesTest} holds them to the same rule.
      */
     @Test
     void everyEpigeneticNumberReachesTheHorn() {
@@ -135,8 +139,6 @@ class UnicornHornGeneTest {
         Set<Float> stretches = new HashSet<>();
         Set<Float> girths = new HashSet<>();
         Set<Float> tilts = new HashSet<>();
-        Set<Integer> tints = new HashSet<>();
-        int glowing = 0;
         int horses = 2000;
         for (long seed = 0; seed < horses; seed++) {
             AttachedPart horn = GENE.hornFor(gt, Epigenome.fromSeed(seed)).orElseThrow();
@@ -145,10 +147,6 @@ class UnicornHornGeneTest {
             stretches.add(horn.stretch());
             girths.add(horn.girth());
             tilts.add(horn.tilt());
-            tints.add(horn.tint());
-            if (horn.emissive()) {
-                glowing++;
-            }
         }
         assertTrue(sizes.size() > 8, "length barely reaches the size bucket: " + sizes);
         assertEquals(HornGenerator.STYLES, styles.size(),
@@ -156,12 +154,20 @@ class UnicornHornGeneTest {
         assertTrue(stretches.size() > 100, "length does not reach the stretch: " + stretches.size());
         assertTrue(girths.size() > 100, "girth is not being read: " + girths.size());
         assertTrue(tilts.size() > 100, "tilt is not being read: " + tilts.size());
-        assertTrue(tints.size() > 100, "tint is not being read: " + tints.size());
-        // glow is a category of GLOW_OUTCOMES, one of which glows.
-        double rate = (double) glowing / horses;
-        double wanted = 1.0 / UnicornHornGene.GLOW_OUTCOMES;
-        assertTrue(rate > wanted * 0.6 && rate < wanted * 1.5,
-                glowing + " of " + horses + " horns glow; expected about " + wanted);
+    }
+
+    /**
+     * <b>Shape only.</b> The unicorn locus grows every horn white and dark,
+     * whatever its epigenome says; colour and glow are other genes (owner, 2026-09-30).
+     */
+    @Test
+    void theHornLocusGrowsEveryHornWhiteAndDark() {
+        for (long seed = 0; seed < 500; seed++) {
+            AttachedPart horn = GENE.hornFor(unicorn(), Epigenome.fromSeed(seed)).orElseThrow();
+            assertEquals(AttachedPart.UNDYED, horn.baseTint());
+            assertEquals(AttachedPart.UNDYED, horn.tipTint());
+            assertFalse(horn.emissive());
+        }
     }
 
     /** Whatever the epigenome says, the horn is drawable: in range, and a real colour. */
@@ -177,8 +183,6 @@ class UnicornHornGeneTest {
                     "seed " + seed + " girth " + horn.girth());
             assertTrue(horn.tilt() >= -0.6f && horn.tilt() <= 1.0f,
                     "seed " + seed + " tilt " + horn.tilt());
-            assertEquals(0xFF, horn.tint() >>> 24,
-                    "a horn's tint must be opaque - the fade is applied by the layer");
             assertSame(HornSize.of(horn.length()),
                     GENE.sizeOf(gt, Epigenome.fromSeed(seed)).orElseThrow());
         }
@@ -235,9 +239,9 @@ class UnicornHornGeneTest {
     @Test
     void theEditorsCountAHornAsSomethingYouCanSee() {
         assertFalse(Genes.influencesCoat(GENE), "the horn paints nothing - that is the premise");
-        assertTrue(GrownParts.grants(GENE));
+        assertTrue(GrownParts.shapes(GENE));
         assertTrue(EditorRules.changesLooks(GENE), "a randomize must be allowed to move the horn");
-        assertFalse(GrownParts.grants(Genes.MSTN), "a stat locus grows nothing");
+        assertFalse(GrownParts.shapes(Genes.MSTN), "a stat locus grows nothing");
         assertFalse(EditorRules.changesLooks(Genes.MSTN), "and stays behind the Rnd health switch");
     }
 

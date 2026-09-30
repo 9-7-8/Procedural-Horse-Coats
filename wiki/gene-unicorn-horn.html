@@ -23,10 +23,11 @@
     A horse with two copies grows a single <strong>tapering horn on its
     forehead</strong> &mdash; and it is the first thing in this mod that is a
     <strong>piece of the horse rather than a picture on it</strong>. Nothing about
-    the coat changes. How long the horn is, how thick, how tightly it spirals, how
-    far it leans and what colour it is are all written on the allele copy and
-    inherited with it, so a horn you like breeds true and a line selected for
-    length keeps getting longer.
+    the coat changes. How long the horn is, how thick, how tightly it spirals and how
+    far it leans are all written on the allele copy and inherited with it, so a horn
+    you like breeds true and a line selected for length keeps getting longer. This
+    gene grows every horn <strong>white</strong>: its colour, its glow and the dust it
+    sheds are <a href="#polygenic">three more genes</a>.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -83,18 +84,28 @@
                 the poll instead</td>
             <td>Continuous</td>
         </tr>
-        <tr>
-            <td><strong>Colour</strong></td>
-            <td>Pale keratin &mdash; ivory, pearl, bone, a warm gold</td>
-            <td>Three channels, each drifting on its own, so a family's horn colour
-                wanders gradually instead of being re-invented</td>
-        </tr>
-        <tr>
-            <td><strong>Glow</strong></td>
-            <td>About one horned horse in eight has a horn that shines in the dark</td>
-            <td>A category, like the twist &mdash; so it breeds true, and a luminous
-                foal out of two dull parents is a real event</td>
-        </tr>
+    </tbody>
+</table>
+
+<h2 id="polygenic">Four genes make a horn</h2>
+
+<p>
+    This gene decides whether a horse has a horn and what shape it is. Three more
+    finish it, and each does <strong>nothing at all to a horse without a horn</strong>
+    &mdash; so a hornless horse can carry a whole unicorn's worth of colour, glow and
+    dust and pass it on without a sign:
+</p>
+
+<table class="data">
+    <thead><tr><th>Gene</th><th>What it does to the horn</th></tr></thead>
+    <tbody>
+        <tr><td><a href="gene-horn-colour.html">Horn colour</a></td>
+            <td>White, the rainbow, pink, black, grey or chaos. Two different copies make
+                a two-tone horn: one colour with a tip of the other</td></tr>
+        <tr><td><a href="gene-horn-glow.html">Horn glow</a></td>
+            <td>Recessive: two copies and the horn glows in the dark, in its own colour</td></tr>
+        <tr><td><a href="gene-horn-dust.html">Horn dust</a></td>
+            <td>Recessive: two copies and the horn sheds a fine falling dust in its own colours</td></tr>
     </tbody>
 </table>
 
@@ -231,14 +242,19 @@
         <tr>
             <td><code>tilt</code></td><td>uniform, a little into the negative</td><td>rotation about x</td><td>Free</td>
         </tr>
-        <tr>
-            <td><code>tint_r/g/b</code></td><td>bright colour channels, pale and high-value</td><td>the submit's tint</td><td>Free &mdash; a draw argument</td>
-        </tr>
-        <tr>
-            <td><code>glow</code></td><td>category; outcome zero glows</td><td>a second full-bright submit</td><td>One extra draw, only when set</td>
-        </tr>
     </tbody>
 </table>
+
+<p>
+    There were six until 2026-09-30: <code>tint_r/g/b</code> and a one-in-eight
+    <code>glow</code> category lived here too. The owner made the horn polygenic and
+    they moved out to <a href="gene-horn-colour.html">horn colour</a> and
+    <a href="gene-horn-glow.html">horn glow</a>, which is why
+    <code>hornFor</code> now returns a white, dark horn and
+    <code>GrownParts.of</code> dresses it. A horse saved before the change carries the
+    old numbers on its copies; the schema no longer names them, so they are read by
+    nothing.
+</p>
 
 <h3>Why length is in both columns</h3>
 
@@ -323,15 +339,21 @@
 </p>
 
 <p>
-    <code>PartModel</code> is therefore a <code>Model&lt;AttachedPart&gt;</code>
+    <code>PartModel</code> is therefore a <code>Model&lt;PartModel.Slice&gt;</code>
     rather than an <code>EntityModel</code> of the horse's state. The type parameter
-    of <code>submitModel</code> is free, and choosing the <em>part</em> means
-    anything that must be applied by mutation can be applied in
-    <code>setupAnim</code>, where it runs per submit with that submit's own numbers.
-    Nothing needs that yet &mdash; a horn's length, girth, lean, colour and glow are
-    all a pose transform or a draw argument, and a pose is copied rather than shared
-    &mdash; so <code>setupAnim</code> is empty. That emptiness is the interesting
-    thing about the class: it is where an antler's tine count will have to go.
+    of <code>submitModel</code> is free, and choosing something about the
+    <em>part</em> means anything that must be applied by mutation is applied in
+    <code>setupAnim</code>, where it runs per submit with that submit's own state.
+</p>
+
+<p>
+    The first thing that needed it was the <a href="gene-horn-colour.html">two-tone
+    horn</a>. A submit carries one tint, so a horn with two colours is submitted once
+    per segment, each <code>Slice</code> naming the one box to draw, and
+    <code>setupAnim</code> sets <code>skipDraw</code> on the rest &mdash;
+    <code>skipDraw</code> and not <code>visible</code>, because each segment is its
+    predecessor's child and <code>visible=false</code> would hide the rest of the
+    horn with it. A one-colour horn is still one submit.
 </p>
 
 <h3 id="anchor">The anchor, and the two models that do not agree</h3>
@@ -372,8 +394,10 @@
     stay on the head in the dev yard and found it exactly placed on an adult, and in the right
     spot on a foal. The parenting through <code>root</code> &rarr; <code>head_parts</code>
     &rarr; <code>head</code> therefore does what the sources said it would. The foal's
-    <code>FOAL_SCALE</code> errs the other way from the tusk it was guarding against: the
-    horn comes out comically small.
+    <code>FOAL_SCALE</code> of 0.55 makes a foal's horn exactly <strong>half</strong> the
+    adult horn in world size (the adult root carries a 1.1 scale, the foal's none), and on a
+    foal's near-adult-sized head that reads as comically small. The owner looked at it and
+    <strong>kept it at half</strong> the same day.
 </p>
 
 <h3 id="sheet">One greyscale sheet for every colour</h3>
@@ -507,16 +531,8 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The horn follows the head and sits right on an adult, but a foal's horn is comically small, randomizing the spawn egg's epigenetics has only just been made to reach it, and nubs, narwhals, size extremes, tack and a pen's frame cost are all unwatched.</p>
+    <p>The horn follows the head and sits right on adults and foals, but randomizing the spawn egg's epigenetics has only just been made to reach it, and nubs, narwhals, size extremes, tack and a pen's frame cost are all unwatched.</p>
 </div>
-
-<h3 id="open-horn-foal-scale">A foal's horn is comically small &mdash; keep it?</h3>
-<p>
-    The owner found it in the right spot on a foal but tiny, and called it funny rather than
-    necessarily a bug. <code>FOAL_SCALE</code> was a guess made to avoid giving a newborn a
-    full-length tusk, and it overshot the other way. Whether to raise it, or keep the joke,
-    is the owner's call.
-</p>
 
 <h3 id="open-horn-placement">Nubs, narwhals, and the size extremes</h3>
 <p>
@@ -574,17 +590,6 @@
     <code>Horn/Horn</code> horse shows there with its gene row and no horn. Whether the
     designer should say so in words, draw it, or something else is a design call rather than a
     defect. See <a href="model-parts.html#open-designer">attached model parts</a>.
-</p>
-
-<h3 id="open-horn-glow-owner">Should a glow come from the light locus instead?</h3>
-<p>
-    A glowing horn is an epigenetic category on this gene. The alternative &mdash; and it is
-    what <a href="gene-cutie-mark.html">cutie mark</a> does &mdash; is a contribution hook, so
-    that a horse whose mane and hooves already glow grows a glowing horn as a matter of course
-    rather than by an independent one-in-eight roll. The hook was not built because it would
-    have had no implementor on the day, and an interface nothing implements is worse than
-    none. Whether to add it, and whether the two should then interact or the light locus should
-    simply win, is unresolved.
 </p>
 
 </section>

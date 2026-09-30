@@ -137,16 +137,18 @@
                 walks every mesh the mod can build with no game running.</td></tr>
         <tr><td><code>AttachedPart</code></td><td>common</td>
             <td>One part on one horse, resolved: a shape plus the numbers applied to it at draw
-                time.</td></tr>
+                time &mdash; including a base and a tip colour, blended by <code>tintAt</code>.</td></tr>
         <tr><td><code>GrownParts</code></td><td>common</td>
-            <td>Every part this genotype grows, in one call. The client asks here and nowhere
-                else, so the second granting gene is a line in this file and no change at all on
-                the Minecraft side.</td></tr>
+            <td>Every part this genotype grows, in one call, <strong>dressed</strong> by the loci that
+                finish it &mdash; the horn&rsquo;s colour and glow are other genes. The client asks
+                here and nowhere else, so the second granting gene is a line in this file and no
+                change at all on the Minecraft side.</td></tr>
         <tr><td><code>PartMeshes</code></td><td>neoforge</td>
             <td>Bakes a shape into a <code>ModelPart</code> tree, once, and keeps it.</td></tr>
         <tr><td><code>PartModel</code></td><td>neoforge</td>
-            <td>A baked mesh with no animation of its own, typed on the <em>part</em> rather
-                than the horse &mdash; see the deferred-submit note below.</td></tr>
+            <td>A baked mesh with no animation of its own, typed on a <code>Slice</code> of the
+                part rather than the horse, so a two-tone part can be drawn a segment at a time
+                &mdash; see the deferred-submit note below.</td></tr>
         <tr><td><code>AttachedPartLayer</code></td><td>neoforge</td>
             <td>Draws them. The only place in the mod that knows a horse bone&rsquo;s
                 name.</td></tr>

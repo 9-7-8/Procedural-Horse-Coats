@@ -23,10 +23,18 @@ package com.example.horsegenetics.common.parts;
  *   <li><b>{@link #stretch}, {@link #girth}, {@link #tilt}</b> are a pose-stack
  *       transform. Free, continuous, and copied into the submit node, so they are
  *       safe under a deferred draw.</li>
- *   <li><b>{@link #tint}, {@link #emissive}</b> are per-submit arguments. Also
- *       free, and also per-horse rather than per-mesh - which is why one greyscale
- *       {@link PartSheet} serves every colour a lineage ever drifts to.</li>
+ *   <li><b>{@link #baseTint}, {@link #tipTint}, {@link #emissive}</b> are
+ *       per-submit arguments. Also free, and also per-horse rather than per-mesh -
+ *       which is why one greyscale {@link PartSheet} serves every colour a lineage
+ *       ever drifts to.</li>
  * </ul>
+ *
+ * <h2>Grown by one locus, dressed by others</h2>
+ * The shape comes from the gene that grants the part; its colour and its glow
+ * come from other loci, applied by {@link #dressed}. That is what makes the horn
+ * polygenic without the unicorn locus knowing the others exist -
+ * {@code GrownParts.of} does the composing, and a part nobody dresses is white
+ * and dark.
  *
  * <p>Nothing in here is mutated on a shared object: the trap this shape avoids is
  * setting {@code visible} or {@code xScale} on a cached {@code ModelPart} and then
@@ -38,11 +46,17 @@ package com.example.horsegenetics.common.parts;
  *                 the epigenome asked for rather than its bucket's nominal length
  * @param girth    scale across the part's axis - a slender horn or a stout one
  * @param tilt     radians the whole part leans forward from the anchor's own up
- * @param tint     opaque ARGB multiplied into the greyscale sheet
+ * @param baseTint opaque ARGB multiplied into the greyscale sheet at the root
+ * @param tipTint  the same at the far end - equal to {@code baseTint} for a
+ *                 one-colour part, and blended from one to the other along its
+ *                 length by {@link #tintAt} for a two-tone one
  * @param emissive drawn a second time full-bright, so it glows in the dark
  */
 public record AttachedPart(PartShape shape, float stretch, float girth, float tilt,
-                           int tint, boolean emissive) {
+                           int baseTint, int tipTint, boolean emissive) {
+
+    /** What a part nobody has dressed wears: opaque white, so the sheet's grain shows as it is. */
+    public static final int UNDYED = 0xFFFFFFFF;
 
     /** How far a part may be scaled on any axis. A guard against a drifted number, not a design range. */
     private static final float MIN_SCALE = 0.2f;
@@ -65,20 +79,53 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
     }
 
     /**
-     * A horn from the numbers the unicorn locus carries.
+     * A horn from the numbers the unicorn locus carries - white and dark until
+     * {@link #dressed} says otherwise.
      *
      * @param length   position on the {@link HornSize} ladder, {@code [0,1]}
      * @param girth    cross-section multiplier
      * @param tilt     radians of forward lean
      * @param style    one of {@link HornGenerator}'s four
-     * @param tint     opaque ARGB
-     * @param emissive whether it glows
      */
-    public static AttachedPart horn(double length, double girth, double tilt, int style,
-                                    int tint, boolean emissive) {
+    public static AttachedPart horn(double length, double girth, double tilt, int style) {
         PartShape shape = PartShape.of(PartKind.HORN, style, length);
         return new AttachedPart(shape, shape.stretchTo(length), (float) girth, (float) tilt,
-                tint, emissive);
+                UNDYED, UNDYED, false);
+    }
+
+    /** This part in other colours and light, its shape untouched. */
+    public AttachedPart dressed(int base, int tip, boolean glows) {
+        return new AttachedPart(shape, stretch, girth, tilt, base, tip, glows);
+    }
+
+    /** Two colours rather than one - the renderer draws such a part a segment at a time. */
+    public boolean twoTone() {
+        return baseTint != tipTint;
+    }
+
+    /**
+     * The colour {@code along} of the way from root ({@code 0}) to tip ({@code 1}).
+     * Each end holds its own colour for its first quarter and the change happens in
+     * between, on a smoothstep - so a two-tone horn reads as a horn of one colour
+     * with a tip of another, rather than as a gradient with no colour of its own.
+     */
+    public int tintAt(float along) {
+        if (!twoTone()) {
+            return baseTint;
+        }
+        float t = (along - 0.25f) / 0.5f;
+        t = t < 0f ? 0f : (t > 1f ? 1f : t);
+        t = t * t * (3f - 2f * t);
+        return 0xFF000000
+                | mix(baseTint >> 16, tipTint >> 16, t) << 16
+                | mix(baseTint >> 8, tipTint >> 8, t) << 8
+                | mix(baseTint, tipTint, t);
+    }
+
+    private static int mix(int a, int b, float t) {
+        a &= 0xFF;
+        b &= 0xFF;
+        return Math.round(a + (b - a) * t);
     }
 
     /** What kind of part this is - the anchor and the sheet region follow from it. */

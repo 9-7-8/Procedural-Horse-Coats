@@ -259,11 +259,11 @@ class PartGeneratorTest {
     @Test
     void anAttachedPartRefusesAnAbsurdScale() {
         AttachedPart tiny = new AttachedPart(
-                new PartShape(PartKind.HORN, 0, 4), 0f, -3f, 0f, 0xFFFFFFFF, false);
+                new PartShape(PartKind.HORN, 0, 4), 0f, -3f, 0f, 0xFFFFFFFF, 0xFFFFFFFF, false);
         assertTrue(tiny.stretch() > 0f, "a zero scale would draw a degenerate mesh");
         assertTrue(tiny.girth() > 0f, "a negative scale would draw the horn inside out");
         AttachedPart huge = new AttachedPart(
-                new PartShape(PartKind.HORN, 0, 4), 500f, 500f, 0f, 0xFFFFFFFF, false);
+                new PartShape(PartKind.HORN, 0, 4), 500f, 500f, 0f, 0xFFFFFFFF, 0xFFFFFFFF, false);
         assertTrue(huge.stretch() < 10f, "a horn a chunk long is a hazard, not a triumph");
         assertEquals(PartKind.HORN, huge.kind());
     }
@@ -272,7 +272,7 @@ class PartGeneratorTest {
     void aHornsDrawnLengthIsWhatTheLadderPromised() {
         for (int i = 0; i <= 50; i++) {
             double position = i / 50.0;
-            AttachedPart part = AttachedPart.horn(position, 1.0, 0.0, 0, 0xFFFFFFFF, false);
+            AttachedPart part = AttachedPart.horn(position, 1.0, 0.0, 0);
             assertEquals(HornSize.lengthFor(position), part.length(), 1e-2,
                     "a horn asked for position " + position + " came out the wrong length");
         }

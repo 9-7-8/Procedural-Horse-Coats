@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horn colour &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> codominant <span class="sep">/</span> colours the horn, paints nothing</p>
+
+<h1>Horn colour</h1>
+
+<p class="lede">
+    What colour a <a href="gene-unicorn-horn.html">unicorn's horn</a> is &mdash; white,
+    any colour of the rainbow, pink, black, grey, or <strong>chaos</strong>, a colour
+    of its own on every copy. Nothing is dominant, so a horse with two different
+    copies has a <strong>two-tone horn</strong>: one colour, with a tip of the other.
+    On a horse without a horn this gene does nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.horn_colour"></div>
+
+<h2 id="colours">The colours</h2>
+
+<table class="data">
+    <thead><tr><th>Allele</th><th>Horn</th><th>In the wild</th></tr></thead>
+    <tbody>
+        <tr><td><span class="allele wild">Wht</span></td><td>White</td><td>Most copies (70%)</td></tr>
+        <tr><td><span class="allele">Red</span> <span class="allele">Org</span> <span class="allele">Yel</span> <span class="allele">Grn</span> <span class="allele">Blu</span> <span class="allele">Ind</span> <span class="allele">Vio</span></td>
+            <td>Red, orange, yellow, green, blue, indigo, violet</td><td>A few percent each</td></tr>
+        <tr><td><span class="allele">Pnk</span> <span class="allele">Blk</span> <span class="allele">Gry</span></td>
+            <td>Pink, black, grey</td><td>A few percent each</td></tr>
+        <tr><td><span class="allele">Cha</span></td><td>Chaos &mdash; any colour at all, different on every copy</td><td>Rarest</td></tr>
+    </tbody>
+</table>
+
+<h2 id="two-tone">Two colours make a two-tone horn</h2>
+
+<p>
+    A horse with two copies of one colour has a horn of that colour. A horse with two
+    <em>different</em> ones has a horn of one colour whose tip is the other, fading
+    between them about halfway up. Which colour is the base is decided by the pair,
+    not by which parent gave which: it is the one earlier in the list above. So a
+    white horse carrying red has a white horn with a red tip, and a red/blue horse a
+    red horn tipped blue &mdash; every time.
+</p>
+
+<p>
+    Because nothing hides anything, you can read a unicorn's colour genes straight off
+    its horn. Most wild unicorns are white, and a good share have a coloured tip.
+</p>
+
+<h2 id="shades">No two reds are the same red</h2>
+
+<p>
+    Every copy carries a little variation of its own, written on the allele and
+    inherited with it: every red horn is clearly red, but the exact shade differs from
+    horse to horse and drifts slowly down a family. White, black and grey vary only a
+    touch. Chaos is the extreme of this &mdash; its whole colour is on the copy, so no
+    two chaos horns match.
+</p>
+
+<h2 id="hornless">On a horse without a horn</h2>
+
+<p>
+    Nothing. A hornless horse can carry any colours at all and show no sign of them,
+    and passes them on to its foals like any other gene &mdash; so the colour a unicorn
+    comes out can depend on ancestors that never had a horn.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>
+    It does nothing to the horse at all, for good or ill. It is only the colour of the
+    horn.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.horn_colour"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.horn_colour</dd></div>
+    <div><dt>Class</dt><dd><code>HornColourGene</code></dd></div>
+    <div><dt>Priority</dt><dd>227 (magical band), in a free run with horn glow and horn dust; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong>, beside the <a href="gene-unicorn-horn.html">unicorn horn</a></dd></div>
+    <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha &mdash; that order is also the base-before-tip order</dd></div>
+    <div><dt>Outcomes</dt><dd>one per colour, plus <code>horn-two-tone</code>; all wild types</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; the bake golden's twelve new rows all hash to the unchanged baseline sheet, and no pipeline coat hash moved when it was added</dd></div>
+</dl>
+
+<h2 id="door">How the colour reaches the horn</h2>
+
+<p>
+    The unicorn locus grows a white, dark horn (<code>UnicornHornGene.hornFor</code>).
+    <code>GrownParts.of</code> &mdash; still the one door the client uses &mdash; then
+    asks <code>HornColourGene.tintsFor(genotype, epigenome)</code> for a base and a tip
+    colour and <code>AttachedPart.dressed</code> puts them on. The renderer never learns
+    which loci were involved.
+</p>
+
+<p>
+    <code>AttachedPart</code> carries <code>baseTint</code> and <code>tipTint</code>
+    instead of one tint, and <code>tintAt(along)</code> blends between them: each end
+    keeps its own colour for its first quarter, with a smoothstep in between, so a
+    two-tone horn reads as a coloured horn with a coloured tip rather than a gradient.
+    A one-colour horn is one submit; a two-tone one is one submit per segment &mdash;
+    see <a href="gene-unicorn-horn.html#deferred">the unicorn horn's coding tab</a>
+    on <code>PartModel.Slice</code>.
+</p>
+
+<h2 id="epigenetics">The numbers on each copy</h2>
+
+<table class="data">
+    <thead><tr><th>Value</th><th>Range</th><th>Does</th></tr></thead>
+    <tbody>
+        <tr><td><code>hue</code></td><td>&minus;1..1</td><td>Up to about 9&deg; round the hue circle</td></tr>
+        <tr><td><code>tone</code></td><td>&minus;1..1</td><td>Saturation and value &plusmn;10%; white, black and grey move &plusmn;4% in value only</td></tr>
+        <tr><td><code>chaos_r/g/b</code></td><td>bright colour</td><td>The whole colour of a chaos copy, which ignores the two above</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Both copies are read, one each, through <code>GeneEpigenetics.copy(slot)</code>
+    &mdash; the codominant pattern &mdash; not the expressed copy, which would count one
+    allele twice.
+</p>
+
+<h2 id="founders">Founders</h2>
+
+<p>
+    Hardy&ndash;Weinberg over the allele frequencies in the class, with white inserted
+    last so the table ends on <code>Wht/Wht</code> &mdash; every founder table ends on
+    its plain combination, which <code>GenotypeTest</code> holds every gene to.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-horses">There is no real locus here</h2>
+
+<p>
+    Unicorns are not real, so neither is this. What is worth saying is why the colours
+    are codominant rather than on a dominance ladder, which was the owner's choice
+    between three options. A ladder hides the second colour a horse carries, and a
+    blend turns most pairs of rainbow colours into brown. Codominance with a
+    two-tone horn keeps both alleles on show, so the horn is also the genotype, and it
+    makes a breeding goal of every pair: a violet horn tipped gold is something you
+    plan for across generations.
+</p>
+
+<p>
+    The small per-copy shade drift is the mod's premise applied to a colour gene: the
+    alleles are the categories, and the epigenome keeps any two horses in a category
+    from being identical.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No coloured horn has been seen in a running game: the colours, the two-tone fade and the per-segment draw it needs are unit-tested and compiled, not watched.</p>
+</div>
+
+<h3 id="open-colour-look">Do the colours read as their names?</h3>
+<p>
+    The tint multiplies a greyscale sheet, so a colour on the horn is darker than the
+    same colour in a swatch. Look at one horn of each colour in daylight and at night:
+    red should read red, not brown; yellow should not look olive; black should still
+    show its grain. Adjust the HSV rows in <code>HornColourGene.HUES</code> if not.
+</p>
+
+<h3 id="open-colour-two-tone">The two-tone fade</h3>
+<p>
+    Check a two-tone horn (<code>Wht/Red</code>, <code>Red/Blu</code>) on a nub and a
+    narwhal: the base colour should hold for the lower part, fade in the middle, and
+    the tip should be the second colour. On a three-segment nub the fade is coarse by
+    construction. Also check a two-tone horn on a fading ridden horse, where every
+    segment's submit has to switch to the translucent render type together.
+</p>
+
+<h3 id="open-colour-cost">Per-segment submits in a herd</h3>
+<p>
+    A two-tone horn costs up to fifteen submits instead of one, doubled if it glows.
+    Two-tone unicorns are rare, but a bred pen of them is not. Measure a pen of twenty
+    against one-colour horns before assuming it is free.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

@@ -348,6 +348,12 @@ public enum GeneFamily {
         // in a different family for a better one: it grows geometry. See
         // MAGIC_PARTS.
         MAGICAL_OVERRIDES.put("horsegenetics.unicorn_horn", MAGIC_PARTS);
+        // And the three loci that finish the horn it grows - its colour, its glow
+        // and its dust. They do nothing to a horse without one, so they belong
+        // beside it rather than with the coat or yield genes their outputs resemble.
+        MAGICAL_OVERRIDES.put("horsegenetics.horn_colour", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.horn_glow", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.horn_dust", MAGIC_PARTS);
 
         // The sex locus paints nothing and is not a disorder. The editors keep
         // it off their lists entirely - the Sex button owns it - but it is a
