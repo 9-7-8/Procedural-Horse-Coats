@@ -43,6 +43,7 @@ wiki/breed-book.html#cold	all	The cold country
 wiki/breed-book.html#desert	all	The dry country
 wiki/breed-book.html#elsewhere	all	The country that is nowhere
 wiki/breed-book.html#entries	all	The breeds
+wiki/breed-book.html#flowers	all	The flowering country
 wiki/breed-book.html#hills	all	The high and windswept country
 wiki/breed-book.html#night	all	The night country
 wiki/breed-book.html#not-native	all	Nothing here is native

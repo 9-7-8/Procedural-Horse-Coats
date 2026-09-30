@@ -9559,6 +9559,158 @@
   ]
 },
 {
+  "id": "unicorn",
+  "name": "Unicorn",
+  "description": "A white horse with a single horn, out of the flowering country. Black underneath the white, which you will only find out by breeding one; the horn comes in any colour, glows in the dark and sheds a fine dust of its own colour, the mane and tail run the whole spectrum, and the hooves shine like lamps. About one in four leaves rainbow dust where it walks. Every one of them would do anything for sugar.",
+  "kind": "magical",
+  "commonness": "rare",
+  "spawn_time": "day",
+  "biomes": [
+    "minecraft:cherry_grove",
+    "minecraft:flower_forest",
+    "minecraft:meadow",
+    "minecraft:sunflower_plains"
+  ],
+  "price": [40, 64],
+  "stats": {
+    "speed": 7,
+    "jump": 7,
+    "health": 6,
+    "size": [0.92, 1.05],
+    "pull": 3
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "ShL/ShL", "weight": 9 },
+      { "pair": "ShL/Sh", "weight": 27 },
+      { "pair": "ShL/ShD", "weight": 15 },
+      { "pair": "Sh/Sh", "weight": 20 },
+      { "pair": "Sh/ShD", "weight": 22 },
+      { "pair": "ShD/ShD", "weight": 7 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W2/N", "weight": 70 },
+      { "pair": "W2/W9", "weight": 30 }
+    ],
+    "horsegenetics.unicorn_horn": [
+      { "pair": "Horn/Horn", "weight": 100 }
+    ],
+    "horsegenetics.horn_colour": [
+      { "pair": "Wht/Wht", "weight": 6.25 },
+      { "pair": "Red/Red", "weight": 6.25 },
+      { "pair": "Org/Org", "weight": 6.25 },
+      { "pair": "Yel/Yel", "weight": 6.25 },
+      { "pair": "Grn/Grn", "weight": 6.25 },
+      { "pair": "Blu/Blu", "weight": 6.25 },
+      { "pair": "Ind/Ind", "weight": 6.25 },
+      { "pair": "Vio/Vio", "weight": 6.25 },
+      { "pair": "Pnk/Pnk", "weight": 6.25 },
+      { "pair": "Blk/Blk", "weight": 6.25 },
+      { "pair": "Gry/Gry", "weight": 6.25 },
+      { "pair": "Cha/Cha", "weight": 6.25 },
+      { "pair": "Wht/Red", "weight": 0.38 },
+      { "pair": "Wht/Org", "weight": 0.38 },
+      { "pair": "Wht/Yel", "weight": 0.38 },
+      { "pair": "Wht/Grn", "weight": 0.38 },
+      { "pair": "Wht/Blu", "weight": 0.38 },
+      { "pair": "Wht/Ind", "weight": 0.38 },
+      { "pair": "Wht/Vio", "weight": 0.38 },
+      { "pair": "Wht/Pnk", "weight": 0.38 },
+      { "pair": "Wht/Blk", "weight": 0.38 },
+      { "pair": "Wht/Gry", "weight": 0.38 },
+      { "pair": "Wht/Cha", "weight": 0.38 },
+      { "pair": "Red/Org", "weight": 0.38 },
+      { "pair": "Red/Yel", "weight": 0.38 },
+      { "pair": "Red/Grn", "weight": 0.38 },
+      { "pair": "Red/Blu", "weight": 0.38 },
+      { "pair": "Red/Ind", "weight": 0.38 },
+      { "pair": "Red/Vio", "weight": 0.38 },
+      { "pair": "Red/Pnk", "weight": 0.38 },
+      { "pair": "Red/Blk", "weight": 0.38 },
+      { "pair": "Red/Gry", "weight": 0.38 },
+      { "pair": "Red/Cha", "weight": 0.38 },
+      { "pair": "Org/Yel", "weight": 0.38 },
+      { "pair": "Org/Grn", "weight": 0.38 },
+      { "pair": "Org/Blu", "weight": 0.38 },
+      { "pair": "Org/Ind", "weight": 0.38 },
+      { "pair": "Org/Vio", "weight": 0.38 },
+      { "pair": "Org/Pnk", "weight": 0.38 },
+      { "pair": "Org/Blk", "weight": 0.38 },
+      { "pair": "Org/Gry", "weight": 0.38 },
+      { "pair": "Org/Cha", "weight": 0.38 },
+      { "pair": "Yel/Grn", "weight": 0.38 },
+      { "pair": "Yel/Blu", "weight": 0.38 },
+      { "pair": "Yel/Ind", "weight": 0.38 },
+      { "pair": "Yel/Vio", "weight": 0.38 },
+      { "pair": "Yel/Pnk", "weight": 0.38 },
+      { "pair": "Yel/Blk", "weight": 0.38 },
+      { "pair": "Yel/Gry", "weight": 0.38 },
+      { "pair": "Yel/Cha", "weight": 0.38 },
+      { "pair": "Grn/Blu", "weight": 0.38 },
+      { "pair": "Grn/Ind", "weight": 0.38 },
+      { "pair": "Grn/Vio", "weight": 0.38 },
+      { "pair": "Grn/Pnk", "weight": 0.38 },
+      { "pair": "Grn/Blk", "weight": 0.38 },
+      { "pair": "Grn/Gry", "weight": 0.38 },
+      { "pair": "Grn/Cha", "weight": 0.38 },
+      { "pair": "Blu/Ind", "weight": 0.38 },
+      { "pair": "Blu/Vio", "weight": 0.38 },
+      { "pair": "Blu/Pnk", "weight": 0.38 },
+      { "pair": "Blu/Blk", "weight": 0.38 },
+      { "pair": "Blu/Gry", "weight": 0.38 },
+      { "pair": "Blu/Cha", "weight": 0.38 },
+      { "pair": "Ind/Vio", "weight": 0.38 },
+      { "pair": "Ind/Pnk", "weight": 0.38 },
+      { "pair": "Ind/Blk", "weight": 0.38 },
+      { "pair": "Ind/Gry", "weight": 0.38 },
+      { "pair": "Ind/Cha", "weight": 0.38 },
+      { "pair": "Vio/Pnk", "weight": 0.38 },
+      { "pair": "Vio/Blk", "weight": 0.38 },
+      { "pair": "Vio/Gry", "weight": 0.38 },
+      { "pair": "Vio/Cha", "weight": 0.38 },
+      { "pair": "Pnk/Blk", "weight": 0.38 },
+      { "pair": "Pnk/Gry", "weight": 0.38 },
+      { "pair": "Pnk/Cha", "weight": 0.38 },
+      { "pair": "Blk/Gry", "weight": 0.38 },
+      { "pair": "Blk/Cha", "weight": 0.38 },
+      { "pair": "Gry/Cha", "weight": 0.38 }
+    ],
+    "horsegenetics.horn_glow": [
+      { "pair": "Glw/Glw", "weight": 100 }
+    ],
+    "horsegenetics.horn_dust": [
+      { "pair": "Dst/Dst", "weight": 100 }
+    ],
+    "horsegenetics.rainbow_dust": [
+      { "pair": "Rbw/Rbw", "weight": 25 },
+      { "pair": "Rbw/n", "weight": 25 },
+      { "pair": "n/n", "weight": 50 }
+    ],
+    "horsegenetics.light": [
+      { "pair": "Lthf/Lthf", "weight": 100 }
+    ],
+    "horsegenetics.prismtail": [
+      { "pair": "Prt/Prt", "weight": 100 }
+    ],
+    "horsegenetics.food_preference": [
+      { "pair": "Sug/Sug", "weight": 100 }
+    ]
+  },
+  "notes": [
+    "BLACK UNDER THE WHITE. Every founder is E/E a/a, a black horse, and every one carries dominant white, so what you see is white. The white is W2 (and W9), because those whiten the whole horse from a single copy; W22 in this mod is a minimal white - a blaze and socks on a black horse - and was tried first and rejected on a render. W2/W2 and W9/W9 do not survive to birth, so the white is held two ways (owner's call, 2026-09-30): 70 in 100 are W2/N, and 30 in 100 carry two different whites, W2/W9, which is viable. Two W2/N unicorns throw a black foal one time in four; a W2/W9 bred to anything throws only white foals.",
+    "The horn is all four horn genes at once: Horn/Horn for the horn, Glw/Glw so it glows, Dst/Dst so it sheds dust, and a random colour. Three in four founders have a solid horn, spread evenly over all twelve colours; one in four is already two-tone, spread evenly over every pair.",
+    "Rainbow dust is the one thing only some of them have: a quarter show it (Rbw/Rbw) and another quarter carry it silently (Rbw/n), so it can be bred up.",
+    "Glowing hooves (Lthf/Lthf), a prismtail mane and tail (Prt/Prt) and a love of sugar (Sug/Sug) are on every founder, homozygous so the breed keeps them.",
+    "Carries neither tolerance locus, so a unicorn is neutral to heat and cold everywhere."
+  ]
+},
+{
   "id": "vyatka",
   "name": "Vyatka",
   "country": "russia",
