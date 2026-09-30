@@ -246,6 +246,34 @@ final class DebugTestYard {
                 List.of("-> TEST YARD", PATH_LEN_Z + " blocks", "every pen runs", "itself - read log"));
 
         verify(level, gy, cx, mouthZ);
+        sprint(level);
+    }
+
+    /**
+     * <b>Run the yard's clocks faster than the wall clock</b> (owner, 2026-09-30: "can't you just speed up
+     * the tick rate, rather than waiting an actual hour?"). Every verdict in the yard counts game ticks,
+     * so a sprint changes when an answer arrives, never what it says. Opt-in through
+     * {@code -PyardSprint=<ticks>} on {@code runClientTestWorld}, so a person visiting the yard is not
+     * dropped into fast-forward. Vanilla's {@code /tick sprint}, which runs ticks back to back with no
+     * sleep between them - so it gains exactly the server's idle time, and a yard of five hundred horses
+     * that already takes most of its fifty milliseconds a tick gains little. The census's ms/tick line is
+     * the reading. UNVERIFIED: that an integrated server honours a sprint the way a dedicated one does.
+     */
+    private static void sprint(ServerLevel level) {
+        String ticks = System.getProperty("horsegenetics.yardSprint");
+        if (ticks == null) {
+            return;
+        }
+        try {
+            int n = Integer.parseInt(ticks.trim());
+            // true means it cut short a sprint already running. Vanilla logs its own "sprint report"
+            // (ticks per second, ms per tick) when the sprint ends - that line is the speed-up, measured.
+            boolean interrupted = level.getServer().tickRateManager().requestGameToSprint(n);
+            ActionTrace.log("test yard", "sprinting " + n + " ticks (" + n / 1200 + " game minutes)"
+                    + (interrupted ? " - replaced a sprint already running" : ""));
+        } catch (NumberFormatException e) {
+            HorseGenetics.LOGGER.warn("[Debug] test yard: horsegenetics.yardSprint is not a tick count: {}", ticks);
+        }
     }
 
     /**

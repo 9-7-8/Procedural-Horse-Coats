@@ -39,6 +39,11 @@ neoForge {
         clientTestWorld {
             client()
             systemProperty 'horsegenetics.autoTestWorld', 'true'
+            // Opt-in sprint for an unattended session: -PyardSprint=72000 runs that many game ticks as
+            // fast as the server can compute them once the yard is built (DebugTestYard.sprint).
+            if (project.hasProperty('yardSprint')) {
+                systemProperty 'horsegenetics.yardSprint', project.property('yardSprint').toString()
+            }
         }
         server {
             server()

@@ -155,12 +155,12 @@ final class DebugYardUnattended {
     /**
      * Gap 222: horses swing every 10 ticks, so a gladiator lands about two blows to a husk's one. Husks, because
      * they do not burn in the yard's daylight. The plain horse is the control: husks ignore horses, so it should
-     * have no {@code [watch] kick} lines at all. Husks are topped back up to two every half day.
+     * have no {@code [watch] kick} lines at all. The husk is replaced every half day.
      */
     private static void kick(ServerLevel level, int gy, int x0, int z0, String name, String code) {
         pen(level, gy, x0, z0, 9, ROW_AA_D, name, Blocks.STONE.defaultBlockState(),
                 List.of(name, code.equals(PLAIN) ? "a plain horse and" : "a monster-hunter and",
-                        "two husks: blows", "every 10 ticks"));
+                        "one husk: blows", "every 10 ticks"));
         // Lidded: at 3/22 Last Stand's bolt jumps any fence (DebugTestYard.lidded).
         DebugTestYard.lidded(level, gy, x0, x0 + 9, z0, z0 + ROW_AA_D);
         horse(level, gy, x0 + 4.5, z0 + 3.5, Sex.MALE, code, true, name);
@@ -174,11 +174,12 @@ final class DebugYardUnattended {
     private static void husks(ServerLevel level, int gy, int x0, int z0, AABB box, String name, int wave) {
         int alive = level.getEntitiesOfClass(net.minecraft.world.entity.monster.Monster.class,
                 box.inflate(0.0, 2.0, 0.0), Mob::isAlive).size();
-        for (int i = alive; i < 2; i++) {
-            animal(level, EntityType.HUSK, gy, x0 + 2.5 + i * 4, z0 + 9.5);
-        }
-        if (alive < 2) {
-            ActionTrace.log("test yard", name + " husk wave " + wave + ": " + (2 - alive) + " husk(s) in");
+        // ONE HUSK, NOT TWO (owner, 2026-09-30). Lidded in, the hunter could no longer bolt, and two husks
+        // killed it once Last Stand's save was spent - ending the pen after eight kicks. Alone against one
+        // it wins, as it did the run before, and every half day's refill is another round of kicks.
+        if (alive < 1) {
+            animal(level, EntityType.HUSK, gy, x0 + 4.5, z0 + 9.5);
+            ActionTrace.log("test yard", name + " husk wave " + wave + ": 1 husk in");
         }
         DebugYardHerd.after(level, 12_000, () -> husks(level, gy, x0, z0, box, name, wave + 1));
     }
