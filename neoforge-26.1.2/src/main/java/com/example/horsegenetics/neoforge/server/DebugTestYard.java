@@ -65,7 +65,7 @@ import java.util.List;
  * without my intervention, and then add in new pens which you can test without
  * me."</i> The yard is now tested by launching the game and reading the log, so
  * every pen in it must start itself and write its own answer; the ones that
- * waited for a person were deleted (see the note above {@link #ROW_J}) and what
+ * waited for a person were deleted and what
  * a pair of hands did for them is done by {@link DebugYardClockwork}'s
  * FakePlayer. A grep for {@code CLOCKWORK} is that half's whole report.
  */
@@ -160,15 +160,6 @@ final class DebugTestYard {
     static final int ROW_AL_D = 16;
 
     /**
-     * <b>Not built.</b> Kept only so {@code DebugYardCombat}, {@code DebugYardHunger} and
-     * {@code DebugYardHands} still compile: every pen in them is answered and none is called from
-     * {@link #build}, and the files are waiting on the owner's go-ahead to delete (2026-09-30).
-     * Delete this block with them. Zero puts nothing anywhere, because nothing reads it.
-     */
-    static final int ROW_J = 0, ROW_J_D = 0, ROW_V = 0, ROW_V_D = 0,
-            ROW_AH = 0, ROW_AH_D = 0, ROW_AI = 0, ROW_AI_D = 0;
-
-    /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
      * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
      * read 110 deep while its rows chained past 150, so the back of it was
@@ -227,14 +218,13 @@ final class DebugTestYard {
         DebugWorldWatch.start(level, new AABB(
                 cx - YARD_HALF_X - 2, gy - 4, ROAD_EDGE_Z,
                 cx + YARD_HALF_X + 2, gy + WALL_TOP_DY + 2, mouthZ + YARD_DEPTH_Z + 2));
-        // And the verdict table, before any row registers a check in it - the infirmary's is
-        // registered by DebugYardCombat, long before the clockwork rows are built.
+        // And the verdict table, before any row registers a check in it.
         DebugYardClockwork.reset();
 
         buildPath(level, gy, cx, mouthZ);
         buildYardFloorAndWalls(level, gy, cx, mouthZ);
-        // In yard order. DebugYardCombat, DebugYardHerd's pens, DebugYardHunger and DebugYardHands are not
-        // called: every question they asked is answered (2026-09-30). So are the dryad and stat pens that
+        // In yard order. The combat, hunger and hands pens and DebugYardHerd's own were deleted with
+        // their classes once every question they asked was answered (2026-09-30). So are the dryad and stat pens that
         // stood in rows A and F, and every clockwork pen - DebugYardClockwork keeps its fake-player hands
         // and verdict lines for the next check that wants them, and builds nothing.
         // Row O: breeding scenarios, each pen logging its horses' breeding state to the watch.
@@ -555,19 +545,6 @@ final class DebugTestYard {
     }
 
     /**
-     * <b>A base coat pale enough to show a dark mark AND a white one.</b>
-     *
-     * <p>A stocked horse names only the locus under test and every other locus
-     * falls to its default, which is a <b>black</b> horse - and on a black
-     * horse a dark marking simply is not there. The owner hit this on
-     * 2026-09-11 with a barred wing and a nightbell foxglove, both of which
-     * "vanished". Chestnut with one cream copy is pale gold, which a black mark
-     * and a white mark both stand out on, and it is the same base the test
-     * kit's own intake eggs use.
-     */
-    static final String PALE = "horsegenetics.extension=e/e-horsegenetics.matp=Cr/N";
-
-    /**
      * <b>Put carriers of one gene where its test happens, tamed.</b>
      *
      * <p>A test whose first step is "find the right spawn egg" is a test that
@@ -603,7 +580,9 @@ final class DebugTestYard {
     /**
      * The same, on a named base coat - {@code base} is a genotype fragment
      * appended to this locus's, for a marking that would be invisible on the
-     * default black horse. See {@link #PALE}.
+     * default black horse - which is where a dark marking vanishes (the owner, 2026-09-11: a barred
+     * wing and a nightbell foxglove); chestnut with one cream copy,
+     * {@code horsegenetics.extension=e/e-horsegenetics.matp=Cr/N}, shows both dark and white marks.
      */
     static void stock(ServerLevel level, int gy, double x, double z, String key,
                               String what, int mares, int studs, String tokens, String base) {

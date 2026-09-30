@@ -42,7 +42,7 @@ import java.util.UUID;
  * too, and it must not read as a pass by being absent.
  *
  * <h2>The hands</h2>
- * {@link DebugYardHands} already fed the sheep spawner with a NeoForge {@link FakePlayer}. {@link Hands} is the same
+ * The old sheep-spawner pens (DebugYardHands, deleted 2026-09-30) fed wheat with a NeoForge {@link FakePlayer}. {@link Hands} is the same
  * thing with one addition that makes the rest of this file possible: <b>it keeps what it is told.</b> A stock
  * FakePlayer drops every system message, and for the milk refusals, the diets and the seed jar <i>the message is the
  * evidence</i> - a refusal that says nothing and a gene that never fired both leave a bottle in the hand. Each use gets
