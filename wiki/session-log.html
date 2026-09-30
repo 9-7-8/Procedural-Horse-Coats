@@ -21,6 +21,23 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-09-29-cut-0-5-034.txt">2026-09-29, second cut of the day
+        &mdash; <strong>the 0.5.034 cut</strong>. 59 commits since v0.5.033, and 59 is not
+        the size of the release &mdash; one of them carries a thousand-file texture pack and
+        a good share of the rest are intake treatments with no code in them. What ships is
+        two finished plans: <a href="rider-comfort.html">rider comfort</a> all five pieces
+        and <a href="item-whistles.html">the whistles</a> all four, both of whose Roadmap
+        tabs were deleted in the range, plus the art session and the braid bug. Nothing here
+        takes a capability away from a player, so unlike 0.5.033 there was no rule change to
+        lead with; <a href="releases.html#v0-5-034">the note</a> leads instead with the two
+        things to distrust &mdash; the fade, which is on by default and which nobody has
+        looked at, and the leash mixin, which sits on the method every dropped item in the
+        game passes through. Jar verified to declare 0.5.034 and to carry every new class; 22
+        gametests, <code>runServer</code> to <code>Done</code> with zero ERROR lines, and
+        <code>debug.log</code> read to confirm both leash mixins applied. The owner&rsquo;s
+        live server was running on the same box the whole time and was identified by its
+        session lock <em>before</em> anything was built, so the dev server could be killed by
+        pid rather than by name.</li>
     <li><a href="session-log/d2026-09-29-the-fade-and-a-braid-that-never-drew.txt">2026-09-29
         &mdash; <strong>the fade, and a braid that had never been drawn</strong>. Rider
         comfort piece 5, the last of the five: the horse you are riding goes see-through as

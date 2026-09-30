@@ -1,0 +1,84 @@
+2026-09-29 — the 0.5.034 cut
+
+
+    Short. Seven sessions above shipped since the last tag; this is the
+    release. Second cut of the same day, which is why the range audit matters
+    more than usual - 0.5.033 went out at 12:21 and this one at 22:00.
+
+    RANGE AUDIT. v0.5.033..HEAD is 59 commits, and 59 is not the size of the
+    release. One commit carries over a thousand files on its own (the CC0
+    texture pack under intake/potential-assets/), and a large share of the rest
+    are intake treatments, scoping notes and session-log entries with no code
+    in them. What actually ships is:
+
+        rider comfort, all five pieces - mounted mining, the ALT+E inventory
+        key, right-click to equip tack, the snapped lead, and the fade
+        whistles, all four pieces - the bond gate on binding, near horses
+        walking in instead of teleporting, one key for every whistle, and a
+        glint on a bound one
+        the art session - five posts drawn apart, three blocks that had worn
+        vanilla furniture, the gold crop, three stall signs, three licensed
+        Raven icons
+        one real bug, found sideways: the rescuing braid had never been drawn
+
+    TWO ROADMAPS EMPTIED. Both rider-comfort.html and item-whistles.html had
+    their Roadmap tabs deleted in this range, so both left roadmap.html by
+    themselves. That is the clean version of "what shipped" for this note: not
+    a list of commits, but two plans that are finished.
+
+    HOW THE NOTE IS LED. Unlike 0.5.033 there is no rule change here - nothing
+    in this release takes a capability away from a player, so there was no
+    warning of that shape to lead with. The two things that do want saying
+    first are both about risk rather than about rules:
+
+      - The fade is on by default and NOBODY HAS SEEN IT. It is the only
+        deliverable in the release whose correctness is a matter of looking,
+        and the standing instruction on it is to report rather than patch
+        round. So the note asks for that in as many words, names the switch,
+        and names the two fallbacks already agreed.
+      - LeashDropMixin sits on Entity.spawnAtLocation, which every dropped
+        item in the game passes through. The guard is one identity comparison,
+        but the symptom of it being wrong is items vanishing nowhere near a
+        horse - which nobody would think to report as a horse bug. The note
+        says that plainly and names behaviour.leads_return as the first thing
+        to try.
+
+    That is a different shape of first block from last time and deliberately
+    so: last time the reader needed to know a rule had changed under them,
+    this time they need to know which two things to distrust.
+
+    THE BRAID GOT ITS OWN SECTION. A bug fix usually does not, but this one is
+    the only item in the release that is retroactive in the other direction:
+    anybody who has ever crafted a rescuing braid has been wearing an invisible
+    one. It is also the sharpest example of why the Verification tabs exist, so
+    it is written as "check the thing you believe you already saw".
+
+    PRE-TAG CHECKS. Version bumped in gradle.properties only. Jar verified
+    rather than assumed - it declares 0.5.034 and carries every new class
+    (RiderFade, all three new mixins, TackEquipHandler, MountedMiningHandler,
+    WhistleCalls, WhistleCallGoal, both keybinding pairs, WhistleSelection out
+    of common/). Build green, creator parity green (7163 checks across 60
+    cases). All 22 gametests pass in 32.98 s with no ERROR line in the run.
+    runServer on the release build to Done (0.349s), zero ERROR lines, and
+    debug.log confirms LeashDropMixin into Entity and LeashPlacerMixin into Mob
+    with no injection failure - which with defaultRequire at 1 is the
+    guarantee. FadingGearMixin is in the config's "client" block and therefore
+    correctly never loads on a dedicated server; the fade session had already
+    confirmed it applies in a real client boot.
+
+    Ran runServer at all because this release adds five config options and
+    three mixins, which is exactly the shape of change that crashes at mod load
+    and nowhere else.
+
+    THE LIVE SERVER WAS RUNNING THROUGHOUT AND WAS NOT TOUCHED. The java
+    process on this box at cut time was ~/26.1.2-neoforge-server, not ours -
+    identified by its world/session.lock and its nogui command line before
+    anything was built, so that the dev server's JVM could be killed at the end
+    by pid without going near it. Worth writing down because "kill every java"
+    at the end of a session would have dropped somebody's players.
+
+    gh release create with the jar attached. A pushed tag is not a release.
+
+    STILL UNPLAYED. All of it. Two keybinds, a new listener on the busiest
+    right-click in the mod, three mixins and a visual feature - none of which a
+    headless test can see. The fade is first in the queue for eyes.
