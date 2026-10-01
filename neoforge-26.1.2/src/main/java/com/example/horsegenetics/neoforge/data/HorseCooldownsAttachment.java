@@ -21,8 +21,8 @@ import java.util.Map;
  * in the translator, so it did not survive a restart and no one could inspect
  * it (roadmap &sect;7).
  *
- * <p>{@code copyOnDeath} so a re-summoned horse keeps its cooldowns. Dev only:
- * no legacy handling.
+ * <p>{@code copyOnDeath} so a re-summoned horse keeps its cooldowns. Saved: a
+ * format change needs a migration (CLAUDE.md hard rule 10).
  */
 public record HorseCooldownsAttachment(Map<String, Long> lastByKey) {
 

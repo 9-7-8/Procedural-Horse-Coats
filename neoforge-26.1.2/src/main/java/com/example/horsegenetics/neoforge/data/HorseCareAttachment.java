@@ -30,7 +30,8 @@ import java.util.UUID;
  * </ul>
  *
  * <p>Synced to the client (bond + in-herd flag only) via
- * {@code HorseCareSyncPayload}. Dev only: no legacy handling.
+ * {@code HorseCareSyncPayload}. Saved: a format change needs a migration
+ * (CLAUDE.md hard rule 10).
  */
 public record HorseCareAttachment(
         int bond,

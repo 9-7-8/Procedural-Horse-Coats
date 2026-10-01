@@ -27,7 +27,8 @@ import java.util.Objects;
  * epigenome only.
  *
  * <p>Validated on construction: both codes must parse under the current
- * {@link Genes} registry. Dev only - no legacy-format handling.
+ * {@link Genes} registry. Both codes are saved: a change to either format
+ * needs a migration (CLAUDE.md hard rule 10).
  */
 public record GenomeSample(String genotypeCode, String epigenomeCode) {
 

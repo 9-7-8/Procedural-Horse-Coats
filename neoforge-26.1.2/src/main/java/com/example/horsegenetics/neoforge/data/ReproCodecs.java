@@ -17,7 +17,7 @@ import java.util.List;
  * the client is told what it needs in words, through the social summary, and
  * never sees an embryo's genome.
  *
- * <p>Dev only: no legacy handling.
+ * <p>Saved: a format change needs a migration (CLAUDE.md hard rule 10).
  */
 public final class ReproCodecs {
 

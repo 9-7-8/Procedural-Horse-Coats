@@ -1149,10 +1149,12 @@
 </p>
 
 <p class="note">
-    <strong>Adding or removing a gene changes the genotype code's shape</strong>, so
-    horses saved before the change will not load. That is expected while the mod has no
-    save compatibility (the standing "no legacy code" rule) &mdash; but it is the one
-    thing to know before adding a gene to a world you care about.
+    <strong>Adding or removing a gene changes the genotype code's shape</strong>, and
+    saves must keep loading across it (the <a href="releases.html#saves">save rule</a>).
+    Adding is safe: codes are keyed by gene, so a horse saved before reads as wild type
+    at the new locus. Removing drops that locus from every horse that carried it, so
+    inside a <code>0.X</code> series a gene is parked or its alleles retired to a
+    fallback (as <code>Clv</code> and <code>Xpl</code> were), never deleted outright.
 </p>
 
 </section>

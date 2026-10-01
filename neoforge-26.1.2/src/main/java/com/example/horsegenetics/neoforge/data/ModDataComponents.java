@@ -80,8 +80,8 @@ public final class ModDataComponents {
      * <p>It keeps the registry id {@code research_gene} it had when it was a bare
      * gene-key {@code String}, because renaming it would drop the component off
      * every paper already in the owner's world and leave blanks. A stored string
-     * still decodes - see {@link ResearchTopicCodecs}, which is where the one
-     * deliberate exception to the no-back-compat rule is written down.
+     * still decodes - see {@link ResearchTopicCodecs}, which is where that
+     * fallback is written down.
      */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<
             com.example.horsegenetics.common.genetics.ResearchTopic>> RESEARCH_TOPIC =

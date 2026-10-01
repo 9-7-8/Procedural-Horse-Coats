@@ -33,7 +33,8 @@ import java.util.List;
  *
  * <p>These four <b>replace</b> a single {@code horsegenetics:horseman}. There is
  * no transitional profession and no alias: a villager who held the old job in an
- * existing world comes back unemployed, which is hard rule 6 working as intended.
+ * existing world comes back unemployed. That shipped before CLAUDE.md hard
+ * rule 10; under it, replacing a profession would need a migration.
  *
  * <p>Unlike the {@code Cowboy}, all four <i>want</i> vanilla's brain: they are
  * shopkeepers who should walk to a workstation in the morning, restock at it,

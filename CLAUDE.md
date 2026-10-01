@@ -148,6 +148,9 @@ file under `wiki/session-log/` from its index; those files are not baked.
    `bake-roadmap-index.mjs` collects them, nothing is hand-written there either, and **a
    plan whose subject has no page means writing the page** - Roadmap tab only, growing the
    others as it ships. `wiki/horse-gear.html` is the worked example. (Owner.)
+10. **Saves keep loading.** A world from any release since the baseline on `wiki/releases.html#saves`
+   loads in every later one of its `0.X` series: a change to anything saved brings its migration.
+   Only a middle-number bump (`0.X.0`, owner's word only) may break saves, and its notes say so.
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four
 or five files each and drifts silently if you miss one** - the four lists are
 on `wiki/making-a-gene.html#contracts`, read it before you start, not after.
@@ -238,9 +241,6 @@ mod.
 
 ---
 ## Status
-Pointers only - the numbers live in the code, the detail on a page.
-- **`common/`** compiles, the suite is green, **`neoforge-26.1.2/`** assembles,
-  **`runServer`** boots clean, **creator parity** green. Confirm, don't trust.
 - **What has actually been seen in-game is a small fraction of what is built.**
   `wiki/verification.html` is the authority on which is which - read it first.
 

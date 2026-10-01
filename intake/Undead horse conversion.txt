@@ -41,12 +41,12 @@ rider, or the horse itself.
       vanilla undead horses go back to behaving as vanilla ones.
 
 
-2. Back-compat is now a requirement, and rule 6 is gone
-=======================================================
-CLAUDE.md hard rule 6 ("no legacy or back-compat code, no saves worth keeping")
-was removed by the owner once the mod went to a tester. From now on a change
-that would break an existing world needs a migration path, and this feature is
-the first one planned under that rule.
+2. Back-compat is a requirement (CLAUDE.md hard rule 10)
+========================================================
+A world saved under any release since the baseline on wiki/releases.html#saves
+must keep loading in every later release of its 0.X series, so a change that
+would break an existing world needs a migration path. This feature is the first
+large one planned under that rule.
   - The converter is a PERMANENT adapter, not a one-shot migration: its input,
     a vanilla zombie_horse or skeleton_horse, never stops arriving (spawn eggs,
     /summon, skeleton traps, other mods, old saves). It is the same kind of
@@ -57,8 +57,8 @@ the first one planned under that rule.
     two new loci. The epigenome fill for a missing gene is the existing
     "record.hasGenome()" path in ensureExistingRecordResolved. Verify both with
     a test that parses a code saved before the genes existed.
-  - Two things to check for other back-compat surfaces the new genes touch, as
-    they are exactly what rule 6 used to excuse: the designer's genes.json and
+  - Two things to check for other back-compat surfaces the new genes touch: the
+    designer's genes.json and
     any saved designer/breed-designer files, and every checked-in genotype code
     in tests and fixtures (they should still parse unchanged).
 
@@ -881,8 +881,8 @@ painted as a skeleton is closed (Appendix C).
 7. Shipping the converter before the genes look right. Conversion is on by
    default (D2), so there is no gate to hide behind: the stage order is the
    only mitigation. Do not release stage 3 without 1 and 2 seen in-game.
-8. A back-compat rule with no precedent yet. This is the first feature planned
-   under the new rule; the genotype path is safe by construction (section 2),
+8. A back-compat rule with little precedent yet. This is the first large feature
+   planned under hard rule 10; the genotype path is safe by construction (section 2),
    but the tester's world is the real test, so read latest.log after the first
    load rather than asking.
 
@@ -1599,7 +1599,6 @@ E. Documentation debt (nothing has been written to the wiki yet)
   wiki/undead-horses.html: a Roadmap tab for the plan, a Verification tab for
   sections B and C above, decisions on the Coding tab, and the two breeds as
   breed-book entries, then the index bakes. The philosophy.html live-test
-  paragraph must be rewritten (the breed sets the bundle) and README.md's line
-  that there is no back-compat layer will be wrong once this ships. The bone diet
+  paragraph must be rewritten (the breed sets the bundle). The bone diet
   allele, the Bne and Rot drop alleles, the BLACK iris row and the new
   OFFERINGS entries are all one gene-page and census update each.

@@ -235,8 +235,13 @@ G. Config
 H. Saves and permanence
    - What is saved, where, and is it bounded?
    - What happens to an existing world on update, and on removal of the mod?
-   - Does it need a migration, or is it acceptable for old saves to lose or reset
-     something? Ask; never decide this silently.
+   - Saves keep loading (CLAUDE.md hard rule 10): a world saved under any release
+     since the baseline on wiki/releases.html#saves must load in every later
+     release of its 0.X series. Name every saved thing the feature changes (codes,
+     allele order, registry ids, attachments, components, structures) and the
+     migration for each. If one truly cannot be written, say so as an Open line for
+     the owner: the alternatives are a named, minimal loss, or holding the feature
+     for a middle-number release.
 
 I. Multiplayer and networking
    - Ownership: who may use it on someone else's horse?
@@ -264,7 +269,9 @@ M. Release - always asked
      number goes up, tag, jar on a GitHub release.
    - Rides the next release: it is built and pushed, but no release is cut for it.
    - A bigger bump: the middle number moves. This is the owner's call only, and it
-     never happens without her saying so explicitly.
+     never happens without her saying so explicitly. It is also the only kind of
+     release that may break saves, and its notes are stamped "no longer back
+     compatible with saves created under 0.X".
    Also ask whether it applies when each piece ships or only when the last one does.
 
 

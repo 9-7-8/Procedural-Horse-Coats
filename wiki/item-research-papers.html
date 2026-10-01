@@ -169,12 +169,12 @@
 </p>
 
 <div class="note">
-    <span class="label">The one piece of back-compat in this repo</span>
+    <span class="label">The first piece of back-compat in this repo</span>
     <p>
         <code>research_gene</code> used to be a bare <code>String</code> gene key, and there
-        are papers in chests, shelves and villager windows holding one. CLAUDE.md hard rule 6
-        refuses legacy shapes outright; <strong>this is the deliberate exception, asked for by
-        name</strong>. A stored string still decodes, through
+        are papers in chests, shelves and villager windows holding one. <strong>It was asked
+        for by name</strong>, before the <a href="releases.html#saves">save rule</a> made
+        keeping saves the norm. A stored string still decodes, through
         <code>ResearchTopic.wholeGene</code>, as the <strong>homozygous non-wild pair</strong>
         for that gene &mdash; the strongest thing a whole-gene paper could have meant. It falls
         back to the carrier pair on a locus whose homozygote the gene forbids, because a paper

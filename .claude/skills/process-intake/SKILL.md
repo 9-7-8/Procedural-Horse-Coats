@@ -111,7 +111,9 @@ made without the owner", and on `wiki/decisions.html` when it is a design call.
   26.1.2 sources or a gametest first. A treatment may cite an API or a past case that
   does not exist, so grep for each one before writing code against it.
 - Read the owning wiki page in `wiki/text/`, then only the classes the treatment names.
-- `common/` first, the NeoForge module thin, hard rules 1-9 as always. If it touches the
+- `common/` first, the NeoForge module thin, hard rules 1-10 as always. Rule 10 is the
+  one a feature breaks without noticing: anything saved that the unit changes ships
+  with its migration, and a test that loads the old shape. If it touches the
   spawn-egg screen or the designer, change both (rule 5).
 - Tests by name only (`--tests '*XTest'`), never the full suite. Break the new test on
   purpose once, to prove it can fail.

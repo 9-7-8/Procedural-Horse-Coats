@@ -250,10 +250,13 @@
     something has parsed a code invalidates it.
 </p>
 <p>
-    A gene added or removed changes the code string, and this mod keeps <strong>no
-    back-compatibility</strong> for that &mdash; adding or removing a gene means existing
-    horses regenerate their coats, and a saved code with a different segment count will
-    not parse. Adding a gene mod mid-world is therefore a fresh-world operation for now.
+    A gene added or removed changes the code string, and saves still load: codes are
+    keyed by gene, so a horse saved before a gene was added reads as wild type at that
+    locus and its coat regenerates, and a segment naming a gene that is no longer
+    registered is dropped. Removing a gene mod mid-world therefore loses that locus
+    from every horse that carried it &mdash; it loads, but the
+    <a href="releases.html#saves">save rule</a> asks for that to be avoided inside a
+    <code>0.X</code> series.
 </p>
 
 <h2 id="generated">The other direction: we read your other mods and build for them</h2>
@@ -887,8 +890,9 @@
         outright and the other is disabled &mdash; not an average.</li>
     <li><strong>Mapping their hundred-plus coats onto genotypes</strong>, if the patch
         wants to preserve existing horses. That is a content project, not a code one, and
-        probably should not be attempted: a fresh world is the cheaper answer and matches
-        this mod&rsquo;s <a href="#third-party-genes">no-back-compatibility rule</a>.</li>
+        probably should not be attempted: a fresh world is the cheaper answer. (The
+        mod&rsquo;s own <a href="releases.html#saves">save rule</a> covers its own formats,
+        not another mod&rsquo;s genes.)</li>
 </ol>
 <div class="note warn">
     <span class="label">Version reality</span>

@@ -28,8 +28,9 @@ import java.util.UUID;
  * saved row - a birth becomes a death and nothing complains. Names cost a few
  * bytes in a file that holds at most a couple of hundred rows per player.
  *
- * <p>An unrecognised name is a hard error rather than a quiet default. There is
- * no back-compat path in this repo, so the only way to read one is a genuine
+ * <p>An unrecognised name is a hard error rather than a quiet default. Names are
+ * only ever added - renaming or removing one needs a migration here first
+ * (CLAUDE.md hard rule 10) - so the only way to read an unknown one is a genuine
  * corruption, and a log that turns an unreadable row into a plausible one is
  * worse than a log that says it could not read it.
  */

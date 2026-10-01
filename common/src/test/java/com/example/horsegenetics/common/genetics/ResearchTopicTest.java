@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>{@code A/a} and {@code a/A} are <b>one</b> paper, or the research shelf
  *       files two rows for the same knowledge and the player cannot tell why;</li>
  *   <li>a paper written before the change (a bare gene key) still resolves - the
- *       one piece of deliberate back-compat in the repo;</li>
+ *       first piece of deliberate back-compat in the repo;</li>
  *   <li>every pair a chest or a villager can hand out actually <b>crafts</b>, so
  *       no source produces a paper that makes an inert carrot.</li>
  * </ul>
@@ -79,7 +79,7 @@ class ResearchTopicTest {
     }
 
     // ------------------------------------------------------------------
-    // The one piece of back-compat in the repo
+    // The first piece of back-compat in the repo
     // ------------------------------------------------------------------
 
     /**

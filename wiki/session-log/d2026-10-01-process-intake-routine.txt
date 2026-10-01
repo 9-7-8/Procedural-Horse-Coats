@@ -49,3 +49,29 @@ Part 1 is written to the AI: ask every design call with the question tool as opt
 keep asking follow-ups, read the code before describing it, and mark what it has not
 read as UNVERIFIED. Each treatment now carries a Release line, and /process-intake
 cuts a patch release, cuts none, or asks, according to that line.
+
+Then the save rule changed. Owner: "remove the no back compat rule from everywhere it
+appears, and now specify that we should try to make everything back compatible as of
+whatever the current release version is. We only stamp 'no longer back compat with saves
+created under this version' when we increase the second number (0.X.0), not the third."
+
+    New CLAUDE.md hard rule 10, and wiki/releases.html#saves: a world saved under 0.5.037
+    (the current release) or any later 0.5 release loads in every later 0.5 release, and
+    every change to something saved brings its migration. Only an owner-approved
+    middle-number release may break saves, and its notes carry the stamp. The README says
+    the same to players. The Status section's "suite is green" bullet went, which kept
+    CLAUDE.md at 300 lines; it was a stale-prone claim anyway.
+
+    The old rule came out of 15 code comments, 7 wiki pages, the undead treatment, the
+    intake guide and two memories. ResearchTopicCodecs and HorseRealmLift had been
+    "the one exception"; they are now just the first back-compat code, written before
+    the rule. The dated release notes and session-log entries were left as written.
+
+    Found on the way: compatibility.html and making-a-gene.html said a save with a gene
+    added or removed would not load. That has been false since codes became gene-keyed
+    on 2026-09-03. An added gene reads as wild type, and a removed one drops that locus.
+    Both pages now say so. Rule 10 makes removing a gene inside a series a thing to
+    avoid: park it, or retire its alleles to a fallback, as Clv and Xpl were.
+
+    Comments only in Java: :common and :neoforge compile green. The designer was not
+    rebaked, since no code moved.
