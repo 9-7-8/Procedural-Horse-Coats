@@ -11,7 +11,7 @@ What already exists, so the building session does not redo it
 ==============================================================
 - client/HorseStasisBankScreen (an AbstractContainerScreen over
   menu/HorseStasisBankMenu): three tabs - Chambers (a chest of chamber items),
-  Browse (every stored horse as a row, filtered by a text box) and a third.
+  Browse (every stored horse as a row, filtered by a text box) and Supply (feed, water and drops).
   Tabs are HorseStasisBankMenu.Tab; applyTab() switches them.
 - The Browse filter box is an EditBox plus a "▾" Button (savedSearchButton, 16 px,
   taken out of the box's well) that opens SavedSearchPicker. The picker is shared
@@ -78,8 +78,8 @@ chamber is Basic, so a horse in a Basic bottle is easy to pull out of the bank.
   but its name is shown. Update to say its name is searchable and nothing else is.
 - Tests: StasisBrowseRow unit tests - a plain name finds a Basic row; the same name
   plus "mare" does not; a negated name excludes it; an Intermediate row is unaffected;
-  locked() agrees in each case. Check whether a StasisBrowseRowTest already exists and
-  extend it rather than adding a second one.
+  locked() agrees in each case. Extend the existing StasisBrowseTest (common/.../horse)
+  rather than adding a second test class.
 
 Piece 3 - eject all empty chambers
 ===================================
