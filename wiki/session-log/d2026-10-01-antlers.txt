@@ -101,3 +101,15 @@ Later again - ram horns, the Mirrorgazer and the Not A Sheep
     Nether-only horse burns otherwise); shape dominance order; Not A Sheep's mapping - white =
     double cream, moorit = chestnut, grey = roan, pied = tobiano, mouflon = pangare (Suffolk face
     and badger-face left out: no natural gene); its weights, biomes, stats and 'uncommon'.
+
+Released and wrapped
+
+    0.5.037 cut on the owner's word: gametest boot 22/22 with no ERROR lines (one pre-existing
+    stasis_chamber recipe-book WARN), tag v0.5.037 on 2920e1c5, jar built from that clean tree and
+    attached to the GitHub release; the note is on wiki/releases.html too. Range audited from
+    v0.5.036: the test-yard commits are dev-only (debug.tools), so the player-facing list is
+    antlers, ram horns, MltH, the four breeds and the natural-covers path fix.
+
+    Pick up first: look at an antlered and a ram-horned horse in game - gene-antlers.html and
+    gene-ram-horns.html Verification tabs. Placement is computed from the model's boxes, and the
+    massive sizes and the four-horned lower horn are the likeliest to need moving.
