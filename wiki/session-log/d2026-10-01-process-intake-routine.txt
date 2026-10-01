@@ -163,3 +163,24 @@ Then three more procedures.
   Then one question round, then the full release set, then the cut. end-session's
   summary now says whether a release looks due.
 Eight more memories became pointers.
+
+Then the version rule changed. Owner: "For releases, you can always increase the third
+number, and we should do that whenever we either fix a bunch of bugs or add a new
+feature. Changing the second number should only happen with a substantial new feature
+that would break back-compat: the second number is a compatibility indicator."
+
+The version is now 0.<compat>.<patch>.
+- A patch release is cut without asking whenever main holds a bunch of fixes or a new
+  feature. A crash or stuck-player fix on a released jar goes at once, on its own.
+- The compat number is the save-break marker. It moves only for a substantial feature
+  that cannot keep saves loading, and the release procedure confirms that one with the
+  owner before cutting.
+This is written in:
+- release.txt (its decision steps);
+- process-intake, add-a-gene, fix-bug and end-session (patch releases are cut, not
+  offered);
+- write-intake-document's question M (now: one release per piece or only the last, and
+  whether it can keep saves loading);
+- CLAUDE.md hard rule 10;
+- the numbering and saves notes on releases.html. The old 2026-09-10 rule is kept there
+  as history.

@@ -3,24 +3,28 @@ COMMAND    : /release
 SAY        : "ship a release", "cut a release", "push a release", "release it",
              "new version", "tag it", "is it worth a release"
 RUNS       : local only (the jar cannot build in the cloud sandbox)
-TAKES      : main with player-facing work since the last tag
-LEAVES     : the owner's decision recorded; if yes, every code test green, a tag, a
-             GitHub release with the jar, and the same note on wiki/releases.html
+TAKES      : main with bug fixes or a new feature since the last tag
+LEAVES     : every code test green, a tag, a GitHub release with the jar, and the same
+             note on wiki/releases.html
 ==============================================================================
 
 WHEN TO USE
 -----------
 Use this in three cases:
 - when the owner asks for a release;
-- when another procedure reaches its release step: process-intake with a Release: line,
-  fix-bug after a crash fix, or end-session's summary;
-- when a session ends with work on main that the history says is worth one.
+- when another procedure reaches its release step: process-intake, fix-bug, or
+  end-session's summary;
+- whenever main holds a bunch of bug fixes or a new feature that are not released yet.
 Real players install these jars: testers, and the owner's server. They cannot rebuild
 from source or read the session log, so "builds green here" is not "playable there".
-CLAUDE OFFERS, THE OWNER DECIDES. The only release that is not offered first is one
-the owner has already asked for. A scheduled self-releasing job was tried once and
-retired by the owner: releases are cut by hand, with a jar and a server boot behind
-them.
+THE VERSION IS 0.<COMPAT>.<PATCH> (owner, 2026-10-01):
+- PATCH, the third number: a session may ALWAYS bump it, without asking. Do it whenever
+  main holds a bunch of bug fixes or a new feature.
+- COMPAT, the second number: a compatibility indicator. It moves only for a substantial
+  new feature that cannot be made back-compatible with saves (CLAUDE.md hard rule 10).
+  A release that moves it is the only kind that may break saves.
+Releases are cut by hand, in a local session, with a jar and a server boot behind them.
+A scheduled self-releasing job was tried once and retired by the owner.
 
 BEFORE YOU START
 ----------------
@@ -34,39 +38,30 @@ BEFORE YOU START
 
 STEPS
 -----
-1. Decide whether a release is due. The owner's record from 0.5.000 on, as a guide:
-   - SHIP NOW, and offer it the moment it is fixed: a crash, a join-blocker, lost data,
-     or a stuck player on a RELEASED jar, from a tester or the owner's server. Fixes like
-     these have gone out within 20 to 80 minutes of the report, one after another,
-     because players are waiting. A replacement for a broken release also goes now, and
-     its note says "replaces <version>".
-   - OFFER AT THE END OF THE SESSION: a finished feature a player will notice. One
-     feature is enough for its own number; size is no bar (one release was a folder
-     move). The same goes for a batch of fixes from play.
-   - OFFER AFTER A QUIET STRETCH: when several sessions or days of player-facing work
-     sit on main untagged. Those stretches have ended in one large catch-up release.
-   - DO NOT OFFER for these alone: docs, intake planning, test-yard or debug-only work
-     (debug tools are off in a real jar), or an unfinished feature. They ride along with
-     the next release.
-   - EXPECT TO BATCH. The owner often holds a cut to add one more thing ("before you cut
-     a new version, can you implement X too?"). A declined offer is normal; it is not a
-     failure.
-   Releases have run at about two a day, in bursts around play and tester activity. Do
-   not cut one just because time has passed.
+1. Decide whether a release is due. Cut one, without asking, when main holds:
+   - A NEW FEATURE, finished, that a player will notice. One is enough; size is no bar.
+   - A BUNCH OF BUG FIXES. One fix is enough when it is a crash, a join-blocker, lost
+     data or a stuck player on a released jar: players are waiting on those, and they
+     have gone out within the hour of the report. A replacement for a broken release
+     goes at once too, and its note says "replaces <version>".
+   Docs, intake planning, test-yard or debug-only work (debug tools are off in a real
+   jar) and unfinished features are NOT a reason on their own. They ride along with the
+   next release.
+   If the owner has said to hold a release ("before you cut, implement X too"), hold it.
+   She often batches one more thing in.
 
-2. Ask the owner, in one question-tool round, with options and a recommendation:
-   a. Cut now, or hold it to batch more? (Offer the queue in intake/ or the open issues
-      that could ride along.)
-   b. Anything on main to hold back or call out?
-   c. Does anything change a world players already have? Under hard rule 10, a patch
-      release must load every world saved since the baseline on
-      wiki/releases.html#saves. A migration has to have been built and tested, never
-      "the note will warn them".
-   d. The middle number: only if she raises it. It moves only on her explicit word. It
-      is also the only kind of release that may break saves, and then its note says "no
-      longer back compatible with saves created under 0.X".
-   e. What the title should lead with, if it is not obvious.
-   If she asked for the release outright, ask only what the history does not answer.
+2. Decide which number moves.
+   a. The patch number, in almost every case.
+   b. The compat number ONLY when a substantial new feature truly cannot keep saves
+      loading. Rule 10 asks for a migration first, so a compat bump means the migration
+      was tried and cannot be written. Confirm with the owner in one question before
+      cutting: it breaks every existing world on every server. Then the note leads with
+      "no longer back compatible with saves created under 0.<old>", and the new series
+      starts its own promise on wiki/releases.html#saves.
+   c. Any change to a world players already have, in a patch release, must be a built and
+      tested migration, never "the note will warn them".
+   Ask the owner only what the history and this procedure do not answer, such as a
+   title she may want to lead with. Say in the summary what was cut, and why it was due.
 
 3. Run the RELEASE SET from test-tiers: every code test, cheapest first, and stop at the
    first red. That means every tier-0 node check, the full :common:test suite,
@@ -77,8 +72,9 @@ STEPS
    Ask what a PLAYER hits that this machine does not: a brand-new world, a survival
    inventory, a horse in view, a client that never saw the previous format.
 
-4. Choose the number. Only the LAST number moves (0.5.037 -> 0.5.038). A number is never
-   reused, and never reissued with different bytes. Bump mod_version in
+4. Set the number: 0.5.037 -> 0.5.038 for a patch, or 0.5.0xx -> 0.6.000 for a compat
+   bump (the third field restarts at 000). A number is never reused, and never reissued
+   with different bytes. Bump mod_version in
    gradle.properties only: neoforge.mods.toml interpolates it.
 
 5. Write the release note by auditing the WHOLE range from the previous tag, never from
@@ -128,7 +124,7 @@ STEPS
 
 DONE WHEN
 ---------
-Either the owner has declined or held the release, and that is said in the summary; or:
+Either the release was not due (or the owner held it), and the summary says why; or:
 - the release set is green;
 - `gh release view` lists the jar;
 - the wiki note matches the GitHub note;
@@ -136,8 +132,9 @@ Either the owner has declined or held the release, and that is said in the summa
 
 NEVER
 -----
-- Never cut a release the owner did not ask for or accept.
-- Never move the middle number without her explicit word.
+- Never cut a release the owner has said to hold.
+- Never move the compat number for anything but a substantial feature that cannot keep
+  saves loading, and never without confirming with the owner.
 - Never reuse a version number, or reissue one with different bytes.
 - Never skip the release set: the full suite runs before every release.
 - Never stop at a pushed tag.

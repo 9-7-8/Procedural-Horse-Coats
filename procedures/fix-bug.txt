@@ -119,8 +119,9 @@ STEPS
 7. End the session with end-session. The session log names the issue, the cause, the
    fix commit, the proof (and whether the issue is closed or waiting), and any new
    issues filed along the way.
-   Release only if the owner asks. When the fix is to a crash or data loss on a
-   released jar, OFFER a release in the report, because testers are on that jar.
+   Release by the release procedure, step 1. A crash, join-blocker, lost data or stuck
+   player on a released jar gets a patch release at once, without asking, because
+   players are on that jar. A smaller fix rides along until a bunch of them is ready.
 
 DONE WHEN
 ---------

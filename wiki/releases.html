@@ -50,9 +50,9 @@
         named in that release's notes and kept as small as it can be.
     </p>
     <p>
-        <strong>Only a middle-number release breaks saves</strong> (<code>0.X.0</code>,
-        never <code>0.0.X</code>), and only on the owner's word, like every middle-number
-        bump. That release's notes are stamped <em>&ldquo;no longer back compatible with
+        <strong>Only a compat release breaks saves</strong>, one that moves the second
+        number (<code>0.X.0</code>), never the third (<code>0.0.X</code>). That release's
+        notes are stamped <em>&ldquo;no longer back compatible with
         saves created under <code>0.5</code>&rdquo;</em> (naming the series it leaves),
         and the new series starts its own promise from its first release. Worlds from
         before <code>0.5.037</code> were made under the old development-only rule and are
@@ -61,19 +61,22 @@
 </div>
 
 <div class="note warn">
-    <span class="label">The numbering, as of 2026-09-10</span>
+    <span class="label">The numbering: 0.&lt;compat&gt;.&lt;patch&gt;, as of 2026-10-01</span>
     <p>
-        <strong>The next release is <code>0.5.000</code>, and after that only the last
-        number moves</strong> &mdash; <code>0.5.001</code>, <code>0.5.002</code>, and on
-        up. It is a three-digit field on purpose: there is a lot of counting to do before
-        anything else changes.
+        <strong>The third number is the patch number, and it goes up whenever a bunch of
+        bugs is fixed or a new feature is added</strong> &mdash; <code>0.5.037</code>,
+        <code>0.5.038</code>, and on up. It is a three-digit field on purpose: there is a
+        lot of counting to do.
     </p>
     <p>
-        <strong>The middle number does not move without the owner saying so, explicitly
-        and out loud.</strong> Not for a big feature, not for a batch of genes, not
-        because the last number is getting long. That is the whole rule and it is the
-        owner's call, not a judgement to make from how much shipped. The versions ran
-        0.2.0 to 0.4.1 in two days, which is what the rule is a reaction to.
+        <strong>The second number is a compatibility indicator.</strong> It moves only for
+        a substantial new feature that cannot keep existing saves loading. Not for a big
+        feature that can, not for a batch of genes, not because the third number is getting
+        long. A world made under one <code>0.X</code> loads in every later release with the
+        same <code>X</code> (see <a href="#saves">Saves</a>), so when the second number
+        changes, that promise starts again. (The rule replaces the 2026-09-10 one, under
+        which the middle number moved only on the owner's say-so. That rule was a reaction
+        to 0.2.0 running to 0.4.1 in two days.)
     </p>
     <p>
         The version itself lives in one place, <code>gradle.properties</code>'

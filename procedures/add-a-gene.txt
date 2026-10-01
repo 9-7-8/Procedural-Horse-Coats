@@ -59,8 +59,10 @@ STEPS
    j. Interactions: what other genes change it, or hide it? Does it stack with similar
       genes?
    k. Breeding items: should a carrot or splice exist for it?
-   l. Release: once built, is it its own version, does it ride the next release, or
-      is it a bigger bump? (Only the owner moves the middle number.)
+   l. Saves: can every existing world keep loading? (Almost always, with a migration.
+      A gene that cannot is a compat - second-number - release, and that is only for
+      a substantial feature.) A finished gene is otherwise a patch release, cut without
+      asking.
    Ask too, for a COAT gene:
    m. Where on the body, and on which bases (black, bay, chestnut, grey, dilutes)?
    n. Shape and edge: spots, lines, patches, gradients; hard or soft edges; size and
@@ -328,8 +330,8 @@ STEPS
    after a data-only bake may be byte-noise: compare the two, and revert the wasm if
    nothing reachable changed.
 
-10. Finish with `./gradlew :neoforge-26.1.2:build`, then end-session. Release as step
-    1's answer (l) says.
+10. Finish with `./gradlew :neoforge-26.1.2:build`, then end-session, then a patch
+    release by the release procedure: a new gene is a new feature.
 
 DONE WHEN
 ---------

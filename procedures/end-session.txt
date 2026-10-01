@@ -70,8 +70,9 @@ STEPS
 
 9. Stop, with a short summary. Say what shipped, what is newly waiting in
    wiki/verification.html, and the one thing the next session should pick up first.
-   Say too whether a release looks due, by release step 1. If one does, offer it; never
-   cut it unasked.
+   Say too whether a release is due, by release step 1: a bunch of bug fixes or a new
+   feature. If one is, cut the patch release by that procedure, unless the owner has
+   said to hold it.
    Then stop: no new work, no "while I'm here" refactors.
 
 DONE WHEN

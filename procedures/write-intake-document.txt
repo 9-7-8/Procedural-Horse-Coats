@@ -124,7 +124,7 @@ Header paragraph (copy this shape):
     and the building session must check first. Source of truth for what exists is
     <wiki page(s)>. This file is retired (deleted, per /process-intake step 8) as each piece
     ships and moves onto <wiki page(s)>'s Gameplay and Coding tabs.
-    Release: <own version | rides the next release | owner bumps the middle number>.
+    Release: <patch per piece | patch on the last piece | rides with <other> | compat bump>.
 
 Sections, in this order. Every one is required. If a section truly has nothing in it,
 write "None" and one line saying why.
@@ -255,7 +255,7 @@ H. Saves and permanence
      allele order, registry ids, attachments, components, structures) and the
      migration for each. If one truly cannot be written, say so as an Open line for
      the owner: the alternatives are a named, minimal loss, or holding the feature
-     for a middle-number release.
+     for a compat (second-number) release.
 
 I. Multiplayer and networking
    - Ownership: who may use it on someone else's horse?
@@ -278,15 +278,17 @@ L. Testing
    - What can only be judged by eye in a running game?
 
 M. Release - always asked
-   "Once this is built, should it count as a new version?" Put these options:
-   - Its own release (Recommended for anything a player will notice): the patch
-     number goes up, tag, jar on a GitHub release.
-   - Rides the next release: it is built and pushed, but no release is cut for it.
-   - A bigger bump: the middle number moves. This is the owner's call only, and it
-     never happens without her saying so explicitly. It is also the only kind of
-     release that may break saves, and its notes are stamped "no longer back
-     compatible with saves created under 0.X".
-   Also ask whether it applies when each piece ships or only when the last one does.
+   The version is 0.<compat>.<patch>. A finished feature gets a patch release by
+   default, and the building session cuts it without asking (release procedure). So
+   ask the two things that default does not settle:
+   - "Should each piece get its own patch release, or only the last one?" Options:
+     each piece (Recommended when each is something a player notices) / only the last
+     piece / rides with another treatment's release.
+   - "Can this keep every existing save loading?" Almost always yes, with a migration
+     (hard rule 10). If it truly cannot, it is a COMPAT bump, the second number. That
+     is only for a substantial feature, it breaks every world on every server, and its
+     note is stamped "no longer back compatible with saves created under 0.X". Record
+     the owner's answer; the release procedure still confirms it before cutting.
 
 
 PART 5 - THE IMPLICATIONS SWEEP

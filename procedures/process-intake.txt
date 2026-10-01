@@ -142,14 +142,13 @@ STEPS
      to it, leave a one-line pointer to where it now lives on the wiki.
    - A To do.txt bullet -> delete it, and its heading if the heading is now empty.
 
-9. End the session with end-session. Then release, as the treatment's Release: line says:
-   - own version -> run the release procedure. If the line says "when the last piece
-     ships" and this is not the last piece, do not release.
-   - rides the next release -> no release.
-   - bigger bump -> ask the owner first. The middle number never moves without her
-     word.
-   - no Release: line (an older treatment) -> no release; raise it as a question in the
-     report.
+9. End the session with end-session. Then release by the release procedure. A finished
+   feature is a patch release, cut without asking. The treatment's Release: line refines
+   it:
+   - "patch on the last piece", and this is not the last piece -> no release yet;
+   - "rides with <other>" -> no release; it goes out with that one;
+   - "compat bump" -> the release procedure confirms it with the owner before cutting;
+   - no Release: line (an older treatment) -> a patch release.
 
 10. Write the session log as wiki/session-log/d<date>-<slug>.txt, with:
     - the owner's request, quoted;
