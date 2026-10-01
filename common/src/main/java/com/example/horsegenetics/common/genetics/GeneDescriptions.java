@@ -274,7 +274,9 @@ public final class GeneDescriptions {
                             + "horse, fading as they cool. WHITE is dominant over everything - one "
                             + "copy glows white. BLACK (unlit), one COLOUR and MULTICOLOUR are "
                             + "recessive and show only as their own homozygotes; the colours are "
-                            + "written on the allele copy and inherited with it. Nothing catches fire."),
+                            + "written on the allele copy and inherited with it. HORN TIP, also "
+                            + "recessive, prints in the colour of the horse's ram horn tips. Nothing "
+                            + "catches fire."),
             Map.entry("horsegenetics.fireproof",
                     "A magical recessive that paints nothing: two copies and neither the horse "
                             + "nor its rider takes fire damage, and the horse swims THROUGH lava rather "
@@ -481,6 +483,19 @@ public final class GeneDescriptions {
                     "A magical, recessive gene: Blm/Blm grows leaves, moss or blossom on "
                             + "the antlers. Which one is inherited. Does nothing to a horse "
                             + "without antlers."),
+            Map.entry("horsegenetics.ram_horns",
+                    "A magical, dominant gene that grows a pair of ram's horns. Rh gives "
+                            + "horns to mares and stallions alike; Rhm to stallions only - a "
+                            + "mare is polled and carries it. Size, how far they curl, "
+                            + "thickness and shade are epigenetic. Grown at maturity."),
+            Map.entry("horsegenetics.ram_horn_form",
+                    "A magical dominance series for the shape of ram's horns: four-horned "
+                            + "over curled over corkscrew over scurs. Does nothing to a polled "
+                            + "horse."),
+            Map.entry("horsegenetics.ram_horn_tip",
+                    "A magical, recessive gene: Tip/Tip fades a ram's horns into a colour "
+                            + "of their own toward the points. The colour is inherited. Molten "
+                            + "hooves' MltH prints match it. Does nothing to a polled horse."),
             Map.entry("horsegenetics.mstn",
                     "MSTN (myostatin), the sprint / stamina trade-off. Codominant: each C copy "
                             + "adds a little speed and costs two hearts of health. Endurance is "

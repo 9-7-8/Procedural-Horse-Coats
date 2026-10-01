@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ram horns &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant, sex-limited allele <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Ram horns</h1>
+
+<p class="lede">
+    One copy and the horse grows a pair of ram&rsquo;s horns &mdash; on a mare or a stallion
+    with <code>Rh</code>, on a stallion only with <code>Rhm</code>, the way most horned
+    sheep breeds have horned rams and polled ewes. How big they are, how far they curl,
+    how thick and what shade are written on the allele. The third grown part, after the
+    <a href="gene-unicorn-horn.html">unicorn horn</a> and <a href="gene-antlers.html">antlers</a>,
+    and built on the antler pattern.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.ram_horns"></div>
+
+<h2 id="two-alleles">Two ways to have horns</h2>
+
+<ul>
+    <li><strong><code>Rh</code></strong> &mdash; horns on every horse that carries it, mare or stallion.</li>
+    <li><strong><code>Rhm</code></strong> &mdash; horns on a <em>stallion</em> only. A mare with it
+        is polled and passes it on, and her genotype reads exactly like a stallion&rsquo;s.</li>
+</ul>
+
+<p>
+    Both are dominant, and <code>Rh</code> wins over <code>Rhm</code>. Foals grow no horns; they
+    come in when the horse grows up, and stay.
+</p>
+
+<h2 id="finding">Finding them</h2>
+
+<p>
+    Rare in the wild &mdash; a few horses in a thousand carry either allele, mostly the
+    stallion-only one. Two breeds carry them on purpose: the
+    <a href="breed-book.html#mirrorgazer">Mirrorgazer</a>, horned on every horse, and the
+    <a href="breed-book.html#not_a_sheep">Not A Sheep</a>, horned like a real flock.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Size</strong> &mdash; five classes, <em>bud</em> to <em>massive</em>; small to
+        standard in the wild, and a line bred for size climbs to massive and stops.</li>
+    <li><strong>Curl</strong> &mdash; how far round a curled horn goes, from a little over half a
+        turn to more than a full one; on a corkscrew horn, how tightly it twists.</li>
+    <li><strong>Girth</strong> and <strong>shade</strong> &mdash; thicker or thinner, pale horn to black.</li>
+</ul>
+
+<p>
+    Two more genes finish them: <a href="gene-ram-horn-form.html">ram horn form</a> picks the
+    shape &mdash; curled, corkscrew, four-horned or scurs &mdash; and
+    <a href="gene-ram-horn-tip.html">ram horn tip</a> fades the points into a colour of their
+    own. A horse can have a unicorn horn, antlers and ram horns all at once.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no attack, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.ram_horns"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ram_horns</dd></div>
+    <div><dt>Class</dt><dd><code>RamHornsGene</code></dd></div>
+    <div><dt>Priority</dt><dd>235 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Rh</span> <span class="allele dom">Rhm</span> <span class="allele wild">n</span>, dominance <code>Rh &gt; Rhm &gt; n</code></dd></div>
+    <div><dt>Founders</dt><dd>written as pairs: <code>Rh/n</code> 0.14%, <code>Rhm/n</code> 0.26%, <code>n/n</code> the rest</dd></div>
+    <div><dt>Epigenome</dt><dd><code>size</code> (0&ndash;0.6, clamp 0&ndash;1), <code>curl</code> (0&ndash;1), <code>girth</code> (0.85&ndash;1.15), <code>shade</code> (0&ndash;1)</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; measured: no coat hash moved in either golden</dd></div>
+</dl>
+
+<h2 id="pattern">The antler pattern, again</h2>
+
+<p>
+    Asked for as &ldquo;a ram horn that follows the same pattern&rdquo; (owner, 2026-10-01), and
+    the choices were put to the owner: inheritance like antlers, all four shapes, and a tip
+    colour gene with hoofprints that match it. So it is the <a href="gene-antlers.html">antlers</a>
+    page with different geometry: the sex gate in <code>grows(genotype)</code> rather than the
+    expression, a foal gate in <code>PartKind.showsOnFoal</code>, two kinds
+    (<code>RAM_HORN_RIGHT</code>/<code>LEFT</code>) at the same <code>CROWN</code> anchors, one mesh
+    per side, and everything composed in <code>GrownParts.of</code>. No new layer, render-state
+    field or config key.
+</p>
+
+<h2 id="numbers">The epigenome, by cost</h2>
+
+<ul>
+    <li><code>size</code>: the class is the mesh's size bucket (<code>RamHornSize</code>, five
+        classes; a bigger horn is more segments so a full curl stays smooth); the remainder is a
+        uniform stretch.</li>
+    <li><code>curl</code>: one of <code>RamHornGenerator.CURLS</code> buckets, in the mesh key with
+        the shape &mdash; how far round a curl turns, or how much a corkscrew rolls per segment.</li>
+    <li><code>girth</code> and <code>shade</code>: a draw-time scale and colour. Shade is pale horn to
+        black; with a <a href="gene-ram-horn-tip.html">coloured tip</a> it is the base colour.</li>
+</ul>
+
+<h2 id="branches">Two-tone colour now runs along each branch</h2>
+
+<p>
+    A two-tone part is drawn a box at a time in the colour <code>AttachedPart.tintAt</code> gives
+    that far along. That used to be the box's index over the box count, which is right for a
+    chain and wrong for a four-horned ram, whose curled horn hangs off the upright one&rsquo;s root
+    and would have been coloured as if it continued it. <code>PartModel.along(i)</code> is now the
+    box&rsquo;s depth over its depth plus the longest run still below it &mdash; identical for a
+    chain, and root-to-tip for each horn of a branched part.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-sheep">Analogous, not measured</h2>
+
+<p>
+    Invented, like the antler loci. Real sheep horn inheritance is famously shaped by one region,
+    <i>RXFP2</i>, with polled, horned and scurred types, and in many breeds by sex: rams horned,
+    ewes polled or with scurs. <code>Rh</code> and <code>Rhm</code> are that difference as two
+    alleles, the way <code>Ant</code> and <code>Antm</code> are for deer. The mod does not claim
+    the real locus works this way, and does not borrow its name.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No ram horn has been seen in a running game: whether a curl clears the face and ear, and how each shape and size reads, are unchecked.</p>
+</div>
+
+<h3 id="open-ram-placement">A curl that clears the head</h3>
+<p>
+    The curl goes back, down past the ear and forward; its outward lean is meant to keep it off
+    the cheek. Look at every curl bucket at standard and massive size, adult only, walking,
+    grazing and rearing. A massive curl may cut through the neck or the bridle.
+</p>
+
+<h3 id="open-ram-gates">The sex and foal gates</h3>
+<p>
+    An <code>Rhm/n</code> mare should be polled, the same stallion horned; an <code>Rh/n</code>
+    mare horned; a foal of any genotype bare until it grows up.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

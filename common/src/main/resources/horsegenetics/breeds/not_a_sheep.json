@@ -1,0 +1,76 @@
+{
+  "id": "not_a_sheep",
+  "name": "Not A Sheep",
+  "description": "A very small horse that is, by every appearance, a sheep. Mostly creamy white, sometimes black, moorit brown, roan-grey or pied, now and then pale-bellied like a wild mouflon. The rams are usually horned - curled, mostly, though some carry four horns and a few just scurs - and the ewes usually are not. It is not a sheep. Please stop trying to shear it.",
+  "kind": "magical",
+  "commonness": "uncommon",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:windswept_hills"
+  ],
+  "price": [10, 18],
+  "stats": {
+    "speed": 3,
+    "jump": 3,
+    "health": 5,
+    "size": [0.508, 0.667],
+    "pull": 2
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "e/e", "weight": 70 },
+      { "pair": "E/E", "weight": 30 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 85 },
+      { "pair": "A/A", "weight": 15 }
+    ],
+    "horsegenetics.matp": [
+      { "pair": "Cr/Cr", "weight": 70 },
+      { "pair": "N/N", "weight": 30 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa2/Pa2", "weight": 20 },
+      { "pair": "pa/pa", "weight": 80 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 8 },
+      { "pair": "rn/rn", "weight": 92 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 10 },
+      { "pair": "to/to", "weight": 90 }
+    ],
+    "horsegenetics.ram_horns": [
+      { "pair": "Rhm/Rhm", "weight": 15 },
+      { "pair": "Rhm/n", "weight": 40 },
+      { "pair": "Rh/Rhm", "weight": 5 },
+      { "pair": "Rh/n", "weight": 10 },
+      { "pair": "n/n", "weight": 30 }
+    ],
+    "horsegenetics.ram_horn_form": [
+      { "pair": "Crl/Crl", "weight": 60 },
+      { "pair": "Crl/Crk", "weight": 8 },
+      { "pair": "Crk/Crk", "weight": 4 },
+      { "pair": "Crl/Fhn", "weight": 10 },
+      { "pair": "Fhn/Fhn", "weight": 3 },
+      { "pair": "Crl/Scr", "weight": 10 },
+      { "pair": "Scr/Scr", "weight": 5 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.ram_horns": {
+      "shade": [0, 0.75]
+    }
+  },
+  "notes": [
+    "Owner's spec, 2026-10-01: sheep-sized (a small pony, Shetland-sized), every natural sheep colour as solids, plus the sheep patterns that have a close natural gene already in the mod, horned like real flocks, and in all ways resembling a sheep.",
+    "WHITE, MOSTLY. Real flocks are mostly white, and the closest natural horse is double cream: Cr/Cr over chestnut is a cremello, over black a smoky cream, both near-white. Cream 70 x any extension makes about seven in ten white.",
+    "THE OTHER SOLIDS. Moorit brown is a chestnut (e/e, no cream) - about one in five. Black is E/E a/a with no cream - under one in twelve. Grey sheep are a dark fleece with white fibres through it, which is roan (Rn/rn, one in twelve) - blue roan on black, red roan on moorit, and lost on a white one, as a grey fleece would be.",
+    "THE PATTERNS WITH A NATURAL GENE. Pied sheep (Jacob) are tobiano, one in ten. Mouflon - a darker body with a pale belly and muzzle - is pangare, shown best on the rare bay (E/E A/A); on a moorit it is the pale-bellied brown. Patterns with no close natural gene - the Suffolk's black face and legs on a white body, badger-face - are left out, per the spec.",
+    "HORNS LIKE REAL FLOCKS. Mostly the rams-only allele: about seven in ten rams and fifteen in a hundred ewes are horned, the rest polled. Curled in about four in five; four-horned (Jacob) about one in eight, scurs one in twenty, corkscrew rare. Horns pale to dark (shade 0 to 0.75), no coloured tips.",
+    "No wool, no bleating: wool does not exist yet in the mod (its own design session), and the owner chose horns as the sheep feature for now."
+  ]
+}

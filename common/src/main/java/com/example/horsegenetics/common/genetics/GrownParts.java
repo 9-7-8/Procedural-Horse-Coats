@@ -59,14 +59,24 @@ public final class GrownParts {
         Optional<AttachedPart> horn = Genes.UNICORN_HORN.hornFor(genotype, epigenome);
         Optional<List<AttachedPart>> rack = Genes.ANTLERS.racksFor(genotype, epigenome,
                 Genes.ANTLER_FORM.habitOf(genotype.pair(Genes.ANTLER_FORM)));
-        if (horn.isEmpty() && rack.isEmpty()) {
+        Optional<List<AttachedPart>> rams = Genes.RAM_HORNS.hornsFor(genotype, epigenome,
+                Genes.RAM_HORN_FORM.shapeOf(genotype.pair(Genes.RAM_HORN_FORM)));
+        if (horn.isEmpty() && rack.isEmpty() && rams.isEmpty()) {
             return List.of();
         }
-        List<AttachedPart> out = new ArrayList<>(3);
+        List<AttachedPart> out = new ArrayList<>(5);
         horn.ifPresent(h -> out.add(dressHorn(h, genotype, epigenome)));
         rack.ifPresent(antlers -> {
             for (AttachedPart antler : antlers) {
                 out.add(dressAntler(antler, genotype, epigenome));
+            }
+        });
+        rams.ifPresent(pair -> {
+            boolean tipped = Genes.RAM_HORN_TIP.tipped(genotype.pair(Genes.RAM_HORN_TIP));
+            int tip = tipped ? Genes.RAM_HORN_TIP.tipColourOf(genotype, epigenome) : 0;
+            for (AttachedPart side : pair) {
+                // The horn's own shade stays at the base; a coloured tip fades in toward the point.
+                out.add(tipped ? side.dressed(side.baseTint(), tip, false) : side);
             }
         });
         return List.copyOf(out);
@@ -112,7 +122,7 @@ public final class GrownParts {
      * <p>The second half is what counts the loci that only dress a part: horn
      * colour and horn glow do nothing to a hornless horse, so asked only of a wild
      * one they would look invisible. The baseline with "every part" is a horse
-     * with a horn and a rack of antlers; a further granting locus adds itself to it.
+     * with a horn, a rack of antlers and ram's horns; a further granting locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way
      * {@code DesignerApi.showsAs} asks the cutie mark. It is the other half of "does
@@ -126,7 +136,8 @@ public final class GrownParts {
         Genotype wild = Genotype.wildType();
         Genotype everyPart = wild
                 .with(new AllelePair(Genes.UNICORN_HORN.Horn, Genes.UNICORN_HORN.Horn))
-                .with(new AllelePair(Genes.ANTLERS.Ant, Genes.ANTLERS.Ant));
+                .with(new AllelePair(Genes.ANTLERS.Ant, Genes.ANTLERS.Ant))
+                .with(new AllelePair(Genes.RAM_HORNS.Rh, Genes.RAM_HORNS.Rh));
         List<AttachedPart> dressed = of(everyPart, epi);
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
             if (!of(wild.with(pair), epi).isEmpty()

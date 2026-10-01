@@ -148,6 +148,26 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
                 tint, tint, false, (float) tines, false, NO_BLOOM);
     }
 
+    /**
+     * One ram's horn, from the numbers the ram horns locus carries - one colour,
+     * root to tip, until the horn tip locus gives it a second.
+     *
+     * @param left  the left side rather than the right
+     * @param form  a {@link RamHornGenerator} shape
+     * @param curl  {@code [0,1]}: how far round a curl goes, how tight a corkscrew twists
+     * @param size  position on the {@link RamHornSize} ladder - class is the mesh, the rest a stretch
+     * @param girth extra scale across the horn
+     * @param tint  opaque ARGB of the keratin
+     */
+    public static AttachedPart ramHorn(boolean left, int form, double curl, double size, double girth, int tint) {
+        PartKind kind = left ? PartKind.RAM_HORN_LEFT : PartKind.RAM_HORN_RIGHT;
+        double c = curl < 0.0 ? 0.0 : (curl > 1.0 ? 1.0 : curl);
+        int bucket = Math.min(RamHornGenerator.CURLS - 1, (int) (c * RamHornGenerator.CURLS));
+        PartShape shape = PartShape.of(kind, form * RamHornGenerator.CURLS + bucket, size);
+        float grow = shape.stretchTo(size);
+        return new AttachedPart(shape, grow, (float) (grow * girth), 0f, tint, tint, false);
+    }
+
     /** This part in other colours and light, its shape untouched. */
     public AttachedPart dressed(int base, int tip, boolean glows) {
         return new AttachedPart(shape, stretch, girth, tilt, base, tip, glows, shown, translucent, bloomTint);

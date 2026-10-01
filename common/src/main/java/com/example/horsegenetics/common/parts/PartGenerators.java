@@ -33,6 +33,11 @@ public final class PartGenerators {
                     shape.style() % AntlerGenerator.VARIANTS,
                     shape.size(),
                     shape.kind() == PartKind.ANTLER_LEFT);
+            case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornGenerator.generate(
+                    shape.style() / RamHornGenerator.CURLS,
+                    shape.style() % RamHornGenerator.CURLS,
+                    shape.size(),
+                    shape.kind() == PartKind.RAM_HORN_LEFT);
         };
     }
 

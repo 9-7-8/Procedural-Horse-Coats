@@ -63,6 +63,14 @@ public final class PartSheet {
      */
     public static final int BLOOM = 4;
 
+    /**
+     * Ram horn keratin - heavy cross-ridges ("growth rings") running across the
+     * horn, which is what makes a ram's horn read as one. Opaque.
+     */
+    public static final int RAM_HORN = 5;
+
+    /** The smoothed, polished last two boxes of a ram's horn. */
+    public static final int RAM_TIP = 6;
     /** Every region, as a mask for {@link #bit} tests. */
     public static final int ALL = -1;
 

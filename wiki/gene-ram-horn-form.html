@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ram horn form &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominance series <span class="sep">/</span> shapes the ram horns, paints nothing</p>
+
+<h1>Ram horn form</h1>
+
+<p class="lede">
+    The shape of a horned horse&rsquo;s <a href="gene-ram-horns.html">ram horns</a>: curled,
+    corkscrew, four-horned or scurs. One shape on both sides. On a polled horse it does nothing.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.ram_horn_form"></div>
+
+<h2 id="shapes">The four shapes</h2>
+
+<table class="data">
+    <thead><tr><th>Allele</th><th>Shape</th><th>Looks like</th></tr></thead>
+    <tbody>
+        <tr><td><code>Fhn</code></td><td>Four-horned</td><td>A short upright pair and a curled pair sweeping down &mdash; a Jacob sheep</td></tr>
+        <tr><td><code>Crl</code></td><td>Curled</td><td>Back, down past the ear and forward again &mdash; the ordinary ram&rsquo;s horn</td></tr>
+        <tr><td><code>Crk</code></td><td>Corkscrew</td><td>Long, straight and twisted, rising up and out &mdash; a Racka or a markhor</td></tr>
+        <tr><td><code>Scr</code></td><td>Scurs</td><td>Loose stubs, the half-horned state</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Each hides the ones below it: four-horned shows over anything, curl over corkscrew and
+    scurs. So scurs need two copies, and two curled horses can throw a scurred foal.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all, for good or ill &mdash; it only shapes horns it might have.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.ram_horn_form"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ram_horn_form</dd></div>
+    <div><dt>Class</dt><dd><code>RamHornFormGene</code></dd></div>
+    <div><dt>Priority</dt><dd>237 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele wild">Crl</span> <span class="allele dom">Crk</span> <span class="allele dom">Fhn</span> <span class="allele dom">Scr</span> &mdash; dominance <code>Fhn &gt; Crl &gt; Crk &gt; Scr</code>; <code>Crl</code> is the default</dd></div>
+    <div><dt>Founders</dt><dd>Hardy&ndash;Weinberg over <code>Crl</code> 0.70, <code>Crk</code> 0.12, <code>Scr</code> 0.10, <code>Fhn</code> 0.08</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="order">Allele order is generator order</h2>
+
+<p>
+    <code>Crl, Crk, Fhn, Scr</code> is the declaration order, the stored order, and
+    <code>RamHornGenerator</code>&rsquo;s shape indices, so <code>shapeOf(pair)</code> is the
+    dominant allele&rsquo;s <code>order()</code> and the first factor of the mesh style. Dominance
+    is its own list. Append, never reorder.
+</p>
+
+<h2 id="four">One root for four horns</h2>
+
+<p>
+    A part mesh is one tree with one root (<code>PartGeneratorTest</code>), so the four-horned
+    shape grows its curled horn from the <em>base</em> of the upright one (<code>t = 0</code>),
+    not as a second root. The dominance order &mdash; four-horned on top, scurs at the bottom
+    &mdash; was this build&rsquo;s call: real polycerate sheep carry a dominant trait, and scurs as
+    the recessive makes a scurred line something you breed for.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-sheep">Analogous, not measured</h2>
+
+<p>
+    The four shapes are real sheep and goat horn types &mdash; the ram&rsquo;s spiral, the
+    straight twisted horn of the Hungarian Racka, the two pairs of a Jacob, and scurs &mdash; but
+    in real animals they are breed characters and several loci, not one allele series. Polycerate
+    (multi-horned) sheep do carry a dominant trait; the rest of the series is a gameplay rule.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>None of the four shapes has been seen on a live horse, so whether each reads as its sheep is unchecked.</p>
+</div>
+
+<h3 id="open-ram-shapes">Each shape, side by side</h3>
+<p>
+    A horned horse of each shape at standard and massive: the curl should read as a ram, the
+    corkscrew as a Racka, four-horned as a Jacob (the lower horn should clear the jaw), scurs as
+    stubs. The four-horned lower horn starting at the upper one&rsquo;s base is the likeliest to
+    look wrong.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

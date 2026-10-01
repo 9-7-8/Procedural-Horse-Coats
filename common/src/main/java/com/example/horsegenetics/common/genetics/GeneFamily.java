@@ -364,6 +364,10 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.antler_glow", MAGIC_PARTS);
         MAGICAL_OVERRIDES.put("horsegenetics.antler_crystal", MAGIC_PARTS);
         MAGICAL_OVERRIDES.put("horsegenetics.antler_bloom", MAGIC_PARTS);
+        // Ram horns follow the antler pattern, and live beside them.
+        MAGICAL_OVERRIDES.put("horsegenetics.ram_horns", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.ram_horn_form", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.ram_horn_tip", MAGIC_PARTS);
 
         // The sex locus paints nothing and is not a disorder. The editors keep
         // it off their lists entirely - the Sex button owns it - but it is a

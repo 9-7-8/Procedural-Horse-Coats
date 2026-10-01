@@ -1,0 +1,108 @@
+{
+  "id": "mirrorgazer",
+  "name": "Mirrorgazer",
+  "description": "A black horse of the Nether with ram's horns that are black at the root and burn into a colour of their own at the points - and wherever it walks it leaves glowing hoofprints in that same colour. Its eyes are the worst of it: black where the whites should be, and a red iris that glows. Every one of them watches you after dark in its own way, and half are shadowcreatures besides.",
+  "kind": "magical",
+  "commonness": "rare",
+  "spawn": ["wild", "spawn_egg"],
+  "biomes": [
+    "minecraft:nether_wastes",
+    "minecraft:crimson_forest",
+    "minecraft:warped_forest",
+    "minecraft:soul_sand_valley",
+    "minecraft:basalt_deltas"
+  ],
+  "spawn_ground": [
+    "minecraft:netherrack",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:magma_block",
+    "regions_unexplored:brimsprout_nylium",
+    "regions_unexplored:cobalt_nylium",
+    "regions_unexplored:glistering_nylium",
+    "regions_unexplored:mycotoxic_nylium"
+  ],
+  "spawn_in_dark": true,
+  "price": [36, 56],
+  "stats": {
+    "speed": 6,
+    "jump": 5,
+    "health": 6,
+    "size": [0.95, 1.05],
+    "pull": 4
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "Red/Red", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_left": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "Red/Red", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_glow_iris_right": [
+      { "pair": "Glo/Glo", "weight": 100 }
+    ],
+    "horsegenetics.shadowcreature": [
+      { "pair": "Shc/Shc", "weight": 50 },
+      { "pair": "n/n", "weight": 50 }
+    ],
+    "horsegenetics.magic_night_watch": [
+      { "pair": "Wst/Wst", "weight": 20 },
+      { "pair": "Wnr/Wnr", "weight": 20 },
+      { "pair": "Wsi/Wsi", "weight": 20 },
+      { "pair": "Wun/Wun", "weight": 20 },
+      { "pair": "Wbh/Wbh", "weight": 20 }
+    ],
+    "horsegenetics.ram_horns": [
+      { "pair": "Rh/Rh", "weight": 100 }
+    ],
+    "horsegenetics.ram_horn_form": [
+      { "pair": "Crl/Crl", "weight": 25 },
+      { "pair": "Crk/Crk", "weight": 25 },
+      { "pair": "Fhn/Fhn", "weight": 25 },
+      { "pair": "Scr/Scr", "weight": 25 }
+    ],
+    "horsegenetics.ram_horn_tip": [
+      { "pair": "Tip/Tip", "weight": 100 }
+    ],
+    "horsegenetics.molten_hooves": [
+      { "pair": "MltH/MltH", "weight": 100 }
+    ],
+    "horsegenetics.fireproof": [
+      { "pair": "Frp/Frp", "weight": 100 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.ram_horns": {
+      "shade": 1
+    }
+  },
+  "notes": [
+    "Owner's spec, 2026-10-01: normal sized, all black, glowing red irises and black scleras, half shadowcreatures, every night-watch variation, ram horns black at the base with any colour at the tip, molten hoofprints the colour of the horn tip, Nether only.",
+    "ALL BLACK: E/E a/a on every founder, no dilution, no white.",
+    "EYES: Red/Red at both iris loci, Blk/Blk at both sclera loci, Glo/Glo at both iris-glow loci and neither sclera-glow locus - so the iris glows and the black sclera does not.",
+    "NIGHT: Shc/Shc in half and nothing in the other half (shadowcreature is recessive, so no silent carriers). Every night-watch variation - the five matched pairs, the only pairs that express - at a fifth each, so every Mirrorgazer watches you after dark in one of the five ways.",
+    "HORNS: Rh/Rh on every founder, so mares are horned too. All four shapes at a quarter each, each as a matched pair so the breed shows all four and breeds each true. Shade is pinned to 1.0, which is black, so the base is always black; Tip/Tip colours the points, and the tip colour is left wild - any colour, inherited and drifting with the line.",
+    "PRINTS: MltH/MltH, the molten hooves allele that prints in the colour of the horn tips, so a Mirrorgazer's hoofprints always match its horns, horse by horse.",
+    "Fireproof (Frp/Frp) was NOT in the owner's spec: added because a horse that spawns only in the Nether otherwise burns in its own biome, as both other Nether breeds are fireproof for. Remove the row if that was not wanted.",
+    "Spawns like the other Nether breeds: the same spawn_ground floor list and spawn_in_dark, since vanilla's animal rule wants grass and light the Nether does not have."
+  ]
+}

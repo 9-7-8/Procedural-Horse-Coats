@@ -48,6 +48,8 @@ const HORN_TIP = 1;
 const BONE = 2;
 const BONE_TIP = 3;
 const BLOOM = 4;
+const RAM_HORN = 5;
+const RAM_TIP = 6;
 
 /** Deterministic integer hash to [0,1). Nothing here may use Math.random. */
 function hash(x, y, salt) {
@@ -117,6 +119,20 @@ function bloom(u, v) {
   return 0.58 + 0.34 * blotch + 0.14 * fine - (fine > 0.8 ? 0.2 : 0);
 }
 
+/**
+ * Ram's horn. The thing that makes a ram's horn read as one is the heavy ridging
+ * ACROSS it - growth rings - so the grain runs along u here, the opposite of the
+ * unicorn's lengthwise keratin, with a period of 2 texels so even a short segment
+ * shows two or three rings. `tip` is the worn, smoothed point: rings faded out.
+ */
+function ram(u, v, tip) {
+  const ring = Math.sin((v * Math.PI) / 1.0);
+  const wobble = noise(u / 3.0, v / 1.5, 7, REGION) * 0.35;
+  const fine = noise(u * 1.4, v * 1.4, 8, REGION) * 0.18;
+  const ridge = tip ? 0.04 * ring : 0.16 * ring;
+  return (tip ? 0.74 : 0.62) + ridge + 0.25 * (wobble + fine);
+}
+
 const px = Buffer.alloc(SIZE * SIZE * 4);          // zeroed: an unused region is blank
 function paint(region, fn) {
   const ox = (region % ACROSS) * REGION;
@@ -139,12 +155,14 @@ paint(HORN_TIP, (u, v) => keratin(u, v, true));
 paint(BONE, (u, v) => bone(u, v, false));
 paint(BONE_TIP, (u, v) => bone(u, v, true));
 paint(BLOOM, (u, v) => bloom(u, v));
+paint(RAM_HORN, (u, v) => ram(u, v, false));
+paint(RAM_TIP, (u, v) => ram(u, v, true));
 
 // The one thing worth asserting: every texel a box can reach is opaque. A part is
 // drawn through a cutout pipeline, which DISCARDS a fragment under an alpha of
 // 0.1 - so a region with a transparent corner is a horn with holes in it, and the
 // hole would appear only on the segment sizes that happen to reach that corner.
-const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM];
+const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM, RAM_HORN, RAM_TIP];
 for (const region of PAINTED) {
   const ox = (region % ACROSS) * REGION;
   const oy = Math.floor(region / ACROSS) * REGION;

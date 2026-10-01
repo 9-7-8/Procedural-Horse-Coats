@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
+import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
@@ -26,6 +27,7 @@ import java.util.List;
  *   <tr><td>{@code MltB/MltB}</td><td>{@code black} - black prints that do not glow</td></tr>
  *   <tr><td>{@code MltC/MltC}</td><td>{@code colour} - glowing prints in one colour, the copy's</td></tr>
  *   <tr><td>{@code MltM/MltM}</td><td>{@code multicolour} - glowing prints running through both copies' colours</td></tr>
+ *   <tr><td>{@code MltH/MltH}</td><td>{@code horn-tip} - glowing prints in the colour of the horse's ram horn tips</td></tr>
  *   <tr><td>any other mix</td><td>nothing - a carrier</td></tr>
  * </table>
  *
@@ -99,7 +101,14 @@ public final class MoltenHoovesGene implements Gene, EpigeneticAbilityContributi
     private final Allele colour = new Allele(KEY, 2, "MltC", "Molten colour (MltC)");
     private final Allele multicolour = new Allele(KEY, 3, "MltM", "Molten multicolour (MltM)");
     private final Allele n = new Allele(KEY, 4, "n", "Wild-type (n)");
-    private final List<Allele> alleles = List.of(white, black, colour, multicolour, n);
+    /**
+     * Appended after the wild type (2026-10-01) rather than inserted before it, so no
+     * existing allele's order moves. Its colour is not its own copy's at all: it is the
+     * horse's ram horn tip colour, asked of {@code RamHornTipGene.printColourOf} - the
+     * owner's ask was hoofprints that match the horns.
+     */
+    private final Allele hornTip = new Allele(KEY, 5, "MltH", "Molten horn-tip (MltH)");
+    private final List<Allele> alleles = List.of(white, black, colour, multicolour, n, hornTip);
 
     private final Expression wild = Expression.wildType(
             "The horse leaves the ground behind it exactly as it found it.");
@@ -127,8 +136,16 @@ public final class MoltenHoovesGene implements Gene, EpigeneticAbilityContributi
                     + "after another - all of them written on the alleles. Two copies of the "
                     + "multicolour allele.");
 
+    private final Expression hornTipPrints = Expression.wildType("horn-tip", "Molten hooves: horn tip",
+            "Glowing hoofprints in the colour of the horse's ram horn tips - or of its horns' own "
+                    + "shade if the tips are not coloured - so the prints always match the horns. Two "
+                    + "copies of the horn-tip allele.");
+
+    /** Wild founders showing the horn-tip prints - homozygotes only. */
+    public static final double WILD_HORN_TIP_PERCENT = 0.1;
+
     private final List<Expression> expressions = List.of(wild, carrier, whitePrints, blackPrints,
-            colourPrints, multicolourPrints);
+            colourPrints, multicolourPrints, hornTipPrints);
 
     private final FounderTable founders = FounderTable.builder()
             .weight(white, white, WILD_DOUBLE_WHITE_PERCENT)
@@ -136,8 +153,10 @@ public final class MoltenHoovesGene implements Gene, EpigeneticAbilityContributi
             .weight(black, black, WILD_BLACK_PERCENT)
             .weight(colour, colour, WILD_COLOUR_PERCENT)
             .weight(multicolour, multicolour, WILD_MULTICOLOUR_PERCENT)
+            .weight(hornTip, hornTip, WILD_HORN_TIP_PERCENT)
             .weight(n, n, 100.0 - WILD_WHITE_PERCENT - WILD_DOUBLE_WHITE_PERCENT
-                    - WILD_BLACK_PERCENT - WILD_COLOUR_PERCENT - WILD_MULTICOLOUR_PERCENT)
+                    - WILD_BLACK_PERCENT - WILD_COLOUR_PERCENT - WILD_MULTICOLOUR_PERCENT
+                    - WILD_HORN_TIP_PERCENT)
             .build();
 
     @Override public String key() { return KEY; }
@@ -162,6 +181,9 @@ public final class MoltenHoovesGene implements Gene, EpigeneticAbilityContributi
         }
         if (pair.homozygousFor(multicolour)) {
             return multicolourPrints;
+        }
+        if (pair.homozygousFor(hornTip)) {
+            return hornTipPrints;
         }
         return pair.count(n) == 2 ? wild : carrier;
     }
@@ -190,6 +212,11 @@ public final class MoltenHoovesGene implements Gene, EpigeneticAbilityContributi
             EpiValues b = epigenetics.copy(1);
             return List.of(emitter(a.rgb("color"), a.rgb("color2"), GLOWS),
                     emitter(b.rgb("color"), b.rgb("color2"), GLOWS));
+        }
+        if (pair.homozygousFor(hornTip)) {
+            // The horn tip locus's numbers, not this one's - the HornDustGene move.
+            int c = Genes.RAM_HORN_TIP.printColourOf(genotype, epigenetics.epigenome()) & 0xFFFFFF;
+            return List.of(emitter(c, c, GLOWS));
         }
         return List.of();
     }

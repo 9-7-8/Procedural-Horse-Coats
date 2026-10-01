@@ -91,6 +91,8 @@ public final class PartModel extends Model<PartModel.Slice> {
     private final boolean[] groupRoot;
     /** Per box: its sheet region. */
     private final int[] regions;
+    /** Per box: how far it is from its root to the end of its own branch, 0 to 1. */
+    private final float[] along;
 
     /**
      * @param segments the mesh's boxes in generator order, so segment {@code i} is
@@ -107,6 +109,7 @@ public final class PartModel extends Model<PartModel.Slice> {
         this.groups = new int[n];
         this.groupRoot = new boolean[n];
         this.regions = new int[n];
+        this.along = alongOf(nodes);
         for (int i = 0; i < n; i++) {
             PartNode node = nodes.get(i);
             groups[i] = node.group();
@@ -114,6 +117,42 @@ public final class PartModel extends Model<PartModel.Slice> {
             groupRoot[i] = node.group() != PartNode.NO_GROUP
                     && (node.isRoot() || nodes.get(node.parent()).group() != node.group());
         }
+    }
+
+    /**
+     * Where box {@code i} sits root ({@code 0}) to tip ({@code 1}) <b>of its own
+     * branch</b> - its depth over its depth plus the longest run of boxes still
+     * below it. On a single chain that is {@code i / (n - 1)}, which is what a
+     * two-tone horn has always been coloured by; on a branched part - a four-horned
+     * ram, whose second horn hangs off the first one's root - each horn runs root to
+     * tip on its own, where the index would have coloured the second horn as if it
+     * continued the first.
+     */
+    public float along(int i) {
+        return along[i];
+    }
+
+    private static float[] alongOf(List<PartNode> nodes) {
+        int n = nodes.size();
+        int[] depth = new int[n];
+        int[] height = new int[n];
+        for (int i = 0; i < n; i++) {
+            PartNode node = nodes.get(i);
+            depth[i] = node.isRoot() ? 0 : depth[node.parent()] + 1;
+        }
+        // Parents precede children, so walking backwards finishes every child first.
+        for (int i = n - 1; i >= 0; i--) {
+            PartNode node = nodes.get(i);
+            if (!node.isRoot()) {
+                height[node.parent()] = Math.max(height[node.parent()], height[i] + 1);
+            }
+        }
+        float[] out = new float[n];
+        for (int i = 0; i < n; i++) {
+            int span = depth[i] + height[i];
+            out[i] = span == 0 ? 0f : (float) depth[i] / span;
+        }
+        return out;
     }
 
     /** How many segments there are to slice - the layer's loop bound. */
