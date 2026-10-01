@@ -1,0 +1,5 @@
+Ram horn tip
+(Magical gene / recessive / colours the horn tips, paints nothing)
+Two copies and a horse’s ram horns keep their own shade at the base and fade into a colour of their own toward the points — any colour, inherited with the allele. Hoofprints from the molten hooves MltH allele come out in the same colour. On a polled horse it does nothing.
+
+Gene key horsegenetics.ram_horn_tip Class RamHornTipGene Priority 238 (magical band); only a code-order slot Family Grown parts Alleles Tip n Founders Tip/Tip 5%, n/n the rest — no wild carriers Epigenome tip_r/g/b , a colour rolled bright and drifting per channel Coat effect none How it reaches the horns, and the prints GrownParts.of dresses each ram horn with base = the horn’s shade and tip = tipColourOf , so it becomes a two-tone part, drawn a box at a time along each branch ( see ram horns ). The prints ask printColourOf(genotype, epigenome) — this gene’s colour if tipped, the horn shade if not — reaching the whole horse’s epigenome through GeneEpigenetics.epigenome() , as horn dust does for the unicorn horn. One answer, asked twice, so the two can never disagree.

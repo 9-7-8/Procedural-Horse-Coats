@@ -188,7 +188,7 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             } else {
                 int n = model.segmentCount();
                 for (int i = 0; i < n; i++) {
-                    float along = n == 1 ? 0f : (float) i / (n - 1);
+                    float along = model.along(i);
                     int tint = RiderFade.fade(part.tintAt(along), alpha);
                     submitSlice(submitNodeCollector, model, PartModel.Slice.segment(i, shown), poseStack,
                             genetic, lightCoords, tint, genetic.isFading());

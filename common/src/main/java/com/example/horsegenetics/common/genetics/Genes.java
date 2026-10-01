@@ -132,6 +132,9 @@ import com.example.horsegenetics.common.genetics.genes.AntlerCrystalGene;
 import com.example.horsegenetics.common.genetics.genes.AntlerFormGene;
 import com.example.horsegenetics.common.genetics.genes.AntlerGlowGene;
 import com.example.horsegenetics.common.genetics.genes.AntlersGene;
+import com.example.horsegenetics.common.genetics.genes.RamHornFormGene;
+import com.example.horsegenetics.common.genetics.genes.RamHornTipGene;
+import com.example.horsegenetics.common.genetics.genes.RamHornsGene;
 import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.genetics.genes.HornDustGene;
 import com.example.horsegenetics.common.genetics.genes.HornGlowGene;
@@ -584,6 +587,12 @@ public final class Genes {
     public static final AntlerCrystalGene ANTLER_CRYSTAL = new AntlerCrystalGene();
     /** Blooming antlers - recessive; leaves, moss or blossom on the rack. Silent without antlers. */
     public static final AntlerBloomGene ANTLER_BLOOM = new AntlerBloomGene();
+    /** Ram horns - dominant; Rh on both sexes, Rhm on stallions only. Size, curl, girth, shade on the copy. */
+    public static final RamHornsGene RAM_HORNS = new RamHornsGene();
+    /** Ram horn form - four-horned over curl over corkscrew over scurs. Silent on a polled horse. */
+    public static final RamHornFormGene RAM_HORN_FORM = new RamHornFormGene();
+    /** Ram horn tip - recessive; a coloured point the MltH hoofprints match. Silent on a polled horse. */
+    public static final RamHornTipGene RAM_HORN_TIP = new RamHornTipGene();
     public static final HealerGene HEALER = new HealerGene();
     /**
      * Magic sectoral heterochromia - two different colour alleles and the horse
@@ -710,6 +719,7 @@ public final class Genes {
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK, UNICORN_HORN,
             HORN_COLOUR, HORN_GLOW, HORN_DUST,
             ANTLERS, ANTLER_FORM, ANTLER_GLOW, ANTLER_CRYSTAL, ANTLER_BLOOM,
+            RAM_HORNS, RAM_HORN_FORM, RAM_HORN_TIP,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

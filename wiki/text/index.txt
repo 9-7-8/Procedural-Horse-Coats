@@ -48,6 +48,7 @@ wiki/breed-book.html#flowers	all	The flowering country
 wiki/breed-book.html#hills	all	The high and windswept country
 wiki/breed-book.html#night	all	The night country
 wiki/breed-book.html#not-native	all	Nothing here is native
+wiki/breed-book.html#pasture	all	The pasture
 wiki/breed-book.html#plains	all	The open country
 wiki/breed-book.html#reading	all	Reading the book against the game
 wiki/breed-book.html#sky	all	The high country
@@ -2178,6 +2179,30 @@ wiki/gene-rainbow-dust.html#inheritance	gameplay	Crossing two of them
 wiki/gene-rainbow-dust.html#invisible	gameplay	It paints nothing
 wiki/gene-rainbow-dust.html#not-particle	science	Why it is not a forty-first particle allele
 wiki/gene-rainbow-dust.html#recessive	coding	Recessive, with no wild carriers
+wiki/gene-ram-horn-form.html#carrot	gameplay	Its gene carrot
+wiki/gene-ram-horn-form.html#four	coding	One root for four horns
+wiki/gene-ram-horn-form.html#health	gameplay	Is it good for the horse?
+wiki/gene-ram-horn-form.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ram-horn-form.html#order	coding	Allele order is generator order
+wiki/gene-ram-horn-form.html#real-sheep	science	Analogous, not measured
+wiki/gene-ram-horn-form.html#shapes	gameplay	The four shapes
+wiki/gene-ram-horn-tip.html#carrot	gameplay	Its gene carrot
+wiki/gene-ram-horn-tip.html#door	coding	How it reaches the horns, and the prints
+wiki/gene-ram-horn-tip.html#finding	gameplay	Finding one
+wiki/gene-ram-horn-tip.html#health	gameplay	Is it good for the horse?
+wiki/gene-ram-horn-tip.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ram-horn-tip.html#matching-prints	gameplay	Matching hoofprints
+wiki/gene-ram-horn-tip.html#real-horses	science	There is no real locus here
+wiki/gene-ram-horns.html#branches	coding	Two-tone colour now runs along each branch
+wiki/gene-ram-horns.html#carrot	gameplay	Its gene carrot
+wiki/gene-ram-horns.html#finding	gameplay	Finding them
+wiki/gene-ram-horns.html#health	gameplay	Is it good for the horse?
+wiki/gene-ram-horns.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ram-horns.html#numbers	coding	The epigenome, by cost
+wiki/gene-ram-horns.html#pattern	coding	The antler pattern, again
+wiki/gene-ram-horns.html#real-sheep	science	Analogous, not measured
+wiki/gene-ram-horns.html#two-alleles	gameplay	Two ways to have horns
+wiki/gene-ram-horns.html#what-varies	gameplay	What varies
 wiki/gene-rapgef5.html#at-a-glance	science	At a glance
 wiki/gene-rapgef5.html#breeds	science	Breeds and frequency
 wiki/gene-rapgef5.html#carrot	gameplay	Its gene carrot

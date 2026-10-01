@@ -38,6 +38,7 @@
         <tr><td><code>MltB/MltB</code></td><td><strong>black</strong> prints that do not glow &mdash; a scorch, not an ember</td></tr>
         <tr><td><code>MltC/MltC</code></td><td>glowing prints in <strong>one colour</strong></td></tr>
         <tr><td><code>MltM/MltM</code></td><td>glowing prints running through <strong>several colours</strong></td></tr>
+<tr><td><code>MltH/MltH</code></td><td>glowing prints in the colour of the horse&rsquo;s <a href="gene-ram-horn-tip.html">ram horn tips</a> &mdash; or its horns&rsquo; own shade if the tips are plain &mdash; so the prints match the horns</td></tr>
         <tr><td>any other mix, e.g. <code>MltB/n</code> or <code>MltC/MltM</code></td><td>nothing &mdash; a carrier</td></tr>
     </tbody>
 </table>
@@ -70,13 +71,14 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd><code>horsegenetics.molten_hooves</code></dd></div>
-    <div><dt>Alleles</dt><dd><code>MltW</code> white, <code>MltB</code> black, <code>MltC</code> colour, <code>MltM</code> multicolour, <code>n</code></dd></div>
+    <div><dt>Alleles</dt><dd><code>MltW</code> white, <code>MltB</code> black, <code>MltC</code> colour, <code>MltM</code> multicolour, <code>n</code>, then <code>MltH</code> horn tip &mdash; appended after the wild type on 2026-10-01 so no existing allele&rsquo;s order moved</dd></div>
     <div><dt>Priority</dt><dd>154 &mdash; beside the other emission loci; it paints nothing, so the number is a slot</dd></div>
     <div><dt>Inheritance</dt><dd>white <strong>dominant</strong> over all; black, colour and multicolour <strong>recessive</strong>, each expressing only as its own homozygote</dd></div>
     <div><dt>Reaches the game as</dt><dd>one <code>emitter</code> (white, black, colour) or two, one per copy (multicolour); the emitter&rsquo;s <code>data</code> is 1 for a glowing print and 0 for black&rsquo;s unlit one</dd></div>
     <div><dt>Particle</dt><dd><code>horsegenetics:hoofprint</code> &mdash; the mod&rsquo;s own, laid by stride</dd></div>
     <div><dt>Epigenetic</dt><dd>two colours per allele copy &mdash; read by the colour allele (copy one&rsquo;s first) and the multicolour allele (all four)</dd></div>
-    <div><dt>Wild founders</dt><dd>white 2% one copy, 0.2% two; black 0.3%, colour 0.5%, multicolour 0.2% as homozygotes &mdash; no invisible carriers</dd></div>
+    <div><dt>Wild founders</dt><dd>white 2% one copy, 0.2% two; black 0.3%, colour 0.5%, multicolour 0.2%, horn tip 0.1% as homozygotes &mdash; no invisible carriers</dd></div>
+    <div><dt>Horn tip</dt><dd><code>MltH</code> carries no colour of its own that it reads: its emitter takes <code>RamHornTipGene.printColourOf</code> off the whole horse&rsquo;s epigenome, the <a href="gene-horn-dust.html">horn dust</a> move. Made for the <a href="breed-book.html#mirrorgazer">Mirrorgazer</a> (owner, 2026-10-01)</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none, ever</strong></dd></div>
 </dl>
 

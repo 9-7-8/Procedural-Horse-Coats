@@ -25,7 +25,13 @@ public enum PartKind {
     ANTLER_RIGHT(PartAnchor.CROWN_RIGHT, PartSheet.BONE),
 
     /** The left-hand antler. A symmetric rack asks both sides for the same variant. */
-    ANTLER_LEFT(PartAnchor.CROWN_LEFT, PartSheet.BONE);
+    ANTLER_LEFT(PartAnchor.CROWN_LEFT, PartSheet.BONE),
+
+    /** The right-hand ram's horn - the ram horns locus. Rooted where an antler is. */
+    RAM_HORN_RIGHT(PartAnchor.CROWN_RIGHT, PartSheet.RAM_HORN),
+
+    /** The left-hand ram's horn. */
+    RAM_HORN_LEFT(PartAnchor.CROWN_LEFT, PartSheet.RAM_HORN);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -51,6 +57,8 @@ public enum PartKind {
             case HORN -> HornGenerator.STYLES;
             // Habit x rack: the antler_form locus picks the first, the rack seed the second.
             case ANTLER_RIGHT, ANTLER_LEFT -> AntlerGenerator.FORMS * AntlerGenerator.VARIANTS;
+            // Shape x how far it curls (how tight a corkscrew twists).
+            case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornGenerator.FORMS * RamHornGenerator.CURLS;
         };
     }
 
@@ -63,13 +71,15 @@ public enum PartKind {
         return switch (this) {
             case HORN -> PartShape.SIZE_BUCKETS;
             case ANTLER_RIGHT, ANTLER_LEFT -> AntlerSize.classes();
+            case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornSize.classes();
         };
     }
 
     /**
      * Does a foal wear this part? A foal wears a half-size horn (owner's call,
      * 2026-09-30); it wears <b>no antlers</b> - the treatment's default (P5), and
-     * the biology: antlers grow from pedicles that do not exist at birth.
+     * the biology: antlers grow from pedicles that do not exist at birth - and no ram's
+     * horns either, which come in with the rack's rule rather than the unicorn's.
      */
     public boolean showsOnFoal() {
         return this == HORN;
@@ -84,7 +94,14 @@ public enum PartKind {
         return switch (this) {
             case HORN -> PartSheet.SOLID;
             case ANTLER_RIGHT, ANTLER_LEFT -> PartSheet.bit(PartSheet.BONE_TIP);
+            // Nothing makes a ram's horn glow yet; if something does, the whole horn.
+            case RAM_HORN_RIGHT, RAM_HORN_LEFT -> PartSheet.SOLID;
         };
+    }
+
+    /** Is this a ram's horn, of either side? */
+    public boolean ramHorn() {
+        return this == RAM_HORN_RIGHT || this == RAM_HORN_LEFT;
     }
 
     /** Is this an antler, of either side? */

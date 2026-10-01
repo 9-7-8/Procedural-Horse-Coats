@@ -81,3 +81,23 @@ Later the same day - the Greenwood
     family at an equal 0.0926% each (patn1/2 show nothing without leopard; a few horses carry two
     because the loci roll independently). Pangare dropped - it lightens red, and there is none on
     black. No shipped breed pins asymmetry any more; the antler page says so.
+
+Later again - ram horns, the Mirrorgazer and the Not A Sheep
+
+    Owner asked for a ram horn on the antler pattern with two breeds. Under the new rule the open
+    calls went to her first, as options: inheritance like antlers (Rh both sexes, Rhm stallions
+    only); all four shapes (curl, corkscrew, four-horned, scurs); a tip-colour gene plus a molten
+    hooves allele that copies it; Mirrorgazer any of the four shapes; Not A Sheep = solids plus
+    only the patterns with a close natural gene, horns like real flocks, small-pony size.
+
+    Built: RamHornsGene (235), RamHornFormGene (237, Fhn > Crl > Crk > Scr, Crl default),
+    RamHornTipGene (238, recessive, bright colour on the copy); MoltenHooves MltH appended AFTER
+    n (order 5) so nothing moved; RamHornGenerator / RamHornSize; RAM_HORN_RIGHT/LEFT kinds on the
+    CROWN anchors; two new sheet regions. PartModel.along(i) now colours a two-tone part root to
+    tip per BRANCH (depth / (depth + height)) - identical for the unicorn horn's chain, needed for
+    the four-horned shape. Goldens moved by key only (10 new bake rows at baseline).
+
+    Calls made without asking, all flagged in the breed notes: Mirrorgazer is fireproof (a
+    Nether-only horse burns otherwise); shape dominance order; Not A Sheep's mapping - white =
+    double cream, moorit = chestnut, grey = roan, pied = tobiano, mouflon = pangare (Suffolk face
+    and badger-face left out: no natural gene); its weights, biomes, stats and 'uncommon'.
