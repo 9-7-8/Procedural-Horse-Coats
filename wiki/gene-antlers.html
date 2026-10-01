@@ -80,8 +80,8 @@
         shorter, a little thicker or thinner, on top of the size.</li>
     <li><strong>Shade</strong> &mdash; from pale bone to dark umber.</li>
     <li><strong>Asymmetry</strong> &mdash; <em>none</em> on any wild horse. Every wild
-        rack is the same on both sides. Only a breed can make a rack lopsided &mdash; the
-        Rimehart does &mdash; and once a line has it, the foals carry it on.</li>
+        rack is the same on both sides. Only a breed can make a rack lopsided, and no breed in the
+        mod does yet; a breed you write yourself can, and once a line has it, the foals carry it on.</li>
 </ul>
 
 <h2 id="polygenic">Five genes make a rack</h2>
@@ -297,8 +297,9 @@
     Real racks are rarely perfectly symmetric, and reindeer are often strikingly lopsided.
     But a lopsided rack on every wild horse reads as a rendering bug before it reads as
     biology. So the owner's call (D3) is that wild racks mirror exactly, and lopsidedness
-    is a thing a breed brings &mdash; the <a href="breed-book.html#rimehart">Rimehart</a>
-    is that breed.
+    is a thing only a breed can bring. Both antlered breeds, the <a href="breed-book.html#rimehart">Rimehart</a>
+    and the <a href="breed-book.html#greenwood">Greenwood</a>, are symmetric too (owner, 2026-10-01): the
+    machinery for a lopsided rack is there for a breed that wants one.
 </p>
 
 </section>
@@ -355,9 +356,10 @@
 
 <h3 id="open-antler-asymmetry">A breed-pinned lopsided rack</h3>
 <p>
-    A Rimehart should have two different antlers, the left one smaller and with fewer
-    tines. Save, reload and breed it to an unrelated antlered horse: the foal that
-    inherits the Rimehart's antler allele should be lopsided too.
+    No shipped breed bands <code>asymmetry</code> any more, so seeing one takes a drop-in breed file
+    with an <code>asymmetry</code> band above 0.1. Such a horse should have two different antlers,
+    the left one smaller and with fewer tines; save, reload and breed it to an unrelated antlered
+    horse, and the foal that inherits its antler allele should be lopsided too.
 </p>
 
 <h3 id="open-antler-cost">A pen of antlered horses</h3>

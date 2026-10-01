@@ -1,7 +1,11 @@
 package com.example.horsegenetics.common.breed;
 
 import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.GrownParts;
 import com.example.horsegenetics.common.genetics.epi.EpiValues;
@@ -12,7 +16,9 @@ import com.example.horsegenetics.common.parts.AntlerGenerator;
 import com.example.horsegenetics.common.parts.AttachedPart;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -65,23 +71,17 @@ class RimehartBreedTest {
         assertTrue(palmate > 20 && palmate < 110, "about one in seven is palmate: " + palmate);
     }
 
-    /**
-     * <b>Lopsided, which no wild horse can be.</b> Asymmetry is banded 0.15 to 0.45,
-     * every one of which is past the threshold, so the left antler is always a rack
-     * of its own and carries fewer tines than the right.
-     */
+    /** Symmetric (owner, 2026-10-01): no asymmetry band, so every rack matches itself. */
     @Test
-    void everyRackIsAsymmetric() {
+    void everyRackIsSymmetricAndBandedUp() {
         Breed b = rimehart();
         for (long seed = 0; seed < FOUNDERS; seed++) {
             Genome g = BreedFounder.roll(b, new SeededRng(seed));
             EpiValues v = g.expressedValues(Genes.ANTLERS);
-            double asym = v.get(AntlersGene.ASYMMETRY);
-            assertTrue(asym >= 0.15 - 1e-9 && asym <= 0.45 + 1e-9, "asymmetry " + asym + " at seed " + seed);
+            assertEquals(0.0, v.get(AntlersGene.ASYMMETRY), 0.0, "seed " + seed);
             List<AttachedPart> rack = GrownParts.of(g.genotype(), g.epigenome());
-            assertTrue(rack.get(0).shape().style() != rack.get(1).shape().style(),
-                    "a symmetric Rimehart at seed " + seed);
-            assertTrue(rack.get(1).shown() < rack.get(0).shown(), "seed " + seed);
+            assertEquals(rack.get(0).shape().style(), rack.get(1).shape().style(), "lopsided at seed " + seed);
+            assertEquals(rack.get(0).shown(), rack.get(1).shown(), 0f, "seed " + seed);
             double size = v.get(AntlersGene.SIZE);
             double tines = v.get(AntlersGene.TINES);
             assertTrue(size >= 0.35 - 1e-9 && size <= 0.75 + 1e-9, "size " + size);
@@ -89,6 +89,69 @@ class RimehartBreedTest {
         }
     }
 
+    /**
+     * <b>The coat, as the owner specified it.</b> A black base on every horse; half dun
+     * (grulla), a quarter grey, a quarter carrying silver - three independent loci.
+     */
+    @Test
+    void aBlackBaseHalfGrullaAQuarterGreyAQuarterSilver() {
+        Breed b = rimehart();
+        int n = 4000;
+        int dun = 0;
+        int grey = 0;
+        int silver = 0;
+        for (long seed = 0; seed < n; seed++) {
+            Genotype g = BreedFounder.roll(b, new SeededRng(seed)).genotype();
+            assertEquals("E/E", g.pair(Genes.EXTENSION).toTokens());
+            assertEquals("a/a", g.pair(Genes.AGOUTI).toTokens());
+            dun += g.pair(gene("horsegenetics.dun")).toTokens().contains("D") ? 1 : 0;
+            grey += g.pair(gene("horsegenetics.grey")).toTokens().contains("G") ? 1 : 0;
+            silver += g.pair(gene("horsegenetics.silver")).toTokens().contains("Z") ? 1 : 0;
+        }
+        assertShare("dun", dun, n, 0.50);
+        assertShare("grey", grey, n, 0.25);
+        assertShare("silver", silver, n, 0.25);
+    }
+
+    /**
+     * <b>About one in twenty carries one natural white allele</b>, any of all of them,
+     * and never two copies of one.
+     */
+    @Test
+    void aboutOneInTwentyCarriesASingleNaturalWhite() {
+        Breed b = rimehart();
+        int n = 20_000;
+        int carriers = 0;
+        Set<String> alleles = new HashSet<>();
+        for (long seed = 0; seed < n; seed++) {
+            Genotype g = BreedFounder.roll(b, new SeededRng(seed)).genotype();
+            boolean any = false;
+            for (Gene w : GeneFamily.NATURAL_WHITE.members()) {
+                AllelePair p = g.pair(w);
+                int variant = 2 - p.count(w.defaultAllele());
+                assertTrue(variant <= 1, w.key() + " " + p.toTokens() + " - two copies at seed " + seed);
+                if (variant == 1) {
+                    any = true;
+                    alleles.add(w.key() + ":" + p.toTokens());
+                }
+            }
+            carriers += any ? 1 : 0;
+        }
+        assertShare("natural white carriers", carriers, n, 0.05);
+        assertTrue(alleles.size() > 40, "only " + alleles.size() + " distinct white alleles turned up");
+    }
+
+    private static void assertShare(String what, int count, int n, double expected) {
+        double share = (double) count / n;
+        assertTrue(Math.abs(share - expected) < 0.25 * expected,
+                what + ": " + count + " of " + n + " is not about " + expected);
+    }
+
+    private static Gene gene(String key) {
+        Gene g = Genes.byKeyOrNull(key);
+        assertNotNull(g, key);
+        return g;
+    }
     /** Moss, never leaves or blossom, on every one that blooms. */
     @Test
     void aBloomingRimehartGrowsMoss() {

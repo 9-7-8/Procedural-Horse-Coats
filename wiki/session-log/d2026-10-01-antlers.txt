@@ -72,3 +72,12 @@ Later the same day - the Greenwood
     (no asymmetry band, to stay distinct from the Rimehart); size 0.3-0.7, tines 3-7, darker bone;
     leaves (growth 0 - a category band is a range, so 'leaves or blossom' would have let moss in)
     on three in ten. Ant rather than the stallion-only Antm was a choice: say if mares should be bare.
+
+    Then the Rimehart was redesigned to the owner's spec, and she asked that new breeds be designed
+    WITH her from now on unless a thorough spec exists. Spec: black base (E/E a/a); 50% dun (grulla:
+    D/D 20, D/d2 30); 25% grey (G2/N, G3/N evenly); 25% carrying silver (Z/z); same antler shapes,
+    all symmetric (asymmetry band removed); very large (size 1.2-1.43, 16.3-18.0 hh); snow biomes
+    only; 5% carrying exactly one of any natural white allele - all 54 across the NATURAL_WHITE
+    family at an equal 0.0926% each (patn1/2 show nothing without leopard; a few horses carry two
+    because the loci roll independently). Pangare dropped - it lightens red, and there is none on
+    black. No shipped breed pins asymmetry any more; the antler page says so.
