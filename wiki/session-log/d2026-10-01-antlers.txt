@@ -1,0 +1,54 @@
+2026-10-01 - antlers: five genes, a second part kind, and the Rimehart
+
+    Owner: "Let's implement the antler plan from intake, following the guidelines there as well
+    as everything we set out for the unicorn horn, including creating a custom breed for the
+    horns."
+
+Done (code, commit 54efbabe, pushed; :neoforge-26.1.2:build green, creator parity green,
+designer boots)
+
+    The whole of intake/"Antler genes - implementation treatment.txt" - Tier 1, Tier 2 and the
+    breed slice - in one session, and the treatment retired. Nothing seen in a running game.
+
+    Genes (all Java, all magical, grown-parts family, priorities 230-234):
+      antlers         Ant (both sexes) > Antm (stallions only) > n. Seven epigenome values on
+                      the copy: size, rack (seed), tines, reach, girth, asymmetry, tint.
+      antler_form     Pal > Crn > Brw > Frk > n; allele order == AntlerGenerator habit index.
+      antler_glow     recessive; glows the points only (PartKind.glowRegions).
+      antler_crystal  recessive; gem category; shafts translucent, points solid.
+      antler_bloom    recessive; growth category (leaves / moss / blossom).
+
+    Parts machinery: ANTLER_RIGHT / ANTLER_LEFT kinds (one mesh per side, never a mirrored
+    negative scale) at new CROWN_RIGHT / CROWN_LEFT anchors; AntlerSize (five classes, the mesh
+    buckets) and AntlerGenerator (all five habits, 16 racks each, baked at the class's most
+    tines). PartNode gained a group (tine number), PartModel.Slice gained shown + a region mask,
+    AttachedPart gained shown / translucent / bloomTint. PartKind gained sizeBuckets,
+    showsOnFoal (antlers: no) and glowRegions. Three new sheet regions, baked.
+
+    Rimehart (rimehart.json): magical, rare, snow forests; every founder Ant, mostly Brw/Brw;
+    the first breed to band asymmetry (0.15-0.45), so every Rimehart rack is lopsided.
+
+    Tests: AntlersGeneTest, RimehartBreedTest, PartGeneratorTest extended; the sex-gate test was
+    mutated on purpose and went red. Both goldens moved by key only - 14 bake rows at the baseline
+    hash, no pipeline coat hash changed. 39 registry-wide classes run and green. The full
+    :common:test suite was NOT run (owner's rule); it would still need to confirm nothing else.
+
+Calls made without the owner (each on a page, open where it should be)
+
+    - Magical, not the treatment's "natural" for antlers / antler_form: a natural gene that
+      paints nothing files under NATURAL_HEALTH, and MAGIC_PARTS was made for antlers. Open on
+      gene-antlers.html#open-antler-family and decisions.html.
+    - Asymmetry is EpiValue.uniform(0,0).clampedTo(0,1) - the treatment's open question about a
+      "breed-pin only" value needed no new epigenome shape. The breed designer's slider divided by
+      the design span; it now runs a zero-wide value over the clamp.
+    - The part-cache test now bounds total boxes, not mesh count (antlers take it to ~860 meshes,
+      past the horn-era 256 limit), and PartMeshes still has no eviction.
+    - The draft folder intake/attached-parts-draft/ is left as it was, as the horn session left
+      it; only the antler treatment file was deleted.
+
+Where to look first in game
+
+    gene-antlers.html#verification: placement through every animation, the Antm mare, a foal,
+    two horses with different tine counts in one frame, a massive rack under a ceiling, and a
+    Rimehart's lopsided rack. Then each modifier page's tab. Palmate is the habit most likely to
+    read wrong (square boxes do not make a plate).

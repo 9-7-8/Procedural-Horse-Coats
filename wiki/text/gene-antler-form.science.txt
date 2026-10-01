@@ -1,0 +1,5 @@
+Antler form
+(Magical gene / dominance series / shapes the antlers, paints nothing)
+How an antlered horse's rack grows: forked like a red deer's, swept back with a brow tine like a reindeer's, broad and palmate like a moose's, crowned with a cup of tines, or a plain spike. One habit, drawn on both sides. On a horse without antlers it does nothing at all.
+
+Analogous, not measured Invented, like the antler locus it modifies (D8). The five habits are the broad shapes deer antlers take — branched, brow-tined, palmate, crowned and simple — but in real deer they are species characters, not alleles of one gene. The split between this locus and the antler allele's numbers is a gameplay rule, written on the treatment: a kind a breeder wants to cross in on purpose, with a 3:1 ratio, is an allele; a quantity they want to nudge is a number. Why plain dominance and never codominant A codominant series would draw one habit on each side. Antlers are symmetric by default (D3), so a palmate-left, forked-right rack would read as a bug; one habit wins and is drawn on both.

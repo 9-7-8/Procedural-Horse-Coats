@@ -1,0 +1,5 @@
+Antler glow
+(Magical gene / recessive / lights the antlers' points, paints nothing)
+Two copies and the points of a horse's antlers glow in the dark — every tine's tip and the end of each beam, in the antler's own colour. On a horse without antlers this gene does nothing at all.
+
+Crossing two of them Finding one Recessive: one copy shows nothing. In the wild a horse carries two copies or none — about one in ten has two — so roughly one antlered wild horse in ten has glowing points. Most horses with two copies have no antlers to light. What it looks like Only the points glow, not the whole rack: a dark antler at night with a light at the end of every tine. They glow in the antler's own colour — bone, umber, or a crystal rack's gem. parts.glow in the client config turns the glow off and keeps the antlers. Is it good for the horse? It does nothing to the horse at all, for good or ill, and lights nothing around it — only the points themselves shine. Its gene carrot
