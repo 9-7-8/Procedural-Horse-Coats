@@ -5,7 +5,7 @@ Nothing here is built or run. "Decided" lines are the owner's request as given;
 "Open" lines are for the building session to settle; "UNVERIFIED" lines are facts
 this file has not proved. Source of truth once routed: wiki/horse-realm.html (a new
 Gameplay/Coding pair, plus a Roadmap tab until it ships) and wiki/breeds.html for the
-breed-pick half. This file is retired (deleted, per START HERE step 3) when the
+breed-pick half. This file is retired (deleted, per /process-intake step 7) when the
 piece ships and moves onto those pages.
 
 The request, as given

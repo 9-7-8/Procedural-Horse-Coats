@@ -75,3 +75,29 @@ created under this version' when we increase the second number (0.X.0), not the 
 
     Comments only in Java: :common and :neoforge compile green. The designer was not
     rebaked, since no code moved.
+
+Then START HERE.txt and Implementation advice.txt were folded away and deleted.
+    - The intake half went into /process-intake: one unit per context window and why;
+      retiring a unit from every intake file; the ways to search without burning context;
+      the hypothesis-and-disproving-check habit; the shape of a change (rules in common/
+      with typed results, server-authoritative config, extend the existing path, throttle
+      refusal notices).
+    - The bug half became a new skill, /fix-bug (.claude/skills/fix-bug/SKILL.md). It
+      takes one GitHub issue, checks whether it is already fixed (dating the report
+      against the release that carries the fix), finds the code through the symptom map,
+      sorts small from large the same way the run-tests routine does, reproduces it in a
+      failing test, fixes it, and closes it only on evidence.
+    - Implementation advice's four numbered plans (breeding caps, bond decay, cowboy
+      ownership, search/naming/loot) were not carried over. They were the old To do bug
+      bullets, and every one has shipped since (the crowding-cap, bond-decay,
+      foal-naming and chest-loot sessions).
+    - Every treatment that said "per START HERE step 3" now points at /process-intake.
+And, at the owner's request, intake/"How to report a bug (cloud session).txt": a
+report-only routine for a cloud session. It asks until the report is actionable, checks
+for duplicates and earlier fixes, finds the likely area read-only, labels the issue (bug,
+and needs-owner when it needs her), and writes it in the shape of issue #13, through the
+GitHub MCP tools. It never fixes, commits or pushes.
+
+Found on the way: the routing table on wiki/roadmap-execution.html still sends "built and
+wrong" to Known gaps. Since rule 9's amendment, that row should say GitHub issues. Left
+for the owner, because check-roadmap-execution.mjs reads that page.

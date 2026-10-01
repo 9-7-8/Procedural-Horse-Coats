@@ -7,8 +7,9 @@ description: Take ONE unit of work out of intake/, implement it, and end the ses
 
 One run = **one unit** out of `intake/`, built, written up, retired, pushed, and the
 session ended. Never a second unit in the same conversation - the owner clears context
-and re-runs this for the next one (`intake/START HERE.txt`, "One bullet, one context
-window").
+and re-runs this for the next one. Context is the scarce resource here, not developer
+time: the next unit's classes, pages and tests are unrelated to this one's, and a fresh
+context that reads only what it needs is cheaper than one carrying every earlier unit.
 
 Intake is for **new features only**. Anything in the folder that is not a new feature
 is not a unit for this routine; leave it where it is.
@@ -22,8 +23,21 @@ read fresh every run, and nothing below names a current item on purpose.
    local copy is routinely stale. Cloud routines also push to main.
 2. `git status --short` - untracked files in `intake/` are the owner queuing material.
    Commit around them; never flag, add or delete them.
-3. Read `intake/START HERE.txt` and `intake/Implementation advice.txt` (once each), then
-   run `node wiki/tools/check-roadmap-execution.mjs`.
+3. Run `node wiki/tools/check-roadmap-execution.mjs`. It checks that every roadmap page
+   is covered and every open gap is routed, so nobody audits those lists by hand.
+
+**Finding things without burning context** (holds for the whole run):
+- Read `wiki/text/`, never `wiki/*.html`, for prose. Start a search at
+  `wiki/text/index.txt` (heading -> `file#anchor`). Open the real `.html` only to edit
+  it, or for `releases.html` and `making-a-gene.html`, which are not baked.
+- Never grep or read `wiki/search-index.js` - one multi-megabyte generated file.
+- Grep narrowly: one file, or `wiki/text/**`, not the whole repository.
+- Read a long routing page (`wiki/roadmap-execution.html`, `wiki/verification.html`) once
+  per session, by the section you need, never in full again.
+- An Explore agent answers an open-ended "where is X" without its dead ends landing in
+  this conversation.
+- Batch independent reads (the owning page's text, the classes named, the test) into
+  one parallel round.
 
 ---
 ## 1. List the units
@@ -33,7 +47,8 @@ A **unit** is the smallest thing that ships alone - not a file:
   `Horse exits` two pieces). A treatment that names no split is one unit.
 
 Not units - leave them alone:
-- `START HERE.txt`, `Implementation advice.txt`, `How to make an intake document.txt`;
+- `How to make an intake document.txt` - the guide for writing units, not a unit;
+- `How to report a bug (cloud session).txt` - a bug-reporting routine, not a unit;
 - `potential-assets/` - art packs, not work. **Use anything in them freely** for the
   unit you are building - copy, crop, recolour, transform - with no need to ask.
   Document each use the way earlier uses are documented: the rules at the bottom
@@ -106,12 +121,21 @@ made without the owner", and on `wiki/decisions.html` when it is a design call.
 
 ---
 ## 6. Build it
-- **Before editing:** one sentence of hypothesis and one check that could disprove it
-  (Implementation advice). Resolve every `UNVERIFIED` line the unit relies on from the
+- **Before editing:** one sentence of hypothesis and one check that could disprove it;
+  run that check straight after the first edit. If the check needs NeoForge runtime
+  state, write the exact manual reproduction on the owning page's Verification tab
+  rather than widening the search. Resolve every `UNVERIFIED` line the unit relies on from the
   26.1.2 sources or a gametest first. A treatment may cite an API or a past case that
   does not exist, so grep for each one before writing code against it.
 - Read the owning wiki page in `wiki/text/`, then only the classes the treatment names.
-- `common/` first, the NeoForge module thin, hard rules 1-10 as always. Rule 10 is the
+- `common/` first, the NeoForge module thin, hard rules 1-10 as always. The rules a
+  feature lives by go in `common/`. Return typed results from them, never chat text or
+  player concerns: the NeoForge side turns a result into config, chat, persistence,
+  navigation and rendering. Config that decides gameplay is server-authoritative;
+  a client may hold a preference, never the authority. Extend the existing path
+  (a search, a filter, a goal, a log) rather than adding a second one beside it.
+  A refusal or failure reported to a player is throttled - once per meaningful
+  attempt, never once per tick - so an AI loop retrying a goal cannot spam chat. Rule 10 is the
   one a feature breaks without noticing: anything saved that the unit changes ships
   with its migration, and a test that loads the old shape. If it touches the
   spawn-egg screen or the designer, change both (rule 5).
@@ -123,10 +147,11 @@ made without the owner", and on `wiki/decisions.html` when it is a design call.
 
 ---
 ## 7. Retire it from intake/
-Per START HERE step 3: delete the shipped unit's **text**, with no "done" marker and no
-strike-through.
-- Last piece of a treatment -> delete the whole file, and any `*-draft/` folder or
-  `Implementation advice.txt` section that only it used. Grep `intake/` for the folder
+Delete the shipped unit's **text**, from every file in `intake/` that mentions it,
+with no "done" marker and no strike-through. A unit that has shipped and still sits
+here is a second description competing with the real record on the wiki, not a log.
+- Last piece of a treatment -> delete the whole file, and any `*-draft/` folder that
+  only it used. Grep `intake/` for the folder
   name first; another treatment may still read it.
 - Not the last piece -> delete that piece's section, and leave a one-line pointer to
   where it now lives on the wiki if the remaining pieces refer to it.

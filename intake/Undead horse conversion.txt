@@ -9,7 +9,7 @@ Nothing here has been checked in-game. Anything that touches a Minecraft or
 NeoForge API is marked UNVERIFIED and must be read out of the 26.1.2 sources
 (or proved in a gametest) before it is relied on - see CLAUDE.md hard rule 8.
 
-Where this goes: intake/ is an inbox, not a plan (START HERE.txt). When this is
+Where this goes: intake/ is an inbox, not a plan (/process-intake). When this is
 picked up it is routed onto wiki/undead-horses.html's Roadmap tab, and this file
 is deleted. Section 12 says exactly what goes where. Appendix A is the script for
 the stage 0 check and Appendix C is what it printed.
@@ -688,7 +688,7 @@ that then have to be converted.
     record that on the page.
 
 
-10. Staging (one bullet, one context window - START HERE.txt)
+10. Staging (one unit, one context window - /process-intake)
 ==============================================================
 Each stage is one session, ends with the CLAUDE.md "Ending a session" routine,
 and leaves the game working. Because conversion is ON by default (D2), stages

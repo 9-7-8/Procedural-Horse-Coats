@@ -4,8 +4,8 @@ Scoped with the owner. Every "Decided" line below is her call; "Recommended" lin
 mine, not asked; "UNVERIFIED" lines are facts this file has not proved and the building
 session must check first. Source of truth for what exists is wiki/model-parts.html (the
 attached-parts layer) plus the unicorn and antler gene pages. This file is the handoff for
-six new parts that all grow on the head or neck. It is retired (deleted, per START HERE
-step 3) as each slice ships and moves onto those pages' Gameplay and Coding tabs.
+six new parts that all grow on the head or neck. It is retired (deleted, per /process-intake
+step 7) as each slice ships and moves onto those pages' Gameplay and Coding tabs.
 
 The six parts, and nothing more
 ===============================

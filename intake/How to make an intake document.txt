@@ -108,7 +108,7 @@ Header paragraph (copy this shape):
     are the scoping session's, not asked; "Open" lines are still to be settled, by
     whom is said on the line; "UNVERIFIED" lines are facts this file has not proved
     and the building session must check first. Source of truth for what exists is
-    <wiki page(s)>. This file is retired (deleted, per START HERE step 3) as each piece
+    <wiki page(s)>. This file is retired (deleted, per /process-intake step 7) as each piece
     ships and moves onto <wiki page(s)>'s Gameplay and Coding tabs.
     Release: <own version | rides the next release | owner bumps the middle number>.
 

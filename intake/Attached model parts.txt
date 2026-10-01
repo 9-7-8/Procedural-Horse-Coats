@@ -5,7 +5,7 @@ Anything that touches a Minecraft or NeoForge API is marked UNVERIFIED and must 
 read out of the 26.1.2 sources (or proved in a running client) before it is relied
 on - CLAUDE.md hard rule 8. Nothing has been seen in-game.
 
-Where this goes: intake/ is an inbox, not a plan (START HERE.txt). When this is
+Where this goes: intake/ is an inbox, not a plan (/process-intake). When this is
 picked up it is routed onto wiki/model-parts.html's Roadmap tab (that page already
 exists, already has the tab and its summary box) and this file is deleted. Section 9
 says exactly what goes where.
@@ -166,7 +166,7 @@ P6. What does the horse designer / CustomHorseSpawnScreen show?
 
 5. The plan, in slices (one bullet, one context window)
 ========================================================
-Per START HERE.txt each slice is one session, ends with the closeout routine, and
+Per /process-intake each slice is one session, ends with the closeout routine, and
 the next slice is not started in the same conversation.
 
 Stage 0 - the spike. One horn, one horse, prove the pipeline. NO gene.
