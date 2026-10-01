@@ -273,11 +273,11 @@ public final class StablePopulator {
         // must not despawn because they left to fetch a saddle.
         horse.setPersistenceRequired();
 
-        Genome genome = spawn.roll(rng);
+        StableSpawn.Rolled rolled = spawn.roll(rng);
+        Genome genome = rolled.genome();
         HorseRecord record = HorseRecords.newFounder(horse, rng, genome);
-        com.example.horsegenetics.common.breed.Breed breed = spawn.breed(rng);
-        BreedFounderLog.founder(breed, genome.genotype(), "stable");
-        record = record.withBreed(breed.id());
+        BreedFounderLog.founder(rolled.breed(), genome.genotype(), "stable");
+        record = record.withBreed(rolled.breed().id());
         HorseRecords.apply(horse, record);
         level.addFreshEntity(horse);
         return true;

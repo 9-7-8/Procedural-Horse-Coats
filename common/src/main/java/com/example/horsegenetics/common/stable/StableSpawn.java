@@ -122,12 +122,25 @@ public record StableSpawn(
     }
 
     /**
+     * One horse and the breed it was rolled from. The two travel together
+     * because the caller stamps that breed on the record: drawing the breed a
+     * second time labelled a multi-breed stable's horses with a breed their
+     * genes did not come from (issue #11).
+     */
+    public record Rolled(Breed breed, Genome genome) {
+    }
+
+    /**
      * One horse. The sex is drawn here rather than forced, so a generated stable
      * is a stable and not a breeding pair - a player who wants to breed from one
      * may have to find a second.
      */
-    public Genome roll(Rng rng) {
+    public Rolled roll(Rng rng) {
         Breed breed = breed(rng);
+        return new Rolled(breed, roll(breed, rng));
+    }
+
+    private Genome roll(Breed breed, Rng rng) {
         Genome genome = BreedFounder.roll(breed, rng, rng.nextBoolean() ? Sex.MALE : Sex.FEMALE);
         Genotype g = genome.genotype();
 

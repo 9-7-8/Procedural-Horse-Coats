@@ -1,12 +1,15 @@
 package com.example.horsegenetics.common.stable;
 
 import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.SpliceSafety;
 import com.example.horsegenetics.common.trait.Condition;
+import com.example.horsegenetics.common.trait.HealthContribution;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Severity;
 import com.example.horsegenetics.common.trait.Traits;
@@ -78,7 +81,7 @@ class StableSpawnTest {
                 stable(StableSpawn.Magic.ALLOWED, 3, 2, 4));
         for (StableSpawn spawn : stables) {
             for (long seed = 0; seed < 60; seed++) {
-                Genome genome = spawn.roll(new SeededRng(seed));
+                Genome genome = spawn.roll(new SeededRng(seed)).genome();
                 Traits traits = HorseTraits.resolve(genome.genotype(), genome.epigenome(), true);
                 for (Condition condition : traits.conditions()) {
                     assertFalse(condition.severity().lethal(),
@@ -97,7 +100,7 @@ class StableSpawnTest {
     void magicNoneLeavesNoMagicalGeneAtAll() {
         StableSpawn spawn = stable(StableSpawn.Magic.NONE, 1, 0, 0, "arabian");
         for (long seed = 0; seed < 40; seed++) {
-            assertEquals(0, magicalLociCarried(spawn.roll(new SeededRng(seed))),
+            assertEquals(0, magicalLociCarried(spawn.roll(new SeededRng(seed)).genome()),
                     "seed " + seed + " carried a magical gene");
         }
     }
@@ -106,7 +109,7 @@ class StableSpawnTest {
     void magicNoCoatLeavesNoMagicalGeneThatPaints() {
         StableSpawn spawn = stable(StableSpawn.Magic.NO_COAT, 0, 0, 0, "appaloosa");
         for (long seed = 0; seed < 40; seed++) {
-            Genome genome = spawn.roll(new SeededRng(seed));
+            Genome genome = spawn.roll(new SeededRng(seed)).genome();
             for (Gene gene : Genes.codeOrder()) {
                 if (!gene.isNatural() && gene.affectsCoat()) {
                     assertTrue(gene.atBaseline(genome.genotype().pair(gene)),
@@ -120,7 +123,7 @@ class StableSpawnTest {
     void everyHorseGetsAtLeastTheMinimumHomozygousMagic() {
         StableSpawn spawn = stable(StableSpawn.Magic.ALLOWED, 0, 1, 11, "friesian");
         for (long seed = 0; seed < 60; seed++) {
-            assertTrue(homozygousMagicLoci(spawn.roll(new SeededRng(seed))) >= 1,
+            assertTrue(homozygousMagicLoci(spawn.roll(new SeededRng(seed)).genome()) >= 1,
                     "seed " + seed + " came out with no homozygous magic");
         }
     }
@@ -133,7 +136,7 @@ class StableSpawnTest {
         int withExtras = 0;
         int runs = 400;
         for (long seed = 0; seed < runs; seed++) {
-            int n = homozygousMagicLoci(spawn.roll(new SeededRng(seed)));
+            int n = homozygousMagicLoci(spawn.roll(new SeededRng(seed)).genome());
             mostSeen = Math.max(mostSeen, n);
             if (n > 1) {
                 withExtras++;
@@ -149,7 +152,7 @@ class StableSpawnTest {
     void rareNaturalsAreForcedAndAreActuallyRare() {
         StableSpawn spawn = stable(StableSpawn.Magic.NONE, 2, 0, 0, "arabian");
         for (long seed = 0; seed < 40; seed++) {
-            Genome genome = spawn.roll(new SeededRng(seed));
+            Genome genome = spawn.roll(new SeededRng(seed)).genome();
             int rare = 0;
             for (Gene gene : Genes.codeOrder()) {
                 if (gene.isNatural()
@@ -183,6 +186,36 @@ class StableSpawnTest {
         for (long seed = 0; seed < 40; seed++) {
             String id = spawn.breed(new SeededRng(seed)).id();
             assertTrue(id.equals("appaloosa") || id.equals("american_paint"), id);
+        }
+    }
+
+    /**
+     * Issue #11. The breed a horse is labelled with must be the breed its genes
+     * were rolled from. With the label drawn separately, a stable listing many
+     * breeds stamped one breed on another's genome - a "Falabella" carrying the
+     * Paint's frame overo. Checked the way {@code BreedFounderLog} checks it: a
+     * disorder gene the labelled breed's sheet does not list is a stray. No
+     * magic and no forced rares, so every gene here is the breed's own doing.
+     */
+    @Test
+    void theBreedReturnedIsTheBreedTheGenesCameFrom() {
+        String[] breeds = {"american_paint", "appaloosa", "knabstrupper", "falabella", "mustang",
+                "kiger_mustang", "marwari", "shire", "american_miniature"};
+        for (String id : breeds) {
+            assertFalse(Breeds.get(id) == Breeds.FERAL_MIXED, "unknown breed " + id);
+        }
+        StableSpawn spawn = stable(StableSpawn.Magic.NONE, 0, 0, 0, breeds);
+        for (long seed = 0; seed < 400; seed++) {
+            StableSpawn.Rolled rolled = spawn.roll(new SeededRng(seed));
+            for (Gene gene : Genes.codeOrder()) {
+                if (!(gene instanceof HealthContribution)) {
+                    continue;
+                }
+                AllelePair pair = rolled.genome().genotype().pair(gene);
+                assertTrue(pair.homozygousFor(gene.defaultAllele()) || rolled.breed().constrains(gene.key()),
+                        "seed " + seed + ": " + rolled.breed().id() + " carries " + gene.key()
+                                + " " + pair + ", not on its sheet");
+            }
         }
     }
 
