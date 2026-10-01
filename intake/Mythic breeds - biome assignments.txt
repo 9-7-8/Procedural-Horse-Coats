@@ -241,7 +241,7 @@ each lost a shore biome, and two moved to very_rare) the most affected biomes by
   eroded_badlands: existing weight 9.8, added 1.5, mythic share 13%
   mangrove_swamp: existing weight 15.8, added 2.2, mythic share 12%
   windswept_forest: existing weight 33.0, added 3.0, mythic share 8%
-A third of a beach or stony shore herd being mythic is still a lot for a coast. If that is too many, the easy dials are to drop Hofvarpnir from one coast, leave Nuckelavee and the Hippocampus
+About one in five coastal herds being mythic (stony shore 19%, beach 17%) is still a lot for a coast. If that is too many, the easy dials are to drop Hofvarpnir from one coast, leave Nuckelavee and the Hippocampus
 unspawned until they are built (they are blocked anyway), or move the water breeds to spawn_egg only.
 
 Breeds that are blocked still get biomes
