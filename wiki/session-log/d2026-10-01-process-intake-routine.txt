@@ -124,3 +124,19 @@ slash command by a thin .claude/skills wrapper that only points at the file.
   server, the safe modpack, the routine's trigger id, the testers, and the machine.
 - intake/ lost its two guide files to procedures/ and gained a short README.txt.
 INDEX.txt lists nine routines that could become procedures next.
+
+Then /review-server-logs (the live server's PCH log exports: read only, paths and the
+reviewed-folders record in local memory) and /add-a-gene. add-a-gene has one path for each
+kind of gene: coat (JSON first, Java when the vocabulary falls short), ability (an effects
+verb first, then a handler), and add-on grown part (PartKind, generator, sheet,
+GrownParts). An Explore agent checked every class, task and test it names against the
+code. At the owner's request, its first step asks every open question up front, in
+consecutive question-tool rounds, before any work.
+
+Found on the way: making-a-gene.html's Java tab still had four stale lines.
+- "This mod has no save compatibility" - wrong under hard rule 10, and wrong in fact,
+  because codes are keyed by gene.
+- "Add the page to SECTIONS in nav.js" - hard rule 7 makes that generated.
+- "Run :common:test" - the whole suite.
+- "Delete coat-golden.txt" - the goldens are copied back from common/build/.
+All four are fixed.

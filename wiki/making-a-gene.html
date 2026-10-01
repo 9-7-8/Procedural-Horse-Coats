@@ -3639,9 +3639,11 @@ public final class YourMod {
         already computed once and cached &mdash; it buys a named failure instead of
         horses whose loci have all shifted by one segment, which reads as a breeding
         bug and is not one.</li>
-    <li><strong>Adding a gene changes the genotype code</strong>, and this mod has no
-        save compatibility: horses saved before your mod was added will not load with
-        it, and will not load again once it is removed.</li>
+    <li><strong>Adding a gene changes the genotype code</strong>, and saves still load
+        both ways, because codes are keyed by gene: a horse saved before your mod was
+        added reads as wild type at your locus, and once your mod is removed the
+        segment naming your gene is dropped. That loses the locus from every horse that
+        carried it, so removing a gene mod mid-world is lossy even though it loads.</li>
 </ul>
 
 <p id="verified-gene-freeze">
@@ -4369,8 +4371,10 @@ private static final List&lt;Gene&gt; BUILTINS = List.of(
 
 <ol>
     <li><strong>Write the gene up.</strong> Add a page under <code>wiki/</code>
-        modelled on an existing gene page, and add it to the
-        <code>SECTIONS</code> array in <code>wiki/nav.js</code>.</li>
+        modelled on an existing gene page. Do not add it to any page list by hand:
+        <code>:common:bakeGeneWikiPages</code> registers every gene that has a page into
+        the generated spans of <code>wiki/pages.js</code> and <code>index.html</code>
+        (CLAUDE.md hard rule 7).</li>
     <li><strong>Give the page a preview window</strong>, if the gene paints. Two
         lines, and no third:
 <div class="codebox">
@@ -4389,12 +4393,16 @@ private static final List&lt;Gene&gt; BUILTINS = List.of(
         <code>wiki/gene-preview/gene-preview.js</code>.</li>
     <li><strong>Bake samples</strong>: <code>./gradlew :common:bakeCoatSamples</code>
         writes <code>build/coat-samples/*.png</code> without launching the game.</li>
-    <li><strong>Run the tests</strong>: <code>./gradlew :common:test</code>.</li>
-    <li><strong>Regenerate the golden file</strong> if the gene deliberately changes
-        an existing coat: delete
-        <code>common/src/test/resources/coat-golden.txt</code>, run the test, copy
-        <code>common/build/coat-golden.txt</code> back &mdash; and say so in the
-        commit message.</li>
+    <li><strong>Run the tests by name</strong>, never the whole suite:
+        <code>./gradlew :common:test --tests '*YourGeneTest'</code>, plus
+        <code>*DeadLayerTest</code> and the two goldens below.</li>
+    <li><strong>Update the two goldens.</strong> Run
+        <code>--tests '*CoatBakeGoldenTest'</code> and
+        <code>--tests '*CoatPipelineGoldenTest'</code>. On a mismatch each writes its
+        actual to <code>common/build/</code>. Check <em>which rows</em> moved (a new gene
+        should add rows, not change old ones), then copy
+        <code>coat-bake-golden.txt</code> and <code>coat-golden.txt</code> back into
+        <code>common/src/test/resources/</code>, and say so in the commit message.</li>
     <li><strong>Give the new gene&rsquo;s own page a Verification tab</strong> saying what to
         look at in-game and where &mdash; never an entry on
         <a href="verification.html">to be verified</a>, which is generated from those tabs

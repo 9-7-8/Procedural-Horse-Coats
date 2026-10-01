@@ -30,6 +30,8 @@ Command                  Runs    Say (any of)                         What it le
                                  "boot a server"
 /release                 local   "ship a release", "cut a release",   tag + GitHub release with the jar
                                  "new version"                        + the wiki note
+/add-a-gene              local   "add a gene", "new gene",            one gene (coat / ability / add-on)
+                                 "a gene that ..."                    asked, built, baked, pushed
 /design-a-breed          either  "make a breed", "new breed"          a breed designed WITH the owner,
                                                                       baked and tested
 /survey-a-mod            local   "survey this mod", "compat with"     the jar's real contents, and
@@ -51,9 +53,6 @@ Routines that might become procedures next
 ------------------------------------------
 These are done often enough to repeat the same way, but nobody has written them up
 yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
-- add-a-gene: wiki/making-a-gene.html is the long reference. A procedure would be the
-  short checklist: the shape, the four contract lists, the goldens, the regenerate rows,
-  and the gene page with its three tabs.
 - rebake: walk CLAUDE.md's regenerate table against a diff. It is step 1 of
   end-session, and often wanted on its own.
 - add-a-wiki-page: hard rule 7 (pages.js), the three tabs, the footer, and the bakes.

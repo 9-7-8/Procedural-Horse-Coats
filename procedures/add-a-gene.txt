@@ -1,0 +1,358 @@
+PROCEDURE  : Add a gene
+COMMAND    : /add-a-gene
+SAY        : "add a gene", "make a gene", "new gene", "a gene that ...", "add an allele"
+RUNS       : local (it bakes, tests and rebuilds the designer's wasm)
+TAKES      : the owner's idea for a gene, or an intake treatment that describes one
+LEAVES     : one registered gene with its tests, goldens, page, bakes and wasm, pushed
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this for any new locus, or a new allele on an existing one. There are three kinds,
+and they are built differently:
+  COAT     - paints the coat and does nothing else (a marking, a colour, a pattern).
+             Built as a data-driven JSON gene unless the vocabulary cannot express it.
+  ABILITY  - does something in the game (flight, a drop, an aura, a temper, a stat, a
+             tolerance, a death effect). Paints nothing, or paints only as a side effect.
+  ADD-ON   - grows a mesh on the horse (the unicorn horn, antlers, ram horns).
+A gene that is two kinds at once (a horn that glows and grants an aura) is built as
+each kind in turn: the part first, then the ability.
+The long reference is wiki/making-a-gene.html. Its tabs are named in the steps below.
+If an intake treatment already describes the gene, use process-intake: it builds a
+unit, then calls back into this procedure for the gene work.
+A new BREED to carry the gene is a separate design: see design-a-breed.
+
+BEFORE YOU START
+----------------
+1. `git pull --ff-only origin main`.
+2. Read wiki/text/philosophy.txt (the gene must earn its place: utility, not
+   decoration, except in breeding), and the gene pages of the closest existing genes.
+3. Know the save rule (CLAUDE.md hard rule 10). Allele order is saved. Never reorder or
+   rename an existing allele. A new allele is added without moving the existing ones.
+
+STEPS
+-----
+1. QUESTION EVERYTHING UP FRONT.
+   Before reading code in depth and before writing anything, find every decision the
+   request leaves open, and ask them all at once. Use the question tool: 2-4 concrete
+   options each, your recommendation first and marked. Ask in consecutive rounds,
+   without starting work in between, until nothing below is unanswered. Then build
+   without stopping to ask again, except for a blocker nobody could have foreseen.
+   If the request or treatment already answers a question, do not ask it; say which
+   answers you took from where. If the owner does not know, take your recommendation
+   and record it under "Calls made without the owner".
+
+   Ask about every kind:
+   a. The concept in one sentence. Which kind is it (coat / ability / add-on / mixed)?
+   b. Natural (it exists in real horses) or magical? It is never both. Natural means
+      a source, and a Science tab that cites it.
+   c. Alleles: how many, their names and tokens, and which one is wild type.
+      Dominance: dominant, recessive, incomplete, or matched-pair.
+   d. What each genotype looks like or does: one outcome per pair that differs.
+   e. Rarity in the wild, and which existing breeds carry it, at what share. A new breed
+      to show it off goes to design-a-breed.
+   f. Sex: is it sex-linked or sex-limited (like the stallion-only antler allele)?
+   g. Foals: does it show from birth?
+   h. Per-horse variation: what differs between two horses with the same genotype
+      (size, tint, count, strength)? Those become epigenome values on the allele copy.
+   i. Health: any health or fertility effect? (This goes on Gameplay as a sentence.)
+   j. Interactions: what other genes change it, or hide it? Does it stack with similar
+      genes?
+   k. Breeding items: should a carrot or splice exist for it?
+   l. Release: once built, is it its own version, does it ride the next release, or
+      is it a bigger bump? (Only the owner moves the middle number.)
+   Ask too, for a COAT gene:
+   m. Where on the body, and on which bases (black, bay, chestnut, grey, dilutes)?
+   n. Shape and edge: spots, lines, patches, gradients; hard or soft edges; size and
+      density; is there an SVG or reference image?
+   o. Colours: absolute colours, or relative to the base coat? Does mane, tail, muzzle
+      or hoof change?
+   p. Draw order against other markings: over or under white, dapples, roan?
+   Ask too, for an ABILITY gene:
+   q. The trigger: always, when ridden, at night, in rain, on death, on interaction,
+      near a mob?
+   r. The effect and its size: numbers, radius, duration, cooldown, maximum targets.
+   s. Who it affects: the horse, the rider, the owner, other horses, mobs? What happens
+      in multiplayer, and on someone else's horse?
+   t. How the player perceives it: particles, sound, a message, an info-screen line?
+   u. Config: may a server turn it off or tune it, and what are the defaults?
+   v. Does it change horse AI or behaviour priorities?
+   w. Modded content: should it reach other mods' mobs, items or blocks (as Chaos does)?
+   x. Balance: what stops it being the best gene to have, and what does it cost?
+   Ask too, for an ADD-ON gene:
+   y. Where it grows (an existing anchor: forehead or crown; or a new one), and does
+      it come in pairs?
+   z. Shapes or styles, and how many variants; the size range; symmetric or lopsided?
+   aa. Colour: its own tint, the coat's colour, a tip colour, glow, a material (crystal,
+       bone, growth)? Are any of these separate modifier genes?
+   bb. Does it hide under, or clash with, a saddle, rider, armour or other gear?
+   cc. Do mares and foals grow it, and how does it scale with the horse's size gene?
+
+2. Read the code. Hand open-ended sweeps to an Explore agent (look-it-up). Grep every
+   class and file named below before relying on it. Path shorthands:
+     C = common/src/main/java/com/example/horsegenetics/common
+     N = neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge
+     R = common/src/main/resources/horsegenetics
+     T = common/src/test/java/com/example/horsegenetics/common
+
+3. Steps for every kind:
+   a. Priority and family.
+      - Natural genes sit in 0-99 (80-99 for genes that paint nothing). Magical genes
+        sit at 100 and up.
+      - Order is by (priority, key); the order genes are registered in is ignored.
+      - C/genetics/GeneFamily.java derives the family. Magical genes go by priority band
+        (MAGICAL_BANDS) unless listed in MAGICAL_OVERRIDES. Natural genes go by
+        NATURAL_OVERRIDES, then NATURAL_HEALTH if the gene paints nothing, then
+        NATURAL_BANDS.
+      - A gene that paints nothing NEEDS an override line, or it files wrongly in the
+        sidebar and both editors.
+   b. Tokens.
+      - Java tokens: alphanumeric, ideally 1-5 characters, unique within the gene.
+      - JSON tokens: anything except "/" and "-".
+      - No token may contain "|" (ResearchTopicTest).
+      - The key is horsegenetics.<gene>; the wild type is "n". Grep every token for a
+        clash with existing alleles.
+   c. Founders: put the expressing combinations in the founder table. No invisible
+      carriers in the wild, except a deliberate CARRIERS_ONLY design, said in notes.
+      Disorders are carrier-only. `python intake/tools/founders.py --check` reports
+      the tier-derived table.
+   d. Breeds: edit R/breeds/*.json. Then `:common:bakeBreedFiles` and
+      `:common:bakeGeneCensus`. Tests: BreedFilesTest, the breed's own *BreedTest,
+      BreedFounderTest, BreedClimateRuleTest.
+   e. Editors (hard rule 5): both the horse designer (web/.../HorseEditor.java,
+      DesignerApi.java) and N/client/CustomHorseSpawnScreen.java read the registry, and
+      shared rules live in C/genetics/EditorRules.java. Edit them only for a deliberate
+      divergence, and write that divergence in the comment on BOTH files.
+   f. Java genes need a description in C/genetics/GeneDescriptions.java
+      (GeneDescriptionCoverageTest). JSON genes carry blurb, notes and expression
+      descriptions. Genes have no lang keys, unless the gene adds an item or block.
+
+4. COAT gene.
+   Path A - data-driven JSON. This is the default.
+   1. Create R/genes/<slug>.json. Use making-a-gene's tabs:
+      - "The file" for the format: format 3, key, name, phase, priority, alleles (the
+        LAST is the population baseline), expressions, founders, knobs, notes;
+      - "Shapes" for the shape;
+      - "Masks & ops" for the paint.
+      The gene creator (wiki/gene-creator/) drafts two alleles and one outcome. Edit
+      anything bigger by hand. The creator drops "needs".
+   2. Add the filename to R/genes/index.json BY HAND. It is the only thing that ships a
+      bundled gene: a jar has no folder to walk. Never regenerate it from the folder
+      (hard rule 6), because an absence there is a killswitch.
+   3. Tests, by name:
+      - *GeneFilesTest*, which runs the real parser. If the SVG point ceiling fails,
+        run `node intake/tools/fit-svg.mjs <gene.json> --write`.
+      - *DeadLayerTest. A layer that paints nothing fails it: fix the gene, then delete
+        its line from dead-layers.txt.
+   4. Look at it.
+      - `:common:bakeGeneIcons`: no icon means the gene paints nothing.
+      - `node intake/tools/coverage.mjs <gene.json>`: which layer reached which body
+        part.
+      - `:common:bakeCoatSamples`: side views in build/coat-samples/.
+      Render before claiming it looks right: a measurement has agreed with a broken coat
+      before.
+   5. The page is GENERATED from the JSON by bakeGeneWikiPages. Edit the JSON, not the
+      page. Only the Verified block and extra tabs are carried over (GeneWikiCarryTest).
+   6. Only if you add a mask or an op: making-a-gene#contracts lists the files, and
+      every one must change or the two engines drift silently:
+      - SpecSchema;
+      - SpecPainter;
+      - the creator's schema.js, spec-engine.js and spec-model.js;
+      - noise.js, if needed;
+      - the tab text;
+      - a use in R/example-genes/prismatic.json.
+      Then run `:common:bakeSpecFixtures`, `check-parity.mjs`, `:common:bakeCreatorAssets`
+      and `:web:bakeDesignerAssets`. Break spec-engine.js on purpose once: parity must
+      go red.
+   Path B - a Java gene, only when the JSON vocabulary cannot express it.
+   1. Create C/genetics/genes/<Name>Gene.java.
+      - Extend AbstractNaturalGene (restrict) or AbstractMagicalGene (tint).
+      - Declare it with TwoAlleleGene.gene(...)..., or implement Gene directly for
+        three or more alleles.
+      - Never write through the coat: use mutableCopy(), and dilute/whiten rather than
+        bare scaling.
+      - Per-horse numbers come from epiSchema() and ctx.epigeneticsFor(KEY), marked
+        .varies().
+      - No Random, UUID, time or mutable statics, and cover every pair.
+   2. Register it in C/genetics/Genes.java: a public static final field, plus the
+      BUILTINS list.
+   3. Write T/genetics/genes/<Name>GeneTest.java. GeneCoatHookTest is the pattern.
+   4. The page is HAND-WRITTEN, with tabs gameplay, coding and science, plus
+      verification. bakeGeneWikiPages still registers it.
+
+5. ABILITY gene.
+   1. Pick the shape, in this order of preference:
+      - JSON with an "effects" block on an expression, if an existing verb does it.
+        The verbs are the AbilityType registrations: traversal, attribute, emitter,
+        mob_effect, yield, glow, healing, spread, charges, breath, on_death, item_drop,
+        mob_aura, night_watch, day_watch, combat, sound, produce, teleport, summon,
+        temper, bond, ward. flying.json is the worked example. An existing verb needs no
+        NeoForge change.
+      - Java base classes:
+        - AbstractAbilityGene - one allele, always magical;
+        - AbstractMatchedPairGene - many alleles, acts only on a matched pair
+          (LycanGene, EggLayerGene, SpawnerGene);
+        - AbstractClimateGene;
+        - AbstractMagicStatGene;
+        - or Gene plus AbilityContribution / EpigeneticAbilityContribution (one or the
+          other, never both);
+        - stats and health go through TraitContribution, HealthContribution and
+          RecessiveDisorderGene (making-a-gene #noncoat).
+   2. Every expression must be wildType, so the coat never re-bakes. The baseline
+      allele is declared last and contributes zero.
+   3. Add a MAGICAL_OVERRIDES entry (MAGIC_BEHAVIOUR, MAGIC_YIELD, MAGIC_EMISSION or
+      MAGIC_BODY), or it files as a coat gene.
+   4. Translation into the game is server-authoritative. Handlers:
+      - N/server/GeneAbilityHandler (the tick loop);
+      - GeneYieldHandler;
+      - GeneDeathHandler;
+      - NightBehaviourHandler;
+      - GeneReactionHandler;
+      - GeneWardHandler.
+      All of them collect through C/genetics/spec/HorseAbilities.activeFor. A bespoke
+      mechanic gets its own handler (LycanthropyHandler, ChaosRoster).
+   5. A new verb (making-a-gene#contract-verb) touches all of these:
+      - a record on GeneAbility;
+      - register(...) in AbilityType;
+      - a case in the handler;
+      - a section on making-a-gene's Effects tab;
+      - a client RenderLayer, if it draws.
+      AbilityType is on the spec/ row of the regenerate table, so run bakeSpecFixtures,
+      then check-parity.mjs.
+   6. Config: server keys in N/ServerConfig.java, each with a safe accessor and a
+      default. A bad value must never crash a world load. Document each key on
+      wiki/config.html.
+   7. Saved state: a new attachment goes in N/data/ModAttachments.java. Under rule 10,
+      any change to an existing one ships with its migration and a test that loads the
+      old shape.
+   8. AI: if goals are added or reprioritised, run
+      `node wiki/tools/bake-behaviour-hierarchy.mjs`.
+   9. Tests:
+      - a unit test in T/genetics/genes/ (LycanGeneTest and ChaosMobLociTest are
+        patterns). Mutate one assertion's subject on purpose, to prove the test bites;
+      - a gametest in N/gametest/ModGameTests.java for anything that only the game can
+        prove;
+      - a yard pen (DebugTestYard) that logs its own PASS or FAIL, for anything that
+        needs time.
+   10. Traps:
+       - dose counts only the first-declared allele, unless abilityDose is used;
+       - matched-pair seeds rolled independently never agree, so use
+         Gene.foundersShareSeeds();
+       - a radius effect needs max_targets;
+       - effects must be perceivable;
+       - common/ imports nothing from Minecraft;
+       - the dev run has no modded mobs or items.
+
+6. ADD-ON gene (a grown part). model-parts' Coding tab "adding a part" is the recipe;
+   the antlers session (wiki/session-log/d2026-10-01-antlers.txt) is the worked
+   example.
+   1. C/parts/PartKind.java: add values, one per side. Never mirror with a negative
+      scale: it turns culled boxes inside out. Add cases in styles(), sizeBuckets(),
+      showsOnFoal(), glowRegions() and any helper predicates.
+      PartGeneratorTest.everyKindIsCompletelyDeclared checks them.
+   2. A new place to grow: C/parts/PartAnchor.java, plus a case in
+      N/client/AttachedPartLayer.anchor(...), with offsets for adults AND foals. Walk
+      from the model root (it has a scale and an offset).
+   3. The generator: C/parts/<X>Generator.java, beside HornGenerator, AntlerGenerator
+      and RamHornGenerator. It emits PartNodes parent-before-child. Add a size class
+      (like AntlerSize), and cases in PartGenerators.build and in PartShape's
+      nominalLength and stretchTo. Bake the topology at its maximum, and show counts
+      out of that maximum.
+   4. The sheet: add a region constant in C/parts/PartSheet.java AND the same constant,
+      plus a paint() call, in neoforge-26.1.2/tools/bake-part-sheet.mjs. The two
+      constants are repeated by value and drift silently. Run
+      `node neoforge-26.1.2/tools/bake-part-sheet.mjs` and commit
+      .../textures/entity/horse/part_sheet.png.
+   5. The granting gene is Java and magical (a MAGIC_PARTS priority slot). It returns
+      AttachedPart(s), with epigenome values on the copy: size, a seed, counts, reach,
+      girth, asymmetry, tint. Modifier genes (form, colour, glow, crystal, growth, tip)
+      are separate Java genes. A form allele's order equals its generator's habit index.
+   6. C/genetics/GrownParts.java: add the call in of(...), plus a dress<X> method. ALSO
+      add the granting locus to the everyPart baseline in shapes(Gene). Otherwise its
+      modifier genes look invisible to EditorRules.changesLooks, and the editors never
+      randomise them.
+   7. Add every new locus to GeneFamily.MAGICAL_OVERRIDES as MAGIC_PARTS. Then the
+      Genes fields, BUILTINS and GeneDescriptions.
+   8. The renderer, N/client/PartModel.java. The deferred-submit trap: every per-horse
+      change goes through setupAnim with that submit's Slice, setting EVERY field on
+      EVERY box every time. Otherwise the second horse overwrites the first one's shared
+      mesh. Never add children to the body or head in createHdBodyMesh: it shifts the
+      HD UVs.
+   9. Tests:
+      - PartGeneratorTest (parent order, determinism, kind completeness, the sheet
+        grid). Watch theWholeSetOfMeshesIsSmall: the part cache has no eviction, and
+        the box total grows with styles times buckets;
+      - a gene test like AntlersGeneTest, covering the sex gate, the foal gate, the
+        epigenome reaching the part, and editor visibility. Mutate the sex gate once;
+      - breed tests for any breed that pins it.
+   10. The browser editor cannot draw a mesh; the game's spawn screen can. Keep that
+       divergence written in BOTH editor files' comments.
+   11. Update wiki/model-parts.html's Coding tab: its kind and region counts go stale
+       with each part.
+   12. Placement is computed from model boxes, so it is unverified until it is seen.
+       The Verification tab asks for:
+       - every animation;
+       - a foal;
+       - two horses with different counts in one frame;
+       - the biggest size under a ceiling;
+       - with a saddle and rider.
+       Hand it over with hand-over-a-test.
+
+7. Goldens: every new gene moves them.
+   Run `--tests '*CoatBakeGoldenTest'` and `--tests '*CoatPipelineGoldenTest'`. On a
+   mismatch, each writes its actual to common/build/. Check WHICH rows moved, then copy
+   them to common/src/test/resources/. A gene that paints nothing should only ADD bake
+   rows at the baseline hash, and change no pipeline hash. Any other movement is a
+   regression until explained.
+
+8. The gene page.
+   - Three tabs inside article.doc: <section class="tab-panel"
+     data-tab="gameplay|coding|science">. Gameplay is for a player, and carries health
+     as a sentence. Design rationale goes on Science. Natural genes must have a Science
+     tab (check-gene-tabs.mjs).
+   - Plus a Verification tab (data-tab="verification") that opens with a
+     note verify-summary box, saying what to look at in game.
+   - A painting gene gets the preview: <div class="gene-preview"
+     data-gene="horsegenetics.x"></div> and the gene-preview.js script.
+   - Never hand-add the page to wiki/pages.js or index.html (hard rule 7).
+
+9. The bake list, in this order. The timeline dates a gene by the first commit that
+   names its key, so commit the code before baking the timeline.
+     :common:bakeGeneBundle   :common:bakeGeneIcons   :common:bakeGeneWikiPages
+     :common:bakeMarkingFacts :common:bakeGeneCensus  :common:bakeUnverifiedGenes
+     node wiki/tools/bake-gene-timeline.mjs
+     :web:bakeDesignerAssets  then  node wiki/tools/check-designer-boots.mjs
+     node wiki/tools/bake-verification-index.mjs  (and bake-roadmap-index.mjs)
+     node wiki/tools/build-search-index.mjs, check-links.mjs, bake-agent-text.mjs
+   Commit everything those wrote (CLAUDE.md's gene row lists them). A wasm rebuild
+   after a data-only bake may be byte-noise: compare the two, and revert the wasm if
+   nothing reachable changed.
+
+10. Finish with `./gradlew :neoforge-26.1.2:build`, then end-session. Release as step
+    1's answer (l) says.
+
+DONE WHEN
+---------
+- The gene is registered and baked, its tests and both goldens are green by name, and
+  its page carries Gameplay, Coding, Science and Verification tabs.
+- The designer boots.
+- The build is green and everything is pushed.
+- The report says what was asked and answered, the calls made without the owner, what
+  a full :common:test run would still check, and where to look first in game.
+
+NEVER
+-----
+- Never start building with questions still open that the owner could have answered at
+  the start.
+- Never reorder or rename an existing allele (saves; hard rule 10).
+- Never regenerate R/genes/index.json from the folder (hard rule 6).
+- Never port a gene to JavaScript (hard rule 3).
+- Never let a gene that paints nothing fall into a coat family. Give it an override.
+- Never claim it looks right without rendering it.
+- Never run the full :common:test suite.
+
+SEE ALSO
+--------
+wiki/making-a-gene.html (the full reference); wiki/model-parts.html; design-a-breed;
+process-intake; hand-over-a-test; end-session; release; CLAUDE.md (hard rules 3, 5, 6,
+7, 10 and the gene rows of the regenerate table).
