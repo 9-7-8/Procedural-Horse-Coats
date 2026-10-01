@@ -33,22 +33,7 @@ What already exists, so the building session does not redo it
 
 Piece 1 - the saved-searches arrow shows on the wrong tab (bug)
 ================================================================
-What the owner sees: the "▾" saved-searches arrow is drawn on the bank's inventory
-(Chambers) screen, instead of only on the page that has the search bar (Browse).
-- Cause, from reading the code (UNVERIFIED in game): applyTab() sets filterBox.visible
-  and filterBox.active from "tab == BROWSE" and defocuses it, but never touches
-  savedSearchButton. The button is added once with addRenderableWidget in init and is
-  therefore drawn on every tab. The filter box hides; the arrow does not.
-- Fix (small): in applyTab(), set savedSearchButton.visible and .active to the same
-  "browsing" value. Also close an open saved-search menu when leaving Browse: the
-  picker (savedSearches.isOpen()) is otherwise left open over the Chambers slots and
-  eats clicks, because the click handler routes to it first. Guard the null the way
-  the filterBox check already does, since applyTab() is called before the button exists.
-- UNVERIFIED: whether the research shelf screen (client/ResearchShelfScreen) has the
-  same shape. It is the sibling the bank copied its tab rules from. Grep it for the
-  same button and fix it in the same change if so, and report which.
-- Test: none unit-testable. Verification tab: open the bank on Chambers, the arrow is
-  gone; switch to Browse, it is back and opens; switch away with the menu open, it closes.
+Routed to GitHub issue #10 on 2026-10-01; the cause, fix and check are written there.
 
 Piece 2 - Basic chambers can be searched by name, and only by name
 ===================================================================
