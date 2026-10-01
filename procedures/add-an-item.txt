@@ -1,0 +1,187 @@
+PROCEDURE  : Add an item
+COMMAND    : /add-an-item
+SAY        : "add an item", "make an item", "new item", "an item that ...", "add a tool for"
+RUNS       : local (art bakes, recipes, a server boot, gametests)
+TAKES      : the owner's idea for something a player holds, or an intake treatment
+             that describes one
+LEAVES     : one registered item with its model, art, name, recipe, behaviour, tests,
+             wiki page and bakes, pushed
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this for any new item a player holds: a tool, a piece of tack, a paper, a carrot, a
+container. The rescuing braid is the worked example (commit e421c818, then its wiki art
+in 37cd3378). A block's item comes with its block. A per-wood or per-material family
+(carts, gates, jumps, modded armour) is step 15's variant. Philosophy: utility, not
+decoration. An item must do something.
+Path shorthands:
+  NF = neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge
+  R  = neoforge-26.1.2/src/main/resources
+  T  = neoforge-26.1.2/tools
+
+BEFORE YOU START
+----------------
+1. `git pull --ff-only origin main`.
+2. Read wiki/text/items.txt (the roster and the house rules) and the closest existing
+   item's page.
+3. Make sure the item's registry id is final. Once it ships, it is permanent: hard rule
+   10, saves.
+
+STEPS
+-----
+1. QUESTION EVERYTHING UP FRONT. Ask every open decision in consecutive question-tool
+   rounds, before any work: options, recommendation first. Skip what the request already
+   answers.
+   a. What it does, in one sentence, and who uses it on what: a horse, a player, a
+      block, or the air.
+   b. How it is used: right-click a horse, right-click in the air, worn in a gear slot,
+      held, consumed? What does each use cost, and does it break or stack (stack size,
+      durability)?
+   c. Who may use it on whose horse (ownership, multiplayer)?
+   d. How it is obtained:
+      - a recipe (with its ingredients), loot, a villager trade, or creative only;
+      - a sense of how rare it should be.
+   e. What it looks like: a recolour of existing art, drawn, or taken from an art pack
+      (use-an-art-pack). Is it dyeable?
+   f. Does it remember anything (a bound horse, a charge, a name)? That state is a data
+      component, and its id is permanent.
+   g. Does it count toward the getting-started checklist (a ProgressTask and its
+      advancement)? Only some items do.
+   h. Is there any config: may a server switch it off or tune it (add-a-config-option)?
+   i. Its name, and the one-line blurb for the Recipes tab.
+   j. Saves: can every existing world keep loading? A new item always can; a CHANGED
+      item may need a migration.
+
+2. Register it. In NF/item/ModItems.java:
+   - `register(name, factory)` registers it and puts it in the mod's creative tab.
+     simple() and carrot() are shortcuts; registerHidden() keeps an item out of the tab.
+   - Properties go in the factory, e.g. `p -> new XItem(p.stacksTo(1))`.
+   - The class is NF/item/<Name>Item.java. Tooltips are usually Component.literal in
+     appendHoverText.
+   - Placing it in a VANILLA tab (addToCreativeTab / fileAfter): read the note there
+     first. A missing anchor silently empties the whole vanilla tab.
+
+3. State, if any: NF/data/ModDataComponents.java,
+   TYPES.register("<id>", builder().persistent(CODEC).networkSynchronized(STREAM_CODEC)).
+   - Prefer state you can DERIVE from a component over state written into one. The
+     ender whistle's glint reads BOUND_HORSE in isFoil(), so nothing needed migrating.
+   - A component id is never renamed, and a changed shape needs a decoding fallback.
+     ResearchTopicCodecs is the precedent, covered by the old_papers_still_read
+     gametest.
+
+4. The client files:
+   - R/assets/horsegenetics/items/<id>.json - the 26.1.2 item definition:
+     {"model":{"type":"minecraft:model","model":"horsegenetics:item/<id>"}}, plus tints
+     if it is dyeable (minecraft:dye);
+   - R/assets/horsegenetics/models/item/<id>.json - parent minecraft:item/generated,
+     layer0 horsegenetics:item/<id>;
+   - R/assets/horsegenetics/textures/item/<id>.png.
+
+5. The art. Choose one route (the header of T/bake-drawn-items.mjs explains them):
+   - recolour: T/bake-item-recolours.mjs, from the pristine sources in T/item-art/;
+   - draw: T/bake-drawn-items.mjs, one character per pixel;
+   - a pack: use-an-art-pack.
+   Then run T/check-duplicate-item-art.mjs, which fails on near-duplicates of our art and
+   vanilla's. Also look at the new sprite beside its nearest neighbour: a hash once called
+   two identical-looking papers distinct. (rebake, row r)
+
+6. The names, in R/assets/horsegenetics/lang/en_us.json:
+   - item.horsegenetics.<id>: the item's name;
+   - recipe.horsegenetics.<recipeId>.desc: the line in the horse menu's Recipes tab.
+     If it is missing, that line is silently blank.
+
+7. The recipe: R/data/horsegenetics/recipe/<id>.json. House rules (items.html):
+   - shapeless;
+   - at least one ingredient from this mod;
+   - raw horse hair, where it fits.
+   Then run T/bake-recipe-reference.mjs and T/check-recipes.mjs (rebake, row q).
+   - check-recipes catches two of our recipes claiming the same inputs, ragged rows and
+     unused keys. It CANNOT see a clash with vanilla or another mod. Check those by
+     hand.
+   - A ragged recipe row throws the whole file away. Every reaper was uncraftable for
+     two releases that way.
+   - A recipe that cannot encode kicks every multiplayer client. Singleplayer never
+     encodes recipes, so only the every_recipe_encodes gametest catches it.
+   - If a recipe must tell "with a component" from "without", make that a separate
+     item, never a component ingredient (the note at the head of
+     bake-recipe-reference.mjs).
+
+8. Optional ways in:
+   - LOOT: NF/data/loot/ModLootModifiers.java, with a JSON in
+     R/data/horsegenetics/loot_modifiers/. Tack weights are constants in
+     AddHorseTackModifier.
+   - TRADES: R/data/horsegenetics/villager_trade/<profession>/level_N/<trade>.json, plus
+     its listing in trade_set/<profession>/level_N.json.
+
+9. Tags. A gear slot is R/data/horsegenetics/tags/item/gear/<slot>.json, read by
+   NF/entity/HorseTackSlot. Dyeable items also go in data/minecraft/tags/item/dyeable.json.
+
+10. Behaviour.
+    - The pure rule goes in common/, with a unit test (common/care/RescuingBraid.java,
+      WhistleSelection.java). common/ never imports Minecraft (hard rule 1).
+    - The game side is NF/server/<Thing>Handler.java (an @EventBusSubscriber), or the
+      item's own use().
+    - A refusal tells the player why, once per attempt, never once per tick.
+    - Grep that every hook you override is actually called. Overriding a hook nothing
+      calls looks exactly like the feature failing.
+    - Never use @OnlyIn on a mod class: in 26.1.2 it logs an ERROR.
+
+11. Checklist task, if step 1g said yes:
+    a. Call HorseProgress.complete(player, ProgressTask.X) in the handler.
+    b. Add the task to common/.../progress/ProgressTask.java.
+    c. Add an icon to the ICON map in T/bake-advancements.mjs. A bad icon id drops the
+       advancement silently.
+    d. Run T/bake-advancements.mjs, then T/check-progress-tasks.mjs (rebake, row l).
+
+12. Tests.
+    - The common unit test, by name (test-tiers, tier 1).
+    - A gametest in NF/gametest/ModGameTests.java for anything only the game can prove:
+      a TEST_FUNCTIONS.register(...) holder, plus a register(event, ...) line in
+      onRegisterGameTests. Run :neoforge-26.1.2:runGameTest.
+    - Mutate a new test once, to prove it can fail.
+
+13. The wiki.
+    a. Add a row to the roster on wiki/items.html.
+    b. Write wiki/item-<slug>.html by add-a-wiki-page: Gameplay and Coding tabs (Science
+       if there is design reasoning), plus a Verification tab saying what to try in
+       game. Include <div class="item-art" data-items="<id>"></div>.
+    c. Run wiki/tools/bake-item-art.mjs. It fails on any item no page shows.
+    d. Then rebake rows s, j, k and i.
+
+14. Boot a server to "Done (" and grep its log for ERROR, Couldn't parse, Invalid and
+    missing (launch-game, step 8). A recipe or data file that fails to parse is logged
+    once and then silently missing from the game. Then look at the item in a client: a
+    render overlay with its arguments swapped draws nothing and logs nothing (the braid
+    was never drawn for that reason).
+
+15. Variant: a per-wood or per-material family. It is written TWICE:
+    - author time, for vanilla's materials: T/bake-carts.mjs, bake-jumps.mjs and
+      bake-double-gates.mjs (rebake, rows n, o and p);
+    - run time, for other mods: NF/compat/Generated* (carts, gates, jumps, armour),
+      MaterialScan and ModdedMaterials.
+    Change both halves. check-block-models.mjs sees only the author-time half, and a
+    drift is a purple cube, or an item that will not craft, logging nothing. Family
+    members are exempt from the wiki art bake (NOT_ON_A_PAGE).
+
+16. Finish with `./gradlew :neoforge-26.1.2:build` and end-session. A new item is a new
+    feature, so cut a patch release by the release procedure.
+
+DONE WHEN
+---------
+The item crafts or drops and does its job, and these are all green: the recipe check, the
+art check, the item-art bake, the progress check (if it has a task), its tests, and a
+clean server boot. Its page shows it, and everything is pushed.
+
+NEVER
+-----
+- Never rename a shipped item id or data component id.
+- Never ship an item no wiki page shows.
+- Never trust a recipe that has not been through check-recipes AND a server boot.
+- Never put an item in a vanilla creative tab without reading the fileAfter note.
+- Never put game rules in the NeoForge handler that could live in common/.
+
+SEE ALSO
+--------
+add-a-config-option; use-an-art-pack; add-a-wiki-page; rebake; test-tiers; launch-game;
+release; wiki/items.html.

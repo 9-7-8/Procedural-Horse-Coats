@@ -1,0 +1,125 @@
+PROCEDURE  : Add a config option
+COMMAND    : /add-a-config-option
+SAY        : "add a config option", "make it configurable", "let servers turn it off",
+             "a setting for", "should be a config"
+RUNS       : local (the option must be proven by a server boot)
+TAKES      : a value in the code that a server or a player should be able to change
+LEAVES     : one config key with a safe accessor, passed into common/ as a value,
+             documented on its feature's page, and proven to load
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this whenever a number or switch should be tunable: a cap, a rate, an on/off for a
+behaviour. The crowding cap (code 08fcf2b9, docs 6246ec15) and the Chaos exclude lists
+(a7f3d8f0) are the worked examples. A config spec fails ONLY when the mod loads, so this
+procedure always ends in a server boot.
+Path shorthand: NF = neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge
+
+BEFORE YOU START
+----------------
+1. Find the value as it is today: the constant (ideally in common/), and every place
+   that reads it.
+2. Read the convention on wiki/text/config.txt. It is a Roadmap page, not a key table.
+
+STEPS
+-----
+1. QUESTION UP FRONT, in one question-tool round, with options and a recommendation:
+   a. Server or client?
+      - Client only for what only that player sees (a camera fade, a keybind feel).
+      - Anything both sides compute, or anything that changes gameplay, is a SERVER
+        option. It is read on both sides, because the server's config syncs to clients.
+   b. The key's name and section: a dotted path, beside its relatives
+      (fertility.nearby_horse_cap, behaviour.leads_return, chaos.exclude_mods).
+   c. The default. Almost always today's behaviour, so nothing changes for existing
+      worlds. The bounds, each for a real reason (MAX_NATURAL_CAP exists because the cap
+      sits inside an entity search). And an off value, if there is one.
+   d. Does changing it while a server runs need to take effect at once?
+   Skip anything the request or treatment already settles.
+
+2. Pick the file. Registration is in NF/HorseGenetics.java.
+   - NF/ServerConfig.java: SERVER; phc/server.toml, with a per-world override in
+     <world>/phc/server.toml.
+   - NF/ClientConfig.java: CLIENT; phc/client.toml.
+   - NF/BreedSpawningConfig.java: COMMON; phc/breed-spawning.toml. Use it only for a
+     spec built from the install's own breed roster: a roster-dependent spec must not be
+     SERVER type.
+   - NF/carts/CartsConfig.java: the carts' own files.
+
+3. Declare it. Add a `public static final ModConfigSpec.XValue NAME;` field, and define
+   it in the class's static builder:
+   - define / defineInRange(key, default, min, max) / defineEnum /
+     defineListAllowEmpty(key, List.of(), () -> sample, validator).
+   - Give it .comment(...) lines stating what it does, the default, the range, and
+     "Server-side" or "Client-side".
+   - The default lives ONCE, as a constant in common/ (ReproRules.DEFAULT_NATURAL_CAP),
+     never typed twice.
+
+4. Write a safe accessor beside it:
+     public static T name() {
+         try { return NAME.get(); } catch (IllegalStateException notLoaded) { return DEFAULT; }
+     }
+   Every read goes through it. Calling .get() before the config loads throws, and that
+   also happens on a client before the server's config arrives.
+
+5. Pass it into common/ as a value. common/ never reads config, so the NeoForge caller
+   reads the accessor and passes the value in. Prefer a record that carries the value
+   AND its limit (NaturalCover.Crowd(othersNearby, cap)): then no downstream code, chat
+   line or log can fall back to the old constant. Pin it with a common test, as
+   NaturalCoverTest.aWorldMayRaiseOrLowerTheCap does.
+
+6. Reload. Accessors read live, so the file watcher's re-read just works. A CACHE built
+   from the value must be keyed on it: ChaosRoster.configKey() rebuilds when the lists
+   change. Derived state needs a ModConfigEvent.Loading/Reloading listener. The watcher
+   runs off the server thread, so swap the derived state whole
+   (BreedSpawningConfig.onConfig).
+
+7. Tests.
+   - The common unit test, by name.
+   - Gametests do not set config. A gametest that depends on the option guards on its
+     accessor and fails with a message if the option is off (whistled_lead_comes_back
+     checks leadsReturn()). The gametest run has its own
+     neoforge-26.1.2/run-gametest/phc/server.toml.
+
+8. Boot it (launch-game, step 8). Run `./gradlew :neoforge-26.1.2:runServer` with no
+   client holding run/, wait for "Done (", and grep the WHOLE log for
+   'ERROR|Couldn.t parse|Invalid|missing'. Then edit the new key in run/phc/server.toml
+   while it runs, and check the change takes effect if step 1d asked for that. Kill the
+   server, then DELETE every config file and .bak the boot generated under run/phc/ and
+   run/config/. The owner's next session must start from defaults.
+
+9. Document it on the page of the feature it governs, the way the existing keys are
+   (fertility.html for the crowding cap, rider-comfort.html for leads, gene-lycan.html
+   for Chaos). Give the key, the default, the range, server or client, and what it does
+   to play, as a sentence on Gameplay and the detail on Coding. Add a Verification-tab
+   check, e.g. "turn it down to 3, and read the limit off the chat line". Rebake rows k
+   and i.
+   wiki/config.html has no key table today; do not start one in passing. Its Roadmap
+   tab plans the sweep.
+
+10. Finish with the build and end-session. A new option is a feature: a patch release
+    (release). Under hard rule 10, its default must keep existing worlds behaving as
+    they did.
+
+DONE WHEN
+---------
+The key loads on a clean boot, its accessor never throws, common/ receives it as a
+value, the test that pins it is green, the generated config files are deleted from run/,
+and its feature page documents it.
+
+NEVER
+-----
+- Never call .get() outside a try/catch accessor.
+- Never use defineInList with an immutable List.of(...) as the ALLOWED values. NeoForge
+  probes contains(null) while writing a fresh file, and the boot crashes (the first
+  0.5.000 boot). Use a mutable new ArrayList<>(Arrays.asList(...)). List.of() as a
+  DEFAULT is fine.
+- Never let common/ read config, or keep a second copy of a default.
+- Never call a boot clean at "Done (" alone. Read the middle of the log.
+- Never leave generated .toml or .bak files in run/.
+- Never make a value that depends on the local breed roster a SERVER option.
+
+SEE ALSO
+--------
+launch-game (step 8, the boot); test-tiers; rebake; release; add-an-item;
+wiki/config.html (Roadmap: the convention sweep).

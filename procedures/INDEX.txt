@@ -38,6 +38,10 @@ Command                  Runs    Say (any of)                         What it le
                                  "run the full suite"                 the full suite only for releases
 /add-a-gene              local   "add a gene", "new gene",            one gene (coat / ability / add-on)
                                  "a gene that ..."                    asked, built, baked, pushed
+/add-an-item             local   "add an item", "new item",           one item: model, art, recipe,
+                                 "an item that ..."                    behaviour, tests, page, booted
+/add-a-config-option     local   "add a config option", "make it      a key with a safe accessor, passed
+                                 configurable"                        into common/, booted, documented
 /design-a-breed          either  "make a breed", "new breed"          a breed designed WITH the owner,
                                                                       baked and tested
 /survey-a-mod            local   "survey this mod", "compat with"     the jar's real contents, and
@@ -72,3 +76,8 @@ yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next c
   layer.
 - measure-worldgen: run Structure.generate headlessly with a control, before claiming a
   worldgen change helped.
+- add-a-wood-family: a per-wood block or item (gates, jumps, carts), written twice
+  (author-time bake and run-time compat). Rare and easy to get wrong: a drift shows as a
+  purple cube and logs nothing. add-an-item step 15 covers the outline today.
+- answer-a-tester: reply on a tester's issue with the release that carries the fix, ask
+  for a retest, and close the issue on their word. Today fix-bug step 2 covers it.

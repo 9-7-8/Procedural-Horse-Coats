@@ -231,3 +231,15 @@ The shared part colour base and HAIR region became a foundation unit of its own 
 ("Part colour base and hair region"), built before any part treatment. Head parts, body
 parts, tusks and feathering now point at it instead of each offering to write it.
 /whats-next was written. add-an-item and add-a-config-option follow.
+Then /add-an-item and /add-a-config-option, built from an Explore agent's verified
+walk-through. The rescuing braid is the worked item. The crowding cap and the Chaos
+exclude lists are the worked config options. Both procedures open with an up-front
+question round, as add-a-gene does.
+Found on the way: wiki/config.html is not a key reference. It has only a Roadmap tab,
+and at least eleven server keys are documented nowhere but on their feature pages:
+chaos.exclude_mods/ids, fertility.nearby_horse_cap, realm.breeding_rate_percent,
+realm.release_emeralds, behaviour.rightclick_equips_tack, escape_health_fraction,
+emergency_stasis_fraction, owner_only_riding, jockey_pass_days and
+commands.horse_give. The config procedure documents a key on its feature's page,
+following the existing ones, and leaves the key-table question to config.html's
+Roadmap sweep.
