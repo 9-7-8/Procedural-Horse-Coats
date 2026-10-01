@@ -43,7 +43,7 @@ accessor (`Genes.codeOrder().size()`), never quote its value.
 ## Where everything is written
 The only markdown files in the repo are `README.md`, this one, and
 `THIRD_PARTY_NOTICES.md` - which is a licence artefact that ships inside the
-jar, not documentation, and must stay plain text. Everything else is the wiki.
+jar, not documentation, and must stay plain text - plus routines (`.claude/skills/`).
 **Everything else is the wiki**: `index.html` (the hub) + `wiki/*.html`.
 Each page below is the **single source of truth** for its subject - update it in
 the same change as the code, and never copy it back into here.

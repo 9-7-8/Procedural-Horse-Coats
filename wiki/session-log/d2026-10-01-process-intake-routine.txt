@@ -1,0 +1,39 @@
+2026-10-01 - a process-intake routine
+
+    Owner: "Can you help me scope a new procedure and create a markdown file for it, called
+    process intake? This is where you go into the intake folder, pick something, implement it,
+    then end the session. You should start with the smallest, highest impact things first, then
+    move onto anything which you can do without me, and only last do the biggest stuff."
+
+Done
+
+    No code. .claude/skills/process-intake/SKILL.md, invoked as /process-intake. It is
+    written from START HERE.txt and the intake sessions that built things from treatments
+    (antlers, the breed climate rule, Chaos at the mob loci). What it adds:
+
+    - The unit is a treatment's piece or slice, not the file, so a three-piece treatment
+      offers three picks.
+    - Every unit is scored on size (S/M/L, where L includes a foundation that other units
+      wait on), impact (defect, then a fix to something shipped, then an unblocker, then new
+      content), whether it needs the owner, and what it depends on.
+    - The tiers, in the order she gave: small with high impact, then anything that needs no
+      owner call, then the big ones.
+    - An UNVERIFIED line needs the source read, not the owner. An Open design line, a breed
+      design or a licence call needs the owner.
+    - Owner questions are asked once, as options, before any code. With no answer, the run
+      drops to the best unit that needs none.
+    - Retiring follows START HERE step 3. A draft folder retires with its treatment and
+      never on its own. potential-assets/ is never a unit.
+    - It ends with CLAUDE.md's routine and names the next unit by the same ranking.
+
+    The routine deliberately names no current item. The queue is read fresh every run.
+
+    Also: START HERE.txt points at the routine, and the CLAUDE.md sentence listing the
+    repo's markdown files now includes .claude/skills/. That line replaced a duplicated
+    "Everything else is the wiki", so the file stays at 300 lines.
+
+Found on the way
+
+    START HERE.txt still describes a "Bugs:" section of To do.txt. Since the
+    bugs-move-to-github session, a bug is a GitHub issue (hard rule 9). The routine says
+    rule 9 wins. START HERE's own text was left for the owner to decide on.
