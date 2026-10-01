@@ -47,9 +47,15 @@
     "horsegenetics.magic_heat": [
       { "pair": "Hsen/n", "weight": 15 },
       { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
-    "Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 carried at the wild rate (GYS1); anhidrosis is not modelled."
+    "Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 carried at the wild rate (GYS1); anhidrosis is not modelled.",
+    "Cold tolerance at the partial tier (Ctol/Ctol 5, Ctol/n 30, n/n 65): one of its four spawn biomes is snowy plains, a quarter, and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01). Its light heat sensitivity is unchanged."
   ]
 }

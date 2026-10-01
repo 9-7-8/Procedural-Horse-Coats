@@ -88,6 +88,9 @@
     ],
     "horsegenetics.fireproof": [
       { "pair": "Frp/Frp", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 100 }
     ]
   },
   "bands": {
@@ -103,6 +106,7 @@
     "HORNS: Rh/Rh on every founder, so mares are horned too. All four shapes at a quarter each, each as a matched pair so the breed shows all four and breeds each true. Shade is pinned to 1.0, which is black, so the base is always black; Tip/Tip colours the points, and the tip colour is left wild - any colour, inherited and drifting with the line.",
     "PRINTS: MltH/MltH, the molten hooves allele that prints in the colour of the horn tips, so a Mirrorgazer's hoofprints always match its horns, horse by horse.",
     "Fireproof (Frp/Frp) was NOT in the owner's spec: added because a horse that spawns only in the Nether otherwise burns in its own biome, as both other Nether breeds are fireproof for. Remove the row if that was not wanted.",
-    "Spawns like the other Nether breeds: the same spawn_ground floor list and spawn_in_dark, since vanilla's animal rule wants grass and light the Nether does not have."
+    "Spawns like the other Nether breeds: the same spawn_ground floor list and spawn_in_dark, since vanilla's animal rule wants grass and light the Nether does not have.",
+    "Heat tolerance is Htol/Htol on every founder, fixed the way the Rimehart's cold tolerance is: every breed that spawns in the Nether is heat tolerant, as a rule (BreedClimate, owner's rule 2026-10-01)."
   ]
 }

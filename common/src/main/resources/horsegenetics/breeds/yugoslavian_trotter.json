@@ -60,6 +60,10 @@
       { "pair": "A/A", "weight": 80 },
       { "pair": "A/C", "weight": 18 },
       { "pair": "C/C", "weight": 2 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -68,7 +72,7 @@
     "DMRT3 sits high, as it should in a trotting breed - the gait-keeper allele is what holds a fast trot together under harness. The trot, the sulky and the racing itself are not modelled.",
     "Every dilution, every pinto pattern, roan and the leopard complex are forced wild; sabino and rabicano sit at a trace for ordinary markings. It is not a colour breed in any sense.",
     "All disorders clear. Being a trotter is not a reason to seed PSSM1 - that is a dominant mutation and needs a direct survey before a breed carries it.",
-    "Carries neither tolerance locus, like the other racing studbooks here.",
+    "No heat locus, like the other racing studbooks here, but cold tolerance at the light tier (Ctol/n 15, n/n 85): one of its seven spawn biomes is snowy, and the cold-spawn rule gives any breed that spawns in snow at least that (BreedClimate, owner's rule 2026-10-01).",
     "Managed only: cowboy, spawn egg and stable."
   ]
 }
