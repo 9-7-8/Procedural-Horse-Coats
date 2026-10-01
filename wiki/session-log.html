@@ -22,9 +22,12 @@
 </p>
 <ul>
     <li><a href="session-log/d2026-10-01-process-intake-routine.txt">2026-10-01
-        &mdash; <strong>A process-intake routine</strong>: <code>/process-intake</code> ranks every
-        unit in intake/ (small and high impact first, then whatever needs no owner call, then the
-        big ones) and builds exactly one.</a></li>
+        &mdash; <strong>Procedures</strong>: every repeatable routine is now a plain-text file in
+        <code>procedures/</code>, each a slash command. Twenty-two of them, from process-intake
+        and fix-bug to release and add-a-gene. CLAUDE.md fell from 300 lines to 194 as
+        routines moved out. Saves now keep loading within a <code>0.X</code> series, and the
+        version reads <code>0.&lt;compat&gt;.&lt;patch&gt;</code>. A run of open design calls
+        was settled through the question tool, which is now hard rule 11.</a></li>
     <li><a href="session-log/d2026-10-01-breed-climate-rule.txt">2026-10-01
         &mdash; <strong>The breed climate rule</strong>: every Nether breed is heat tolerant, fixed,
         and every breed that spawns in snowy biomes carries cold tolerance at a tier set by their

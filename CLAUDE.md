@@ -156,11 +156,10 @@ NeoForge module thin.** That is what makes a future `forge-1.12.2/` cheap.
 ./gradlew :neoforge-26.1.2:build          # full compile + jar
 ./gradlew :neoforge-26.1.2:runClient       # the game (launch it per procedures/launch-game.txt)
 ```
-Every other test and check, and when each is worth its time: `procedures/test-tiers.txt`.
 Requires JDK 25 (auto-provisioned); crash reports land in `neoforge-26.1.2/run/crash-reports/`.
 **Never run the full `:common:test` suite unless the owner asks or a release is being
 cut** - it is ten minutes and more. Use `--tests`, and say what a full run would still check.
-Which test, when: `procedures/test-tiers.txt` - the longer it runs, the more it must matter.
+Every other test and check, and when each is worth it: `procedures/test-tiers.txt`.
 **The owner's last play session is on disk - read it rather than asking.**
 `neoforge-26.1.2/run/logs/latest.log`, and `debug.log` beside it for more.
 A bug report of the shape "it still doesn't work" is usually answerable from

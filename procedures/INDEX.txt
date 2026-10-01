@@ -70,14 +70,5 @@ How they fit together
 
 Routines that might become procedures next
 ------------------------------------------
-These are done often enough to repeat the same way, but nobody has written them up
-yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
-- compat-test: build the synthetic mod and boot with it, to prove the modded-material
-  layer.
-- measure-worldgen: run Structure.generate headlessly with a control, before claiming a
-  worldgen change helped.
-- add-a-wood-family: a per-wood block or item (gates, jumps, carts), written twice
-  (author-time bake and run-time compat). Rare and easy to get wrong: a drift shows as a
-  purple cube and logs nothing. add-an-item step 15 covers the outline today.
-- answer-a-tester: reply on a tester's issue with the release that carries the fix, ask
-  for a retest, and close the issue on their word. Today fix-bug step 2 covers it.
+They are queued in intake/To do.txt, under "Routines to write up as procedures". When one
+is written, by FORMAT.txt, its bullet is deleted there and its row added above.

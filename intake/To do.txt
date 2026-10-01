@@ -5,3 +5,9 @@ Decided by the owner on 2026-10-01; each is small, and needs only building:
 - The horse designer lists each grown part as a trait, with "not drawn here; see it in game" (wiki/model-parts.html#open-designer). Hard rule 5: it is a designer-only change, so keep the divergence comment on both editor files.
 - A stallion's free covers per day becomes a server config option, fertility.free_covers_per_day, defaulting to the current ReproRules.FREE_COVERS_PER_DAY, beside fertility.nearby_horse_cap (procedures/add-a-config-option.txt).
 - A GENERATED config key table on wiki/config.html (owner, 2026-10-01): a small bake that reads every key from ServerConfig, ClientConfig, BreedSpawningConfig and CartsConfig (key, side, default, range, its comment) and writes the table, each key linked to its feature page. It goes in procedures/rebake.txt as a new row, and add-a-config-option step 9 then says to run it. At least eleven server keys are documented nowhere else today.
+
+Routines to write up as procedures (procedures/FORMAT.txt; then a row in procedures/INDEX.txt, a .claude/skills wrapper and the keyword memory):
+- compat-test: build the synthetic mod and boot with it, to prove the modded-material layer.
+- measure-worldgen: run Structure.generate headlessly with a control, before claiming a worldgen change helped.
+- add-a-wood-family: a per-wood block or item (gates, jumps, carts), written twice (author-time bake and run-time compat). Rare and easy to get wrong: a drift shows as a purple cube and logs nothing. add-an-item step 15 covers the outline today.
+- answer-a-tester: reply on a tester's issue with the release that carries the fix, ask for a retest, and close the issue on their word. Today fix-bug step 2 covers it.
