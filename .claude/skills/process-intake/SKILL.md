@@ -33,7 +33,7 @@ A **unit** is the smallest thing that ships alone - not a file:
   `Horse exits` two pieces). A treatment that names no split is one unit.
 
 Not units - leave them alone:
-- `START HERE.txt`, `Implementation advice.txt`;
+- `START HERE.txt`, `Implementation advice.txt`, `How to make an intake document.txt`;
 - `potential-assets/` - art packs, not work. **Use anything in them freely** for the
   unit you are building - copy, crop, recolour, transform - with no need to ask.
   Document each use the way earlier uses are documented: the rules at the bottom
@@ -88,7 +88,7 @@ Within a tier, break ties by: unblocks the most other units -> fewest regenerate
 artefacts -> oldest in `git log -- intake/`.
 
 Never pick: anything that needs the live server (`26.1.2-neoforge-server` is another
-Claude's), or a release - cut one only if she asks.
+Claude's).
 
 Say in **one line** what you picked, which tier, and why the runner-up lost. Then
 carry on: no confirmation wait, unless step 5 asks something.
@@ -140,6 +140,17 @@ Run CLAUDE.md's **"Ending a session"** routine in full: regenerate, build green
 (`:neoforge-26.1.2:build`, `check-parity.mjs`, `check-designer-boots.mjs` if `common/`
 or `web/` moved), code commit, then a separate docs commit, budget audit, verify clean,
 kill every process you started.
+
+**Release** - do what the treatment's `Release:` line says (the owner answered it while
+scoping; see `How to make an intake document.txt`, Part 4 section M):
+- *own version* -> after the docs commit, cut it: read `mod_version` in
+  `gradle.properties` against `git tag`, bump the LAST number only, boot a server to
+  `Done(` with no ERROR lines, tag, and publish a GitHub release with the jar from that
+  clean tagged tree. Put the release note on `wiki/releases.html` too. If the line says
+  "when the last piece ships" and this is not the last piece, do not cut one.
+- *rides the next release* -> no release.
+- *bigger bump* -> stop and ask her first. The middle number never moves without her word.
+- no `Release:` line (an older treatment) -> no release; name it as a question in step 9.
 
 The session log file is `wiki/session-log/d<date>-<slug>.txt`, shaped like the earlier
 intake sessions (`d2026-10-01-antlers.txt`, `-breed-climate-rule.txt`, `-chaos-mob-loci.txt`):
