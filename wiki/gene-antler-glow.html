@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antler glow &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> lights the antlers' points, paints nothing</p>
+
+<h1>Antler glow</h1>
+
+<p class="lede">
+    Two copies and the points of a horse's <a href="gene-antlers.html">antlers</a> glow in
+    the dark &mdash; every tine's tip and the end of each beam, in the antler's own colour.
+    On a horse without antlers this gene does nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.antler_glow"></div>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Recessive: one copy shows nothing. In the wild a horse carries two copies or none
+    &mdash; about one in ten has two &mdash; so roughly one antlered wild horse in ten has
+    glowing points. Most horses with two copies have no antlers to light.
+</p>
+
+<h2 id="what-it-does">What it looks like</h2>
+
+<p>
+    Only the points glow, not the whole rack: a dark antler at night with a light at the
+    end of every tine. They glow in the antler's own colour &mdash; bone, umber, or a
+    <a href="gene-antler-crystal.html">crystal</a> rack's gem. <code>parts.glow</code> in
+    the client config turns the glow off and keeps the antlers.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all, for good or ill, and lights nothing around it &mdash; only the points themselves shine.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.antler_glow"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.antler_glow</dd></div>
+    <div><dt>Class</dt><dd><code>AntlerGlowGene</code></dd></div>
+    <div><dt>Priority</dt><dd>232 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Glw</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Founders</dt><dd><code>Glw/Glw</code> 10%, <code>n/n</code> the rest &mdash; no wild carriers</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="door">How it reaches the rack</h2>
+
+<p>
+    <code>GrownParts.of</code> sets the antler part's <code>emissive</code> flag. The layer
+    then draws a second, full-bright submit of the same mesh over the regions
+    <code>PartKind.glowRegions()</code> names &mdash; for an antler only
+    <code>PartSheet.BONE_TIP</code>, the last box of every chain, where a horn glows all
+    over. One flag, and the region mask is what makes it "the tips". It carries no
+    epigenetic numbers.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-horses">There is no real locus here</h2>
+
+<p>
+    A magical gene with no real counterpart, and the <a href="gene-horn-glow.html">horn
+    glow</a> locus's twin. Its own locus rather than an antler allele so that any rack, of
+    any habit, size or colour, can also glow. Recessive, with no wild carriers, by the rule
+    every magical trail follows: the allele is in the wild in the form that can show.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Glowing antler points have not been seen at night, so whether the tips alone read as a glow is unchecked.</p>
+</div>
+
+<h3 id="open-antler-glow-look">Glowing points at night</h3>
+<p>
+    An antlered <code>Glw/Glw</code> horse at night, bone and crystal: the tines' tips and
+    the beam ends should glow and nothing else. Then <code>parts.glow</code> off, and the
+    rack should still draw, lit like the rest of the horse. A tine that is only partly grown
+    in should glow at its partial size.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

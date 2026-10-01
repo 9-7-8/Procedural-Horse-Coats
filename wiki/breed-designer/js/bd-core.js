@@ -525,6 +525,12 @@ window.HG = window.HG || {};
     var isHue = /hue/i.test(v.name) && v.max <= 360 && v.max - v.min >= 180;
     var isCat = v.kind === "category";
     var lo = isCat ? 0 : v.min, hi = isCat ? v.max - 1 : v.max;
+    // A value whose wild range is zero wide - every founder rolls the same number
+    // and drift never moves it, like the antlers' asymmetry - is one ONLY a breed
+    // can set. Its sliders run over the hard clamp instead, or they would be pinned
+    // at the one value a breed has no reason to write (and step 0 is NaN below).
+    var pinnedWild = !isCat && hi === lo && v.clampHi > v.clampLo;
+    if (pinnedWild) { lo = v.clampLo; hi = v.clampHi; }
     var step = isCat ? 1 : (hi - lo) / 200;
     var mode = cur === undefined ? "wild" : Array.isArray(cur) ? "range" : "fixed";
     var row = el("div", { "class": "epi-row" + (isHue ? " hue" : "") });
@@ -541,6 +547,7 @@ window.HG = window.HG || {};
     if (mode === "wild") {
       ctl.appendChild(el("span", { "class": "rng", text: isCat
         ? "any of " + (v.max) + " options"
+        : pinnedWild ? "always " + bd.round(v.min) + " in the wild; only a breed can set it"
         : "wild " + bd.round(v.min) + " to " + bd.round(v.max) }));
     } else {
       var a = Array.isArray(cur) ? cur[0] : cur, b = Array.isArray(cur) ? cur[1] : cur;

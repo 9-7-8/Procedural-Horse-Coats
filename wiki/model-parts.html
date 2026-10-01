@@ -25,22 +25,22 @@
     why this is a page rather than a line on a list.
 </p>
 <p class="lede">
-    <strong>The foundation is built and one part uses it</strong>: the
-    <a href="gene-unicorn-horn.html">unicorn horn</a>. Antlers, spines, crystals, hoof
-    feathering and wings are the same machinery plus a generator each, and are still on
-    <a href="#roadmap">the Roadmap tab</a> &mdash; as is
-    <a href="breed-book.html#breed-sources">the reindeer-breed content</a> in the breed book,
-    which needs the breed hook rather than the layer.
+    <strong>The foundation is built and two parts use it</strong>: the
+    <a href="gene-unicorn-horn.html">unicorn horn</a> and <a href="gene-antlers.html">antlers</a>,
+    which an antlered breed, the <a href="breed-book.html#rimehart">Rimehart</a>, carries on every
+    horse. Spines, crystals, hoof feathering and wings are the same machinery plus a generator
+    each, and are still on <a href="#roadmap">the Roadmap tab</a>.
 </p>
 
 <div class="note warn">
     <span class="label">Built, and not yet seen in a running game</span>
     <p>
-        The layer, the mesh cache and the horn gene are unit-tested and compile;
-        <strong>no horse has worn a part on screen</strong>. The placement offsets are computed
-        from the horse models&rsquo; boxes rather than tuned against a live animal. The open
-        checks are on <a href="gene-unicorn-horn.html#verification">the horn&rsquo;s Verification
-        tab</a> and <a href="#verification">this page&rsquo;s</a>.
+        The layer, the mesh cache, the horn and the antlers are unit-tested and compile. A horn
+        has been seen on screen, following the head (2026-09-30); <strong>no antler has</strong>,
+        and its placement is computed from the horse model&rsquo;s boxes rather than tuned against
+        a live animal. The open checks are on <a href="gene-unicorn-horn.html#verification">the
+        horn&rsquo;s</a> and <a href="gene-antlers.html#verification">the antlers&rsquo;</a>
+        Verification tabs, and <a href="#verification">this page&rsquo;s</a>.
     </p>
 </div>
 
@@ -55,6 +55,16 @@
     how far it leans and what colour it is are inherited with the allele and drift over
     generations, so a line bred for length really does get longer horns. A foal born with the
     gene wears a small one from the day it is born.
+</p>
+
+<p>
+    And <a href="gene-antlers.html">antlers</a>: a rare dominant, so one copy grows a rack
+    &mdash; on any horse with <code>Ant</code>, on stallions only with <code>Antm</code>, and
+    never on a foal. How big it is, how many tines, how far it reaches, how thick and what shade
+    are inherited with the allele; four more genes pick its habit (forked, brow-tined, palmate,
+    crowned or spike) and can make its points glow, turn it to crystal, or grow moss on it. A
+    wild rack is the same on both sides; two breeds, the <a href="breed-book.html#rimehart">Rimehart</a>
+    and the <a href="breed-book.html#greenwood">Greenwood</a>, are antlered on every horse.
 </p>
 
 <p>
@@ -155,11 +165,13 @@
     </tbody>
 </table>
 
-<h2 id="adding">Adding the second part</h2>
+<h2 id="adding">Adding another part</h2>
 
 <ol>
-    <li>A value on <code>PartKind</code>, with its anchor and sheet region, and a
-        <code>styles()</code> case.</li>
+    <li>A value on <code>PartKind</code>, with its anchor and sheet region, and cases in
+        <code>styles()</code>, <code>sizeBuckets()</code>, <code>showsOnFoal()</code> and
+        <code>glowRegions()</code> &mdash; every one a switch expression or a comparison, so the
+        compiler or a test catches a kind left out.</li>
     <li>A generator beside <code>HornGenerator</code>, emitting <code>PartNode</code>s with
         <strong>every parent before its children</strong> &mdash; <code>PartMeshes</code> bakes
         in one pass and <code>PartGeneratorTest</code> is what stops a violation reaching a
@@ -179,6 +191,19 @@
     config key, or a texture per colour. That was the goal.
 </p>
 
+<p>
+    <strong>The antlers were the test of that claim, and it held</strong> (2026-10-01, in the
+    code): no new layer, no render-state field and no config key. What they did need was two
+    things the horn never asked for, and both landed in the shared machinery rather than beside
+    it &mdash; a <em>count</em> (tines shown out of the most the mesh holds, through
+    <code>PartModel.Slice.shown</code> and <code>PartNode.group</code>) and <em>passes by
+    region</em> (a crystal antler's see-through shafts, the bloom clumps and the glowing points
+    are each one submit drawing only some <code>PartSheet</code> regions, through
+    <code>Slice.regions</code>). Plus a foal gate, as data on the kind. The antlers are also two
+    kinds, one per side, rather than one mirrored mesh: a negative scale would turn a culled
+    box inside out, and an asymmetric rack wants the sides to differ anyway.
+</p>
+
 <h2 id="three-tiers">The rule that keeps a herd cheap</h2>
 
 <p>
@@ -190,7 +215,7 @@
     <li><strong>Topology</strong> &mdash; segment counts, branching, twist &mdash; goes in the
         <code>PartShape</code> and means baking a mesh. Quantised, and the set of shapes is
         therefore finite and small: <code>PartKind.styles()</code> &times;
-        <code>PartShape.SIZE_BUCKETS</code> per kind, for the whole game, forever. <strong>The
+        <code>PartKind.sizeBuckets()</code> per kind, for the whole game, forever. <strong>The
         bound on cost is structural rather than a budget somebody has to enforce</strong>, which
         is why <code>PartMeshes</code> needs neither eviction nor a time budget where
         <code>GeneticCoatTextureFactory</code> needs both.</li>
@@ -199,6 +224,11 @@
         <em>copied</em> into the submit node. This is also what closes the seam the size buckets
         would otherwise leave: the scale lands a part on its exact epigenetic length, so nothing
         pops as a lineage grows through a bucket boundary.</li>
+    <li><strong>Counts</strong> &mdash; an antler's tines &mdash; sit in between. The mesh is
+        baked with the most it can carry, numbered base to tip, and a horse shows the first
+        <i>k</i> with the next one scaled by the fraction. Bounded by the mesh, so a drifted count
+        can never draw more boxes than were baked; continuous, so a line bred for more tines grows
+        the next one in.</li>
     <li><strong>Colour and glow</strong> are arguments to the submit. One greyscale sheet
         therefore serves every colour, which is the same trick a dyed braid uses.</li>
 </ul>
@@ -215,10 +245,14 @@
     </p>
     <p>
         The escape is that <code>submitModel</code> is <em>generic in its state</em>, so
-        <code>PartModel</code> is a <code>Model&lt;AttachedPart&gt;</code>: anything that must be
+        <code>PartModel</code> is a <code>Model&lt;PartModel.Slice&gt;</code>: anything that must be
         applied by mutation goes in <code>setupAnim</code>, where it runs per submit with that
-        submit&rsquo;s own numbers. Nothing needs it yet, so <code>setupAnim</code> is empty
-        &mdash; and that is exactly where an antler&rsquo;s tine count will have to go.
+        submit&rsquo;s own slice. Three things go through it: which segment of a two-tone horn,
+        which sheet regions a pass draws, and how many of an antler&rsquo;s tines show &mdash; and
+        it sets every field on every box every time, because the last submit of that shared mesh
+        may have been another horse&rsquo;s. (That <code>setupAnim</code> runs per submit and
+        immediately before its draw is read from the 26.1.2 sources; two horses with different
+        tine counts in one frame is the check that would show it.)
     </p>
 </div>
 
@@ -275,8 +309,9 @@
 
 <p>
     <code>part_sheet.png</code> is 64&times;64, cut into a 4&times;4 grid of 16&times;16 regions,
-    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Two regions are painted
-    and the rest are room for the parts that have not been written.
+    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Five regions are
+    painted &mdash; horn and horn tip, antler bone and antler point, and the bloom clumps &mdash; and
+    the rest are room for the parts that have not been written.
 </p>
 
 <p>
@@ -309,7 +344,7 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        The parts the built machinery has no generator for yet &mdash; antlers, dorsal spines and
+        The parts the built machinery has no generator for yet &mdash; dorsal spines and
         crystalline growths first, then hoof feathering, tufted tails and wings &mdash; plus the
         two hooks that would let something other than one gene ask for a part: a breed file, and
         the worn side, so a horse shoe draws through this layer rather than a bespoke one.
@@ -322,9 +357,10 @@
         Meshes attached to the horse model, gene- or breed-driven, with no independent animation
         needed. <strong>High priority:</strong> spikes / dorsal spines and crystalline growths
         &mdash; small models, head- or spine-parented, big visual payoff. The
-        <a href="gene-unicorn-horn.html">unicorn horn</a> was the first of that batch and has
-        shipped. <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails,
-        hoof feathering (already wanted by the draught breeds), tusks, antlers.
+        <a href="gene-unicorn-horn.html">unicorn horn</a> was the first of that batch and
+        <a href="gene-antlers.html">antlers</a> the second; both have shipped.
+        <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails, hoof
+        feathering (already wanted by the draught breeds), tusks.
     </p>
 </div>
 
@@ -349,22 +385,15 @@
     <a href="#adding">the Coding tab</a> &mdash; and none of them needs a new layer.
 </p>
 <ul>
-    <li><strong>Antlers.</strong> The best case for a generator rather than a model, because an
-        antler is a recursive branch: a beam with tines that fork, so a seed and a size expand
-        into a rack that is different on every horse and still unmistakably an antler. That is
-        the mod&rsquo;s premise applied to geometry, and it is something a hand-modelled mesh
-        cannot do at all. It is also the <strong>first part that needs a per-horse tine
-        count</strong>, which is the first thing that has to go through
-        <code>PartModel.setupAnim</code> rather than the pose stack &mdash; see the
-        deferred-submit note.</li>
     <li><strong>Dorsal spines.</strong> A row along the back; needs a <code>SPINE</code> anchor,
         which is the first anchor on the body rather than the head and therefore the first one
         that has to be checked against a body-armour layer.</li>
     <li><strong>Crystalline growths.</strong> Geometry is easy (crossed prisms read as
-        eight-sided); the unknown is the render type. Translucency would want the shafts blended
-        and the caps opaque so the expensive pass is the smallest, and if that reads muddy,
+        eight-sided). The render type is no longer unknown: <a href="gene-antler-crystal.html">crystal
+        antlers</a> already draw their shafts through <code>entityTranslucent</code> and their
+        points solid, by region, and a crystal growth is the same two passes. If that reads muddy,
         opaque emissive crystals are still a good look. A <code>parts.translucent</code> setting
-        joins the config block when there is something translucent to switch.</li>
+        joins the config block if a translucent pass is measured to cost.</li>
     <li><strong>Hoof feathering.</strong> Four anchors at once, and the first part that should
         take its colour from the horse&rsquo;s own coat texture rather than a tint &mdash; a
         sampled mane patch comes out the right colour on every horse, the way real feathering
@@ -378,9 +407,11 @@
 <ul>
     <li><strong>A breed may declare parts.</strong> Touches the breed format,
         <code>BreedSpecWriter</code>, the breed-file bakes and the breed designer, which is why
-        it is its own slice rather than a line in an existing one. It is what unblocks
-        <a href="breed-book.html#breed-sources">the reindeer breeds</a>: a reindeer is then a
-        band on a tine count rather than new code.</li>
+        it is its own slice rather than a line in an existing one. Less urgent than it was: a
+        part that a gene grows is already a breed's to give, with an ordinary gene pool and
+        <code>bands</code> on the gene's numbers &mdash; the <a href="breed-book.html#rimehart">Rimehart</a>
+        is antlered and brow-tined that way, with no new format. This hook is for a
+        part with no gene behind it.</li>
     <li><strong>The worn side.</strong> Point <a href="item-horse-shoes.html">horse shoes</a> at
         this layer rather than a bespoke one; gear stacks resolve to the same
         <code>AttachedPart</code> list. Saddle pads follow. Not settled: whether a worn item may
@@ -532,7 +563,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, a second part sharing the layer, and any cost against a herd.</p>
+    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, the antlers on screen, and any cost against a herd.</p>
 </div>
 
 <h3 id="open-parts-draw-order">Draw order has been argued, not observed</h3>
@@ -544,15 +575,14 @@
     treat the first dorsal-spine or saddle-pad part as a reason to re-test rather than to assume.
 </p>
 
-<h3 id="open-parts-second-anchor">One layer, many parts &mdash; unproven past one</h3>
+<h3 id="open-parts-second-anchor">One layer, many parts &mdash; built, not watched</h3>
 <p>
-    The design claim is that a second part is a generator and a data row, with no new layer, no
-    new render-state field and no new config key. Nothing has tested that, because there is one
-    part. The first honest test of it is <strong>antlers</strong>, which also exercise the two
-    things the horn never touches: a per-horse element count through
-    <code>PartModel.setupAnim</code> rather than the pose stack, and a seeded variant in the
-    shape key. If either forces a change to the layer or the render state, the abstraction is
-    wrong in a way only the second part could reveal.
+    The antlers answered the code half (see <a href="#adding">Adding another part</a>): the
+    second part needed no new layer, render-state field or config key. What is unwatched is the
+    runtime half &mdash; a horn and a rack of antlers on one horse, and two antlered horses with
+    different tine counts in one frame, which is the first time <code>setupAnim</code> carries
+    something per horse that a wrong order would visibly swap. The detail is on
+    <a href="gene-antlers.html#open-antler-tines">the antlers&rsquo; tab</a>.
 </p>
 
 <h3 id="open-designer">The browser designer cannot draw a part &mdash; and what to do about it</h3>
@@ -563,7 +593,7 @@
     along with its coat, so a unicorn in the spawn egg, the family tree or the horse browser is
     drawn wearing its horn. The browser designer previews a flat coat texture and cannot draw
     geometry, so there a <code>Horn/Horn</code> horse shows its gene row and its epigenome and
-    no horn. The cheap answer is for the designer to <em>list</em> the part as a trait and say
+    no horn, and an antlered one no antlers. The cheap answer is for the designer to <em>list</em> the part as a trait and say
     plainly that it is not drawn; anything better is its own plan. The divergence is written in
     a comment on both files, per hard rule 5.
 </p>
@@ -581,7 +611,8 @@
 
 <div class="page-foot">
     <div class="seealso">
-        <a href="gene-unicorn-horn.html">Unicorn horn &mdash; the part that ships</a>
+        <a href="gene-unicorn-horn.html">Unicorn horn &mdash; the first part</a>
+        <a href="gene-antlers.html">Antlers &mdash; the second, and the first with a count</a>
         <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
         <a href="body-space.html">Body space &amp; the horse model</a>
         <a href="horse-gear.html">Horse gear &mdash; what else renders on a horse</a>

@@ -1,0 +1,5 @@
+Antler glow
+(Magical gene / recessive / lights the antlers' points, paints nothing)
+Two copies and the points of a horse's antlers glow in the dark — every tine's tip and the end of each beam, in the antler's own colour. On a horse without antlers this gene does nothing at all.
+
+Gene key horsegenetics.antler_glow Class AntlerGlowGene Priority 232 (magical band); only a code-order slot Family Grown parts Alleles Glw n Founders Glw/Glw 10%, n/n the rest — no wild carriers Coat effect none How it reaches the rack GrownParts.of sets the antler part's emissive flag. The layer then draws a second, full-bright submit of the same mesh over the regions PartKind.glowRegions() names — for an antler only PartSheet.BONE_TIP , the last box of every chain, where a horn glows all over. One flag, and the region mask is what makes it "the tips". It carries no epigenetic numbers.

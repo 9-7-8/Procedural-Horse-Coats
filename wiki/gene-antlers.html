@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antlers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant, sex-limited allele <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Antlers</h1>
+
+<p class="lede">
+    One copy and the horse grows a rack of antlers from the top of its skull &mdash; on a
+    mare or a stallion with <code>Ant</code>, on a stallion only with <code>Antm</code>.
+    No two racks are alike: how big, how many tines, how far they reach, how thick and
+    what shade of bone are all written on the allele and inherited with it. The second
+    gene in the mod, after the <a href="gene-unicorn-horn.html">unicorn horn</a>, that
+    grows a piece of the horse rather than colouring it.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.antlers"></div>
+
+<h2 id="two-alleles">Two ways to have antlers</h2>
+
+<ul>
+    <li><strong><code>Ant</code></strong> &mdash; antlers on every horse that carries it,
+        mare or stallion, the way a reindeer has them.</li>
+    <li><strong><code>Antm</code></strong> &mdash; antlers on a <em>stallion</em> only,
+        the way a red deer has them. A mare with it shows nothing at all and passes it on.
+        <strong>The genotype alone will not tell you</strong>: a mare's <code>Antm/n</code>
+        reads exactly like a stallion's. Breed her to a stallion and look at the
+        colts.</li>
+</ul>
+
+<p>
+    Both are dominant, so one copy is enough, and <code>Ant</code> wins over
+    <code>Antm</code>. Foals of either sex grow no antlers; the rack comes in when the
+    horse grows up, and stays &mdash; antlers here are permanent, never cast.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Rare: about four wild horses in a thousand carry an antler allele, and the
+    stallion-only one is the commoner. So most antlered horses you find in the wild are
+    stallions &mdash; and somewhere out there are mares carrying <code>Antm</code> that
+    look like nothing at all. The <a href="breed-book.html#rimehart">Rimehart</a> is the
+    one breed that is antlered on every horse, mares included.
+</p>
+
+<h2 id="what-varies">Two racks are not alike</h2>
+
+<p>Every one of these is on the antler allele, and a foal that inherits the allele inherits the rack:</p>
+
+<ul>
+    <li><strong>Size</strong> &mdash; five classes, <em>yearling</em>, <em>small</em>,
+        <em>standard</em>, <em>large</em> and <em>massive</em>. Wild horses are small to
+        standard; breeding for size climbs to massive and stops there. A bigger rack is
+        more beam and more tines, not a small one stretched.</li>
+    <li><strong>Tines</strong> &mdash; how many points. One to six in the wild; a bred
+        line can reach eight on a massive rack. It grows continuously: a line bred toward
+        more tines grows the next one in gradually rather than snapping it on.</li>
+    <li><strong>The rack itself</strong> &mdash; where the tines sit and how they turn.
+        It almost never changes between parent and foal.</li>
+    <li><strong>Reach</strong> and <strong>girth</strong> &mdash; a little longer or
+        shorter, a little thicker or thinner, on top of the size.</li>
+    <li><strong>Shade</strong> &mdash; from pale bone to dark umber.</li>
+    <li><strong>Asymmetry</strong> &mdash; <em>none</em> on any wild horse. Every wild
+        rack is the same on both sides. Only a breed can make a rack lopsided, and no breed in the
+        mod does yet; a breed you write yourself can, and once a line has it, the foals carry it on.</li>
+</ul>
+
+<h2 id="polygenic">Five genes make a rack</h2>
+
+<p>This gene decides <em>whether</em>, and how big. Four more finish the rack, and each does nothing to a horse without antlers:</p>
+
+<ul>
+    <li><a href="gene-antler-form.html">Antler form</a> &mdash; how it grows: forked,
+        brow-tined, palmate, crowned or a plain spike.</li>
+    <li><a href="gene-antler-glow.html">Antler glow</a> &mdash; the points glow in the dark.</li>
+    <li><a href="gene-antler-crystal.html">Crystal antlers</a> &mdash; see-through, in a gem colour.</li>
+    <li><a href="gene-antler-bloom.html">Blooming antlers</a> &mdash; leaves, moss or blossom on the tines.</li>
+</ul>
+
+<p>A horse can have a <a href="gene-unicorn-horn.html">unicorn horn</a> and antlers at once.</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>
+    It does nothing at all, for good or ill. Antlers move no stat, grant no attack,
+    change no hitbox, and do not stop the horse going through a doorway &mdash; however big
+    the rack looks. It is worth exactly what you think it looks worth.
+</p>
+
+<h2 id="turning-it-off">If it costs you frames</h2>
+
+<p>
+    A rack is a few dozen small boxes, more than a horn. The same three client settings
+    the horn uses cover antlers: <code>parts.enabled</code> draws grown parts at all,
+    <code>parts.glow</code> the extra glowing pass, and <code>parts.detailDistance</code>
+    how close a horse must be for its parts to be drawn. Turning them off hides the
+    antlers on your screen only; the horse still has them, breeds them and shows them to
+    every other player.
+</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.antlers"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.antlers</dd></div>
+    <div><dt>Class</dt><dd><code>AntlersGene</code></dd></div>
+    <div><dt>Priority</dt><dd>230 (magical band), the first of a run of five for the antler loci; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong>, beside the <a href="gene-unicorn-horn.html">unicorn horn</a></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Ant</span> <span class="allele dom">Antm</span> <span class="allele wild">n</span>, dominance <code>Ant &gt; Antm &gt; n</code></dd></div>
+    <div><dt>Outcomes</dt><dd>wild, <code>antlers</code>, <code>antlers-stallion</code> &mdash; all wild types</dd></div>
+    <div><dt>Founders</dt><dd>written as pairs, by hand: <code>Ant/n</code> 0.14%, <code>Antm/n</code> 0.26%, <code>n/n</code> the rest &mdash; no homozygotes</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; measured: adding the five antler loci moved no coat hash in either golden</dd></div>
+</dl>
+
+<h2 id="table">The combination table</h2>
+
+<table class="data">
+    <thead><tr><th>Combination</th><th>Outcome</th><th>Mare</th><th>Stallion</th></tr></thead>
+    <tbody>
+        <tr><td><code>n/n</code></td><td>wild</td><td>&mdash;</td><td>&mdash;</td></tr>
+        <tr><td><code>Ant/*</code></td><td><code>antlers</code></td><td>antlers</td><td>antlers</td></tr>
+        <tr><td><code>Antm/n</code>, <code>Antm/Antm</code></td><td><code>antlers-stallion</code></td><td>nothing</td><td>antlers</td></tr>
+    </tbody>
+</table>
+
+<h2 id="sex-gate">The sex gate is not in the expression</h2>
+
+<p>
+    <code>expressionOf</code> never reads the sex locus: a gene's expression reading
+    another locus is a cross-locus read the coat pipeline is built to avoid. The gate is
+    in <code>AntlersGene.grows(genotype)</code>, which <code>racksFor</code> &mdash; and so
+    <code>GrownParts.of</code> &mdash; asks. That is safe for a part for the reason it is
+    safe for the cutie mark's emblem: the part is drawn after the coat, nothing reads it
+    back, and it is not in the coat texture's key. The cost is the one the gameplay tab
+    states, and the expression's own text says: the genotype does not show the rule.
+</p>
+
+<h2 id="numbers">The epigenome, sorted by what it costs to change</h2>
+
+<p>Seven values on each <code>Ant</code> / <code>Antm</code> copy; the expressing copy is the dominant one.</p>
+
+<table class="data">
+    <thead><tr><th>Value</th><th>Wild range</th><th>Clamp</th><th>Cost tier</th><th>What draws it</th></tr></thead>
+    <tbody>
+        <tr><td><code>size</code></td><td>0 &ndash; 0.6</td><td>0 &ndash; 1</td><td>C + A</td><td>class = the mesh's size bucket; the remainder a uniform stretch</td></tr>
+        <tr><td><code>rack</code></td><td>seed</td><td>&mdash;</td><td>C</td><td>one of 16 racks per habit (the render cache's view of a <code>long</code>)</td></tr>
+        <tr><td><code>tines</code></td><td>1 &ndash; 6</td><td>0 &ndash; 8</td><td>B</td><td>how many tine groups show; the last one scaled by the fraction</td></tr>
+        <tr><td><code>reach</code></td><td>0.85 &ndash; 1.15</td><td>0.6 &ndash; 1.5</td><td>A</td><td>scale along the part's axis</td></tr>
+        <tr><td><code>girth</code></td><td>0.85 &ndash; 1.15</td><td>0.6 &ndash; 1.5</td><td>A</td><td>scale across it</td></tr>
+        <tr><td><code>asymmetry</code></td><td>exactly 0</td><td>0 &ndash; 1</td><td>C + B + A</td><td>past 0.1 the left antler's own rack; throughout, up to half its tines and a fifth of its size off</td></tr>
+        <tr><td><code>tint</code></td><td>0 &ndash; 1</td><td>0 &ndash; 1</td><td>A</td><td>pale bone to dark umber, the per-submit colour</td></tr>
+    </tbody>
+</table>
+
+<h3 id="asymmetry">How asymmetry is "breed-pinned only" with no special case</h3>
+<p>
+    The treatment left it open whether the epigenome could declare a value "fixed at
+    zero, breed-pin only". It can, with nothing new: <code>EpiValue.uniform(asymmetry,
+    0, 0).clampedTo(0, 1)</code>. A zero-wide design range means <code>EpiRoll</code>
+    rolls exactly 0 for every founder and <code>EpiDrift</code>'s step, a fraction of the
+    design span, is exactly 0 &mdash; so drift never moves it. A breed band is stamped
+    through the hard clamp (<code>BreedFounder.stampBands</code>), which is 0 to 1, so a
+    breed can still write any value. <code>AntlersGeneTest</code> holds both halves. The
+    one tool that divided by the design span &mdash; the
+    <a href="breed-designer/">breed designer</a>'s slider &mdash; now runs such a value's
+    slider over the clamp instead.
+</p>
+
+<h2 id="rendering">How a rack reaches the screen</h2>
+
+<p>
+    <code>GrownParts.of</code> &mdash; the one door the client uses &mdash; asks
+    <code>racksFor(genotype, epigenome, form)</code> with the habit
+    <a href="gene-antler-form.html">antler form</a> picked, gets two
+    <code>AttachedPart</code>s, right then left, and dresses each with the three modifier
+    loci. Everything else is the horn's machinery, unchanged in shape:
+</p>
+
+<ul>
+    <li><strong>One mesh per side.</strong> Two <code>PartKind</code>s,
+        <code>ANTLER_RIGHT</code> and <code>ANTLER_LEFT</code>, rooted at the
+        <code>CROWN_RIGHT</code> / <code>CROWN_LEFT</code> anchors just inside vanilla's
+        ears. A mirrored copy by negative scale would turn boxes inside out under a culled
+        render type, and a symmetric rack is just the same variant asked of both kinds.</li>
+    <li><strong>Baked at the maximum, shown by count.</strong> <code>AntlerGenerator</code>
+        builds every tine the size class can hold, numbered base to tip in
+        <code>PartNode.group</code>. <code>PartModel.setupAnim</code> hides the groups past
+        <code>shown</code> and scales the fractional one, per submit &mdash; the deferred-submit
+        rule the horn's two-tone slices already obey. <code>ModelPart.xScale/yScale/zScale</code>
+        exist in 26.1.2 (read in the sources), which the treatment had left unverified.</li>
+    <li><strong>A region mask per pass.</strong> The solid bone, a crystal antler's
+        see-through shafts, the bloom clumps and the glowing points are each one submit
+        of the same mesh drawing only its own <code>PartSheet</code> regions
+        (<code>BONE</code>, <code>BONE_TIP</code>, <code>BLOOM</code>).</li>
+    <li><strong>No foal.</strong> <code>PartKind.showsOnFoal()</code> is false for both
+        antler kinds, and the layer skips them on a baby before anchoring.</li>
+</ul>
+
+<h2 id="decided">What the owner decided before it was built</h2>
+
+<p>Put to the owner on the intake treatment and answered there, 2026-09-30; built as decided.</p>
+
+<ul>
+    <li><strong>D1 &mdash; both alleles.</strong> <code>Ant</code> on both sexes and
+        <code>Antm</code> on stallions only.</li>
+    <li><strong>D2 &mdash; procedural.</strong> Racks come from <code>AntlerGenerator</code>, not
+        hand-modelled meshes.</li>
+    <li><strong>D3 &mdash; symmetric by default.</strong> Asymmetry is an epigenetic number that
+        founders roll as zero and drift never moves; only a breed can set it. Antler form is a
+        plain dominance series, never codominant, and there are no per-parent-copy sides.</li>
+    <li><strong>D4 &mdash; permanent.</strong> No casting, no velvet, no year clock, no
+        antler-cycle locus. <strong>D5</strong>, a shed-antler item, is moot under it.</li>
+    <li><strong>D6 &mdash; crystal is a modifier.</strong>
+        <a href="gene-antler-crystal.html">Crystal antlers</a> change a rack; crystal growths on
+        the body stay a separate part.</li>
+    <li><strong>D7 &mdash; rare and hand-seeded</strong>, like flying: the founder pairs are written
+        out by hand. This is a Java gene, so the <code>tools/founders.py</code> skip list the
+        treatment mentioned &mdash; for gene files &mdash; does not apply.</li>
+    <li><strong>D8 &mdash; invented names</strong>; the science tab says the biology is analogous,
+        not measured.</li>
+    <li><strong>D9 &mdash; size is one number</strong> on the allele, breedable and bandable, not a
+        separate size locus.</li>
+    <li>The three cosmetic modifiers kept: <a href="gene-antler-glow.html">glow</a>,
+        <a href="gene-antler-crystal.html">crystal</a> and <a href="gene-antler-bloom.html">bloom</a>.
+        A charge attack is <strong>out of scope</strong>; nothing here assumes one.</li>
+</ul>
+
+<h2 id="cost">What it costs, and the cache bound</h2>
+<p>
+    An antler is at most <code>AntlerGenerator.MAX_NODES</code> boxes, asserted over every
+    shape. Five habits &times; sixteen racks &times; five sizes &times; two sides is the
+    whole set of antler meshes the client can ever bake, lazily, and
+    <code>PartGeneratorTest</code> now bounds the cache by <em>boxes</em> over
+    <code>PartGenerators.allShapes()</code> rather than by mesh count, since the antlers took
+    that count past the horn-era limit of 256. A pen of antlered horses has not been
+    measured.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-deer">Analogous, not measured</h2>
+
+<p>
+    There is no antler locus in horses, and these are invented names for invented genes
+    (decision D8). The design borrows from deer, and says so rather than claiming a
+    mechanism. Real antlers are bone, grown from pedicles on the skull and cast and
+    regrown every year under the control of testosterone &mdash; which is why in almost
+    every deer only the males carry them. Reindeer and caribou are the exception, with
+    antlers on both sexes. <code>Ant</code> and <code>Antm</code> are that difference as two
+    alleles: the reindeer arrangement and the red-deer one.
+</p>
+
+<p>
+    The mod does <em>not</em> cast antlers (decision D4): a rack here is permanent,
+    with no velvet and no year clock. And it does not borrow a real horn gene's name. The
+    sheep horn locus, <i>RXFP2</i>, is the famous horned-versus-polled gene in sheep, but
+    whether anything like it governs antlers in deer is not established, so the page makes
+    no such claim.
+</p>
+
+<h2 id="why-dominant">Why dominant, when the horn is recessive</h2>
+<p>
+    A unicorn is meant to be a find, and recessive makes it one. Antlers are meant to be
+    a <em>line</em>: dominant means one antlered parent is enough, so a breeder who has one
+    can keep it. The sex-limited allele puts the find back in &mdash; a mare carrying
+    <code>Antm</code> looks like nothing, and is the horse that makes antlered colts.
+</p>
+
+<h2 id="why-symmetric">Why symmetric by default</h2>
+<p>
+    Real racks are rarely perfectly symmetric, and reindeer are often strikingly lopsided.
+    But a lopsided rack on every wild horse reads as a rendering bug before it reads as
+    biology. So the owner's call (D3) is that wild racks mirror exactly, and lopsidedness
+    is a thing only a breed can bring. Both antlered breeds, the <a href="breed-book.html#rimehart">Rimehart</a>
+    and the <a href="breed-book.html#greenwood">Greenwood</a>, are symmetric too (owner, 2026-10-01): the
+    machinery for a lopsided rack is there for a breed that wants one.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No antler has been seen in a running game: placement, the sex and foal gates, tines by count, size extremes, asymmetry and cost are all unchecked.</p>
+</div>
+
+<h3 id="open-antler-placement">Where a rack sits, through every animation</h3>
+<p>
+    The <code>CROWN_RIGHT</code>/<code>CROWN_LEFT</code> anchors are worked out from the
+    model's boxes (just inside the ears, half a unit into the skull), not tuned on a live
+    horse. Look at an antlered adult standing, walking, galloping, rearing and grazing:
+    both antlers should stay rooted to the skull and lean out and back. Then a horse in a
+    headstall or mask &mdash; the Head gear zone &mdash; and an invisible horse, which
+    should show nothing.
+</p>
+
+<h3 id="open-antler-gates">The sex gate and the foal gate</h3>
+<p>
+    An <code>Antm/n</code> mare should show no antlers and an <code>Antm/n</code> stallion
+    should; an <code>Ant/n</code> mare should. A foal of any genotype should show none and
+    grow its rack when it grows up. The spawn egg's preview should obey the same gates.
+</p>
+
+<h3 id="open-antler-tines">Tines by count, two horses in one frame</h3>
+<p>
+    Two antlered horses with different <code>tines</code> values on screen together
+    should each keep their own count &mdash; the test of the per-submit
+    <code>setupAnim</code> claim, which is read from the sources and has not been watched.
+    A line whose <code>tines</code> drifts across a whole number should grow the next
+    tine in, not snap it on.
+</p>
+
+<h3 id="open-antler-sizes">Size extremes, and the ceiling</h3>
+<p>
+    All five size classes on a tiny and a huge horse; whether the rack scales with the
+    horse's genetic size. The massive rack against a low ceiling, a doorway and the
+    rider's view &mdash; the class lengths in <code>AntlerSize</code> are a first placement
+    and may need shortening.
+</p>
+
+<h3 id="open-antler-variants">Sixteen racks reading as sixteen</h3>
+<p>
+    Whether the sixteen racks of each habit look like different racks on a live horse. If
+    they do not, <code>AntlerGenerator.VARIANTS</code> is the one number to raise. This is the
+    one place the render cache and the no-pre-baked-subsets rule touch: the seed is a
+    <code>long</code> on the genome, and the cache maps it to this many shapes.
+</p>
+
+<h3 id="open-antler-asymmetry">A breed-pinned lopsided rack</h3>
+<p>
+    No shipped breed bands <code>asymmetry</code> any more, so seeing one takes a drop-in breed file
+    with an <code>asymmetry</code> band above 0.1. Such a horse should have two different antlers,
+    the left one smaller and with fewer tines; save, reload and breed it to an unrelated antlered
+    horse, and the foal that inherits its antler allele should be lopsided too.
+</p>
+
+<h3 id="open-antler-cost">A pen of antlered horses</h3>
+<p>
+    Twenty antlered horses in one pen against the same pen without parts &mdash; look for a
+    cliff, not a percentage. Racks are bigger than horns.
+</p>
+
+<h3 id="open-antler-family">Natural or magical</h3>
+<p>
+    The treatment proposed <em>natural</em> for this gene and antler form; they ship as
+    <em>magical</em>, in the grown-parts family, because a natural gene that paints
+    nothing files under the disorders and because that family was made for antlers. The owner&rsquo;s
+    call; moving them is two lines in <code>GeneFamily</code> and two
+    <code>isNatural()</code> overrides, plus a science tab each (they already have one).
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

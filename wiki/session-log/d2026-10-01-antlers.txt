@@ -1,0 +1,83 @@
+2026-10-01 - antlers: five genes, a second part kind, and the Rimehart
+
+    Owner: "Let's implement the antler plan from intake, following the guidelines there as well
+    as everything we set out for the unicorn horn, including creating a custom breed for the
+    horns."
+
+Done (code, commit 54efbabe, pushed; :neoforge-26.1.2:build green, creator parity green,
+designer boots)
+
+    The whole of intake/"Antler genes - implementation treatment.txt" - Tier 1, Tier 2 and the
+    breed slice - in one session, and the treatment retired. Nothing seen in a running game.
+
+    Genes (all Java, all magical, grown-parts family, priorities 230-234):
+      antlers         Ant (both sexes) > Antm (stallions only) > n. Seven epigenome values on
+                      the copy: size, rack (seed), tines, reach, girth, asymmetry, tint.
+      antler_form     Pal > Crn > Brw > Frk > n; allele order == AntlerGenerator habit index.
+      antler_glow     recessive; glows the points only (PartKind.glowRegions).
+      antler_crystal  recessive; gem category; shafts translucent, points solid.
+      antler_bloom    recessive; growth category (leaves / moss / blossom).
+
+    Parts machinery: ANTLER_RIGHT / ANTLER_LEFT kinds (one mesh per side, never a mirrored
+    negative scale) at new CROWN_RIGHT / CROWN_LEFT anchors; AntlerSize (five classes, the mesh
+    buckets) and AntlerGenerator (all five habits, 16 racks each, baked at the class's most
+    tines). PartNode gained a group (tine number), PartModel.Slice gained shown + a region mask,
+    AttachedPart gained shown / translucent / bloomTint. PartKind gained sizeBuckets,
+    showsOnFoal (antlers: no) and glowRegions. Three new sheet regions, baked.
+
+    Rimehart (rimehart.json): magical, rare, snow forests; every founder Ant, mostly Brw/Brw;
+    the first breed to band asymmetry (0.15-0.45), so every Rimehart rack is lopsided.
+
+    Tests: AntlersGeneTest, RimehartBreedTest, PartGeneratorTest extended; the sex-gate test was
+    mutated on purpose and went red. Both goldens moved by key only - 14 bake rows at the baseline
+    hash, no pipeline coat hash changed. 39 registry-wide classes run and green. The full
+    :common:test suite was NOT run (owner's rule); it would still need to confirm nothing else.
+
+Calls made without the owner (each on a page, open where it should be)
+
+    - Magical, not the treatment's "natural" for antlers / antler_form: a natural gene that
+      paints nothing files under NATURAL_HEALTH, and MAGIC_PARTS was made for antlers. Open on
+      gene-antlers.html#open-antler-family and decisions.html.
+    - Asymmetry is EpiValue.uniform(0,0).clampedTo(0,1) - the treatment's open question about a
+      "breed-pin only" value needed no new epigenome shape. The breed designer's slider divided by
+      the design span; it now runs a zero-wide value over the clamp.
+    - The part-cache test now bounds total boxes, not mesh count (antlers take it to ~860 meshes,
+      past the horn-era 256 limit), and PartMeshes still has no eviction.
+    - The draft folder intake/attached-parts-draft/ is left as it was, as the horn session left
+      it; only the antler treatment file was deleted.
+
+Where to look first in game
+
+    gene-antlers.html#verification: placement through every animation, the Antm mare, a foal,
+    two horses with different tine counts in one frame, a massive rack under a ceiling, and a
+    Rimehart's lopsided rack. Then each modifier page's tab. Palmate is the habit most likely to
+    read wrong (square boxes do not make a plate).
+
+Later the same day - the Greenwood
+
+    Owner: "Let's create a forest like horse that's dark bay, and has every possible variation of
+    the fawn and dryad genes in its pool (the genes that plant trees and the genes that spread
+    grass and such)". Read as three loci: fawn (the spotted topline), dryad (trees, mushrooms,
+    flowers, bone meal) and verdant (grass, moss, mycelium).
+
+    greenwood.json: magical, rare, forest / dark / birch / old-growth birch; E/E A/A over Sh/ShD
+    or ShD/ShD (liver bay, sometimes seal brown). "Every possible variation" was taken as every
+    pair that SHOWS, at equal weight: all 45 expressing dryad pairs, the three matched verdant
+    covers (a verdant mix cancels), and the eight fawn pairs that show - so no Greenwood is a
+    silent carrier of any of them. GreenwoodBreedTest asserts the pools equal those sets, using
+    each gene's own rule for showing. No antlers - not asked for; easy to add.
+
+    Then: "That breed should have antlers." The Greenwood now carries Ant on every founder
+    (Ant/Ant 75, Ant/n 25), so mares are antlered; forked with crowned in four in ten; symmetric
+    (no asymmetry band, to stay distinct from the Rimehart); size 0.3-0.7, tines 3-7, darker bone;
+    leaves (growth 0 - a category band is a range, so 'leaves or blossom' would have let moss in)
+    on three in ten. Ant rather than the stallion-only Antm was a choice: say if mares should be bare.
+
+    Then the Rimehart was redesigned to the owner's spec, and she asked that new breeds be designed
+    WITH her from now on unless a thorough spec exists. Spec: black base (E/E a/a); 50% dun (grulla:
+    D/D 20, D/d2 30); 25% grey (G2/N, G3/N evenly); 25% carrying silver (Z/z); same antler shapes,
+    all symmetric (asymmetry band removed); very large (size 1.2-1.43, 16.3-18.0 hh); snow biomes
+    only; 5% carrying exactly one of any natural white allele - all 54 across the NATURAL_WHITE
+    family at an equal 0.0926% each (patn1/2 show nothing without leopard; a few horses carry two
+    because the loci roll independently). Pangare dropped - it lightens red, and there is none on
+    black. No shipped breed pins asymmetry any more; the antler page says so.

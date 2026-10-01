@@ -281,6 +281,11 @@ window.HG.pages = {
         {
             title: "Magical grown parts",
             items: [
+                { href: "gene-antler-form.html", text: "Antler form", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-antler-glow.html", text: "Antler glow", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-antlers.html", text: "Antlers", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-antler-bloom.html", text: "Blooming antlers", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-antler-crystal.html", text: "Crystal antlers", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-horn-colour.html", text: "Horn colour", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-horn-dust.html", text: "Horn dust", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-horn-glow.html", text: "Horn glow", kind: "magical", views: ["gameplay","coding","science"] },

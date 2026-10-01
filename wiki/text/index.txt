@@ -40,6 +40,7 @@ wiki/body-space.html#vanilla-model	all	The vanilla model underneath
 wiki/body-space.html#verified	all	Verified
 wiki/breed-book.html#burning	all	The burning country
 wiki/breed-book.html#cold	all	The cold country
+wiki/breed-book.html#deep-woods	all	The deep woods
 wiki/breed-book.html#desert	all	The dry country
 wiki/breed-book.html#elsewhere	all	The country that is nowhere
 wiki/breed-book.html#entries	all	The breeds
@@ -50,6 +51,7 @@ wiki/breed-book.html#not-native	all	Nothing here is native
 wiki/breed-book.html#plains	all	The open country
 wiki/breed-book.html#reading	all	Reading the book against the game
 wiki/breed-book.html#sky	all	The high country
+wiki/breed-book.html#snow-forests	all	The snow forests
 wiki/breed-book.html#the-horse-people	all	The cowboy and the equestrians
 wiki/breed-book.html#the-leftovers	all	The things that still work
 wiki/breed-book.html#wet	all	The wet and wooded country
@@ -360,6 +362,54 @@ wiki/gene-angler.html#finding	gameplay	Finding one
 wiki/gene-angler.html#inheritance	gameplay	Crossing two of them
 wiki/gene-angler.html#layers	coding	What it paints
 wiki/gene-angler.html#outcomes	gameplay	What it can come out as
+wiki/gene-antler-bloom.html#carrot	gameplay	Its gene carrot
+wiki/gene-antler-bloom.html#door	coding	It costs boxes, not a system
+wiki/gene-antler-bloom.html#finding	gameplay	Finding one
+wiki/gene-antler-bloom.html#health	gameplay	Is it good for the horse?
+wiki/gene-antler-bloom.html#inheritance	gameplay	Crossing two of them
+wiki/gene-antler-bloom.html#real-horses	science	There is no real locus here
+wiki/gene-antler-bloom.html#what-it-does	gameplay	What it looks like
+wiki/gene-antler-crystal.html#carrot	gameplay	Its gene carrot
+wiki/gene-antler-crystal.html#door	coding	How it reaches the rack
+wiki/gene-antler-crystal.html#finding	gameplay	Finding one
+wiki/gene-antler-crystal.html#health	gameplay	Is it good for the horse?
+wiki/gene-antler-crystal.html#inheritance	gameplay	Crossing two of them
+wiki/gene-antler-crystal.html#real-horses	science	There is no real locus here
+wiki/gene-antler-crystal.html#what-it-does	gameplay	What it looks like
+wiki/gene-antler-form.html#carrot	gameplay	Its gene carrot
+wiki/gene-antler-form.html#door	coding	How it reaches the rack
+wiki/gene-antler-form.html#finding	gameplay	Finding one
+wiki/gene-antler-form.html#habits	gameplay	The five habits
+wiki/gene-antler-form.html#health	gameplay	Is it good for the horse?
+wiki/gene-antler-form.html#inheritance	gameplay	Crossing two of them
+wiki/gene-antler-form.html#order	coding	The allele order is the generator's habit order
+wiki/gene-antler-form.html#real-horses	science	Analogous, not measured
+wiki/gene-antler-form.html#why-not-codominant	science	Why plain dominance and never codominant
+wiki/gene-antler-glow.html#carrot	gameplay	Its gene carrot
+wiki/gene-antler-glow.html#door	coding	How it reaches the rack
+wiki/gene-antler-glow.html#finding	gameplay	Finding one
+wiki/gene-antler-glow.html#health	gameplay	Is it good for the horse?
+wiki/gene-antler-glow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-antler-glow.html#real-horses	science	There is no real locus here
+wiki/gene-antler-glow.html#what-it-does	gameplay	What it looks like
+wiki/gene-antlers.html#asymmetry	coding	How asymmetry is "breed-pinned only" with no special case
+wiki/gene-antlers.html#carrot	gameplay	Its gene carrot
+wiki/gene-antlers.html#cost	coding	What it costs, and the cache bound
+wiki/gene-antlers.html#decided	coding	What the owner decided before it was built
+wiki/gene-antlers.html#finding	gameplay	Finding one
+wiki/gene-antlers.html#health	gameplay	Is it good for the horse?
+wiki/gene-antlers.html#inheritance	gameplay	Crossing two of them
+wiki/gene-antlers.html#numbers	coding	The epigenome, sorted by what it costs to change
+wiki/gene-antlers.html#polygenic	gameplay	Five genes make a rack
+wiki/gene-antlers.html#real-deer	science	Analogous, not measured
+wiki/gene-antlers.html#rendering	coding	How a rack reaches the screen
+wiki/gene-antlers.html#sex-gate	coding	The sex gate is not in the expression
+wiki/gene-antlers.html#table	coding	The combination table
+wiki/gene-antlers.html#turning-it-off	gameplay	If it costs you frames
+wiki/gene-antlers.html#two-alleles	gameplay	Two ways to have antlers
+wiki/gene-antlers.html#what-varies	gameplay	Two racks are not alike
+wiki/gene-antlers.html#why-dominant	science	Why dominant, when the horn is recessive
+wiki/gene-antlers.html#why-symmetric	science	Why symmetric by default
 wiki/gene-auroraband.html#carrot	gameplay	Its gene carrot
 wiki/gene-auroraband.html#file	coding	The file
 wiki/gene-auroraband.html#finding	gameplay	Finding one
@@ -3152,7 +3202,7 @@ wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
 wiki/items.html#tack-found	gameplay	Somebody else’s tack, in a chest
 wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
 wiki/known-gaps.html#migrated	all	Migrated open checks
-wiki/model-parts.html#adding	coding	Adding the second part
+wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing

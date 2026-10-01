@@ -4013,6 +4013,133 @@
   ]
 },
 {
+  "id": "greenwood",
+  "name": "Greenwood",
+  "description": "A dark bay out of the deep woods with a fawn's line of spots down its back and a stag's rack of antlers on mare and stallion alike, often hung with leaves - and the woods follow it. Every Greenwood leaves something growing where it has stood - saplings of any of the six trees, mushrooms, flowers, or a dusting of bone meal that hurries the rest along - and every one spreads a carpet of grass, moss or mycelium under its hooves. No two leave the same wood behind them.",
+  "kind": "magical",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest"
+  ],
+  "price": [32, 50],
+  "stats": {
+    "speed": 6,
+    "jump": 6,
+    "health": 7,
+    "size": [0.92, 1.02],
+    "pull": 4
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 100 }
+    ],
+    "horsegenetics.shade": [
+      { "pair": "Sh/ShD", "weight": 85 },
+      { "pair": "ShD/ShD", "weight": 15 }
+    ],
+    "horsegenetics.fawn": [
+      { "pair": "Fwn/Fwn", "weight": 12.5 },
+      { "pair": "Fwn/Fwk", "weight": 12.5 },
+      { "pair": "Fwn/Fwc", "weight": 12.5 },
+      { "pair": "Fwn/n", "weight": 12.5 },
+      { "pair": "Fwk/Fwk", "weight": 12.5 },
+      { "pair": "Fwk/Fwc", "weight": 12.5 },
+      { "pair": "Fwk/n", "weight": 12.5 },
+      { "pair": "Fwc/Fwc", "weight": 12.5 }
+    ],
+    "horsegenetics.dryad": [
+      { "pair": "Oak/Oak", "weight": 2.22 },
+      { "pair": "Oak/Brch", "weight": 2.22 },
+      { "pair": "Oak/Spru", "weight": 2.22 },
+      { "pair": "Oak/Jung", "weight": 2.22 },
+      { "pair": "Oak/Aca", "weight": 2.22 },
+      { "pair": "Oak/Dark", "weight": 2.22 },
+      { "pair": "Oak/Mush", "weight": 2.22 },
+      { "pair": "Oak/Flwr", "weight": 2.22 },
+      { "pair": "Oak/Bone", "weight": 2.22 },
+      { "pair": "Brch/Brch", "weight": 2.22 },
+      { "pair": "Brch/Spru", "weight": 2.22 },
+      { "pair": "Brch/Jung", "weight": 2.22 },
+      { "pair": "Brch/Aca", "weight": 2.22 },
+      { "pair": "Brch/Dark", "weight": 2.22 },
+      { "pair": "Brch/Mush", "weight": 2.22 },
+      { "pair": "Brch/Flwr", "weight": 2.22 },
+      { "pair": "Brch/Bone", "weight": 2.22 },
+      { "pair": "Spru/Spru", "weight": 2.22 },
+      { "pair": "Spru/Jung", "weight": 2.22 },
+      { "pair": "Spru/Aca", "weight": 2.22 },
+      { "pair": "Spru/Dark", "weight": 2.22 },
+      { "pair": "Spru/Mush", "weight": 2.22 },
+      { "pair": "Spru/Flwr", "weight": 2.22 },
+      { "pair": "Spru/Bone", "weight": 2.22 },
+      { "pair": "Jung/Jung", "weight": 2.22 },
+      { "pair": "Jung/Aca", "weight": 2.22 },
+      { "pair": "Jung/Dark", "weight": 2.22 },
+      { "pair": "Jung/Mush", "weight": 2.22 },
+      { "pair": "Jung/Flwr", "weight": 2.22 },
+      { "pair": "Jung/Bone", "weight": 2.22 },
+      { "pair": "Aca/Aca", "weight": 2.22 },
+      { "pair": "Aca/Dark", "weight": 2.22 },
+      { "pair": "Aca/Mush", "weight": 2.22 },
+      { "pair": "Aca/Flwr", "weight": 2.22 },
+      { "pair": "Aca/Bone", "weight": 2.22 },
+      { "pair": "Dark/Dark", "weight": 2.22 },
+      { "pair": "Dark/Mush", "weight": 2.22 },
+      { "pair": "Dark/Flwr", "weight": 2.22 },
+      { "pair": "Dark/Bone", "weight": 2.22 },
+      { "pair": "Mush/Mush", "weight": 2.22 },
+      { "pair": "Mush/Flwr", "weight": 2.22 },
+      { "pair": "Mush/Bone", "weight": 2.22 },
+      { "pair": "Flwr/Flwr", "weight": 2.22 },
+      { "pair": "Flwr/Bone", "weight": 2.22 },
+      { "pair": "Bone/Bone", "weight": 2.22 }
+    ],
+    "horsegenetics.antlers": [
+      { "pair": "Ant/Ant", "weight": 75 },
+      { "pair": "Ant/n", "weight": 25 }
+    ],
+    "horsegenetics.antler_form": [
+      { "pair": "Frk/Frk", "weight": 60 },
+      { "pair": "Frk/Crn", "weight": 25 },
+      { "pair": "Crn/Crn", "weight": 15 }
+    ],
+    "horsegenetics.antler_bloom": [
+      { "pair": "Blm/Blm", "weight": 30 },
+      { "pair": "Blm/n", "weight": 30 },
+      { "pair": "n/n", "weight": 40 }
+    ],
+    "horsegenetics.verdant": [
+      { "pair": "mush/mush", "weight": 33.34 },
+      { "pair": "moss/moss", "weight": 33.33 },
+      { "pair": "grass/grass", "weight": 33.33 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.antlers": {
+      "size": [0.3, 0.7],
+      "tines": [3, 7],
+      "tint": [0.35, 0.75]
+    },
+    "horsegenetics.antler_bloom": {
+      "growth": 0
+    }
+  },
+  "notes": [
+    "DARK BAY. Every founder is E/E A/A, and the shade locus is Sh/ShD in 85 and ShD/ShD in 15: a bay-shade score of 2.5 or more before the per-horse roll, so a liver bay - the dark bay - nearly always, and now and then dark enough to read as a seal brown. No dilution and no white.",
+    "EVERY DRYAD VARIATION. All 45 expressing dryad pairs are in the pool at equal weight - the nine matched ones (oak, birch, spruce, jungle, acacia, dark oak, mushroom, flower, bone meal) and all 36 mixed ones, each of which plants both its things at half rate - and no carrier and no wild type, so every Greenwood plants something. One in five is a matched specialist; dark oak groves need a matched Dark/Dark horse.",
+    "EVERY VERDANT VARIATION. Mycelium, moss and grass, a third each, all as matched pairs - verdant only spreads from two matching copies, and a mixed pair cancels - so every Greenwood leaves a carpet of one of the three. No carriers.",
+    "ANTLERS ON EVERY HORSE, a forest stag's: every founder carries Ant, so mares are antlered too, and a quarter carry a single copy, so a Greenwood bred to an unantlered horse throws antlered foals half the time from those. Forked - a red deer's rack - with crowned showing in four in ten (Crn is dominant over Frk). Symmetric, unlike the Rimehart: no asymmetry band. Racks banded small to large, three to seven tines, mid to dark bone.",
+    "BLOOMING RACKS. Three in ten grow leaves on their antlers (growth index 0 - the Rimehart's is moss), and another three in ten carry it silently.",
+    "EVERY FAWN VARIATION. Every fawn pair that shows, at equal weight: white fawn four in eight (Fwn over anything), black fawn three in eight (Fwk over Fwc or n, or two), and coloured fawn (Fwc/Fwc, the hue on the copy) one in eight. Fwc/n shows nothing and is left out, so every Greenwood has the spotted topline."
+  ]
+},
+{
   "id": "guoxia",
   "name": "Guoxia",
   "country": "china",
@@ -8047,6 +8174,187 @@
   "notes": [
     "Massively muscled hindquarters and broad chest - the sprinter. nd1/nd2 give the odd dorsal stripe with no dilution.",
     "HYPP, PSSM1 and HERDA all have loci now - see SCN4A, GYS1 and PPIB. Both dominants, so a wild-caught Quarter Horse really can be an affected one."
+  ]
+},
+{
+  "id": "rimehart",
+  "name": "Rimehart",
+  "description": "A very large black horse of the snowfields with a rack of antlers on mare and stallion alike, swept back and over with a tine thrown forward above the face, the same on both sides. Half of them are grulla - dun over the black, smoke-grey with a dark stripe down the back - a quarter go grey with age, and a quarter carry silver, which turns a black mane and tail to flax. Some carry moss on the tines, and a few have points that glow through the polar night. Untroubled by any cold.",
+  "kind": "magical",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:snowy_plains",
+    "minecraft:snowy_taiga",
+    "minecraft:snowy_slopes",
+    "minecraft:snowy_beach",
+    "minecraft:ice_spikes",
+    "minecraft:grove",
+    "minecraft:frozen_river",
+    "minecraft:frozen_peaks",
+    "minecraft:jagged_peaks"
+  ],
+  "price": [30, 48],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 8,
+    "size": [1.2, 1.43],
+    "pull": 8
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 20 },
+      { "pair": "D/d2", "weight": 30 },
+      { "pair": "d2/d2", "weight": 50 }
+    ],
+    "horsegenetics.grey": [
+      { "pair": "G2/N", "weight": 12.5 },
+      { "pair": "G3/N", "weight": 12.5 },
+      { "pair": "N/N", "weight": 75 }
+    ],
+    "horsegenetics.silver": [
+      { "pair": "Z/z", "weight": 25 },
+      { "pair": "z/z", "weight": 75 }
+    ],
+    "horsegenetics.natural_zebra": [
+      { "pair": "Zeb/n", "weight": 0.0926 },
+      { "pair": "n/n", "weight": 99.9074 }
+    ],
+    "horsegenetics.roan": [
+      { "pair": "Rn/rn", "weight": 0.0926 },
+      { "pair": "rn/rn", "weight": 99.9074 }
+    ],
+    "horsegenetics.rabicano": [
+      { "pair": "Rb/rb", "weight": 0.0926 },
+      { "pair": "rb/rb", "weight": 99.9074 }
+    ],
+    "horsegenetics.tobiano": [
+      { "pair": "To/to", "weight": 0.0926 },
+      { "pair": "to/to", "weight": 99.9074 }
+    ],
+    "horsegenetics.leopard": [
+      { "pair": "LP/lp", "weight": 0.0926 },
+      { "pair": "lp/lp", "weight": 99.9074 }
+    ],
+    "horsegenetics.ednrb": [
+      { "pair": "O/N", "weight": 0.0926 },
+      { "pair": "N/N", "weight": 99.9074 }
+    ],
+    "horsegenetics.kit": [
+      { "pair": "W22/N", "weight": 0.0926 },
+      { "pair": "W4/N", "weight": 0.0926 },
+      { "pair": "W2/N", "weight": 0.0926 },
+      { "pair": "W9/N", "weight": 0.0926 },
+      { "pair": "W11/N", "weight": 0.0926 },
+      { "pair": "W14/N", "weight": 0.0926 },
+      { "pair": "W17/N", "weight": 0.0926 },
+      { "pair": "W24/N", "weight": 0.0926 },
+      { "pair": "W13/N", "weight": 0.0926 },
+      { "pair": "W23/N", "weight": 0.0926 },
+      { "pair": "W1/N", "weight": 0.0926 },
+      { "pair": "W3/N", "weight": 0.0926 },
+      { "pair": "W7/N", "weight": 0.0926 },
+      { "pair": "W16/N", "weight": 0.0926 },
+      { "pair": "W25/N", "weight": 0.0926 },
+      { "pair": "W27/N", "weight": 0.0926 },
+      { "pair": "W30/N", "weight": 0.0926 },
+      { "pair": "W39/N", "weight": 0.0926 },
+      { "pair": "W10/N", "weight": 0.0926 },
+      { "pair": "W5/N", "weight": 0.0926 },
+      { "pair": "W6/N", "weight": 0.0926 },
+      { "pair": "W8/N", "weight": 0.0926 },
+      { "pair": "W12/N", "weight": 0.0926 },
+      { "pair": "W18/N", "weight": 0.0926 },
+      { "pair": "W21/N", "weight": 0.0926 },
+      { "pair": "W26/N", "weight": 0.0926 },
+      { "pair": "W28/N", "weight": 0.0926 },
+      { "pair": "W31/N", "weight": 0.0926 },
+      { "pair": "W33/N", "weight": 0.0926 },
+      { "pair": "W37/N", "weight": 0.0926 },
+      { "pair": "W38/N", "weight": 0.0926 },
+      { "pair": "W15/N", "weight": 0.0926 },
+      { "pair": "W19/N", "weight": 0.0926 },
+      { "pair": "SB1/N", "weight": 0.0926 },
+      { "pair": "W20/N", "weight": 0.0926 },
+      { "pair": "W35/N", "weight": 0.0926 },
+      { "pair": "W32/N", "weight": 0.0926 },
+      { "pair": "W34/N", "weight": 0.0926 },
+      { "pair": "N/N", "weight": 96.4812 }
+    ],
+    "horsegenetics.manchado": [
+      { "pair": "ma/Ma", "weight": 0.0926 },
+      { "pair": "Ma/Ma", "weight": 99.9074 }
+    ],
+    "horsegenetics.mitf": [
+      { "pair": "SW3/N", "weight": 0.0926 },
+      { "pair": "SW1/N", "weight": 0.0926 },
+      { "pair": "SW5/N", "weight": 0.0926 },
+      { "pair": "SW9/N", "weight": 0.0926 },
+      { "pair": "N/N", "weight": 99.6296 }
+    ],
+    "horsegenetics.pax3": [
+      { "pair": "SW2/N", "weight": 0.0926 },
+      { "pair": "SW4/N", "weight": 0.0926 },
+      { "pair": "SW10/N", "weight": 0.0926 },
+      { "pair": "N/N", "weight": 99.7222 }
+    ],
+    "horsegenetics.patn1": [
+      { "pair": "PATN1/n", "weight": 0.0926 },
+      { "pair": "n/n", "weight": 99.9074 }
+    ],
+    "horsegenetics.patn2": [
+      { "pair": "PATN2/n", "weight": 0.0926 },
+      { "pair": "n/n", "weight": 99.9074 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 100 }
+    ],
+    "horsegenetics.antlers": [
+      { "pair": "Ant/Ant", "weight": 70 },
+      { "pair": "Ant/Antm", "weight": 20 },
+      { "pair": "Ant/n", "weight": 10 }
+    ],
+    "horsegenetics.antler_form": [
+      { "pair": "Brw/Brw", "weight": 70 },
+      { "pair": "Frk/Brw", "weight": 15 },
+      { "pair": "Brw/Pal", "weight": 15 }
+    ],
+    "horsegenetics.antler_bloom": [
+      { "pair": "Blm/Blm", "weight": 15 },
+      { "pair": "Blm/n", "weight": 20 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.antler_glow": [
+      { "pair": "Glw/Glw", "weight": 10 },
+      { "pair": "Glw/n", "weight": 20 },
+      { "pair": "n/n", "weight": 70 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.antlers": {
+      "size": [0.35, 0.75],
+      "tines": [3.5, 6.5],
+      "reach": [0.95, 1.2],
+      "tint": [0.25, 0.6]
+    },
+    "horsegenetics.antler_bloom": {
+      "growth": 1
+    }
+  },
+  "notes": [
+    "BLACK UNDER EVERYTHING (owner's spec, 2026-10-01). Every founder is E/E a/a. Half are dun - D/D in 20, D/d2 in 30 - which on black is grulla. A quarter are grey, G2/N and G3/N evenly. A quarter carry silver (Z/z), which on a black horse shows: a flaxen mane and tail and a lighter body. The three loci are independent, so a grulla can also be grey or silver.",
+    "A SPRINKLE OF WHITE (owner's spec). About one in twenty carries exactly one copy of one natural white allele - any of all fifty-four, across natural zebra, roan, rabicano, tobiano, leopard, frame, every KIT allele, manchado, the MITF and PAX3 splashes and the two PATN modifiers - each at an equal share. PATN1 and PATN2 show nothing without leopard, and a recessive like manchado is carried silently. Because the loci are rolled independently a very few carry two.",
+    "ANTLERS ON BOTH SEXES. Every founder carries Ant, the allele that grows antlers on a mare as well as a stallion. One in five also carries the stallion-only Antm silently: Ant is dominant over it, so it only surfaces when two Rimeharts each pass it on, and then the mares of that line go bare.",
+    "BROW-TINED, AND SYMMETRIC (owner's spec). 70 in 100 are Brw/Brw; 15 carry Frk under it and show brow-tined anyway, and 15 carry Pal over it and show palmate. No asymmetry band, so every rack matches itself, as every wild one does.",
+    "SIZE AND TINES ARE BANDED UP. Racks sit from small to large with three and a half to six and a half tines; a line bred for size climbs to a massive rack, and the clamp stops it there.",
+    "VERY LARGE (owner's spec): a draught horse's size band, Clydesdale-tall at the top.",
+    "Moss on every one that blooms (growth index 1), and a fifth carry the bloom silently. A tenth have glowing points, and another fifth carry them. Cold-tolerant (Ctol/Ctol) on every horse; spawns only in snow biomes."
   ]
 },
 {

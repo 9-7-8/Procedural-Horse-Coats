@@ -3,7 +3,9 @@ package com.example.horsegenetics.common.genetics;
 import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.parts.AttachedPart;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * <b>Every piece of geometry this horse's genes grow</b>, in one call.
@@ -51,12 +53,43 @@ public final class GrownParts {
         if (genotype == null) {
             return List.of();
         }
-        // One granting locus today. The second one turns this into a collect into
-        // an ArrayList; until then, returning the Optional's own list keeps the
-        // common "no parts" answer free of an allocation.
-        return Genes.UNICORN_HORN.hornFor(genotype, epigenome)
-                .<List<AttachedPart>>map(horn -> List.of(dressHorn(horn, genotype, epigenome)))
-                .orElseGet(List::of);
+        // Two granting loci. Each answers empty for nearly every horse, and the
+        // list is only built when one of them says otherwise - so the common "no
+        // parts" answer still allocates nothing.
+        Optional<AttachedPart> horn = Genes.UNICORN_HORN.hornFor(genotype, epigenome);
+        Optional<List<AttachedPart>> rack = Genes.ANTLERS.racksFor(genotype, epigenome,
+                Genes.ANTLER_FORM.habitOf(genotype.pair(Genes.ANTLER_FORM)));
+        if (horn.isEmpty() && rack.isEmpty()) {
+            return List.of();
+        }
+        List<AttachedPart> out = new ArrayList<>(3);
+        horn.ifPresent(h -> out.add(dressHorn(h, genotype, epigenome)));
+        rack.ifPresent(antlers -> {
+            for (AttachedPart antler : antlers) {
+                out.add(dressAntler(antler, genotype, epigenome));
+            }
+        });
+        return List.copyOf(out);
+    }
+
+    /**
+     * The antlers are polygenic the same way: the antlers locus grows them in bone,
+     * the form locus has already picked their habit, and three more loci finish them
+     * - glow at the points, crystal shafts in a gem colour, and leaves.
+     */
+    private static AttachedPart dressAntler(AttachedPart antler, Genotype genotype, Epigenome epigenome) {
+        AttachedPart out = antler;
+        if (Genes.ANTLER_CRYSTAL.crystal(genotype.pair(Genes.ANTLER_CRYSTAL))) {
+            int gem = Genes.ANTLER_CRYSTAL.gemOf(genotype, epigenome);
+            out = out.dressed(gem, gem, false).crystalline(true);
+        }
+        if (Genes.ANTLER_GLOW.glows(genotype.pair(Genes.ANTLER_GLOW))) {
+            out = out.dressed(out.baseTint(), out.tipTint(), true);
+        }
+        if (Genes.ANTLER_BLOOM.blooms(genotype.pair(Genes.ANTLER_BLOOM))) {
+            out = out.blooming(Genes.ANTLER_BLOOM.growthOf(genotype, epigenome).tint());
+        }
+        return out;
     }
 
     /**
@@ -79,7 +112,7 @@ public final class GrownParts {
      * <p>The second half is what counts the loci that only dress a part: horn
      * colour and horn glow do nothing to a hornless horse, so asked only of a wild
      * one they would look invisible. The baseline with "every part" is a horse
-     * with a horn today; a second granting locus adds itself to it.
+     * with a horn and a rack of antlers; a further granting locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way
      * {@code DesignerApi.showsAs} asks the cutie mark. It is the other half of "does
@@ -91,8 +124,9 @@ public final class GrownParts {
     public static boolean shapes(Gene gene) {
         Epigenome epi = Epigenome.fromSeed(0x5EEDL);
         Genotype wild = Genotype.wildType();
-        Genotype everyPart = wild.with(
-                new AllelePair(Genes.UNICORN_HORN.Horn, Genes.UNICORN_HORN.Horn));
+        Genotype everyPart = wild
+                .with(new AllelePair(Genes.UNICORN_HORN.Horn, Genes.UNICORN_HORN.Horn))
+                .with(new AllelePair(Genes.ANTLERS.Ant, Genes.ANTLERS.Ant));
         List<AttachedPart> dressed = of(everyPart, epi);
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
             if (!of(wild.with(pair), epi).isEmpty()

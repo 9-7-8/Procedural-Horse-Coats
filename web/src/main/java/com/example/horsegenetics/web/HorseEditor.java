@@ -65,11 +65,13 @@ import java.util.List;
  *       in.</li>
  * </ul>
  *
- * <p><b>And one in what the preview can draw.</b> The unicorn-horn locus grows
- * a mesh on the horse's head rather than painting its coat. The game's screen
- * draws it on its preview; this page previews a coat texture and cannot, so a
- * {@code Horn/Horn} horse shows its gene row and its epigenome values here and
- * <b>no horn in the picture</b>. The cheap fix is to say in words that the part
+ * <p><b>And one in what the preview can draw.</b> The unicorn-horn and antler
+ * loci grow meshes on the horse's head rather than painting its coat. The game's
+ * screen draws them on its preview; this page previews a coat texture and cannot,
+ * so a {@code Horn/Horn} or {@code Ant/n} horse shows its gene rows and its
+ * epigenome values here and <b>no horn or antlers in the picture</b>. (The game's
+ * preview also obeys the antler sex gate: an {@code Antm} mare shows none there
+ * either, correctly.) The cheap fix is to say in words that the part
  * is not drawn, the expensive one a preview that can draw geometry, and it is a
  * design call either way. See {@code wiki/model-parts.html#open-designer}.
  *

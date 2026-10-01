@@ -17,7 +17,7 @@ import java.util.List;
  * horse's part is applied to the finished mesh as a transform - see
  * {@link AttachedPart} - so this function's output is shared by every horse with
  * the same shape, and there are at most
- * {@code kinds x styles x }{@link PartShape#SIZE_BUCKETS} of them.
+ * {@code styles x }{@link PartKind#sizeBuckets()} of them per kind.
  */
 public final class PartGenerators {
 
@@ -28,6 +28,11 @@ public final class PartGenerators {
     public static List<PartNode> build(PartShape shape) {
         return switch (shape.kind()) {
             case HORN -> HornGenerator.generate(shape.nominalLength(), shape.style());
+            case ANTLER_RIGHT, ANTLER_LEFT -> AntlerGenerator.generate(
+                    shape.style() / AntlerGenerator.VARIANTS,
+                    shape.style() % AntlerGenerator.VARIANTS,
+                    shape.size(),
+                    shape.kind() == PartKind.ANTLER_LEFT);
         };
     }
 
@@ -40,7 +45,7 @@ public final class PartGenerators {
         List<PartShape> out = new ArrayList<>();
         for (PartKind kind : PartKind.values()) {
             for (int style = 0; style < kind.styles(); style++) {
-                for (int size = 0; size < PartShape.SIZE_BUCKETS; size++) {
+                for (int size = 0; size < kind.sizeBuckets(); size++) {
                     out.add(new PartShape(kind, style, size));
                 }
             }

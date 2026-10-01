@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal antlers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> turns the antlers to crystal, paints nothing</p>
+
+<h1>Crystal antlers</h1>
+
+<p class="lede">
+    Two copies and a horse's <a href="gene-antlers.html">antlers</a> are crystal: the
+    beams and tines see-through in a gem colour, the points solid. Which gem is inherited.
+    On a horse without antlers this gene does nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.antler_crystal"></div>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Recessive and rare: about one wild horse in twenty has two copies, and almost none of
+    them has antlers. A crystal rack is something you breed &mdash; find a two-copy horse,
+    and cross it into an antlered line.
+</p>
+
+<h2 id="what-it-does">What it looks like</h2>
+
+<p>
+    The rack keeps its shape and takes a gem's colour instead of bone's: clear quartz,
+    amethyst, rose quartz, citrine, emerald, sapphire or ruby. The beams and tines are
+    see-through &mdash; you can see the head behind them &mdash; and the points are solid,
+    which gives each tine an edge. The gem is written on the allele and almost never
+    changes between parent and foal, so a line of amethyst antlers stays amethyst.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all, for good or ill. Crystal antlers are no harder, sharper or more fragile than bone ones; they are only a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.antler_crystal"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.antler_crystal</dd></div>
+    <div><dt>Class</dt><dd><code>AntlerCrystalGene</code></dd></div>
+    <div><dt>Priority</dt><dd>233 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Cry</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Founders</dt><dd><code>Cry/Cry</code> 5%, <code>n/n</code> the rest &mdash; no wild carriers</dd></div>
+    <div><dt>Epigenome</dt><dd><code>gem</code> &mdash; a category over <code>AntlerCrystalGene.GEMS</code>; append only</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="door">How it reaches the rack</h2>
+
+<p>
+    <code>GrownParts.of</code> retints the antler with the gem colour and sets its
+    <code>translucent</code> flag. The layer then draws it as <em>two</em> submits: the
+    <code>BONE</code> region through <code>entityTranslucent</code> at
+    <code>AttachedPart.CRYSTAL_ALPHA</code>, and everything else solid &mdash; the points
+    (<code>BONE_TIP</code>) through the ordinary cutout pass. That is the split the
+    treatment asked for (Attached model parts 12.5): the blended, sorted pass is the one
+    that costs, so it draws the least it can. The "which translucent render type is a
+    layer offered" question it left open has an answer &mdash;
+    <code>RenderTypes.entityTranslucent</code>, the same one a fading ridden horse's horn
+    already uses.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-horses">There is no real locus here</h2>
+
+<p>
+    A magical gene with no real counterpart. It is a modifier of the antlers rather than
+    a part of its own (decision D6): it can only change a rack the
+    <a href="gene-antlers.html">antler locus</a> has already grown. Crystal growths on the
+    body, if they come, are a separate gene with a separate part.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>A crystal rack has not been seen in game, so the translucent shafts' sorting against the horse and each other is unchecked.</p>
+</div>
+
+<h3 id="open-crystal-look">See-through shafts, solid points</h3>
+<p>
+    A <code>Cry/Cry</code> antlered horse in each gem: the head should show through the
+    beams, the points should be solid, and nothing should vanish or flicker as the camera
+    circles. Translucent boxes inside one mesh sort per submit, not per box, so a tine
+    behind the beam may draw in the wrong order &mdash; look for it. Then a crystal rack
+    on a ridden, fading horse, and next to water and stained glass.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

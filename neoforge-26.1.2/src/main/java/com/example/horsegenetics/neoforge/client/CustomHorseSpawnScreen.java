@@ -143,12 +143,13 @@ import java.util.List;
  * ({@code wiki/horse-designer/js/gui.js}), and it copies the layout constants
  * and colours below by value, so a moved widget is a two-line change.
  *
- * <p><b>A grown part is one deliberate divergence.</b> The unicorn-horn locus
- * grows a mesh on the horse's head ({@code AttachedPartLayer}) rather than
- * painting the coat. This preview draws it - {@code GeneticHorseRenderer.applyCoat}
- * hands every screen's model horse its parts along with its coat - but the
- * browser twin previews a coat texture and cannot draw geometry, so there a
- * {@code Horn/Horn} horse shows its gene row and epigenome and no horn. Closing
+ * <p><b>A grown part is one deliberate divergence.</b> The unicorn-horn and
+ * antler loci grow meshes on the horse's head ({@code AttachedPartLayer}) rather
+ * than painting the coat. This preview draws them - {@code GeneticHorseRenderer.applyCoat}
+ * hands every screen's model horse its parts along with its coat, sex gate
+ * included, so an {@code Antm} mare shows no antlers here - but the browser twin
+ * previews a coat texture and cannot draw geometry, so there a {@code Horn/Horn}
+ * or {@code Ant/n} horse shows its gene rows and epigenome and no part. Closing
  * that is a design call, not an omission: see
  * {@code wiki/model-parts.html#open-designer}.
  *

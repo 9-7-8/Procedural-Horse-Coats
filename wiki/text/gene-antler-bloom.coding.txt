@@ -1,0 +1,5 @@
+Blooming antlers
+(Magical gene / recessive / grows leaves on the antlers, paints nothing)
+Two copies and leaves, moss or blossom grow on a horse's antlers — a clump on every tine and a few along each beam. Which of the three is inherited. On a horse without antlers this gene does nothing at all.
+
+Gene key horsegenetics.antler_bloom Class AntlerBloomGene Priority 234 (magical band); only a code-order slot Family Grown parts Alleles Blm n Founders Blm/Blm 8%, n/n the rest — no wild carriers Epigenome growth — a category over AntlerBloomGene.GROWTHS (leaves, moss, blossom); append only Coat effect none It costs boxes, not a system Every antler mesh AntlerGenerator builds already carries its clumps, in the PartSheet.BLOOM region: one on each tine's point, in that tine's group so it hides and shrinks with it, and a few on the beam. An ordinary rack's submits simply never draw that region. GrownParts.of sets the part's bloomTint , and the layer adds one submit drawing only BLOOM in that colour. That is the treatment's "a per-tine tint override plus a small second box set", done as a region of the mesh rather than a second mesh, so it adds no axis to the part cache.

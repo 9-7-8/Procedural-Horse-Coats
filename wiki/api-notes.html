@@ -720,6 +720,17 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     the cheaper route where it is available, and it is worth reaching for first.
 </p>
 
+<p>
+    <strong><code>ModelPart</code> has per-part scale, and two ways to hide a box.</strong>
+    <code>xScale</code>, <code>yScale</code> and <code>zScale</code> are public fields in 26.1.2
+    (default 1, applied in <code>translateAndRotate</code> after the rotation, so a part scales
+    about its own pivot), and <code>offsetScale</code> adds to them. <code>visible = false</code>
+    skips the part <em>and its children</em>; <code>skipDraw = true</code> skips only its own
+    cubes and still walks the children. Antler tines use both: <code>visible</code> on a tine's
+    first box hides the whole tine, <code>skipDraw</code> picks the sheet regions a pass draws
+    (<code>PartModel.setupAnim</code>). Read out of the sources, 2026-10-01.
+</p>
+
 <h2 id="onlyin-on-mod-classes">Do not put <code>@OnlyIn</code> on a class of your own</h2>
 
 <p>

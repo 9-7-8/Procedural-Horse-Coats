@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antler form &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominance series <span class="sep">/</span> shapes the antlers, paints nothing</p>
+
+<h1>Antler form</h1>
+
+<p class="lede">
+    How an antlered horse's rack grows: forked like a red deer's, swept back with a brow
+    tine like a reindeer's, broad and palmate like a moose's, crowned with a cup of tines,
+    or a plain spike. One habit, drawn on both sides. On a horse without
+    <a href="gene-antlers.html">antlers</a> it does nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.antler_form"></div>
+
+<h2 id="habits">The five habits</h2>
+
+<table class="data">
+    <thead><tr><th>Allele</th><th>Habit</th><th>Looks like</th></tr></thead>
+    <tbody>
+        <tr><td><code>Pal</code></td><td>Palmate</td><td>A short beam opening into a broad palm, with points round its edge &mdash; a moose, a fallow buck</td></tr>
+        <tr><td><code>Crn</code></td><td>Crowned</td><td>A tall beam ending in a cup of tines splayed every way &mdash; a royal head</td></tr>
+        <tr><td><code>Brw</code></td><td>Brow-tined</td><td>Swept back and over in a long curve, one tine thrown forward over the face &mdash; a reindeer</td></tr>
+        <tr><td><code>Frk</code></td><td>Forked</td><td>Branched up the beam, the lower tines longest &mdash; a red deer. The commonest</td></tr>
+        <tr><td><code>n</code></td><td>Spike</td><td>A plain spike, forking once when it is large &mdash; a yearling, a brocket</td></tr>
+    </tbody>
+</table>
+
+<p>
+    Each allele hides the ones below it: a horse with <code>Pal</code> and anything else
+    is palmate, one with <code>Brw</code> and <code>Frk</code> is brow-tined. So two
+    forked horses can throw a spike-antlered foal, one time in four, if both carry
+    <code>n</code> underneath.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Every horse carries a form, antlered or not &mdash; it simply does nothing until the
+    horse has antlers. About half of wild copies are forked, a fifth are spike, and the
+    other three habits are rarer. That makes an ordinary-looking horse a reasonable way to
+    bring a palmate rack into an antlered line.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all, for good or ill &mdash; it only changes the shape of antlers it might have.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.antler_form"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.antler_form</dd></div>
+    <div><dt>Class</dt><dd><code>AntlerFormGene</code></dd></div>
+    <div><dt>Priority</dt><dd>231 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Frk</span> <span class="allele dom">Brw</span> <span class="allele dom">Pal</span> <span class="allele dom">Crn</span> <span class="allele wild">n</span> &mdash; dominance <code>Pal &gt; Crn &gt; Brw &gt; Frk &gt; n</code></dd></div>
+    <div><dt>Founders</dt><dd>Hardy&ndash;Weinberg over <code>Frk</code> 0.50, <code>Brw</code> 0.12, <code>Pal</code> 0.08, <code>Crn</code> 0.08, <code>n</code> 0.22</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="order">The allele order is the generator's habit order</h2>
+
+<p>
+    <code>Frk, Brw, Pal, Crn, n</code> is the order the alleles are declared and stored
+    in, <em>and</em> <code>AntlerGenerator</code>'s habit indices &mdash; so
+    <code>habitOf(pair)</code> is the dominant allele's <code>order()</code>, and it becomes
+    the first factor of the antler <code>PartShape</code>'s style. Dominance is not the
+    declaration order; it is a separate list. Appending a habit is safe; reordering would
+    rewrite every horse's rack, and removing one makes <code>Genotype.readableStored</code>
+    drop the whole segment.
+</p>
+
+<h2 id="door">How it reaches the rack</h2>
+
+<p>
+    <code>GrownParts.of</code> passes <code>habitOf</code> to
+    <code>AntlersGene.racksFor</code>, which builds both sides in it. It carries no
+    epigenetic numbers: how many tines and how big are the antler allele's, and this locus
+    only picks the rule that places them.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-horses">Analogous, not measured</h2>
+
+<p>
+    Invented, like the <a href="gene-antlers.html">antler locus</a> it modifies (D8). The
+    five habits are the broad shapes deer antlers take &mdash; branched, brow-tined,
+    palmate, crowned and simple &mdash; but in real deer they are species characters, not
+    alleles of one gene. The split between this locus and the antler allele's numbers is a
+    gameplay rule, written on the treatment: a <em>kind</em> a breeder wants to cross in on
+    purpose, with a 3:1 ratio, is an allele; a <em>quantity</em> they want to nudge is a
+    number.
+</p>
+
+<h2 id="why-not-codominant">Why plain dominance and never codominant</h2>
+<p>
+    A codominant series would draw one habit on each side. Antlers are symmetric by default
+    (D3), so a palmate-left, forked-right rack would read as a bug; one habit wins and is
+    drawn on both.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>None of the five habits has been seen on a live horse, so whether each reads as its deer is unchecked.</p>
+</div>
+
+<h3 id="open-form-look">Each habit, side by side</h3>
+<p>
+    An antlered horse of each habit at a standard and a massive size. Forked should read
+    as a red deer, brow-tined as a reindeer (the brow tine forward over the face), palmate
+    as a broad plate, crowned as a cup at the top, spike as a spike. The palm is built from
+    square boxes and may read as a clump rather than a plate &mdash; that is the habit most
+    likely to need its generator rule redrawn.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

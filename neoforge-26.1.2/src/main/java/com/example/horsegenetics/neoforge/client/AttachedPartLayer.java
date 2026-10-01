@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.parts.AttachedPart;
 import com.example.horsegenetics.common.parts.PartAnchor;
+import com.example.horsegenetics.common.parts.PartSheet;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -16,8 +17,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 
 /**
- * Draws the horse's <b>grown parts</b> - today a unicorn horn - as meshes hung on
- * bones the horse model already animates.
+ * Draws the horse's <b>grown parts</b> - a unicorn horn, a rack of antlers - as
+ * meshes hung on bones the horse model already animates.
  *
  * <p>This is the mod's <b>first visual that is not a texture</b>, and the one
  * structural claim behind it is that a part needs no animation of its own: a mesh
@@ -84,6 +85,21 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     private static final float[] FOAL_FOREHEAD = {0f, -3.45f, -1.0f};
 
     /**
+     * Where the <b>left</b> antler roots on the adult skull; the right is the same
+     * with {@code x} negated. Vanilla's {@code left_ear} spans {@code x 0.55..2.55,
+     * y -13..-10, z 4..5}, so this is just inside the ear and a unit forward of it,
+     * half a unit into the top of the skull - the pedicle. A first placement from the
+     * boxes, not a tuned one.
+     */
+    private static final float[] ADULT_CROWN = {1.5f, -10.5f, 3.0f};
+
+    /**
+     * The same on the foal. Never drawn - a foal wears no antlers - and here because
+     * the switch below must answer for every anchor on both models.
+     */
+    private static final float[] FOAL_CROWN = {1.5f, -3.45f, 0.8f};
+
+    /**
      * How large a foal's horn is against the horn it will grow into.
      *
      * <p>A foal wears its own horn rather than nothing (owner's call) because a horn
@@ -116,6 +132,11 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
         }
         float alpha = genetic.fadeAlpha;
         for (AttachedPart part : genetic.parts) {
+            // A foal grows no antlers - they come with maturity (PartKind.showsOnFoal) -
+            // but wears its half-size horn.
+            if (state.isBaby && !part.kind().showsOnFoal()) {
+                continue;
+            }
             poseStack.pushPose();
             anchor(part.kind().anchor(), state.isBaby, poseStack);
 
@@ -133,6 +154,7 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             poseStack.scale(part.girth(), part.stretch(), part.girth());
 
             PartModel model = PartMeshes.get(part.shape());
+            float shown = part.shown();
             // A grown part fades with the horse it grew on - a solid horn hanging in
             // the air over a see-through horse would read as a bug. RiderFade.fade
             // keeps the colour and moves only the alpha, and the render type has to
@@ -146,62 +168,96 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             // in setupAnim and not a skipDraw set here. Two-tone horns are the rare
             // case (two different colour alleles on a horse that is already one in
             // four hundred), so the common horn still costs one draw.
+            //
+            // A crystal antler is two: the bone region see-through, the points
+            // solid - so the expensive blended pass draws the least it can.
             boolean glow = part.emissive() && genetic.drawPartGlow;
-            if (!part.twoTone()) {
-                submitSlice(submitNodeCollector, model, PartModel.Slice.ALL, poseStack, genetic,
-                        lightCoords, RiderFade.fade(part.baseTint(), alpha), glow);
+            int glowRegions = part.kind().glowRegions();
+            if (part.translucent()) {
+                int shafts = PartSheet.bit(PartSheet.BONE);
+                submitSlice(submitNodeCollector, model, PartModel.Slice.regions(shafts, shown), poseStack,
+                        genetic, lightCoords,
+                        RiderFade.fade(part.baseTint(), alpha * AttachedPart.CRYSTAL_ALPHA), true);
+                submitSlice(submitNodeCollector, model,
+                        PartModel.Slice.regions(PartSheet.SOLID & ~shafts, shown), poseStack,
+                        genetic, lightCoords, RiderFade.fade(part.tipTint(), alpha), genetic.isFading());
+            } else if (!part.twoTone()) {
+                submitSlice(submitNodeCollector, model, PartModel.Slice.regions(PartSheet.SOLID, shown),
+                        poseStack, genetic, lightCoords, RiderFade.fade(part.baseTint(), alpha),
+                        genetic.isFading());
             } else {
                 int n = model.segmentCount();
                 for (int i = 0; i < n; i++) {
                     float along = n == 1 ? 0f : (float) i / (n - 1);
-                    submitSlice(submitNodeCollector, model, new PartModel.Slice(i), poseStack,
-                            genetic, lightCoords, RiderFade.fade(part.tintAt(along), alpha), glow);
+                    int tint = RiderFade.fade(part.tintAt(along), alpha);
+                    submitSlice(submitNodeCollector, model, PartModel.Slice.segment(i, shown), poseStack,
+                            genetic, lightCoords, tint, genetic.isFading());
+                    if (glow) {
+                        submitGlow(submitNodeCollector, model, new PartModel.Slice(i, shown, glowRegions),
+                                poseStack, genetic, tint);
+                    }
                 }
+            }
+            if (glow && !part.twoTone()) {
+                submitGlow(submitNodeCollector, model, PartModel.Slice.regions(glowRegions, shown),
+                        poseStack, genetic, RiderFade.fade(part.tipTint(), alpha));
+            }
+            // Leaves are their own colour and their own pass, over boxes every antler
+            // mesh already carries and only a blooming horse ever draws.
+            if (part.blooms()) {
+                submitSlice(submitNodeCollector, model,
+                        PartModel.Slice.regions(PartSheet.bit(PartSheet.BLOOM), shown), poseStack,
+                        genetic, lightCoords, RiderFade.fade(part.bloomTint(), alpha), genetic.isFading());
             }
             poseStack.popPose();
         }
     }
 
     /**
-     * One slice of a part - the whole of it, or one segment - in one colour, plus
-     * its glow pass when it glows.
+     * One slice of a part - the whole of it, one segment, or some of its regions -
+     * in one colour.
      *
-     * <p>The glow is a second submit of the same slice at full brightness - the way
-     * EmissiveCoatLayer redraws a glowing mane - so only a glowing horn pays for it,
-     * it glows in its own colour whatever that is, and a player who cannot afford
-     * it can turn the pass off and keep the horn.
+     * @param blended draw it through the blended pipeline: a fading horse, or a
+     *                crystal antler's shafts
      */
     private static void submitSlice(SubmitNodeCollector collector, PartModel model,
                                     PartModel.Slice slice, PoseStack poseStack,
                                     GeneticHorseRenderState genetic, int lightCoords, int tint,
-                                    boolean glow) {
+                                    boolean blended) {
         collector.order(1).submitModel(
                 model,
                 slice,
                 poseStack,
-                genetic.isFading() ? RenderTypes.entityTranslucent(SHEET)
-                        : RenderTypes.entityCutout(SHEET),
+                blended ? RenderTypes.entityTranslucent(SHEET) : RenderTypes.entityCutout(SHEET),
                 lightCoords,
                 OverlayTexture.NO_OVERLAY,
                 tint,
                 null,
                 genetic.outlineColor,
                 null);
-        if (glow) {
-            collector.order(2).submitModel(
-                    model,
-                    slice,
-                    poseStack,
-                    RenderTypes.entityTranslucentEmissive(SHEET, false),
-                    FULL_BRIGHT,
-                    OverlayTexture.NO_OVERLAY,
-                    tint,
-                    null,
-                    genetic.outlineColor,
-                    null);
-        }
     }
 
+    /**
+     * The glow pass: the same slice again at full brightness - the way
+     * EmissiveCoatLayer redraws a glowing mane - so only a glowing part pays for it,
+     * it glows in its own colour whatever that is, and a player who cannot afford it
+     * can turn the pass off and keep the part.
+     */
+    private static void submitGlow(SubmitNodeCollector collector, PartModel model,
+                                   PartModel.Slice slice, PoseStack poseStack,
+                                   GeneticHorseRenderState genetic, int tint) {
+        collector.order(2).submitModel(
+                model,
+                slice,
+                poseStack,
+                RenderTypes.entityTranslucentEmissive(SHEET, false),
+                FULL_BRIGHT,
+                OverlayTexture.NO_OVERLAY,
+                tint,
+                null,
+                genetic.outlineColor,
+                null);
+    }
     /**
      * Put the pose stack at {@code anchor}, in that bone's own space and in that
      * bone's own units.
@@ -233,6 +289,14 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
                 headParts.translateAndRotate(poseStack);
                 headParts.getChild("head").translateAndRotate(poseStack);
                 yield baby ? FOAL_FOREHEAD : ADULT_FOREHEAD;
+            }
+            case CROWN_RIGHT, CROWN_LEFT -> {
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                float[] base = baby ? FOAL_CROWN : ADULT_CROWN;
+                float side = anchor == PartAnchor.CROWN_LEFT ? 1f : -1f;
+                yield new float[] {side * base[0], base[1], base[2]};
             }
         };
 

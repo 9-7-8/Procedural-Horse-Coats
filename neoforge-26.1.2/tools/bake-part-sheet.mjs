@@ -11,7 +11,7 @@
 // GREYSCALE, AND THAT IS THE DESIGN
 // Not a limitation of the tool. Colour is a per-horse tint applied at draw time -
 // the same method a dyed braid uses - so one file serves every horn this mod can
-// grow: ivory, bone, pearl, a warm gold, and whatever a lineage's colour drifts to
+// grow - and every antler: ivory, bone, umber, a gem, a leaf green, and whatever a lineage's colour drifts to
 // over thirty generations. What a region carries is grain and light. Painting the
 // colour in would mean one sheet per colour, and the colours are continuous.
 //
@@ -45,6 +45,9 @@ const REGION = 16;
 const ACROSS = SIZE / REGION;
 const HORN = 0;
 const HORN_TIP = 1;
+const BONE = 2;
+const BONE_TIP = 3;
+const BLOOM = 4;
 
 /** Deterministic integer hash to [0,1). Nothing here may use Math.random. */
 function hash(x, y, salt) {
@@ -88,6 +91,32 @@ function keratin(u, v, tip) {
   return base + 0.3 * (long + fine) + ridge;
 }
 
+/**
+ * Antler bone. Coarser and more pitted than keratin - antler is bone, with a
+ * rough, beaded surface ("pearling") toward the base - and still streaked along v,
+ * the length of the beam. `tip` is the polished point: smoother and paler, because
+ * a real tine's tip is worn smooth and light, and because that is the region a
+ * glowing antler lights and a crystal one keeps solid, so it should read as a cap.
+ */
+function bone(u, v, tip) {
+  const long = noise(u / 1.4, v / 3.5, 3, REGION) * 0.40;
+  const pits = noise(u * 1.9, v * 1.9, 4, REGION);
+  const pearl = tip ? 0 : (pits > 0.72 ? -0.16 : 0) + (pits < 0.18 ? 0.10 : 0);
+  const base = tip ? 0.80 : 0.62;
+  return base + (tip ? 0.12 : 0.3) * long + pearl;
+}
+
+/**
+ * Leaves, moss and blossom - one mottled grain with no direction, since a clump
+ * is not grown along anything. Light and dark blotches so the per-horse tint (a
+ * green, an olive, a pink) reads as foliage rather than as a painted block.
+ */
+function bloom(u, v) {
+  const blotch = noise(u / 2.2, v / 2.2, 5, REGION);
+  const fine = noise(u * 1.3, v * 1.3, 6, REGION);
+  return 0.58 + 0.34 * blotch + 0.14 * fine - (fine > 0.8 ? 0.2 : 0);
+}
+
 const px = Buffer.alloc(SIZE * SIZE * 4);          // zeroed: an unused region is blank
 function paint(region, fn) {
   const ox = (region % ACROSS) * REGION;
@@ -107,12 +136,16 @@ function paint(region, fn) {
 
 paint(HORN, (u, v) => keratin(u, v, false));
 paint(HORN_TIP, (u, v) => keratin(u, v, true));
+paint(BONE, (u, v) => bone(u, v, false));
+paint(BONE_TIP, (u, v) => bone(u, v, true));
+paint(BLOOM, (u, v) => bloom(u, v));
 
 // The one thing worth asserting: every texel a box can reach is opaque. A part is
 // drawn through a cutout pipeline, which DISCARDS a fragment under an alpha of
 // 0.1 - so a region with a transparent corner is a horn with holes in it, and the
 // hole would appear only on the segment sizes that happen to reach that corner.
-for (const region of [HORN, HORN_TIP]) {
+const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM];
+for (const region of PAINTED) {
   const ox = (region % ACROSS) * REGION;
   const oy = Math.floor(region / ACROSS) * REGION;
   for (let v = 0; v < REGION; v++) {
@@ -125,4 +158,4 @@ for (const region of [HORN, HORN_TIP]) {
 }
 
 writePng(OUT, SIZE, SIZE, px);
-console.log(`wrote ${OUT} (${SIZE}x${SIZE}, ${ACROSS}x${ACROSS} regions, 2 painted)`);
+console.log(`wrote ${OUT} (${SIZE}x${SIZE}, ${ACROSS}x${ACROSS} regions, ${PAINTED.length} painted)`);

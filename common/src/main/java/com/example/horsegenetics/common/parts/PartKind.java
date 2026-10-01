@@ -4,21 +4,28 @@ package com.example.horsegenetics.common.parts;
  * <b>What a gene or a breed asks for.</b> One value per kind of grown part; the
  * client maps a kind to a render pass, and {@code common/} never sees a mesh.
  *
- * <p>There is exactly one today. That is the point of the slice rather than an
- * oversight: the registry, the layer and the placement contract are built once
- * and the second kind is a value here plus a generator. A kind nothing draws
- * would be a promise the game does not keep, so kinds arrive with their
- * geometry, not ahead of it.
+ * <p>A kind nothing draws would be a promise the game does not keep, so kinds
+ * arrive with their geometry, not ahead of it. The antlers were the first test of
+ * the claim that the second part is "a value here plus a generator": they are two
+ * values (one per side - see {@link AntlerGenerator} on why), and they needed two
+ * things the horn did not - a count shown at draw time, and a part a foal does not
+ * wear - which landed here as {@link #showsOnFoal()} and in the mesh's node groups.
  */
 public enum PartKind {
 
     /**
      * A single tapering horn on the forehead - the unicorn locus. Opaque, ivory
-     * by default, and the one part in the mod that has no seeded variation at
-     * all: a horn is a cone, and everything that differs between two horses'
-     * horns is length, girth, twist, lean and colour.
+     * by default, and with no seeded variation at all: a horn is a cone, and
+     * everything that differs between two horses' horns is length, girth, twist,
+     * lean and colour.
      */
-    HORN(PartAnchor.FOREHEAD, PartSheet.HORN);
+    HORN(PartAnchor.FOREHEAD, PartSheet.HORN),
+
+    /** The right-hand antler of a rack - the antlers locus. */
+    ANTLER_RIGHT(PartAnchor.CROWN_RIGHT, PartSheet.BONE),
+
+    /** The left-hand antler. A symmetric rack asks both sides for the same variant. */
+    ANTLER_LEFT(PartAnchor.CROWN_LEFT, PartSheet.BONE);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -42,6 +49,46 @@ public enum PartKind {
     public int styles() {
         return switch (this) {
             case HORN -> HornGenerator.STYLES;
+            // Habit x rack: the antler_form locus picks the first, the rack seed the second.
+            case ANTLER_RIGHT, ANTLER_LEFT -> AntlerGenerator.FORMS * AntlerGenerator.VARIANTS;
         };
+    }
+
+    /**
+     * How many size buckets - meshes along the size ladder - this kind has. The
+     * horn's sixteen are fine steps whose only job is a sane segment count; the
+     * antler's five are the {@link AntlerSize} classes, each a different rack.
+     */
+    public int sizeBuckets() {
+        return switch (this) {
+            case HORN -> PartShape.SIZE_BUCKETS;
+            case ANTLER_RIGHT, ANTLER_LEFT -> AntlerSize.classes();
+        };
+    }
+
+    /**
+     * Does a foal wear this part? A foal wears a half-size horn (owner's call,
+     * 2026-09-30); it wears <b>no antlers</b> - the treatment's default (P5), and
+     * the biology: antlers grow from pedicles that do not exist at birth.
+     */
+    public boolean showsOnFoal() {
+        return this == HORN;
+    }
+
+    /**
+     * The sheet regions a glowing part lights. A glowing horn glows all over; a
+     * glowing antler only at its points - each tine's tip and the beam's end - which
+     * is the antler glow locus as the treatment wrote it.
+     */
+    public int glowRegions() {
+        return switch (this) {
+            case HORN -> PartSheet.SOLID;
+            case ANTLER_RIGHT, ANTLER_LEFT -> PartSheet.bit(PartSheet.BONE_TIP);
+        };
+    }
+
+    /** Is this an antler, of either side? */
+    public boolean antler() {
+        return this == ANTLER_RIGHT || this == ANTLER_LEFT;
     }
 }

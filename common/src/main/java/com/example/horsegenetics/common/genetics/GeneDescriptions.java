@@ -459,6 +459,28 @@ public final class GeneDescriptions {
                     "A magical, recessive gene: Dst/Dst makes a unicorn's horn shed a fine "
                             + "dust in its own colours, which falls past its face. Does nothing to "
                             + "a horse without a horn. One copy shows nothing."),
+            Map.entry("horsegenetics.antlers",
+                    "A magical, dominant gene that grows a rack of antlers. Ant gives "
+                            + "antlers to mares and stallions alike; Antm to stallions only - a "
+                            + "mare carries it and shows nothing. Size, tine count, reach, "
+                            + "thickness and colour are epigenetic and inherited with the allele. "
+                            + "Grown at maturity; a foal has none."),
+            Map.entry("horsegenetics.antler_form",
+                    "A magical dominance series for how antlers grow: palmate over "
+                            + "crowned over brow-tined over forked over a plain spike. One habit "
+                            + "on both sides. Does nothing to a horse without antlers."),
+            Map.entry("horsegenetics.antler_glow",
+                    "A magical, recessive gene: Glw/Glw makes the points of the antlers "
+                            + "glow in the dark. Does nothing to a horse without antlers. One "
+                            + "copy shows nothing."),
+            Map.entry("horsegenetics.antler_crystal",
+                    "A magical, recessive gene: Cry/Cry turns the antlers to crystal - "
+                            + "see-through gem-coloured beams and tines with solid points. The "
+                            + "gem is inherited. Does nothing to a horse without antlers."),
+            Map.entry("horsegenetics.antler_bloom",
+                    "A magical, recessive gene: Blm/Blm grows leaves, moss or blossom on "
+                            + "the antlers. Which one is inherited. Does nothing to a horse "
+                            + "without antlers."),
             Map.entry("horsegenetics.mstn",
                     "MSTN (myostatin), the sprint / stamina trade-off. Codominant: each C copy "
                             + "adds a little speed and costs two hearts of health. Endurance is "
