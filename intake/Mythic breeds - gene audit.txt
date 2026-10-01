@@ -1,7 +1,7 @@
 Mythic breeds - gene audit
 
 An AUDIT, NOT A SPEC. Nothing here has been changed in the repo and no decision has been made for the owner. It
-maps two tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
+maps three tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
 parts and breeds), what is already scoped in intake/ but not built, and what is still unscoped. Read from the
 shipped gene classes and gene files, the wiki gene pages, the shipped breed files and every treatment in intake/.
 UNVERIFIED lines are things I could not confirm.
@@ -10,13 +10,13 @@ Scope rules (the owner's)
 =========================
 - PUBLIC DOMAIN ONLY. Anything drawn from a still-protected work is out: the Lord of the Rings (Shadowfax, the Mearas),
   Harry Potter (the thestral), Dungeons & Dragons (the D&D nightmare), The Legend of Zelda (Epona) and The NeverEnding Story
-  (Artax) were in the tables and are now REMOVED from this audit. What stays is myth and folklore with no living rightsholder:
-  Greek, Norse, Hindu, Chinese, Irish, Scottish and Orcadian traditions.
+  (Artax), Narnia (Fledge; C. S. Lewis) and Tolkien's legendarium (Nahar, Felaroef) were in the tables and are now REMOVED from this audit. What stays is myth and folklore with no living rightsholder:
+  Greek, Norse, Hindu, Chinese, Irish, Scottish, Orcadian, Turkic and Islamic traditions.
 - Corollary for the building sessions: a breed's name and lore must be written fresh from the myth, not copied. The tables cite
   Wikipedia and other sites; their wording is not public domain (Wikipedia text is CC BY-SA). Name the creature, write our own
   description.
 - NO TALKING. A horse that speaks or prophesies is a huge feature and is out of scope for now. It is dropped as a gap everywhere
-  below (Arion, Xanthus). It stays as breed-description lore only, or not at all.
+  below (Arion, Xanthus; Fledge's speech went with Fledge). It stays as breed-description lore only, or not at all.
 - The mod's own shipped breeds are not affected. The existing breed called Nightmare (a tiny will-o'-the-wisp) is the owner's own
   invention, so the earlier naming clash with the D&D steed is moot now that the D&D steed is removed.
 - A natural DAPPLE gene is now on the owner's to-do list (intake/To do.txt). Balius is the breed that wants it.
@@ -71,7 +71,7 @@ ROADMAP only, no treatment (wiki/model-parts.html's Roadmap tab, and Stage 6 of 
  1. WINGS. Feathered pegasus wings and dragon wings. The settled route is a copy of the elytra mesh textured from Minecraft's own
     wings/elytra.png (so any elytra retexture pack is the wing art, no licence issue), two static poses, a flap as polish. Never broken
     into a treatment; the Roadmap tab lists pegasus wings as "lower" priority than the horn, antlers, spines and crystals. The biggest
-    blocker (Pegasus, Uchchaihshravas, and part of Longma).
+    blocker (Pegasus, Uchchaihshravas, and part of Longma), and optional for Tulpar and Buraq.
  2. TAILS. A lion or tufted tail (the Unicorn's "tufted or lion-like tail") and a fish tail (Hippocampus), plus a dragon or blade tail.
     On the Roadmap tab; not scoped.
  3. FORCED RIDING, "the kelpie" (wiki/forced-riding.html Roadmap tab): a wild horse that lets you mount and will not let you off, carrying
@@ -89,7 +89,7 @@ GAP, nothing anywhere:
  8. CLOVEN HOOVES / HOOF CAPS. Dropped from the feet scope when feathering was chosen alone. The Unicorn's "sometimes cloven hooves".
  9. A DRAGON-LIKE MANE (Longma): mane COLOUR is there; mane SHAPE (flame-like, frill, crest) is not. A neck frill or ruff from the head and body
     treatments gets part of the way.
-10. "JOURNEYS ASSOCIATED WITH OTHER REALMS" (Sleipnir): no ability. Flight and speed are present; realm travel needs a design call (a portal-making
+10. "JOURNEYS ASSOCIATED WITH OTHER REALMS" and a supernatural NIGHT JOURNEY (Sleipnir, Buraq): no ability. Flight and speed are present; realm travel needs a design call (a portal-making
     ability, a dimension hop, or just lore).
 11. PURIFY WATER (Unicorn): no gene. Healer and Cleansing Light are nearest. Optional per the table ("in some traditions"); a design call.
 12. KELPIE SHAPESHIFTING into something other than a land animal (a person, a fish): Lycan cannot, by design.
@@ -132,25 +132,41 @@ Status: READY (all genes exist, build the breed JSON), PARTIAL (the breed can sh
  Svadilfari ..... READY. Heavy and powerful, pull 10, speed 10. The only claim to check is the stat: pull and speed both at 10 on one breed.
  Puca ........... READY on genes: black, and a Lycan shape pool (a breed pins the alleles it wants, e.g. goat, rabbit, dog-like wolf, hare). The "wild
                   journeys" ability (17) is optional and unscoped.
+ Grani .......... READY. Grey (Grey), a powerful build, speed 10. "Exceptional strength and courage" are the pull and health stats plus lore. Sleipnir's descendant:
+                  that is lineage lore, not eight legs (the table says so). It could be written as a cross label or a note rather than a gene.
+ Skinfaxi ....... READY. The Suntouched gene is a "mane and tail that stay bright in the dark and a body that casts light like a torch, with gold sparks", and the
+                  Light gene gives a gold mane, gold hooves and a horse that lights a stable. Both exist; this is nearly their description.
+ Hrimfaxi ....... READY, with one UNVERIFIED. A frost mane is Frostfall (mane, forelock and tail fading to white); Rime and Orchid Frost cover frost on the coat. "Dew falling
+                  from his bit": the Particle locus has a head body site, so a falling-drop particle from the head is plausible, but I did not confirm which of its alleles
+                  reads as dew. Check the allele table before promising it.
+ Arvakr, Alsvidr  READY as a pair of breeds or one breed with two lines. Powerful chariot horses, speed 10: stats plus the pull stat. They pull the sun's chariot
+                  "across the sky": the mod's carts take one puller today, and two to a wagon (a whippletree) is a carts Roadmap item, so a matched pair hitched together
+                  is the only thing that would wait on it. The breeds do not.
+ Tulpar ......... PARTIAL. Flight (the flying gene), varied colours and a light fast build all exist. "Wings in many depictions" is gap 1, optional: it ships wingless like
+                  Cloudtouched, and wings add the look. A type, not an individual.
+ Buraq .......... PARTIAL. White; a size between a donkey and a mule (a breed size range, which exists); speed 10 and "vast strides". Missing: 10 (a night journey); wings (1)
+                  are optional ("in some later descriptions"). Not a human face: the table says it is not universal, and none is planned. SENSITIVITY, flagged not decided:
+                  Buraq is a sacred figure in Islamic tradition. Whether and how to depict it as a game creature is the owner's call, and a respectful treatment (lore written
+                  from the tradition, no joke names or breeding-for-stats framing) is worth deciding before it ships.
  Nuckelavee ..... BLOCKED, a different class of problem: 14 (skinless coat, cheap), 15 (torso and leg fins, large), 16 (poison aura, small). It is a rideable
                   monster in name only; consider a non-rideable boss mob, or leave it out.
 
 Removed from this audit
 =======================
-Not public domain: Shadowfax and Mearas (The Lord of the Rings), the Thestral (Harry Potter), the Nightmare (Dungeons & Dragons), Epona (The Legend of
+Not public domain: Fledge (The Chronicles of Narnia, C. S. Lewis), Nahar and Felaroef (Tolkien's legendarium), Shadowfax and Mearas (The Lord of the Rings), the Thestral (Harry Potter), the Nightmare (Dungeons & Dragons), Epona (The Legend of
 Zelda) and Artax (The NeverEnding Story). Dropped with them: the "seen only by those who have witnessed death" rule, longevity and endurance as gene gaps (they
 were only the Thestral's and Mearas's), and the Nightmare naming clash. If any of these returns it must be as an original creature with no borrowed name,
 art or text.
-Out of scope for now: a talking or prophesying horse (Arion, Xanthus). A huge feature; not worth it yet.
+Out of scope for now: a talking or prophesying horse (Arion, Xanthus; and Fledge, already removed). A huge feature; not worth it yet.
 
 What this means for scoping
 ===========================
-Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca. Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Mostly
-covered once the parts are built (INTAKE): Longma, Unicorn.
+Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr. Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Partial
+(wings optional): Tulpar, Buraq. Mostly covered once the parts are built (INTAKE): Longma, Unicorn.
 One real blocker each: Pegasus (wings), Uchchaihshravas (seven heads), Sleipnir (eight legs), Hippocampus (hide the rear plus a fish tail), Kelpie and Each-uisge
 (forced riding), Nuckelavee (several).
 In priority order, by how many breeds each unblocks:
-  A. WINGS (Pegasus, Uchchaihshravas, Longma). A real treatment is needed; the elytra route is already researched.
+  A. WINGS (Pegasus, Uchchaihshravas, Longma; optional for Tulpar and Buraq). A real treatment is needed; the elytra route is already researched.
   B. FORCED RIDING (Kelpie, Each-uisge, and Puca's journeys). Already researched and deferred; needs its dependencies decided, then a treatment.
   C. TAILS (Unicorn, Hippocampus, a dragon blade). Small: a tail is a body-bone-adjacent part, like a spine row.
   D. IMMORTALITY (Arion, Balius, Xanthus): a design call first.
@@ -160,7 +176,7 @@ In priority order, by how many breeds each unblocks:
 
 Design questions this raises that are not gene gaps
 ===================================================
-- Named individuals versus breeds. Pegasus, Sleipnir, Uchchaihshravas, Arion, Balius, Xanthus, Gullfaxi and Svadilfari are single beings; the mod's unit is a
+- Named individuals versus breeds. Pegasus, Sleipnir, Uchchaihshravas, Arion, Balius, Xanthus, Gullfaxi, Svadilfari, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr and Buraq are single beings (Tulpar is a type); the mod's unit is a
   breed (a population). Options: a breed called after the creature, a unique spawn that exists once per world, or a breed plus a named-founder mechanism.
   Nothing in the repo decides this.
 - Which of these should be wild spawns, creative/spawn-egg only, or reachable only by breeding. The breed file's spawn list already supports all three; the
