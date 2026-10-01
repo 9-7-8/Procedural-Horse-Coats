@@ -152,3 +152,90 @@ What I could not verify
 - The exact allele tokens of the flying gene's true-flight form; the Nightmare and Cloudtouched breed files already pin the gene, so
   copy their pairs.
 - Whether a dragon-like mane can be done with the existing mane colour genes plus the head and body parts; it is a visual judgement.
+
+
+=====================================================================================================
+SECOND TABLE (added later): Arion, Balius, Xanthus, Gullfaxi, Svadilfari, Puca, Each-uisge, Nuckelavee, Epona, Artax
+=====================================================================================================
+Same legend and same method as above. Read against the first table: the gap numbers 1 to 16 are the same, and new gaps
+continue from 17. Still an audit, not a spec; UNVERIFIED lines are things I could not confirm.
+
+What this table needs that the first did not
+============================================
+Mostly ordinary horses with one big hole: IMMORTALITY. Ten breeds, and only two real blockers (immortality, and the water
+predator's forced riding that the first table already had), plus one monster (Nuckelavee) that is a different kind of problem.
+
+HAVE (implemented)
+- Coats: chestnut, palomino, buckskin, yellow and reddish-brown (Extension, Agouti, Shade, Matp cream/pearl, Dun, Champagne,
+  Flaxen); dark and black (Extension, Agouti); grey and appears-white (Grey, Silver); a golden or pale-gold mane and tail
+  (mane_color, tail_color, Flaxen); spotted (Leopard, Appaloosa modifier, Rosette and the other spotted patterns).
+  UNVERIFIED: an explicit DAPPLE gene. Shade is the bay-shade locus, not dapple. The nearest are Grey, Sooty and the data gene
+  Scarab Dapple; confirm which one reads as "dappled" before pinning Balius to it.
+- Speed and jump to the stat cap, and size: breed stats run to 10. UNVERIFIED that speed 10 is reachable (as in the first table).
+- Pulling strength (Svadilfari): HAVE. "pull" is a first-class stat out of ten (a Shire pulls 10), with a Magic Pull gene beside
+  it; the shipped Netherhorse is pull 8. Heavy and powerful: size and health stats.
+- Shapeshifting (Puca, Each-uisge): Lycan, which already has wolf, cat, fox, goat, rabbit and the other peaceful land animals as
+  alleles, matched pair, at night. A Puca that turns into a goat or a rabbit is the closest fit in the whole audit.
+- Blight (Nuckelavee): the gene that kills grass and growth under the horse. It is half of "associated with disease and blight".
+- Water abilities for the Each-uisge: the same ones as the Kelpie in the first table (water walking, no drowning, water breathing).
+
+INTAKE (scoped, not built)
+- Nothing in intake/ is asked for by these ten, EXCEPT indirectly: the head and body part treatments give a monster some dragon-ish or
+  armoured features, and nothing more.
+
+New gaps (continuing the numbering)
+===================================
+17. IMMORTALITY (Arion, Balius, Xanthus): GAP. No gene makes a horse unkillable or brings it back. The nearest shipped things are
+    immunities (Fireproof, Ocean Born, Bird Boned), health scaling (Magic Health), and /horseresurrect, which is an OPERATOR command,
+    not a gene. This is the largest new item and it is a DESIGN call before it is an engineering one, because "immortal" can mean at
+    least three different things with different balance costs: (a) takes no damage; (b) cannot die from ordinary causes but still dies
+    to the void or a command; (c) dies and stands back up after a delay (a totem). It touches the lethal-foal and death-handling paths,
+    breeding economics, the Exits ledger and any server that kills horses on purpose. Three breeds (Arion, Balius, Xanthus) are blocked on it
+    only as a flavour: each is otherwise a fast ordinary horse, so a no-immortality version is shippable.
+18. HUMAN SPEECH and PROPHECY (Arion, Xanthus; also Shadowfax in the first table): GAP, and almost certainly pure lore. No gene. Leave as breed
+    description text unless the owner wants a speaking-horse feature, which would be a new system.
+19. A SKINLESS, EXPOSED-FLESH COAT (Nuckelavee): GAP, but a cheap one. A coat gene is a data file under horsegenetics/genes/ (see
+    wiki/making-a-gene.html); the existing Bloodstained, Cleave and Burn are the nearest looks and none is a flayed-muscle coat.
+20. A HUMAN TORSO ON THE HORSE'S BACK, and FIN-LIKE LEG APPENDAGES (Nuckelavee): GAP, and the first is a very large attachment: a
+    separate body of boxes (torso, arms, head) hung on the body bone. The leg fins resemble feathering (a part on each leg bone) and
+    could reuse the Feathering treatment's per-leg anchors. Neither is scoped.
+21. POISONOUS BREATH / DISEASE (Nuckelavee): partial. Blight kills growth; there is no gene that poisons or sickens creatures near the horse.
+    A small effects-block aura gene would cover it (the effects verbs are a contract, see making-a-gene.html), but it is not scoped.
+22. WILD JOURNEYS (Puca): optional. "May take riders on wild, frightening journeys" is the same family as the Kelpie's forced riding (3), as a
+    gentler variant. If forced riding is ever scoped, a Puca is a parameter on it; until then it is flavour text.
+
+Breed by breed (second table)
+=============================
+ Arion .......... READY minus immortality (17) and speech (18). Dark or golden coat, black mane, speed 10.
+ Balius ......... READY minus immortality (17). Dappled or spotted coat (see the dapple note above), speed 10.
+ Xanthus ........ READY minus immortality (17) and prophetic speech (18). A yellow, blond or reddish-brown coat, speed 10.
+ Gullfaxi ....... READY. A golden mane (mane_color plus Flaxen), speed 10, a powerful build. Nothing blocks it.
+ Svadilfari ..... READY. Heavy and powerful, pull 10, speed 10. "Unusually intelligent" is lore. The only claim to check is the stat: pull and
+                  speed both at 10 on one breed (see the stat-cap note in the first table).
+ Puca ........... READY on genes (black, a Lycan shape pool, no single fixed look); the "wild journeys" ability (22) is optional and unscoped.
+                  The one mod-specific question is which shapes: Lycan's pool is every peaceful land animal; a Puca lore-wise is goat, rabbit, dog,
+                  hare, so a breed can pin those alleles (the breed file's genes block does this).
+ Each-uisge ..... BLOCKED on 3 (forced riding), like the Kelpie. Shapeshifting is Lycan (night only, land animals only). It is a distinct breed or
+                  a variant of the Kelpie; both need the same engine, which is the thing to scope.
+ Nuckelavee ..... BLOCKED, and a different class of problem: 19 (skinless coat, cheap), 20 (torso and leg fins, large), 21 (poison aura, small).
+                  It is a rideable monster in name only; the table itself calls it "more a horse-human sea demon than a rideable horse".
+                  Consider shipping it as a non-rideable boss mob or leaving it out.
+ Epona .......... READY. Chestnut or palomino, a pale or white mane and tail (Flaxen), 9/8 stats, no ability. Needs nothing.
+ Artax .......... READY. Grey that reads white, a pale mane, 8/7 stats, no ability. Needs nothing.
+
+Cross-table summary
+===================
+Ready now, no engineering (build breed files): Shadowfax, Mearas, D&D Nightmare (with a rename), Gullfaxi, Svadilfari, Epona, Artax, Puca.
+Ready except for lore-only features: Arion, Balius, Xanthus (immortality is a real gap, so they ship as ordinary fast horses until it is decided).
+Mostly covered once the parts are built (INTAKE): Longma, Unicorn.
+One real blocker each: Pegasus (wings), Thestral (wings and the seen-death rule), Uchchaihshravas (seven heads), Sleipnir (eight legs), Hippocampus (hide the
+rear plus a fish tail), Kelpie and Each-uisge (forced riding), Nuckelavee (several).
+
+New design calls this table adds
+================================
+- Immortality: which of the three meanings, if any, and whether it is a gene, a breed property or an item.
+- Epona and Artax are characters from a commercial game and a published novel and film. The project is CC BY-NC, and naming a breed after a
+  trademarked character is a licensing and naming question for the owner, not an engineering one. A generic lore name (a "Pampas Bay", a "Pale
+  Mare") would carry the same genetics. Flagged, not decided.
+- Individuals again (Arion, Balius, Xanthus, Gullfaxi, Svadilfari, Epona, Artax are single named beings; the same breed-versus-unique-spawn
+  question as the first table, now across seventeen of twenty-one rows).
