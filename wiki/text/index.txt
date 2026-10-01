@@ -3313,29 +3313,29 @@ wiki/rider-comfort.html#vanilla-leads-coding	coding	How the snapped lead is retu
 wiki/rider-comfort.html#vanilla-leads-placer	coding	And the owner has to be written down before it breaks
 wiki/rider-comfort.html#vanilla-leads-seam	coding	The drop cannot be hooked where it happens
 wiki/rider-comfort.html#vanilla-leads-test	coding	What the test can and cannot reach
-wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration
-wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections
+wiki/roadmap-execution.html#ai-arbitration-first	all	3. Navigation failure and AI arbitration - built, tests owed
+wiki/roadmap-execution.html#behaviour-fixes	all	4. Breeding, food and boundary corrections - shipped, unplayed
 wiki/roadmap-execution.html#breeding-behaviour	all	Breeding and horse behaviour
 wiki/roadmap-execution.html#coverage	all	Every roadmap tab has a lane
 wiki/roadmap-execution.html#discovery-ui	all	Horse discovery and naming
-wiki/roadmap-execution.html#fixes-first	all	Fixes and tuning come first
+wiki/roadmap-execution.html#fixes-first	all	What is left of the fix pass
 wiki/roadmap-execution.html#gap-routing	all	Open-gap routing audit
 wiki/roadmap-execution.html#gates	all	Foundations and decision gates
 wiki/roadmap-execution.html#gear-and-attachments	all	Gear and visual attachments
 wiki/roadmap-execution.html#handoff	all	Implementation handoff packet
 wiki/roadmap-execution.html#hardening-matrix	all	The required hardening matrix
-wiki/roadmap-execution.html#identity-first	all	1. Persistent identity and record retrieval
-wiki/roadmap-execution.html#interaction-first	all	2. Interaction routing and screen lifecycle
+wiki/roadmap-execution.html#identity-first	all	1. Persistent identity and record retrieval - not built
+wiki/roadmap-execution.html#interaction-first	all	2. Interaction routing and screen lifecycle - partly built
 wiki/roadmap-execution.html#loot-and-acquisition	all	Loot and acquisition
 wiki/roadmap-execution.html#owned-horse-records	all	Owned horses and records
-wiki/roadmap-execution.html#records-and-events	all	5. Ownership events, alerts and history
+wiki/roadmap-execution.html#records-and-events	all	5. Ownership events, alerts and history - mostly shipped
 wiki/roadmap-execution.html#routing	all	Route every request first
 wiki/roadmap-execution.html#session-loop	all	The execution loop
 wiki/roadmap-execution.html#session-packet	all	Session start and closeout packet
 wiki/roadmap-execution.html#slice-brief	all	The slice brief
 wiki/roadmap-execution.html#slices	all	New-content vertical slices in dependency order
 wiki/roadmap-execution.html#symptom-map	all	Symptom-to-anchor map
-wiki/roadmap-execution.html#ui-and-gear-fixes	all	6. UI and equipment actions
+wiki/roadmap-execution.html#ui-and-gear-fixes	all	6. UI and equipment actions - partly built
 wiki/stables.html#adding	all	Adding one: two files and no Java
 wiki/stables.html#debug-announce	all	Turning the commentary on
 wiki/stables.html#rarity	all	How often they generate
