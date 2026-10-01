@@ -225,6 +225,55 @@
 </ul>
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>A Chaos allele that lays any item the nine hand-picked ones do not cover, vanilla or modded, chosen by a seed on the allele copy &mdash; the item half of what the three mob loci got on 2026-10-01.</p>
+</div>
+
+<h2 id="chaos">Chaos: every other item</h2>
+<p>
+    Asked for out of <code>intake/</code>: the egg layer should reach any item any installed mod
+    adds, not only the nine it ships with. Built the way <a href="gene-lycan.html#chaos-coding">the
+    mob loci&rsquo;s Chaos</a> was, for the reasons recorded there: the nine alleles stay, and one
+    more, <code>Cha</code>, goes after the last of them and before <code>n</code>, carrying a
+    <code>chaos</code> seed on the copy (<code>MobRoster.CHAOS_TOKEN</code> /
+    <code>CHAOS_SEED</code> &mdash; and <code>AbstractMatchedPairGene</code> already handles a
+    Chaos subject, its matched-seed rule and <code>foundersShareSeeds</code>, for any locus that
+    lists <code>chaosVariant()</code>). Owner&rsquo;s decisions:
+</p>
+<ul>
+    <li>Chaos covers <strong>every item that is not one of the nine</strong>, vanilla and modded
+        alike, under the eligibility rules below.</li>
+    <li>The ability's item field carries <code>chaos:&lt;seed&gt;</code>, as the mob loci&rsquo;s
+        subject does; no new field on <code>GeneAbility.Produce</code>, so no SpecSchema or fixture
+        change. The game resolves it where it lays.</li>
+    <li><code>interval</code> stays the one tuned value; the seed is a second, <code>SEED</code>
+        kind.</li>
+    <li>The <code>nearby_cap</code> guard counts item entities of any kind, so a Chaos layer does
+        not lay on top of an uncollected pile.</li>
+    <li>Weighted like one vanilla allele in the founder table, and kept there in every pack.</li>
+</ul>
+<h3 id="chaos-items">Which items Chaos may produce</h3>
+<p>
+    Shared with <a href="gene-magic-item-drop.html#roadmap">magic item drop</a>. Decided: allowed
+    unless blocked. The default blocklist is creative-only and operator items (command, structure
+    and jigsaw blocks, barrier, light, debug stick, knowledge book and the like), every spawn egg,
+    and every container that can hold things (shulker boxes, bundles &mdash; a horse that lays a
+    full shulker is a duplication route). This mod&rsquo;s own items are eligible like anyone
+    else&rsquo;s, and the Gameplay tab must say so. On top, two config lists by mod id and item id,
+    the same shape as the mob ones (<code>chaos.exclude_mods</code> / <code>chaos.exclude_ids</code>
+    in <code>ServerConfig</code> &mdash; extend those or add item twins). <strong>Check first:</strong>
+    whether the registry can tell a creative-only modded item from a survival one; if it cannot,
+    the default list is the hand-written vanilla set and modded operator items are the pack
+    author&rsquo;s job, said plainly in the config comment and on the Gameplay tab. The item list is
+    a second list in <code>server/ChaosRoster</code>, built the same lazy, sorted, cached way.
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-item-drop.html">Magic item drop</a>

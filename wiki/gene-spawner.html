@@ -76,6 +76,17 @@
     ever homozygous here. Somebody has to make it.
 </p>
 
+<p id="chaos">
+    <strong>Chaos</strong> (<code>Cha</code>) is one more allele, standing for every creature
+    <em>another</em> mod adds &mdash; monsters and bosses included, since this locus reaches the
+    hostile ones on purpose. Two Chaos copies make two of one modded creature per meal; which one is
+    written on the horse&rsquo;s copies, worked out from the mods your world has loaded, and it can
+    change with the modpack. Both copies must carry the same line, as at
+    <a href="gene-lycan.html#chaos">lycan</a>. A server takes a boss off the list with
+    <code>chaos.exclude_ids</code> in its config, or a whole mod with
+    <code>chaos.exclude_mods</code>. With no modded creature installed it makes nothing.
+</p>
+
 <h2 id="colour">The colour of what it makes</h2>
 
 <p>
@@ -184,6 +195,19 @@
     </p>
 </div>
 
+<h3 id="chaos-coding">Chaos (2026-10-01)</h3>
+
+<p>
+    <code>Cha</code> sits after <code>Zvil</code> and before <code>n</code>; its copy carries a
+    <code>chaos</code> seed beside <code>variant</code>. A matched pair with agreeing seeds hands
+    <code>summon</code> the subject <code>chaos:&lt;seed&gt;</code>, and
+    <code>GeneAbilityHandler.summon</code> resolves it through <code>ChaosRoster</code>&rsquo;s
+    <code>SPAWNER</code> list &mdash; every modded <code>Mob</code> that is not a horse, not ours and
+    not excluded. The variant value still applies to whatever is made. Shared mechanics are on
+    <a href="gene-pack-leader.html#chaos-coding">pack leader&rsquo;s page</a>, the design on
+    <a href="gene-lycan.html#chaos-coding">lycan&rsquo;s</a>.
+</p>
+
 <h3 id="verified">Verified</h3>
 
 <p id="verified-every-meal">
@@ -276,8 +300,21 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>One narrow regression check: the second <code>finalizeSpawn</code> that re-rolled equipment is gone, so a spawner's zombie must still be <strong>wearing the gear it spawned with</strong> rather than a fresh roll.</p>
+    <p>The Chaos allele (2026-10-01) has never made a modded creature; behind it one narrow regression check: a spawner's zombie must still be <strong>wearing the gear it spawned with</strong> rather than a fresh roll.</p>
 </div>
+
+<h3 id="chaos-unplayed">Chaos (2026-10-01, NOT played)</h3>
+<ul>
+    <li><strong>A modded creature per meal.</strong> In a pack with other mods&rsquo; mobs, feed a
+        <code>Cha/Cha</code> horse: two of one modded creature appear, the same kind every meal, and
+        the <code>[Spawner] made 2 of 2 ...</code> line names it.</li>
+    <li><strong>The exclude lists work.</strong> Put that creature's id in
+        <code>chaos.exclude_ids</code>, reload the config, feed again: a different creature (the
+        roster rebuilds when the lists change). A whole mod in <code>chaos.exclude_mods</code> takes
+        all of its mobs off.</li>
+    <li><strong>Nothing installed.</strong> A plain install says <code>nothing made - no modded
+        creature available</code> in chat with debug announce on.</li>
+</ul>
 
 <h3 id="open-older-gene-spawner">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>

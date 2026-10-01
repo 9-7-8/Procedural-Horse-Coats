@@ -242,6 +242,53 @@ if (replace) {
 </ul>
 </section>
 
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>A Chaos allele whose doubled form drops one item chosen by a seed on the allele copy, in place of the leather, out of every item the fixed drops do not cover &mdash; the item half of what the three mob loci got on 2026-10-01.</p>
+</div>
+
+<h2 id="chaos">Chaos: an item nobody chose</h2>
+<p>
+    Asked for out of <code>intake/</code>, &ldquo;functions similarly to the eye allele&rdquo;. The
+    owner&rsquo;s decisions:
+</p>
+<ul>
+    <li>One more allele, <code>Cha</code>, whose copy carries a <code>chaos</code> seed, inherited
+        exactly &mdash; drift only ever re-rolls a seed whole, rarely &mdash; so a line breeds true.
+        Same constants and same matched-seed machinery as <a href="gene-lycan.html#chaos-coding">the
+        mob loci</a>.</li>
+    <li><strong>Recessive like every variant here:</strong> it takes two Chaos copies. Two copies
+        with different seeds follow this locus's rule for two different variants &mdash; they settle
+        on nothing and the horse drops ordinary leather.</li>
+    <li>A matched pair <strong>replaces the leather</strong>, as diamonds do, so it stays a choice a
+        breeder makes. One stack of one; count is the ability's min/max, start at 1&ndash;1.</li>
+    <li>Unlike the egg layer this locus is not one allele per item, so it needs a new drop kind:
+        <code>&quot;chaos:&lt;seed&gt;&quot;</code> as the drop name, one more case in
+        <code>server/GeneDeathHandler.itemFor</code>&rsquo;s switch.</li>
+    <li>Founder table: doubled forms only, as the rest of this locus; Chaos gets a small weight of
+        its own, the owner&rsquo;s to tune once it exists.</li>
+</ul>
+<h3 id="chaos-items-drop">Which items Chaos may produce</h3>
+<p>
+    Shared with <a href="gene-egg-layer.html#roadmap">the egg layer</a>. Decided: allowed
+    unless blocked. The default blocklist is creative-only and operator items (command, structure
+    and jigsaw blocks, barrier, light, debug stick, knowledge book and the like), every spawn egg,
+    and every container that can hold things (shulker boxes, bundles &mdash; a horse that lays a
+    full shulker is a duplication route). This mod&rsquo;s own items are eligible like anyone
+    else&rsquo;s, and the Gameplay tab must say so. On top, two config lists by mod id and item id,
+    the same shape as the mob ones (<code>chaos.exclude_mods</code> / <code>chaos.exclude_ids</code>
+    in <code>ServerConfig</code> &mdash; extend those or add item twins). <strong>Check first:</strong>
+    whether the registry can tell a creative-only modded item from a survival one; if it cannot,
+    the default list is the hand-written vanilla set and modded operator items are the pack
+    author&rsquo;s job, said plainly in the config comment and on the Gameplay tab. The item list is
+    a second list in <code>server/ChaosRoster</code>, built the same lazy, sorted, cached way.
+</p>
+
+</section>
+
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-on-death.html">Magic on death &mdash; the other half</a>

@@ -67,6 +67,19 @@
     is a fine thing to breed for, and a horse shut <em>inside</em> a squid drowns.
 </p>
 
+<h3 id="chaos">Chaos: an animal from another mod</h3>
+
+<p>
+    One more allele, <strong>Chaos</strong> (<code>Cha</code>), stands for every peaceful animal
+    <em>another</em> mod adds. Two Chaos copies lead one kind of modded animal &mdash; which kind is
+    written on the horse&rsquo;s copies, worked out from the mods your world has loaded, and it can
+    change if the modpack does. Both copies must carry the same line: two different Chaos carriers
+    crossed give a foal that leads nothing, exactly like two different vanilla alleles. Only
+    peaceful animals are chosen (fliers and swimmers are fine, as above); a server can take a mod
+    or one animal off the list in its config. With no modded animals installed it does nothing.
+    See <a href="gene-lycan.html#chaos">lycan</a>, which has the same allele.
+</p>
+
 <h2 id="find">What you can catch</h2>
 
 <p>
@@ -141,6 +154,23 @@
     must find the same allele twice is a search with a target.
 </p>
 
+<h3 id="chaos-coding">Chaos (2026-10-01)</h3>
+
+<p>
+    <code>Cha</code> sits after the last vanilla allele and before <code>n</code>, and the copy
+    carries a <code>chaos</code> seed &mdash; the locus&rsquo;s first epigenetic value. The shared
+    base, <code>AbstractMatchedPairGene</code>, does the work for both mob loci on it: a matched
+    Chaos pair whose two seeds agree hands its <code>mob_aura</code> the subject
+    <code>chaos:&lt;seed&gt;</code> in the ordinary mob field, a disagreeing pair hands it nothing,
+    and <code>foundersShareSeeds</code> makes a fresh horse one line. The game module swaps the
+    subject for a real id at each beat through <code>ChaosRoster</code>&rsquo;s
+    <code>PACK</code> list &mdash; modded mobs that are not a <code>MONSTER</code> spawn category and
+    not hostile on inspection. The design and the reasons it is one allele rather than one per mob
+    are on <a href="gene-lycan.html#chaos-coding">lycan&rsquo;s page</a>; the seed field and the
+    info-screen line are on <a href="gene-lycan.html#roadmap">its Roadmap tab</a>.
+    <code>ChaosMobLociTest</code> pins the common half.
+</p>
+
 <h3 id="verified">Verified</h3>
 
 <p id="verified-retinue-cost">
@@ -171,8 +201,18 @@
     <span class="label">What needs verifying here</span>
     <p>Leader of the pack has been measured as cheap but never watched working: nobody has confirmed
     that a retinue actually forms, that a mismatched pair produces none, or that the followers are
-    released when the horse is gone.</p>
+    released when the horse is gone. The Chaos allele (2026-10-01) has never met a modded mob.</p>
 </div>
+
+<h3 id="chaos-unplayed">Chaos (2026-10-01, NOT played)</h3>
+<ul>
+    <li><strong>A modded retinue.</strong> In a pack with another mod&rsquo;s peaceful animals, a
+        <code>Cha/Cha</code> horse from the spawn egg gathers one kind of them, and the
+        <code>[chaos] ... pack leader</code> count in the log is above zero. No modded monster is
+        ever on that list.</li>
+    <li><strong>Nothing installed.</strong> In a plain install a <code>Cha/Cha</code> horse leads
+        nothing and logs <code>no modded animal available for PACK</code> once.</li>
+</ul>
 
 <h3 id="open-gene-pack-leader">Still open (NOT played)</h3>
 

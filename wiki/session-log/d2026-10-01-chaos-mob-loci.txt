@@ -1,0 +1,47 @@
+2026-10-01 - Chaos at the three mob loci
+
+
+    Picked from intake/ as the most important thing in it: To do.txt held only two
+    bullets, both the owner's own modded-server tuning ask (Lycan's mob list, and the
+    item genes, should reach other mods' content), and a treatment beside them had
+    every design call settled. The other intake treatments were already routed onto
+    Roadmap tabs. Per START HERE, one bullet: the mob half shipped, the item half was
+    routed.
+
+    What shipped. Lycanthropy, Leader of the pack and Spawner each gained ONE allele,
+    Cha, between their last vanilla allele and n, standing for every mob another mod
+    adds. Which mob is a SEED value on the allele copy, picked by position from a list
+    the server builds out of the live entity registry the first time a Chaos horse
+    asks (server/ChaosRoster): not vanilla, not ours, summonable, not a horse, not
+    excluded by the new chaos.exclude_mods / chaos.exclude_ids server config; then
+    lycan keeps only what isWearable accepts, pack leader only the peaceful ones,
+    spawner everything. The vanilla alleles are untouched.
+
+    The one real design problem was founders. Two Chaos copies act only when their
+    seeds agree (the matched-pair rule, one level down, the owner's call), but two
+    copies rolled independently never agree, so every wild or spawned Chaos/Chaos
+    horse would have been the mismatched outcome - and Lycan's founders are all
+    homozygous. Answer: Gene.foundersShareSeeds(), a list of seed values a freshly
+    made horse carries identically on both copies, applied wherever Epigenome rolls
+    two copies together and never in breeding. Two lines crossed stay two lines;
+    inbreeding within a line keeps its animal. A mutation test (removing the
+    sharing) fails LycanGeneTest, so the test is real.
+
+    Evidence. LycanGeneTest (four new Chaos tests) and a new ChaosMobLociTest green;
+    the bake golden gained exactly three rows (the three new alleles, blank sheets),
+    nothing else moved; the pipeline golden did not move. A chaos_roster gametest
+    passed with the other 22: the classifier sorts vanilla wolf, bat, cod, bee,
+    zombie, horse and arrow correctly, and the real lists are sorted, stable, never
+    vanilla or ours, and nested lycan in pack in spawner. Those lists are EMPTY in the
+    dev run - it has no mod with mobs - so nothing here has met a real modded mob.
+    Build green, creator parity green, designer boots on the rebuilt wasm.
+
+    Routed, not built. The items half (egg layer and magic item drop Chaos, and the
+    item blocklist) is on those two pages' Roadmap tabs; the editors' seed field and
+    the info screen naming the resolved animal are on gene-lycan's Roadmap tab. The
+    two To do.txt bullets and the treatment file are deleted, and section 6 of
+    Implementation advice.txt with them.
+
+    Where to look first: the Verification tabs of gene-lycan, gene-pack-leader and
+    gene-spawner - every Chaos check there needs a pack with real modded mobs, which
+    the owner's server has and the dev run does not.

@@ -1433,6 +1433,8 @@ wiki/gene-lut.html#pipeline	coding	Where it sits in the pipeline
 wiki/gene-lut.html#table	coding	The combination table
 wiki/gene-lut.html#verified	coding	Verified
 wiki/gene-lycan.html#carrot	gameplay	Its gene carrot
+wiki/gene-lycan.html#chaos	gameplay	Chaos: an animal from another mod
+wiki/gene-lycan.html#chaos-coding	coding	Chaos: one allele for every modded mob (2026-10-01)
 wiki/gene-lycan.html#clock	gameplay	Dusk, dawn, and dimensions with no night
 wiki/gene-lycan.html#cloud	coding	The cloud colour
 wiki/gene-lycan.html#forms	gameplay	The shapes
@@ -1953,6 +1955,8 @@ wiki/gene-overcast.html#inheritance	gameplay	Crossing two of them
 wiki/gene-overcast.html#layers	coding	What it paints
 wiki/gene-overcast.html#outcomes	gameplay	What it can come out as
 wiki/gene-pack-leader.html#alleles	gameplay	One allele per mob
+wiki/gene-pack-leader.html#chaos	gameplay	Chaos: an animal from another mod
+wiki/gene-pack-leader.html#chaos-coding	coding	Chaos (2026-10-01)
 wiki/gene-pack-leader.html#find	gameplay	What you can catch
 wiki/gene-pack-leader.html#health	gameplay	Health
 wiki/gene-pack-leader.html#matched	coding	Why a matched pair
@@ -2418,6 +2422,7 @@ wiki/gene-sooty.html#not-shade	science	Why it is not the shade locus, given they
 wiki/gene-sooty.html#shape	coding	Where it sits
 wiki/gene-sooty.html#what-it-does	gameplay	What it does
 wiki/gene-spawner.html#cap	science	From self-limiting to paid-for
+wiki/gene-spawner.html#chaos-coding	coding	Chaos (2026-10-01)
 wiki/gene-spawner.html#colour	gameplay	The colour of what it makes
 wiki/gene-spawner.html#findable	coding	A locus almost nobody will find by accident
 wiki/gene-spawner.html#health	gameplay	Health

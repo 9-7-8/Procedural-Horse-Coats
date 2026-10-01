@@ -195,14 +195,41 @@
         <tr><td><code>Pig</code></td><td>Pig</td><td><code>Plr</code></td><td>Polar bear</td><td><code>Rbt</code></td><td>Rabbit</td></tr>
         <tr><td><code>Shp</code></td><td>Sheep</td><td><code>Snf</code></td><td>Sniffer</td><td><code>Strd</code></td><td>Strider</td></tr>
         <tr><td><code>Tlma</code></td><td>Trader llama</td><td><code>Trt</code></td><td>Turtle</td><td><code>Wtr</code></td><td>Wandering trader</td></tr>
-        <tr><td><code>Wlf</code></td><td>Wolf</td><td colspan="4">&mdash;</td></tr>
+        <tr><td><code>Wlf</code></td><td>Wolf</td><td><code>Cha</code></td><td>Chaos &mdash; <a href="#chaos">another mod&rsquo;s animal</a></td><td colspan="2">&mdash;</td></tr>
     </tbody>
 </table>
+
+<h2 id="chaos">Chaos: an animal from another mod</h2>
+
+<p>
+    The table above is vanilla, and it stays hand-written. Every animal <em>another</em> mod adds
+    reaches this locus through one more allele, <strong>Chaos</strong> (<code>Cha</code>). Two
+    Chaos copies turn the horse into one modded animal at nightfall &mdash; which one is written
+    on the horse&rsquo;s copies rather than on the allele, so every Chaos line is its own animal,
+    and it is worked out from the mods your world has loaded.
+</p>
+
+<ul>
+    <li><strong>Both copies must agree.</strong> A Chaos horse you catch, or spawn from an egg, is
+        always one line, and shifts. Cross two different Chaos horses and the foal carries two lines
+        and stays a horse &mdash; the same &ldquo;the same thing twice&rdquo; rule as every shape
+        here. Breed within one line and its foals keep its animal.</li>
+    <li><strong>The same rule as the vanilla shapes.</strong> Nothing that swims, flies or attacks
+        on sight is ever chosen, and no horse-like animal is either.</li>
+    <li><strong>It follows the modpack.</strong> Add or remove a mod and a Chaos horse may become a
+        different animal &mdash; that is what Chaos means. A server can take a whole mod, or one
+        animal, off the list in its config (<code>chaos.exclude_mods</code>,
+        <code>chaos.exclude_ids</code>).</li>
+    <li><strong>With no modded animals installed it does nothing.</strong> The allele is still
+        there, so a horse means the same thing on every server; it simply stays a horse all
+        night.</li>
+</ul>
 
 <h2 id="wild">Finding one</h2>
 
 <p>
-    Each shape sits at <strong>0.03%</strong> of founders, homozygous, and there are no
+    Each shape sits at <strong>0.03%</strong> of founders, homozygous &mdash; Chaos counts as
+    <em>one</em> shape, however many animals your mods add &mdash; and there are no
     wild carriers and no wild mismatches &mdash; the same rule as
     <a href="gene-particle.html#wild">the particle locus</a>, for the same reason: a
     recessive whose carrier is invisible has to put its expressing combination in the
@@ -309,6 +336,7 @@
         <tr><td><code>common/genetics/genes/LycanGene.java</code></td><td>the alleles, the matched-pair rule, the founder table, the cloud colour</td></tr>
         <tr><td><code>neoforge/data/LycanShift.java</code></td><td>the attachment: the horse&rsquo;s tag, the cloud colour, the mob id</td></tr>
         <tr><td><code>neoforge/server/LycanthropyHandler.java</code></td><td>the swap at both ends of the night, the cloud, the riding ban, the aggro hook</td></tr>
+        <tr><td><code>neoforge/server/ChaosRoster.java</code></td><td>what a Chaos seed can name: the modded mobs this server loaded, one sorted list per mob locus</td></tr>
         <tr><td><code>neoforge/server/LycanTemperGoal.java</code></td><td>the grudge: chase, strike, forget at sunrise or on lost sight</td></tr>
     </tbody>
 </table>
@@ -341,6 +369,48 @@
     once. <code>AMBIENT</code> is in the flying list because vanilla's bat flies without a flying
     navigation or the interface to show for it &mdash; unverified in game, and the safe direction
     to be wrong in.
+</p>
+
+<h3 id="chaos-coding">Chaos: one allele for every modded mob (2026-10-01)</h3>
+<p>
+    Asked for out of <code>intake/</code> as &ldquo;rebuild the roster from the live registry&rdquo;,
+    and built the other way round on purpose. An allele per registry entry was rejected after
+    reading the code: a token is text in the genotype code and registry ids collide with its
+    separators; a live-registry allele list changes with the modpack, so two servers would read
+    one code differently; and the designer, the census and this wiki are baked from
+    <code>common/</code>, where no registry exists. So the vanilla forms are untouched and the
+    locus gained <strong>one</strong> allele, <code>Cha</code>, between <code>Wlf</code> and
+    <code>n</code> (every existing pair sorts as before; tokens, not orders, are stored).
+</p>
+<ul>
+    <li><strong>The value is on the copy.</strong> Each Chaos copy carries a <code>SEED</code>
+        epigenetic value named <code>chaos</code> (<code>MobRoster.CHAOS_SEED</code>), beside the
+        cloud colour. <code>LycanGene.chaosSeed(pair, epigenetics)</code> returns it only when the
+        pair is <code>Cha/Cha</code> <em>and</em> both copies carry the same seed &mdash; the
+        matched-pair rule, one level down.</li>
+    <li><strong>Founders share it.</strong> Two independently rolled seeds never match, which
+        would have made every wild Chaos founder the mismatched outcome. A new
+        <code>Gene.foundersShareSeeds()</code> names seed values a freshly made horse carries
+        identically on both copies; <code>Epigenome</code> applies it wherever it rolls two copies
+        together (the founder roll, <code>copiesFor</code>, and <code>alignedTo</code> filling an
+        empty pair). Breeding never applies it, so two lines crossed stay two lines.
+        <code>LycanGeneTest</code> pins both, and fails when the sharing is removed.</li>
+    <li><strong>The game resolves it.</strong> <code>ChaosRoster</code> takes every entity type
+        that is not <code>minecraft:</code> or ours, can be summoned, is not excluded by the
+        <code>chaos.exclude_mods</code> / <code>chaos.exclude_ids</code> server config, and builds
+        into a non-horse <code>Mob</code>; sorts by id; and keeps, for this locus, the ones
+        <code>isWearable</code> accepts &mdash; the very check the shift makes at dusk, so the two
+        cannot disagree. The seed picks <code>floorMod(seed, size)</code>. Built lazily on the first
+        Chaos lookup, rebuilt only when the exclude lists change; a type that throws while being
+        built is skipped and logged once.</li>
+    <li><strong>Weighted as one form</strong> in the founder table (<code>0.03%</code>, homozygous),
+        and kept there in a pack with no modded mobs, so a code means the same thing everywhere.</li>
+</ul>
+<p>
+    Checked by the <code>chaos_roster</code> gametest (the classifier on vanilla wolf, bat, cod,
+    bee, zombie, horse and arrow; the real lists sorted, never vanilla or ours, stable, and nested
+    lycan &sub; pack &sub; spawner), which passed on 2026-10-01 with all three modded lists empty,
+    since the dev run has no other mod with mobs in it.
 </p>
 
 <h3 id="verified">Verified</h3>
@@ -473,8 +543,31 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The ground-only allele set of 2026-09-24 has never been played &mdash; no shifter has been caught in the wild since, and the runtime refusal that backs it has no way to fire in a vanilla game; behind it sit a shifted horse across a chunk unload, riders and dimensions, and what each form refuses.</p>
+    <p>Chaos (2026-10-01) has never met a real modded animal &mdash; nothing about it has been played; behind it the ground-only allele set of 2026-09-24 is unplayed too, then a shifted horse across a chunk unload, riders and dimensions, and what each form refuses.</p>
 </div>
+
+<h3 id="chaos-unplayed">Chaos, the modded-animal allele (2026-10-01, not played)</h3>
+<ul>
+    <li><strong>A modded animal as a werewolf.</strong> In a pack with another mod&rsquo;s land
+        animals, spawn a <code>Cha/Cha</code> horse from the spawn egg and wait for dusk: it becomes
+        one of them, and the log has <code>[chaos] modded mobs a Chaos allele can name: N lycan,
+        ...</code> once, with N above zero. The dev run cannot show this &mdash; it has no mod with
+        mobs in it, and the gametest only proved the empty case.</li>
+    <li><strong>A modded flier or swimmer is never chosen.</strong> Compare that log line&rsquo;s
+        lycan count with the pack: nothing that flies, swims or is hostile should be on it, and
+        <code>[lycan] ... swims, flies or is hostile in this build</code> should never appear for a
+        Chaos horse. This is also the first time <code>isWearable</code> meets a body nobody here
+        has read &mdash; until Chaos it had no way to fire in a vanilla game.</li>
+    <li><strong>No modded animals.</strong> In a plain install a <code>Cha/Cha</code> horse stays a
+        horse all night, and the log says <code>no modded animal available for LYCAN</code> once.</li>
+    <li><strong>Building every modded mob once.</strong> The roster constructs one instance of
+        each modded entity type, unadded, the first time a Chaos horse asks. Watch for a lag spike
+        at that moment in a large pack, and for any mob that leaves something behind (a sound, a
+        boss bar, a block) from being built and discarded. Unverified that every mod tolerates
+        <code>EntitySpawnReason.CONVERSION</code> outside a real spawn.</li>
+    <li><strong>A saved Chaos horse after a mod is removed</strong> loads, and becomes a different
+        animal, or none &mdash; never an error.</li>
+</ul>
 
 <h3 id="ground-only-0924">Nothing that swims or flies is an allele any more (2026-09-24, not played)</h3>
 <ul>
@@ -483,11 +576,6 @@
         mob named must be a peaceful land animal. A single <code>minecraft:cod</code> or
         <code>minecraft:bat</code> in that log means a stale genotype is still being parsed
         somewhere, since the allele no longer exists.</li>
-    <li><strong>The runtime refusal has no way to fire in a vanilla game</strong>, which is the
-        point of it &mdash; the allele set already excludes every body it would refuse. What would
-        exercise it is another mod's peaceful flying or aquatic mob once the roster is
-        registry-derived; until then the only evidence it works is that
-        <code>[lycan] ... swims, flies or is hostile in this build</code> never appears in a log.</li>
     <li><strong>Existing horses.</strong> Any horse in the owner's world carrying one of the fifteen
         deleted alleles has a genotype code the parser no longer recognises at that locus. Worth one
         look at whether such a horse loads at all, or whether its whole record is refused.</li>
@@ -502,6 +590,40 @@
     <li><strong>The were-animal's temper.</strong> Hit one and walk away: it follows and strikes for about three points a second, gives up after three seconds out of sight, and forgets at dawn. Hit a were-chicken too, since no form has an attack attribute and the damage is dealt by hand.</li>
     <li><strong>Lycan and rainbow looks.</strong> A shifted animal's walking dust cloud reads, even on something as small as a rabbit. Two were-wolves are different colours. Rainbow dust reads as a rainbow at the slow end of its cycle, several horses are on different hues at once, and the spawn egg's mote preview cycles too.</li>
 </ul>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>Chaos shipped without its two decided extras, shared by all three mob loci: a seed field for it in both horse editors, and the info screen naming the animal a Chaos horse resolves to.</p>
+</div>
+
+<h2 id="chaos-seed-field">A Chaos seed in the two editors</h2>
+<p>
+    Owner&rsquo;s call: the <a href="horse-designer/">horse designer</a> and the spawn egg&rsquo;s
+    screen both offer Chaos <em>with a seed field</em>, marked &ldquo;resolved in game&rdquo;, so a
+    tester can pick a line rather than take what the roll gives. Today both list the allele (it is
+    in <code>common/</code>, so they get it by existing) and roll the seed &mdash; and a fresh horse
+    always carries one seed on both copies, so what they make does shift. The field is the missing
+    half. Hard rule 5: the same field in <code>web/HorseEditor.java</code> and
+    <code>CustomHorseSpawnScreen</code>, and since a seed is a new kind of editable value in both,
+    the divergence from every other allele row is a comment on both files. Applies equally to
+    <a href="gene-pack-leader.html">Leader of the pack</a> and <a href="gene-spawner.html">the
+    spawner</a>.
+</p>
+
+<h2 id="chaos-display">Naming the resolved animal on the info screen</h2>
+<p>
+    Owner&rsquo;s call: on a horse the server knows, the info screen says what a Chaos horse
+    resolves to (&ldquo;would shift into: &hellip;&rdquo;), following the loaded modpack; where the
+    client cannot know &mdash; the designer, a horse whose record has not arrived &mdash; it says
+    &ldquo;Chaos&rdquo;. Needs the server to resolve the seed through <code>ChaosRoster</code> and
+    send the id with the horse&rsquo;s record, since the roster exists only on the server. The same
+    line serves the other two loci (&ldquo;leads: &hellip;&rdquo;, &ldquo;spawns: &hellip;&rdquo;).
+</p>
 
 </section>
 
