@@ -1,0 +1,200 @@
+Daily realm horse - implementation treatment
+
+Drafted in a session confined to intake/ (nothing outside this folder was touched).
+Nothing here is built or run. "Decided" lines are the owner's request as given;
+"Open" lines are for the building session to settle; "UNVERIFIED" lines are facts
+this file has not proved. Source of truth once routed: wiki/horse-realm.html (a new
+Gameplay/Coding pair, plus a Roadmap tab until it ships) and wiki/breeds.html for the
+breed-pick half. This file is retired (deleted, per START HERE step 3) when the
+piece ships and moves onto those pages.
+
+The request, as given
+======================
+Every "morning" in Minecraft, one new, fully random horse spawns in the horse
+realm, to add genetic diversity. It follows normal spawn rules, except that it
+may be Feral Mixed or ANY breed, regardless of biome.
+
+What already exists, so the building session does not redo it
+==============================================================
+- The realm is the level horsegenetics:horse_realm (HorseRealm.REALM_LEVEL,
+  HorseRealm.isRealm(level)). Its biome (data/horsegenetics/worldgen/biome/
+  horse_realm.json) has EVERY spawner list empty, so nothing spawns there
+  naturally today; horses only arrive by portal. The new spawn is therefore a
+  server-driven spawn, not a spawner entry and not a biome modifier.
+- HorseRealmRules (server/) refuses any mob that is not a horse, and marks every
+  arriving horse persistent. A spawned horse is a horse, so it passes; make sure
+  the spawn path sets persistence itself rather than relying on the join hook,
+  and check which EntitySpawnReason the rules accept (UNVERIFIED: read the
+  FinalizeSpawnEvent / EntityJoinLevelEvent handlers in that class before
+  choosing a reason; NATURAL and CHUNK_GENERATION also trip BreedSpawnHandler,
+  see below).
+- The realm is a circle that GROWS: HorseRealmSize / HorseRealmCensus count
+  every horse standing in it (size.note on each horse's scan) and
+  growToFit() enlarges the field to keep density. A daily horse therefore adds
+  to the census and, over a long world, grows the field. That is intended and
+  free, but say so on the page, and the in-game matrix below includes it.
+- Realm horses are not tamed. HorseRealmHerds already gathers untamed realm
+  horses into bands on a slow scan, and HorseRealmFeral turns a tamed horse
+  whose owner has left the realm wild. A fresh horse needs no new herd code:
+  spawn it, tag it, let the herd scan find it. Check whether a LONE horse is
+  acceptable to HorseRealmHerds (it elects leaders from "clumps"); UNVERIFIED.
+- BreedSpawnHandler (FinalizeSpawnEvent, reasons NATURAL / CHUNK_GENERATION /
+  SPAWNER) tags a horse with WILD_SPAWN_KEY and CANCELS it when
+  Breeds.anythingMaySpawn(biome, dark) is false. The realm biome has no breed in
+  it, so a NATURAL-reason spawn there would be cancelled or demoted to a lone
+  Feral Mixed. This is the trap: do NOT spawn with a reason that routes through
+  that gate and hope. Use a reason the handler ignores (EntitySpawnReason.
+  COMMAND or MOB_SUMMONED - UNVERIFIED which of the two the SDK exposes under
+  that name) and apply the breed explicitly.
+- HerdManager.pickWildBreed(biome, rng, dark) picks from
+  Breeds.wildCandidates(biomeId, dark): the breeds whose biomes() cover the
+  biome AND whose spawn_time allows this hour. "Regardless of biome" means
+  bypassing exactly this filter. Breeds.all() is the whole registry (shipped
+  breeds, owner breeds from .minecraft/phc/breeds, Feral Mixed).
+- A Feral Mixed horse rolls every gene unconstrained ("the pre-breeds
+  behaviour" - wiki/breeds.html). A breed horse is rolled through that breed's
+  constrained pool. There is already a code path that makes a horse "of breed
+  X" for the breed spawn egg and for /summon-style creation
+  (HorseEggSpawner, ModBreedSpecs); reuse it, do not re-roll genes by hand.
+- Day detection exists in two spellings and ONE of them is a trap:
+  Level.isBrightOutside() / isDarkOutside() are what every gene condition and
+  handler here uses. DebugWorldWatch and DebugTestWorldHandler both record that
+  26.1.2 REPLACED getDayTime() with a ServerClockManager of WorldClock holders,
+  so do not write `dayTime % 24000`. The realm's dimension type declares
+  default_clock minecraft:overworld, so its sky follows the overworld clock;
+  UNVERIFIED that isBrightOutside() on the REALM level flips at the same moment
+  as on the overworld (DebugTestWorldHandler.setNight records an owner report
+  that "night isn't working in the horse dimension" - read that comment before
+  trusting the realm's own sky).
+
+The design
+==========
+One slow server tick, one transition, one spawn.
+
+1. Detect the morning as a TRANSITION, not a state. Keep a per-world SavedData
+   (or a field on HorseRealmSize's data, which is already per-world and
+   already persisted) holding the last observed bright/dark reading and the
+   last day a horse was spawned. On the server tick (ServerTickEvent.Post, the
+   same shape as HorseRealmCensus.onServerTick, gated to run once every N
+   ticks, N around 40) read the realm level's isBrightOutside(); when it goes
+   dark -> bright, it is morning. Persisting "last spawned" is what stops a
+   server that restarts at dawn, or a player who sleeps the night through and
+   triggers /time skips, from spawning twice or never.
+   - Decided: once per morning, not per player and not per loaded chunk.
+   - Open: SLEEP and /time set. A skipped night should still count as one
+     morning; a /time set day issued twice should not give two. Keying the
+     "already spawned" guard on the clock's day COUNT (not the time of day)
+     answers both. Find the day count under the new clock API (api-notes).
+   - Open: should the realm tick at all with no players online, or only
+     while someone is in the dimension? Natural horse spawns do not happen in
+     unloaded levels, and the realm is huge (HorseRealm.radius). The simple
+     rule - spawn only when the realm level is loaded (it is, at spawn
+     chunks, but the field's far chunks are not) - needs a decision on WHERE
+     (next heading) that works whether or not a player is nearby.
+2. Pick a breed, with no biome filter. Candidate set = Breeds.all() plus Feral
+   Mixed. Decided: ANY breed, or Feral Mixed. Open, and it is the one number
+   to settle: the weighting. Three honest options, in rising cost:
+   (a) uniform over the list - every breed equally likely, Feral Mixed one
+       entry among ~dozens, so almost every daily horse is a breed horse;
+   (b) Feral Mixed as one outcome with its own share (suggest 1 in 4), then
+       uniform over breeds - keeps the realm from filling with breed founders
+       only, which is the opposite of "more genetic diversity" (a breed is a
+       CONSTRAINED slice of the pool; Feral Mixed is the wide one);
+   (c) weight each breed by its own wild frequency. Rejected for this: those
+       weights encode biome rarity, and the request says regardless of biome.
+   Recommend (b). Whichever is chosen, skip a breed whose BreedSource does not
+   allow WILD (the cowboy-only breeds, the undead and magical ones the
+   Nightmare/Netherhorse style entries are) UNLESS the owner wants them in the
+   realm; that is a second open question, because the realm is persistent and
+   protected from damage, so a hostile-by-design breed there is a permanent
+   resident. Open: ask the owner. Default: honour BreedSource.WILD.
+   Also skip anything Breeds.anythingMaySpawn would refuse under the owner's
+   spawn settings? NO - the settings are per-biome and the request is
+   explicit that biome is irrelevant. Say that on the page.
+3. Pick a place. Decided: normal spawn rules, which for a land animal means a
+   legal standing spot, not inside a wall, on a solid floor, with headroom.
+   The realm is a flat plane (GROUND_Y 64, STAND_Y 65) so "legal" is nearly
+   always true; the real constraints are the perimeter (HorseRealm.inBounds /
+   isWall - a horse must start well inside it) and the portal cells
+   (isPortalChunk - do not drop one on a portal frame or on top of someone's
+   stable). Open: random point anywhere in the circle, or near existing horses
+   so it joins a herd instead of standing alone. Suggest: pick a random
+   existing untamed realm horse, spawn within 8-24 blocks of it; if the realm
+   has none, spawn at a random in-bounds point. That makes the newcomer a
+   herd member by the existing scan with no new code.
+   Chunk loading: the spawn point's chunk must be loaded. Use
+   level.isLoaded / getChunkSource().getChunkNow and, if absent, pick the next
+   candidate. Do NOT force-load a chunk (the force-load re-entrancy crash is
+   documented at length in HorseFoundingTickHandler and CowboyHandler; spawning
+   a horse writes Attributes.SCALE, which scans collisions). Spawn from the
+   tick, after chunk work, never from a task queued mid-chunk.
+4. Make the horse. Create the entity, call the existing breed-application
+   path (so genes, coat, name, pedigree, body stats and epigenome all resolve
+   exactly as a spawn egg's would), set persistent, and tag it so it can be
+   found and counted. Open: tag with a small NBT flag (a new
+   "horsegenetics:realm_born" boolean beside WILD_SPAWN_KEY) so a later session
+   can show "born in the realm" on its record. Do not reuse WILD_SPAWN_KEY:
+   HerdManager reads it to decide whether to found a herd from a clump, and
+   sharing it would pull this horse through that path and its biome gate.
+5. Log through ActionTrace.log("realm", ...) with the breed and the position,
+   so the owner can read "a horse was born in the realm" from latest.log
+   without being there. CLAUDE.md already says the owner's session is on disk.
+
+What this must not do
+======================
+- No pre-generated list of coats (CLAUDE.md hard rule 4): the horse is rolled
+  at the moment of the spawn, from the real gene pool, never picked from a
+  baked set.
+- No logic in neoforge/ that could live in common/. The weighting rule in step
+  2 (given the breed list, the RNG and the settings, return a breed or Feral
+  Mixed) is pure and belongs in common/breed/ beside Breeds.wildCandidates, with
+  a unit test; the neoforge side is only the transition detector, the placement
+  and the entity creation. Touching common/ means :web:bakeDesignerAssets and
+  check-designer-boots.mjs per the CLAUDE.md table.
+- No effect on the debug corridor (DebugPenManager.DEBUG_LEVEL): HorseRealm.
+  isRealm(level) is false for it, which is exactly the check to use.
+- No server-config surprise: add a ServerConfig toggle (default ON, since it
+  is the owner's design; a server owner who finds the realm too full needs an
+  off switch) and an optional per-morning count (default 1). Check how
+  ServerConfig names its other realm options before naming these.
+- No cap-free growth. The realm already grows to keep density, so population
+  is self-limiting on the field's side, but a server that runs for a year gets
+  hundreds of daily horses. Open: a soft cap (stop spawning above N untamed
+  horses in the realm, N derived from field area, not a literal) so the realm
+  does not become a lag source; the census already counts them.
+
+Tests and checks
+=================
+- common/: the weighting rule, deterministic from a seeded Rng - every breed
+  reachable, Feral Mixed at its share over many draws, a WILD-forbidden breed
+  never picked, an empty breed list yields Feral Mixed. Run with
+  --tests '*DailyRealmBreedTest' (name it), never the full suite.
+- Gametest in neoforge gametest/ModGameTests: set the realm clock to just
+  before morning, advance, assert exactly one new horse in the realm, it has a
+  record, it is persistent, it is not in the debug level, and a second
+  transition the same day adds none. Setting the clock: DebugTestWorldHandler
+  already drives it through `time set` and `gamerule doDaylightCycle`, and says
+  why (the clock API is several lookups deep); do the same.
+- In-game matrix (record on the realm page's Verification tab, unplayed):
+  (1) a normal overnight wait gives one new horse at dawn; (2) sleeping through
+  the night gives one, not zero; (3) `/time set day` twice gives one; (4)
+  restart the server at dawn: no duplicate, no miss; (5) the new horse is
+  protected like every other realm horse (damage cancelled); (6) it joins a
+  band within a few minutes; (7) its record opens in the H menu with a name,
+  pedigree and coat; (8) across thirty mornings the breed mix is what the
+  weighting says and Feral Mixed appears; (9) the field size line in the log
+  moves when the census grows it; (10) nobody spawns in the wall or on a
+  portal; (11) with the realm unloaded and nobody online, nothing spawns and
+  nothing is owed (decide whether missed mornings are made up - suggest NOT).
+
+Routing when this is built
+===========================
+- wiki/horse-realm.html: Gameplay tab (a player's sentence: "a new horse is
+  born in the realm every morning"), Coding tab (the transition detector, the
+  breed rule, the NBT flag, the config), and a Verification tab for the matrix.
+  Re-run build-search-index, check-links, bake-agent-text, and
+  bake-verification-index.
+- wiki/breeds.html: one paragraph under spawning - "the realm ignores biome".
+- wiki/decisions.html: the weighting call and the BreedSource.WILD call, once
+  settled. Do not leave either only in this file.
+- wiki/session-log/: the dated record.
