@@ -1,0 +1,171 @@
+Breed climate tolerance - spec
+
+A SPEC, NOT AN IMPLEMENTATION. Nothing here has been changed in the repo. Scoped with the
+owner; every "Decided" line is her call. "UNVERIFIED" lines are facts this file has not
+proved and the building session must check first. Source of truth for what exists is
+wiki/breeds.html ("Heat and cold") and the breed files in
+common/src/main/resources/horsegenetics/breeds/. This file is retired (deleted, per START
+HERE step 3) when it ships.
+
+The ask
+=======
+1. Every Nether breed carries heat tolerance, as a rule.
+2. Every breed that spawns in cold biomes carries cold tolerance. Go through the breeds
+   and fix any that do not.
+
+What already exists
+===================
+- Two climate loci, both in common/ (genetics/genes/AbstractClimateGene):
+    horsegenetics.magic_heat  - alleles Htol (tolerant), Hsen (sensitive), n
+    horsegenetics.magic_cold  - alleles Ctol (tolerant), Csen (sensitive), n
+  A breed pins them in its "genes" block as a weighted pool of pairs, for example
+  {"horsegenetics.magic_cold": [{"pair":"Ctol/Ctol","weight":60}, {"pair":"Ctol/n","weight":35},
+  {"pair":"n/n","weight":5}]}. A breed that does not list the key carries neither and is neutral.
+- The cold flag the game uses is "anything with snow": Biome.coldEnoughToSnow at the horse's
+  position (GeneAbilityHandler, sampleWorld "cold_biome"). The hot flag is base temperature
+  1.0 or more plus the jungles and the mangrove swamp ("hot_biome"). The breed rule below is
+  about where a breed SPAWNS, which is a list of biome ids on the breed ("biomes").
+- The existing tiers (wiki/breeds.html), set 2026-09-15 from each breed's lore and origin and
+  not from its spawn biomes:
+    Near-fixed  Ctol/Ctol 60, Ctol/n 35, n/n 5
+    Partial     Ctol/Ctol 5,  Ctol/n 30, n/n 65
+    Light       Ctol/n 15, n/n 85
+  Heat is the same with Htol. Rimehart (cold) pins a single pair, Ctol/Ctol 100.
+- BreedFilesTest guards that breed files load, warn about nothing and bake byte-for-byte.
+  NetherBreedsTest and RimehartBreedTest roll founders and assert the notes' sentences.
+  BreedBandsReachTest guards a band on a knob the expressed allele never reads.
+  A breed's "notes" are the design and tests assert sentences from them, so a gene added to
+  a breed needs its note sentence updated with it.
+
+Definitions (the rule)
+======================
+- A NETHER BREED is a breed whose "biomes" list contains any of: minecraft:nether_wastes,
+  crimson_forest, warped_forest, soul_sand_valley, basalt_deltas. Today that is exactly two:
+  Netherhorse and Nightmare, which spawn only in those five.
+- A COLD BIOME, for the breed rule, is a vanilla biome whose base temperature is below 0.15,
+  the game's own "snow falls here" line at sea level:
+    snowy_plains, ice_spikes, snowy_taiga, snowy_beach, snowy_slopes, grove, frozen_peaks,
+    jagged_peaks, frozen_river
+  UNVERIFIED: this list is from the biome temperatures as the spec author knows them, not
+  read from the game's data. The building session must check each against the real base
+  temperatures (and that the list is complete: a missed frozen biome means a missed breed)
+  before relying on it. Biomes at altitude that only become snowy by height (windswept hills,
+  taiga at 0.25) are NOT cold biomes for this rule: a breed's spawn list names a biome, not a
+  mountain, and the owner's rule is about where the breed spawns.
+- A breed that lists a biome id from another mod is not classified by this rule. All 129
+  shipped breeds list vanilla ids only (checked), so nothing is lost today; the guard test
+  (below) treats an unclassified id as "not cold" and says so, rather than guessing.
+
+Decided: Nether breeds
+======================
+- Both Netherhorse and Nightmare pin "horsegenetics.magic_heat" at
+  [{"pair":"Htol/Htol","weight":100}] - FIXED, matching Rimehart's fixed cold tolerance, so a
+  Nether horse is always heat tolerant. No Hsen anywhere in either pool.
+- Neither currently pins magic_heat (both carry Fireproof, a different locus; unchanged).
+- Both carry "bands" in the breed file. UNVERIFIED how bands interact with a new pinned locus:
+  read BreedBandsReachTest and the band format (wiki/breed-format.html) first, and add the heat
+  locus the way the other pinned loci are, not as a band. A band on a knob the expressed allele
+  never reads is the exact bug that test exists for.
+- Update each breed's "notes" with a sentence stating the heat tolerance, and update the
+  Heat/Cold "Why" table row on wiki/breeds.html (they are currently listed there as NEUTRAL).
+
+Decided: cold-spawning breeds, the share ladder
+================================================
+For each breed, share = (number of its biomes that are cold biomes) / (number of its biomes).
+Target tier from share:
+    share >= 0.50   Near-fixed  (Ctol/Ctol 60, Ctol/n 35, n/n 5)
+    share >= 0.25   Partial     (Ctol/Ctol 5,  Ctol/n 30, n/n 65)
+    share >  0      Light       (Ctol/n 15, n/n 85)
+- Decided: a breed's existing cold gene is only ever RAISED to the target tier, never lowered.
+  Compare by the expected number of Ctol copies per horse: near-fixed 1.55, partial 0.40,
+  light 0.15 (Rimehart's fixed 2.0 and the existing Ctol/n 30 pools are compared by the same
+  number). A breed already at or above its target is left exactly as it is.
+- The count of biomes is "biomes" as listed on the breed, each id counted once.
+
+The changes this produces today
+================================
+Computed from the shipped breed files with the cold list above (re-run it in the building
+session; it is a count over the JSON, not an opinion). Six breeds are below their target:
+
+  breed                 cold biomes / all   share   target       current cold pool        change
+  bashkir_curly         2 / 6               0.33    Partial      none                     add Partial
+  clydesdale            2 / 4               0.50    Near-fixed   Ctol/n 15, n/n 85        raise to Near-fixed
+  enderpony             8 / 45              0.18    Light        none                     add Light
+  percheron             1 / 4               0.25    Partial      none                     add Partial
+  yili                  3 / 10              0.30    Partial      Ctol/n 15, n/n 85        raise to Partial
+  yugoslavian_trotter   1 / 7               0.14    Light        none                     add Light
+
+Thirty-nine other cold-spawning breeds are already at or above their target and are NOT
+changed (the building session lists them in its summary so the owner can see the rule was
+applied, not skipped). Netherhorse and Nightmare are the only Nether breeds.
+
+Decided: conflicts
+==================
+- Where a breed spawns in cold biomes yet carries a cold-SENSITIVE (Csen) allele: leave it and
+  LIST it for the owner, do not change it. NOTE: under the definition above no shipped breed
+  is in that position (the survey found none). Thoroughbred carries Csen but its listed biome
+  that is temperature-classified is hot, not cold, so it is not a conflict. The building
+  session re-runs the check and says "none" if still none.
+- Heat tolerance for non-Nether breeds is NOT part of this change. The owner asked for a rule
+  for Nether breeds only; hot-biome breeds (desert, savanna, badlands, jungle) stay as their
+  lore set them.
+
+How each changed breed is edited
+================================
+- Edit the breed JSON under common/src/main/resources/horsegenetics/breeds/ (a breed is
+  JSON, not Java). Add or replace the "horsegenetics.magic_cold" (or magic_heat) entry with the
+  tier's exact weighted pool above. Do not touch other genes.
+- yili and enderpony carry "strains" with their own gene blocks. UNVERIFIED whether a strain's
+  pool overrides the breed-level pool for an unlisted locus. Read how strains compose with the
+  breed pool (wiki/breed-format.html) and set the climate gene at the breed level unless a
+  strain is the thing that carries it today.
+- Update each changed breed's "notes" with its climate sentence if the notes name climate.
+
+Docs that must change with it
+=============================
+- wiki/breeds.html, "Heat and cold": the table rows for the six cold changes and the two Nether
+  breeds, and the "A breed not listed ... neutral" sentence, which currently names Enderpony,
+  Netherhorse, Nightmare and Wielkopolski among the neutral ones. Remove from it the breeds that
+  now carry the gene.
+- DOCUMENTATION CONTRADICTION found while surveying (move to the Verification tab of
+  breeds.html, not fixed silently): the neutral list on that page names Wielkopolski, but its
+  file pins Ctol/n 15, n/n 85 for cold. Either the page is stale or the file is. The rule above
+  does not change Wielkopolski (it is already at its target), so this is a separate fix.
+- wiki/breed-format.html or the breed book if it describes a breed's climate; check with
+  wiki/tools/check-breed-heights.mjs only if sizes or printed heights move (they do not).
+
+A guard, so the rule stays true
+================================
+The owner said "as a rule". A rule nothing checks drifts the first time a breed is added.
+- Add a common/ test (extend NetherBreedsTest for the Nether half and add a small
+  BreedClimateRuleTest for the cold ladder, or one class if cleaner) that, for every shipped
+  breed file: (a) any breed listing a Nether biome has Htol/Htol at weight 100 and no Hsen;
+  (b) any breed with a cold biome has an expected Ctol copy count at or above its ladder tier.
+  It prints the unclassified (modded) biome ids it skipped. Tests are game-free, so the
+  biome lists live in the test or in a small common/ class the test and the spec share.
+  (Recommended, not asked: put the two biome lists in one common/ class so the rule has one
+  home and a new vanilla biome is added once.)
+- Per CLAUDE.md the owner runs no full suite: run BreedFilesTest, NetherBreedsTest, the new
+  test, BreedsTest for each edited breed and BreedBandsReachTest by name.
+
+Bakes and artifacts this invalidates (CLAUDE.md table, "any breed")
+===================================================================
+- :common:bakeBreedFiles, then :common:bakeGeneCensus (the census reads the breed sheets).
+- wiki/horse-designer/assets/breeds.json and wiki/gene-census.html are regenerated by those.
+- Anything in common/ or web/: :web:bakeDesignerAssets then check-designer-boots.mjs
+  (wiki/horse-designer/wasm/web.wasm).
+- Wiki prose: node wiki/tools/build-search-index.mjs, check-links.mjs, bake-agent-text.mjs.
+- check-breed-heights.mjs is NOT needed: no size or printed height changes.
+- The coat goldens should not move (climate genes paint nothing). If a golden row moves,
+  something other than this changed.
+
+Verification (not unit-testable)
+================================
+- On the owning page's Verification tab (wiki/breeds.html): spawn or breed a few of the six
+  changed breeds in play and check the share of horses carrying Ctol matches the tier; check a
+  Nether horse always reads heat tolerant in the info screen.
+
+Order and size
+==============
+Mostly data: two Nether breed edits, six cold-gene edits, one test, one docs table. Small. One
+session.
