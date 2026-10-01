@@ -1214,6 +1214,8 @@ public final class ModGameTests {
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
         // Four horses spawned and seven interact events posted, all in one tick.
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
+        // Builds one instance of every mob it classifies, inside one tick.
+        register(event, environment, CHAOS_ROSTER, 100);
     }
 
     /**
@@ -2191,6 +2193,73 @@ public final class ModGameTests {
                 com.example.horsegenetics.neoforge.item.StasisChamberItem.snapshotOf(chamber);
         return held == null ? -1.0F
                 : held.horse().getFloatOr(net.minecraft.world.entity.LivingEntity.TAG_HEALTH, -1.0F);
+    }
+
+    /**
+     * <b>The Chaos roster</b> - what the Chaos allele at Lycanthropy, Leader of the
+     * pack and Spawner can turn a seed into. Two halves. The classifier is put
+     * through vanilla mobs whose answers are known, because a dev run has no
+     * other mod with mobs in it and the modded lists are empty here; that is the
+     * half that proves the rules. Then the real lists: sorted, never vanilla or
+     * ours, the same twice, nested lycan-in-pack-in-spawner, and an empty list
+     * picks nothing rather than throwing. A real modded mob is a play check on
+     * gene-lycan.html's Verification tab.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> CHAOS_ROSTER =
+            TEST_FUNCTIONS.register("chaos_roster", () -> ModGameTests::chaosRoster);
+
+    private static void chaosRoster(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        var L = com.example.horsegenetics.neoforge.server.ChaosRoster.Use.LYCAN;
+        var P = com.example.horsegenetics.neoforge.server.ChaosRoster.Use.PACK;
+        var S = com.example.horsegenetics.neoforge.server.ChaosRoster.Use.SPAWNER;
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.WOLF, java.util.EnumSet.of(L, P, S));
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.BAT, java.util.EnumSet.of(P, S));
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.COD, java.util.EnumSet.of(P, S));
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.BEE, java.util.EnumSet.of(P, S));
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.ZOMBIE, java.util.EnumSet.of(S));
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.HORSE,
+                java.util.EnumSet.noneOf(com.example.horsegenetics.neoforge.server.ChaosRoster.Use.class));
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.ARROW,
+                java.util.EnumSet.noneOf(com.example.horsegenetics.neoforge.server.ChaosRoster.Use.class));
+
+        List<String> previous = null;
+        for (var use : com.example.horsegenetics.neoforge.server.ChaosRoster.Use.values()) {
+            var list = com.example.horsegenetics.neoforge.server.ChaosRoster.list(use, level);
+            if (list != com.example.horsegenetics.neoforge.server.ChaosRoster.list(use, level)) {
+                helper.fail("the " + use + " roster was rebuilt between two calls with the config unchanged");
+            }
+            List<String> ids = new ArrayList<>();
+            for (var type : list) {
+                String id = BuiltInRegistries.ENTITY_TYPE.getKey(type).toString();
+                if (id.startsWith("minecraft:") || id.startsWith(HorseGenetics.MOD_ID + ":")) {
+                    helper.fail("the " + use + " roster names " + id + " - Chaos is other mods' mobs only");
+                }
+                ids.add(id);
+            }
+            List<String> sorted = new ArrayList<>(ids);
+            java.util.Collections.sort(sorted);
+            if (!sorted.equals(ids)) {
+                helper.fail("the " + use + " roster is not sorted by id, so a seed means different mobs on two servers");
+            }
+            if (previous != null && !ids.containsAll(previous)) {
+                helper.fail("the " + use + " roster is missing a mob the stricter list before it has: " + previous);
+            }
+            previous = ids;
+            if (ids.isEmpty() && com.example.horsegenetics.neoforge.server.ChaosRoster.pick(use, 42L, level) != null) {
+                helper.fail("an empty " + use + " roster picked a mob");
+            }
+        }
+        helper.succeed();
+    }
+
+    private static void expectUses(GameTestHelper helper, ServerLevel level,
+                                   net.minecraft.world.entity.EntityType<?> type,
+                                   java.util.Set<com.example.horsegenetics.neoforge.server.ChaosRoster.Use> expected) {
+        var got = com.example.horsegenetics.neoforge.server.ChaosRoster.classify(type, level);
+        if (!got.equals(expected)) {
+            helper.fail(BuiltInRegistries.ENTITY_TYPE.getKey(type) + " classified as " + got + ", expected " + expected);
+        }
     }
 
     private static void register(RegisterGameTestsEvent event,

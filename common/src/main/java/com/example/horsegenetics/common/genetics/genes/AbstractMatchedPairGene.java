@@ -189,7 +189,51 @@ public abstract class AbstractMatchedPairGene implements Gene, EpigeneticAbility
     public final List<GeneAbility> abilitiesFor(AllelePair pair, Genotype genotype,
                                                 GeneEpigenetics epigenetics) {
         Variant v = matchedVariant(pair);
-        return v == null ? List.of() : abilitiesFor(v, epigenetics.copy(0));
+        if (v == null) {
+            return List.of();
+        }
+        if (MobRoster.isChaos(v.subject())) {
+            // The matched-pair rule again, one level down: two Chaos copies act
+            // only if they carry the same seed. The subject the ability gets is
+            // "chaos:<seed>", which the game module resolves against its roster.
+            Long seed = chaosSeed(epigenetics);
+            if (seed == null) {
+                return List.of();
+            }
+            v = new Variant(v.allele(), MobRoster.chaosSubject(seed), v.label());
+        }
+        return abilitiesFor(v, epigenetics.copy(0));
+    }
+
+    /** Both copies' Chaos seed when they agree, else {@code null}. */
+    private static Long chaosSeed(GeneEpigenetics epigenetics) {
+        long first = epigenetics.copy(0).seed(MobRoster.CHAOS_SEED);
+        long second = epigenetics.copy(1).seed(MobRoster.CHAOS_SEED);
+        return first == second ? first : null;
+    }
+
+    /**
+     * Does this locus offer {@link MobRoster#CHAOS_TOKEN Chaos}? A subclass that
+     * lists it as a subject must also declare {@link MobRoster#CHAOS_SEED} in its
+     * {@link #epiSchema}; {@link #foundersShareSeeds} follows from this.
+     */
+    public final boolean offersChaos() {
+        for (Variant v : variants) {
+            if (MobRoster.isChaos(v.subject())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public List<String> foundersShareSeeds() {
+        return offersChaos() ? List.of(MobRoster.CHAOS_SEED) : List.of();
+    }
+
+    /** The subject list entry every Chaos-offering locus appends after its last vanilla one. */
+    protected static Variant0 chaosVariant() {
+        return new Variant0(MobRoster.CHAOS_TOKEN, MobRoster.CHAOS_SUBJECT, MobRoster.CHAOS_LABEL);
     }
 
     /** Convenience for a subclass building its subject list from a table. */

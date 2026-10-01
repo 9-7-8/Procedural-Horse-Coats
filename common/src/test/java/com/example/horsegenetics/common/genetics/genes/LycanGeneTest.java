@@ -2,7 +2,9 @@ package com.example.horsegenetics.common.genetics.genes;
 
 import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.AlleleEpigenetics;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.epi.EpiValues;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
@@ -52,7 +54,7 @@ class LycanGeneTest {
             assertTrue(tokens.add(form.allele().token()), "duplicate token " + form.allele().token());
             assertTrue(form.mob().startsWith("minecraft:"), "not a vanilla mob id: " + form.mob());
         }
-        assertEquals(GENE.forms().size() + 1, GENE.alleles().size(), "the forms plus one wild type");
+        assertEquals(GENE.forms().size() + 2, GENE.alleles().size(), "the forms, Chaos and one wild type");
         assertSame(GENE.wildTypeAllele(), GENE.defaultAllele());
     }
 
@@ -273,5 +275,75 @@ class LycanGeneTest {
     @Test
     void theSameHorseAlwaysTrailsTheSameColour() {
         assertEquals(cloudOf(pair("Cat", "Cat"), 77), cloudOf(pair("Cat", "Cat"), 77));
+    }
+
+    // ------------------------------------------------------------------
+    // Chaos: every modded animal, through a seed on the copy
+    // ------------------------------------------------------------------
+
+    /** Chaos sits after the last vanilla form and before n, so no existing pair reorders. */
+    @Test
+    void chaosIsOneAlleleBetweenTheFormsAndTheWildType() {
+        Allele chaos = GENE.chaosAllele();
+        assertEquals(MobRoster.CHAOS_TOKEN, chaos.token());
+        assertEquals(GENE.forms().size(), chaos.order());
+        assertEquals(chaos.order() + 1, GENE.wildTypeAllele().order());
+        assertNull(GENE.formOf(pair("Cha", "Cha")), "Chaos is not a fixed form");
+        assertTrue(GENE.shifts(pair("Cha", "Cha")));
+    }
+
+    /** A Chaos/Chaos horse whose two copies carry the given seeds. */
+    private static GeneEpigenetics chaosCopies(long first, long second) {
+        Genotype genotype = Genotype.wildType().with(pair("Cha", "Cha"));
+        EpiValues mid = GENE.epiSchema().midpoint();
+        Epigenome epi = Epigenome.random(new SeededRng(3)).with(LycanGene.KEY, new Epigenome.Copies(
+                new AlleleEpigenetics(7, mid.withSeed(MobRoster.CHAOS_SEED, first)),
+                new AlleleEpigenetics(9, mid.withSeed(MobRoster.CHAOS_SEED, second))));
+        Genome genome = new Genome(genotype, epi);
+        return GeneEpigenetics.forGene(GENE, genome.genotype(), genome.epigenome());
+    }
+
+    /** The matched-pair rule, one level down: the same seed shifts, two different seeds do not. */
+    @Test
+    void twoChaosCopiesShiftOnlyOnTheSameSeed() {
+        assertEquals(Long.valueOf(42L), GENE.chaosSeed(pair("Cha", "Cha"), chaosCopies(42, 42)));
+        assertNull(GENE.chaosSeed(pair("Cha", "Cha"), chaosCopies(42, 43)), "two Chaos lines are a horse");
+        assertNull(GENE.chaosSeed(pair("Cha", "n"), chaosCopies(42, 42)), "one copy is a carrier");
+        assertNull(GENE.chaosSeed(pair("Wlf", "Wlf"), chaosCopies(42, 42)), "a wolf is not Chaos");
+    }
+
+    /**
+     * Every horse made fresh - wild, spawned, or out of an editor - carries one
+     * seed on both copies, or a wild Chaos shifter would be a mismatched horse,
+     * which the founder rule above forbids.
+     */
+    @Test
+    void aFreshChaosHorseIsOneLine() {
+        Genotype genotype = Genotype.wildType().with(pair("Cha", "Cha"));
+        Set<Long> seeds = new HashSet<>();
+        for (long s = 0; s < 20; s++) {
+            Genome g = Genome.of(genotype, new SeededRng(s));
+            Long seed = GENE.chaosSeed(g.genotype().pair(GENE),
+                    GeneEpigenetics.forGene(GENE, g.genotype(), g.epigenome()));
+            assertNotNull(seed, "fresh horse " + s + " has two Chaos lines");
+            seeds.add(seed);
+        }
+        assertTrue(seeds.size() > 15, "every fresh line should be its own animal, got " + seeds.size());
+    }
+
+    /** ...and crossing two of them is crossing two lines: the foal is a horse. */
+    @Test
+    void twoChaosLinesCrossedAreAHorse() {
+        Genotype genotype = Genotype.wildType().with(pair("Cha", "Cha"));
+        Genome dam = Genome.of(genotype.withSex(com.example.horsegenetics.common.horse.Sex.FEMALE), new SeededRng(1));
+        Genome sire = Genome.of(genotype.withSex(com.example.horsegenetics.common.horse.Sex.MALE), new SeededRng(2));
+        Genome foal = dam.breedWith(sire, new SeededRng(5));
+        assertTrue(GENE.isChaos(foal.genotype().pair(GENE)));
+        assertNull(GENE.chaosSeed(foal.genotype().pair(GENE),
+                GeneEpigenetics.forGene(GENE, foal.genotype(), foal.epigenome())));
+        // A foal of one line, both copies from the same founder, is that line.
+        Genome sibling = dam.breedWith(dam.withSex(com.example.horsegenetics.common.horse.Sex.MALE), new SeededRng(5));
+        assertNotNull(GENE.chaosSeed(sibling.genotype().pair(GENE),
+                GeneEpigenetics.forGene(GENE, sibling.genotype(), sibling.epigenome())));
     }
 }

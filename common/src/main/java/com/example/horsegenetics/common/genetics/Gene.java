@@ -564,4 +564,19 @@ public interface Gene {
     default boolean wildTypeCarriesEpigenetics() {
         return false;
     }
+
+    /**
+     * <b>Seed values a freshly made horse carries identically on both copies.</b>
+     * Every other value is rolled independently per copy. A gene lists a
+     * {@code SEED} here when a pair acts only if its two seeds <i>match</i> - the
+     * Chaos allele at the three mob loci ({@code MobRoster.CHAOS_SEED}) - because
+     * two independent rolls never match, and every wild, spawned or edited
+     * Chaos/Chaos horse would otherwise be the mismatched outcome. Inheritance is
+     * untouched: a bred foal's copies still come from two parents, so two Chaos
+     * lines crossed stay two lines. Sharing a seed with a copy of a different
+     * allele is harmless, since only a Chaos copy reads it.
+     */
+    default List<String> foundersShareSeeds() {
+        return List.of();
+    }
 }

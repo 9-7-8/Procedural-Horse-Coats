@@ -31,6 +31,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.particles.ShriekParticleOption;
 import net.minecraft.core.particles.SpellParticleOption;
 import net.minecraft.core.particles.VibrationParticleOption;
+import com.example.horsegenetics.common.genetics.genes.MobRoster;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -508,6 +509,15 @@ public final class GeneAbilityHandler {
         if (!beat(horse, interval)) {
             return;
         }
+        String subject = aura.mob();
+        if (MobRoster.isChaos(subject)) {
+            // Leader of the pack's Chaos allele: one peaceful modded mob, by seed.
+            subject = ChaosRoster.pickId(ChaosRoster.Use.PACK, MobRoster.chaosSeed(subject), level);
+            if (subject == null) {
+                ChaosRoster.warnEmpty(ChaosRoster.Use.PACK, horse.getName().getString());
+                return;
+            }
+        }
         AABB box = horse.getBoundingBox().inflate(aura.radius());
         double reachSqr = aura.radius() * aura.radius();
         boolean attract = "attract".equals(aura.mode());
@@ -520,7 +530,7 @@ public final class GeneAbilityHandler {
             // The group (or the single mob id) decides who this aura is about.
             // Tags, not a hardcoded list - see MobGroups, and the five genes
             // that would otherwise each go blind to modded creatures.
-            if (mob == horse || !MobGroups.matches(aura.group(), aura.mob(), mob)) {
+            if (mob == horse || !MobGroups.matches(aura.group(), subject, mob)) {
                 continue;
             }
             // The scan box is a box and the aura is a sphere, so check properly.
@@ -2738,10 +2748,21 @@ public final class GeneAbilityHandler {
                     ChatFormatting.YELLOW);
             return;
         }
-        Identifier rl = Identifier.tryParse(su.mob());
+        String mobId = su.mob();
+        if (MobRoster.isChaos(mobId)) {
+            // The Spawner's Chaos allele: any modded mob, by seed - monsters included.
+            mobId = ChaosRoster.pickId(ChaosRoster.Use.SPAWNER, MobRoster.chaosSeed(mobId), level);
+            if (mobId == null) {
+                ChaosRoster.warnEmpty(ChaosRoster.Use.SPAWNER, horse.getName().getString());
+                DebugAnnounce.say(level, "Spawner", "nothing made - no modded creature available",
+                        ChatFormatting.YELLOW);
+                return;
+            }
+        }
+        Identifier rl = Identifier.tryParse(mobId);
         EntityType<?> type = rl == null ? null : BuiltInRegistries.ENTITY_TYPE.getValue(rl);
-        if (type == null || type == EntityType.PIG && !"minecraft:pig".equals(su.mob())) {
-            warnUntranslated("summon:" + su.mob(), geneKey);
+        if (type == null || type == EntityType.PIG && !"minecraft:pig".equals(mobId)) {
+            warnUntranslated("summon:" + mobId, geneKey);
             return;
         }
         String what = type.getDescription().getString();

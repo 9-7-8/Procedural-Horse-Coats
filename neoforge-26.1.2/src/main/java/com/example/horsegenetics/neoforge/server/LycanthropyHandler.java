@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -181,28 +182,42 @@ public final class LycanthropyHandler {
             return; // record not assigned yet - the spawn handler runs first
         }
         HorseRecord record = HorseRecords.of(horse);
-        LycanGene.Form form;
+        String mob;
         int cloud;
         try {
             Genotype genotype = Genotype.parse(record.geneticCode());
-            form = Genes.LYCAN.formOf(genotype.pair(Genes.LYCAN));
-            if (form == null) {
-                return;
+            AllelePair pair = genotype.pair(Genes.LYCAN);
+            GeneEpigenetics epi = GeneEpigenetics.forGene(Genes.LYCAN, genotype,
+                    Epigenome.parse(record.epigenomeCode()));
+            LycanGene.Form form = Genes.LYCAN.formOf(pair);
+            if (form != null) {
+                mob = form.mob();
+            } else {
+                // Chaos: a modded animal, picked by the seed both copies carry -
+                // and nothing at all if the copies are two different lines.
+                Long seed = Genes.LYCAN.chaosSeed(pair, epi);
+                if (seed == null) {
+                    return;
+                }
+                mob = ChaosRoster.pickId(ChaosRoster.Use.LYCAN, seed, level);
+                if (mob == null) {
+                    ChaosRoster.warnEmpty(ChaosRoster.Use.LYCAN, record.displayName());
+                    return;
+                }
             }
-            cloud = GeneEpigenetics.forGene(Genes.LYCAN, genotype, Epigenome.parse(record.epigenomeCode()))
-                    .expressed().rgb("cloud");
+            cloud = epi.expressed().rgb("cloud");
         } catch (RuntimeException bad) {
             return;
         }
 
-        EntityType<?> type = EntityType.byString(form.mob()).orElse(null);
+        EntityType<?> type = EntityType.byString(mob).orElse(null);
         if (type == null || !(type.create(level, EntitySpawnReason.CONVERSION) instanceof Mob animal)) {
             // A mob id this build has never heard of, or one that is not a Mob.
             // The horse simply does not shift - a missing form is a gene that
             // does nothing, not a crash on somebody's world tick.
-            if (WARNED.add(form.mob())) {
+            if (WARNED.add(mob)) {
                 HorseGenetics.LOGGER.warn("[lycan] no mob '{}' in this build - {} will not shift",
-                        form.mob(), record.displayName());
+                        mob, record.displayName());
             }
             return;
         }
@@ -219,9 +234,9 @@ public final class LycanthropyHandler {
             // This supersedes the owner's 2026-09-13 call that a were-fish
             // "should absolutely still shift and then just die" - the fish
             // alleles do not exist any more (owner, 2026-09-24).
-            if (WARNED.add(form.mob())) {
+            if (WARNED.add(mob)) {
                 HorseGenetics.LOGGER.warn("[lycan] '{}' swims, flies or is hostile in this build - "
-                        + "{} will not shift", form.mob(), record.displayName());
+                        + "{} will not shift", mob, record.displayName());
             }
             animal.discard();
             return;
@@ -239,7 +254,7 @@ public final class LycanthropyHandler {
         // pedigreed horse with it.
         animal.setPersistenceRequired();
         animal.setHealth((float) Math.max(1.0, healthLeft * animal.getMaxHealth()));
-        animal.setData(ModAttachments.LYCAN_SHIFT.get(), new LycanShift(form.mob(), cloud, save(horse)));
+        animal.setData(ModAttachments.LYCAN_SHIFT.get(), new LycanShift(mob, cloud, save(horse)));
         addTemper(animal);
 
         horse.ejectPassengers();
@@ -249,7 +264,7 @@ public final class LycanthropyHandler {
         if (ServerConfig.debugTools()) {
             String print = roundTripPrint(horse);
             DUSK_PRINTS.put(horse.getUUID(), print);
-            ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " shifted into a " + form.mob() + " at dusk | "
+            ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " shifted into a " + mob + " at dusk | "
                     + print + String.format(", hp %.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
         }
     }
@@ -276,7 +291,7 @@ public final class LycanthropyHandler {
      * thing that catches it. A modded ground-dwelling ambient mob would be
      * excluded with it, which is the safe direction to be wrong in.
      */
-    private static boolean isWearable(EntityType<?> type, Mob animal) {
+    static boolean isWearable(EntityType<?> type, Mob animal) {
         MobCategory category = type.getCategory();
         boolean swims = category == MobCategory.WATER_CREATURE
                 || category == MobCategory.WATER_AMBIENT

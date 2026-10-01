@@ -6,6 +6,7 @@ import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.FounderContext;
 import com.example.horsegenetics.common.genetics.FounderTable;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.GeneRarity;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
@@ -53,9 +54,17 @@ import java.util.Locale;
  * is enforced twice - once by this constructor taking only
  * {@link MobRoster.Habitat#GROUND} entries, and again in the game module, where
  * the shift refuses a resolved entity type whose spawn category or navigation
- * says it swims, flies or hunts. The second check is the one that will still
- * hold when the roster is derived from the live registry and starts naming
- * mobs nobody here has read.
+ * says it swims, flies or hunts. The second check is the one that holds for
+ * {@link #chaosAllele Chaos}, which names mobs nobody here has read.
+ *
+ * <h2>Chaos: every modded animal, through one allele</h2>
+ * The vanilla forms stay hand-written. Modded mobs arrive through one more
+ * allele, {@code Cha}, whose copy carries a seed; the game module builds the
+ * list of modded mobs that pass the same blacklist when the server starts, and
+ * the seed picks one by position ({@code server/ChaosRoster}). Two Chaos copies
+ * shift only if they carry the <b>same</b> seed - see {@link #chaosSeed} - and
+ * a fresh horse's two copies always do ({@link #foundersShareSeeds}), so a wild
+ * Chaos shifter is one animal and two crossed Chaos lines are a horse.
  *
  * <h2>What is not in this file</h2>
  * The <b>shift itself</b> - swapping the horse for a real animal at dusk and
@@ -108,6 +117,7 @@ public final class LycanGene implements Gene {
     }
 
     private final List<Form> forms = new ArrayList<>();
+    private final Allele chaos;
     private final Allele n;
     private final List<Allele> alleles;
     private final List<Expression> expressions;
@@ -138,6 +148,20 @@ public final class LycanGene implements Gene {
                     + "the same animal twice. Both are carried and both are passed on, so this "
                     + "horse is one parent of two different lines.");
 
+    /**
+     * Two Chaos copies. Whether they <i>agree</i> is a fact about the copies, not
+     * the alleles, so the outcome says both possibilities - see {@link #chaosSeed}.
+     */
+    private final Expression CHAOS = Expression.wildType("lycan-chaos", "Chaos shape",
+            "Two Chaos copies. At nightfall this horse becomes an animal from another mod - which "
+                    + "one is written on the copies rather than the allele, so every Chaos line is "
+                    + "its own animal, and it is worked out from the mods this world has loaded: "
+                    + "change the modpack and the animal may change with it. Both copies must carry "
+                    + "the same Chaos seed, which a horse caught or made fresh always does and two "
+                    + "different Chaos lines crossed never do. Nothing that swims, flies or hunts "
+                    + "is ever chosen, and a world with no modded animal that passes has none to "
+                    + "offer: then the horse stays a horse.");
+
     private final FounderTable founders;
 
     public LycanGene() {
@@ -149,12 +173,17 @@ public final class LycanGene implements Gene {
             form(e.token(), e.mob(), e.label());
         }
 
-        n = new Allele(KEY, forms.size(), "n", "Wild-type (n)");
+        // Chaos goes after the last form and before n: every vanilla form keeps
+        // its order, and n stays last, which expressionOf reads pairs by.
+        chaos = new Allele(KEY, forms.size(), MobRoster.CHAOS_TOKEN,
+                MobRoster.CHAOS_LABEL + " (" + MobRoster.CHAOS_TOKEN + ")");
+        n = new Allele(KEY, forms.size() + 1, "n", "Wild-type (n)");
 
-        List<Allele> all = new ArrayList<>(forms.size() + 1);
+        List<Allele> all = new ArrayList<>(forms.size() + 2);
         for (Form f : forms) {
             all.add(f.allele());
         }
+        all.add(chaos);
         all.add(n);
         alleles = List.copyOf(all);
 
@@ -174,13 +203,20 @@ public final class LycanGene implements Gene {
             shifted[f.allele().order()] = e;
             out.add(e);
         }
+        shifted[chaos.order()] = CHAOS;
+        out.add(CHAOS);
         expressions = List.copyOf(out);
 
+        // Chaos is weighted like ONE form, not like one per modded mob: a
+        // modpack with two hundred animals must not make shifters two hundred
+        // times commoner. It stays in the table in a pack with none, so a code
+        // means the same thing in every pack; there it simply does nothing.
         FounderTable.Builder b = FounderTable.builder();
         for (Form f : forms) {
             b.weight(f.allele(), WILD_HOMOZYGOUS_PERCENT);
         }
-        founders = b.weight(n, 100.0 - WILD_HOMOZYGOUS_PERCENT * forms.size()).build();
+        b.weight(chaos, WILD_HOMOZYGOUS_PERCENT);
+        founders = b.weight(n, 100.0 - WILD_HOMOZYGOUS_PERCENT * (forms.size() + 1)).build();
     }
 
     private void form(String token, String mob, String label) {
@@ -215,7 +251,7 @@ public final class LycanGene implements Gene {
     @Override public FounderTable founderTable(FounderContext context) { return founders; }
 
 
-    /** Every form this gene defines, in declaration order - for the wiki and the tests. */
+    /** Every vanilla form this gene defines, in declaration order - for the wiki and the tests. Not Chaos. */
     public List<Form> forms() {
         return List.copyOf(forms);
     }
@@ -245,12 +281,42 @@ public final class LycanGene implements Gene {
             return null;
         }
         int a = pair.first().order();
-        return a == pair.second().order() && a != n.order() ? forms.get(a) : null;
+        return a == pair.second().order() && a < forms.size() ? forms.get(a) : null;
     }
 
-    /** Does this horse shift at all? */
+    /** The Chaos allele: every modded animal, through a seed on the copy. */
+    public Allele chaosAllele() {
+        return chaos;
+    }
+
+    /** Two Chaos copies, whatever their seeds say? */
+    public boolean isChaos(AllelePair pair) {
+        return pair != null && pair.first().equals(chaos) && pair.second().equals(chaos);
+    }
+
+    /**
+     * <b>The seed a Chaos shifter resolves</b>, or {@code null} when this horse is
+     * not one: not Chaos/Chaos, or two Chaos copies carrying <b>different</b>
+     * seeds - the matched-pair rule, applied to the copies instead of the
+     * alleles. The game module turns the seed into an animal
+     * ({@code server/ChaosRoster}); nothing here can, since the list is the
+     * loaded modpack's.
+     */
+    public Long chaosSeed(AllelePair pair, GeneEpigenetics epigenetics) {
+        if (!isChaos(pair) || epigenetics == null) {
+            return null;
+        }
+        long first = epigenetics.copy(0).seed(MobRoster.CHAOS_SEED);
+        long second = epigenetics.copy(1).seed(MobRoster.CHAOS_SEED);
+        return first == second ? first : null;
+    }
+
+    /**
+     * Could this genotype shift at all? A vanilla matched pair, or Chaos/Chaos -
+     * whose copies must still agree, which only {@link #chaosSeed} can say.
+     */
     public boolean shifts(AllelePair pair) {
-        return formOf(pair) != null;
+        return formOf(pair) != null || isChaos(pair);
     }
 
     /**
@@ -264,6 +330,13 @@ public final class LycanGene implements Gene {
      */
     @Override
     public EpiSchema epiSchema() {
-        return EpiSchema.of(EpiValue.colour("cloud", 0.55, 1.00, 0.70, 1.00));
+        return EpiSchema.of(EpiValue.colour("cloud", 0.55, 1.00, 0.70, 1.00))
+                .and(EpiValue.seed(MobRoster.CHAOS_SEED));
+    }
+
+    /** A fresh Chaos/Chaos horse is one line, not two - see {@link Gene#foundersShareSeeds}. */
+    @Override
+    public List<String> foundersShareSeeds() {
+        return List.of(MobRoster.CHAOS_SEED);
     }
 }

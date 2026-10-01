@@ -36,6 +36,11 @@ import java.util.List;
  * of its owner. The tag is the blacklist - a mob added to this table as
  * {@link Habitat#WATER} or {@link Habitat#AIR} cannot reach the lycan locus by
  * being forgotten about.
+ *
+ * <h2>Modded mobs</h2>
+ * Not listed here, and never will be: each locus has one more allele,
+ * {@link #CHAOS_TOKEN Chaos}, that stands in for every modded mob at once - see
+ * the section at the bottom of this class, and {@code neoforge/server/ChaosRoster}.
  */
 public final class MobRoster {
 
@@ -179,5 +184,81 @@ public final class MobRoster {
         List<Entry> out = new ArrayList<>(PEACEFUL);
         out.addAll(HOSTILE);
         return List.copyOf(out);
+    }
+
+    // ------------------------------------------------------------------
+    // Chaos: every modded mob, through one allele
+    // ------------------------------------------------------------------
+
+    /*
+     * The roster above is vanilla and hand-written, and it stays that way. A
+     * modpack's mobs reach the three loci through ONE extra allele each, Chaos,
+     * whose meaning is a seed on the allele copy rather than a mob on the allele
+     * - the eye locus's chaos colour, pointed at a registry instead of at a
+     * colour wheel. The game module builds the list of eligible modded mobs when
+     * the server starts and the seed picks one by position.
+     *
+     * Why not an allele per modded mob (recorded so it is not reopened): a token
+     * is text in the genotype code and registry ids collide with its separators;
+     * a live-registry allele list changes with the modpack, so two servers would
+     * read one code differently; and the designer, the census and the wiki are
+     * baked from here, where no registry exists. One permanent allele answers all
+     * three - a removed mod can never leave a horse naming an allele that is gone.
+     */
+
+    /** The Chaos allele's token at all three mob loci. Free at every one of them; keep it so. */
+    public static final String CHAOS_TOKEN = "Cha";
+
+    /** The Chaos allele's label. */
+    public static final String CHAOS_LABEL = "Chaos";
+
+    /** The epigenetic seed a Chaos copy carries - one {@code SEED} value, same name at all three loci. */
+    public static final String CHAOS_SEED = "chaos";
+
+    /**
+     * The subject a Chaos variant names before a seed is attached. Not a mob id:
+     * nothing in the game can resolve it, so a path that forgets to swap it for
+     * {@link #chaosSubject(long)} finds no mob and does nothing.
+     */
+    public static final String CHAOS_SUBJECT = "chaos";
+
+    private static final String CHAOS_PREFIX = "chaos:";
+
+    /**
+     * The subject an ability carries for a Chaos pair with this seed -
+     * {@code "chaos:<seed>"}, in the field that otherwise holds a mob id, so no
+     * ability record needed a new field. Decimal, signed, because the
+     * game module parses it back and {@code Long.parseUnsignedLong} is not
+     * available to {@code common/}'s browser build.
+     */
+    public static String chaosSubject(long seed) {
+        return CHAOS_PREFIX + seed;
+    }
+
+    /** Is {@code subject} a chaos subject rather than a mob id? */
+    public static boolean isChaos(String subject) {
+        return subject != null && (subject.equals(CHAOS_SUBJECT) || subject.startsWith(CHAOS_PREFIX));
+    }
+
+    /** The seed in a {@link #chaosSubject}, or {@code 0} for the bare {@link #CHAOS_SUBJECT} or a malformed one. */
+    public static long chaosSeed(String subject) {
+        if (subject == null || !subject.startsWith(CHAOS_PREFIX)) {
+            return 0L;
+        }
+        try {
+            return Long.parseLong(subject.substring(CHAOS_PREFIX.length()));
+        } catch (NumberFormatException bad) {
+            return 0L;
+        }
+    }
+
+    /**
+     * <b>Which entry a seed picks</b> from a list of {@code size}: the seed modulo
+     * the size, never negative. By position, so adding or removing a mod moves
+     * what an existing seed means - the owner's call: it is chaos. {@code -1}
+     * when the list is empty, which is "no modded animal available".
+     */
+    public static int chaosPick(long seed, int size) {
+        return size <= 0 ? -1 : (int) Math.floorMod(seed, (long) size);
     }
 }

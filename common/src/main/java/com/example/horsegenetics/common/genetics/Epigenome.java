@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.genetics.epi.EpiValues;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -106,7 +107,7 @@ public final class Epigenome {
             if (!stores(g)) {
                 continue;
             }
-            m.put(g.key(), founderCopies(g.epiSchema(), rng));
+            m.put(g.key(), founderCopies(g, rng));
         }
         return new Epigenome(m);
     }
@@ -162,13 +163,31 @@ public final class Epigenome {
      * unnoticed.
      */
     public static Copies copiesFor(Gene gene, long seed) {
-        return founderCopies(gene.epiSchema(), new SeededRng(seed, gene.key()));
+        return founderCopies(gene, new SeededRng(seed, gene.key()));
     }
 
-    private static Copies founderCopies(EpiSchema schema, Rng rng) {
+    private static Copies founderCopies(Gene gene, Rng rng) {
+        EpiSchema schema = gene.epiSchema();
         AlleleEpigenetics a = AlleleEpigenetics.founder(schema, rng);
         AlleleEpigenetics b = AlleleEpigenetics.deconflict(a, AlleleEpigenetics.founder(schema, rng), rng);
-        return new Copies(a, b);
+        return new Copies(a, shareSeeds(gene, a, b));
+    }
+
+    /**
+     * {@code second} with the seeds {@link Gene#foundersShareSeeds} names copied
+     * from {@code first}, so a fresh horse's two copies agree on them. Only ever
+     * applied to two copies made together, never to a bred pair.
+     */
+    private static AlleleEpigenetics shareSeeds(Gene gene, AlleleEpigenetics first, AlleleEpigenetics second) {
+        List<String> shared = gene.foundersShareSeeds();
+        if (shared.isEmpty() || first.isEmpty() || second.isEmpty()) {
+            return second;
+        }
+        EpiValues values = second.values();
+        for (String name : shared) {
+            values = values.withSeed(name, first.values().seed(name));
+        }
+        return new AlleleEpigenetics(second.priority(), values);
     }
 
     /** From explicit per-gene copies; every gene that stores must be supplied. */
@@ -230,7 +249,7 @@ public final class Epigenome {
      * what stops two clients rendering the same horse differently.
      */
     private static Copies placeholder(Gene g) {
-        return founderCopies(g.epiSchema(), new SeededRng(g.key().hashCode()));
+        return founderCopies(g, new SeededRng(g.key().hashCode()));
     }
 
     private static AlleleEpigenetics parseCopy(Gene g, String text) {
@@ -331,6 +350,9 @@ public final class Epigenome {
             AllelePair pair = genotype.pair(g);
             AlleleEpigenetics first = fit(g, pair.first(), c.first(), 0);
             AlleleEpigenetics second = fit(g, pair.second(), c.second(), 1);
+            if (c.first().isEmpty() && c.second().isEmpty()) {
+                second = shareSeeds(g, first, second);   // both filled here, together: a fresh pair
+            }
             if (!first.isEmpty() && !second.isEmpty() && first.priority() == second.priority()) {
                 second = second.bumped(true);   // a filled copy must not tie its partner
             }

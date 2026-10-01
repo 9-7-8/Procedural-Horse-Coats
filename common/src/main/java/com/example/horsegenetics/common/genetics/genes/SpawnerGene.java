@@ -43,6 +43,13 @@ import java.util.List;
  * clearest argument the gene database has for existing - but it does mean the
  * first spawner in a world is a project rather than a discovery.
  *
+ * <h2>Modded creatures, through Chaos</h2>
+ * {@link MobRoster#CHAOS_TOKEN Chaos} is one more allele whose copy carries a
+ * seed, and the game module turns the seed into one of the loaded modpack's
+ * creatures. Loosest of the three mob loci, as the vanilla list is: any modded
+ * mob, monsters and bosses included; a server's config exclude lists are how a
+ * boss is taken out.
+ *
  * <p>Three requirements land on the translator rather than here, and each is on
  * the gene's page as a hazard: spawn through the normal path so other mods'
  * protections still fire, never mark what is spawned persistent, and only
@@ -72,10 +79,23 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
                         + "nothing at all.",
                 new MatchedText() {
                     @Override public String name(Variant v) {
+                        if (MobRoster.isChaos(v.subject())) {
+                            return "Spawns a creature from another mod";
+                        }
                         return "Spawns " + v.label().toLowerCase() + "s";
                     }
 
                     @Override public String description(Variant v) {
+                        if (MobRoster.isChaos(v.subject())) {
+                            return "Two Chaos copies. Feed the horse and two of one creature from "
+                                    + "another mod appear nearby - any mod's creature, monsters and "
+                                    + "bosses included, unless the server's config excludes them. "
+                                    + "Which one is a seed on the copies, worked out from the mods "
+                                    + "this world has loaded, so it can change with the modpack. "
+                                    + "Both copies must carry the same seed: a horse caught or made "
+                                    + "fresh always does, two Chaos lines crossed never do. With no "
+                                    + "modded creature installed it makes nothing.";
+                        }
                         return "Two matching copies. Feed the horse anything it eats and two "
                                 + v.label().toLowerCase() + "s appear nearby - every meal, as "
                                 + "many times as you care to feed it.";
@@ -88,6 +108,7 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
         for (MobRoster.Entry e : MobRoster.all()) {
             out.add(new Variant0(e.token(), e.mob(), e.label()));
         }
+        out.add(chaosVariant()); // every modded mob, after the last vanilla one - see MobRoster
         return out;
     }
 
@@ -108,7 +129,7 @@ public final class SpawnerGene extends AbstractMatchedPairGene {
 
     @Override
     public EpiSchema epiSchema() {
-        return EpiSchema.of(EpiValue.uniform(VARIANT, 0.0, 0.999));
+        return EpiSchema.of(EpiValue.uniform(VARIANT, 0.0, 0.999), EpiValue.seed(MobRoster.CHAOS_SEED));
     }
 
     @Override

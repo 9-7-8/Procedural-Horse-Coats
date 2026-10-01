@@ -359,6 +359,18 @@ public final class ServerConfig {
      */
     public static final ModConfigSpec.IntValue JOCKEY_PASS_DAYS;
 
+    /**
+     * <b>What a Chaos allele may never name.</b> The three mob loci each have one
+     * {@code Cha} allele standing in for every modded mob ({@code server/ChaosRoster});
+     * these take a whole mod, or one mob, off all three lists. Default is
+     * "allowed unless listed" - the owner's call - so a pack author removes a
+     * modded boss here rather than opting each mob in.
+     */
+    public static final ModConfigSpec.ConfigValue<java.util.List<? extends String>> CHAOS_EXCLUDE_MODS;
+
+    /** See {@link #CHAOS_EXCLUDE_MODS}: single ids, {@code modid:mob}. */
+    public static final ModConfigSpec.ConfigValue<java.util.List<? extends String>> CHAOS_EXCLUDE_IDS;
+
     public static final ModConfigSpec.BooleanValue DEBUG_ANNOUNCE;
 
     public static final ModConfigSpec.BooleanValue DEBUG_TOOLS;
@@ -683,6 +695,23 @@ public final class ServerConfig {
                         "Feeding a second pass ADDS another of these rather than replacing",
                         "what is left, so a three-day meeting is three passes.")
                 .defineInRange("behaviour.jockey_pass_days", 1, 1, 365);
+        CHAOS_EXCLUDE_MODS = builder
+                .comment("Mods whose mobs a Chaos allele may never name, by mod id. (default: [])",
+                        "Lycanthropy, Leader of the pack and Spawner each have one Chaos allele that",
+                        "stands in for every modded mob at once: a seed on the horse picks one from",
+                        "the mods this server has loaded. Vanilla mobs are never on that list - they",
+                        "have alleles of their own. Spawner reaches monsters and bosses on purpose;",
+                        "this list, and the next, are how a boss is taken off it.",
+                        "A seed picks by position, so adding or removing a mod here or in the pack",
+                        "can change what an existing Chaos horse turns into. That is the point of it.",
+                        "Example: [\"somemod\", \"othermod\"]")
+                .defineListAllowEmpty("chaos.exclude_mods", java.util.List.of(), () -> "somemod",
+                        o -> o instanceof String s && !s.isBlank());
+        CHAOS_EXCLUDE_IDS = builder
+                .comment("Single mobs a Chaos allele may never name, as modid:mob. (default: [])",
+                        "Applied on top of chaos.exclude_mods. Example: [\"somemod:dragon_king\"]")
+                .defineListAllowEmpty("chaos.exclude_ids", java.util.List.of(), () -> "somemod:somemob",
+                        o -> o instanceof String s && s.indexOf(':') > 0);
         DEBUG_ANNOUNCE = builder
                 .comment("Whether this mod prints its own diagnostics to chat and the log.",
                         "  A cowboy founding, a villager taking an equestrian job, a stable",
@@ -704,6 +733,24 @@ public final class ServerConfig {
                         "permission, so this does not hand them to ordinary players.")
                 .define("debug.tools", !production());
         SPEC = builder.build();
+    }
+
+    /** {@code chaos.exclude_mods}, safely - empty when the config is not loaded yet. */
+    public static java.util.List<String> chaosExcludeMods() {
+        try {
+            return java.util.List.copyOf(CHAOS_EXCLUDE_MODS.get());
+        } catch (IllegalStateException notLoaded) {
+            return java.util.List.of();
+        }
+    }
+
+    /** {@code chaos.exclude_ids}, safely - empty when the config is not loaded yet. */
+    public static java.util.List<String> chaosExcludeIds() {
+        try {
+            return java.util.List.copyOf(CHAOS_EXCLUDE_IDS.get());
+        } catch (IllegalStateException notLoaded) {
+            return java.util.List.of();
+        }
     }
 
     /** Safe read - falls back to the default if the config is not loaded yet. */
