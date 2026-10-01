@@ -1,0 +1,21 @@
+2026-10-01 - the mythical goats, scoped as one treatment
+
+    An intake session. No code, wiki prose or assets touched; nothing built or played. The
+    owner pasted a table of six mythical goats (Amalthea, Zlatorog, the Sea-goat, the Dahu, the
+    Chimera, the Yule Goat) and asked for breed plans plus a goat build gene, made the way the
+    deer build was.
+
+    Output: intake/Mythical goats - implementation treatment.txt. New things needed: one appended
+    "scimitar" shape on the ram horn form gene (goat and ibex horns), six breeds, and a Roadmap-only
+    goat-build.html plan page plus one Roadmap line for a one-horn asymmetry.
+
+    Owner's calls: all six are breeds, with the ones that need big new genes and models noted
+    (the Sea-goat and the Chimera ship as their goat half only); Dahu one breed, uneven legs lore
+    only; scimitar appended to the ram horn form; Zlatorog and the Yule Goat wait for the deer's
+    mane-and-tail and hoof colour genes; Yule Goat a gold coat now, straw coat gene later; Amalthea
+    a normal pair and a Roadmap item for a one-horn asymmetry; very_rare and rare, wild and spawn
+    egg only, as the deer; goat-build.html separate from the deer page; rides the next release.
+    Biome lists, stats, sizes, the allele token and the dominance slot are recommendations, not asked.
+
+    What the building session picks up first: the scimitar shape (Piece 1), checking the part-sheet
+    bake takes a fifth ram horn form without moving the other four.

@@ -1,0 +1,345 @@
+Mythical goats - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "Open" lines are still to be settled, by whom is said on the line; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first. Source of truth for what
+exists is wiki/gene-ram-horns.html, wiki/gene-ram-horn-form.html, wiki/model-parts.html, wiki/breeds.html,
+wiki/breed-format.html and wiki/curly-coat.html (the plan-page precedent). This file is retired (deleted, per
+START HERE step 3) as each piece ships and moves onto those pages' Gameplay and Coding tabs.
+Release: rides the next release (Decided). Applies when each piece ships; none cuts its own.
+It sits beside "Mythical deer - implementation treatment.txt" and shares two of its pieces (the mane-and-tail
+shape gene and the hoof colour gene); it follows the audit's two rules: public domain only, no talking.
+
+
+1. The request, as given
+========================
+"Similar to the last sessions, you're going to add new breed plans for some goats. While we're shipping them as
+horses, we're in a magical fantasy world where goats and horses are cross fertile. Create a 'goat build' gene in
+the same way you made the deer build gene."
+Then a table of six rows. Reading: six entries, each a horse breed that is a goat in a horse's body, plus a goat
+build plan page. "In the same way as the deer build" means a Roadmap-only plan page that currently does nothing
+(Piece 3), not a built gene. Confirmed by the owner's answers below.
+
+The six, with the table's facts kept and nothing invented:
+  Amalthea              Greek      colour not specified; ordinary she-goat build; two horns (one broken off in the
+                                   cornucopia account). Lore: the cornucopia, a horn of abundance. Some traditions make
+                                   her a nymph; "the goat" is version-specific.
+  Zlatorog / Goldhorn   Slovene    white; no mane, tail not specified; compact agile mountain ungulate; golden horns;
+                                   speed 10, jump 10. A chamois, or an ibex in some tellings. Flowers grow from his blood
+                                   and restore his strength (lore only, see Decided).
+  Sea-goat / Capricorn  Greek      goat half and fish half, colours vary; goat hair in front, a fish tail behind; powerful
+                                   forequarters; goat horns and a scaled tail; aquatic movement.
+  Dahu                  Alpine     variable, mountain-goat or chamois colouring; small to medium mountain-goat build; legs
+                                   shorter on one side; ordinary horns in some tellings. A humorous tall tale.
+  Chimera               Greek      no canonical colour; lion mane, serpent tail; heavy and monstrous; lion forepart, goat head
+                                   or middle, serpent-headed tail; breathes fire. A goat-containing hybrid.
+  Yule Goat / Julbock   Scandinavian straw-gold; woven straw mane and tail, straw feet not hooves; straw horns, often red
+                                   ribbons; no inherent power; a folkloric effigy.
+
+
+2. In scope, and what is not
+============================
+In scope
+ - Piece 1: a "scimitar" shape appended to the ram horn form gene. Decided.
+ - Piece 2: six breeds, as horses, "all six, noting the ones which would need substantial new genes and models"
+   (Decided). Two (Sea-goat, Chimera) ship as their goat half only; their missing halves are listed in 3c and
+   written on their pages.
+ - Piece 3: goat-build.html, a Roadmap-only plan page, and one Roadmap line for a one-horn asymmetry. Decided.
+Not in scope (all re-askable)
+ - A goat BODY shape (short legs, deep chest, short neck, small head). Decided: breed stats and size only;
+   the plan page is Piece 3, as for the deer build.
+ - Dahu's uneven legs. Decided: lore only, one breed. No leg-length asymmetry is built or planned.
+ - Amalthea's broken horn as geometry. Decided: a Roadmap item only (a one-horn asymmetry), the breed ships
+   with its normal pair.
+ - The woven-straw coat and the red ribbons of the Yule Goat. Decided: a gold coat now, the straw coat gene
+   later; ribbons are not planned.
+ - Any new ability: the cornucopia (Amalthea), blood-flowers (Zlatorog), the celestial tie (Sea-goat), fire
+   breath that burns (Chimera). Recommended: none (the deer's rule); the nearest cosmetic or shipped gene is
+   named per breed in Piece 2. Not asked.
+ - Speech, in any form: none in these six. Decided as the audit's rule.
+ - A separate new goat horn gene, a goat beard (Head parts), a fish tail, a lion forepart, a serpent tail,
+   extra heads, hiding a vanilla bone: all untouched here, see 3c.
+
+
+3. What already exists, so the building session does not redo it
+=================================================================
+3a. Horns, the one piece of machinery this touches
+  - RamHornsGene (common/.../genetics/genes/RamHornsGene.java): dominant, sex-limited allele pair Rh (either
+    sex) and Rhm (stallion only). Grows geometry, paints nothing. Not a Sheep (breeds/not_a_sheep.json) pins it
+    with "pair" weights - the precedent for a horned breed's pool.
+  - RamHornFormGene (same folder): "horsegenetics.ram_horn_form", PRIORITY 237, alleles in generator order
+    Crl, Crk, Fhn, Scr (permanent, append only), dominance Fhn > Crl > Crk > Scr, one shape on both sides.
+    Founder frequencies Crk 0.12, Fhn 0.08, Scr 0.10, Crl the remainder. Each allele is an Allele whose second
+    argument is RamHornGenerator's shape index.
+  - RamHornGenerator (common/.../parts/RamHornGenerator.java): shape constants CURL 0, CORKSCREW 1, FOUR 2,
+    SCURS 3; FORMS = 4, CURLS = 4, MAX_NODES = 24. PartKind uses FORMS * CURLS as the baked variation count for
+    RAM_HORN_RIGHT and RAM_HORN_LEFT, so a fifth shape raises that count and means a re-bake of the part sheet
+    (neoforge-26.1.2/tools/bake-part-sheet.mjs). RamHornSize and RamHornTipGene carry size and tip on the copy.
+  - Horn colour: HornColourGene is codominant with hue and tone on each allele copy; the ram horns already read a
+    tint. A golden horn (Zlatorog) is a tint value. UNVERIFIED that the range reaches a convincing metallic gold
+    on a ram horn: bake a sample before pinning (the deer treatment asks the same of antlers).
+  - HornGenerator's own comment mentions a "gentle scimitar curve" on the unicorn horn; that is a curve on one
+    shape, not a shape of ram horn. Do not read it as the feature being built.
+3b. Breeds and the pages
+  - Closest breed precedent: breeds/not_a_sheep.json (magical, uncommon, "pair" weights, biomes, size
+    [0.508, 0.667], pull 2, ram horns pinned). Other precedents for mythic breeds: breeds/rimehart.json.
+    Biome vocabulary, spawn rules, the cold-share rule and the herd list: "Mythic breeds - biome assignments.txt".
+  - A breed is a JSON file (wiki/breed-format.html); the breed designer writes the weights, never by hand.
+  - Lycan (a matched pair, a peaceful land animal at night) already includes a goat among its shapes. These
+    breeds are goats, not shapeshifters; Recommended: they do not pin Lycan. Not asked.
+  - The plan-page precedent: wiki/curly-coat.html ("Planned / not built", Roadmap tab only). The deer treatment's
+    Piece 5 builds deer-build.html the same way; goat-build.html is its twin.
+3c. What the six need that does not exist (the owner's "noting" request)
+  Zlatorog and the Yule Goat need pieces from the DEER treatment (Decided: they wait for them):
+   - Mane and tail shape gene (deer Piece 1): Zlatorog's "no mane"; the Yule Goat's straw-like cropped mane is
+     the nearest. UNVERIFIED whether that gene's cropped mane reads as straw; it will not read as WOVEN.
+   - Hoof colour gene (deer Piece 2): the Yule Goat's "straw feet, not hooves" is the nearest, a pale gold hoof.
+     UNVERIFIED that the deer's metal-and-gem palette reaches a straw tone; if not, a straw allele is appended
+     to that gene, not built here.
+  Sea-goat and Chimera need new genes and models, none of which is scoped (audit gaps; numbers are the audit's):
+   - A fish tail (audit gap 2) and HIDING the horse's hind half (gap 7). The machinery can ADD parts and nothing
+     HIDES a vanilla bone. Together, an L piece of work, the Hippocampus's own blocker.
+   - Chimera: a lion forepart and mane, a serpent-headed tail, a goat head on the middle: hiding (gap 7), a tail
+     part with a head (gap 2), and extra heads (gap 6). Each an L piece. Nothing here scopes them.
+   - Chimera's fire breath (gap 19): nothing sets targets alight; GeneAbility's effects verbs have no ignite
+     verb. A cosmetic flame from the head (the Particle locus's flames) works today.
+   - Sea-goat's aquatic movement: shipped. Ocean Born (cannot drown), Magic Swim Speed, Magic Water Breathing
+     and Waterborn all exist (wiki/gene-*.html); the water coat patterns (fish_scales, tidemark) give scales.
+  Dahu: uneven legs. Nothing makes one side's legs shorter; Decided lore only.
+  Amalthea: one horn missing. The pair is symmetric by default; the head parts treatment mentions an
+   asymmetry knob that is not built. Decided: a Roadmap line only.
+Looks built but is not
+  - Goat is a Lycan shape, not a build. A goat build gene does not exist; "currently does nothing" is its state.
+  - There is no goat horn. Ram horns are sheep horns (curl, corkscrew, four-horned, scurs); the corkscrew is the
+    nearest goat look (markhor), and no shape sweeps back like an ibex or a goat's.
+  - There is no goat beard yet. Head parts' goat beard (BEARD, a single centred part) is scoped, not built.
+  - "Molten Hooves" is a glowing trail, not hoof colour; hoof colour is the deer treatment's unbuilt Piece 2.
+  - HornGenerator has a scimitar curve for the unicorn horn; the ram horn has no scimitar form.
+  - Curly coat is a plan page, not a gene.
+
+
+4. The pieces
+=============
+Piece 1 - Goat horns: the scimitar shape
+------------------------------------------
+What the player sees: a goat or ibex's long horns sweeping back from the head in a gentle blade, on either sex
+ (Rh) or a stallion only (Rhm). Gold is the existing horn tint.
+ Decided: append one new shape to Ram horn form, not a new gene. Name "Scimitar".
+ Recommended: token "Sci" (a PROPOSAL; grep every existing allele token first). Allele list order becomes
+   Crl, Crk, Fhn, Scr, Sci (append only, permanent). Dominance independent of order: Fhn > Crl > Sci > Crk > Scr,
+   so a scimitar goat crossed with a corkscrew goat throws scimitar and a curled horse still beats it. Open
+   (building session): the dominance slot.
+ Recommended: founder frequency modest (about 0.06 for Sci, taken from Crl's remainder) so the wild pool
+   carries it rarely; the goat breeds pin it. The value is a PROPOSAL.
+ Recommended: shape is a long, slightly backswept blade with faint ridges; one root, no corkscrew. The curl knob
+   (CURLS) is the sweep amount. UNVERIFIED whether the current node budget (MAX_NODES 24) allows a ridged blade.
+ Where: common/ - RamHornFormGene (the allele, expression text and founder table), RamHornGenerator (the shape,
+   FORMS from 4 to 5), PartKind's baked count follows FORMS * CURLS; NeoForge - re-bake the part sheet.
+ Data and saves: allele order is permanent once a world uses it; append only. A world without the allele is
+   unchanged; a world saved with it and then loaded without it is not a case (the allele ships with the mod).
+ Sync: none new; the part rides the render state it already rides.
+ Config: none (the existing client parts switches apply).
+ Tests: RamHornFormGene test for the new allele in the dominance series and in a pair; RamHornGenerator test
+   that the new shape produces nodes inside the budget at every curl value and at every size class;
+   PartGeneratorTest; EditorRules parity.
+   The two goldens move by KEY ONLY (the horns paint nothing); run *CoatBakeGoldenTest and
+   *CoatPipelineGoldenTest and check which rows moved, as for the antlers.
+ Play checks: the blade on a mare and a stallion in the yard, foal (ram horns do not show on foals: confirm),
+   both sizes, gold and plain tint, with a halter and a saddle on, against the existing four shapes at the same
+   size; clipping with the ears and a neighbouring antler or unicorn horn (accepted per the head parts decision).
+ Docs: gene-ram-horn-form.html (Gameplay: the shapes table and the inheritance paragraph go from four to five;
+   Coding: the allele order; Science: the real-goat remark), gene-ram-horns.html, model-parts.html if the part
+   sheet changes, genetics-model.html only if priorities move (they do not).
+ Re-bake after (CLAUDE.md table): any file in genes/ is NOT touched (this gene is Java); the long gene row's
+   bakes still apply because the gene's allele list changed - run them; the web/designer rebake and boot check;
+   the part sheet.
+
+Piece 2 - The six breeds
+------------------------
+What the player sees: six goat-like horses in the wild and as spawn eggs, each with a breed-book entry that tells
+ the myth in fresh words. Two of them (Sea-goat, Chimera) are their goat half only.
+ Decided: all six are breeds. Kind magical. Spawn "wild" and "spawn_egg" only (Decided: same as the deer, not
+   the cowboy and not the stables). Commonness very_rare for named individuals (Amalthea, Zlatorog, Dahu, Yule
+   Goat); rare for the types (Sea-goat, Chimera). Open (owner): the Chimera is one named monster and a hybrid,
+   so very_rare may be right; asked and answered "Same as the deer", so the deer's rule is applied literally.
+ Decided: Zlatorog and the Yule Goat wait for the deer's Pieces 1 and 2. Amalthea, Dahu, Sea-goat and Chimera
+   have no deer dependency; Recommended order is to ship them all after Piece 1, so no breed is re-pooled for
+   the scimitar later.
+ Every row below is a PROPOSAL for the owner's review. Biome lists, stats and sizes were NOT asked. Every
+ founder carries the expressing allele (no invisible carriers); every pool pins ram_horns and ram_horn_form.
+ Breed weights go through the breed designer's output, per breed-format.html.
+
+ Amalthea (very_rare)
+   biomes: minecraft:windswept_hills, minecraft:windswept_gravelly_hills, minecraft:meadow, minecraft:plains
+   stats: speed 4, jump 6, health 6; size small. Coat: the ordinary she-goat - white, browns, black, pied; the
+   whole pool is allowed with a spread, like Not A Sheep. Horns: Rh, Sci. Notes on the page: the cornucopia is
+   a story, not an ability; she may be a nymph in some tellings; the broken horn is the Roadmap item.
+ Zlatorog (very_rare, waits on deer Piece 1 for "no mane")
+   biomes: minecraft:jagged_peaks, minecraft:frozen_peaks, minecraft:grove, minecraft:snowy_slopes
+   (cold: the climate rule gives it near-fixed cold tolerance, which suits a Julian Alps animal)
+   stats: speed 10, jump 10, health 7; size small, compact. Coat: white (the dominant whites, Grey for an aged
+   look). Mane: none (deer Piece 1's allele). Horns: Rh, Sci pinned, gold horn tint pinned. UNVERIFIED that
+   speed 10 and jump 10 are reachable in BreedStatCurve (the audit's own caveat). The page notes the animal is
+   a chamois or an ibex in the tellings, and that the blood-flowers are lore only (Recommended: no ability).
+ Sea-goat / Capricorn (rare; GOAT HALF ONLY)
+   biomes: minecraft:beach, minecraft:stony_shore, minecraft:river (oceans map to beach by analogue)
+   stats: speed 6, jump 3, health 7; size standard. Coat: blue-greys, black and slate with the water patterns
+   (fish_scales, tidemark) allowed. Horns: Rh, Sci. Water: Ocean Born and Magic Swim Speed pinned (aquatic
+   movement; nearest shipped). The fish tail and the hidden hind half are NOT drawn: the page says so and links
+   the audit gaps; it is a goat-fronted horse until then.
+ Dahu (very_rare)
+   biomes: minecraft:meadow, minecraft:grove, minecraft:windswept_hills, minecraft:taiga
+   (cold share 0.25: partial cold tolerance; right for an Alpine animal)
+   stats: speed 4, jump 7 (a surefooted slope animal), health 5; size small. Coat: chamois and mountain-goat
+   colours - bays, browns, greys, pale-bellied. Horns: Rh, Sci, ordinary size. The uneven legs are lore: the
+   page tells the left-short and right-short tale and says plainly that no leg is shorter.
+ Chimera (rare; GOAT-AND-FLAME HALF ONLY)
+   biomes: minecraft:badlands, minecraft:savanna, minecraft:windswept_savanna, minecraft:desert
+   stats: speed 7, jump 5, health 9, size large (heavy, monstrous). Coat: the whole pool, tawny gold and dark
+   weighted. Horns: Rh, Sci. Fire: Fireproof pinned, plus the Particle locus's flames pinned as a cosmetic
+   breath (Recommended; nothing burns). The lion forepart, the lion mane, the goat head on the back and the
+   serpent-headed tail are NOT drawn: listed in 3c, written on the page. UNVERIFIED which allele is the
+   flame particle (grep the Particle locus).
+ Yule Goat / Julbock (very_rare, waits on deer Pieces 1 and 2)
+   biomes: minecraft:taiga, minecraft:snowy_taiga, minecraft:snowy_plains, minecraft:plains
+   (cold share 0.5: near-fixed? read the climate spec; Recommended it is acceptable, a Scandinavian effigy)
+   stats: speed 3, jump 3, health 4; size standard (the table says "varies"). No ability (an effigy has none).
+   Coat: straw-gold - champagne, palomino, dunalino; "gold coat now, straw coat gene later" (Decided). Mane:
+   cropped (deer Piece 1's allele) and pale. Hooves: the straw-tone hoof allele (deer Piece 2). Horns: Rh, Sci
+   in a straw tone (Recommended, a tint on the copy; ribbons are not planned). Page: it is a folk effigy, not a
+   living goat; the straw coat and ribbons are named as "would need a new gene".
+ Common checks: cold share of each biome list against the climate spec (Zlatorog picks up near-fixed cold
+   tolerance, right; the Yule Goat and Dahu pick up partial or more, review). Is every biome on the herd list in
+   data/horsegenetics/neoforge/biome_modifier/add_horse_herds.json? The biome-assignments file warns that several
+   named biomes are off the list (UNVERIFIED for frozen_peaks, snowy_slopes, windswept_savanna: check each).
+ Where: breed JSON under common/src/main/resources/horsegenetics/breeds/ via the breed designer's output;
+   breeds.html, breed-book.html; the spawn eggs (neoforge-26.1.2/tools/bake-breed-eggs.mjs only for any new egg
+   texture: a breed egg texture must be named for the breed id, per CLAUDE.md).
+ Data and saves: a breed id is permanent once a world has horses of it; renaming later orphans them.
+ Sync: none new.
+ Config: none.
+ Tests: *BreedsTest per breed (a pinned pair pins the allele); BreedFilesTest; BreedBandsReachTest for any band
+   on a knob no pinned pair reads (the gold tint and the stats).
+ Play checks: each breed in a yard pen; the horn on both sexes; a cross of two (a cross label per breeds.html);
+   a wild herd in each biome; a Sea-goat and a Chimera in the dev yard to confirm they read as goats and not as
+   unfinished horses; the climate-rule tolerance shown on the info screen.
+ Docs: breeds.html (a row each), breed-book.html (a Goats section, lore in fresh words from the myth, and each
+   page says what is NOT drawn), the breed census (bakeGeneCensus); the heights printed by hand run through
+   check-breed-heights.mjs.
+
+Piece 3 - The goat build plan and the one-horn plan
+---------------------------------------------------
+What the player sees: nothing in the game. A plan page, goat-build.html, so the build is pinned and findable.
+ Decided: a Roadmap-only page named for the goat build (Roadmap tab only, one sentence in a note
+   roadmap-summary box, per CLAUDE.md rule 9), twin of the deer build page; separate page, not shared.
+ Decided: it currently does nothing. What it would be: short legs, a deep compact chest, a short neck, a small
+   head. Why it waits: it needs HdHorseModel, the foal model and wiki/body-space.html's tables; a bigger feature
+   than any piece here. Until it ships the goat breeds are lean horses with horns - say so on each breed's
+   Verification tab.
+ Recommended: the page says it would share the body-space groundwork with the deer build, and that both could
+   become one build gene's alleles (build: horse, deer, goat) if the owner prefers. Open (owner): one locus
+   with several alleles, or separate loci. Not asked.
+ Decided: a one-horn asymmetry line goes on model-parts.html's Roadmap tab (Amalthea's broken horn); no page.
+ Where: wiki only, no code.
+ Tests: none (check-links.mjs and the roadmap bake guard the page).
+ Play checks: none.
+ Docs: goat-build.html (new); the SECTIONS array in wiki/pages.js only (CLAUDE.md rule 7) with the views it
+   belongs in ("coding" only, as curly-coat.html); model-parts.html's Roadmap tab; node
+   wiki/tools/sync-page-views.mjs, then bake-roadmap-index.mjs and bake-verification-index.mjs.
+
+
+5. Decisions (anything not inside a piece)
+===========================================
+A. The ask: six breeds plus a goat build plan page. Smallest worthwhile version: Piece 1 plus Amalthea and Dahu
+   (nothing waits on the deer). Decided: all six breeds.
+B. Fit: horses-only, vanilla intact; carrot not stick (no penalty); the horns are a grown part that does nothing
+   (the head parts decision applied). A concept is a breed, not a gene: these are breeds; the scimitar is an
+   allele because it can sit on any horned horse. The magical setting (goats and horses cross-fertile) is the
+   owner's, stated in the request; it needs no mechanism, it is why they are horse breeds. No settled decision bent.
+C. Meeting it: wild herds and spawn eggs, as the deer. Tutorial text: none; a note on each breed page. Refusal
+   text: none (no new action).
+D. Genetics: see Piece 1. No new gene; one appended allele. Epigenome values: the existing ram horn size, curl and
+   tip, and the horn tint on the copy; no new ranges. No sex linkage change (Rh and Rhm as before). It is not a
+   lethal and not a health effect (horns do nothing to the horse). Both editors (rule 5): the horse designer and
+   CustomHorseSpawnScreen show the allele by reading the gene's list; rebake the wasm and run
+   check-designer-boots.mjs, and check the editor's horn shape list has five entries.
+E. Breeds: see Piece 2. No existing breed's pool needs to move. Open (building session): Not a Sheep's pool
+   keeps Crl, Crk, Fhn, Scr and gains no Sci; check its test does not enumerate shapes by count.
+F. Items and blocks: none. Carrots: the ram horn form already has a gene carrot; Open (building session)
+   whether a new allele needs a recipe row (read wiki/making-a-gene.html#contracts, four or five files).
+G. Config: none.
+H. Saves: tokens and allele order permanent; append only.
+I. Multiplayer: nothing to authorise; the client reads the render state only.
+J. Compatibility: none beyond the biome analogues (a modded biome that stands in for a mountain biome reaches
+   these herds automatically).
+K. Performance: one shape in a baked sheet; no tick work.
+L. Tests: see the pieces.
+M. Release: rides the next release (Decided); applies when each piece ships.
+
+Implications sweep
+  Genetics model / registry ... touches: one allele on an existing gene. Coat pipeline / goldens ... touches:
+  key-only golden moves (horns paint nothing). Eye colour ... untouched. Body space / model parts ... touches:
+  the part sheet and one baked-count constant; the goat build page is a plan for body-space.html. Breeding /
+  pedigree ... untouched. Breeds ... touches: six new breeds; no existing pool changes. Horse body ... untouched.
+  Care / herds ... touches: six new wild herds only, through the biome modifier. AI goals ... untouched.
+  Items / carrots ... touches: possibly one gene carrot row. Tack / gear ... untouched (horns are drawn before
+  armour, saddle and halter, as for the other horns). Villagers / stables ... untouched (these breeds are not
+  sold). Realm / dimension ... touches: the realm's pens list breeds; confirm the new breeds' genes are not on
+  the unverified list (unverified-genes.txt re-bake). H menu ... touches: info text for the new allele.
+  Stasis ... untouched. Designers ... touches: both editors, rule 5. Gene creator ... untouched. Config ...
+  untouched. Other mods ... untouched. Advancements ... untouched. Backport ... the logic is in common/. Wiki
+  ... touches: ram horn form and ram horns pages, breeds, breed book, census, the new goat-build page, one
+  Roadmap line on model-parts.
+Three likeliest ways it goes wrong for a real player
+  1. A Sea-goat or Chimera reads as an unfinished horse. Handled by the pages saying what is not drawn and by a
+     yard-pen play check; a consequence of the owner's "all six" call.
+  2. The scimitar clips with ears or a halter at some size. Accepted per the head parts decision; a play check.
+  3. The goats read as lean horses with horns until the goat build ships. Decided; named on the Verification
+     tabs and the breed descriptions.
+
+
+6. UNVERIFIED (riskiest first)
+===============================
+ 1. Whether the part-sheet bake and the baked variation count (FORMS * CURLS in PartKind) accept a fifth shape
+    without moving the other four shapes' UVs (read PartKind, PartSheet, bake-part-sheet.mjs; bake and diff).
+ 2. Whether a ridged back-swept blade fits RamHornGenerator.MAX_NODES at every size and curl (generate and count).
+ 3. Whether speed 10 and jump 10 are reachable in BreedStatCurve (Zlatorog). If not, it is the stat ceiling.
+ 4. Whether a horn tint reaches metallic gold on a ram horn (bake a sample).
+ 5. Whether the deer's hoof palette reaches a straw tone and its cropped mane reads as straw (after those ship).
+ 6. Which Particle-locus allele is the cosmetic flame (Chimera) and whether pinning it with Fireproof is accepted
+    by BreedFilesTest.
+ 7. Whether frozen_peaks, snowy_slopes and windswept_savanna are on the herd list in
+    data/horsegenetics/neoforge/biome_modifier/add_horse_herds.json.
+ 8. Whether ram horns hide on foals (every other grown part has a showsOnFoal rule; read PartKind).
+ 9. Whether any test enumerates ram horn shapes by a hard-coded count of four.
+
+
+7. Order and size
+=================
+ Piece 1 scimitar shape ......... S to M. Groundwork: every goat breed pins it; ships first.
+ Piece 2a Amalthea, Dahu ........ S each, after Piece 1; nothing else needed.
+ Piece 2b Sea-goat, Chimera ..... S each (goat half only), after Piece 1.
+ Piece 2c Zlatorog, Yule Goat ... S each, after Piece 1 AND the deer's Pieces 1 (mane-and-tail) and 2 (hoof colour).
+ Piece 3 goat-build plan page ... S (a page and a Roadmap line); may ride with any piece, the best fit is Piece 1.
+ Waits on: nothing for 1, 2a, 2b, 3; the deer's Pieces 1 and 2 for 2c. Unblocks: a later goat build gene, a
+ straw coat gene for the Yule Goat, a one-horn asymmetry, and (with other treatments) the Sea-goat's fish tail and
+ the Chimera's missing parts.
+ Do not do in one session: Piece 1 and any of 2c (the second waits on another treatment); two of the Piece 2
+ breeds that both change a gene file; Piece 2c with the deer's hoof gene in the same session as its own tests.
+
+
+8. Release
+==========
+Rides the next release (Decided); applies when each piece ships (no release is cut by this feature alone).
+
+
+9. After each piece ships
+=========================
+ Regenerate-table rows touched: Piece 1: the long gene row (the gene's list changed), the two goldens (key only),
+ anything in common/ (:web:bakeDesignerAssets then check-designer-boots.mjs), the part sheet (bake-part-sheet.mjs),
+ wiki prose (search index, links, agent text). Piece 2: the breed row (bakeBreedFiles then bakeGeneCensus, plus
+ check-breed-heights.mjs), a breed egg row if an egg texture is added. Piece 3: sync-page-views.mjs, the roadmap and
+ verification index bakes, then the prose row. ProgressTask is untouched.
+ Wiki: gene-ram-horn-form.html and gene-ram-horns.html (Gameplay and Coding tabs) for Piece 1; breeds.html and
+ breed-book.html (a Goats section) for Piece 2; goat-build.html as a new Roadmap-only page (rule 9), added to the
+ SECTIONS array in wiki/pages.js only, and one Roadmap line on model-parts.html for Piece 3.
