@@ -34,13 +34,16 @@ Command                  Runs    Say (any of)                         What it le
                                                                       baked and tested
 /survey-a-mod            local   "survey this mod", "compat with"     the jar's real contents, and
                                                                       options
+/review-server-logs      local   "check the server logs", "review     new export folders reviewed once;
+                                 the PCH logs"                        bugs -> issues, wants -> To do
 (no command) look-it-up  either  "where is", "which class handles"    an answer that saves context
 (no command) FORMAT      either  "write a procedure"                  the template every file follows
 
 How they fit together
 ---------------------
   feature wanted -> write-intake-document -> intake/ treatment -> process-intake -> end-session
-  bug noticed    -> report-bug (cloud) or run-tests (yard) -> GitHub issue -> fix-bug -> end-session
+  bug noticed    -> report-bug (cloud), run-tests (yard) or review-server-logs (server)
+                    -> GitHub issue -> fix-bug -> end-session
   needs her eyes -> hand-over-a-test -> launch-game
   shipping       -> release (after end-session; process-intake triggers it from a Release: line)
 
@@ -64,5 +67,3 @@ yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next c
   layer.
 - measure-worldgen: run Structure.generate headlessly with a control, before claiming a
   worldgen change helped.
-- read-server-logs: turn a log bundle the owner hands over into issues. Today report-bug
-  covers this, one bug at a time.
