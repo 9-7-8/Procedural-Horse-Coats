@@ -1,0 +1,159 @@
+Feathering - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are mine, not
+asked; "UNVERIFIED" lines are facts this file has not proved and the building session must check
+first. Source of truth for what exists is wiki/model-parts.html (hoof feathering is on its Roadmap
+tab) and the unicorn horn and antler gene pages. This file is the handoff for ONE gene that grows
+feathering - long hair hanging from each fetlock, as on a Clydesdale or a Friesian. It sits beside
+"Head parts", "Body parts" and "Tusks gene" and follows the same pattern. It is retired (deleted, per
+START HERE step 3) when it ships and moves onto the gene page's Gameplay and Coding tabs.
+
+Scope
+=====
+The ask was "all the feet parts". Decided, from her choices: FEATHERING ONLY. Not in this file, left for later and
+re-askable: fetlock claws, cloven/horn hoof caps, fetlock spurs. Nothing here blocks them; the four per-leg anchors
+below are where they would hang.
+
+What already exists, so the building session does not redo it
+==============================================================
+Everything the head-parts treatment says about the existing machinery applies and is not repeated:
+AttachedPartLayer, PartKind / PartAnchor / PartShape / PartGenerators / PartNode / PartSheet, GrownParts.of as the one
+door, the "adding a part" recipe on model-parts.html's Coding tab, the cost-sorted variation rule (topology baked,
+proportions free, counts shown out of a baked maximum), and the deferred-submit trap in PartModel. Read that file's
+first section. What is specific to feet:
+- The legs are four separate model parts, children of the ROOT (siblings of body, not children of it), in HdHorseModel:
+  left_hind_leg, right_hind_leg, left_front_leg, right_front_leg. Each is one box (about 4 wide, 11 long, 4 deep, hung
+  from a pivot at about y=14) with its own non-mirrored texture patch. A part parented to a leg bone swings with the
+  leg for nothing, which is the same "inherits an already-animated bone" claim the horn proves for the head. Read the
+  exact numbers from HdHorseModel and HdBabyHorseModel; do not copy them from here.
+- The foal's legs share bone NAMES with the adult's and nothing else, so each leg anchor needs an adult offset and a
+  foal offset, like every other anchor in AttachedPartLayer.anchor.
+- Per-leg epigenome values already exist: EpiValue.overLegs() carries one number per leg, in CoatRegions.LEGS order
+  (left front, right front, left hind, right hind). Not used here (see "one setting" below) but available.
+- The coat's lower legs are the thing the feathering's colour comes from, and the coat knows exactly where they are:
+  common/coat/pattern/CoatRegions.paintLowerLeg and HorseSkinGeometry.bounds(skin, leg) / forEachTexel(skin, leg, ...)
+  already map "the lower part of leg X" onto texels of the coat sheet, game-free. Socks, stockings and every pattern
+  that reaches a leg are painted there.
+- The coat is generated on the CLIENT into a DynamicTexture by GeneticCoatTextureFactory (budgeted, LRU-cached by
+  CoatData.textureKey(); it builds a NativeImage). So the pixels are on the client, behind a texture that may not
+  exist yet on the first frames of a horse.
+- Grown parts already fade with the horse as a rider looks down (RiderFade), and a foal wears soft parts (feathering
+  is one) scaled with the foal. Nothing to build for either.
+- Horse shoes are planned to draw through this same layer at per-hoof anchors (Horse shoes.txt). Feathering anchors at
+  the FETLOCK, above the hoof, with its own anchors, so the two do not share an offset.
+
+Decided
+=======
+- ONE gene, horsegenetics.feathering, granting feathering on all four legs. Four legs, ONE setting: one set of numbers
+  on the allele copy drives all four legs, with a front-to-hind ratio so hind feathering can be shorter. Not separate
+  front and hind genes, and not a per-leg number.
+- The feathering's COLOUR is the colour of the LEG UNDERNEATH THE ANCHOR POINT. Not the mane colour, and no colour
+  gene. A horse with one white sock has feathering that is white on that leg and the coat colour on the others. This
+  is a different mechanism from the head and body parts (which use a horn-style colour gene), so it is written out
+  below rather than inherited.
+- Foals wear it (soft part), scaled with the foal.
+- The part does NOTHING. No stat, ability or hitbox. Say it plainly on the Gameplay tab.
+- No config key beyond the existing client parts.* switches.
+- Everything can stack with every other grown part (decided for the head parts).
+Not asked, my recommendation (change it if she says otherwise):
+- DOMINANT, one copy shows, no sex limit. She had no preference. Reasoning: breeds want it near-fixed and pin the gene in
+  their breed files (a later task), and a dominant allele means a draught cross shows it, which matches how the look
+  behaves in real draught crosses. Recessive is the alternative and changes only expressionOf and the founder table.
+
+How the feathering is built
+===========================
+Four new PartKinds, one per leg (not one kind drawn four times: a PartKind carries exactly one anchor):
+    FEATHER_FRONT_LEFT, FEATHER_FRONT_RIGHT, FEATHER_HIND_LEFT, FEATHER_HIND_RIGHT
+with four new anchors (FETLOCK_FRONT_LEFT and so on), each a case in AttachedPartLayer.anchor that walks the root and
+then the leg bone, and yields an adult and a foal offset. The root is walked first for every anchor (the HD adult
+carries a 1.1 scale on the root; skipping it makes a part 10% small and 2.5 units high). Never add a child to a leg
+in createHdBodyMesh for a part: that moves the mesh the HD coat UVs are baked against.
+- Shape (a starting proposal, tuned by eye in the dev yard): a fringe of thin hanging boxes around the lower leg,
+  starting at the fetlock and falling over the hoof. Styles (topology, baked): fringe (a back-and-sides fringe only),
+  skirt (a full ring of boxes around the leg) and heavy (a two-tier ring, longer). Each is a numbered set of boxes, so a
+  count can show k of N and the last grow in, like tines.
+- Epigenome on the allele copy, one setting for all four legs: length, density (boxes shown), droop (how far the hair
+  falls outward), and a front-to-hind ratio. A category for style.
+- Sheet: a hair grain, the HAIR region the head parts' beard and ruff also need. The sheet has room (five of sixteen
+  regions are painted today). If the head parts have shipped HAIR, reuse it; if not, this adds it, and which session
+  owns the region must be settled before either starts, or two regions appear.
+- It is a part with NO colour gene, no glow and no translucency: one opaque pass per leg.
+- Rigid in v1. Decided by the "no animation" brief and her earlier note, not asked: no counter-swing. The old plan
+  suggested a pure formula (feather.xRot = -0.3 * leg.xRot) so the hair trails the hoof instead of swinging like a rigid
+  sleeve; that is the same "polish, not v1" call the wings got. Leave it as a follow-up.
+
+Colour: how a leg's tint is found
+=================================
+This is the one genuinely new mechanism, and the one with a real unknown in it.
+- Where it lives: the sampler's TEXEL LIST is game-free and belongs in common/ (a small class, say LegPatches, beside
+  CoatRegions): for a Skin (adult or baby) and a leg, return the coat-sheet texels of a small band of that leg
+  directly under the feathering's anchor, using the same HorseSkinGeometry.bounds and forEachTexel the sock-painters
+  use, so it can be unit-tested with no game and cannot drift from the coat's own leg geometry. The AVERAGING of those
+  texels' colours happens on the client, which has the pixels.
+- The client reads the generated coat's pixels, averages the patch's opaque texels per leg, and passes that colour as the
+  feathering's base tint (the same arguments a horn's tint travels in). Cache the four averages keyed by the coat's
+  texture key, so it costs once per coat and not per frame; evict with the coat.
+- "Under the anchor point" is decided to mean the band of the leg just BELOW the fetlock where the hair hangs, not the
+  whole leg. Recommended, not asked: ONE tint per leg (the average of that band), no tip tint. Two-tone feathering
+  (the colour at the anchor fading to the colour at the hoof) is a possible later refinement and is not in v1.
+- UNVERIFIED, and the first thing to check: that the CPU-side NativeImage of a generated coat is still readable on the
+  client after upload. DynamicTexture normally holds its pixels, but GeneticCoatTextureFactory caches and may drop or
+  close the image. Read it. If the pixels are not kept, the fallback is to compute the leg's colour in common/ from the
+  coat pipeline (heavier) or to keep a tiny per-leg colour recorded at bake time next to the texture (a four-int
+  record in the same cache entry). Decide with the owner only if neither is cheap.
+- UNVERIFIED and second: the coat may not exist yet. A horse's coat is baked on a budget, so the first frames of a horse
+  can draw with no texture. Recommended: do NOT draw the feathering until the coat's four leg colours exist, rather
+  than draw it in a wrong colour and flip. Check what the horse itself draws meanwhile; if it draws a placeholder,
+  the feathering is simply absent for those frames.
+- Dilute, grey and patterned coats: the band's average is the colour a player sees on that leg, which is what was
+  asked for. A leg whose band straddles a sock's edge averages to a blend; that is acceptable and a Verification-tab note.
+- Emissive/glow coats: the average is of the base coat, not the glow. No feathering glow in this treatment.
+
+The gene
+========
+horsegenetics.feathering, alleles Fth (feathered) and n (wild type); one granting method (copy UnicornHornGene.hornFor
+and AntlersGene.racksFor) that returns the four AttachedParts for a genotype and epigenome, and one line in GrownParts.of.
+- A dominant expression (Fth/Fth and Fth/n both feathered) and a wild one. Founder frequency is a number to tune in a dev
+  yard, not here; start at a small share near the antlers'.
+- Copy the horn's/antlers' isNatural() and rarity. Priority: a magical-band code-order slot (the gene paints nothing),
+  UNVERIFIED which are free; read the Genes registry. UNVERIFIED which GeneFamily; reuse the horn's.
+- It is NOT natural to a breed until a breed pins it. Breeds that want it (the draught breeds: Clydesdale, Shire, Percheron,
+  Friesian, Gypsy Vanner, Dales, Fell and so on) pin it through the ordinary genes block of their breed file. That is a
+  SEPARATE task with its own spec (it moves breed files, bakeBreedFiles and the census); it is deliberately not in this
+  treatment, but the owner should expect to ask for it next.
+
+Cost, from the old plan
+=======================
+Four legs times about ten boxes is about forty extra boxes per feathered horse, and four draws because each leg has its own
+tint. The meshes are shared and bounded (kinds times styles times size buckets, so no eviction is needed). A draught herd
+is the case worth measuring; parts.enabled already switches every part off for a client that pays for it.
+
+Tests and checks (CLAUDE.md: no full suite; run by name)
+=========================================================
+- PartGeneratorTest: build every mesh of every feathering kind, style and size bucket, parents before children.
+- A LegPatches test (common/, pure): for the adult and the baby Skin and all four legs, the texel list is non-empty,
+  lies inside that leg's bounds, and is the band just under the anchor, not the hoof and not the thigh. Mirror check: left
+  and right legs return the mirrored texels the coat's own medial-face rule would.
+- A FeatheringGene test (copy UnicornHornGeneTest / AntlersGeneTest): dominant expression, founders, the epigenome defaults.
+- The coat goldens must NOT move (the gene paints nothing); the coat-bake golden gains a row, so regenerate it and check
+  only the NEW row appeared.
+- Play checks (the gene page's Verification tab, never seen in game): a horse with one white sock and feathering (that leg's
+  hair is white, the others the coat colour); a dun, a grey and a patterned horse; a tiny and a huge horse (the size gene
+  scales parts through the pose scale already on the stack, which the page records as a claim from reading); a foal; the
+  horse walking, galloping and rearing; two horses in one frame with different coats (the deferred-submit and tint-cache
+  check); a herd of draught horses for cost; and the first frames of a horse whose coat has not baked yet.
+
+After it ships (CLAUDE.md table)
+================================
+- Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
+  bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs, and commit genes.json, the icons, the new
+  gene page, timeline-of-genes.html, gene-census.html, marking-facts.json, unverified-genes.txt and the generated spans of
+  wiki/pages.js and index.html.
+- Anything in common/ (the genes and LegPatches): :web:bakeDesignerAssets then node wiki/tools/check-designer-boots.mjs,
+  and the designer / CustomHorseSpawnScreen twin (hard rule 5).
+- A new sheet region (HAIR, if this ships first): node neoforge-26.1.2/tools/bake-part-sheet.mjs, which writes part_sheet.png.
+- Wiki: the feathering gene page with Gameplay, Coding and Science tabs (check-gene-tabs.mjs); model-parts.html loses
+  "hoof feathering" from its Roadmap tab and gains it on Gameplay and Coding; then build-search-index.mjs, check-links.mjs,
+  bake-agent-text.mjs, sync-page-views.mjs if a tab moved, and bake-roadmap-index.mjs and bake-verification-index.mjs.
+- Size and order: one slice, one session. It is the first part whose colour comes from the coat; the sampler is the part to
+  get right and the part most likely to be reused by anything else that should match the horse.

@@ -1,0 +1,113 @@
+Realm breeding pause - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first.
+Source of truth for what exists is wiki/horse-realm.html (the realm) and the breeding
+pages (wiki/breeding.html, wiki/fertility.html). This file is retired (deleted,
+per START HERE step 3) when it ships, and moves onto those pages' Gameplay and
+Coding tabs.
+
+The ask, in one paragraph
+==========================
+In the horse realm, breeding should advance at normal speed, but only while the mare
+is actually loaded, which is to say while a player is near enough to have her in a
+loaded chunk. A mare nobody is near does not progress, and does not catch up when
+somebody arrives.
+
+What already exists, so the building session does not redo it
+==============================================================
+- common/repro/Pregnancy: "Every time is an absolute game tick, so a mare whose
+  chunk was unloaded for a week is exactly as far on as one that was watched the
+  whole time - nothing counts down." conceivedTick, dueTick, lossTick; due(now) is
+  now >= dueTick. That is the property this ask reverses for the realm only.
+- So today an unloaded realm mare is not frozen: her due tick passes while no one is
+  there, and she gives birth the moment her chunk loads. The realm is 1,600 blocks in
+  radius and a player loads only a dozen chunks of it (wiki/horse-realm.html), so most
+  of the field is unloaded most of the time, and most pregnancies would currently
+  finish off-screen.
+- server/ReproHandler is the thin game-side wrapper (breed, set, withPregnancy, the
+  late-pregnancy slowdown, weaning). The realm is a dimension (server/HorseRealm,
+  HorseRealm.REALM_LEVEL) with rules keyed to it in server/HorseRealmRules.
+- "Shared slow tick" in wiki/horse-care.html: one periodic tick that visits loaded
+  horses; the natural place to notice "this realm mare was last ticked a while ago".
+- UNVERIFIED: the realm applies no time change of its own today. "Normal speed" is
+  read as one loaded tick = one tick of progress, the same as the overworld. Confirm
+  nothing in HorseRealmRules scales or skips time before relying on that.
+
+Design
+======
+- Decided: "while a player is in there" means WHILE THE MARE IS LOADED, per mare,
+  not a realm-wide clock that runs whenever anybody is anywhere in the realm. A
+  mare in a chunk nobody has loaded does not progress even if a player is on the
+  other side of the realm.
+- Decided: the scope is THE WHOLE BREEDING CYCLE, not only gestation: pregnancy
+  (due and early-loss timers), heat, breeding cooldowns and foal growth/weaning all
+  follow loaded time for a horse in the realm.
+- Decided: it is CONFIGURABLE, a server option, DEFAULT ON. Off restores today's
+  plain game time exactly.
+- Decided: a paused pregnancy SAYS SO. A mare in the realm that is paused shows it
+  where the pregnancy is read (the info screen's pregnancy line), so it does not
+  look stuck: for example "paused while nobody is near".
+
+Mechanism (recommended; the owner has not chosen a mechanism)
+------------------------------------------------------------
+Do not change the stored absolute ticks into counters. Keep every timer an absolute
+game tick, and move them FORWARD by the time the horse spent unloaded:
+- Record when the horse was last seen ticking (the shared slow tick already visits
+  loaded horses; an attachment holding "last seen at game tick T").
+- When a realm horse loads or is next ticked, work out gap = now - lastSeen, and add
+  gap to every absolute-tick timer she carries (dueTick, lossTick, the heat and
+  cooldown stamps), then set lastSeen = now. Net effect: the unloaded time did not
+  happen to her.
+- Only do this for a horse that is IN the realm (HorseRealm.isRealm(level)). A
+  horse that leaves the realm pregnant keeps her shifted timers and from then on
+  runs on plain game time; a horse that enters pregnant starts being tracked on
+  arrival, with lastSeen = the moment she arrives so she does not get a free gap.
+- Why this rather than a counter: it leaves Pregnancy and every reader of dueTick
+  untouched (due(now) stays now >= dueTick), it works the same for a mare saved
+  mid-pregnancy under the old rules, and it needs no new clock.
+- Pregnancy is an immutable record (withPregnancy). Shifting means building a new
+  Pregnancy with moved ticks, in common/repro where a test can pin it down
+  (a pure function: shift(pregnancy, gap)), and the game module only stores it.
+  Keep the rule in common/, hard rule 1.
+
+UNVERIFIED - the building session checks first (each needs a call from the owner if false)
+===========================================================================================
+1. Which timers are absolute game ticks and which already only advance while the
+   horse ticks. Vanilla entity age and in-love counters only advance while loaded and
+   would already behave as wanted. The mod's own heat, cooldown and weaning stamps
+   (BreedingCooldownHandler, NaturalBreedingHandler, ReproHandler) are the ones that
+   need shifting. Inventory them all before writing the shift; one missed timer is a
+   mare that is paused for pregnancy but not for heat.
+2. Whether a horse can be loaded and ticked in a way that does not reach the shared
+   slow tick (a chunk loaded for a moment, a forced chunk, a ticket from the ender
+   whistle's call). A momentary load would otherwise count as "loaded time" for the
+   whole gap. Decide what counts as loaded: ticked for at least one slow-tick
+   interval is the recommendation.
+3. A horse that dies, is claimed, or leaves the realm while unloaded cannot be
+   shifted; the first load after the change does it, which is fine.
+4. Whether the info screen's pregnancy line can see "this mare is in the realm" on
+   the client. If not, add one flag to the synced record rather than a payload.
+
+Config
+======
+One server option under behaviour.*, default true, with the safe accessor beside it
+(copy leadsReturn()). Its comment must say plainly that off is today's behaviour and
+that on changes when realm foals are born.
+
+Tests and checks
+================
+- common/: a pure test for shift(pregnancy, gap): due and loss both move by the gap,
+  a gap of 0 is the identity, and the invariant dueTick > conceivedTick still holds.
+- A gametest: a pregnant realm mare, unload her, advance game time, load her, and
+  assert she is NOT due; the same with the option off IS due.
+- Play checks (Verification tab): put a pregnant mare through a portal, leave the
+  realm for a long while, come back and see she has barely progressed; stand near her
+  and watch her progress at normal speed; read the paused line while away.
+
+After it ships
+==============
+Per CLAUDE.md's table: anything in common/ means :web:bakeDesignerAssets then
+check-designer-boots.mjs; wiki prose on horse-realm, breeding and fertility
+(build-search-index.mjs, check-links.mjs, bake-agent-text.mjs). Move the plan onto
+the owning pages' Gameplay and Coding tabs and delete this file.

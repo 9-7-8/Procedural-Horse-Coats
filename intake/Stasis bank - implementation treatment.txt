@@ -1,0 +1,131 @@
+Stasis bank - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first.
+Three small pieces on the Horse Stasis Bank screen, shippable together or alone.
+Source of truth for what exists is wiki/horse-stasis.html (the bank). This file is
+retired (deleted, per START HERE step 3) as each piece ships and moves onto that
+page's Gameplay and Coding tabs.
+
+What already exists, so the building session does not redo it
+==============================================================
+- client/HorseStasisBankScreen (an AbstractContainerScreen over
+  menu/HorseStasisBankMenu): three tabs - Chambers (a chest of chamber items),
+  Browse (every stored horse as a row, filtered by a text box) and Supply (feed, water and drops).
+  Tabs are HorseStasisBankMenu.Tab; applyTab() switches them.
+- The Browse filter box is an EditBox plus a "▾" Button (savedSearchButton, 16 px,
+  taken out of the box's well) that opens SavedSearchPicker. The picker is shared
+  with the horse browser and reads the same saved list.
+- Browse rows: StasisBrowseRow (common/horse), one per chamber that holds a horse,
+  built from menu.stored(); filtered by StasisBrowseRow.filter(rows, query), which
+  runs HorseQuery over the rows whose tier is searchable().
+- StasisTier (common/horse): BASIC cannot be searched (searchable() is false);
+  INTERMEDIATE and above can. A Basic chamber still LISTS its horse by name - the
+  item's tooltip names it at every tier - but any typed query drops it, and
+  StasisBrowseRow.locked(rows) is the count the screen prints as "left out".
+- Menu verbs ride clickMenuButton(Player, int id): ids below HorseStasisBankBlockEntity.SLOTS
+  toggle stud, ids SLOTS..2*SLOTS-1 withdraw one chamber into the player's pack. The
+  menu's own comment explains why a menu-button int and not a payload of its own, and
+  that the server re-checks everything because a menu button is a packet.
+- "Empty" chamber: menu.stored() lists only chambers WITH a snapshot, so an empty
+  chamber (a chamber item in a bank slot with StasisChamberItem.snapshotOf(stack) == null)
+  appears on Chambers and nowhere on Browse.
+
+Piece 1 - the saved-searches arrow shows on the wrong tab (bug)
+================================================================
+What the owner sees: the "▾" saved-searches arrow is drawn on the bank's inventory
+(Chambers) screen, instead of only on the page that has the search bar (Browse).
+- Cause, from reading the code (UNVERIFIED in game): applyTab() sets filterBox.visible
+  and filterBox.active from "tab == BROWSE" and defocuses it, but never touches
+  savedSearchButton. The button is added once with addRenderableWidget in init and is
+  therefore drawn on every tab. The filter box hides; the arrow does not.
+- Fix (small): in applyTab(), set savedSearchButton.visible and .active to the same
+  "browsing" value. Also close an open saved-search menu when leaving Browse: the
+  picker (savedSearches.isOpen()) is otherwise left open over the Chambers slots and
+  eats clicks, because the click handler routes to it first. Guard the null the way
+  the filterBox check already does, since applyTab() is called before the button exists.
+- UNVERIFIED: whether the research shelf screen (client/ResearchShelfScreen) has the
+  same shape. It is the sibling the bank copied its tab rules from. Grep it for the
+  same button and fix it in the same change if so, and report which.
+- Test: none unit-testable. Verification tab: open the bank on Chambers, the arrow is
+  gone; switch to Browse, it is back and opens; switch away with the menu open, it closes.
+
+Piece 2 - Basic chambers can be searched by name, and only by name
+===================================================================
+What the owner sees: typing a horse's name in the Browse search finds it even when its
+chamber is Basic, so a horse in a Basic bottle is easy to pull out of the bank.
+- Decided: Basic chambers match on NAME ONLY. Nothing else about a Basic horse becomes
+  searchable - not breed, coat, genes, sex or any flag. The bank still cannot look
+  inside a Basic chamber; the name is already shown on the row and on the item.
+- Decided: only a PLAIN NAME QUERY reaches a Basic row. A query is plain when every
+  term is a bare word that is not one of HorseQuery.flags(), has no key (no ":", ">",
+  "<"), and is optionally negated with "-". Any query that uses a flag, a key or a
+  comparison keeps leaving Basic rows out and keeps the "left out" count, exactly as
+  today. A mixed query (a name plus "mare" or "gen>2") does NOT pull a Basic horse
+  in on the strength of its name.
+- Match rule for a plain query: every term is a case-insensitive substring of the
+  horse's name (the snapshot's horseName, which every row already carries), and
+  a negated term must not be. Same AND and same substring behaviour as HorseQuery's
+  bare word, minus the other fields it reads.
+- Where it lives: common/horse/StasisBrowseRow.filter, so it is game-free (hard
+  rule 1) and unit-testable. Decide "is this query plain" with HorseQuery's own
+  term parsing (HorseQuery.terms(query) is public) and flags() rather than writing a
+  second parser, so a new flag cannot silently become a "name".
+- StasisBrowseRow.locked() (the "left out" count) must follow: a plain name query
+  leaves out zero Basic rows, a mixed query leaves them all out. The text the screen
+  prints for it needs no change if it already reads locked().
+- Docs: wiki/horse-stasis.html says a Basic chamber is "storage only" and that nothing
+  but its name is shown. Update to say its name is searchable and nothing else is.
+- Tests: StasisBrowseRow unit tests - a plain name finds a Basic row; the same name
+  plus "mare" does not; a negated name excludes it; an Intermediate row is unaffected;
+  locked() agrees in each case. Extend the existing StasisBrowseTest (common/.../horse)
+  rather than adding a second test class.
+
+Piece 3 - eject all empty chambers
+===================================
+What the owner sees: a button on the bank screen that takes every empty stasis chamber
+out of the bank in one press.
+- Where: the Chambers tab, where the empties physically are. They do not appear on
+  Browse. (Recommended, not asked: put it on Chambers and not on Browse.)
+- Decided: ONE PRESS, no confirmation. Ejecting only moves items and loses nothing.
+  The button reads "Eject empties (N)" with the count, and is greyed out and
+  unclickable when N is 0.
+- Decided: empties go into the player's inventory, and whatever does not fit DROPS on
+  the ground at the bank. Nothing stays stuck and nothing is deleted.
+- What counts as empty: a chamber item in a chamber slot with no snapshot, of ANY
+  tier. A chamber holding a horse is never ejected. The drop and supply slots are not
+  chamber slots and are never touched.
+- Server rule: a new verb on clickMenuButton, with an id one past the existing two
+  ranges (2*SLOTS), so it needs no payload. The server re-checks that the player is
+  still using the menu, then walks the chamber container and moves each empty one. Move
+  items through the container's own methods (removeItem / setItem), not by mutating
+  stacks in place: the menu's own comment explains the bank's tick gate is recomputed
+  through the container, and a bank whose last horse left must stop ticking.
+- UNVERIFIED how the client counts empties for the label. The screen has menu.stored()
+  (occupied only) and the container's slots; counting "chamber item present and
+  snapshotOf == null" per frame is cheap only if snapshotOf does not decode the whole
+  tag. The screen's own comment says contents are decoded rarely, never per frame. Read
+  StasisChamberItem.snapshotOf and, if it is expensive, count off the same
+  contentSignature() rebuild that refreshRows() uses instead of per frame.
+- UNVERIFIED how to drop overflow at the bank from the menu: the block entity has a
+  position; an existing path for spilling a container's contents when the bank is
+  broken (a Containers.dropContents call or similar) is the thing to reuse.
+- Tests: a gametest - a bank holding two empties and one occupied chamber: pressing it
+  ejects exactly the two, the occupied one stays, a full inventory drops the overflow
+  at the bank, and a bank with no empties does nothing.
+- Lang: the button label and its disabled tooltip go in lang/en_us.json.
+
+Order and size
+==============
+Piece 1 is a few lines. Piece 2 is a common/ change plus one doc line. Piece 3 is a
+button, a menu verb and a gametest. Build in that order; one bullet per session is the
+rule, but these three share one screen and one test class, so one session is sensible
+if the owner says so.
+
+After each piece ships
+======================
+Per CLAUDE.md's table: a common/ change (piece 2) means :web:bakeDesignerAssets then
+check-designer-boots.mjs; wiki prose on horse-stasis.html (build-search-index.mjs,
+check-links.mjs, bake-agent-text.mjs). Piece 1 needs a Verification-tab check on that
+page (it was not seen in game). Move each shipped piece onto the page's Gameplay and
+Coding tabs and delete its section here.
