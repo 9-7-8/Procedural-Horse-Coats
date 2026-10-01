@@ -19,8 +19,8 @@ raven-fantasy-hd-free/   Icons by Clockwork Raven Studios. Use in a free mod is
 pixelated-patterns/      32x32 and 64x64 patterns by NormalMap_Games. The 64x64
                          half is ON DISK (125 files); the 32x32 zip is not. Licence
                          STILL UNKNOWN - the store page states none and neither zip
-                         carries one, so the images are NOT IN GIT and nothing may be
-                         copied out until the owner asks the author. Possibly the best
+                         carries one, so the images are NOT IN GIT. Usable all the
+                         same, per the owner's standing permission below. Possibly the best
                          fit for the mesh greyscale bases, at the mod's own pixel scale.
 internet-pattern-book/   331 Geocities background tiles archived by HYPERTELEX,
                          ON DISK since 2026-09-29. NOT IN GIT. The murkiest of the
@@ -34,6 +34,9 @@ internet-pattern-book/   331 Geocities background tiles archived by HYPERTELEX,
 
 The rule for using anything from here
 =====================================
+0. Permission is standing (owner, 2026-10-01): everything in this folder is here
+   to be used. Copy, crop, recolour or otherwise transform any of it, in any pack,
+   without asking first. What is still required is the paper trail below.
 1. Copy ONLY the specific files you need out of a pack into the module that
    uses them.
 2. Add each use to that pack's USAGE.txt in the same change - file, where it
