@@ -1,0 +1,147 @@
+Tusks gene - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are mine, not
+asked; "UNVERIFIED" lines are facts this file has not proved and the building session must check
+first. Source of truth for what exists is wiki/model-parts.html and the unicorn horn and antler
+gene pages. This file is the handoff for ONE gene whose alleles are three mouth-and-muzzle growths:
+boar tusks, sabre fangs and a narwhal horn. It sits beside "Head parts - implementation treatment.txt"
+and "Body parts - implementation treatment.txt" and follows the same pattern. It is retired (deleted,
+per START HERE step 3) as each slice ships and moves onto that gene's Gameplay and Coding tabs.
+
+The gene, in one paragraph
+==========================
+A single locus, horsegenetics.tusks, with one allele per form and a wild type:
+    Tsk  - boar tusks      (short, curved, rising from the lower jaw at each side)
+    Sab  - sabre fangs     (long, straight, blade-like canines hanging from the upper lip)
+    Nar  - narwhal horn    (one long spiral tusk, pointing straight forward from the front of the muzzle)
+    n    - wild type
+Token spellings are proposals; check them for a clash with every existing allele token before using them.
+
+What already exists, so the building session does not redo it
+==============================================================
+Everything the head-parts treatment says about the existing machinery applies and is not repeated:
+AttachedPartLayer, PartKind / PartAnchor / PartShape / PartGenerators / PartNode / PartSheet, GrownParts.of as
+the one door, the "adding a part" recipe on model-parts.html's Coding tab, the cost-sorted variation rule, and the
+deferred-submit trap in PartModel. Read that file's first section. What is specific here:
+- HornGenerator already builds "a tapering chain of boxes" with four styles (SMOOTH, LOOSE, SPIRAL, TIGHT). Its own
+  note says a straight tapered spiral is "the storybook horn and a narwhal tusk both", and that base width
+  grows with length but not proportionally, because a narwhal horn is thicker at the root than a nub and far more
+  slender for its length. So the narwhal horn is NOT a new generator: it is a horn kind with a longer length
+  ceiling and the SPIRAL / TIGHT styles, at a different anchor.
+- The boar tusks and the sabre fangs are the two parts that need a NEW generator (a tapering curved chain for the
+  tusk, a flat tapering blade for the fang). AntlerGenerator and HornGenerator are the two worked examples.
+- Dominant multi-allele genes already exist: AntlersGene (Ant, Antm, n) is the template for "any copy of a form
+  grows it". It reads values from the expressing copy.
+- The epigenome API reads per-copy values: GeneEpigenetics gives expressed() and copy(int slot). This matters
+  here, because two different forms on one horse each need THEIR OWN copy's numbers.
+- A foal grows no hard part (PartKind.showsOnFoal() false); the unicorn horn is the only hard part a foal wears.
+
+Decided
+=======
+- ONE gene, with a form per allele. Not three genes.
+- Dominant, and the forms COMBINE. One copy of any form grows that form. A horse with two DIFFERENT forms grows BOTH
+  (Tsk/Sab: boar tusks and sabre fangs; Sab/Nar: fangs and a narwhal horn; Tsk/Nar: tusks and a horn). Parts can
+  stack (decided for the head parts), so there is no suppression rule. Two copies of the SAME form grow that form once,
+  from one copy's numbers (below).
+- The plain "tusks" form is BOAR tusks: short, curved, rising from the lower jaw on each side. Walrus tusks are
+  not a form; they would overlap the sabre fangs.
+- The narwhal horn is CENTRED on the front of the muzzle, one horn pointing straight forward. Not offset to the left.
+  It does not sit on the forehead where the unicorn horn is, so the two can stack.
+- NO sex limit. Mares and stallions grow every form. (The antlers' Antm stallion-only allele has no counterpart
+  here; say so on the page so nobody assumes it.)
+- Foals wear none of the three (hard parts, like the antlers).
+- The part does NOTHING. No stat, ability or hitbox. Say it plainly on the Gameplay tab.
+- No config key beyond the existing client parts.* switches.
+Carried over from the head parts, NOT re-asked (Recommended, change if she says otherwise):
+- Colour is its own horn-style colour gene: horsegenetics.tusk_colour, codominant, the horn's allele set (white wild
+  type, the rainbow, pink, black, grey, and chaos), two different copies giving a two-tone part from base to tip,
+  hue and tone on each copy. ONE colour gene for the whole tusks gene, so every form on a horse is tinted by the same
+  gene (a horse with fangs and a horn has both ivory, or both red). White is the wild type, which reads as ivory.
+  Reuse the shared AbstractPartColourGene if the head or body parts have shipped it; if not, settle which session
+  owns it before this one starts, so two copies do not appear.
+- Everything can stack with every other grown part (horn, antlers, the head and body parts).
+
+How each form is built
+======================
+Five new PartKinds (the hard pairs are two kinds, one per side, not a negative scale):
+    TUSK_RIGHT, TUSK_LEFT      boar tusks, anchors JAW_RIGHT / JAW_LEFT
+    SABRE_RIGHT, SABRE_LEFT    sabre fangs, anchors LIP_RIGHT / LIP_LEFT
+    NARWHAL                    narwhal horn, anchor SNOUT
+Each kind carries its anchor and its default sheet region; foal gate false for all five.
+- JAW_*: the corner of the lower jaw at each side, level with the mouth line. Boar tusks curve UP and slightly
+  outward and back, past the upper lip.
+- LIP_*: the front of the upper lip, each side of centre. Sabre fangs hang DOWN and a little forward, long enough
+  to reach below the chin.
+- SNOUT: the centre of the front of the muzzle, pointing forward along the head's own axis.
+Geometry below is a starting proposal in tapered boxes; the owner's eyes in the dev yard decide the numbers, and every
+proportion is a pose-stack transform so tuning is cheap. All static, parented to the head bone.
+- Boar tusk: a tapering chain of three to four boxes, curving. Styles (topology, baked): short (a small upward curl),
+  long (a larger sweep) and hooked (curling back on itself near the tip). Epigenome: length, girth, curve.
+- Sabre fang: one flat tapering blade, with a slight forward lean, one or two segments. Styles: straight, curved-back
+  and serrated (a notched edge from a few extra small boxes). Epigenome: length, girth, lean.
+- Narwhal horn: HornGenerator's SPIRAL or TIGHT style at a longer length ceiling, pointing forward. Epigenome: length,
+  girth, twist (a style category), tilt. Its length ceiling is the thing to pick by eye: it must read as a long tusk
+  without the whole horse looking like a unicorn on its face.
+- Sheet: HORN and HORN_TIP for all three (ivory grain, existing, no new region).
+- Epigenome schema: one set of generic numbers on the gene, read by the form the copy carries: length, girth, curve
+  (a generic bend or lean), a style category, and a SEED for any variation (a serration pattern, a hook). A copy
+  carries every value whatever its allele, and only the ones its form uses are read, the way the antlers carry
+  asymmetry whether or not it is above zero. Founders roll them like the horn's.
+- Which copy drives which form: a homozygote (Sab/Sab) uses the first copy's numbers and grows the pair symmetrically
+  (a decision carried from the antlers: symmetric by default, no asymmetry knob). A mixed pair (Sab/Nar) grows the sabre
+  from the Sab copy's numbers and the narwhal horn from the Nar copy's. UNVERIFIED: that copy(slot) is stable and
+  canonical for a given allele, so a copy's numbers always follow its own allele and never swap with the other copy.
+  Read GeneEpigenetics and AllelePair's canonical order, and test it with a mixed pair both ways round.
+
+Expressions and founders
+========================
+Expressions (what the info screen says): wild; each single form (Tsk, Sab, Nar, from one or two copies); and the three
+combinations (Tsk+Sab, Tsk+Nar, Sab+Nar). Write each one as the player will read it. Two copies of the same form is the
+same expression as one copy; a form does not get stronger from a second copy. (UNVERIFIED how AllelePair.count and
+Expression naming handle "any copy of X" across three dominant alleles; AntlersGene.expressionOf is the pattern.)
+Founder frequencies: numbers to tune in a dev yard, not here. Recommended starting point: three dominant alleles each at
+a small share near the antlers' (a small fraction of a percent of horses showing each form), the narwhal horn the rarest
+of the three.
+Copy the horn's/antlers' isNatural() (false) and rarity (RARE). UNVERIFIED which GeneFamily; reuse the horn's.
+Priority: a magical-band code-order slot (a part gene paints nothing), kept beside its colour gene. UNVERIFIED which
+slots are free; read the Genes registry for the next free run.
+No breed is changed. A breed can pin the gene later through the ordinary genes block (a boar breed with tusks is an
+obvious later use).
+
+Slices (one bullet per session, each shippable alone)
+=====================================================
+  Slice A: the gene, its colour gene, the new SNOUT anchor and the narwhal horn, end to end. It is the cheapest form
+           (no new generator; the horn's), so it proves the gene, the multi-form expression, the per-copy numbers and
+           the colour gene once.
+  Slice B: the boar tusks and the sabre fangs together (the two new generators, the four new anchors JAW_* and LIP_*,
+           the mixed-pair behaviour made visible: fangs plus a horn on one horse).
+If the head parts' Slice A has shipped, this reuses the colour-gene base class; if not, see the ownership note above.
+
+Tests and checks (CLAUDE.md: no full suite; run by name)
+=========================================================
+- PartGeneratorTest: build every mesh of every new kind, style and size bucket, parents before children.
+- A TusksGene test (copy AntlersGeneTest and UnicornHornGeneTest): each form from one and from two copies, each mixed
+  pair grows both forms, wild grows none, founders at the stated shares, the epigenome defaults, and the check that a
+  mixed pair's numbers follow their own alleles whichever way round the pair is written.
+- A colour gene test: two different copies make a two-tone part, a chaos copy ignores hue and tone.
+- The coat goldens must NOT move (the gene paints nothing); the coat-bake golden gains rows, so regenerate it and check
+  only NEW rows appeared.
+- Play checks (the gene page's Verification tab, never seen in game): each form on a tiny and a huge horse (the size
+  gene scales parts through the pose scale already on the stack, which the page records as a claim from reading); a horse
+  with two forms; the horse grazing (the head lowers: does the narwhal horn clip the ground, do the fangs clip the jaw);
+  the head moving and the mouth opening, since the vanilla upper_mouth is a separate part and the lower jaw may animate
+  (UNVERIFIED: whether it does; anchor to the head bone and say which was used, so the tusks do not follow a jaw that
+  is not the one they grew from); a horn plus a narwhal horn on one head; and the tusks with a bridle or head armour.
+
+After each slice ships (CLAUDE.md table)
+========================================
+- Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
+  bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs, and commit genes.json, the icons,
+  the new gene pages, timeline-of-genes.html, gene-census.html, marking-facts.json, unverified-genes.txt and the
+  generated spans of wiki/pages.js and index.html.
+- Anything in common/: :web:bakeDesignerAssets then node wiki/tools/check-designer-boots.mjs, and the designer /
+  CustomHorseSpawnScreen twin (hard rule 5).
+- Wiki pages: the tusks gene page with Gameplay, Coding and Science tabs (check-gene-tabs.mjs), and a short colour gene
+  page like the horn colour page. Then build-search-index.mjs, check-links.mjs, bake-agent-text.mjs, and
+  sync-page-views.mjs if a tab moved. model-parts.html: tusks are on its Roadmap tab as a lower-priority item; move
+  them onto Gameplay and Coding as each slice ships, then re-run bake-roadmap-index.mjs and bake-verification-index.mjs.
