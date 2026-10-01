@@ -1,7 +1,7 @@
 Mythic breeds - gene audit
 
 An AUDIT, NOT A SPEC. Nothing here has been changed in the repo and no decision has been made for the owner. It
-maps four tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
+maps five tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
 parts and breeds), what is already scoped in intake/ but not built, and what is still unscoped. Read from the
 shipped gene classes and gene files, the wiki gene pages, the shipped breed files and every treatment in intake/.
 UNVERIFIED lines are things I could not confirm.
@@ -105,6 +105,14 @@ GAP, nothing anywhere:
 16. POISONOUS BREATH / DISEASE (Nuckelavee): partial. Blight kills growth; no gene poisons or sickens creatures near the horse. A small effects-block
     aura gene would cover it (the effects verbs are a contract, see making-a-gene.html), but it is not scoped.
 17. WILD JOURNEYS (Puca): optional. The same family as forced riding (3), as a gentler variant; until then it is flavour text.
+19. FIRE BREATH, "breathes destructive flame" (Ares's team: Aithon, Konabos, Phobos): GAP. Nothing in the mod sets targets alight. Fireproof makes the HORSE immune, Molten
+    Hooves is explicitly "light and particles only - nothing it runs over catches", and the Particle flames are cosmetic. The gene effect verbs (GeneAbility: Emitter, Combat,
+    OnHurt, Summon and others) have no ignite or projectile-fire verb. UNVERIFIED whether Combat or an Emitter could carry one; a new verb costs four or five files (the
+    contract is on wiki/making-a-gene.html#contracts). A cosmetic version (a flame-breath particle from the head, the Particle locus's head site) would work today and would
+    not hurt anything.
+20. ROOSTER FOREPARTS (Hippalektryon): GAP, the same family as the Hippocampus. A rooster front on a horse's hind half needs a way to HIDE the horse's head, neck and forelegs (gap 7)
+    and then to ADD a beaked head, a comb and wattles, a feathered chest and bird feet. The ruff (INTAKE) and the bird coat patterns (corvid, peafowl) give a feathered neck and
+    chest look; beak, comb and talons are unscoped parts (the talons would be the unscoped foot claws, gap 8). Out of reach without 7.
 18. A NATURAL DAPPLE GENE: now on the owner's to-do list (intake/To do.txt). Wanted by Balius.
 
 Breed by breed (public-domain sources only)
@@ -163,6 +171,24 @@ Status: READY (all genes exist, build the breed JSON), PARTIAL (the breed can sh
                   Pangare gene and the coat patterns), a flowing mane (mane_color). Missing: cloven hooves (8), an ox tail (2), and a mane SHAPE (9). "Auspicious appearance associated
                   with wise rulers" has no mechanic; Holy Ward (no hostile spawns nearby) is the nearest, and is a lore dressing, not a gap. Whether to ship a horse-shaped qilin at
                   all, or leave it out because the real creature is not a horse, is the owner's call.
+ FIFTH TABLE (Norse and Greek named horses; all public domain). Most rows carry almost no description, which is good news: nothing blocks a plain breed.
+ Sinir, Skeidbrimir, Gisl, Falhofnir  READY. "No individual power recorded" and no coat given. Plain fast horses with any coat pool. Two small hooks: Falhofnir's name may
+                  mean hair about the hooves, which is the Feathering treatment (INTAKE, and it is the table's "possible reading", not a fact); Gisl's name may mean a ray or beam, but
+                  the table says that does not establish a glow, so do not give it Suntouched or Light on that evidence.
+ Hofvarpnir ..... READY, and neat. "Travels through the air and over the sea", no wings specified: true flight (the flying gene, two copies) plus Waterborn (walks on the surface of
+                  water) is exactly that. No wings needed. His sire Hamskerpir and dam Gardrofa (the table gives no powers, and "fence-breaker" is only a name) are lineage lore: a cross label
+                  or founder note, the same question as Grani and Sleipnir.
+ Bloudughofi .... READY. "Bloody hoof": there is no hoof-COLOUR gene, but Molten Hooves in a red (MltC) pair leaves glowing red hoofprints, which is a fair reading. The crosses-fire idea
+                  is the table's own caution; Fireproof exists if wanted.
+ Aithon, Konabos, Phobos (Ares's team)  BLOCKED only on 19 (fire breath). Powerful chariot horses, speed 10 and "10+". With a cosmetic flame-breath they are ready now. Name caution:
+                  there is a second Aithon among the names for Helios's horses, so breed ids need a disambiguator.
+ Skylla, Sthenios (Poseidon's team)  READY. Sea-chariot horses: swimming, water breathing, Waterborn and the water patterns all exist. The table says do NOT give them a fish tail, so
+                  gaps 2 and 7 do not apply to them.
+ Podarkes ....... READY minus 13 (immortality). A light fast immortal horse; ships as an ordinary fast horse until immortality is decided. Distinct from Podargos (Diomedes's horse).
+ Hippalektryon .. BLOCKED on 20 (and 7, 8). A horse-rooster hybrid. Consider leaving it out, or a horse with a feathered ruff and bird coat as an approximation that is honest about being one.
+ Askhetos, Kygnos  READY. Racing horses of the Dioscuri line (Kyllaros's offspring), speed 10. Kygnos is white (and Cygnus suggests whiteness). Askhetos has no stated coat.
+ Bronte, Sterope, Aithops (Helios's team)  READY, and they join the Horses of Helios entry above: more names for the same fire-and-sun team. Ancient sources give different sets of names,
+                  so the team is a pool of names, not a fixed four.
  Nuckelavee ..... BLOCKED, a different class of problem: 14 (skinless coat, cheap), 15 (torso and leg fins, large), 16 (poison aura, small). It is a rideable
                   monster in name only; consider a non-rideable boss mob, or leave it out.
 
@@ -176,7 +202,7 @@ Out of scope for now: a talking or prophesying horse (Arion, Xanthus; the Narnia
 
 What this means for scoping
 ===========================
-Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Mares of Diomedes, Horses of Helios, Chollima (wingless). Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Partial
+Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Mares of Diomedes, Horses of Helios (with Bronte, Sterope, Aithops), Chollima (wingless), Hofvarpnir, Sinir, Skeidbrimir, Gisl, Falhofnir, Bloudughofi, Skylla, Sthenios, Askhetos, Kygnos. Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Partial
 (wings optional): Tulpar, Buraq, Qilin (a horse-bodied version). Mostly covered once the parts are built (INTAKE): Longma, Unicorn.
 One real blocker each: Pegasus (wings), Uchchaihshravas (seven heads), Sleipnir (eight legs), Hippocampus (hide the rear plus a fish tail), Kelpie and Each-uisge
 (forced riding), Nuckelavee (several).
@@ -186,17 +212,19 @@ In priority order, by how many breeds each unblocks:
   C. TAILS (Unicorn, Hippocampus, Qilin, a dragon blade). Small: a tail is a body-bone-adjacent part, like a spine row.
   D. IMMORTALITY (Arion, Balius, Xanthus): a design call first.
   E. A NATURAL DAPPLE GENE (Balius): on the to-do list.
-  F. THE BODY-STRUCTURE PROBLEMS (extra legs, extra heads, hide-a-bone, a human torso). Each unblocks exactly one breed and each is a different engineering
+  F. FIRE BREATH (Aithon, Konabos, Phobos). A new ability; a cosmetic version needs nothing.
+  G. THE BODY-STRUCTURE PROBLEMS (extra legs, extra heads, hide-a-bone, a human torso). Each unblocks exactly one breed and each is a different engineering
      problem; scope separately and only if the owner wants those breeds.
 
 Design questions this raises that are not gene gaps
 ===================================================
-- Named individuals versus breeds. Pegasus, Sleipnir, Uchchaihshravas, Arion, Balius, Xanthus, Gullfaxi, Svadilfari, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr and Buraq are single beings (Tulpar, Chollima, the Mares of Diomedes, the Horses of Helios and the Qilin are types or groups); the mod's unit is a
+- Named individuals versus breeds. Pegasus, Sleipnir, Uchchaihshravas, Arion, Balius, Xanthus, Gullfaxi, Svadilfari, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Buraq and nearly every row of the fifth table (Hofvarpnir, Skylla, Sthenios, Podarkes, Askhetos, Kygnos and the rest) are single beings (Tulpar, Chollima, the Mares of Diomedes, the Horses of Helios and the Qilin are types or groups); the mod's unit is a
   breed (a population). Options: a breed called after the creature, a unique spawn that exists once per world, or a breed plus a named-founder mechanism.
   Nothing in the repo decides this.
 - Which of these should be wild spawns, creative/spawn-egg only, or reachable only by breeding. The breed file's spawn list already supports all three; the
   tables do not say.
 - Whether "10+" speed means the stat cap or a stat past it. UNVERIFIED.
+- Naming: the fifth table has several beings who share a name with another (Aithon of Ares and Aithon of Helios, Podarkes and Podargos). Breed ids must be unique and readable.
 - Whether to scope Momentum Sprint (wiki/momentum-sprint.html, Roadmap tab only, no intake treatment). Chollima's whole identity depends on it, and the page also names Arion and Sleipnir.
 - A team of two or four to one chariot (Arvakr and Alsvidr, the Horses of Helios): a carts Roadmap item, not scoped.
 
