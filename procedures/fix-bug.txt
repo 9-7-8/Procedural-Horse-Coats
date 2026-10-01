@@ -14,6 +14,7 @@ owner. Every bug is a GitHub issue (CLAUDE.md hard rule 9). Bugs never go in int
 which holds new features only, and never on a Verification tab, which holds checks on
 things nobody has seen yet. The labels:
   bug            - every defect;
+  tuning         - a balance or tuning request; this procedure takes those too;
   found-in-yard  - found by a test-yard run;
   needs-owner    - waits on the owner's answer; every routine skips it until she
                    removes the label.
@@ -25,7 +26,8 @@ One run fixes ONE issue. The owner clears context and runs this again for the ne
 BEFORE YOU START
 ----------------
 1. `git pull --ff-only origin main`.
-2. `gh issue list --state open --label bug --search "-label:needs-owner" --limit 200`.
+2. `gh issue list --state open --search "label:bug,tuning -label:needs-owner" --limit 200`
+   (a comma in label: means either label).
    Testers do not always label their issues, so also scan the open issues with no
    label, and label any that are bugs.
 3. Run `node wiki/tools/check-roadmap-execution.mjs`.
@@ -119,9 +121,9 @@ STEPS
 7. End the session with end-session. The session log names the issue, the cause, the
    fix commit, the proof (and whether the issue is closed or waiting), and any new
    issues filed along the way.
-   Release by the release procedure, step 1. A crash, join-blocker, lost data or stuck
-   player on a released jar gets a patch release at once, without asking, because
-   players are on that jar. A smaller fix rides along until a bunch of them is ready.
+   Release by the release procedure, step 1. A fix, even a crash fix, rides along until
+   a bunch of fixes or a new feature is ready; then the patch release is cut without
+   asking (owner's rule: crash fixes batch too).
 
 DONE WHEN
 ---------

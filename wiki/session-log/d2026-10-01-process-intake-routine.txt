@@ -184,3 +184,18 @@ This is written in:
 - CLAUDE.md hard rule 10;
 - the numbering and saves notes on releases.html. The old 2026-09-10 rule is kept there
   as history.
+
+Then the owner settled what was still undecided, through the question tool:
+- Server chat: a new feature goes to To do.txt; a bug or a tuning request becomes a
+  GitHub issue. There is a new label, tuning (needs-owner when it is a balance call), and
+  issue #15 moved to it. fix-bug and run-tests now pick up bug and tuning issues together
+  (label:bug,tuning).
+- Crash fixes batch like any other fix. The only immediate release is the replacement
+  for a broken one.
+- The undead bundle decision moved onto the wiki now: undead-horses.html (whose
+  Verification tab held only this question, so the tab is gone and the page left the
+  index), decisions.html (now under Settled) and philosophy.html (the rule held).
+- The four fix-pass test classes that were never written are dropped from
+  roadmap-execution.
+- Test timings get recorded at the next release's full run, not by a run now.
+- Two more procedures: add-a-wiki-page and use-an-art-pack.

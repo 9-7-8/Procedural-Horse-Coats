@@ -1,0 +1,96 @@
+PROCEDURE  : Add a wiki page
+COMMAND    : /add-a-wiki-page
+SAY        : "add a wiki page", "write a page for", "new page", "this needs its own page"
+RUNS       : either (cloud can write and run the node checks)
+TAKES      : a subject with no page of its own: a system, an item, a plan
+LEAVES     : one page in wiki/, in the single page list, with the right tabs, a true
+             footer, and every index and check rebaked
+==============================================================================
+
+WHEN TO USE
+-----------
+- Whenever a subject needs a page of its own: a new system, an item, or a plan.
+- A plan whose subject has no page MEANS writing one (CLAUDE.md rule 9), with only a
+  Roadmap tab at first. The page grows the other tabs as the thing ships.
+  wiki/horse-gear.html and wiki/troughs.html are worked examples.
+- A GENE page is different: add-a-gene writes or generates it, and a bake registers it.
+- Never put a page's content into CLAUDE.md, which holds only standing rules.
+
+BEFORE YOU START
+----------------
+1. Check whether a page already owns the subject. Look up wiki/text/index.txt
+   (look-it-up). A section on an existing page is often right instead.
+2. Read one page of the same kind as a model: troughs.html for a plan,
+   item-<x>.html for an item, horse-care.html for a system.
+
+STEPS
+-----
+1. Write wiki/<slug>.html from the model page's skeleton. Keep its <head> scripts exactly
+   (pages.js, tabs.js, nav.js, search.js) and its <main class="content"><article
+   class="doc"> wrapper. Then:
+   - an eyebrow, <p class="eyebrow core|magical">, saying what it is ("Planned / not
+     built" for a plan);
+   - an <h1>, which is the page's name everywhere;
+   - a lede: one paragraph saying what the thing is, and whether it exists yet.
+
+2. Tabs, as <section class="tab-panel" data-tab="..."> inside article.doc, per
+   wiki/tabs.js:
+   - an item or a system page carries gameplay (the default, for a player who does not
+     want the model; health goes here as a sentence), coding, and science (design
+     rationale goes on science, not coding);
+   - verification: unseen behaviour, opening with ONE sentence in a
+     <div class="note verify-summary"> box;
+   - roadmap: what is planned, opening with ONE sentence in a
+     <div class="note roadmap-summary"> box;
+   - a plan-only page starts with the roadmap tab alone;
+   - a page with no tab panels at all is allowed for reference material, and is then
+     left alone by the tab tooling.
+   Never write an entry onto verification.html or roadmap.html. They are generated from
+   these tabs.
+
+3. The footer, outside the tabs:
+   <div class="page-foot"><div class="seealso">...links...</div> one-sentence blurb</div>
+   The See-also links and the blurb must stay true to the page's own tabs.
+   check-links.mjs fails a footer that promises work the page no longer has, or points
+   where the subject is not.
+
+4. Register it in the ONE page list: add an entry to the right SECTIONS group in
+   wiki/pages.js:
+       { href: "<slug>.html", text: "<the h1>", kind: "core"|"magical", views: [...] }
+   The sidebar and the landing page both read it, so add it nowhere else (hard rule 7).
+   Never edit inside the BEGIN/END generated spans of pages.js or index.html.
+   Then run `node wiki/tools/sync-page-views.mjs`, which writes views from the page's
+   actual tabs. Do not hand-maintain views.
+
+5. Link it in. Point to it from the pages that own neighbouring subjects, and from
+   CLAUDE.md's page map only if it is a top-level subject every session needs. An
+   orphan page is found by nobody.
+
+6. Bake and check, in order:
+     node wiki/tools/bake-verification-index.mjs   (if it has a verification tab)
+     node wiki/tools/bake-roadmap-index.mjs        (if it has a roadmap tab)
+     node wiki/tools/build-search-index.mjs
+     node wiki/tools/check-links.mjs --orphans
+     node wiki/tools/bake-agent-text.mjs
+   The two index bakes hard-fail on a tab with no summary box. check-roadmap-execution.mjs
+   fails until a new roadmap page has its row in roadmap-execution.html's coverage table,
+   so add the row.
+
+7. Commit and push straight away. The owner reads the live wiki.
+
+DONE WHEN
+---------
+The page is in pages.js with synced views, every bake and check above is green, at
+least one other page links to it, and it is pushed.
+
+NEVER
+-----
+- Never add a page anywhere but pages.js's SECTIONS (hard rule 7).
+- Never hand-write onto verification.html or roadmap.html (rule 9).
+- Never copy a page's content into CLAUDE.md or another page. Link to it instead.
+- Never leave a footer promising work its tabs no longer have.
+
+SEE ALSO
+--------
+add-a-gene (gene pages); look-it-up; rebake; wiki/tabs.js; wiki/pages.js; CLAUDE.md hard
+rules 7 and 9.

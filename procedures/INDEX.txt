@@ -42,14 +42,18 @@ Command                  Runs    Say (any of)                         What it le
                                                                       options
 /review-server-logs      local   "check the server logs", "review     new export folders reviewed once;
                                  the PCH logs"                        bugs -> issues, wants -> To do
+/add-a-wiki-page         either  "add a wiki page", "new page"        one page in pages.js, true tabs
+                                                                      and footer, indexes rebaked
+/use-an-art-pack         local   "use the art packs", "find art for"  art copied and transformed, with
+                                                                      USAGE.txt + notices written
 (no command) look-it-up  either  "where is", "which class handles"    an answer that saves context
 (no command) FORMAT      either  "write a procedure"                  the template every file follows
 
 How they fit together
 ---------------------
   feature wanted -> write-intake-document -> intake/ treatment -> process-intake -> end-session
-  bug noticed    -> report-bug (cloud), run-tests (yard) or review-server-logs (server)
-                    -> GitHub issue -> fix-bug -> end-session
+  bug or tuning  -> report-bug (cloud), run-tests (yard) or review-server-logs (server)
+                    -> GitHub issue (bug | tuning) -> fix-bug -> end-session
   needs her eyes -> hand-over-a-test -> launch-game
   any change     -> rebake -> test-tiers (lowest tier that proves it)
   shipping       -> release: offer -> owner decides -> the release set -> tag + jar + note
@@ -58,13 +62,10 @@ Routines that might become procedures next
 ------------------------------------------
 These are done often enough to repeat the same way, but nobody has written them up
 yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
-- add-a-wiki-page: hard rule 7 (pages.js), the three tabs, the footer, and the bakes.
 - close-a-check: move a Verification item to Coding with its evidence, delete its pen,
   and re-bake the indexes. It is step 2 of run-tests, often done alone.
 - whats-next: read the verification index, the open issues and intake/, and offer the
   owner 2-4 next pieces of work with a recommendation.
-- use-an-art-pack: copy from intake/potential-assets/ with the USAGE.txt and
-  THIRD_PARTY_NOTICES.md paper trail.
 - compat-test: build the synthetic mod and boot with it, to prove the modded-material
   layer.
 - measure-worldgen: run Structure.generate headlessly with a control, before claiming a

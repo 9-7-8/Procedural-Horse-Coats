@@ -47,8 +47,9 @@ STEPS
 
 2. Make sure it is a bug.
    - A new feature -> tell them it goes through write-intake-document, and stop.
-   - A design disagreement ("too hard", "I don't like how...") -> still file it, with
-     needs-owner.
+   - A tuning request or design disagreement ("too rare", "too hard", "I don't like
+     how...") -> file it with the tuning label instead of bug, plus needs-owner when it
+     is a balance call.
    - Working as intended -> say so, and quote the wiki page (in wiki/text/) that shows
      it is deliberate.
 
@@ -71,7 +72,8 @@ STEPS
    "suspected area: ...". Search the way look-it-up describes.
 
 5. Decide the labels and the urgency.
-   - bug: always.
+   - bug: every defect. tuning instead, for a balance or tuning request (numbers,
+     rates, how something feels). Never both.
    - needs-owner: add it when the fix needs her decision, because there is more than
      one reasonable fix, or a design, balance or philosophy question. When you add it,
      end the issue with 2-4 fix options, your recommendation first. An issue without

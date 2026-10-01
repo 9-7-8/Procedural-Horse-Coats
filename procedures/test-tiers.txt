@@ -71,6 +71,8 @@ STEPS
    - Never "just to be safe", never to regenerate a golden, never because the change
      "could" move it. Say in the summary which tests a full run would still need to
      check, and why.
+   - The slowest classes, measured on the last full run (the release procedure fills
+     this in): not measured yet.
    - Its full run has found that checks had drifted from the code, not mod bugs, so
      read a red test as "is the test still describing the code?" before reading it as a
      regression.

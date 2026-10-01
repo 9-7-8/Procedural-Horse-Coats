@@ -40,10 +40,10 @@ STEPS
 -----
 1. Decide whether a release is due. Cut one, without asking, when main holds:
    - A NEW FEATURE, finished, that a player will notice. One is enough; size is no bar.
-   - A BUNCH OF BUG FIXES. One fix is enough when it is a crash, a join-blocker, lost
-     data or a stuck player on a released jar: players are waiting on those, and they
-     have gone out within the hour of the report. A replacement for a broken release
-     goes at once too, and its note says "replaces <version>".
+   - A BUNCH OF BUG FIXES. Crash and stuck-player fixes batch like the rest (owner's
+     rule, 2026-10-01): they wait for a bunch or a feature. The one exception is a
+     replacement for a release that is itself broken. It goes at once, and its note says
+     "replaces <version>".
    Docs, intake planning, test-yard or debug-only work (debug tools are off in a real
    jar) and unfinished features are NOT a reason on their own. They ride along with the
    next release.
@@ -64,7 +64,9 @@ STEPS
    title she may want to lead with. Say in the summary what was cut, and why it was due.
 
 3. Run the RELEASE SET from test-tiers: every code test, cheapest first, and stop at the
-   first red. That means every tier-0 node check, the full :common:test suite,
+   first red. After the full :common:test run, record its slowest classes in test-tiers'
+   tier 3 (read common/build/test-results/test/*.xml), so tiers rest on measured times.
+   This needs updating only when the list changes. That means every tier-0 node check, the full :common:test suite,
    :neoforge-26.1.2:test, :neoforge-26.1.2:runGameTest, every headless browser check,
    and a server boot to "Done (" with the log grepped for
    'ERROR|Couldn.t parse|Invalid|missing'. A red result blocks the release until it is
