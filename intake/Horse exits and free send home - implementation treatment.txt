@@ -5,7 +5,7 @@ are facts this file has not proved and the building session must check first.
 Two pieces, shippable separately: (1) a new Exits tab on the H menu, (2) Send
 home becomes free by default and configurable. Source of truth for what exists is
 wiki/horse-browser.html (the H menu) and wiki/horse-care.html / wiki/item-tickets.html
-(Send home and tickets). This file is retired (deleted, per /process-intake step 7) as
+(Send home and tickets). This file is retired (deleted, per /process-intake step 8) as
 each piece ships and moves onto those pages' Gameplay and Coding tabs.
 
 What already exists, so the building session does not redo it

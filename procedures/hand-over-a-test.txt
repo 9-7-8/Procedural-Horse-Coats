@@ -1,0 +1,66 @@
+PROCEDURE  : Hand a test over to the owner
+COMMAND    : /hand-over-a-test
+SAY        : "what should I test", "give me something to test", "set up a test",
+             "update the test kit", "re-aim the kit"
+RUNS       : local (it edits the debug kit and launches the game)
+TAKES      : something built that only the owner's eyes or hands can check
+LEAVES     : a re-aimed test kit, a clean horse dimension, and a numbered list in chat
+==============================================================================
+
+WHEN TO USE
+-----------
+Whenever a session asks the owner to check something in the game by hand. She is the
+only person who can play, so her time in the game is the scarcest thing in the project.
+A kit full of finished tests spends it on work already done, and a vague ask ("go look
+at the yard") spends it guessing what was meant.
+If a pen can answer the question without her, build a pen instead (run-tests).
+
+BEFORE YOU START
+----------------
+Read the newest entries in wiki/verification.html, and the Verification tabs they link.
+
+STEPS
+-----
+1. Audit the test kit: DebugTestWorldHandler.BATCHES and giveBatch, in
+   neoforge-26.1.2/.../server/.
+   - Is every batch still relevant? Delete a batch whose checks are confirmed, and move
+     the rest up.
+   - Re-aim any slot whose item is already confirmed.
+   - Batch 1 is always the next thing to test, and the newest tests go there.
+
+2. Kit conventions:
+   - One hotbar per batch, at most nine slots. Batch 1 is given on login. `/testkit n`
+     swaps the hotbar for batch n, and `/testkit` lists the batches. Never fill the whole
+     inventory: a 36-slot kit was "SUPER overwhelming".
+   - Use preset eggs (PresetHorseSpawnEggItem.of plus a CUSTOM_NAME) for the exact
+     horses each test needs, plus its consumables and blocks, and give one chat-legend
+     line per slot.
+   - Taming needs a stick (right-click tames on the spot). Breeding needs golden
+     carrots. Any batch that asks her to tame or breed carries them, and both sexes
+     wherever it breeds.
+   - Files the kit cannot make (drop-in breeds or genes, breed-spawning.toml) are
+     prepared in the dev run's run/phc/.
+
+3. Audit the horse dimension. Is every extra structure or pen there still for a test that
+   is open? Remove the ones whose tests are finished.
+
+4. Rebuild and launch as launch-game describes. Never compile while she has the client
+   open.
+
+5. End the hand-over message with a numbered list in chat: every step in order, and
+   what a pass looks like for each. Visual checks go last.
+
+DONE WHEN
+---------
+The kit's batch 1 is the next test, the dimension holds nothing finished, the game is
+up, and the numbered list is in chat.
+
+NEVER
+-----
+- Never ask her to test something a pen or a unit test could answer.
+- Never hand over a kit that still holds confirmed tests.
+- Never say "go look at the yard" without the numbered steps.
+
+SEE ALSO
+--------
+run-tests; launch-game; wiki/horse-dimension.html (the corridor, the pens, the kit).

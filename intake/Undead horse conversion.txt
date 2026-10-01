@@ -690,7 +690,7 @@ that then have to be converted.
 
 10. Staging (one unit, one context window - /process-intake)
 ==============================================================
-Each stage is one session, ends with the CLAUDE.md "Ending a session" routine,
+Each stage is one session, ends with procedures/end-session.txt,
 and leaves the game working. Because conversion is ON by default (D2), stages
 1-4 must all be finished before any of them is released: the converter is
 merged last and released together with the genes and breeds it depends on. Until

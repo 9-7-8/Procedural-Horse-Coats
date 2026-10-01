@@ -6,7 +6,7 @@ first. Source of truth for what exists is wiki/model-parts.html and the antler p
 handoff for four new parts that grow on the horse's BODY: a back sail, a dorsal spine row,
 shoulder/hip plates and crystal growths. It sits beside "Head parts - implementation treatment.txt"
 (the head parts, which have their own slices) and follows the same pattern. It is retired (deleted, per
-/process-intake step 7) as each slice ships and moves onto those pages' Gameplay and Coding tabs.
+/process-intake step 8) as each slice ships and moves onto those pages' Gameplay and Coding tabs.
 
 In scope, and what is not
 =========================

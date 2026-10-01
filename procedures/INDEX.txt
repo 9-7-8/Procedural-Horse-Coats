@@ -1,0 +1,68 @@
+PROCEDURES - INDEX
+==================
+
+Every repeatable routine in this project is a plain-text file in this folder. The format
+is in FORMAT.txt. Each file is also a slash command: .claude/skills/<slug>/SKILL.md is a
+thin wrapper that says "read procedures/<slug>.txt and follow it", and holds no steps of
+its own. /show-procedures prints this list.
+
+When the owner says one of the SAY words below, read that file in full and follow it.
+Do not work from memory of what the routine says: the file is the only copy.
+
+Command                  Runs    Say (any of)                         What it leaves
+-----------------------  ------  -----------------------------------  ---------------------------------
+/end-session             local   "end the session", "wrap up",        code + docs pushed as two commits,
+                                 "we're done for today"               nothing left running
+/process-intake          local   "process intake", "pick something    ONE intake feature built and
+                                 from intake", "next intake item"     retired, session ended
+/write-intake-document   either  "scope a feature", "write an intake  one treatment in intake/, every
+                                 document", "add a feature request"   design call asked
+/fix-bug                 local   "fix a bug", "fix #N",               ONE GitHub issue fixed and
+                                 "work the issues"                    proven, session ended
+/report-bug              cloud   "report a bug", "file a bug",        one well-formed GitHub issue per
+                                 "this is broken"                     bug; no code changed
+/run-tests               local   "run tests", "run the yard"          passes closed, pens built, bugs
+                                                                      filed, a report
+/hand-over-a-test        local   "what should I test", "update the    a re-aimed kit and a numbered
+                                 test kit"                            list in chat
+/launch-game             local   "launch the game", "restart",        exactly one game running,
+                                 "launch into the yard",              confirmed from a fresh log
+                                 "boot a server"
+/release                 local   "ship a release", "cut a release",   tag + GitHub release with the jar
+                                 "new version"                        + the wiki note
+/design-a-breed          either  "make a breed", "new breed"          a breed designed WITH the owner,
+                                                                      baked and tested
+/survey-a-mod            local   "survey this mod", "compat with"     the jar's real contents, and
+                                                                      options
+(no command) look-it-up  either  "where is", "which class handles"    an answer that saves context
+(no command) FORMAT      either  "write a procedure"                  the template every file follows
+
+How they fit together
+---------------------
+  feature wanted -> write-intake-document -> intake/ treatment -> process-intake -> end-session
+  bug noticed    -> report-bug (cloud) or run-tests (yard) -> GitHub issue -> fix-bug -> end-session
+  needs her eyes -> hand-over-a-test -> launch-game
+  shipping       -> release (after end-session; process-intake triggers it from a Release: line)
+
+Routines that might become procedures next
+------------------------------------------
+These are done often enough to repeat the same way, but nobody has written them up
+yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
+- add-a-gene: wiki/making-a-gene.html is the long reference. A procedure would be the
+  short checklist: the shape, the four contract lists, the goldens, the regenerate rows,
+  and the gene page with its three tabs.
+- rebake: walk CLAUDE.md's regenerate table against a diff. It is step 1 of
+  end-session, and often wanted on its own.
+- add-a-wiki-page: hard rule 7 (pages.js), the three tabs, the footer, and the bakes.
+- close-a-check: move a Verification item to Coding with its evidence, delete its pen,
+  and re-bake the indexes. It is step 2 of run-tests, often done alone.
+- whats-next: read the verification index, the open issues and intake/, and offer the
+  owner 2-4 next pieces of work with a recommendation.
+- use-an-art-pack: copy from intake/potential-assets/ with the USAGE.txt and
+  THIRD_PARTY_NOTICES.md paper trail.
+- compat-test: build the synthetic mod and boot with it, to prove the modded-material
+  layer.
+- measure-worldgen: run Structure.generate headlessly with a control, before claiming a
+  worldgen change helped.
+- read-server-logs: turn a log bundle the owner hands over into issues. Today report-bug
+  covers this, one bug at a time.

@@ -1,0 +1,120 @@
+PROCEDURE  : Run tests (the self-piloted yard loop)
+COMMAND    : /run-tests
+SAY        : "run tests", "run the yard", "test run", "check the yard"
+RUNS       : local (it launches the game)
+TAKES      : the test yard in the horse dimension, open Verification checks, open issues
+LEAVES     : passed checks closed, new pens built, bugs filed as issues, small bugs fixed,
+             the game running if pens are still timing, a report
+==============================================================================
+
+WHEN TO USE
+-----------
+When the owner says "run tests": run the whole verification loop, start to finish, with
+no more input from her. She is the only person who can play the game, so the yard
+exists to test without her. Its pens start themselves, run on a clock, and log their
+own verdicts.
+For one bug taken on deliberately, use fix-bug instead. To ask HER to test something by
+hand, use hand-over-a-test.
+
+BEFORE YOU START
+----------------
+1. `git pull`.
+2. Read the last run before anything else: neoforge-26.1.2/run/logs/latest.log, plus
+   the rolled <date>-1.log.gz if it ran past midnight (check `head -1 latest.log`: if it
+   starts at 00:00, read both). Grep for "[trace] test yard", "CLOCKWORK", "[watch]",
+   WARN and ERROR.
+
+STEPS
+-----
+1. Survey.
+   a. Read wiki/verification.html (generated) and the Verification tabs it points to.
+   b. Read every open issue from anyone, testers included, except those waiting on the
+      owner: `gh issue list --state open --search "-label:needs-owner" --limit 200`.
+   c. For each issue and check, decide whether a pen, a test or a small fix can settle
+      it in this run, and fold those into steps 3, 4 and 7.
+   d. Rank what can be wrong without anyone seeing it first, and visual checks last.
+
+2. Close what passed.
+   A yard PASS or a clockwork PASS closes the check it answers (owner's rule).
+   a. Move the check off the page's Verification tab onto its Coding tab, with the date
+      and the log line.
+   b. Delete the pen.
+   c. If the PASS proves a fix, close that issue too, with a comment quoting the PASS
+      line and naming the fix commit.
+   Judge each pen by its OWN question, written in its method's comment block, and not
+   by the gene's Verified flag: a gene can be verified while a question about it is
+   still open. INCONCLUSIVE and silent pens stay open. A night with no PASS line is
+   evidence to record, not a closure.
+
+3. Build new pens for open checks and issues a pen can answer unattended.
+   A pen must start itself, run on a clock, and log its own PASS or FAIL (see the
+   DebugTestYard javadoc, DebugWorldWatch, and DebugYardClockwork for anything that needs
+   hands). A check that needs the owner's eyes or hands cannot be a pen: leave it where
+   it is and list it in the report.
+
+4. Re-aim the debug kit if what she would test by hand has changed (hand-over-a-test,
+   "the kit").
+
+5. Build and launch.
+   Run the targeted --tests and `:neoforge-26.1.2:build`. Then launch into the yard
+   detached, as launch-game describes, and confirm "all-day pens built" in a log
+   newer than the launch. "Run tests" counts as permission to launch. If she is in a
+   world, ask before closing it; the title screen may be closed without asking.
+
+6. Every bug found becomes a GitHub issue:
+   `gh issue create --label bug --label found-in-yard`.
+   The repository is public, so write plainly:
+   - what failed;
+   - the log evidence (exact lines, with the date);
+   - the suspected code (file:line);
+   - the owning wiki page.
+   Search the existing issues first, and comment on a match rather than opening a
+   duplicate. Then sort the bug:
+   - SMALL (cause clear, fix obvious and local, no design / philosophy / save-format /
+     balance call): open the issue anyway, for the audit trail, then fix it.
+     a. Reference #N in the commit.
+     b. Add a pen or test that proves the fix, then rebuild and relaunch under step 5.
+     c. Leave the issue open until a PASS proves the fix. Close it at once only when a
+        unit test proves it and no runtime question remains.
+     d. A fix only her eyes can confirm stays open for her.
+   - LARGE (needs her in any way): list the fix options in the issue, recommendation
+     first, and add needs-owner. That label takes the issue out of every later run's
+     survey, so never leave it off. When she has answered, remove the label and the
+     next run picks the issue up.
+   Testers' issues (no found-in-yard) follow the same split. Close a fixed one on
+   proof, with the evidence and the commit.
+
+7. Regenerate and push.
+   Run the bakes from CLAUDE.md's table, at minimum:
+   - bake-verification-index.mjs
+   - bake-roadmap-index.mjs
+   - build-search-index.mjs
+   - check-links.mjs
+   - bake-agent-text.mjs
+   Commit and push. This is not end-session: leave the game running if pens are still
+   timing.
+
+8. Report in chat:
+   - what closed, with its evidence;
+   - the pens added and removed;
+   - the issues opened and closed, as links;
+   - what is still running, and when it should answer;
+   - a short numbered list of what only she can check, with visual checks last.
+
+DONE WHEN
+---------
+Every PASS has closed its check and pen, every bug found has an issue, the small fixes
+are pushed with their proof pending or in hand, and the report is given.
+
+NEVER
+-----
+- Never poll a long pen with sleep. Say when it should answer.
+- Never close a check on an INCONCLUSIVE or silent pen.
+- Never leave needs-owner off a bug that needs her.
+- Never put a bug on a Verification tab or in intake/ (hard rule 9).
+- Never launch a hidden, unfocused client without pauseOnLostFocus:false (launch-game).
+
+SEE ALSO
+--------
+launch-game; hand-over-a-test; fix-bug; report-bug; end-session; wiki/horse-dimension.html
+(the yard); CLAUDE.md hard rule 9.

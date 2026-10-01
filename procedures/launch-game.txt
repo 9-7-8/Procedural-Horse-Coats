@@ -1,0 +1,126 @@
+PROCEDURE  : Launch, restart or close the game
+COMMAND    : /launch-game
+SAY        : "launch the game", "launch into the yard", "restart the game", "relaunch",
+             "start the client", "boot a server", "close the game"
+RUNS       : local only
+TAKES      : a built tree, and knowledge of whether the owner is playing
+LEAVES     : exactly one client (or server) running, confirmed from a fresh log
+==============================================================================
+
+WHEN TO USE
+-----------
+Any time a session starts, stops or rebuilds under the dev client or server. Every
+step here exists because getting it wrong once cost the owner a play session, a night
+of yard data, or a crash she reported as a bug.
+
+BEFORE YOU START
+----------------
+Find out whether a game is running, and whether the owner is in a world.
+- Running clients (match on fml.modFolders; nothing narrower works, because the dev
+  client is started by FML, not by a class with "Minecraft" in its name):
+    Get-CimInstance Win32_Process -Filter "Name='java.exe' or Name='javaw.exe'" |
+      Where-Object { $_.CommandLine -match 'fml.modFolders' }
+  Do not classify by exclusion ("anything that is not a GradleDaemon"). A healthy
+  runClient has a second JVM, the gradlew wrapper, and killing it kills the launcher.
+- In a world or at the title screen? Read neoforge-26.1.2/run/logs/latest.log.
+  - IN A WORLD: the last "Starting integrated minecraft server", "logged in with entity
+    id", "[trace] dimension" or "[watch] ==== census" line is newer than the last
+    "Stopping singleplayer server".
+  - AT THE TITLE SCREEN: no server started this launch, or the last such line is
+    "Stopping singleplayer server" / "Saving worlds", followed only by client noise.
+  - If it is ambiguous, treat it as in a world.
+
+STEPS
+-----
+1. Decide whether you may close what is running.
+   - Owner in a world -> NOT without asking, in her most recent message. Build the
+     fix, say it is ready, offer the restart, and wait. An earlier "restart it" is not
+     standing permission. She is the only tester; closing the game under her costs her
+     the thread of whatever she was in the middle of.
+   - Title screen -> you may close and restart without asking (owner's rule).
+   - "Run tests" counts as permission to launch.
+   - When the owner has explicitly granted unattended-restart permission for a stretch
+     (the local memory records the terms), small, clear fixes may restart unattended. Anything large, unclear, or near the philosophy waits
+     for morning. Leave a written account of every restart.
+   - A client you did not launch -> ask before closing it.
+
+2. Before closing anything, read the log through.
+   The next launch overwrites latest.log, so closing the game is the moment that
+   session's evidence stops existing. Check at least:
+   - the last census block;
+   - the [watch] event kinds and counts;
+   - every death, with its damage source;
+   - every WARN and ERROR.
+   Say what it changed about your understanding, including anything that contradicts
+   what you told her before.
+
+3. Do not build under a running client.
+   A Gradle build replaces common.jar in place. The running game then throws
+   ClassNotFoundException for a class that is right there, and the crash looks exactly
+   like a real defect. If a crash report names one of this mod's own classes, compare
+   the jar's mtime with the crash time first: a newer jar is the whole answer.
+   To type-check one file without building, take the classpath off the live process
+   (its -cp, from the fml.modFolders command line) and compile into the scratchpad:
+     javac -d <scratchpad> -cp "<that classpath>" path/to/OneFile.java
+
+4. Close every client.
+   Kill every fml.modFolders process, not just the one you think is there. Two clients
+   share run/ and interleave latest.log until it is useless. TaskStop on a runClient task
+   is not enough on its own: re-check the processes afterwards.
+
+5. Free memory, then launch DETACHED, never as a harness background task.
+   The harness kills background tasks when free memory dips, which happens during world
+   creation, and the game dies with no crash report. Run `./gradlew --stop` first, then,
+   in PowerShell, from the repository root:
+     Start-Process -FilePath "$repo\gradlew.bat" `
+       -ArgumentList ":neoforge-26.1.2:runClient","--console=plain" `
+       -WorkingDirectory $repo -WindowStyle Minimized `
+       -RedirectStandardOutput "$env:TEMP\phc-runclient.log" `
+       -RedirectStandardError  "$env:TEMP\phc-runclient.log.err"
+   - Into the yard with no clicks: use the task :neoforge-26.1.2:runClientTestWorld. It
+     creates the test world from the title screen and sends the player into the horse
+     dimension about three seconds after login.
+   - Never `Start-Process cmd.exe /c "gradlew.bat ..."`: that launches nothing.
+   - The owner's own fallback: `.\gradlew :neoforge-26.1.2:runClient` in PowerShell.
+
+6. Unattended runs: set pauseOnLostFocus:false in neoforge-26.1.2/run/options.txt
+   first. An unfocused client otherwise pauses itself ("Saving and pausing game..."),
+   logs nothing, and looks exactly like a healthy idle run. Watch the log's line count
+   grow. If it has not grown in two minutes, the run is dead.
+
+7. Confirm it really started, from a log NEWER than the launch (the old one still says
+   "CLIENT in DEV"):
+   - a fml.modFolders process within a minute;
+   - the yard writes "[trace] test yard | all-day pens built".
+   Say it launched only after that.
+
+8. A server boot, for anything that runs at mod load (config specs, registries, the mod
+   constructor, drop-in folders):
+   a. Run `./gradlew :neoforge-26.1.2:runServer` in the background, after checking that
+      no client holds the run directory. A DirectoryLock IOException means the owner's
+      game is open; it does not mean a bad registration.
+   b. Poll the log for "Done (" or "BUILD FAILED", then kill the --nogui java process.
+   c. Reaching "Done (" is not a clean boot. Also grep the whole log for
+      'ERROR|Couldn.t parse|Invalid|missing', and triage each hit as ours or another
+      mod's. Datapack failures are logged once and then the game runs without that
+      content.
+   d. Delete any config file the boot generated, so the owner's next session starts from
+      defaults.
+
+DONE WHEN
+---------
+Exactly one game process is running (or none, if you were closing). Its start is
+confirmed from a fresh log. The old log was read before it was overwritten.
+
+NEVER
+-----
+- Never close a client the owner is playing in without her say-so in her latest message.
+- Never launch a second client on top of a first.
+- Never run runClient as a harness background task.
+- Never claim a launch without seeing the process and a fresh log line.
+- Never touch the owner's live server. It is not a dev run.
+
+SEE ALSO
+--------
+run-tests; hand-over-a-test; release (the server boot before tagging); end-session
+(step 8, killing what you started).

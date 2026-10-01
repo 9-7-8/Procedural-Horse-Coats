@@ -1,22 +1,36 @@
-How to make an intake document
+PROCEDURE  : Write an intake document
+COMMAND    : /write-intake-document
+SAY        : "write an intake document", "scope a feature", "add a feature request",
+             "make a treatment", "intake this"
+RUNS       : either (it only reads code and writes one file in intake/)
+TAKES      : a new feature the owner wants, in her words
+LEAVES     : one implementation treatment in intake/, every design call settled or
+             marked Open, ready for process-intake
+==============================================================================
 
-Who this is for
-===============
-Anyone adding a new feature request to intake/. You can be a person working with an AI
-session, or the AI session itself. The result is an IMPLEMENTATION TREATMENT: one .txt file
-in intake/ that a later session (run with /process-intake) can build from without asking
-anything the treatment should already have answered.
+WHEN TO USE
+-----------
+Anyone adding a new feature request to intake/ follows this: a person working with an
+AI session, or the AI session itself. The result is an IMPLEMENTATION TREATMENT, one
+.txt file in intake/ that process-intake can build from without asking anything the
+treatment should already have answered.
+Intake is for NEW FEATURES ONLY. A bug is a GitHub issue: use report-bug.
 
-Intake is for NEW FEATURES ONLY. Anything else does not go in this folder.
+The bar: a treatment is finished when the building session needs the owner for
+NOTHING except what is marked Open, and every Open line truly could not be settled
+now. The antlers, the breed climate rule and the Chaos allele each shipped in one
+session because their treatments had already made every call.
 
-The bar: a treatment is finished when the building session needs the owner for NOTHING
-except what is marked Open, and every Open line is something that truly could not be
-settled now. The antlers, the breed climate rule and the Chaos allele all shipped in
-one session each because their treatments had already made every call.
+BEFORE YOU START
+----------------
+Scoping touches intake/ and nothing else: no code, no wiki, no assets. Reading the
+code is required; changing it is not allowed. Read wiki/text/philosophy.txt and
+wiki/text/decisions.txt first.
 
-Scoping touches intake/ and nothing else. No code, no wiki, no assets. Reading the
-code is required; changing it is not allowed.
-
+STEPS
+-----
+Work through Parts 1 to 5 in order. Part 1 holds for the whole session. Then run the
+self-check under DONE WHEN.
 
 PART 1 - INSTRUCTIONS FOR THE AI SESSION DOING THE SCOPING
 ==========================================================
@@ -108,7 +122,7 @@ Header paragraph (copy this shape):
     are the scoping session's, not asked; "Open" lines are still to be settled, by
     whom is said on the line; "UNVERIFIED" lines are facts this file has not proved
     and the building session must check first. Source of truth for what exists is
-    <wiki page(s)>. This file is retired (deleted, per /process-intake step 7) as each piece
+    <wiki page(s)>. This file is retired (deleted, per /process-intake step 8) as each piece
     ships and moves onto <wiki page(s)>'s Gameplay and Coding tabs.
     Release: <own version | rides the next release | owner bumps the middle number>.
 
@@ -307,8 +321,9 @@ Then write down the three most likely ways the feature goes wrong for a real pla
 Put them in the treatment as Decided handling, Open questions or play checks.
 
 
-PART 6 - SELF-CHECK BEFORE SAVING
-=================================
+DONE WHEN
+---------
+The treatment is committed and pushed, and every box below is ticked:
 [ ] The file name ends "- implementation treatment.txt". The header names the source-of-
     truth pages and has a Release line.
 [ ] The owner's request is quoted.
@@ -322,3 +337,17 @@ PART 6 - SELF-CHECK BEFORE SAVING
 [ ] Order and size are written, including what this waits on and what it unblocks.
 [ ] No implementation code is pasted in.
 [ ] Only intake/ changed, apart from the session log entry.
+
+NEVER
+-----
+- Never mark a guess "Decided". If the owner was not asked, the line is
+  "Recommended"; if neither of you can decide yet, it is "Open".
+- Never write code, wiki or asset changes while scoping.
+- Never put a bug in intake/.
+- Never design a breed without the owner (design-a-breed).
+- Never paste implementation code into a treatment. It is stale before it is used.
+
+SEE ALSO
+--------
+process-intake (builds what this writes); report-bug; design-a-breed; look-it-up;
+release (the Release: line); wiki/philosophy.html; wiki/decisions.html.

@@ -101,3 +101,26 @@ GitHub MCP tools. It never fixes, commits or pushes.
 Found on the way: the routing table on wiki/roadmap-execution.html still sends "built and
 wrong" to Known gaps. Since rule 9's amendment, that row should say GitHub issues. Left
 for the owner, because check-roadmap-execution.mjs reads that page.
+
+Then roadmap-execution.html was brought up to date, after an Explore audit against the code:
+- routing sends a bug to a GitHub issue and a feature to an intake treatment;
+- the stale gap-routing list is gone;
+- the six fix stages and the slices now say what is left: the record-by-UUID request
+  and registry, the H-menu row action, equip-all, and the info screen's tab strip;
+- the part-layer gate is marked partly settled, and the undead gate settled in intake;
+- thirteen coverage rows were corrected.
+
+And then procedures/. Every routine is now one plain-text file in procedures/, reachable
+from a cloud clone, in one format (FORMAT.txt), listed in INDEX.txt, and registered as a
+slash command by a thin .claude/skills wrapper that only points at the file.
+- Eleven procedures: end-session (moved out of CLAUDE.md, which fell from 300 lines to
+  263), process-intake, write-intake-document, fix-bug, report-bug, run-tests,
+  hand-over-a-test, launch-game, release, design-a-breed and survey-a-mod.
+- Two reference files without a command: look-it-up and FORMAT.
+- /show-procedures lists them all and checks the folder against the index.
+- Most of them were memories until today. Their content moved into the repo, and the
+  memories are now one-line pointers, with a keyword map (procedures-keywords).
+- What stays local is private or machine-specific: the overnight restart terms, the live
+  server, the safe modpack, the routine's trigger id, the testers, and the machine.
+- intake/ lost its two guide files to procedures/ and gained a short README.txt.
+INDEX.txt lists nine routines that could become procedures next.

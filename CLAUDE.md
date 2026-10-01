@@ -43,7 +43,8 @@ accessor (`Genes.codeOrder().size()`), never quote its value.
 ## Where everything is written
 The only markdown files in the repo are `README.md`, this one, and
 `THIRD_PARTY_NOTICES.md` - which is a licence artefact that ships inside the
-jar, not documentation, and must stay plain text - plus routines (`.claude/skills/`).
+jar, not documentation, and must stay plain text - plus the slash-command
+wrappers in `.claude/skills/`, which only point at `procedures/*.txt`.
 **Everything else is the wiki**: `index.html` (the hub) + `wiki/*.html`.
 Each page below is the **single source of truth** for its subject - update it in
 the same change as the code, and never copy it back into here.
@@ -245,52 +246,14 @@ mod.
   `wiki/verification.html` is the authority on which is which - read it first.
 
 ---
-## Ending a session
-The routine for **"end the session"** / "wrap up" / "we're done for today" - a
-fixed order, since the docs pass comes *after* the code is pushed and reviews
-where the session landed rather than narrating it mid-change.
-1. **Regenerate what the session invalidated** (the table under Build & test),
-   then **fix the twin** if `CustomHorseSpawnScreen` or the designer changed
-   (hard rule 5).
-2. **Build green**: `:neoforge-26.1.2:build`, `check-parity.mjs`. Don't push red -
-   if you must, say so in the commit message and in `wiki/known-gaps.html`.
-3. **Commit and push the code.** Read `git status --short` first; the repo has a
-   `.gitignore`, so if build or run output appears then a pattern is wrong - fix
-   the pattern, don't `git add` around it. Work directly on **`main`**; don't
-   branch. One descriptive commit: what changed and *why*, not a file list.
-4. **Then update the docs to what is true now** - not "what I changed today".
-   Walk the map above and honour the source-of-truth rule. At minimum:
-   a new dated file in `wiki/session-log/` and its index entry,
-   the **Verification tab of each page the session built on** (what is newly
-   unplayed *and where to look*; delete only what the owner confirmed in-game,
-   then re-bake the index), `wiki/known-gaps.html` (delete what closed, add
-   what was discovered), plus any gene or system page the session moved, and
-   `wiki/nav.js` if a page was added.
-5. **Audit this file and put it back under budget.** Not "did I add anything" -
-   that is too easy to answer *no* to without looking. Actually run it:
-
-   ```bash
-   wc -l CLAUDE.md                            # must be <= 300
-   git diff HEAD~1 -- CLAUDE.md               # what did this session add?
-   grep -nE '20[0-9]{2}-[0-9]{2}-[0-9]{2}|[0-9]{3,}' CLAUDE.md   # dates + derived numbers
-   ```   Then run **every line the session added here** through the test and the
-   routing table at the top, and move what fails: a date means session-log
-   material, a long number a derived value that should be an accessor name.
-   Over 300 lines is the signal to **move a whole section out**, not to trim
-   words to squeeze under it - 299 lines of history has already failed.
-6. **Commit and push the doc update as its own commit.** Step 4 always leaves
-   the tree dirty; a session must not end with unpushed doc changes.
-7. **Verify clean**: `git status --short` empty and `git log origin/main..HEAD`
-   empty.
-8. **Kill every process this session started** - Gradle daemons and workers, any
-   `runClient` / `runServer`, and every shell left running in the background.
-   They outlive the session and sit on the owner's RAM for days. Kill the game
-   and server processes *first*, then `./gradlew --stop`: a daemon still running
-   a build ignores the stop. Leave the owner's own terminals alone, and if a
-   client is up that you did not launch, ask before closing it.
-9. **Stop** with a short summary - what shipped, what is newly waiting in
-   `wiki/verification.html`, and the one thing the next session should pick up
-   first. Then stop: no new work, no "while I'm here" refactors.
+## Procedures
+Repeatable routines are plain text in `procedures/` - the list is `procedures/INDEX.txt`,
+the template `procedures/FORMAT.txt` - and each is also a slash command. When the owner
+says a procedure's words ("end the session", "run tests", "process intake", "fix a bug",
+"report a bug", "ship a release", "launch the game", the rest in the index), read that
+file and follow it; never work a routine from memory. **"End the session" is
+`procedures/end-session.txt`**: regenerate, build, code commit, docs commit, this file's
+budget audit, verify clean, kill what you started, summarise.
 
 ---
 ## License

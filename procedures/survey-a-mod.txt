@@ -1,0 +1,61 @@
+PROCEDURE  : Survey another mod
+COMMAND    : /survey-a-mod
+SAY        : "survey this mod", "look at this mod", "should we adapt", "what does X add",
+             "compat with"
+RUNS       : local (it downloads and unzips a jar)
+TAKES      : a mod name or CurseForge link, and a question about it
+LEAVES     : what the jar really contains, and add / adapt / skip options for the owner
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this when a survey row on the compatibility pages, or a request, asks what another
+mod adds, or whether to adapt any of it. Answer from the JAR, never from the store page.
+The store page advertises what was never written. One mod's page promised a horse model,
+18 coats, animations and progression. Its jar held 197 cosmetic items, three blocks, no
+recipes and no horse entity.
+
+BEFORE YOU START
+----------------
+Check the compatibility page (wiki/text/compatibility.txt) for an earlier survey of the
+same mod.
+
+STEPS
+-----
+1. Get the jar.
+   - From CurseForge:
+     https://mediafilez.forgecdn.net/files/<first 4 digits of file id>/<rest>/<name>.jar
+     The file id is in the /files/<id> URL.
+   - Third-party jars may also be read from a local modpack instance; the local memory
+     names the safe one. Never read from the owner's live server.
+2. Unzip it, then read, in this order:
+   - assets/<modid>/lang/en_us.json - the real roster of items, blocks and entities;
+   - data/ - whether anything is craftable, and what loot or tags it adds;
+   - the classes - what they actually do: `javap -p -c` (javap is under ~/.gradle/jdks/,
+     not on PATH). Use PowerShell: the Bash tool has neither strings nor javap;
+   - META-INF/jarjar - bundled APIs hide there.
+3. Tell the owner what the brief is really about BEFORE posing choices: the premise of
+   the request may be what needs correcting.
+4. Then offer add / adapt / skip per feature, 2-4 options each, with a recommendation.
+   Check each against wiki/philosophy.html#utility-not-decoration. Horses only; utility,
+   not decoration; vanilla left intact.
+5. To test real compatibility, build a synthetic mod. The modded-material layer does
+   nothing without another mod present, so fake one rather than assume.
+6. Record the answer on wiki/compatibility.html (the survey section), never in
+   CLAUDE.md. An agreed feature goes through write-intake-document.
+
+DONE WHEN
+---------
+The owner has the jar's real contents and a set of options. Her answer is recorded on
+the compatibility page.
+
+NEVER
+-----
+- Never write roadmap material from a store page.
+- Never vendor anything from another mod without checking its licence (CLAUDE.md
+  License).
+- Never touch the owner's live server or its mods folder.
+
+SEE ALSO
+--------
+write-intake-document; wiki/compatibility.html; wiki/philosophy.html.

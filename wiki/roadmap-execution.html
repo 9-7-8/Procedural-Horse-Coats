@@ -29,11 +29,11 @@
     Before implementation, give each request one owner and one state. There are two queues,
     and each has its own routine. <strong>Something built but wrong is a bug</strong>: it is a
     GitHub issue labelled <code>bug</code>. The cloud session files it by
-    <code>intake/How to report a bug (cloud session).txt</code>, the yard's &ldquo;run
+    <code>procedures/report-bug.txt</code> (<code>/report-bug</code>), the yard's &ldquo;run
     tests&rdquo; routine files what it finds, and <code>/fix-bug</code> fixes one issue per
     session. <strong>Something not built yet is a feature</strong>: it is scoped into an
     implementation treatment in <code>intake/</code> by
-    <code>intake/How to make an intake document.txt</code>, and <code>/process-intake</code>
+    <code>procedures/write-intake-document.txt</code>, and <code>/process-intake</code>
     builds one piece of it per session. <code>intake/</code> holds features only, never bugs.
     A question whose answer changes the design belongs in
     <a href="decisions.html">Design decisions</a>. Something built but unseen belongs on the
@@ -48,7 +48,7 @@
 <tr><td>Built and wrong</td><td>A GitHub issue (<code>bug</code>; <code>needs-owner</code> if it waits on the owner)</td><td>Record the observed failure, the version and the cheapest discriminating check. <code>/fix-bug</code> takes one per session.</td></tr>
 <tr><td>Built, not seen</td><td>The feature&rsquo;s Verification tab</td><td>Write a pass condition and where to look in-game.</td></tr>
 <tr><td>Design is unresolved</td><td><a href="decisions.html">Design decisions</a></td><td>Answer the gate before writing implementation code.</td></tr>
-<tr><td>Wanted, not yet scoped</td><td>A treatment in <code>intake/</code></td><td>Scope it with the owner by <code>How to make an intake document.txt</code>: pieces, decisions, release.</td></tr>
+<tr><td>Wanted, not yet scoped</td><td>A treatment in <code>intake/</code></td><td>Scope it with the owner by <code>procedures/write-intake-document.txt</code>: pieces, decisions, release.</td></tr>
 <tr><td>Shape is agreed, work is absent</td><td>The treatment, or the feature&rsquo;s Roadmap tab</td><td>Define prerequisites, a first vertical slice and its acceptance test. <code>/process-intake</code> builds one piece per session.</td></tr>
 </tbody>
 </table>
