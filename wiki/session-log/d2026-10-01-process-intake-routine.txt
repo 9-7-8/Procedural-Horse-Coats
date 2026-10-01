@@ -35,3 +35,17 @@ Done
 Then: "remove any references to bugs - we'll handle bugs in a fully separate way. Intake
 is only for new features." The routine now says intake holds new features only, and
 anything else in the folder is not a unit. Bugs are not mentioned in it at all.
+
+Then: intake/"How to make an intake document.txt", for whoever adds a feature request,
+person or AI. It covers:
+- the scope: one feature per file, split into pieces that each ship alone, smallest
+  and highest impact first;
+- the file's header and its nine required sections;
+- every decision a treatment has to make, A to M, with M (should it be a new
+  version?) always asked;
+- an implications sweep across every subject in CLAUDE.md's map;
+- a self-check to run before saving.
+Part 1 is written to the AI: ask every design call with the question tool as options,
+keep asking follow-ups, read the code before describing it, and mark what it has not
+read as UNVERIFIED. Each treatment now carries a Release line, and /process-intake
+cuts a patch release, cuts none, or asks, according to that line.

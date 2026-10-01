@@ -1,6 +1,7 @@
 Read this before touching anything else in intake/.
 To take the next item out of this folder, run /process-intake
 (.claude/skills/process-intake/SKILL.md): it ranks every unit here and builds one.
+To ADD a feature request here, follow "How to make an intake document.txt".
 
 What this folder is
 ====================

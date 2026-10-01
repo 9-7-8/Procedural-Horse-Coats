@@ -1,0 +1,317 @@
+How to make an intake document
+
+Who this is for
+===============
+Anyone adding a new feature request to intake/. You can be a person working with an AI
+session, or the AI session itself. The result is an IMPLEMENTATION TREATMENT: one .txt file
+in intake/ that a later session (run with /process-intake) can build from without asking
+anything the treatment should already have answered.
+
+Intake is for NEW FEATURES ONLY. Anything else does not go in this folder.
+
+The bar: a treatment is finished when the building session needs the owner for NOTHING
+except what is marked Open, and every Open line is something that truly could not be
+settled now. The antlers, the breed climate rule and the Chaos allele all shipped in
+one session each because their treatments had already made every call.
+
+Scoping touches intake/ and nothing else. No code, no wiki, no assets. Reading the
+code is required; changing it is not allowed.
+
+
+PART 1 - INSTRUCTIONS FOR THE AI SESSION DOING THE SCOPING
+==========================================================
+If you are an AI asked to write an intake document, these rules apply the whole way
+through. They are not optional and are not satisfied by doing them once.
+
+1. ASK, DON'T ASSUME. Use your question tool (AskUserQuestion) for every design call.
+   - Each question gets 2-4 concrete options, with your recommendation first and
+     marked "(Recommended)". The owner amends the near-right option far faster than
+     she answers an open question.
+   - Ask in rounds of up to four questions. Expect several rounds: answers raise new
+     questions, and you must keep asking until the decision checklist (Part 4) has
+     no blank that only she can fill.
+   - Ask follow-up and clarifying questions whenever an answer is ambiguous, conflicts
+     with something in the code or the wiki, or has a consequence she may not have
+     seen. Say what the consequence is in the question.
+   - Never turn a guess into a "Decided" line. If you chose something without asking,
+     it is "Recommended". If neither of you can choose yet, it is "Open".
+
+2. READ BEFORE YOU WRITE. Every claim in "What already exists" comes from reading the
+   code or wiki/text/, with a class or file name. A treatment that describes a system
+   from memory sends the building session after APIs that do not exist. Use an Explore
+   agent for wide "where does X happen" sweeps. Anything about a Minecraft or NeoForge
+   API that you have not read in the 26.1.2 sources is marked UNVERIFIED (CLAUDE.md hard
+   rule 8).
+
+3. THINK ABOUT IMPLICATIONS AS WIDELY AS YOU CAN. Walk the whole of Part 5 (the
+   implications sweep) for every feature, even a small one, and write the result down.
+   The cheapest bugs to fix are the ones found before any code exists. For each area,
+   ask yourself:
+   - What does this feature change there?
+   - What there could break this feature?
+   - What would a player do with the two together that nobody planned for?
+   Then turn every real interaction you find into either a Decided line (after asking)
+   or an Open line.
+
+4. ASK ABOUT THE RELEASE. Always ask: once this is built, should it count as a new
+   version? Use the options in Part 4, section M. Record the answer in the treatment's
+   Release line.
+
+5. CHECK THE PHILOSOPHY. Read wiki/philosophy.html (in wiki/text/) and
+   wiki/decisions.html before proposing a design. If the feature bends a settled
+   decision, tell the owner which decision and ask. Never reopen a settled decision
+   quietly.
+
+6. BREEDS ARE DESIGNED WITH THE OWNER. If the feature needs a new breed, or changes
+   one, settle every part of it with her before writing it down. That means name,
+   coat, gene pool and weights, biomes, size, stats and rarity.
+
+7. FINISH CLEANLY. Save the file in intake/, run the self-check (Part 6), commit and
+   push it to main, and add a session log entry the way earlier scoping sessions did
+   (wiki/session-log/d2026-09-29-scoping-troughs.txt). In that entry, say that no code
+   was touched and what the building session should pick up first.
+
+
+PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS
+========================================
+- ONE FEATURE PER FILE. It is one ask from the owner, as she would name it.
+  Related asks that share no code are separate files. Asks that share machinery
+  (the head parts, body parts, tusks and feathering) are separate files that point
+  at each other. Each one says which of them builds the shared piece.
+- SPLIT IT INTO PIECES. A piece:
+  - ships alone, in one session;
+  - leaves the game in a working state;
+  - can be tested on its own.
+  Two to four pieces is typical. A feature that needs more than about five is
+  probably two features.
+- SMALLEST, HIGHEST-IMPACT PIECE FIRST. Groundwork that other pieces need goes first,
+  even when it is not the smallest piece. Say why the order is what it is.
+- SAY WHAT IS OUT. An "In scope / not in scope" list stops the building session from
+  growing the feature. Anything the owner chose to leave for later is listed here,
+  marked re-askable.
+- NO CODE IN THE TREATMENT. Name classes, fields and files freely. Sketch a signature
+  if it settles a design call. Never write the implementation: the building session
+  reads the real code anyway, and pasted code goes stale before it is used.
+- ONE CODE PATH. If the game already does something close to this feature, the
+  treatment says to extend that, not to build a second path beside it.
+
+
+PART 3 - THE FILE: NAME, HEADER AND SECTIONS
+============================================
+File name:  "<Feature name> - implementation treatment.txt"
+
+Header paragraph (copy this shape):
+
+    <Feature name> - implementation treatment
+
+    Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines
+    are the scoping session's, not asked; "Open" lines are still to be settled, by
+    whom is said on the line; "UNVERIFIED" lines are facts this file has not proved
+    and the building session must check first. Source of truth for what exists is
+    <wiki page(s)>. This file is retired (deleted, per START HERE step 3) as each piece
+    ships and moves onto <wiki page(s)>'s Gameplay and Coding tabs.
+    Release: <own version | rides the next release | owner bumps the middle number>.
+
+Sections, in this order. Every one is required. If a section truly has nothing in it,
+write "None" and one line saying why.
+
+1. The request, as given
+   The owner's words, quoted. Then one paragraph on how you read them, and any
+   reading she confirmed.
+
+2. In scope, and what is not
+   A bullet list for each.
+
+3. What already exists, so the building session does not redo it
+   - Classes, files, wiki pages, configs, tags and payloads this feature touches or
+     copies, each with its path.
+   - The closest precedent in the mod. For example, "a trough is a new rung in
+     Hunger.Food, not a new goal".
+   - Anything that LOOKS built but is not. These were the most useful lines in every
+     treatment so far.
+
+4. The pieces. One section per piece, titled "Piece N - <what the player gets>".
+   Each piece covers all of these, or says "None":
+   - What the player sees. One or two sentences in player language.
+   - Decided / Recommended / Open lines for every design call in the piece.
+   - Where the code lives: what goes in common/ (hard rule 1: the rules, the wording,
+     anything a test can pin) and what goes in the NeoForge module (config,
+     networking, rendering, navigation, persistence).
+   - Data and saves: what is stored, where, and whether it is permanent. Registry ids,
+     allele order and genotype codes are permanent once a world has used them, so say
+     what happens to a world that has them if the feature is changed later.
+   - Sync: what the client needs to know, and which existing payload carries it.
+   - Config: each option with its side (server or client), default, bounds and off
+     state. If there are none, say "Config: none" and why.
+   - Tests: the unit tests by class name, plus any gametests, each with what it proves.
+   - Play checks: what someone must see in a running game. These become the owning
+     page's Verification tab.
+   - Docs that must change with it: wiki pages whose current text becomes untrue.
+
+5. Decisions
+   Every applicable item from Part 4 that is not already covered inside a piece.
+   Each one is Decided, Recommended or Open.
+
+6. UNVERIFIED
+   Every fact the plan rests on that nobody has read in the source or seen in a game,
+   each with how to check it. Order them so the building session checks the riskiest
+   one first.
+
+7. Order and size
+   - The piece order, and why.
+   - A size for each piece: S, M or L (see .claude/skills/process-intake/SKILL.md).
+   - What other treatments it waits on or unblocks.
+   - What must NOT be done in the same session as what.
+
+8. Release
+   The owner's answer to Part 4 section M, repeated here, and whether it applies when
+   EACH piece ships or only when the LAST one does.
+
+9. After each piece ships
+   - The rows of CLAUDE.md's regenerate table this will touch.
+   - Which wiki page and tab each shipped piece lands on.
+   - Any new wiki page that has to be written. A plan with no page means writing one
+     (CLAUDE.md rule 9).
+
+
+PART 4 - EVERY DECISION A TREATMENT HAS TO MAKE
+===============================================
+Walk every heading below. Skip a heading only by writing "does not apply, because ..."
+in your notes. Most of these become owner questions.
+
+A. The ask
+   - What exactly does the player get? Restate it in one sentence and have her confirm it.
+   - Who is it for: a new player, a breeder, a server owner, or a modpack?
+   - What is the smallest version that would still be worth having?
+
+B. Fit with the mod (wiki/philosophy.html, wiki/decisions.html)
+   - Is it horses-only? Does it leave vanilla intact?
+   - Is it a carrot, not a stick? Does it reward, rather than punish ignoring it?
+   - Is it utility rather than decoration? Breeding is the only exception.
+   - Should it be a gene or a breed? (A concept is a breed, not a gene, unless it can
+     be any breed.)
+   - Does it bend any settled decision? Name it.
+
+C. How the player meets it
+   - How is it obtained? Crafting, loot, trade, spawning, breeding, a command, or
+     already present?
+   - Is it survival-reachable? Is it creative-only, OP-only or owner-only?
+   - Where is it explained? The tutorial or checklist (ProgressTask + advancement),
+     the H menu's Getting started, an item tooltip.
+   - What do the feedback messages say: success, refusal, and why it was refused?
+     The wording lives in common/.
+
+D. Genetics (if it is or adds a gene; see wiki/making-a-gene.html)
+   - Natural or magical? Which GeneFamily, and what priority?
+   - Alleles, their tokens (check for clashes with every existing token), dominance
+     and order. Alleles may only ever be appended, never reordered.
+   - Epigenome values on the copy, and their ranges.
+   - Sex linkage. Is it shown on foals? Is it a lethal, or a health effect? (Health is
+     written as a sentence on Gameplay.)
+   - Founder frequencies, and which breeds carry it. No invisible carriers in the wild:
+     put the expressing combinations in the founder table.
+   - Both editors: the horse designer and the spawn screen (rule 5).
+   - What the info screen says about it.
+
+E. Breeds
+   - Does it need a new breed or change an existing one? Settle the whole breed with
+     the owner: name, coat, pool, weights, bands, biomes, size, stats and rarity.
+   - Does any existing breed's pool, notes or climate rule need to move?
+
+F. Items and blocks
+   - Recipe: check it clashes with no existing recipe.
+   - Art. Anything in intake/potential-assets/ may be used freely; log the use in
+     that pack's USAGE.txt and THIRD_PARTY_NOTICES.md.
+   - Its own wiki page (three tabs), and a lang key.
+   - Does it come in per-wood or per-material variants? If so, it needs an
+     author-time bake and a run-time compat twin, and the two must agree.
+   - Loot tables, trades and stack size.
+
+G. Config
+   - Which values are tunable at all? Are they server-side or client-side?
+   - What are the defaults, the bounds, and the off switch?
+   - What happens to a bad value? It must never crash a world load.
+
+H. Saves and permanence
+   - What is saved, where, and is it bounded?
+   - What happens to an existing world on update, and on removal of the mod?
+   - Does it need a migration, or is it acceptable for old saves to lose or reset
+     something? Ask; never decide this silently.
+
+I. Multiplayer and networking
+   - Ownership: who may use it on someone else's horse?
+   - Which payloads does it need? Can the client trust anything sent to it?
+   - Is it dedicated-server safe, with no client classes on the server?
+
+J. Compatibility (wiki/compatibility.html)
+   - Modded materials, woods, mobs and items. Does it read the live registry?
+   - Known neighbours on the owner's modpack.
+   - Does it need a synthetic mod to test the modded path?
+
+K. Performance
+   - Is it per tick or per event? Does it force chunk loads?
+   - What does it cache, and how does the cache stay bounded?
+   - What is the worst case on a server with a thousand horses?
+
+L. Testing
+   - What can a unit test in common/ pin down?
+   - What needs a gametest, and what needs a yard pen?
+   - What can only be judged by eye in a running game?
+
+M. Release - always asked
+   "Once this is built, should it count as a new version?" Put these options:
+   - Its own release (Recommended for anything a player will notice): the patch
+     number goes up, tag, jar on a GitHub release.
+   - Rides the next release: it is built and pushed, but no release is cut for it.
+   - A bigger bump: the middle number moves. This is the owner's call only, and it
+     never happens without her saying so explicitly.
+   Also ask whether it applies when each piece ships or only when the last one does.
+
+
+PART 5 - THE IMPLICATIONS SWEEP
+===============================
+For each area below, write one line: "touches - how" or "untouched - why not". The
+list is the subject map from CLAUDE.md. The page named is where to read what exists.
+
+- Genetics model, gene registry, priorities ............ genetics-model, gene-*
+- Coat pipeline and the two goldens ..................... pipeline
+- Eye colour ............................................ eye-colour
+- Body space, the model, grown parts .................... body-space, model-parts
+- Breeding, pedigree, records, stat inheritance ......... breeding
+- Breeds, spawning, regions, breed files ................ breeds, breed-format
+- Speed / health / jump / size, disorders, lethals ...... horse-body
+- Healing, bond, herds, the slow tick, hunger ........... horse-care
+- AI goals (and the behaviour hierarchy bake) ........... behaviour-hierarchy
+- Items, carrots, splices, research papers .............. items, carrots
+- Tack and gear slots ................................... horse-gear
+- Villagers, the cowboy, the barn, trades ............... villagers
+- Realm, portals, the dimension, stables ................ horse-realm, stables
+- The H menu, the log, search ........................... horse-browser
+- Stasis chambers and the bank ........................... horse-stasis
+- The horse designer and spawn screen (rule 5) .......... horse-designer
+- The gene creator, the breed designer, web/ (wasm) ..... architecture
+- Config, server and client ............................. compatibility, api-notes
+- Other mods and modded content ......................... compatibility
+- Advancements and the checklist ........................ ProgressTask
+- The 1.12.2 backport: is the logic in common/? ......... architecture
+- The wiki: which page owns it, and does a new page need writing?
+
+Then write down the three most likely ways the feature goes wrong for a real player.
+Put them in the treatment as Decided handling, Open questions or play checks.
+
+
+PART 6 - SELF-CHECK BEFORE SAVING
+=================================
+[ ] The file name ends "- implementation treatment.txt". The header names the source-of-
+    truth pages and has a Release line.
+[ ] The owner's request is quoted.
+[ ] Every Decided line was actually asked. Nothing guessed is marked Decided.
+[ ] Every Open line says who settles it: the owner, or the building session.
+[ ] Every Part 4 heading is covered, or marked "does not apply, because ...".
+[ ] The Part 5 sweep has been walked, and its results are in the treatment.
+[ ] Every "What already exists" claim names a real class or file. Grep each one.
+[ ] Every unread API is marked UNVERIFIED, with a way to check it.
+[ ] Each piece ships alone, has tests and play checks, and names the docs it changes.
+[ ] Order and size are written, including what this waits on and what it unblocks.
+[ ] No implementation code is pasted in.
+[ ] Only intake/ changed, apart from the session log entry.
