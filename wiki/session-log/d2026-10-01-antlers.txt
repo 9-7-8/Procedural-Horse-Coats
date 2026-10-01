@@ -52,3 +52,17 @@ Where to look first in game
     two horses with different tine counts in one frame, a massive rack under a ceiling, and a
     Rimehart's lopsided rack. Then each modifier page's tab. Palmate is the habit most likely to
     read wrong (square boxes do not make a plate).
+
+Later the same day - the Greenwood
+
+    Owner: "Let's create a forest like horse that's dark bay, and has every possible variation of
+    the fawn and dryad genes in its pool (the genes that plant trees and the genes that spread
+    grass and such)". Read as three loci: fawn (the spotted topline), dryad (trees, mushrooms,
+    flowers, bone meal) and verdant (grass, moss, mycelium).
+
+    greenwood.json: magical, rare, forest / dark / birch / old-growth birch; E/E A/A over Sh/ShD
+    or ShD/ShD (liver bay, sometimes seal brown). "Every possible variation" was taken as every
+    pair that SHOWS, at equal weight: all 45 expressing dryad pairs, the three matched verdant
+    covers (a verdant mix cancels), and the eight fawn pairs that show - so no Greenwood is a
+    silent carrier of any of them. GreenwoodBreedTest asserts the pools equal those sets, using
+    each gene's own rule for showing. No antlers - not asked for; easy to add.

@@ -40,6 +40,7 @@ wiki/body-space.html#vanilla-model	all	The vanilla model underneath
 wiki/body-space.html#verified	all	Verified
 wiki/breed-book.html#burning	all	The burning country
 wiki/breed-book.html#cold	all	The cold country
+wiki/breed-book.html#deep-woods	all	The deep woods
 wiki/breed-book.html#desert	all	The dry country
 wiki/breed-book.html#elsewhere	all	The country that is nowhere
 wiki/breed-book.html#entries	all	The breeds
