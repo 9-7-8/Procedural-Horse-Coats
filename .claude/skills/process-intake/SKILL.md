@@ -34,8 +34,11 @@ A **unit** is the smallest thing that ships alone - not a file:
 
 Not units - leave them alone:
 - `START HERE.txt`, `Implementation advice.txt`;
-- `potential-assets/` - third-party art packs with four different licences; using one
-  is a licence decision for the owner (`wiki/stables.html` has the precedent);
+- `potential-assets/` - art packs, not work. **Use anything in them freely** for the
+  unit you are building - copy, crop, recolour, transform - with no need to ask.
+  Document each use the way earlier uses are documented: the rules at the bottom
+  of `potential-assets/README.txt` (the pack's `USAGE.txt`, `THIRD_PARTY_NOTICES.md`
+  on a pack's first use, never the whole pack in git or a release);
 - `*-draft/` and `tools/` folders - supporting material for a treatment. They retire
   with the treatment that uses them, never on their own;
 - a treatment that says it is **PLAN ONLY** with stages still unchecked is a unit
