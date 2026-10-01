@@ -143,7 +143,7 @@ Tests and checks (CLAUDE.md: no full suite; run by name)
   horse walking, galloping and rearing; two horses in one frame with different coats (the deferred-submit and tint-cache
   check); a herd of draught horses for cost; and the first frames of a horse whose coat has not baked yet.
 
-After it ships (CLAUDE.md table)
+After it ships (procedures/rebake.txt)
 ================================
 - Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
   bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs, and commit genes.json, the icons, the new

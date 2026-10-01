@@ -46,6 +46,10 @@ Command                  Runs    Say (any of)                         What it le
                                                                       and footer, indexes rebaked
 /use-an-art-pack         local   "use the art packs", "find art for"  art copied and transformed, with
                                                                       USAGE.txt + notices written
+/close-a-check           either  "that works", "confirmed",           the item gone from its tab, written
+                                 "that shipped"                       up on Coding/Gameplay, rebaked
+/audit-claude-md         either  "audit CLAUDE.md", "is CLAUDE.md     CLAUDE.md at most 300 lines of
+                                 over budget"                         standing rules and pointers
 (no command) look-it-up  either  "where is", "which class handles"    an answer that saves context
 (no command) FORMAT      either  "write a procedure"                  the template every file follows
 
@@ -62,8 +66,6 @@ Routines that might become procedures next
 ------------------------------------------
 These are done often enough to repeat the same way, but nobody has written them up
 yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
-- close-a-check: move a Verification item to Coding with its evidence, delete its pen,
-  and re-bake the indexes. It is step 2 of run-tests, often done alone.
 - whats-next: read the verification index, the open issues and intake/, and offer the
   owner 2-4 next pieces of work with a recommendation.
 - compat-test: build the synthetic mod and boot with it, to prove the modded-material

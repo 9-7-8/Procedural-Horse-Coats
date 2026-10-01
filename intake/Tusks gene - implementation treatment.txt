@@ -133,7 +133,7 @@ Tests and checks (CLAUDE.md: no full suite; run by name)
   (UNVERIFIED: whether it does; anchor to the head bone and say which was used, so the tusks do not follow a jaw that
   is not the one they grew from); a horn plus a narwhal horn on one head; and the tusks with a bridle or head armour.
 
-After each slice ships (CLAUDE.md table)
+After each slice ships (procedures/rebake.txt)
 ========================================
 - Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
   bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs, and commit genes.json, the icons,

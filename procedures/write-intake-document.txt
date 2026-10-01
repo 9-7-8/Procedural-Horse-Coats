@@ -182,7 +182,7 @@ write "None" and one line saying why.
    EACH piece ships or only when the LAST one does.
 
 9. After each piece ships
-   - The rows of CLAUDE.md's regenerate table this will touch.
+   - The rows of the regenerate table in procedures/rebake.txt this will touch.
    - Which wiki page and tab each shipped piece lands on.
    - Any new wiki page that has to be written. A plan with no page means writing one
      (CLAUDE.md rule 9).

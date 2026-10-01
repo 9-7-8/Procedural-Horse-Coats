@@ -196,7 +196,7 @@ Tests and checks (CLAUDE.md rules apply: no full suite; run by name)
   is a claim from reading); the parts stacked together; a horse with a maned neck and barding for the ruff;
   the beard and ear fins while the horse grazes and while its head moves.
 
-After each slice ships (CLAUDE.md table)
+After each slice ships (procedures/rebake.txt)
 ========================================
 - Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages,
   bakeMarkingFacts, bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs. Commit

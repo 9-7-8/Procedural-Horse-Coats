@@ -734,7 +734,7 @@ Stage 1 - FIRST the sheet converter (D36, D37, Appendix E) and the
           in other breeds' tables (D3b). Then the Great Valley Skeleton Horse
           and Graveborn Warmblood breed files, pinning the undead pair and the
           diet, temper and stat loci, plus the pool mechanism (D3). Pure
-          common/, no Minecraft. Regenerate per the CLAUDE.md table for a new
+          common/, no Minecraft. Regenerate per procedures/rebake.txt for a new
           gene AND a new breed (goldens, gene bundle, icons, census,
           unverified-genes.txt, wiki page spans, designer wasm,
           :common:bakeBreedFiles, check-breed-heights.mjs, *BreedsTest,
@@ -797,9 +797,9 @@ Also run node neoforge-26.1.2/tools/check-progress-tasks.mjs if a ProgressTask
 is added, and :neoforge-26.1.2:build before any push.
 
 
-12. Regenerate / document (CLAUDE.md tables, applied to this plan)
+12. Regenerate / document (procedures/rebake.txt, applied to this plan)
 ====================================================================
-Code side, per the "Regenerate what you invalidate" table:
+Code side, per the regenerate table in procedures/rebake.txt:
   - any gene            : the two coat goldens; bakeGeneBundle, bakeGeneIcons,
                           bakeGeneWikiPages, bakeMarkingFacts, bakeGeneCensus,
                           bakeUnverifiedGenes, bake-gene-timeline.mjs, and the

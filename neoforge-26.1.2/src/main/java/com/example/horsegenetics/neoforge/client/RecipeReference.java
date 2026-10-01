@@ -33,7 +33,7 @@ import java.util.List;
  * 26.1.2 hands out display objects rather than the recipes themselves. A
  * generated summary read straight off the classpath needs neither, and cannot
  * drift from the recipes it was generated from - only go stale, which is what
- * the regenerate table in CLAUDE.md is for.
+ * the regenerate table in procedures/rebake.txt is for.
  *
  * <p><b>The trade is honest and worth writing down:</b> this describes the
  * recipes <i>this jar ships</i>, not the recipes the server is running. A

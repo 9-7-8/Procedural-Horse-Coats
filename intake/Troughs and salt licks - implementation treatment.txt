@@ -205,7 +205,7 @@ Cross-cutting rules for every piece
   it) not an accident.
 - Config: ServerConfig, with a safe accessor beside it in the leadsReturn()
   style, only for a number worth tuning. No per-gene or per-wood option.
-- Regeneration, per the CLAUDE.md table: the per-wood bake (author-time and
+- Regeneration, per procedures/rebake.txt: the per-wood bake (author-time and
   the compat/Generated* twin), the recipe reference, check-recipes.mjs,
   check-block-models.mjs, check-duplicate-item-art.mjs, the search index and
   bake-agent-text.mjs, and bake-verification-index.mjs plus

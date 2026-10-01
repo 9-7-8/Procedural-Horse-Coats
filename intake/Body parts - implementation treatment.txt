@@ -211,7 +211,7 @@ Tests and checks (CLAUDE.md: no full suite; run by name)
   as a rider looks down; the parts stacked together; and the horse in the realm and in the browser portrait if
   parts draw there.
 
-After each slice ships (CLAUDE.md table)
+After each slice ships (procedures/rebake.txt)
 ========================================
 - Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
   bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs, and commit genes.json, the

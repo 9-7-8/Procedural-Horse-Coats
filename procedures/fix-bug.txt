@@ -101,7 +101,7 @@ STEPS
    - Break the fix on purpose once, and watch the test go red.
    - Run tests by name only. If a gametest goes red, run HEAD without your diff
      (`git stash`) before blaming the diff: gametests are sensitive to tick phase.
-   - Run every regenerate-table row the change touched.
+   - Run every rebake row the change touched.
    - If the fix turns out larger than step 4 judged, stop and treat the bug as large.
 
 6. Close it on evidence.

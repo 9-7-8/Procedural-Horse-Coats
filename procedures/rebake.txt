@@ -1,7 +1,7 @@
 PROCEDURE  : Rebake what a change invalidated
 COMMAND    : /rebake
 SAY        : "rebake", "run the bakes", "regenerate", "re-bake everything this touched",
-             "is anything stale"
+             "is anything stale", "regenerate what you invalidate"
 RUNS       : local (most bakes are Gradle tasks or need headless Chrome)
 TAKES      : a set of changed files (uncommitted, or a commit range)
 LEAVES     : every derived, checked-in artefact current, and only the real changes
@@ -10,21 +10,22 @@ LEAVES     : every derived, checked-in artefact current, and only the real chang
 
 WHEN TO USE
 -----------
-After any change, before it is committed and pushed. This is step 1 of end-session, and
+After ANY change, before it is committed and pushed. This is step 1 of end-session, and
 part of add-a-gene, design-a-breed and every procedure that edits a source with a
 derived copy.
-Every artefact here is checked in, and fails SILENTLY when stale. A stale snapshot makes
-its own check pass by definition. The parity check stayed green for a day while the
-creator drew every horse with its spine and belly swapped.
-
-The table of what-to-rebake-for-what is CLAUDE.md's "Regenerate what you invalidate".
-It is the only copy, so read it there. This procedure is how to walk it.
+Every artefact in the table below is checked in, and fails SILENTLY when it is stale.
+Rebaking is part of the parity check, not a chore beside it. expected.json is a
+checked-in snapshot of the Java, so a stale one makes check-parity.mjs green BY
+DEFINITION. That is how a UV swap hid for a day, while the creator drew every horse with
+its spine and belly patches exchanged. Likewise, a git status showing common/ changed
+and wiki/horse-designer/wasm/ unchanged means the designer is running yesterday's mod.
+The table in step 2 is the ONLY copy of what-to-rebake-for-what. CLAUDE.md and the
+other procedures point here.
 
 BEFORE YOU START
 ----------------
-1. Get the list of changed files:
-   `git status --short` and `git diff --stat`, or `git diff --stat <from>..HEAD` for a
-   range.
+1. Get the list of changed files: `git status --short` and `git diff --stat`, or
+   `git diff --stat <from>..HEAD` for a range.
 2. Make sure no game is running from this checkout. A bake rewrites jars and classes
    under a running client, which then crashes with ClassNotFoundException for a class
    that exists (launch-game, "before you start").
@@ -35,57 +36,193 @@ BEFORE YOU START
 
 STEPS
 -----
-1. Match each changed path to its rows in CLAUDE.md's table. One file can hit several
-   rows: a gene file hits the gene row, the common/ row, and the prose row for its page.
+1. Match each changed path to its rows in the table (step 2). One file can hit several
+   rows: a gene file hits the gene row, the common/ row and the prose row for its page.
    Write down the rows you will run, in table order.
 
-2. Run the rows. Their order inside a row matters:
-   - Gene row: bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
-     bakeGeneCensus, bakeUnverifiedGenes, then bake-gene-timeline.mjs.
-     - The timeline dates a gene by the first commit that names its key, so commit the
-       code first, or a new gene lands in "Undated".
-     - bakeUnverifiedGenes reads the pages' Verified blocks, so it runs after the pages.
-   - Breed row: bakeBreedFiles, THEN bakeGeneCensus (the census reads the breed
-     sheets).
-   - spec/ row: bakeSpecFixtures, THEN check-parity.mjs. Parity against an old fixture
-     proves nothing. Also run bake-export-fixtures.mjs if the creator's metadata or
-     effects moved.
-   - Jumps then double gates: bake-jumps.mjs merges the axe tag that the gates are also
-     in, so re-run bake-double-gates.mjs after it, and check both families are in the
-     tag.
-   - A recipe change: bake-recipe-reference.mjs, then check-recipes.mjs.
-   - Anything in common/ or web/: :web:bakeDesignerAssets, then
-     check-designer-boots.mjs. TeaVM compiles only the reachable graph, so the task
-     can go green while the page comes up blank.
-   - Any wiki prose, LAST: build-search-index.mjs, check-links.mjs (add --orphans when
-     pages moved), then bake-agent-text.mjs.
-   - Any Verification or Roadmap tab touched: bake-verification-index.mjs and
-     bake-roadmap-index.mjs. Each hard-fails on a tab with no summary box.
-   - A part-sheet region changed: bake-part-sheet.mjs (not in the table; see
-     add-a-gene).
+2. THE TABLE. For each row: "if you touched" -> "re-run" -> "commit".
+   Paths: C = common/src/main/resources/horsegenetics,
+          N = neoforge-26.1.2/src/main/resources (assets/horsegenetics, data/...),
+          T = neoforge-26.1.2/tools.
 
-3. Never regenerate R/genes/index.json from the folder (hard rule 6). An absence there
-   is a killswitch.
+   a. Any gene, or a coat deliberately moved
+      RUN    Two goldens move, and both write their actual to common/build/ on a
+             mismatch. Run --tests '*CoatBakeGoldenTest' (every gene, seconds) and
+             --tests '*CoatPipelineGoldenTest' (39 whole horses, seconds). Check WHICH
+             rows moved, then copy them back.
+      COMMIT common/src/test/resources/coat-bake-golden.txt, coat-golden.txt
 
-4. Read each Gradle task's real exit code. Log to a file and read it. Never pipe
-   Gradle into tail or head: a pipeline's exit code is the last command's, so a red
-   build reports green. A long-running task piped into a filter that exits is left
-   wedged.
+   b. Anything in common/ or web/
+      RUN    :web:bakeDesignerAssets, then node wiki/tools/check-designer-boots.mjs.
+             TeaVM compiles only the reachable graph, so the task goes green and the
+             page comes up blank.
+      COMMIT wiki/horse-designer/wasm/web.wasm (see step 5: it is not reproducible)
 
-5. Decide what actually changed. Every bake rewrites all its outputs, and `git status`
+   c. Any breed, or BreedSpecWriter
+      RUN    :common:bakeBreedFiles, THEN :common:bakeGeneCensus. The census's breed
+             column is read off the breed sheets, and nothing guards it the way
+             BreedFilesTest guards the files. If a breed's size, or its printed height
+             on breeds.html or breed-book.html, moved: node wiki/tools/check-breed-heights.mjs
+             (those heights are hand-typed, and it once found three wrong).
+             BreedFilesTest passing is not "the pool is right". That is *BreedsTest per
+             breed, and BreedBandsReachTest for a band on a knob no pinned pair reads.
+      COMMIT C/breeds/, wiki/horse-designer/assets/breeds.json, wiki/gene-census.html
+
+   d. spec/, SpecSchema, AbilityType, HorseSkinGeometry, the noise classes
+      RUN    :common:bakeSpecFixtures, THEN node wiki/gene-creator/tools/check-parity.mjs.
+             Geometry also moves :common:bakeGeneIcons. If the creator's metadata or
+             effects moved: node wiki/gene-creator/tools/bake-export-fixtures.mjs.
+      COMMIT wiki/gene-creator/fixtures/expected.json, wiki/assets/gene-icons/
+
+   e. The coat PNGs, the name tables, or example-genes/
+      RUN    :common:bakeCreatorAssets + :web:bakeDesignerAssets
+      COMMIT the regenerated assets, including wiki/gene-creator/js/examples.js
+
+   f. A gene's layers or masks
+      RUN    --tests '*DeadLayerTest' (seconds). A layer that paints nothing fails it:
+             fix the gene, then DELETE its line.
+      COMMIT common/src/test/resources/dead-layers.txt
+
+   g. Any file in C/genes/, or any gene page's <h1>, tabs, or Verified block
+      RUN    in this order:
+               :common:bakeGeneBundle
+               :common:bakeGeneIcons
+               :common:bakeGeneWikiPages
+               :common:bakeMarkingFacts
+               :common:bakeGeneCensus
+               :common:bakeUnverifiedGenes
+               node wiki/tools/bake-gene-timeline.mjs
+             The timeline dates a gene by the first commit naming its key, so commit
+             the code first, or a new gene lands in "Undated". bakeUnverifiedGenes reads
+             the pages' Verified blocks, so it runs after the pages exist.
+      COMMIT - wiki/horse-designer/assets/genes.json
+             - wiki/assets/gene-icons/
+             - the gene's wiki/gene-*.html
+             - wiki/timeline-of-genes.html
+             - wiki/gene-census.html. It lists EVERY gene's alleles, data-driven or
+               not, and a new gene is on it only after the bake.
+             - wiki/breed-designer/assets/marking-facts.json
+             - C/unverified-genes.txt. This is the horse dimension's coat column: a
+               stale one shows pens for confirmed genes and hides the rest.
+             - the generated spans of wiki/pages.js and index.html.
+      NEVER  regenerate C/genes/index.json from the folder (hard rule 6).
+
+   h. GeneFamily, or a gene's priority (it may change family)
+      RUN    :common:bakeGeneWikiPages
+      COMMIT the two generated spans, plus every gene page's eyebrow
+
+   i. Any wiki prose at all - run this LAST
+      RUN    node wiki/tools/build-search-index.mjs, then check-links.mjs (hrefs,
+             #fragments, and footers whose See-also or blurb outlived their tabs; add
+             --orphans when pages moved), then node wiki/tools/bake-agent-text.mjs
+      COMMIT wiki/search-index.js, wiki/text/
+
+   j. A page's tab panels, or a section moved between tabs
+      RUN    node wiki/tools/sync-page-views.mjs
+      COMMIT wiki/pages.js
+
+   k. Any Verification or Roadmap tab: added, deleted, or its summary sentence reworded
+      RUN    node wiki/tools/bake-verification-index.mjs and
+             node wiki/tools/bake-roadmap-index.mjs. Each hard-fails on a tab with no
+             summary box, rather than write an index that omits a page.
+      COMMIT wiki/verification.html, wiki/roadmap.html
+
+   l. ProgressTask: a checklist task added, deleted or retitled
+      RUN    node T/bake-advancements.mjs (a new task needs an icon in its ICON map
+             first), then T/check-progress-tasks.mjs. Every task is also an
+             advancement, and the bake is the only thing that makes it one.
+      COMMIT N/data/horsegenetics/advancement/
+
+   m. Any AI goal added, removed or re-prioritised
+      RUN    node wiki/tools/bake-behaviour-hierarchy.mjs
+      COMMIT wiki/behaviour-hierarchy.html
+
+   n. A wood, or any geometry, of the DOUBLE GATES
+      RUN    node T/bake-double-gates.mjs, then row q, because it writes recipes too.
+             It only WRITES. Removing a wood means deleting that wood's files and lang
+             keys by hand.
+      COMMIT the regenerated blockstates/, models/block/, items/, recipe/,
+             loot_table/blocks/, both data/minecraft/tags/block/ files, and the merged
+             lang/en_us.json
+
+   o. A wood, or any geometry, of the JUMPS
+      RUN    node T/bake-jumps.mjs, then row q. It MERGES mineable/axe, which the gates
+             are also in, so re-run bake-double-gates.mjs after it and check both
+             families are still in that tag. Jump geometry is written twice more:
+             block/JumpBlock's VoxelShape, and compat/GeneratedJumps.
+      COMMIT the regenerated blockstates/, models/block/, items/, recipe/,
+             loot_table/blocks/, data/minecraft/tags/block/mineable/axe.json, and the
+             merged lang/en_us.json
+
+   p. A cart recipe, model or lang key, or CartKind
+      RUN    node T/bake-carts.mjs (vanilla's twelve woods only)
+      COMMIT the regenerated models/item/, items/, recipe/ and the merged lang/en_us.json
+
+      Per-wood families are written TWICE (rows n, o, p): tools/bake-*.mjs for
+      vanilla's woods at author time, and compat/Generated* for other mods' woods at run
+      time. Change one, change the other. A drift shows as a modded block that is a
+      purple cube, or a modded cart that will not craft, and logs nothing.
+      check-block-models.mjs catches only the author-time half.
+
+   q. Any file in N/data/horsegenetics/recipe/
+      RUN    node T/bake-recipe-reference.mjs, then T/check-recipes.mjs
+      COMMIT assets/horsegenetics/recipe_reference.json
+
+   r. An item sprite, or the recipe table in bake-item-recolours.mjs
+      RUN    node T/bake-item-recolours.mjs. Its sources are pristine copies in
+             tools/item-art/, never the live textures, which is what makes it safe to
+             re-run. Then T/check-duplicate-item-art.mjs, which is the authority and
+             fails on a NEAR-duplicate as well as an exact one.
+      COMMIT the regenerated textures/item/*.png
+
+   s. Any block art of ours, or any data-blocks / data-items on a wiki page
+      RUN    T/bake-block-art.mjs, then wiki/tools/bake-block-previews.mjs and
+             wiki/tools/bake-item-art.mjs. Both refuse anything still wearing unchanged
+             vanilla art (the wiki may not ship Mojang's), and the second also fails on
+             an item no page shows.
+      COMMIT textures/block/*.png, wiki/assets/block-preview/, wiki/assets/item-art/
+
+   t. A breed egg texture in assets/horsegenetics/textures/item/breed_egg/
+      RUN    node T/bake-breed-eggs.mjs. It hard-fails on a filename that is not a breed
+             id, since a case on a value no horse carries never draws.
+      COMMIT the regenerated models/item/breed_egg/ and items/breed_spawn_egg.json
+
+   u. tools/villagers/equestrian.source.png, the one piece of villager art
+      RUN    T/villagers/bake-profession-hats.ps1. It writes FIVE files: a hat colour per
+             equestrian, plus the cowboy's own uncoloured copy. The hat is TWO
+             rectangles on the sheet, crown and brim. Recolouring only the crown gives a
+             villager a teal hat with a brown underside.
+      COMMIT the five PNGs under assets/.../textures/entity/villager/
+
+   v. Either tools/barn/*.source.nbt, or bake-barn.py itself
+      RUN    python T/barn/bake-barn.py
+      COMMIT data/horsegenetics/structure/cowboy_barn.nbt
+
+   w. Any tools/stables/*.source.nbt, or bake-stables.py itself
+      RUN    python T/stables/bake-stables.py
+      COMMIT the regenerated data/horsegenetics/structure/*.nbt
+
+   x. A part-sheet region (PartSheet.java, or a paint() in the tool)
+      RUN    node T/bake-part-sheet.mjs. Its constants repeat PartSheet's by value, and
+             the two drift silently.
+      COMMIT N/assets/horsegenetics/textures/entity/horse/part_sheet.png
+
+   A row is missing if a derived, checked-in file has no row. Add the row here in the
+   same change, never to CLAUDE.md.
+
+3. Read each Gradle task's real exit code. Log to a file and read it. Never pipe Gradle
+   into tail or head: a pipeline's exit code is the last command's, so a red build
+   reports green. A long-running task piped into a filter that exits is left wedged.
+
+4. Decide what actually changed. Every bake rewrites all its outputs, and `git status`
    flags a rewritten file on its timestamp alone. `git diff --name-only` is the
-   authority.
-   - Commit what git diff shows.
-   - Never commit to quiet a status that git diff says is clean.
-   - The designer wasm (wiki/horse-designer/wasm/web.wasm) is not reproducible: two
-     builds of one tree differ. After a DATA-only bake, where no reachable common/ or
-     web/ code changed, revert the wasm (`git checkout -- wiki/horse-designer/wasm/`)
-     rather than commit 2 MB of noise. If code changed, commit it, and check that the
-     designer boots.
+   authority. Commit what git diff shows. Never commit to quiet a status that git diff
+   says is clean.
 
-6. Goldens move only by running their test classes (test-tiers, tier 1). Check WHICH
-   rows moved before copying the actuals from common/build/ back into
-   common/src/test/resources/.
+5. The designer wasm is not reproducible: two builds of one tree differ. After a
+   DATA-only bake, where no reachable common/ or web/ code changed, revert it
+   (`git checkout -- wiki/horse-designer/wasm/`) rather than commit 2 MB of noise. If
+   code changed, commit it, and check the designer boots.
 
 DONE WHEN
 ---------
@@ -96,13 +233,13 @@ DONE WHEN
 
 NEVER
 -----
-- Never edit a generated file by hand (genes.json, gene-census.html, verification.html,
-  roadmap.html, wiki/text/, the generated spans). Edit the source and bake.
+- Never edit a generated file by hand: genes.json, gene-census.html,
+  verification.html, roadmap.html, wiki/text/, or the generated spans. Edit the source,
+  then bake.
 - Never trust a green check whose snapshot was not rebaked first.
 - Never bake under the owner's running client.
 - Never rebuild genes/index.json from the folder.
 
 SEE ALSO
 --------
-CLAUDE.md ("Regenerate what you invalidate" - the table itself); test-tiers;
-end-session; add-a-gene; design-a-breed; launch-game.
+test-tiers; end-session; add-a-gene; design-a-breed; add-a-wiki-page; launch-game.

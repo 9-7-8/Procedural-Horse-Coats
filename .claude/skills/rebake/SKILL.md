@@ -1,6 +1,6 @@
 ---
 name: rebake
-description: Rebake every derived, checked-in artefact a change invalidated, by walking CLAUDE.md's regenerate table in the right order, reading real exit codes, and committing only what git diff says changed. Use when the owner says "rebake", "run the bakes", "regenerate", "is anything stale".
+description: Rebake every derived, checked-in artefact a change invalidated, by walking the regenerate table in procedures/rebake.txt in the right order, reading real exit codes, and committing only what git diff says changed. Use when the owner says "rebake", "run the bakes", "regenerate", "is anything stale".
 ---
 
 Read `procedures/rebake.txt` in full, then follow it exactly.

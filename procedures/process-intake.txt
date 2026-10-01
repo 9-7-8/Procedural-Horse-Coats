@@ -122,7 +122,7 @@ STEPS
      change both (rule 5).
    - Run tests by name only (--tests '*XTest'), never the full suite. Break the new
      test on purpose once, to prove it can fail.
-   - Run every regenerate-table row the change touched.
+   - Run every rebake row the change touched.
    - If the unit turns out bigger than its score, ship the part that stands alone and
      put the rest back in the treatment as its next piece. Do not widen the run.
 

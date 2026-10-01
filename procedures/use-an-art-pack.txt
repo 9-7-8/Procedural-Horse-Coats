@@ -48,7 +48,7 @@ STEPS
      fails on near-duplicates;
    - block art -> bake-block-art.mjs, then bake-block-previews.mjs and bake-item-art.mjs.
      Those refuse unchanged vanilla art on the wiki.
-   See CLAUDE.md's regenerate table (rebake).
+   See the regenerate table in procedures/rebake.txt (rebake).
 5. Look at it in the game, or in the wiki preview, before calling it done
    (hand-over-a-test, if it needs the owner's eyes).
 

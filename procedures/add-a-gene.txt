@@ -219,7 +219,7 @@ STEPS
       - a case in the handler;
       - a section on making-a-gene's Effects tab;
       - a client RenderLayer, if it draws.
-      AbilityType is on the spec/ row of the regenerate table, so run bakeSpecFixtures,
+      AbilityType is on the spec/ row of rebake's table (row d), so run bakeSpecFixtures,
       then check-parity.mjs.
    6. Config: server keys in N/ServerConfig.java, each with a safe accessor and a
       default. A bad value must never crash a world load. Document each key on
@@ -326,7 +326,7 @@ STEPS
      :web:bakeDesignerAssets  then  node wiki/tools/check-designer-boots.mjs
      node wiki/tools/bake-verification-index.mjs  (and bake-roadmap-index.mjs)
      node wiki/tools/build-search-index.mjs, check-links.mjs, bake-agent-text.mjs
-   Commit everything those wrote (CLAUDE.md's gene row lists them). A wasm rebuild
+   Commit everything those wrote (rebake's gene row, g, lists them). A wasm rebuild
    after a data-only bake may be byte-noise: compare the two, and revert the wasm if
    nothing reachable changed.
 
@@ -357,4 +357,4 @@ SEE ALSO
 --------
 wiki/making-a-gene.html (the full reference); wiki/model-parts.html; design-a-breed;
 process-intake; hand-over-a-test; end-session; release; CLAUDE.md (hard rules 3, 5, 6,
-7, 10 and the gene rows of the regenerate table).
+7, 10 and the gene rows of rebake's table).

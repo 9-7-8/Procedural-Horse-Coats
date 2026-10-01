@@ -199,3 +199,22 @@ Then the owner settled what was still undecided, through the question tool:
   roadmap-execution.
 - Test timings get recorded at the next release's full run, not by a run now.
 - Two more procedures: add-a-wiki-page and use-an-art-pack.
+
+Then CLAUDE.md was audited for routines hiding as rules. It went from 264 lines to 192.
+- The "Regenerate what you invalidate" table (its biggest block) now lives only in
+  procedures/rebake.txt, as plain-text rows a-x. It added a row for the part sheet,
+  which was never in the table. The per-wood "written twice" note and the
+  parity-snapshot paragraph went with it.
+- Hard rule 9's mechanics became /close-a-check. It covers both a check that has been
+  answered and a plan that has shipped.
+- The Build & test command list became a pointer to test-tiers.
+- Hard rule 7's gene-page detail, the three-tabs note and the contracts note became
+  pointers.
+- end-session's inline budget audit became /audit-claude-md. That procedure was then
+  run on the result: every pointer resolves, and the only numbers left are the budget,
+  an example and a gap id.
+Every reference to "CLAUDE.md's table" now points at procedures/rebake.txt: seven
+procedures, ten intake treatments, three Java comments and architecture.html. That
+page's "Cutting a release" section is now a pointer to /release. It had said the version
+lives in two places, but neoforge.mods.toml has read ${mod_version} since 2026-09-16.
+Two more memories became pointers.
