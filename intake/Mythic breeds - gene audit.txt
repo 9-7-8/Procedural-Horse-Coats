@@ -1,7 +1,7 @@
 Mythic breeds - gene audit
 
 An AUDIT, NOT A SPEC. Nothing here has been changed in the repo and no decision has been made for the owner. It
-maps six tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
+maps seven tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
 parts and breeds), what is already scoped in intake/ but not built, and what is still unscoped. Read from the
 shipped gene classes and gene files, the wiki gene pages, the shipped breed files and every treatment in intake/.
 UNVERIFIED lines are things I could not confirm.
@@ -11,9 +11,9 @@ Scope rules (the owner's)
 - PUBLIC DOMAIN ONLY. Anything drawn from a still-protected work is out: the Lord of the Rings (Shadowfax, the Mearas),
   Harry Potter (the thestral), Dungeons & Dragons (the D&D nightmare), The Legend of Zelda (Epona) and The NeverEnding Story
   (Artax), Narnia (Fledge; C. S. Lewis) and Tolkien's legendarium (Nahar, Felaroef, Asfaloth, Snowmane, Rochallor) and further Narnia horses (Bree, Hwin, Jewel) were in the tables and are now REMOVED from this audit. What stays is myth and folklore with no living rightsholder:
-  Greek, Norse, Hindu, Chinese, East Asian, Irish, Scottish, Orcadian, Turkic and Islamic traditions.
+  Greek, Norse, Icelandic saga, Hindu, Chinese, East Asian, Irish, Scottish, Orcadian, Turkic and Islamic traditions.
 - Corollary for the building sessions: a breed's name and lore must be written fresh from the myth, not copied. The tables cite
-  Wikipedia and other sites; their wording is not public domain (Wikipedia text is CC BY-SA). Name the creature, write our own
+  Wikipedia and other sites (some of the Irish rows cite local-history pages whose own wording is certainly not public domain); their wording is not public domain (Wikipedia text is CC BY-SA). Name the creature, write our own
   description.
 - NO TALKING. A horse that speaks or prophesies is a huge feature and is out of scope for now. It is dropped as a gap everywhere
   below (Arion, Xanthus; the Narnian Talking Horses, Bree, Hwin, Jewel and Fledge, went out with their stories). It stays as breed-description lore only, or not at all.
@@ -113,6 +113,8 @@ GAP, nothing anywhere:
 20. ROOSTER FOREPARTS (Hippalektryon): GAP, the same family as the Hippocampus. A rooster front on a horse's hind half needs a way to HIDE the horse's head, neck and forelegs (gap 7)
     and then to ADD a beaked head, a comb and wattles, a feathered chest and bird feet. The ruff (INTAKE) and the bird coat patterns (corvid, peafowl) give a feathered neck and
     chest look; beak, comb and talons are unscoped parts (the talons would be the unscoped foot claws, gap 8). Out of reach without 7.
+21. RIDER PROTECTION (Enbarr, in "one account"): GAP, optional. A horse that keeps its rider from being killed while mounted. The nearest shipped pieces protect against ONE cause each (Ocean Born:
+    cannot drown; Bird Boned: no fall damage). There is no "cannot be killed while riding" gene. It touches the same death-handling design as immortality (13) and should be decided with it.
 18. A NATURAL DAPPLE GENE: now on the owner's to-do list (intake/To do.txt). Wanted by Balius.
 
 Breed by breed (public-domain sources only)
@@ -202,6 +204,20 @@ Status: READY (all genes exist, build the breed JSON), PARTIAL (the breed can sh
                   Vishnu in Hindu tradition, so the same care as Buraq applies to how it is named, written and framed.
  Lampos, Phaethon (the horses of Dawn)  READY. A sun-and-dawn chariot pair; the same family as the Horses of Helios and Arvakr and Alsvidr, and the same only-the-hitch caveat (two to a wagon is a
                   carts Roadmap item). Name cautions from the table: this Phaethon is the horse, not the better-known figure who drove the sun chariot, and Lampos is not Lampon (one of Diomedes's horses).
+ SEVENTH TABLE (Irish, Icelandic and Homeric horses; all public domain; the Irish trio's source is a local-history page, so write fresh).
+ Enbarr / Aonbharr  READY minus 21 (optional). Runs over land and sea "swift as the wind": true flight is not asked for, but Waterborn (walks on the surface of water) plus speed 10 is exactly that.
+                  White is a retelling choice, the table says, not an ancient fact, so it is a pool colour and not a rule. The "protects the rider from being killed" account is gap 21 and optional.
+ Liath Macha and Dub Sainglend  READY. Cu Chulainn's grey (Grey) and black (Extension and Agouti) chariot pair, "remarkable endurance and loyalty": stats and bond. They appear from a pool in the
+                  story, which is flavour. Only a matched pair hitched to one chariot waits on the carts Roadmap item (two to a wagon).
+ Freyfaxi ....... READY, and it already has its one mechanic. Hrafnkell forbids anyone else to ride his horse: the shipped rule that a tamed horse refuses to carry anybody but its owner (and teams
+                  and allies) does exactly that. A plain horse otherwise.
+ Rhesus's horses  READY. A white team "whiter than snow", large and strong, speed 10: Extreme White Dominant or Grey. An unnamed team, so a breed with a lore name, not a named individual.
+ Attach, Gaoth, Sidhe  READY. A named trio with no stated powers. Gaoth means "wind", which the table says does not prove speed; the weather speed gene exists if wanted, but nothing claims it.
+                  Treat the spellings and meanings cautiously (the table's own note).
+ Podargos (Hector's)  READY. A battle-trained chariot horse, speed 9: stats, and the Magic Fighter gene (what the horse hits for) if a fighter is wanted. Name caution: not Podargos of the Diomedes
+                  team, and not Podarkes of the earlier table; the breed id needs a disambiguator.
+ Niamh's white horse  READY minus 10 (optional). White, light to medium, "10+": Waterborn covers riding over the sea. Carrying a rider between Ireland and the Otherworld is gap 10 (realm travel),
+                  the same gap as Sleipnir and Buraq. The table says do not identify it with Enbarr: they are two breeds.
  Nuckelavee ..... BLOCKED, a different class of problem: 14 (skinless coat, cheap), 15 (torso and leg fins, large), 16 (poison aura, small). It is a rideable
                   monster in name only; consider a non-rideable boss mob, or leave it out.
 
@@ -215,7 +231,7 @@ Out of scope for now: a talking or prophesying horse (Arion, Xanthus; the Narnia
 
 What this means for scoping
 ===========================
-Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Mares of Diomedes, Horses of Helios (with Bronte, Sterope, Aithops), Chollima (wingless), Hofvarpnir, Sinir, Skeidbrimir, Gisl, Falhofnir, Bloudughofi, Skylla, Sthenios, Askhetos, Kygnos, Pedasus, Gulltoppr, Silfrintoppr, Gladr, Gyllir, Glenr, Lettfeti, Devadatta, Lampos, Phaethon (and Kyllaros, Phlogeus, Harpagos without immortality). Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Partial
+Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Mares of Diomedes, Horses of Helios (with Bronte, Sterope, Aithops), Chollima (wingless), Hofvarpnir, Sinir, Skeidbrimir, Gisl, Falhofnir, Bloudughofi, Skylla, Sthenios, Askhetos, Kygnos, Liath Macha, Dub Sainglend, Freyfaxi, Rhesus's horses, Attach, Gaoth, Sidhe, Podargos (Hector's), Enbarr, Niamh's white horse, Pedasus, Gulltoppr, Silfrintoppr, Gladr, Gyllir, Glenr, Lettfeti, Devadatta, Lampos, Phaethon (and Kyllaros, Phlogeus, Harpagos without immortality). Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Partial
 (wings optional): Tulpar, Buraq, Qilin (a horse-bodied version). Mostly covered once the parts are built (INTAKE): Longma, Unicorn.
 One real blocker each: Pegasus (wings), Uchchaihshravas (seven heads), Sleipnir (eight legs), Hippocampus (hide the rear plus a fish tail), Kelpie and Each-uisge
 (forced riding), Nuckelavee (several).
@@ -237,7 +253,8 @@ Design questions this raises that are not gene gaps
 - Which of these should be wild spawns, creative/spawn-egg only, or reachable only by breeding. The breed file's spawn list already supports all three; the
   tables do not say.
 - Whether "10+" speed means the stat cap or a stat past it. UNVERIFIED.
-- Naming: the fifth table has several beings who share a name with another (Aithon of Ares and Aithon of Helios, Podarkes and Podargos, Kyllaros and the centaur Cyllarus, Phaethon the horse and Phaethon the charioteer, Lampos and Lampon). Breed ids must be unique and readable.
+- Rider protection (21) and realm travel (10) belong with immortality (13): one design call on what the mod will let a horse do about death and about worlds.
+- Naming: the fifth table has several beings who share a name with another (Aithon of Ares and Aithon of Helios, Podarkes and Podargos (and a third, Hector's, who is neither), Kyllaros and the centaur Cyllarus, Phaethon the horse and Phaethon the charioteer, Lampos and Lampon). Breed ids must be unique and readable.
 - Whether to scope Momentum Sprint (wiki/momentum-sprint.html, Roadmap tab only, no intake treatment). Chollima's whole identity depends on it, and the page also names Arion and Sleipnir.
 - A team of two or four to one chariot (Arvakr and Alsvidr, the Horses of Helios): a carts Roadmap item, not scoped.
 
@@ -246,3 +263,18 @@ What I could not verify
 - Whether the breed stat curve can express speed 10 (or pull 10 together with it) for a whole breed.
 - The exact allele tokens of the flying gene's true-flight form; the Nightmare and Cloudtouched breed files already pin the gene, so copy their pairs.
 - Whether a dragon-like mane can be done with the existing mane colour genes plus the head and body parts; a visual judgement.
+
+Final tally (after seven tables; names only, so it cannot go stale as a number)
+==============================================================================
+READY, no engineering: Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Gullfaxi, Svadilfari, Puca, Mares of Diomedes, Horses of Helios (with Bronte, Sterope, Aithops), Chollima (wingless),
+  Hofvarpnir, Sinir, Skeidbrimir, Gisl, Falhofnir, Bloudughofi, Skylla and Sthenios, Askhetos, Kygnos, Pedasus, Gulltoppr, Silfrintoppr, Gladr, Gyllir, Glenr, Lettfeti, Devadatta,
+  Lampos and Phaethon, Liath Macha, Dub Sainglend, Freyfaxi, Rhesus's horses, Attach, Gaoth, Sidhe, Podargos (Hector's).
+READY minus a design call (they ship as ordinary fast horses until it is decided): Arion, Balius (and a dapple gene), Xanthus, Podarkes, Kyllaros, Phlogeus, Harpagos (immortality, 13);
+  Enbarr (rider protection, 21, optional) and Niamh's white horse (realm travel, 10, optional).
+PARTIAL: Tulpar, Buraq, Qilin (horse-bodied), Unicorn (exists). MOSTLY COVERED by INTAKE: Longma.
+BLOCKED: Pegasus (wings), Uchchaihshravas (seven heads), Sleipnir (eight legs), Hippocampus (hide the rear and a fish tail), Hippalektryon (rooster foreparts), Kelpie and Each-uisge (forced
+  riding), Aithon, Konabos and Phobos (fire breath), Nuckelavee (several).
+Removed: everything not public domain, and the talking horses (see the rules at the top).
+Next to scope, in the order the audit recommends: wings; forced riding; tails; immortality, rider protection and realm travel as one design call; a natural dapple gene (on the to-do list);
+  fire breath; and only then the body-structure problems. Momentum Sprint (Chollima's defining feat) is a Roadmap item with no treatment yet.
+Biomes for every entry, and the open spawn questions, are in "Mythic breeds - biome assignments.txt".

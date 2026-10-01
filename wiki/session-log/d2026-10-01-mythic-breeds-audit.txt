@@ -1,0 +1,33 @@
+2026-10-01 - the mythic-breeds audit, and a biome for every one
+
+
+    An intake session, a second one the same day. No code touched, nothing built or
+    played. The owner pasted seven tables of mythical and folkloric horses (the
+    Greek, Norse, Irish, Hindu, Chinese, Turkic and Islamic traditions, plus a few
+    from books and games) and asked which genes the mod already has to make them,
+    which are already scoped in intake/, and which still need scoping. Two rules
+    arrived along the way: public domain only, and no talking horses.
+
+    The audit (intake/Mythic breeds - gene audit.txt). Everything from Tolkien,
+    Harry Potter, Dungeons and Dragons, Narnia, Zelda and The NeverEnding Story was
+    removed under the first rule, and the speaking-horse gap under the second.
+    What is left maps cleanly: about forty breeds can be built from existing genes
+    with no engineering (the plain Norse and Greek named horses, the sun-chariot
+    teams, Grani, Skinfaxi, Hrimfaxi, Gullfaxi, Svadilfari, the Irish chariot pair,
+    Freyfaxi and more); seven wait only on an immortality design call; four are
+    partial; nine are blocked on one real thing each. The biggest unblocker is
+    wings, then forced riding (the kelpie), then tails. New gaps found: immortality,
+    rider protection, fire breath, a skinless coat, rooster foreparts, extra legs
+    and heads, hiding a bone, and a natural dapple gene (added to intake/To do.txt).
+
+    The biomes (intake/Mythic breeds - biome assignments.txt). Every entry has a
+    vanilla biome list drawn from the herd modifier's own list, a spawn time, a
+    commonness tier, and a consequence check against the breed climate spec (eight
+    breeds would pick up cold tolerance from their biomes). The coasts are the
+    crowded part: a few water breeds were thinned to keep beaches and stony shores
+    from becoming a fifth mythic.
+
+    What the next session picks up first: the audit's own order (wings, forced
+    riding, tails, one immortality-and-travel design call), plus the owner's open
+    questions in the biome file (spawn kinds, whether the plain horses should be
+    one breed, whether each sun team is one breed).
