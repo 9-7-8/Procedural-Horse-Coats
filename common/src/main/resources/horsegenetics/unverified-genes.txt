@@ -252,6 +252,11 @@ horsegenetics.magic_zebra
 horsegenetics.grey
 horsegenetics.extension
 horsegenetics.accretion_field
+horsegenetics.antler_bloom
+horsegenetics.antler_crystal
+horsegenetics.antler_form
+horsegenetics.antler_glow
+horsegenetics.antlers
 horsegenetics.census
 horsegenetics.cleave_side
 horsegenetics.shade

@@ -1,0 +1,84 @@
+{
+  "id": "rimehart",
+  "name": "Rimehart",
+  "description": "A dun horse out of the snow forests with a rack of antlers on mare and stallion alike, swept back and over with a tine thrown forward above the face. No two racks match, and no rack matches itself: the two sides grow differently, as a reindeer's do. Some carry moss on the tines, and a few have points that glow through the polar night. Stocky, shaggy and untroubled by any cold.",
+  "kind": "magical",
+  "commonness": "rare",
+  "biomes": [
+    "minecraft:snowy_taiga",
+    "minecraft:taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:grove",
+    "minecraft:snowy_plains"
+  ],
+  "price": [30, 48],
+  "stats": {
+    "speed": 5,
+    "jump": 4,
+    "health": 8,
+    "size": [0.88, 0.98],
+    "pull": 8
+  },
+  "genes": {
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 70 },
+      { "pair": "E/e", "weight": 30 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "A/A", "weight": 35 },
+      { "pair": "A/a", "weight": 35 },
+      { "pair": "a/a", "weight": 30 }
+    ],
+    "horsegenetics.dun": [
+      { "pair": "D/D", "weight": 70 },
+      { "pair": "D/d2", "weight": 30 }
+    ],
+    "horsegenetics.pangare": [
+      { "pair": "Pa2/Pa2", "weight": 60 },
+      { "pair": "Pa2/Pa1", "weight": 40 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 100 }
+    ],
+    "horsegenetics.antlers": [
+      { "pair": "Ant/Ant", "weight": 70 },
+      { "pair": "Ant/Antm", "weight": 20 },
+      { "pair": "Ant/n", "weight": 10 }
+    ],
+    "horsegenetics.antler_form": [
+      { "pair": "Brw/Brw", "weight": 70 },
+      { "pair": "Frk/Brw", "weight": 15 },
+      { "pair": "Brw/Pal", "weight": 15 }
+    ],
+    "horsegenetics.antler_bloom": [
+      { "pair": "Blm/Blm", "weight": 15 },
+      { "pair": "Blm/n", "weight": 20 },
+      { "pair": "n/n", "weight": 65 }
+    ],
+    "horsegenetics.antler_glow": [
+      { "pair": "Glw/Glw", "weight": 10 },
+      { "pair": "Glw/n", "weight": 20 },
+      { "pair": "n/n", "weight": 70 }
+    ]
+  },
+  "bands": {
+    "horsegenetics.antlers": {
+      "size": [0.35, 0.75],
+      "tines": [3.5, 6.5],
+      "reach": [0.95, 1.2],
+      "asymmetry": [0.15, 0.45],
+      "tint": [0.25, 0.6]
+    },
+    "horsegenetics.antler_bloom": {
+      "growth": 1
+    }
+  },
+  "notes": [
+    "ANTLERS ON BOTH SEXES. Every founder carries Ant, the allele that grows antlers on a mare as well as a stallion - the reindeer's arrangement, and the reason this breed exists. One in five also carries Antm, the stallion-only allele, silently: Ant is dominant over it, so it only surfaces when two Rimeharts each pass it on, and then it is the mares of that line that go bare.",
+    "BROW-TINED. 70 in 100 are Brw/Brw; 15 carry Frk under it and show brow-tined anyway, and 15 carry Pal over it and show palmate - Pal is the top of the antler_form series. A palmate Rimehart bred to a plain one throws half brow-tined foals.",
+    "ASYMMETRIC, AND THE FIRST BREED TO PIN IT. No wild horse has any asymmetry - every founder rolls exactly zero and drift cannot move it (decision D3) - so the only way to a lopsided rack is a breed that writes the value. This one bands it 0.15 to 0.45: past 0.1 the left antler grows a different rack from the right, and the more of it a horse has, the fewer tines and the shorter beam on that side. Bred to an unrelated antlered horse, the foals' copies carry the number on, so a line keeps its lopsidedness without the breed.",
+    "SIZE AND TINES ARE BANDED UP. A wild antlered horse is drawn from the lower part of the size ladder with one to six tines; a Rimehart sits from small to large with three and a half to six and a half. Neither is a ceiling: a line bred for size climbs to a massive rack, and the clamp stops it there.",
+    "Moss, not leaves: every Rimehart that blooms grows moss (growth index 1). A fifth carry the bloom silently. A few have glowing points, and another fifth carry them.",
+    "Dun over bay or black - bay dun and grullo - with pangare paling the muzzle and belly, so the coat reads grey-brown with a light underside, the reindeer's colours. Cold-tolerant (Ctol/Ctol) like every snow breed."
+  ]
+}

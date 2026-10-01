@@ -354,6 +354,16 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.horn_colour", MAGIC_PARTS);
         MAGICAL_OVERRIDES.put("horsegenetics.horn_glow", MAGIC_PARTS);
         MAGICAL_OVERRIDES.put("horsegenetics.horn_dust", MAGIC_PARTS);
+        // The antlers, and the four loci that shape and finish them. The treatment
+        // proposed "natural" for the first two; they are magical here because a
+        // natural gene that paints nothing files as a disorder (NATURAL_HEALTH),
+        // and because this family's own note names antlers as what it was made
+        // for. An open call on decisions.html, not a settled one.
+        MAGICAL_OVERRIDES.put("horsegenetics.antlers", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.antler_form", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.antler_glow", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.antler_crystal", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.antler_bloom", MAGIC_PARTS);
 
         // The sex locus paints nothing and is not a disorder. The editors keep
         // it off their lists entirely - the Sex button owns it - but it is a

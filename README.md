@@ -122,9 +122,10 @@ closer, and `coats.bakeBudgetMs` caps how much time per moment goes into making 
 ones. Lower either on a slower computer.
 
 The other thing in there worth knowing about is **`parts.enabled`**, which draws the
-bits some horses grow - a unicorn's horn, so far. A horn is about as much shape again as
-the horse wearing it, so a big herd of them is the one case worth a switch: turn it off,
-or turn off just `parts.glow` (the extra pass a horn that shines in the dark needs, and
+bits some horses grow - a unicorn's horn, and a rack of antlers. A horn is about as much
+shape again as the horse wearing it and a rack more, so a big herd of them is the one case
+worth a switch: turn it off, or turn off just `parts.glow` (the extra pass a horn or
+antler points that shine in the dark need, and
 the first thing to try if a shader pack makes one look wrong), or bring
 `parts.detailDistance` in. **None of it changes your horses** - a horse with a horn still
 has the horn, still passes it to its foals, and wears it again the moment you switch

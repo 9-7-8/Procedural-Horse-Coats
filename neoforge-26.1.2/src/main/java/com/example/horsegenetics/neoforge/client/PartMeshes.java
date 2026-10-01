@@ -36,9 +36,12 @@ import java.util.Map;
  * there is nothing here to ration.
  * <ul>
  *   <li><b>No eviction.</b> The whole set of meshes this mod can bake is bounded by
- *       {@code kinds x styles x }{@link PartShape#SIZE_BUCKETS} - sixty-four for
- *       the horn, and {@code PartGeneratorTest} pins that. A cache that cannot
- *       exceed sixty-four entries of ninety quads each does not need a policy.</li>
+ *       {@code PartGenerators.allShapes()}, and {@code PartGeneratorTest} pins it.
+ *       The antlers took that bound from sixty-four to the high hundreds - two sides,
+ *       five habits, sixteen racks, five sizes - and it stayed without a policy
+ *       because the cache fills only with racks somebody has actually bred, and a
+ *       world holding every one of them is a world with hundreds of distinct
+ *       antlered lines in view. If that is ever measured, this is where the LRU goes.</li>
  *   <li><b>No budget.</b> {@code GeneticCoatTextureFactory} rations bakes because a
  *       coat is a per-pixel loop over a 128x128 sheet and there are unboundedly
  *       many of them - walking toward a herd froze the owner's machine outright.
@@ -132,6 +135,6 @@ public final class PartMeshes {
             PartNode node = nodes.get(i);
             parts[i] = (node.isRoot() ? baked : parts[node.parent()]).getChild("n" + i);
         }
-        return new PartModel(baked, List.of(parts));
+        return new PartModel(baked, List.of(parts), nodes);
     }
 }

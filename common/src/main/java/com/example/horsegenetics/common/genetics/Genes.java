@@ -127,6 +127,11 @@ import com.example.horsegenetics.common.genetics.genes.TigerEyeGene;
 import com.example.horsegenetics.common.genetics.genes.TobianoGene;
 import com.example.horsegenetics.common.genetics.genes.Toe1Gene;
 import com.example.horsegenetics.common.genetics.genes.UnicornHornGene;
+import com.example.horsegenetics.common.genetics.genes.AntlerBloomGene;
+import com.example.horsegenetics.common.genetics.genes.AntlerCrystalGene;
+import com.example.horsegenetics.common.genetics.genes.AntlerFormGene;
+import com.example.horsegenetics.common.genetics.genes.AntlerGlowGene;
+import com.example.horsegenetics.common.genetics.genes.AntlersGene;
 import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.genetics.genes.HornDustGene;
 import com.example.horsegenetics.common.genetics.genes.HornGlowGene;
@@ -564,6 +569,21 @@ public final class Genes {
     public static final HornGlowGene HORN_GLOW = new HornGlowGene();
     /** Horn dust - recessive; the horn sheds falling dust in its own colours. Silent without a horn. */
     public static final HornDustGene HORN_DUST = new HornDustGene();
+    /**
+     * <b>Antlers</b> - the second locus that grows geometry. Dominant, three
+     * alleles: {@code Ant} on both sexes, {@code Antm} on stallions only (a render
+     * gate, not a genotype rule). Size, rack, tines, reach, girth, asymmetry and
+     * colour are epigenetic. Paints nothing.
+     */
+    public static final AntlersGene ANTLERS = new AntlersGene();
+    /** Antler form - the rack's growth habit, a dominance series. Silent without antlers. */
+    public static final AntlerFormGene ANTLER_FORM = new AntlerFormGene();
+    /** Antler glow - recessive; the antlers' points glow. Silent without antlers. */
+    public static final AntlerGlowGene ANTLER_GLOW = new AntlerGlowGene();
+    /** Crystal antlers - recessive; see-through gem shafts, solid points. Silent without antlers. */
+    public static final AntlerCrystalGene ANTLER_CRYSTAL = new AntlerCrystalGene();
+    /** Blooming antlers - recessive; leaves, moss or blossom on the rack. Silent without antlers. */
+    public static final AntlerBloomGene ANTLER_BLOOM = new AntlerBloomGene();
     public static final HealerGene HEALER = new HealerGene();
     /**
      * Magic sectoral heterochromia - two different colour alleles and the horse
@@ -689,6 +709,7 @@ public final class Genes {
             PACK_LEADER, SPAWNER,
             LIGHT, HEALER, SECTORAL_EYES, VERDANT, LUT, CUTIE_MARK, UNICORN_HORN,
             HORN_COLOUR, HORN_GLOW, HORN_DUST,
+            ANTLERS, ANTLER_FORM, ANTLER_GLOW, ANTLER_CRYSTAL, ANTLER_BLOOM,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

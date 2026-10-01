@@ -44,6 +44,32 @@ public final class PartSheet {
     public static final int HORN_TIP = 1;
 
     /**
+     * Antler bone - a coarser, pitted grain than the horn's, running along the
+     * beam. Opaque, and the region a crystalline antler draws see-through.
+     */
+    public static final int BONE = 2;
+
+    /**
+     * The last box of every antler chain - each tine's point and the beam's
+     * end. Polished smoother and paler; the region a glowing antler lights and a
+     * crystalline one keeps opaque.
+     */
+    public static final int BONE_TIP = 3;
+
+    /**
+     * Leaf, moss and blossom clumps on a blooming antler. A mottled grain with no
+     * direction. Every antler mesh carries these boxes; only a blooming one draws
+     * them - see {@code AntlerGenerator}.
+     */
+    public static final int BLOOM = 4;
+
+    /** Every region, as a mask for {@link #bit} tests. */
+    public static final int ALL = -1;
+
+    /** Every region but {@link #BLOOM}: the solid body of a part. */
+    public static final int SOLID = ~(1 << BLOOM);
+
+    /**
      * How many regions the sheet has room for. The grid is deliberately larger
      * than the two regions in use: antlers, crystals and hoof feathering each
      * want one or two, and they land without moving a single UV that already
@@ -62,5 +88,15 @@ public final class PartSheet {
     /** Top edge of {@code region}, in pixels - a {@code texOffs} v. */
     public static int v(int region) {
         return (region / ACROSS) * REGION;
+    }
+
+    /** {@code region} as a one-bit mask, for a submit that draws only some regions. */
+    public static int bit(int region) {
+        return 1 << region;
+    }
+
+    /** Does {@code mask} include {@code region}? */
+    public static boolean in(int mask, int region) {
+        return (mask & bit(region)) != 0;
     }
 }

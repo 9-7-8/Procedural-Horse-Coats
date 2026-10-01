@@ -25,20 +25,25 @@ package com.example.horsegenetics.common.parts;
  * the same scale: nothing pops as a lineage's horns grow through a boundary.
  *
  * <h2>The bound on cost is structural</h2>
- * {@code kinds x styles x SIZE_BUCKETS} is every part mesh this mod can ever
- * bake - 64 for the horn - however many horses exist and whatever a drifted
- * epigenome asks for. That is the whole reason the key is coarse, and it is worth
- * more than a budget somebody has to remember to enforce.
+ * The sum over kinds of {@code styles x sizeBuckets} is every part mesh this mod
+ * can ever bake, however many horses exist and whatever a drifted epigenome asks
+ * for - {@code PartGenerators.allShapes().size()}, pinned by
+ * {@code PartGeneratorTest}. That is the whole reason the key is coarse, and it is
+ * worth more than a budget somebody has to remember to enforce.
  *
  * @param kind  what the part is
  * @param style which of {@link PartKind#styles()} variants
- * @param size  which of {@link #SIZE_BUCKETS} length steps
+ * @param size  which of {@link PartKind#sizeBuckets()} length steps
  */
 public record PartShape(PartKind kind, int style, int size) {
 
     /**
-     * Length steps per kind. Sixteen, so the widest gap between neighbours is
-     * under 7% - see the class note.
+     * The horn's length steps. Sixteen, so the widest gap between neighbours is
+     * under 7% - see the class note. Other kinds name their own count in
+     * {@link PartKind#sizeBuckets()}: an antler's five are size classes with a
+     * different rack in each, so its stretch within a class is wider (under 20%)
+     * and that is deliberate - the class change is the topology, the stretch only
+     * the seam.
      */
     public static final int SIZE_BUCKETS = 16;
 
@@ -50,9 +55,9 @@ public record PartShape(PartKind kind, int style, int size) {
             throw new IllegalArgumentException(
                     kind + ": style " + style + " outside 0.." + (kind.styles() - 1));
         }
-        if (size < 0 || size >= SIZE_BUCKETS) {
+        if (size < 0 || size >= kind.sizeBuckets()) {
             throw new IllegalArgumentException(
-                    kind + ": size bucket " + size + " outside 0.." + (SIZE_BUCKETS - 1));
+                    kind + ": size bucket " + size + " outside 0.." + (kind.sizeBuckets() - 1));
         }
     }
 
@@ -66,20 +71,27 @@ public record PartShape(PartKind kind, int style, int size) {
      */
     public static PartShape of(PartKind kind, int style, double length) {
         double clamped = length < 0.0 ? 0.0 : (length > 1.0 ? 1.0 : length);
-        int bucket = (int) (clamped * SIZE_BUCKETS);
+        int buckets = kind.sizeBuckets();
+        int bucket = (int) (clamped * buckets);
         return new PartShape(kind, Math.max(0, Math.min(kind.styles() - 1, style)),
-                Math.min(SIZE_BUCKETS - 1, bucket));
+                Math.min(buckets - 1, bucket));
     }
 
     /** The middle of this bucket, on the {@code [0,1]} size ladder. */
     public double centre() {
-        return (size + 0.5) / SIZE_BUCKETS;
+        return (size + 0.5) / kind.sizeBuckets();
     }
 
     /** How long the mesh this shape bakes to actually is, in model units. */
     public float nominalLength() {
+        return lengthAt(centre());
+    }
+
+    /** The length {@code position} on this kind's ladder asks for. */
+    private float lengthAt(double position) {
         return switch (kind) {
-            case HORN -> HornSize.lengthFor(centre());
+            case HORN -> HornSize.lengthFor(position);
+            case ANTLER_RIGHT, ANTLER_LEFT -> AntlerSize.lengthFor(position);
         };
     }
 
@@ -90,8 +102,6 @@ public record PartShape(PartKind kind, int style, int size) {
      */
     public float stretchTo(double position) {
         double clamped = position < 0.0 ? 0.0 : (position > 1.0 ? 1.0 : position);
-        return switch (kind) {
-            case HORN -> HornSize.lengthFor(clamped) / nominalLength();
-        };
+        return lengthAt(clamped) / nominalLength();
     }
 }

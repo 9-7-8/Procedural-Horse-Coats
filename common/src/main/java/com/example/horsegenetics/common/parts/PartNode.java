@@ -43,9 +43,24 @@ package com.example.horsegenetics.common.parts;
  * @param len    how far the box reaches up its own axis, model units
  * @param girth  the box's square cross-section, model units
  * @param tex    which {@link PartSheet} region the box samples
+ * @param group  which <b>countable element</b> this box belongs to - an antler's
+ *               tines are groups {@code 0, 1, 2...} ordered base to tip, so "show
+ *               the first {@code k}" is always a sensible antler. {@link #NO_GROUP}
+ *               for a box that is always drawn (a horn, an antler's beam). The
+ *               first box of a group, the one whose parent is outside it, is the
+ *               one the client hides or shrinks; the rest follow as its children.
  */
 public record PartNode(int parent, float t, float ox, float oy, float oz,
-                       float rx, float ry, float rz, float len, float girth, int tex) {
+                       float rx, float ry, float rz, float len, float girth, int tex, int group) {
+
+    /** {@link #group} of a box that is not part of any countable element. */
+    public static final int NO_GROUP = -1;
+
+    /** A box in no group - everything a horn is made of. */
+    public PartNode(int parent, float t, float ox, float oy, float oz,
+                    float rx, float ry, float rz, float len, float girth, int tex) {
+        this(parent, t, ox, oy, oz, rx, ry, rz, len, girth, tex, NO_GROUP);
+    }
 
     /** Whether this box is rooted at the anchor rather than on another box. */
     public boolean isRoot() {

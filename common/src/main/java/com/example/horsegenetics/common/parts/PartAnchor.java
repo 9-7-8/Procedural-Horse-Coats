@@ -21,11 +21,20 @@ public enum PartAnchor {
      * The flat of the skull between the eyes and forward of the ears, pointing
      * up and a little forward. Where a horn goes.
      */
-    FOREHEAD
+    FOREHEAD,
+
+    /**
+     * The top of the skull just inside and forward of the <b>right</b> ear, where
+     * an antler's pedicle would be. Model {@code -x}, the side of vanilla's own
+     * {@code right_ear}.
+     */
+    CROWN_RIGHT,
+
+    /** The same on the other side, model {@code +x}. */
+    CROWN_LEFT
 
     // The next anchors, named here only so the shape of the enum is obvious and
-    // NOT declared until something draws them: CROWN (behind the ears, for
-    // antlers), SPINE (along the back, for crystals and dorsal spines),
-    // WITHERS_PAIR (wings), HOOF_x4 (feathering, shoes). Each is one row in the
-    // client's offset table and one entry here.
+    // NOT declared until something draws them: SPINE (along the back, for
+    // crystals and dorsal spines), WITHERS_PAIR (wings), HOOF_x4 (feathering,
+    // shoes). Each is one row in the client's offset table and one entry here.
 }

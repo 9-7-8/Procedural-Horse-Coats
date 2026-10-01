@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blooming antlers &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> grows leaves on the antlers, paints nothing</p>
+
+<h1>Blooming antlers</h1>
+
+<p class="lede">
+    Two copies and leaves, moss or blossom grow on a horse's
+    <a href="gene-antlers.html">antlers</a> &mdash; a clump on every tine and a few along
+    each beam. Which of the three is inherited. On a horse without antlers this gene does
+    nothing at all.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.antler_bloom"></div>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Recessive: about one wild horse in twelve has two copies, and most of those have no
+    antlers to bloom. The <a href="breed-book.html#rimehart">Rimehart</a> carries it, and
+    every Rimehart that blooms grows moss.
+</p>
+
+<h2 id="what-it-does">What it looks like</h2>
+
+<p>
+    Small clumps on the tines and the beams, in leaf green, moss olive or blossom pink. A
+    tine the horse has not fully grown carries its clump at the same partial size. The
+    growth is written on the allele and almost never changes between parent and foal.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all, for good or ill. Nothing can be harvested from the leaves.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.antler_bloom"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.antler_bloom</dd></div>
+    <div><dt>Class</dt><dd><code>AntlerBloomGene</code></dd></div>
+    <div><dt>Priority</dt><dd>234 (magical band); only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Blm</span> <span class="allele wild">n</span></dd></div>
+    <div><dt>Founders</dt><dd><code>Blm/Blm</code> 8%, <code>n/n</code> the rest &mdash; no wild carriers</dd></div>
+    <div><dt>Epigenome</dt><dd><code>growth</code> &mdash; a category over <code>AntlerBloomGene.GROWTHS</code> (leaves, moss, blossom); append only</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="door">It costs boxes, not a system</h2>
+
+<p>
+    Every antler mesh <code>AntlerGenerator</code> builds already carries its clumps, in
+    the <code>PartSheet.BLOOM</code> region: one on each tine's point, in that tine's group
+    so it hides and shrinks with it, and a few on the beam. An ordinary rack's submits
+    simply never draw that region. <code>GrownParts.of</code> sets the part's
+    <code>bloomTint</code>, and the layer adds one submit drawing only <code>BLOOM</code>
+    in that colour. That is the treatment's "a per-tine tint override plus a small second
+    box set", done as a region of the mesh rather than a second mesh, so it adds no axis
+    to the part cache.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="real-horses">There is no real locus here</h2>
+
+<p>
+    A magical gene with no real counterpart. Deer do rub velvet and vegetation off their
+    antlers, and an old stag's rack can come away with moss and grass tangled in it; this
+    is that image, made heritable.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Blooming antlers have not been seen in game, so whether the clumps read as foliage rather than blocks is unchecked.</p>
+</div>
+
+<h3 id="open-bloom-look">Leaves, moss and blossom on a rack</h3>
+<p>
+    One horse of each growth: the clumps should read as foliage in their colour, sit on the
+    tine points and along the beam, and vanish with a hidden tine. The clump boxes stick
+    out sideways from the beam and may need pulling in on a massive rack.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>
