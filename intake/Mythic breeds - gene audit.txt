@@ -238,4 +238,4 @@ New design calls this table adds
   trademarked character is a licensing and naming question for the owner, not an engineering one. A generic lore name (a "Pampas Bay", a "Pale
   Mare") would carry the same genetics. Flagged, not decided.
 - Individuals again (Arion, Balius, Xanthus, Gullfaxi, Svadilfari, Epona, Artax are single named beings; the same breed-versus-unique-spawn
-  question as the first table, now across seventeen of twenty-one rows).
+  question as the first table, now across eleven of the twenty-one rows).
