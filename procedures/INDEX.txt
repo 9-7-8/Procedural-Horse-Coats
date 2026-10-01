@@ -28,8 +28,12 @@ Command                  Runs    Say (any of)                         What it le
 /launch-game             local   "launch the game", "restart",        exactly one game running,
                                  "launch into the yard",              confirmed from a fresh log
                                  "boot a server"
-/release                 local   "ship a release", "cut a release",   tag + GitHub release with the jar
-                                 "new version"                        + the wiki note
+/release                 local   "ship a release", "new version",     owner's decision; if yes, every
+                                 "is it worth a release"              code test green, jar + wiki note
+/rebake                  local   "rebake", "run the bakes",           every derived artefact current,
+                                 "is anything stale"                  only real changes staged
+/test-tiers              local   "which tests should I run",          the cheapest proving tests run;
+                                 "run the full suite"                 the full suite only for releases
 /add-a-gene              local   "add a gene", "new gene",            one gene (coat / ability / add-on)
                                  "a gene that ..."                    asked, built, baked, pushed
 /design-a-breed          either  "make a breed", "new breed"          a breed designed WITH the owner,
@@ -47,14 +51,13 @@ How they fit together
   bug noticed    -> report-bug (cloud), run-tests (yard) or review-server-logs (server)
                     -> GitHub issue -> fix-bug -> end-session
   needs her eyes -> hand-over-a-test -> launch-game
-  shipping       -> release (after end-session; process-intake triggers it from a Release: line)
+  any change     -> rebake -> test-tiers (lowest tier that proves it)
+  shipping       -> release: offer -> owner decides -> the release set -> tag + jar + note
 
 Routines that might become procedures next
 ------------------------------------------
 These are done often enough to repeat the same way, but nobody has written them up
 yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
-- rebake: walk CLAUDE.md's regenerate table against a diff. It is step 1 of
-  end-session, and often wanted on its own.
 - add-a-wiki-page: hard rule 7 (pages.js), the three tabs, the footer, and the bakes.
 - close-a-check: move a Verification item to Coding with its evidence, delete its pen,
   and re-bake the indexes. It is step 2 of run-tests, often done alone.

@@ -140,3 +140,26 @@ Found on the way: making-a-gene.html's Java tab still had four stale lines.
 - "Run :common:test" - the whole suite.
 - "Delete coat-golden.txt" - the goldens are copied back from common/build/.
 All four are fixed.
+
+Then three more procedures.
+- /rebake walks CLAUDE.md's regenerate table without copying it. It covers the order
+  inside a row, reading real exit codes, git diff over git status, reverting a wasm after
+  a data-only bake, and generated asset copies.
+- /test-tiers sets the rule that the longer a test runs, the more the moment must matter:
+  - tier 0: compile and node checks, in seconds;
+  - tier 1: one test class, about fifteen seconds;
+  - tier 2: gametests, browser checks and a server boot, about a minute;
+  - tier 3: the full suite, ten to fifteen minutes, only for a release or when the owner
+    asks.
+  The owner's new rule: every release runs every code test. CLAUDE.md's full-suite line
+  now says so.
+- /release became "Create a new release". An Explore agent read every release from
+  0.5.000 to 0.5.037 (39 in 21 days), and the pattern became step 1:
+  - crash and stuck-player fixes on a released jar ship within the hour;
+  - one finished feature a player will notice is enough for its own number;
+  - play-report fixes batch;
+  - docs, intake and debug work only ride along;
+  - Claude offers, the owner decides, and she often holds a cut to add one more thing.
+  Then one question round, then the full release set, then the cut. end-session's
+  summary now says whether a release looks due.
+Eight more memories became pointers.

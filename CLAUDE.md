@@ -195,9 +195,9 @@ node wiki/tools/bake-verification-index.mjs && node wiki/tools/bake-roadmap-inde
 node neoforge-26.1.2/tools/check-progress-tasks.mjs # every checklist task is hooked, and is an advancement
 ```
 Requires JDK 25 (auto-provisioned); crash reports land in `neoforge-26.1.2/run/crash-reports/`.
-**Never run the full `:common:test` suite unless the owner asks** - it is ten
-minutes and they will not wait through it; use `--tests` and say in the summary
-what a full run would still need to check. (Owner's rule.)
+**Never run the full `:common:test` suite unless the owner asks or a release is being
+cut** - it is ten minutes and more. Use `--tests`, and say what a full run would still check.
+Which test, when: `procedures/test-tiers.txt` - the longer it runs, the more it must matter.
 **The owner's last play session is on disk - read it rather than asking.**
 `neoforge-26.1.2/run/logs/latest.log`, and `debug.log` beside it for more.
 A bug report of the shape "it still doesn't work" is usually answerable from

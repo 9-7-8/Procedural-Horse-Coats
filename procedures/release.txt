@@ -1,105 +1,152 @@
-PROCEDURE  : Ship a release
+PROCEDURE  : Create a new release
 COMMAND    : /release
 SAY        : "ship a release", "cut a release", "push a release", "release it",
-             "new version", "tag it"
+             "new version", "tag it", "is it worth a release"
 RUNS       : local only (the jar cannot build in the cloud sandbox)
-TAKES      : a green main that the owner has said to release
-LEAVES     : a tag, a GitHub release with the jar attached, and the same note on
-             wiki/releases.html
+TAKES      : main with player-facing work since the last tag
+LEAVES     : the owner's decision recorded; if yes, every code test green, a tag, a
+             GitHub release with the jar, and the same note on wiki/releases.html
 ==============================================================================
 
 WHEN TO USE
 -----------
-When the owner says to ship, or when a treatment's Release: line says "own version" and
-process-intake has just built its last piece. Real players install these jars, and
-they cannot rebuild from source or read the session log. "Builds green here" is not
-"playable there".
+Use this in three cases:
+- when the owner asks for a release;
+- when another procedure reaches its release step: process-intake with a Release: line,
+  fix-bug after a crash fix, or end-session's summary;
+- when a session ends with work on main that the history says is worth one.
+Real players install these jars: testers, and the owner's server. They cannot rebuild
+from source or read the session log, so "builds green here" is not "playable there".
+CLAUDE OFFERS, THE OWNER DECIDES. The only release that is not offered first is one
+the owner has already asked for. A scheduled self-releasing job was tried once and
+retired by the owner: releases are cut by hand, with a jar and a server boot behind
+them.
 
 BEFORE YOU START
 ----------------
 1. `git fetch` FIRST. Cloud routines push to main while a local session works, and a
    release cut from a stale main is rejected at push time, after the tag has gone up.
    If main moved, read what landed and reconcile. Never force-push over it.
-2. Read mod_version in gradle.properties and compare it with `git tag` and
-   `gh release list`. The working version is often already ahead of the last tag; if
-   so, ship that number rather than bumping again.
+2. Read mod_version in gradle.properties and compare it with `git tag --sort=-creatordate`
+   and `gh release list`. The working version is often already ahead of the last tag:
+   if so, ship that number rather than bumping again.
+3. List what is on main since the last tag: `git log --oneline v<last>..origin/main`.
 
 STEPS
 -----
-1. Choose the number. Only the LAST number moves (0.5.037 -> 0.5.038), and it is never
-   reused. The middle number moves only when the owner says so, explicitly: not for a
-   big feature, not for a batch of genes, not because the last number is getting long.
-   A middle-number release is also the only kind that may break saves (CLAUDE.md hard
-   rule 10). Its notes must say "no longer back compatible with saves created under
-   0.X". A patch release must load every world from its series since the save baseline
-   on wiki/releases.html#saves.
-   Bump mod_version in gradle.properties only. neoforge.mods.toml interpolates it.
+1. Decide whether a release is due. The owner's record from 0.5.000 on, as a guide:
+   - SHIP NOW, and offer it the moment it is fixed: a crash, a join-blocker, lost data,
+     or a stuck player on a RELEASED jar, from a tester or the owner's server. Fixes like
+     these have gone out within 20 to 80 minutes of the report, one after another,
+     because players are waiting. A replacement for a broken release also goes now, and
+     its note says "replaces <version>".
+   - OFFER AT THE END OF THE SESSION: a finished feature a player will notice. One
+     feature is enough for its own number; size is no bar (one release was a folder
+     move). The same goes for a batch of fixes from play.
+   - OFFER AFTER A QUIET STRETCH: when several sessions or days of player-facing work
+     sit on main untagged. Those stretches have ended in one large catch-up release.
+   - DO NOT OFFER for these alone: docs, intake planning, test-yard or debug-only work
+     (debug tools are off in a real jar), or an unfinished feature. They ride along with
+     the next release.
+   - EXPECT TO BATCH. The owner often holds a cut to add one more thing ("before you cut
+     a new version, can you implement X too?"). A declined offer is normal; it is not a
+     failure.
+   Releases have run at about two a day, in bursts around play and tester activity. Do
+   not cut one just because time has passed.
 
-2. Boot a server if anything that runs at mod load changed (config specs, the mod
-   constructor, registries, drop-in folders). Follow launch-game, step 8: reach
-   "Done (", AND grep the log for ERROR, Couldn't parse, Invalid and missing. A jar that
-   cannot load goes straight to players.
+2. Ask the owner, in one question-tool round, with options and a recommendation:
+   a. Cut now, or hold it to batch more? (Offer the queue in intake/ or the open issues
+      that could ride along.)
+   b. Anything on main to hold back or call out?
+   c. Does anything change a world players already have? Under hard rule 10, a patch
+      release must load every world saved since the baseline on
+      wiki/releases.html#saves. A migration has to have been built and tested, never
+      "the note will warn them".
+   d. The middle number: only if she raises it. It moves only on her explicit word. It
+      is also the only kind of release that may break saves, and then its note says "no
+      longer back compatible with saves created under 0.X".
+   e. What the title should lead with, if it is not obvious.
+   If she asked for the release outright, ask only what the history does not answer.
 
-3. Ask what a PLAYER hits that this machine does not: a brand-new world, a survival
+3. Run the RELEASE SET from test-tiers: every code test, cheapest first, and stop at the
+   first red. That means every tier-0 node check, the full :common:test suite,
+   :neoforge-26.1.2:test, :neoforge-26.1.2:runGameTest, every headless browser check,
+   and a server boot to "Done (" with the log grepped for
+   'ERROR|Couldn.t parse|Invalid|missing'. A red result blocks the release until it is
+   fixed or the owner waives it.
+   Ask what a PLAYER hits that this machine does not: a brand-new world, a survival
    inventory, a horse in view, a client that never saw the previous format.
 
-4. Write the release note by auditing the WHOLE range from the previous tag, never from
-   what this session remembers building. Run against v<prev>..HEAD:
+4. Choose the number. Only the LAST number moves (0.5.037 -> 0.5.038). A number is never
+   reused, and never reissued with different bytes. Bump mod_version in
+   gradle.properties only: neoforge.mods.toml interpolates it.
+
+5. Write the release note by auditing the WHOLE range from the previous tag, never from
+   what this session remembers building. One note covered a tenth of its range and had
+   to be rewritten after testers had the jar. Run these against v<prev>..HEAD:
      git log --oneline v<prev>..HEAD                       (and --stat for the shape)
      git diff v<prev>..HEAD -- '*/lang/en_us.json'         (new items, blocks, keys, UI)
      git diff --name-status v<prev>..HEAD -- '*/data/horsegenetics/recipe/'
      git diff --name-status v<prev>..HEAD -- '*/src/main/java/**' | grep '^[AD]'
      git diff v<prev>..HEAD -- '*Config*.java' | grep -E '^\+.*(define|comment)'
-   Then hand the session-log read for the date range to a subagent, asking it to mark
-   each item player-facing or dev-only.
-   - Cut everything dev-only. debug.tools is off in a real jar, so the test yard, the
-     kit and the debug pens are unreachable for players. Check that gate before
-     believing a commit subject.
-   - A commit subject can describe code that does not exist. Some "Implement X" commits
-     touched only intake/ drafts. Run `git show --stat` on every commit you mention.
+   Hand the session-log read for the date range to a subagent, and have it mark each
+   item player-facing or dev-only.
+   - Cut everything dev-only. debug.tools is off in a real jar.
+   - A commit subject can describe code that does not exist. Run `git show --stat` on
+     every commit you mention.
    House style:
-   - a lede, then one section per subject;
-   - "What this does to a world you already have": genes dropped to default, changed
-     breed frequencies, anything that moves a save. Under rule 10 a patch release should
-     have nothing here except migrations that ran;
-   - an honest "Not played yet" / "Known rough edges" section pointing at
-     wiki/verification.html, which opens with the open bugs: the GitHub issues labelled
-     bug;
-   - if an earlier release is broken, a "replace version X" line, and whether existing
-     saves are damaged.
+   - a lede that names the range's breadth, then one section per subject;
+   - "What this does to a world you already have": migrations that ran, removals,
+     changed defaults, changed breed frequencies. Lead with a warning box when anything
+     here could surprise a server owner;
+   - "Not played yet" / "Known rough edges", pointing at wiki/verification.html and
+     opening with the open GitHub bug issues;
+   - when replacing a broken release, the "replace <version>" line, and whether saves
+     made under it are damaged.
 
-5. Build the jar from a CLEAN tree whose HEAD is the commit you will tag, so what ships
-   is provably what was tagged: `./gradlew :neoforge-26.1.2:build`.
+6. Build the jar from a CLEAN tree whose HEAD is the commit you will tag:
+   `./gradlew :neoforge-26.1.2:build`. Open the jar to confirm its version and the new
+   classes.
 
-6. Tag and publish:
+7. Tag and publish:
      git tag -a v<new> -m "<title>"
      git push origin main --tags
      gh release create v<new> <jar> --title "<title>" --notes-file <note>
-   The title describes the range's breadth, not the last feature touched. Check that
-   the commit is right with `git rev-list -n 1 v<new>`. `git rev-parse` returns the tag
-   object, not the commit.
+   Check the tagged commit with `git rev-list -n 1 v<new>`. `git rev-parse` returns
+   the tag object, not the commit.
 
-7. Verify that the jar is reachable: `gh release view v<new> --json assets`. Do not ask
-   for an `isLatest` field: it does not exist, and the whole call errors. A pushed tag
-   is not a release. Testers download from the release page.
+8. Verify that the jar is downloadable: `gh release view v<new> --json assets`. Do not
+   ask for an isLatest field: it does not exist, and the whole call fails. A pushed tag
+   is not a release, because testers download from the release page.
 
-8. Put the same note on wiki/releases.html, as a new <h2 id="v0-5-0xx"> section. Then
+9. Put the same note on wiki/releases.html as a new <h2 id="v0-5-0xx"> section. Then
    run build-search-index.mjs and check-links.mjs, and commit and push.
+
+10. If a release turns out broken: fix it, and ship the replacement at once. Retitle the
+    broken one on GitHub as "superseded by <version>, do not use". Write in the new note
+    what a world that ran the broken one needs.
 
 DONE WHEN
 ---------
-`gh release view` lists the jar. The wiki note matches the GitHub note. main and the
-tag are pushed, and the tree is clean.
+Either the owner has declined or held the release, and that is said in the summary; or:
+- the release set is green;
+- `gh release view` lists the jar;
+- the wiki note matches the GitHub note;
+- main and the tag are pushed, and the tree is clean.
 
 NEVER
 -----
-- Never move the middle number without the owner's explicit word.
+- Never cut a release the owner did not ask for or accept.
+- Never move the middle number without her explicit word.
 - Never reuse a version number, or reissue one with different bytes.
+- Never skip the release set: the full suite runs before every release.
 - Never stop at a pushed tag.
 - Never write the note from memory instead of the tag range.
-- Never release from the cloud. Its sandbox cannot fetch NeoForge, so it ships no jar.
+- Never release from the cloud.
+- Never ship a patch release that breaks saves made under its series.
 
 SEE ALSO
 --------
-launch-game (the server boot); end-session; wiki/releases.html (the numbering and saves
-notes); CLAUDE.md hard rule 10.
+test-tiers (the release set); launch-game (the server boot); end-session; fix-bug;
+process-intake; wiki/releases.html (the numbering and saves notes); CLAUDE.md hard
+rule 10.

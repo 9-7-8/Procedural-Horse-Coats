@@ -1,0 +1,117 @@
+PROCEDURE  : Choose which tests to run
+COMMAND    : /test-tiers
+SAY        : "which tests should I run", "run the tests", "run all the tests",
+             "run the full suite", "test everything"
+RUNS       : local (tier 0 and the node checks also run in the cloud)
+TAKES      : a change, and a reason to test it
+LEAVES     : the cheapest set of tests that can prove the change, run, with real exit
+             codes read
+==============================================================================
+
+WHEN TO USE
+-----------
+Every time a session is about to run a test. The rule: THE LONGER A TEST TAKES, THE MORE
+IMPORTANT THE MOMENT MUST BE TO JUSTIFY IT. The owner waits on every minute a session
+spends testing, and a full-suite run followed by a regenerate-and-verify cycle once
+cost her forty minutes.
+"Run tests", on its own, means the test-yard loop (run-tests), not this.
+
+BEFORE YOU START
+----------------
+1. Know what the change could break. Name the classes it touched and the behaviour it
+   changed.
+2. Make sure no game from this checkout is running if you will use Gradle (launch-game).
+
+STEPS
+-----
+1. Pick the LOWEST tier that can prove the change. Each tier includes the one below it
+   only when the step says so.
+
+   TIER 0 - seconds, every change, no reason needed:
+   - `./gradlew :common:classes` (or :neoforge-26.1.2:compileJava): does it compile?
+   - The node checks the change touches (each takes seconds):
+       check-links.mjs                       any wiki prose or anchor
+       check-roadmap-execution.mjs           roadmap or gap routing
+       check-gene-tabs.mjs                   a natural gene page
+       check-breed-heights.mjs               a breed's size or printed height
+       check-recipes.mjs                     a recipe
+       check-block-models.mjs                a blockstate or block model
+       check-duplicate-item-art.mjs          item art
+       check-progress-tasks.mjs              a checklist task or advancement
+       wiki/gene-creator/tools/check-parity.mjs   spec/ (after bakeSpecFixtures)
+
+   TIER 1 - about fifteen seconds per class, for any change to logic:
+   - `./gradlew :common:test --tests '*ThatClassTest'`, one class or a few, by name:
+     - the owning class's test;
+     - the test the procedure names (BreedFilesTest for a breed, DeadLayerTest for a
+       gene layer);
+     - CoatBakeGoldenTest and CoatPipelineGoldenTest, when anything that paints moved.
+   - A new or changed test is mutated once: break the code, watch it go red, revert.
+   - The NeoForge module's own unit tests, if they touched it:
+     `./gradlew :neoforge-26.1.2:test`.
+
+   TIER 2 - about a minute, when the change needs the game to prove it:
+   - `./gradlew :neoforge-26.1.2:runGameTest`, the headless gametests. Use it when a
+     handler, attachment, payload, registry or config path changed.
+     - If it goes red, stash your diff and run HEAD before blaming the change:
+       gametests depend on tick phase, and a moving failure is a flake to fix.
+   - Browser checks that drive headless Chrome: check-designer-boots.mjs (after any
+     wasm), check-creator-steps.mjs, check-path-canvas.mjs, check-colour-control.mjs,
+     check-glow-control.mjs, check-glow-render.mjs and check-ai.mjs. Run them when their
+     page's code changed.
+   - A server boot to "Done (", with the log grepped for errors, when anything that runs
+     at mod load changed (launch-game, step 8).
+
+   TIER 3 - ten to fifteen minutes or more. ONLY when it truly matters:
+   - The FULL :common:test suite (`./gradlew :common:test`, over a thousand tests). It
+     walks exhaustive genotype spaces and bakes thousands of coats.
+   - Run it ONLY:
+     a. when cutting a release (release, step 3) - every code test, every time; or
+     b. when the owner asks for it.
+   - Never "just to be safe", never to regenerate a golden, never because the change
+     "could" move it. Say in the summary which tests a full run would still need to
+     check, and why.
+   - Its full run has found that checks had drifted from the code, not mod bugs, so
+     read a red test as "is the test still describing the code?" before reading it as a
+     regression.
+
+   THE RELEASE SET - everything that is code, before every release:
+   - every tier-0 node check;
+   - the full :common:test suite;
+   - :neoforge-26.1.2:test;
+   - :neoforge-26.1.2:runGameTest;
+   - every headless browser check;
+   - the server boot, with its log grepped.
+   Run them in that order, cheapest first, so a cheap failure stops the expensive ones.
+   A red result blocks the release until it is fixed or the owner waives it.
+
+2. How to run a long tier safely.
+   - Free memory first: `./gradlew --stop`, and close what you started. A full run has
+     been killed twice by low memory with a server cycling beside it.
+   - Run it in the background, logging to a file, and do other work. Never poll it with
+     sleep.
+   - Read the real exit code from the log. Never trust a piped command's exit code.
+   - Let it finish. If one must be killed, kill the Gradle test JVMs AND delete
+     common/build/test-results/test/ before running anything else. An orphaned worker
+     wedges every later run.
+
+3. Report:
+   - which tier you ran, and why that tier;
+   - the result with its real exit code;
+   - what the next tier would still check.
+
+DONE WHEN
+---------
+The change is proven at the lowest tier that can prove it, and the report names the tier
+and what is left unchecked.
+
+NEVER
+-----
+- Never run the full suite outside a release, unless the owner asks.
+- Never skip the release set before a release.
+- Never call a check green from a piped exit code.
+- Never treat a test that has never failed as proof. Mutate it once.
+
+SEE ALSO
+--------
+release; rebake; run-tests (the yard - a different thing); launch-game; end-session.

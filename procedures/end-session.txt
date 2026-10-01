@@ -18,9 +18,8 @@ Know which files the session touched: `git status --short` and `git diff --stat`
 
 STEPS
 -----
-1. Regenerate what the session invalidated.
-   Walk CLAUDE.md's "Regenerate what you invalidate" table row by row, against the
-   files that changed. If CustomHorseSpawnScreen or the horse designer changed, fix the
+1. Regenerate what the session invalidated, by the rebake procedure. It walks CLAUDE.md's
+   "Regenerate what you invalidate" table row by row, against the files that changed. If CustomHorseSpawnScreen or the horse designer changed, fix the
    other one too (hard rule 5).
 
 2. Build green.
@@ -71,6 +70,8 @@ STEPS
 
 9. Stop, with a short summary. Say what shipped, what is newly waiting in
    wiki/verification.html, and the one thing the next session should pick up first.
+   Say too whether a release looks due, by release step 1. If one does, offer it; never
+   cut it unasked.
    Then stop: no new work, no "while I'm here" refactors.
 
 DONE WHEN
