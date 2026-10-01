@@ -14,8 +14,8 @@ Done
     - The unit is a treatment's piece or slice, not the file, so a three-piece treatment
       offers three picks.
     - Every unit is scored on size (S/M/L, where L includes a foundation that other units
-      wait on), impact (defect, then a fix to something shipped, then an unblocker, then new
-      content), whether it needs the owner, and what it depends on.
+      wait on), impact (finishes something shipped, then an unblocker, then new content),
+      whether it needs the owner, and what it depends on.
     - The tiers, in the order she gave: small with high impact, then anything that needs no
       owner call, then the big ones.
     - An UNVERIFIED line needs the source read, not the owner. An Open design line, a breed
@@ -32,8 +32,6 @@ Done
     repo's markdown files now includes .claude/skills/. That line replaced a duplicated
     "Everything else is the wiki", so the file stays at 300 lines.
 
-Found on the way
-
-    START HERE.txt still describes a "Bugs:" section of To do.txt. Since the
-    bugs-move-to-github session, a bug is a GitHub issue (hard rule 9). The routine says
-    rule 9 wins. START HERE's own text was left for the owner to decide on.
+Then: "remove any references to bugs - we'll handle bugs in a fully separate way. Intake
+is only for new features." The routine now says intake holds new features only, and
+anything else in the folder is not a unit. Bugs are not mentioned in it at all.

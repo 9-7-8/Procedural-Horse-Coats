@@ -10,6 +10,9 @@ session ended. Never a second unit in the same conversation - the owner clears c
 and re-runs this for the next one (`intake/START HERE.txt`, "One bullet, one context
 window").
 
+Intake is for **new features only**. Anything in the folder that is not a new feature
+is not a unit for this routine; leave it where it is.
+
 This file is the *routine*. It does not hold the queue: what is in intake/ today is
 read fresh every run, and nothing below names a current item on purpose.
 
@@ -21,16 +24,13 @@ read fresh every run, and nothing below names a current item on purpose.
    Commit around them; never flag, add or delete them.
 3. Read `intake/START HERE.txt` and `intake/Implementation advice.txt` (once each), then
    run `node wiki/tools/check-roadmap-execution.mjs`.
-   Where START HERE says bugs go to a "Bugs:" section, **CLAUDE.md hard rule 9 wins**:
-   a bug is a GitHub issue (`bug`, plus `needs-owner` if it waits on her).
 
 ---
 ## 1. List the units
 A **unit** is the smallest thing that ships alone - not a file:
 - each bullet in `To do.txt` (its first line is permanent; never delete it, never count it);
-- each **piece / slice / tier** a treatment names (`Stasis bank` has three pieces,
-  `Head parts` three slices, `Horse exits` two pieces). A treatment that names no
-  split is one unit.
+- each **piece / slice / tier** a treatment names (`Head parts` has three slices,
+  `Horse exits` two pieces). A treatment that names no split is one unit.
 
 Not units - leave them alone:
 - `START HERE.txt`, `Implementation advice.txt`;
@@ -48,11 +48,11 @@ context the build needs.
 
 ---
 ## 2. Throw out what is already done
-Per START HERE step 1, for every unit you might pick: grep `wiki/session-log/` and
-`wiki/text/` for its keywords, and check the open GitHub issues. A treatment may
-already point at an issue (the stasis bank's arrow is #10). **Date it before
-deleting it** (START HERE step 1.3): a bullet newer than the fix, especially one
-saying "still", is open.
+For every unit you might pick: grep `wiki/session-log/` and `wiki/text/` for its
+keywords, and look for its classes in the code. **Date it before deleting it**: get
+the date the unit was written (`git log --date=short -S 'a phrase' -- intake/`) and
+the date the matching work landed. A unit written *after* that work asks for more
+than was built, so it is still open.
 
 Already done -> delete its text from intake/ (step 7) and note it in the session
 log. That deletion does **not** count as this run's unit; carry on and pick one.
@@ -65,7 +65,7 @@ in your reply before picking, one row per unit:
 | | Question | How to tell |
 |---|---|---|
 | **Size** | S, M or L? | **S** = one screen or class, one test class, few rows of the regenerate table. **M** = one session, a new gene or system slice, several bakes. **L** = the treatment says multi-session, or it is a *foundation* other units wait on (a new part kind, a shared base class, a new sheet region, a structure bake, an entity type). |
-| **Impact** | What does a player get? | Highest first: **a defect** players hit now -> **a fix or finish** to something that has shipped -> **unblocks** other units -> **new content**. A unit the owner flagged in her own words ("most important", "next") goes to the top of its tier. |
+| **Impact** | What does a player get? | Highest first: **finishes** something that has shipped (a missing piece of a screen, item or system players already use) -> **unblocks** other units -> **new content**. A unit the owner flagged in her own words ("most important", "next") goes to the top of its tier. |
 | **Owner** | Can it be built without her? | **No** if it has an `Open:` line that is a *design* call (not a mechanism the builder may pick), says "confirm with the owner", designs or redesigns a breed (breeds are designed with her unless a thorough spec exists), touches `wiki/philosophy.html`, or needs a licence call. `UNVERIFIED` lines do **not** need her - they need reading the source. "Recommended" lines are the scoper's default and can be taken. |
 
 Also note **depends on**: a unit that needs another unit's foundation (a part that
@@ -73,7 +73,7 @@ needs a sheet region or colour base class another treatment adds) cannot go firs
 
 ---
 ## 4. Pick, in this order
-1. **Tier 1 - small and high impact.** Size S, impact defect/fix/unblocks. Owner calls
+1. **Tier 1 - small and high impact.** Size S, impact finishes or unblocks. Owner calls
    are allowed here *only if* they fit in one question round (step 5).
 2. **Tier 2 - anything you can do without her.** Any size S or M, no owner design
    calls, dependencies already shipped.
@@ -84,8 +84,7 @@ needs a sheet region or colour base class another treatment adds) cannot go firs
 Within a tier, break ties by: unblocks the most other units -> fewest regenerated
 artefacts -> oldest in `git log -- intake/`.
 
-Never pick: a bug better closed by the **run tests** routine (it holds a yard pen
-for it), anything that needs the live server (`26.1.2-neoforge-server` is another
+Never pick: anything that needs the live server (`26.1.2-neoforge-server` is another
 Claude's), or a release - cut one only if she asks.
 
 Say in **one line** what you picked, which tier, and why the runner-up lost. Then
@@ -144,7 +143,7 @@ intake sessions (`d2026-10-01-antlers.txt`, `-breed-climate-rule.txt`, `-chaos-m
 - the owner's request, quoted;
 - **Done**: the unit, the commit, what is green, and which treatment file or section was retired;
 - **Calls made without the owner**;
-- **Found on the way**: stale docs, wrong `UNVERIFIED` claims, things filed as issues;
+- **Found on the way**: stale docs, wrong `UNVERIFIED` claims;
 - **Tests run by name**, and what a full `:common:test` run would still check;
 - **Where to look first** in game: the Verification tab anchors.
 
