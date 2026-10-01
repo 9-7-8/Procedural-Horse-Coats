@@ -345,6 +345,16 @@
     horse are on the checks.
 </p>
 
+
+<h3 id="open-designer">Settled 2026-10-01: the designer says plainly that a part is not drawn</h3>
+<p>
+    The browser designer previews a flat coat texture and cannot draw geometry, while the game's
+    spawn screen draws every part. The owner's call is the cheap one: the designer
+    <em>lists</em> each grown part as a trait, with a line saying it is not drawn there and can
+    be seen in game. It does not attempt a 3D preview. The divergence stays written in a comment
+    on both editor files (hard rule 5). <strong>Not built yet</strong>: it is queued in
+    <code>intake/To do.txt</code>.
+</p>
 </section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
@@ -592,19 +602,6 @@
     different tine counts in one frame, which is the first time <code>setupAnim</code> carries
     something per horse that a wrong order would visibly swap. The detail is on
     <a href="gene-antlers.html#open-antler-tines">the antlers&rsquo; tab</a>.
-</p>
-
-<h3 id="open-designer">The browser designer cannot draw a part &mdash; and what to do about it</h3>
-<p>
-    <code>wiki/horse-designer/</code> and <code>CustomHorseSpawnScreen</code> are one screen in
-    two places, and on this they now differ. The game's screen draws the horn on its preview:
-    every screen's model horse gets its parts from <code>GeneticHorseRenderer.applyCoat</code>
-    along with its coat, so a unicorn in the spawn egg, the family tree or the horse browser is
-    drawn wearing its horn. The browser designer previews a flat coat texture and cannot draw
-    geometry, so there a <code>Horn/Horn</code> horse shows its gene row and its epigenome and
-    no horn, and an antlered one no antlers. The cheap answer is for the designer to <em>list</em> the part as a trait and say
-    plainly that it is not drawn; anything better is its own plan. The divergence is written in
-    a comment on both files, per hard rule 5.
 </p>
 
 <h3 id="open-parts-herd">Nothing has been measured</h3>

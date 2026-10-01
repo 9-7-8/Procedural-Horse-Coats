@@ -1,0 +1,76 @@
+Part colour base and hair region - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "UNVERIFIED" lines are facts this file has not proved, and the building session
+must check them first. Source of truth for what exists: wiki/model-parts.html and the unicorn horn's
+gene pages. This file is retired (deleted, per /process-intake step 8) when it ships, and is written up
+on model-parts.html's Coding tab.
+Release: rides with the first part treatment that uses it (it changes nothing a player can see).
+
+The request, as given
+=====================
+Owner, 2026-10-01, asked which treatment should build the shared piece that feathering, the head
+parts, the body parts and the tusks all need: "A foundation unit first." So it is its own small
+unit, built BEFORE any of those four, and each of them reuses it rather than writing its own.
+
+In scope, and what is not
+=========================
+In: (1) one shared abstract colour-gene base class for a grown part; (2) one new sheet region, HAIR.
+Out: any new part, anchor, generator or PartKind. Those belong to the four part treatments. The
+translucent MEMBRANE and CRYSTAL regions stay with the body parts treatment, which is the only one
+that uses them.
+
+What already exists, so the building session does not redo it
+==============================================================
+- common/.../genetics/genes/HornColourGene.java (implements Gene): the unicorn horn's colour locus.
+  It is codominant, with white as the wild type, plus the rainbow, pink, black, grey and chaos
+  alleles. Two different copies give a two-tone part, and each copy carries hue and tone numbers.
+  It paints nothing on the coat.
+- common/.../parts/PartSheet.java: a 64-pixel sheet of 16-pixel regions (REGION, ACROSS). Regions
+  HORN 0 to RAM_TIP 6 are used, so the sheet has room.
+- neoforge-26.1.2/tools/bake-part-sheet.mjs repeats PartSheet's constants by value, and paints each
+  region. It writes .../textures/entity/horse/part_sheet.png. The two drift silently (see
+  procedures/rebake.txt, row x).
+- The head parts treatment planned both pieces inside its own Slice A (the base) and Slice C (HAIR).
+  The body parts, tusks and feathering treatments each said "if it has not shipped, this one writes
+  it". This unit replaces all of those notes.
+
+Piece 1 - AbstractPartColourGene
+================================
+What the player sees: nothing. This is machinery.
+- Decided: build a shared base before any of the part treatments.
+- Recommended: an abstract class, AbstractPartColourGene, in common/.../genetics/genes/, parameterised
+  by key, priority and display name. It carries HornColourGene's allele set, codominance, per-copy hue
+  and tone epigenome, two-tone rule and founders. A part's colour gene is then one short subclass.
+- Open (the building session decides): whether HornColourGene itself moves onto the base. If it does,
+  it MUST NOT change any token, allele order, priority, founder weight or coat-golden row (CLAUDE.md
+  hard rule 10: allele order is saved). Prove that with --tests '*CoatBakeGoldenTest',
+  '*CoatPipelineGoldenTest' and the horn's own gene test, unchanged.
+- UNVERIFIED: which parts of HornColourGene are horn-specific (its key referenced elsewhere,
+  GrownParts dressing, the editors' changesLooks wiring). Read GrownParts and EditorRules before
+  extracting anything.
+- Tests: a unit test that a throwaway subclass behaves exactly as HornColourGene does: the same
+  outcomes for every pair, the same epigenome schema, the same founders. Mutate one to prove the
+  test bites.
+
+Piece 2 - the HAIR region
+=========================
+What the player sees: nothing until a part uses it (a goat beard, a ruff, feathering).
+- Recommended: region index 7 (the next free slot). Add the constant to PartSheet and the same
+  constant, with a paint() call, to bake-part-sheet.mjs. It is a tileable fibrous grain: hair, not
+  keratin, so it reads differently from HORN and BONE.
+- Run `node neoforge-26.1.2/tools/bake-part-sheet.mjs` and commit part_sheet.png.
+- Tests: PartGeneratorTest's sheet-grid checks still pass with the new region.
+
+Order and size
+==============
+One unit, size S, one session. It goes before any of: Head parts (all slices), Body parts Slice A,
+Tusks Slice A, Feathering. It unblocks all four.
+
+After it ships
+==============
+procedures/rebake.txt row x (the part sheet), plus row b (common/ changed: :web:bakeDesignerAssets
+and check-designer-boots.mjs; a pure refactor may leave the wasm as byte-noise, so revert it if
+nothing reachable changed). Write it up on wiki/model-parts.html's Coding tab ("adding a part" now
+says to subclass AbstractPartColourGene and to use HAIR for soft parts). Then delete the ownership
+notes this unit replaced, in the four part treatments, if any are left.

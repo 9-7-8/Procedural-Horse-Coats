@@ -1,0 +1,87 @@
+PROCEDURE  : What's next?
+COMMAND    : /whats-next
+SAY        : "what's next", "what should we do next", "what should I work on", "pick
+             something", "where are we", "start of session"
+RUNS       : either (a cloud session reads the same files and issues)
+TAKES      : nothing but the repository and its GitHub issues
+LEAVES     : 2-4 concrete next pieces of work in front of the owner, each with its
+             procedure, plus a recommendation; then the one she picks, started
+==============================================================================
+
+WHEN TO USE
+-----------
+At the start of a session, or whenever the owner asks what to do next. Every queue in the
+project lives in a different place: intake/, GitHub issues, Verification tabs, Roadmap
+tabs, the server's log exports, unreleased work on main. This procedure reads them all
+once and turns them into a short choice. It recommends; it does not decide.
+If the owner has already named the work, skip this and run that work's procedure.
+
+BEFORE YOU START
+----------------
+1. `git pull --ff-only origin main`. Then `git status --short`: untracked files in intake/
+   are the owner's queued material.
+2. Search the way look-it-up describes. Read summaries and headers, never whole pages.
+   The point is a quick, wide look.
+
+STEPS
+-----
+1. Read every queue, cheaply. Take one line per item:
+   a. UNRELEASED WORK on main: `git log --oneline v<last tag>..origin/main`. Is a patch
+      release due (release, step 1: a bunch of fixes, or a new feature)?
+   b. OPEN BUGS and TUNING:
+      `gh issue list --state open --search "label:bug,tuning -label:needs-owner"`, plus
+      the needs-owner ones, which are waiting on her answers. Note the urgency line of
+      each.
+   c. INTAKE: the units in intake/, scored as process-intake steps 1-4 score them
+      (size, impact, owner, dependencies). Count intake/To do.txt bullets too.
+   d. WAITING ON HER EYES: wiki/verification.html, the newest entries and the oldest
+      ones. Also anything a yard pen could answer without her (run-tests).
+   e. THE SERVER: unreviewed PCH log export folders (review-server-logs; the local
+      memory holds the record). A local session only.
+   f. OPEN DESIGN CALLS: the "Current owners" list on wiki/decisions.html.
+   g. LAST SESSION'S HAND-OFF: the newest wiki/session-log/ file's "pick up first" line.
+
+2. Rank, highest first. The order follows the owner's own priorities:
+   a. A released jar that is broken for players (the DAMAGE urgency) -> fix-bug.
+   b. A patch release that is due -> release.
+   c. Anything the owner named last session as "pick up first".
+   d. Cheap, high-value work that needs nothing from her:
+      - small bugs (fix-bug);
+      - pens that can close checks (run-tests);
+      - unreviewed server logs (review-server-logs);
+      - Tier 1 or Tier 2 intake units (process-intake).
+   e. Work that needs her answers. Gather its questions so one round unblocks it.
+   f. The big ones: Tier 3 intake units, foundations, long Roadmap items.
+   g. Visual-only checks come last, always.
+   Never offer two options that are really one. Never offer work whose prerequisite has
+   not shipped.
+
+3. Present 2-4 options with the question tool. Each option says:
+   - what it is, in one line;
+   - which procedure runs it;
+   - its size (S, M or L) and whether it needs the owner;
+   - why now.
+   Put the recommendation first, marked "(Recommended)". Put any pending owner
+   questions (step 1, items b and f) in the SAME round, so she can answer them while
+   picking.
+
+4. Run the chosen option's procedure, from its first step. Do not carry this survey's
+   reading into it beyond what that procedure needs.
+
+DONE WHEN
+---------
+The owner has picked, any pending questions were asked in the same round, and the
+picked work has started under its own procedure.
+
+NEVER
+-----
+- Never start work before the owner picks, unless she has said to just get on with it.
+  In that case take the recommendation, and say so.
+- Never read whole pages or every issue body to build the list.
+- Never recommend a visual check above work that can be wrong without anyone seeing it.
+- Never offer a release that is not due, or hold back one that is.
+
+SEE ALSO
+--------
+process-intake; fix-bug; run-tests; review-server-logs; release; look-it-up;
+hand-over-a-test.

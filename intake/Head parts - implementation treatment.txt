@@ -61,10 +61,8 @@ Decisions that apply to all six
 - Decided: COLOUR IS ITS OWN GENE PER PART, the way the unicorn horn's is: six new colour genes, each a
   codominant locus with the horn's allele set (white wild type, the rainbow, pink, black, grey, and chaos),
   two different copies giving a two-tone part, each copy carrying hue and tone numbers. A colour gene does
-  nothing to a horse without its part. Recommended, not asked: one shared abstract base class for the six
-  (AbstractPartColourGene), parameterised by key, priority and name, rather than six copies of
-  HornColourGene's code. Whether HornColourGene itself moves onto the base is the building session's call;
-  it must not change a token, a priority, a founder weight or a coat-golden row (it paints nothing).
+  nothing to a horse without its part. Each is a subclass of AbstractPartColourGene, the shared base built
+  by the foundation unit "Part colour base and hair region" (owner, 2026-10-01: a foundation unit first).
 - Decided: foals wear the SOFT parts only: ear fins/frills, goat beard and ruff. The hard parts - dragon
   horns, cheek spikes, brow ridge - do not show on a foal, like antlers. This is PartKind.showsOnFoal().
   Soft parts on a foal are scaled with the foal like the horn is (the anchor already applies FOAL_SCALE).
@@ -131,9 +129,8 @@ boxes only. All are static, parented to a bone that already animates.
    - UNVERIFIED which bone: the vanilla horse's lower jaw may animate (mouth open when grazing). Anchoring
      to the head bone keeps the beard on the skull while the jaw moves; anchoring to the jaw would move
      it with the mouth. Recommended: the head bone. Read HorseModel and say which was used.
-   - Sheet: a NEW region, HAIR, a tileable fibrous grain (hair does not look like keratin); needs a region
-     constant in PartSheet and a paint() call in bake-part-sheet.mjs (it is a one-region addition; the sheet
-     has room). Colour: its own colour gene. On foals: yes (soft part).
+   - Sheet: the HAIR region, from the foundation unit "Part colour base and hair region". Colour: its own
+     colour gene. On foals: yes (soft part).
 
 6. Ruff (RUFF, single, a ring)
    - Inheritance: decided RARE RECESSIVE.
@@ -174,9 +171,10 @@ Six granting genes and six colour genes.
 Slices and order
 ================
 One bullet per session is the rule, so three slices, each shippable alone:
-  Slice A: the shared machinery plus ONE part, end to end, as the proof - the dragon horns (closest to the
-           horn and antlers; the new NAPE anchors and the AbstractPartColourGene base). It settles the
-           pattern, and anything that goes wrong goes wrong once.
+  Slice A: ONE part, end to end, as the proof - the dragon horns (closest to the horn and antlers; the new
+           NAPE anchors). It waits for the foundation unit "Part colour base and hair region", which builds
+           the shared colour base and HAIR. It settles the pattern, and anything that goes wrong goes
+           wrong once.
   Slice B: the hard-edged remaining parts that need no new sheet region: ear fins, cheek spikes, brow ridge
            (new anchors EAR_*, CHEEK_*, BROW; the count-shown machinery is already there).
   Slice C: the soft parts that need HAIR and the neck anchor: goat beard and ruff.

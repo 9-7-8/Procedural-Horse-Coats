@@ -218,3 +218,16 @@ procedures, ten intake treatments, three Java comments and architecture.html. Th
 page's "Cutting a release" section is now a pointer to /release. It had said the version
 lives in two places, but neoforge.mods.toml has read ${mod_version} since 2026-09-16.
 Two more memories became pointers.
+
+Then the owner settled the open calls left from the horn and antler sessions, through the
+question tool:
+- The antlers stay magical, and the Greenwood's mares keep their antlers.
+- A light horse's horn glows too, following the light locus as the cutie mark does.
+- The designer lists a part it cannot draw, and says so plainly.
+Each one moved off its Verification tab onto the page's Coding tab, and onto decisions.html
+under Settled. The two that need building are queued in To do.txt, beside a third: a
+stallion's free covers per day becomes a config option.
+The shared part colour base and HAIR region became a foundation unit of its own in intake/
+("Part colour base and hair region"), built before any part treatment. Head parts, body
+parts, tusks and feathering now point at it instead of each offering to write it.
+/whats-next was written. add-an-item and add-a-config-option follow.

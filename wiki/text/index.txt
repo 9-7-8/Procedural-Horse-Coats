@@ -401,6 +401,7 @@ wiki/gene-antlers.html#finding	gameplay	Finding one
 wiki/gene-antlers.html#health	gameplay	Is it good for the horse?
 wiki/gene-antlers.html#inheritance	gameplay	Crossing two of them
 wiki/gene-antlers.html#numbers	coding	The epigenome, sorted by what it costs to change
+wiki/gene-antlers.html#open-antler-family	coding	Settled 2026-10-01: magical, not natural
 wiki/gene-antlers.html#polygenic	gameplay	Five genes make a rack
 wiki/gene-antlers.html#real-deer	science	Analogous, not measured
 wiki/gene-antlers.html#rendering	coding	How a rack reaches the screen
@@ -1225,6 +1226,7 @@ wiki/gene-horn-glow.html#door	coding	How it reaches the horn
 wiki/gene-horn-glow.html#finding	gameplay	Finding one
 wiki/gene-horn-glow.html#health	gameplay	Is it good for the horse?
 wiki/gene-horn-glow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-glow.html#open-glow-light-locus	coding	Settled 2026-10-01: a light horse's horn glows too
 wiki/gene-horn-glow.html#real-horses	science	There is no real locus here
 wiki/gene-horn-glow.html#what-it-does	gameplay	What it looks like
 wiki/gene-hot-blooded.html#health	gameplay	Health
@@ -3236,6 +3238,7 @@ wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
+wiki/model-parts.html#open-designer	coding	Settled 2026-10-01: the designer says plainly that a part is not drawn
 wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time
 wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
 wiki/model-parts.html#settings	gameplay	If they cost you frames

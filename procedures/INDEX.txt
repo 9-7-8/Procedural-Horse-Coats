@@ -11,6 +11,8 @@ Do not work from memory of what the routine says: the file is the only copy.
 
 Command                  Runs    Say (any of)                         What it leaves
 -----------------------  ------  -----------------------------------  ---------------------------------
+/whats-next              either  "what's next", "what should we do    2-4 options with a recommendation,
+                                 next", "where are we"                 then the picked work started
 /end-session             local   "end the session", "wrap up",        code + docs pushed as two commits,
                                  "we're done for today"               nothing left running
 /process-intake          local   "process intake", "pick something    ONE intake feature built and
@@ -66,8 +68,6 @@ Routines that might become procedures next
 ------------------------------------------
 These are done often enough to repeat the same way, but nobody has written them up
 yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
-- whats-next: read the verification index, the open issues and intake/, and offer the
-  owner 2-4 next pieces of work with a recommendation.
 - compat-test: build the synthetic mod and boot with it, to prove the modded-material
   layer.
 - measure-worldgen: run Structure.generate headlessly with a control, before claiming a

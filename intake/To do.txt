@@ -1,1 +1,6 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
+
+Decided by the owner on 2026-10-01; each is small, and needs only building:
+- A light horse's horn glows too: the horn follows the light locus, as the cutie mark does (wiki/gene-horn-glow.html#open-glow-light-locus).
+- The horse designer lists each grown part as a trait, with "not drawn here; see it in game" (wiki/model-parts.html#open-designer). Hard rule 5: it is a designer-only change, so keep the divergence comment on both editor files.
+- A stallion's free covers per day becomes a server config option, fertility.free_covers_per_day, defaulting to the current ReproRules.FREE_COVERS_PER_DAY, beside fertility.nearby_horse_cap (procedures/add-a-config-option.txt).
