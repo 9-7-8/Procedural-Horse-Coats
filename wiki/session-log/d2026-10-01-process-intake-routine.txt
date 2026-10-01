@@ -243,3 +243,8 @@ emergency_stasis_fraction, owner_only_riding, jockey_pass_days and
 commands.horse_give. The config procedure documents a key on its feature's page,
 following the existing ones, and leaves the key-table question to config.html's
 Roadmap sweep.
+
+Then a new hard rule. Owner: "Always ask me questions using the question tool unless they
+are absolutely genuinely too open ended for that." It is CLAUDE.md hard rule 11 (now 194
+lines). The question left in prose last round went straight back through the tool. Its
+answer: a GENERATED config key table on config.html, queued in To do.txt.

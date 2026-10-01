@@ -132,6 +132,8 @@ file under `wiki/session-log/` from its index; those files are not baked.
    loads in every later one of its `0.X` series: a change to anything saved brings its migration.
    The version is `0.<compat>.<patch>`. Patch: any fix batch or feature, no asking. Compat:
    only a substantial feature that cannot keep saves loading; only it may break them.
+11. **Ask the owner with the question tool** (AskUserQuestion: 2-4 options, recommendation
+   first) - every question, unless it is genuinely too open-ended for options. (Owner.)
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four or five
 files** - the lists are on `wiki/making-a-gene.html#contracts`; `procedures/add-a-gene.txt`
 walks them. A gene or item page is three tabs (gameplay, coding, science): `add-a-wiki-page`.
