@@ -1,0 +1,47 @@
+2026-10-01 - Bugs move to GitHub issues
+
+
+    No code changed this session. It changed where bugs are recorded, and filed the
+    ones that were waiting.
+
+    The rule. The owner asked for a self-piloted "run tests" routine: audit the test
+    yard, build and delete pens, launch, read the log, close what passed, fix small
+    bugs, and report the large ones for later. Asked where bugs should go, she chose
+    GitHub issues for EVERY bug found, including ones fixed in the same run, so the
+    fix commit and the yard PASS that proves it close the issue together. CLAUDE.md
+    hard rule 9 now carves bugs out of the Verification tabs. Unproven runtime checks,
+    design calls, documentation contradictions and compatibility checks stay on the
+    tabs as before. Labels: `bug` for every defect; `found-in-yard` for one a yard run
+    found; `needs-owner` for one that waits on the owner's decision. A test run
+    surveys every open issue, testers' included, except `needs-owner`, and takes the
+    ones a pen, a test or a small fix can settle. Removing `needs-owner` after
+    answering puts an issue back in the queue.
+
+    intake/. Every bug bullet in To do.txt had already been retired to the wiki
+    between 2026-09-24 and 09-30. The one live bug left was Piece 1 of the stasis
+    bank treatment (the saved-searches arrow drawn on the Chambers tab). It is now
+    issue #10, and the treatment keeps a pointer.
+
+    The live server's logs. The owner brought a report another session had extracted
+    from 26.1.2-neoforge-server's logs (17 Sep - 1 Oct). Four issues came out of it:
+      #11  generated stables roll the breed twice, so in the 13-breed TM U Stable a
+           horse's record can name a different breed from the one its genes came
+           from. All eight TM U "NOT ON ITS SHEET" founder lines are this.
+      #12  the founder log reports the Stables' deliberate homozygous magic
+           (Friesian Ijw/Ijw, Grd/Grd) as NOT ON ITS SHEET - a false alarm.
+      #13  horse AI forces synchronous chunk loads. The report had filtered out
+           Cupboard's 911 chunk-load traces as noise, but about 250 carry our frames.
+           The hunger goal's canContinueToUse is the per-tick one and is still
+           unguarded on main; the realm, portal and lift paths may be deliberate.
+      #14  black quartz and chimerite horse armour are generated, and sold by the
+           metalsmith, on a server with neither source mod (needs-owner).
+    Looked at and not raised: retired alleles resetting to default (documented),
+    the removed hair items in player stats, the refmap WARN, the server's own
+    /tellraw and KubeJS script errors (the server Claude's, not the repo's), and
+    horses killing horses (the aggression gene, working). Left unexplained: four
+    horses with consecutive entity ids suffocating together on 27 Sep at about 17:23,
+    one at y=40.
+
+    Next. Run tests. The first run should pick up #10-#13, each a small fix with its
+    cause already written in the issue, and #2 (a tester's structure-generation
+    screenshot).
