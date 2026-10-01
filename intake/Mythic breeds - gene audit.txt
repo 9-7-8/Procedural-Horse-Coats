@@ -1,7 +1,7 @@
 Mythic breeds - gene audit
 
 An AUDIT, NOT A SPEC. Nothing here has been changed in the repo and no decision has been made for the owner. It
-maps five tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
+maps six tables of mythical and folkloric horses from the owner onto what the mod already has (implemented genes,
 parts and breeds), what is already scoped in intake/ but not built, and what is still unscoped. Read from the
 shipped gene classes and gene files, the wiki gene pages, the shipped breed files and every treatment in intake/.
 UNVERIFIED lines are things I could not confirm.
@@ -93,7 +93,7 @@ GAP, nothing anywhere:
     ability, a dimension hop, or just lore).
 11. PURIFY WATER (Unicorn): no gene. Healer and Cleansing Light are nearest. Optional per the table ("in some traditions"); a design call.
 12. KELPIE SHAPESHIFTING into something other than a land animal (a person, a fish): Lycan cannot, by design.
-13. IMMORTALITY (Arion, Balius, Xanthus): GAP. No gene makes a horse unkillable or brings it back. Nearest shipped: immunities (Fireproof, Ocean
+13. IMMORTALITY (Arion, Balius, Xanthus, Podarkes, and the Dioscuri's horses Kyllaros, Phlogeus and Harpagos): GAP. No gene makes a horse unkillable or brings it back. Nearest shipped: immunities (Fireproof, Ocean
     Born, Bird Boned), Magic Health, and /horseresurrect, an OPERATOR command and not a gene. A design call before an engineering one: (a) takes no
     damage, (b) cannot die from ordinary causes but still dies to the void or a command, (c) dies and stands back up after a delay (a totem). It
     touches death handling, breeding economics, the Exits ledger and any server that kills horses on purpose. All three breeds are otherwise fast
@@ -189,6 +189,19 @@ Status: READY (all genes exist, build the breed JSON), PARTIAL (the breed can sh
  Askhetos, Kygnos  READY. Racing horses of the Dioscuri line (Kyllaros's offspring), speed 10. Kygnos is white (and Cygnus suggests whiteness). Askhetos has no stated coat.
  Bronte, Sterope, Aithops (Helios's team)  READY, and they join the Horses of Helios entry above: more names for the same fire-and-sun team. Ancient sources give different sets of names,
                   so the team is a pool of names, not a fixed four.
+ SIXTH TABLE (Greek, Norse and Hindu named horses; all public domain; again almost nothing is described, so nothing blocks a plain breed).
+ Pedasus ........ READY. Achilles's mortal third horse, keeping pace with two immortal ones: a fast mortal horse, speed 10. It is the natural COUNTERPART to Balius and Xanthus, who wait on
+                  immortality (13); Pedasus does not.
+ Kyllaros, Phlogeus, Harpagos  READY minus 13 (immortality), the Dioscuri's horses. Speed "10+", no coat given. They ship as fast ordinary horses until immortality is decided. Name caution:
+                  Kyllaros is the horse of Castor, not the centaur Cyllarus (a different being in Ovid), and Askhetos and Kygnos in the fifth table are named as his offspring.
+ Gulltoppr, Silfrintoppr  READY. "Golden tuft" and "silver tuft": a gold or silver mane and tail through mane_color and tail_color (and Flaxen), exactly as for Gullfaxi. The table says the name does
+                  not establish a golden or silver BODY, so only the mane is a safe reading.
+ Gladr, Gyllir, Glenr  READY. Named Aesir horses with no powers and no coat; plain fast horses. Gyllir's gold-related name is not a coat description, per the table.
+ Lettfeti ....... READY. "Light-foot": a light, fast build by name, no measured speed. A light build and a fast pool are stats; nothing more is claimed.
+ Devadatta ...... READY. White, a powerful divine mount, speed "10+". Wings only "in some art", so optional (1). SENSITIVITY, flagged not decided: Devadatta is the horse of Kalki, the final avatar of
+                  Vishnu in Hindu tradition, so the same care as Buraq applies to how it is named, written and framed.
+ Lampos, Phaethon (the horses of Dawn)  READY. A sun-and-dawn chariot pair; the same family as the Horses of Helios and Arvakr and Alsvidr, and the same only-the-hitch caveat (two to a wagon is a
+                  carts Roadmap item). Name cautions from the table: this Phaethon is the horse, not the better-known figure who drove the sun chariot, and Lampos is not Lampon (one of Diomedes's horses).
  Nuckelavee ..... BLOCKED, a different class of problem: 14 (skinless coat, cheap), 15 (torso and leg fins, large), 16 (poison aura, small). It is a rideable
                   monster in name only; consider a non-rideable boss mob, or leave it out.
 
@@ -202,7 +215,7 @@ Out of scope for now: a talking or prophesying horse (Arion, Xanthus; the Narnia
 
 What this means for scoping
 ===========================
-Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Mares of Diomedes, Horses of Helios (with Bronte, Sterope, Aithops), Chollima (wingless), Hofvarpnir, Sinir, Skeidbrimir, Gisl, Falhofnir, Bloudughofi, Skylla, Sthenios, Askhetos, Kygnos. Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Partial
+Ready now, no engineering (build breed files): Gullfaxi, Svadilfari, Puca, Grani, Skinfaxi, Hrimfaxi, Arvakr, Alsvidr, Mares of Diomedes, Horses of Helios (with Bronte, Sterope, Aithops), Chollima (wingless), Hofvarpnir, Sinir, Skeidbrimir, Gisl, Falhofnir, Bloudughofi, Skylla, Sthenios, Askhetos, Kygnos, Pedasus, Gulltoppr, Silfrintoppr, Gladr, Gyllir, Glenr, Lettfeti, Devadatta, Lampos, Phaethon (and Kyllaros, Phlogeus, Harpagos without immortality). Ready without immortality: Arion, Balius (better with a dapple gene), Xanthus. Partial
 (wings optional): Tulpar, Buraq, Qilin (a horse-bodied version). Mostly covered once the parts are built (INTAKE): Longma, Unicorn.
 One real blocker each: Pegasus (wings), Uchchaihshravas (seven heads), Sleipnir (eight legs), Hippocampus (hide the rear plus a fish tail), Kelpie and Each-uisge
 (forced riding), Nuckelavee (several).
@@ -224,7 +237,7 @@ Design questions this raises that are not gene gaps
 - Which of these should be wild spawns, creative/spawn-egg only, or reachable only by breeding. The breed file's spawn list already supports all three; the
   tables do not say.
 - Whether "10+" speed means the stat cap or a stat past it. UNVERIFIED.
-- Naming: the fifth table has several beings who share a name with another (Aithon of Ares and Aithon of Helios, Podarkes and Podargos). Breed ids must be unique and readable.
+- Naming: the fifth table has several beings who share a name with another (Aithon of Ares and Aithon of Helios, Podarkes and Podargos, Kyllaros and the centaur Cyllarus, Phaethon the horse and Phaethon the charioteer, Lampos and Lampon). Breed ids must be unique and readable.
 - Whether to scope Momentum Sprint (wiki/momentum-sprint.html, Roadmap tab only, no intake treatment). Chollima's whole identity depends on it, and the page also names Arion and Sleipnir.
 - A team of two or four to one chariot (Arvakr and Alsvidr, the Horses of Helios): a carts Roadmap item, not scoped.
 
