@@ -1,0 +1,39 @@
+2026-10-01 - scoping exits, the stasis bank, a climate rule, and the model parts
+
+
+    An intake session, a continuation of the one that scoped rider comfort and the
+    Chaos allele. Nine treatments or specs written into intake/, no code touched,
+    nothing built or played. Every design call in them was put to the owner with the
+    question tool and is recorded there as Decided; each file also lists what is
+    still UNVERIFIED for the session that builds it.
+
+    Horse exits and free send home. An Exits tab on the H menu backed by its own
+    permanent per-owner ledger (the Log keeps only 200 rows), filtered by died, sold
+    or given to a player, sold to a dealer, and sent to the realm (a new event: the
+    portal and the freedom stick were never logged). Send home becomes free by
+    default, including out of the stasis bank, with an optional configured item
+    consumed per trip and a 5-second per-player cooldown.
+
+    Realm breeding pause. A realm mare's breeding timers (pregnancy, heat, cooldowns,
+    foal growth) advance only while she is loaded, default on, with a "paused" sign
+    on the pregnancy readout. Pregnancy ticks are absolute game ticks today, so an
+    unloaded mare gives birth the moment she loads; the recommended mechanism shifts
+    her timers forward by her unloaded time.
+
+    Stasis bank. The saved-searches arrow shows on the Chambers tab because the
+    screen hides the filter box but never the button; Basic chambers become
+    searchable by plain name only; one press ejects every empty chamber.
+
+    Breed climate tolerance (a spec). Nether breeds pin heat tolerance at 100%; a
+    breed's cold tolerance is raised to a share-of-cold-biomes ladder. Six breeds
+    change. One documentation contradiction found: Wielkopolski.
+
+    Model parts, in four treatments: head parts (dragon horns, ear fins, cheek
+    spikes, brow ridge, goat beard, ruff), body parts (back sail, dorsal spines,
+    plates, crystal growths, with the saddle zone hidden under a saddle or rider),
+    the tusks gene (boar tusks, sabre fangs and a narwhal horn as one dominant locus
+    whose forms combine) and feathering (coloured from the leg beneath it).
+
+    What the next session picks up first: the shared colour-gene base class and the
+    hair sheet region are needed by several of these treatments, so settle which
+    session writes each before any of them starts.
