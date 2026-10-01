@@ -4015,7 +4015,7 @@
 {
   "id": "greenwood",
   "name": "Greenwood",
-  "description": "A dark bay out of the deep woods with a fawn's line of spots down its back, and the woods follow it. Every Greenwood leaves something growing where it has stood - saplings of any of the six trees, mushrooms, flowers, or a dusting of bone meal that hurries the rest along - and every one spreads a carpet of grass, moss or mycelium under its hooves. No two leave the same wood behind them.",
+  "description": "A dark bay out of the deep woods with a fawn's line of spots down its back and a stag's rack of antlers on mare and stallion alike, often hung with leaves - and the woods follow it. Every Greenwood leaves something growing where it has stood - saplings of any of the six trees, mushrooms, flowers, or a dusting of bone meal that hurries the rest along - and every one spreads a carpet of grass, moss or mycelium under its hooves. No two leave the same wood behind them.",
   "kind": "magical",
   "commonness": "rare",
   "biomes": [
@@ -4100,16 +4100,42 @@
       { "pair": "Flwr/Bone", "weight": 2.22 },
       { "pair": "Bone/Bone", "weight": 2.22 }
     ],
+    "horsegenetics.antlers": [
+      { "pair": "Ant/Ant", "weight": 75 },
+      { "pair": "Ant/n", "weight": 25 }
+    ],
+    "horsegenetics.antler_form": [
+      { "pair": "Frk/Frk", "weight": 60 },
+      { "pair": "Frk/Crn", "weight": 25 },
+      { "pair": "Crn/Crn", "weight": 15 }
+    ],
+    "horsegenetics.antler_bloom": [
+      { "pair": "Blm/Blm", "weight": 30 },
+      { "pair": "Blm/n", "weight": 30 },
+      { "pair": "n/n", "weight": 40 }
+    ],
     "horsegenetics.verdant": [
       { "pair": "mush/mush", "weight": 33.34 },
       { "pair": "moss/moss", "weight": 33.33 },
       { "pair": "grass/grass", "weight": 33.33 }
     ]
   },
+  "bands": {
+    "horsegenetics.antlers": {
+      "size": [0.3, 0.7],
+      "tines": [3, 7],
+      "tint": [0.35, 0.75]
+    },
+    "horsegenetics.antler_bloom": {
+      "growth": 0
+    }
+  },
   "notes": [
     "DARK BAY. Every founder is E/E A/A, and the shade locus is Sh/ShD in 85 and ShD/ShD in 15: a bay-shade score of 2.5 or more before the per-horse roll, so a liver bay - the dark bay - nearly always, and now and then dark enough to read as a seal brown. No dilution and no white.",
     "EVERY DRYAD VARIATION. All 45 expressing dryad pairs are in the pool at equal weight - the nine matched ones (oak, birch, spruce, jungle, acacia, dark oak, mushroom, flower, bone meal) and all 36 mixed ones, each of which plants both its things at half rate - and no carrier and no wild type, so every Greenwood plants something. One in five is a matched specialist; dark oak groves need a matched Dark/Dark horse.",
     "EVERY VERDANT VARIATION. Mycelium, moss and grass, a third each, all as matched pairs - verdant only spreads from two matching copies, and a mixed pair cancels - so every Greenwood leaves a carpet of one of the three. No carriers.",
+    "ANTLERS ON EVERY HORSE, a forest stag's: every founder carries Ant, so mares are antlered too, and a quarter carry a single copy, so a Greenwood bred to an unantlered horse throws antlered foals half the time from those. Forked - a red deer's rack - with crowned showing in four in ten (Crn is dominant over Frk). Symmetric, unlike the Rimehart: no asymmetry band. Racks banded small to large, three to seven tines, mid to dark bone.",
+    "BLOOMING RACKS. Three in ten grow leaves on their antlers (growth index 0 - the Rimehart's is moss), and another three in ten carry it silently.",
     "EVERY FAWN VARIATION. Every fawn pair that shows, at equal weight: white fawn four in eight (Fwn over anything), black fawn three in eight (Fwk over Fwc or n, or two), and coloured fawn (Fwc/Fwc, the hue on the copy) one in eight. Fwc/n shows nothing and is left out, so every Greenwood has the spotted topline."
   ]
 },

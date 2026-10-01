@@ -6,10 +6,17 @@ import com.example.horsegenetics.common.genetics.BayShade;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GenotypeCatalog;
 import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.GrownParts;
+import com.example.horsegenetics.common.genetics.genes.AntlerBloomGene;
+import com.example.horsegenetics.common.horse.Sex;
+import com.example.horsegenetics.common.parts.AntlerGenerator;
+import com.example.horsegenetics.common.parts.AttachedPart;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -47,6 +54,36 @@ class GreenwoodBreedTest {
         }
     }
 
+    /**
+     * <b>A forest stag's rack on every horse</b> - mares too, since every founder
+     * carries Ant - forked or crowned, symmetric (no asymmetry band, unlike the
+     * Rimehart), and leaves, never moss, on the ones that bloom.
+     */
+    @Test
+    void everyGreenwoodWearsASymmetricForkedOrCrownedRack() {
+        Breed b = greenwood();
+        int blooming = 0;
+        int leaves = AntlerBloomGene.GROWTHS.get(0).tint();
+        for (long seed = 0; seed < 500; seed++) {
+            Genome g = BreedFounder.roll(b, new SeededRng(seed));
+            for (Sex sex : Sex.values()) {
+                Genome as = g.withSex(sex);
+                List<AttachedPart> rack = GrownParts.of(as.genotype(), as.epigenome());
+                assertEquals(2, rack.size(), "a " + sex + " Greenwood without a rack at seed " + seed);
+                assertEquals(rack.get(0).shape().style(), rack.get(1).shape().style(),
+                        "a lopsided Greenwood at seed " + seed);
+            }
+            int habit = Genes.ANTLER_FORM.habitOf(g.genotype().pair(Genes.ANTLER_FORM));
+            assertTrue(habit == AntlerGenerator.FORK || habit == AntlerGenerator.CROWN,
+                    "habit " + habit + " at seed " + seed);
+            AttachedPart right = GrownParts.of(g.genotype(), g.epigenome()).get(0);
+            if (right.blooms()) {
+                blooming++;
+                assertEquals(leaves, right.bloomTint(), "seed " + seed);
+            }
+        }
+        assertTrue(blooming > 100 && blooming < 200, "about three in ten bloom: " + blooming);
+    }
     /**
      * <b>Every variation that shows, and nothing that does not.</b> Each locus's pool is
      * exactly its expressing pairs, judged by the gene's own rule: dryad expresses from

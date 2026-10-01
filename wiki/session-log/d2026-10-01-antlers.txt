@@ -66,3 +66,9 @@ Later the same day - the Greenwood
     covers (a verdant mix cancels), and the eight fawn pairs that show - so no Greenwood is a
     silent carrier of any of them. GreenwoodBreedTest asserts the pools equal those sets, using
     each gene's own rule for showing. No antlers - not asked for; easy to add.
+
+    Then: "That breed should have antlers." The Greenwood now carries Ant on every founder
+    (Ant/Ant 75, Ant/n 25), so mares are antlered; forked with crowned in four in ten; symmetric
+    (no asymmetry band, to stay distinct from the Rimehart); size 0.3-0.7, tines 3-7, darker bone;
+    leaves (growth 0 - a category band is a range, so 'leaves or blossom' would have let moss in)
+    on three in ten. Ant rather than the stallion-only Antm was a choice: say if mares should be bare.
