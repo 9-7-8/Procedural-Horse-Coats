@@ -4,7 +4,7 @@ Scoped with the owner. Every "Decided" line below is her call; "Open" lines are
 still to be settled by the building session. One piece per session per START
 HERE. Source of truth for what exists is wiki/troughs.html (Roadmap tab only
 today); this file is the handoff for the work that tab lists, and it is
-retired (deleted, per START HERE step 3) as each piece ships and moves onto
+retired (deleted, per /process-intake step 8) as each piece ships and moves onto
 that page's new Gameplay and Coding tabs.
 
 What already exists, so the building session does not redo it
@@ -158,8 +158,8 @@ eats a mouthful at a time.
   out through a gate, which is the exact opposite of what the stall is for.
   Recommend: an empty in-stall trough means the horse stays put and hungry,
   and the OWNER gets one throttled notice (per the "report a refusal once per
-  meaningful attempt, not once per tick" rule in START HERE / the advice
-  file). Hunger never hurts a horse in this mod, so staying hungry costs
+  meaningful attempt, not once per tick" rule in
+  /process-intake step 6). Hunger never hurts a horse in this mod, so staying hungry costs
   healing, not health.
 - Gate: the stall must be resolved once per horse per search, not per tick,
   and never by scanning the world. Reuse the cached stall record if there

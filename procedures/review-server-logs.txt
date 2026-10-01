@@ -1,0 +1,119 @@
+PROCEDURE  : Review the server's log exports
+COMMAND    : /review-server-logs
+SAY        : "check the server logs", "review the PCH logs", "read the server logs",
+             "what happened on the server"
+RUNS       : local only (the exports are on the owner's machine)
+TAKES      : the dated export folders written by the server's log exporter
+LEAVES     : every new folder reviewed once; bugs filed as GitHub issues; player wants
+             noted in intake/To do.txt; a report; the reviewed-folders record updated
+==============================================================================
+
+WHEN TO USE
+-----------
+When the owner asks for the server's logs to be checked. Players on her server meet the
+mod in ways no dev run does. These exports are the only record of what broke for them,
+what they asked for in passing, and how their horses actually die.
+This procedure says where to look and what counts as new. Recording what you find
+follows the existing procedures: bugs through report-bug, and features into intake/.
+
+BEFORE YOU START
+----------------
+1. The paths are machine-specific, so they live in local memory, not here. The memory
+   "pch-server-logs" names the export folder, the raw server logs folder, and THE RECORD
+   of export folders already reviewed. The export path contains a space: quote it in
+   every shell command.
+2. The server belongs to someone else's session. Only ever READ these folders.
+3. Know the export layout. Inside the export folder there is one dated folder per
+   export (2026-10-01, 2026-10-02, ...). A second export on the same day gets -run2,
+   -run3, and so on. For one date, the plain folder is earliest and each -runN is
+   progressively later. Each folder holds:
+     00-SUMMARY.txt                time window, counts, scope, limits. READ FIRST.
+     01-errors-and-warnings.txt    horse-related ERROR/WARN, with stack traces
+     02-player-chat.txt            every player chat line in the window, unfiltered
+     03-player-activity.txt        joins, leaves, advancements
+     04-equine-deaths.txt          named horse / donkey / mule death events
+     05-compat-notes.txt           compatibility and back-compat findings, with evidence
+     06-mod-versions.txt           which horsegenetics builds appeared in the window
+     07-raw-horse-lines.txt        unfiltered horse-tagged lines, for grepping
+   A file reading "(none in this window)" means nothing matched. It does not mean the
+   export failed.
+
+STEPS
+-----
+1. Work out what is new. The folders are already incremental: each holds only what was
+   new when it was written. They never overlap, and nothing needs de-duplicating
+   across them.
+   a. List the dated folders.
+   b. Skip every folder name already in the record.
+   c. Take the rest in chronological order: by date, then plain, then -run2, -run3.
+   If nothing is new, say so and stop.
+
+2. For each new folder, in order:
+   a. Read 00-SUMMARY.txt first: the window, the counts, and what was left out.
+   b. Version context: 06-mod-versions.txt says which builds the window covers, so a
+      regression can be tied to a release.
+   c. Bugs: 01-errors-and-warnings.txt and 05-compat-notes.txt.
+      - Trust the quoted evidence in 05. Do NOT trust its "SUGGESTION" text: that is
+        generic advice attached to a pattern-matching rule, never checked against the
+        mod's source. Verify every finding in the code before acting on it.
+      - Separate the server operator's own scripts from the mod. An error from a
+        server-side KubeJS script (names like horse_chunk_refresh.js or
+        horse_wild_spawn_stamp.js) is the operator's code. Note it in the report, but
+        never file it as a mod bug.
+      - File each real mod bug following report-bug, steps 3 to 6: search for
+        duplicates and earlier fixes, find the likely code, choose the labels and
+        urgency, and write the issue. There is no reporter to ask questions, so skip
+        its step 1. Write "Reported by: the server log export, folder <name>", and use
+        06's builds as the version. Locally, use the gh CLI.
+   d. Player wants and friction: 02-player-chat.txt. Players describe wants and
+      annoyances in passing, and these are filed nowhere else. Add each real one as a
+      short bullet to intake/To do.txt, under a heading "From the server (unscoped)".
+      Paraphrase it, with no player name and no quote. Unscoped wants become features
+      only through write-intake-document, with the owner.
+   e. How horses die: 04-equine-deaths.txt. Look for patterns, not single deaths: a
+      cause that repeats, a place, a mob, a time. A pattern that is a defect becomes an
+      issue. A pattern that is balance or AI goes in the report, with 2-4 options for
+      the owner.
+   f. 03-player-activity.txt and 07-raw-horse-lines.txt are context: grep them when a
+      finding above needs more.
+   g. Add the folder name to the record ONLY after the folder is finished, so an
+      interrupted run retries it rather than silently skipping it.
+
+3. If something is genuinely missing from the exports, the raw server logs folder
+   (named in the memory) has more. debug-*.log.gz is not scanned by the exporter.
+
+4. Commit and push any change to intake/To do.txt.
+
+5. Report to the owner:
+   - which folders were reviewed, and the window and builds they cover;
+   - the issues filed or commented on, as links;
+   - the player wants added to To do.txt;
+   - the death patterns, with options;
+   - the operator-script errors (for whoever runs the server);
+   - anything you could not tell from these logs.
+
+DONE WHEN
+---------
+Every new folder has been reviewed and added to the record, each finding sits in its
+place (an issue, To do.txt, or the report), and the report is given.
+
+NEVER
+-----
+- Never read, trust or modify the exporter's .state.json in the export folder. It is
+  the exporter's own watermark, not a record of what was reviewed, and changing it
+  corrupts future exports.
+- Never write anything into the server's folders. Read only.
+- Never put a player's name, a chat quote or anything a player said into the public
+  repository or a GitHub issue. Paraphrase it.
+- Never file a KubeJS script error as a mod bug.
+- Never act on a 05 SUGGESTION without checking the code.
+- Never conclude a command was not run because it is missing. The server does not log
+  issued commands at all.
+- Never treat these files as the server's whole health. Errors are filtered to ones that
+  name a horse identifier, chat is only in-game chat (not Discord, not in person), and
+  only this mod's footprint is captured.
+
+SEE ALSO
+--------
+report-bug (how a bug becomes an issue); write-intake-document (how a want becomes a
+feature); fix-bug; release (a regression tied to a build).

@@ -147,9 +147,10 @@ have differently-sized *hitboxes*, so if you would rather every saddle, lead and
 fence gap sit exactly where vanilla puts it, set it `false`. Both are server-side,
 and neither changes what a horse carries or passes to its foals.
 
-**Every release so far is a development release**, and there is no back-compatibility
-layer - a new version will not load a world made by an older one. What changed in each
-is on
+**Your saves carry forward.** A world made under 0.5.037 or any later 0.5 release
+keeps loading in every later 0.5 release. Only a jump in the middle number (0.6.0,
+0.7.0, ...) may break old saves, and that release's notes will say so plainly. What
+changed in each is on
 **[the releases page](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/releases.html)**.
 
 **Currently built for 26.1.2 only.** Porting to other Minecraft versions -

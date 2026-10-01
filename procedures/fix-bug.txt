@@ -1,0 +1,143 @@
+PROCEDURE  : Fix a bug
+COMMAND    : /fix-bug
+SAY        : "fix a bug", "fix the next bug", "fix #N", "work the issues"
+RUNS       : local (it builds, and may need the game)
+TAKES      : open GitHub issues labelled bug
+LEAVES     : ONE issue fixed and proven (closed), or fixed and waiting on a named
+             check; the session ended
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this to take one bug on deliberately, from anyone: a tester, the test yard, or the
+owner. Every bug is a GitHub issue (CLAUDE.md hard rule 9). Bugs never go in intake/,
+which holds new features only, and never on a Verification tab, which holds checks on
+things nobody has seen yet. The labels:
+  bug            - every defect;
+  found-in-yard  - found by a test-yard run;
+  needs-owner    - waits on the owner's answer; every routine skips it until she
+                   removes the label.
+run-tests finds bugs in the yard and fixes the small ones in passing. report-bug turns
+a player's report into an issue. This procedure fixes one issue.
+
+One run fixes ONE issue. The owner clears context and runs this again for the next.
+
+BEFORE YOU START
+----------------
+1. `git pull --ff-only origin main`.
+2. `gh issue list --state open --label bug --search "-label:needs-owner" --limit 200`.
+   Testers do not always label their issues, so also scan the open issues with no
+   label, and label any that are bugs.
+3. Run `node wiki/tools/check-roadmap-execution.mjs`.
+
+STEPS
+-----
+1. Pick one.
+   If the owner named an issue, take it, even if it carries needs-owner: naming it is
+   her answer. Read her latest comment on it first. Otherwise rank, highest first:
+   a. Damage: a crash, a lost horse or item, a save that no longer loads (rule 10).
+   b. Wrong behaviour players hit on a released jar: testers, the owner's server.
+   c. Wrong behaviour found only in the yard (found-in-yard).
+   d. Cosmetic only. This always goes last.
+   Within a level, prefer an issue whose cause is already written in it, then the
+   oldest. Read the whole thread before deciding anything. Say in one line what you
+   took, and why.
+
+2. Is it already fixed?
+   a. Grep wiki/session-log/ and wiki/text/ for a keyword from the issue. Search the
+      history too: git log --date=short --pretty='%h %ad %s' -S 'identifier' -- <file>
+   b. Date the report against the fix. This step decides it, and skipping it closes
+      live bugs as stale. A session log that says "fixed" proves nothing on its own:
+      players run a released jar, so check which release carries the fix
+      (`git tag --contains <commit>`) against the version they reported. A report
+      written after the fix shipped, especially one that says "still", means the fix
+      did not work. In that case, read the code.
+   c. Fixed and released before the report -> comment with the commit and the release,
+      ask the reporter to retest on it, and leave the issue open until they answer.
+      Fixed but not released -> comment that the fix rides the next release.
+
+3. Find the owning code. Stop as soon as you have it.
+   a. The issue itself: a file:line, a log line, a stack trace.
+   b. The symptom map: wiki/text/roadmap-execution.txt, "Symptom-to-anchor map". Read
+      its row before searching the repository at all.
+   c. The owning wiki page, from CLAUDE.md's map.
+   d. The owner's last play session: neoforge-26.1.2/run/logs/latest.log and debug.log.
+      server/DebugAnnounce writes this mod's own diagnostics there.
+   e. An Explore agent.
+   Search the way look-it-up describes.
+
+4. Small or large.
+   Small means the cause is clear from the evidence and the fix is obvious and local.
+   It involves no design call, nothing near wiki/philosophy.html, nothing settled on
+   wiki/decisions.html, and no balance change. Fix it now.
+   Large means the cause is unclear, there is more than one reasonable fix, or there is
+   a design, balance or philosophy question. For a large bug:
+   a. Comment once with what you found (the evidence, file:line) and 2-4 fix options,
+      your recommendation first.
+   b. Add needs-owner.
+   c. If no code has been written yet, go back to step 1 and take the next issue.
+   A save-format change is not large by itself. Under hard rule 10 it is fine, as long
+   as it ships with its migration and a test that loads the old shape. Ask only if no
+   migration can be written.
+
+5. Fix it.
+   - Reproduce first. Write one sentence of hypothesis and one check that could
+     disprove it, and make the check a failing test. Use a unit test in common/ when
+     the rule lives there, which should be most of the time. Otherwise use a gametest,
+     or failing that, a yard pen that logs its own PASS or FAIL. If the bug can only be
+     reproduced by hand, write the exact steps into the issue.
+   - Edit the smallest owning slice, and run the check straight away.
+   - Shape:
+     - The rule goes in common/, returning a typed result, never chat text.
+     - Gameplay config is server-authoritative.
+     - For AI and pathing bugs, check reachability and path-failure states before
+       changing movement, collision or fence rules.
+     - Keep a horse's history (pedigree, log) separate from its current ownership.
+     - Extend the existing path; never add a second, screen-only copy of a rule.
+     - If the spawn-egg screen or the designer is involved, change both (rule 5).
+     - Flag any unverified API (rule 8).
+   - Break the fix on purpose once, and watch the test go red.
+   - Run tests by name only. If a gametest goes red, run HEAD without your diff
+     (`git stash`) before blaming the diff: gametests are sensitive to tick phase.
+   - Run every regenerate-table row the change touched.
+   - If the fix turns out larger than step 4 judged, stop and treat the bug as large.
+
+6. Close it on evidence.
+   - Commit as "Fix #N: <what was wrong>", saying why, not which files changed. Do not
+     write "Fixes #N" unless the proof is already in hand: a push to main
+     auto-closes the issue.
+   - A test proves it and no runtime question remains -> close the issue, with a
+     comment naming the commit and the test.
+   - Only the game can prove it -> leave the issue open, and comment "fixed in
+     <commit>, waiting on <pen> / an in-game check: <what to look for>". run-tests
+     closes it on the yard PASS. A fix that only the owner's eyes can confirm stays
+     open for her.
+   - If the fix changes behaviour a wiki page describes, update that page's Gameplay or
+     Coding tab in the same change.
+   - Everything you post on GitHub ends with the Claude Code attribution footer.
+
+7. End the session with end-session. The session log names the issue, the cause, the
+   fix commit, the proof (and whether the issue is closed or waiting), and any new
+   issues filed along the way.
+   Release only if the owner asks. When the fix is to a crash or data loss on a
+   released jar, OFFER a release in the report, because testers are on that jar.
+
+DONE WHEN
+---------
+The issue is closed with its proof, or is open with a comment naming the commit and the
+check it waits on, and the session has ended. Then report:
+1. the issue, and its state;
+2. the next issue by step 1's ranking;
+3. any issue you labelled needs-owner this run, with its question in one line.
+Then stop. Do not start that next issue.
+
+NEVER
+-----
+- Never fix two issues in one conversation.
+- Never close an issue on a session log's word, or before the proof exists.
+- Never touch the owner's live server; read only the logs she hands you.
+- Never rebuild under a client the owner is playing in (launch-game).
+
+SEE ALSO
+--------
+report-bug; run-tests; look-it-up; end-session; release; wiki/roadmap-execution.html.

@@ -28,8 +28,7 @@ import java.util.List;
  * owner's call (2026-09-24): on a server the interesting half of this locus is
  * the water source, and the explosion is a hazard whose carrier is invisible,
  * so a horse somebody bred by accident takes out a stable and the ground under
- * it. There is no back-compat path - a saved horse carrying {@code Xpl} loads
- * with this locus dropped back to {@code n/n} by
+ * it. A saved horse carrying {@code Xpl} still loads, with this locus dropped back to {@code n/n} by
  * {@link com.example.horsegenetics.common.genetics.Genotype#readableStored},
  * the same route Cleave's retired {@code Clv} takes.
  *

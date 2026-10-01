@@ -1846,8 +1846,8 @@ public final class ModGameTests {
      * the old shape, and the whole of the compatibility is one
      * {@code Codec.either(record, string)} in
      * {@link com.example.horsegenetics.neoforge.data.ResearchTopicCodecs} -
-     * documented as this repo's single deliberate exception to the
-     * no-back-compat rule.
+     * the first back-compat path in this repo, written before CLAUDE.md hard
+     * rule 10 made one the norm.
      *
      * <p><b>It fails silently and could not be unit-tested.</b> A component whose
      * persistent codec refuses its stored value is <i>dropped</i> on load, with a

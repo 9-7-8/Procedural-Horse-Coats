@@ -31,7 +31,7 @@ import java.util.UUID;
  *       compound faster for a horse scanned more often.</li>
  * </ul>
  *
- * <p>Dev only: no legacy handling.
+ * <p>Saved: a format change needs a migration (CLAUDE.md hard rule 10).
  */
 public record HorseSocialAttachment(long bornTick, Optional<UUID> dam, Optional<UUID> natalHerd,
                                     double disperseAfterDays, List<Relationship> relationships,

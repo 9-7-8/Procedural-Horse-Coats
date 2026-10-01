@@ -137,7 +137,8 @@ public final class Epigenome {
             // walked codeOrder() drawing as it went, so registering a locus at
             // priority 68 gave every gene above 68 a different draw and the
             // horse at seed 13 became a different horse. That is free in play -
-            // there are no saves - but it is not free in tests: adding natural
+            // a saved horse stores its epigenome, it is not re-rolled - but it
+            // is not free in tests: adding natural
             // zebra broke three assertions in WhitePatternGenesTest, all by
             // margins under 0.05, none of them a real regression, and the only
             // signal was a red build after an unrelated-looking change.

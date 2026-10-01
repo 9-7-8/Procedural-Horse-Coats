@@ -807,7 +807,8 @@ class WhitePatternGenesTest {
      * reason: {@code Epigenome.random} walks {@code Genes.codeOrder()} drawing
      * as it goes, so <b>registering any new gene renumbers the seed stream for
      * every gene after it</b> and a horse at seed 13 is a different horse than
-     * it was. That is by design - the mod keeps no saves - but it means a
+     * it was. That is harmless to saves, which store the epigenome rather than
+     * re-roll it - but it means a
      * threshold tuned to within a hair of one particular draw is a landmine for
      * the next person to add a gene. Widening the sample is the fix; nudging
      * the threshold is not.

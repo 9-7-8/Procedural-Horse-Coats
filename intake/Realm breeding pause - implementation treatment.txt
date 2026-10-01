@@ -4,7 +4,7 @@ Scoped with the owner. Every "Decided" line below is her call; "UNVERIFIED" line
 are facts this file has not proved and the building session must check first.
 Source of truth for what exists is wiki/horse-realm.html (the realm) and the breeding
 pages (wiki/breeding.html, wiki/fertility.html). This file is retired (deleted,
-per START HERE step 3) when it ships, and moves onto those pages' Gameplay and
+per /process-intake step 8) when it ships, and moves onto those pages' Gameplay and
 Coding tabs.
 
 The ask, in one paragraph

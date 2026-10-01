@@ -39,6 +39,27 @@
     </p>
 </div>
 
+<div class="note warn" id="saves">
+    <span class="label">Saves, as of 0.5.037</span>
+    <p>
+        <strong>A world saved under <code>0.5.037</code> or any later <code>0.5</code>
+        release keeps loading in every later <code>0.5</code> release.</strong> Every
+        change to something a world stores (genotype and epigenome codes, allele order,
+        registry ids, attachments, item components, structures) comes with whatever
+        migration it needs. Where a migration truly cannot be written, the loss is
+        named in that release's notes and kept as small as it can be.
+    </p>
+    <p>
+        <strong>Only a middle-number release breaks saves</strong> (<code>0.X.0</code>,
+        never <code>0.0.X</code>), and only on the owner's word, like every middle-number
+        bump. That release's notes are stamped <em>&ldquo;no longer back compatible with
+        saves created under <code>0.5</code>&rdquo;</em> (naming the series it leaves),
+        and the new series starts its own promise from its first release. Worlds from
+        before <code>0.5.037</code> were made under the old development-only rule and are
+        not covered.
+    </p>
+</div>
+
 <div class="note warn">
     <span class="label">The numbering, as of 2026-09-10</span>
     <p>

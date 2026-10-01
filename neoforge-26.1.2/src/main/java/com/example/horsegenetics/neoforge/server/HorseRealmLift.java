@@ -22,15 +22,13 @@ import java.util.Deque;
  * surface is picked up and put down {@value #OFFSET} blocks higher, and the
  * chunk it came out of is left empty.
  *
- * <h2>This is back-compat code, which this repo does not allow</h2>
+ * <h2>This is back-compat code</h2>
  * <b>The owner asked for it by name</b> ("write a handler for worlds that
  * already generated the dimension, that losslessly just moves all blocks
- * upwards"), and the reason the standing rule does not apply is that the rule's
- * own premise has expired: <i>no saves worth keeping</i> was true when there was
- * one tester and a dev world. There is now a shared server with other people on
- * it and a field of horses living in this dimension, and regenerating it would
- * delete them. Written down here rather than argued each time somebody reads
- * the hard rules and finds this class.
+ * upwards"): there is a shared server with other people on it and a field of
+ * horses living in this dimension, and regenerating it would delete them. It
+ * predates CLAUDE.md hard rule 10, which now asks the same of every format
+ * change.
  *
  * <h2>How it knows which chunks still need it</h2>
  * <b>It asks the chunk, and stores nothing.</b> A chunk generated before the

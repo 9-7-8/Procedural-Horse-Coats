@@ -1,0 +1,126 @@
+PROCEDURE  : Report a bug
+COMMAND    : /report-bug
+SAY        : "report a bug", "file a bug", "I found a bug", "this is broken",
+             "log this as an issue"
+RUNS       : cloud first (claude.ai/code, the app, a GitHub session); local works too
+TAKES      : a bug report from the owner or a tester, in their own words
+LEAVES     : ONE well-formed GitHub issue per bug (or a comment on an existing one);
+             no code changed
+==============================================================================
+
+WHEN TO USE
+-----------
+Someone tells a session about something built that behaves wrongly. This procedure
+REPORTS the bug; it never fixes it. Fixing is fix-bug, run on the owner's machine,
+where the game can be built and tested.
+Do not use it for a new feature request ("it should also..."). That is
+write-intake-document.
+
+What a cloud session can and cannot do:
+- It CAN read the whole repository (a fresh clone of main), its history and wiki/text/,
+  and search, read, create and comment on issues on 9-7-8/Procedural-Horse-Coats.
+  It does that through the GitHub MCP tools (mcp__github__...). If they are not loaded,
+  load them with ToolSearch. A cloud session has no gh CLI.
+- It CANNOT see the owner's machine: no latest.log, no crash reports, no running game.
+  Any log or screenshot has to come from whoever reported the bug.
+
+BEFORE YOU START
+----------------
+Quote the reporter's own words. Note who reported the bug (the owner, or a named
+tester) and where they hit it.
+
+STEPS
+-----
+1. Ask until the issue could be acted on without asking again.
+   Use the question tool. Give 2-4 options for each question, the likeliest first, so
+   the reporter picks rather than writes. Ask in rounds, with follow-ups, until you
+   have:
+   - WHAT happened, and what they expected instead;
+   - VERSION: the jar's version, and whether it was single-player, their own world or
+     a server;
+   - STEPS to repeat it, and whether it happens every time, sometimes or once;
+   - OTHER MODS, modpack or shaders, if they might matter;
+   - EVIDENCE: the exact error text, the crash report (always ask for this on a
+     crash), the relevant lines of logs/latest.log, or a screenshot;
+   - DAMAGE: was a horse, an item or a world lost? That sets the urgency (step 5).
+   Write "unknown" for anything they do not know. Never guess.
+
+2. Make sure it is a bug.
+   - A new feature -> tell them it goes through write-intake-document, and stop.
+   - A design disagreement ("too hard", "I don't like how...") -> still file it, with
+     needs-owner.
+   - Working as intended -> say so, and quote the wiki page (in wiki/text/) that shows
+     it is deliberate.
+
+3. Check it is not already reported, or already fixed.
+   - Search open AND closed issues for the symptom, the item or gene, and the class.
+     - An open match -> add a comment there with the new evidence, the version and the
+       reporter. Do not open a duplicate.
+     - A closed match -> read how it was closed. If the reporter's version is newer
+       than the fix, the fix failed: open a new issue that links the old one.
+   - Search the history for a fix: `git log --date=short -S 'identifier' -- <file>`,
+     and grep wiki/session-log/ for the symptom. Then compare against their version
+     with `git tag --contains <commit>`:
+     - the fix is in their version -> the fix failed, and the issue says so;
+     - the fix came after their version -> tell them which release carries it (or that
+       the next one will). File nothing unless they still see the bug on that version.
+
+4. Find where it probably lives. Read only, and keep it short.
+   Start at the symptom map (wiki/text/roadmap-execution.txt), then the owning page in
+   wiki/text/. Write a file:line only if you actually read it; otherwise write
+   "suspected area: ...". Search the way look-it-up describes.
+
+5. Decide the labels and the urgency.
+   - bug: always.
+   - needs-owner: add it when the fix needs her decision, because there is more than
+     one reasonable fix, or a design, balance or philosophy question. When you add it,
+     end the issue with 2-4 fix options, your recommendation first. An issue without
+     this label is picked up by the next run-tests or fix-bug run.
+   - Never found-in-yard: that label is the yard's own. Never invent new labels.
+   - Urgency goes in the body's first line, as one of:
+       DAMAGE   - a crash, a lost horse or item, a save that will not load;
+       PLAYERS  - wrong behaviour on a released jar;
+       COSMETIC - looks wrong, nothing lost or blocked.
+
+6. Write the issue.
+   The repository is public and testers read it, so write it plainly. Issue #13 is a
+   good model.
+   Title: the symptom in a player's words, plus the thing it happens to.
+   Body, in this order:
+     **Urgency:** DAMAGE / PLAYERS / COSMETIC
+     **What happens:**  one or two sentences.
+     **Expected:**  one sentence.
+     **Version:**  0.5.0xx, and single-player / own world / server (or "unknown").
+     **Steps to repeat:**  numbered, and how often it happens.
+     **Evidence:**  the error text, crash or log lines in a code block, exactly as
+       given, with their date. Link any screenshot.
+     **Reported by:**  the owner or a tester, and where they hit it.
+     **Already known?**  related issues, and any fix commit with its release.
+     **Suspected area:**  class or file:line, and how sure you are.
+     **Owning page:**  the wiki page.
+     **Fix options:**  only on a needs-owner issue.
+   End the body with the attribution footer:
+     ---
+     _Generated by [Claude Code](https://claude.ai/code)_
+   (The issue body is markdown on GitHub. Only this procedure file is plain text.)
+
+7. Report back with the link, the urgency, and whether the issue will be picked up
+   automatically or waits on the owner (and her question). Several bugs at once means
+   several issues, one bug each, all linked.
+
+DONE WHEN
+---------
+Every bug reported has one issue (or a comment on a duplicate), and the reporter has
+the links.
+
+NEVER
+-----
+- Never change code, the wiki or intake/, and never commit, push or open a pull
+  request. The issue is the whole deliverable.
+- Never touch the owner's live server.
+- Never fix the bug in the same session; fix-bug runs where the game is.
+- Never file a bug as a file in intake/ or on a Verification tab (hard rule 9).
+
+SEE ALSO
+--------
+fix-bug; run-tests; write-intake-document; look-it-up.

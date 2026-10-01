@@ -4,7 +4,7 @@ Scoped with the owner. Every "Decided" line below is her call; "UNVERIFIED" line
 are facts this file has not proved and the building session must check first.
 Three small pieces on the Horse Stasis Bank screen, shippable together or alone.
 Source of truth for what exists is wiki/horse-stasis.html (the bank). This file is
-retired (deleted, per START HERE step 3) as each piece ships and moves onto that
+retired (deleted, per /process-intake step 8) as each piece ships and moves onto that
 page's Gameplay and Coding tabs.
 
 What already exists, so the building session does not redo it

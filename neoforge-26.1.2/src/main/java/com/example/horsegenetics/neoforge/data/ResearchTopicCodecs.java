@@ -13,11 +13,11 @@ import net.minecraft.network.codec.StreamCodec;
  * in the integration layer for the same reason {@link TransferDeedCodecs} is:
  * the domain type stays free of DataFixerUpper.
  *
- * <h2>The one piece of back-compat in this repo</h2>
+ * <h2>The first piece of back-compat in this repo</h2>
  * {@code horsegenetics:research_gene} used to be a plain {@code String} gene
  * key, and there are papers in the owner's chests, shelves and villager windows
- * holding one. The rest of the mod refuses legacy shapes outright (CLAUDE.md
- * hard rule 6) and this is the deliberate exception, asked for by name: a stored
+ * holding one. It was asked for by name, before CLAUDE.md hard rule 10 made
+ * keeping saves the standing rule: a stored
  * <b>string</b> still decodes, through {@link ResearchTopic#wholeGene} - which
  * reads it as the homozygous variant pair, the strongest thing a whole-gene
  * paper could have meant.

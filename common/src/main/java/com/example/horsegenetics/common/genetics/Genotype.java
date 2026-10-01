@@ -25,11 +25,13 @@ import java.util.Set;
  * Example:
  * {@code "horsegenetics.extension=E/e-horsegenetics.agouti=A/a-..."}.
  *
- * <p><b>Parsing is tolerant</b> (dev only, no saves): a registered gene with no
+ * <p><b>Parsing is tolerant</b>, because saves must keep loading
+ * (CLAUDE.md hard rule 10): a registered gene with no
  * segment reads as its wild type, and a segment naming a gene that is not
  * registered is <b>dropped</b> - so adding or removing a gene is nothing more
  * than a coat regeneration. A bad <i>allele token</i> on a known gene is still
- * a hard error. There is no positional / legacy code handling.
+ * a hard error. There is no positional / legacy code handling: positional codes
+ * went on 2026-09-03, before any release a save can come from.
  */
 public final class Genotype {
 

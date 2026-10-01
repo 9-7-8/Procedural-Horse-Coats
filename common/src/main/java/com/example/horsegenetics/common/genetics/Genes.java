@@ -182,8 +182,9 @@ import java.util.Set;
  * <p>Register during startup, before anything parses a genotype - each
  * registration can move where a gene sits in the code, and a code written
  * against the old order still parses (a gene now absent from it reads as wild
- * type) but is a different genotype. Dev-only mod, no saves to keep; see the
- * "no legacy code" rule in {@code CLAUDE.md}.
+ * type) but is a different genotype. Saved codes must keep loading within a
+ * 0.X series ({@code CLAUDE.md} hard rule 10), which is what {@link Genotype}'s
+ * tolerant parsing is for.
  */
 public final class Genes {
 

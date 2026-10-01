@@ -1,0 +1,80 @@
+PROCEDURE  : The procedure format
+COMMAND    : (none - this is the template every procedure follows)
+SAY        : "write a procedure", "new procedure"
+RUNS       : either
+TAKES      : a routine that is done more than once the same way
+LEAVES     : one .txt file in procedures/, a line in INDEX.txt, a slash command
+==============================================================================
+
+WHAT A PROCEDURE IS
+-------------------
+A procedure is a routine the owner names in a few words ("end the session", "run
+tests") and expects carried out the same way every time, without being re-explained.
+The file holds the WHOLE routine. A slash command, a memory or CLAUDE.md may point at
+it, but never holds a second copy of its steps. Two copies drift, and the session that
+reads the stale one does the wrong thing confidently.
+
+Procedures are plain text, so any session can read them: local, cloud, or a person on
+github.com. Put nothing in one that should not be public. That means no email
+addresses, machine names, hardware, tokens or trigger ids, and nothing about anyone's
+private life. Those stay in the local memory of the session that needs them.
+
+THE TEMPLATE
+------------
+Copy this exactly. Keep the header keys in this order, padded to line up, and the
+sections in this order. Write "None." under a section that has nothing in it, rather
+than leaving the section out.
+
+    PROCEDURE  : <Title, a few words>
+    COMMAND    : /<slug>          (the file is procedures/<slug>.txt)
+    SAY        : "<keyword>", "<keyword>", ...   (the owner's words that start it)
+    RUNS       : local | cloud | either   (+ one clause if it is partly both)
+    TAKES      : <what must exist before it starts>
+    LEAVES     : <what is true when it is done>
+    ==============================================================================
+
+    WHEN TO USE
+    -----------
+    One short paragraph. Also say when NOT to use it, and what to use instead.
+
+    BEFORE YOU START
+    ----------------
+    What to read, check or sync first.
+
+    STEPS
+    -----
+    1. Numbered, in order. A step that branches says so ("Small -> ...; large -> ...").
+       Sub-steps are lettered. Each step says what to run or read, by name.
+
+    DONE WHEN
+    ---------
+    The checkable conditions, and what to report to the owner.
+
+    NEVER
+    -----
+    The mistakes this routine exists to prevent. Write each one as a rule, then give
+    the reason in a few words.
+
+    SEE ALSO
+    --------
+    Other procedures, wiki pages, and CLAUDE.md sections it leans on.
+
+STYLE
+-----
+- Plain text only. No markdown: no **bold**, no # headings, no tables with pipes.
+  Backquotes around a command or a path are fine.
+- Wrap at about 90 columns.
+- Write for a session that has never seen this repository. It knows nothing this
+  conversation knew.
+- Name the accessor, never a derived number. Do not write a gene count, a test count or
+  a release number that will be wrong next week.
+- A "why" belongs beside the rule it explains, in a few words, not in a story.
+
+ADDING ONE
+----------
+1. Write procedures/<slug>.txt from the template.
+2. Add its row to procedures/INDEX.txt.
+3. Register the slash command: .claude/skills/<slug>/SKILL.md, a copy of any existing
+   wrapper with the name, description and file path changed. A wrapper holds no steps.
+4. Add its SAY keywords to the local memory file that maps keywords to procedures, so
+   a session that hears them finds the file.

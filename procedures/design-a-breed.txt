@@ -1,0 +1,104 @@
+PROCEDURE  : Design a breed
+COMMAND    : /design-a-breed
+SAY        : "make a breed", "create a breed", "new breed", "a horse that's ...",
+             "add a breed for"
+RUNS       : either for the design; local for the build and bakes
+TAKES      : a request for a breed, or a breed inside a bigger request
+LEAVES     : a breed JSON the owner designed with you, registered, baked and tested
+==============================================================================
+
+WHEN TO USE
+-----------
+Whenever a request implies a new breed, or changes an existing one. "Create a breed" in
+the middle of a bigger task is still a breed: stop and use this at that point.
+Owner's rule: breeds are designed WITH her. Never invent one alone, unless a thorough
+spec or treatment already pins every choice down. Twice, breeds were invented end to
+end from one-line requests, and she had to come back and correct them.
+
+BEFORE YOU START
+----------------
+Read wiki/text/breed-format.txt. That page is the format's source of truth;
+common/breed/spec/BreedSpecParser.java is what actually accepts a file. Shipped breeds
+live in common/src/main/resources/horsegenetics/breeds/, one JSON each.
+
+STEPS
+-----
+1. Draft, then ask. Reply with a short draft and 2-4 concrete decision questions (the
+   question tool, recommended option first), covering:
+   - name;
+   - look and coat;
+   - which genes and alleles are in the pool, with their weights;
+   - bands;
+   - biomes;
+   - size;
+   - stats;
+   - rarity.
+   Write the file only when she has answered.
+
+2. Write the JSON in the REAL format. Drafts from other models invent a schema; never
+   paste one. The translations they always need:
+     type -> kind
+     sources -> spawn (omit when it is all four)
+     coat_genes / disorder_genes / coat_structure_genes -> one genes block
+     per-allele frequencies -> weighted PAIRS (square the frequencies; weights are
+       relative), e.g. [{"pair":"E/E","weight":41},{"pair":"E/e","weight":46},...]
+     stat_scores -> stats
+     epigenetic_bands -> bands
+     price in hundreds -> omit (this mod prices in single-digit emerald ranges)
+     commonness AND spawn_weight -> ONE or the other, lower-case; both is an error
+     notes as one string -> an array of strings
+     a lineage block -> delete it
+     bare gene names -> horsegenetics.-prefixed real keys
+
+3. Use the real gene keys and allele tokens. Grep the
+   `new Allele(KEY, n, "token", ...)` lines in common/.../genetics/genes/*Gene.java.
+   Neither gene index lists the natural loci. The traps:
+   - cream/pearl is horsegenetics.matp (Cr prl sun sno N);
+   - frame overo is horsegenetics.ednrb;
+   - splash is horsegenetics.mitf (SW1 SW9) and horsegenetics.pax3 (SW2 SW4 SW10);
+   - sabino AND the W-series are both horsegenetics.kit, so they share ONE pool;
+   - leopard is horsegenetics.leopard (LP lp);
+   - patn1 and patn2 are TWO loci, never one pool;
+   - dun is D / d1 / d2;
+   - grey is G3 / G2 / N;
+   - in flaxen, f is the WILD type, and in pangare, pa is.
+   PLOD1 here is Friesian DWARFISM, NOT WFFS. A WFFS rate written as PLOD1 quietly
+   seeds dwarfism into a sport horse, and nothing catches it. WFFS, JEB, FIS and RYR1
+   have no locus: the breed ships clear, says so in its notes, and the gene goes on the
+   health-genes roadmap with its measured rate.
+   Disorders are carrier-only pairs (scid/N, ca/N, lfs/N, ...).
+   Put the expressing combinations in the founder table: no invisible carriers in the
+   wild for a recessive particle-style gene.
+
+4. Register it. Add the file to breeds/index.json: a file missing from the index never
+   loads. (Breeds are not genes. Hard rule 6 is about genes/index.json.)
+
+5. Apply the breed climate rule. Nether breeds pin heat tolerance; snow-biome breeds
+   carry cold tolerance at their tier. BreedClimateRuleTest holds every file to it.
+
+6. Bake and test, per CLAUDE.md's breed row:
+   - `:common:bakeBreedFiles`, then `:common:bakeGeneCensus`;
+   - `node wiki/tools/check-breed-heights.mjs` if the size or a printed height moved;
+   - run BreedFilesTest, the breed's own *BreedTest (write one for a breed with a
+     deliberate pool), BreedBandsReachTest and BreedClimateRuleTest, by name.
+
+7. Write it up on wiki/breeds.html and wiki/breed-book.html, and record each call made
+   without her in the breed's notes.
+
+DONE WHEN
+---------
+She answered the design questions, the file loads (BreedFilesTest), its own test passes,
+the bakes are committed, and the wiki lists the breed.
+
+NEVER
+-----
+- Never design a breed alone from a one-line request.
+- Never paste another model's breed JSON.
+- Never write PLOD1 for WFFS.
+- Never ship a draft that has no genetics in it. Ask: ship it from house style, skip
+  it and backfill, or skip it and ship fewer. Expect "skip".
+
+SEE ALSO
+--------
+write-intake-document (a thorough breed spec there counts as her design);
+wiki/breed-format.html; wiki/breeds.html; CLAUDE.md (the breed regenerate row).

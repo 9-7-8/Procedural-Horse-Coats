@@ -1,0 +1,55 @@
+PROCEDURE  : Look something up without burning context
+COMMAND    : (none - other procedures point here)
+SAY        : "where is", "how does X work", "which class handles"
+RUNS       : either
+TAKES      : a question about the repository or the wiki
+LEAVES     : the answer, with the context still free for the work it serves
+==============================================================================
+
+WHEN TO USE
+-----------
+Whenever a task needs to find something in this repository. Context is the scarce
+resource in a session here, not developer time. A search that reads the wrong files
+leaves less room for the build that follows it.
+
+BEFORE YOU START
+----------------
+Decide which subject the question belongs to, using CLAUDE.md's page map. That names
+the wiki page that is the single source of truth for it.
+
+STEPS
+-----
+1. Prose questions: read wiki/text/, never wiki/*.html. It is the same content with the
+   markup stripped, one small file per page or tab. Start at wiki/text/index.txt, which
+   maps every heading to its file#anchor. Open a real .html only to edit it, or for
+   releases.html and making-a-gene.html, which are not baked into text.
+2. "Which class handles this?" Look at the symptom map first:
+   wiki/text/roadmap-execution.txt, section "Symptom-to-anchor map". Then the owning
+   page's Coding tab. Only then search the code.
+3. Search narrowly: one file, one folder, or wiki/text/**. A repository-wide search is
+   the last resort.
+4. Open-ended questions ("how does Y work", "where is X decided"): hand them to an
+   Explore agent. Its dead-end searches then stay out of this conversation.
+5. Batch reads that do not depend on each other (the page's text, the classes it names,
+   the test) into one parallel round.
+6. A dated record (what a session did, and why): pick one file under wiki/session-log/
+   from the index at wiki/session-log.html. Those files are not baked into wiki/text/.
+7. Read a long routing page (roadmap-execution, verification) once per session, by the
+   section you need. Never read it in full a second time.
+8. The owner's last play session is on disk: neoforge-26.1.2/run/logs/latest.log, with
+   debug.log beside it. Read it rather than asking. A run that crossed midnight
+   continues from <date>-1.log.gz, so read both.
+
+DONE WHEN
+---------
+The question is answered with a file:line or file#anchor that can be quoted.
+
+NEVER
+-----
+- Never grep or read wiki/search-index.js. It is one multi-megabyte generated file.
+- Never run the full :common:test suite to answer a question. Use --tests '*XTest'.
+- Never trust a claim from memory over the code. Grep the class or flag first.
+
+SEE ALSO
+--------
+CLAUDE.md (the page map); wiki/text/index.txt; process-intake; fix-bug.

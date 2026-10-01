@@ -49,3 +49,117 @@ Part 1 is written to the AI: ask every design call with the question tool as opt
 keep asking follow-ups, read the code before describing it, and mark what it has not
 read as UNVERIFIED. Each treatment now carries a Release line, and /process-intake
 cuts a patch release, cuts none, or asks, according to that line.
+
+Then the save rule changed. Owner: "remove the no back compat rule from everywhere it
+appears, and now specify that we should try to make everything back compatible as of
+whatever the current release version is. We only stamp 'no longer back compat with saves
+created under this version' when we increase the second number (0.X.0), not the third."
+
+    New CLAUDE.md hard rule 10, and wiki/releases.html#saves: a world saved under 0.5.037
+    (the current release) or any later 0.5 release loads in every later 0.5 release, and
+    every change to something saved brings its migration. Only an owner-approved
+    middle-number release may break saves, and its notes carry the stamp. The README says
+    the same to players. The Status section's "suite is green" bullet went, which kept
+    CLAUDE.md at 300 lines; it was a stale-prone claim anyway.
+
+    The old rule came out of 15 code comments, 7 wiki pages, the undead treatment, the
+    intake guide and two memories. ResearchTopicCodecs and HorseRealmLift had been
+    "the one exception"; they are now just the first back-compat code, written before
+    the rule. The dated release notes and session-log entries were left as written.
+
+    Found on the way: compatibility.html and making-a-gene.html said a save with a gene
+    added or removed would not load. That has been false since codes became gene-keyed
+    on 2026-09-03. An added gene reads as wild type, and a removed one drops that locus.
+    Both pages now say so. Rule 10 makes removing a gene inside a series a thing to
+    avoid: park it, or retire its alleles to a fallback, as Clv and Xpl were.
+
+    Comments only in Java: :common and :neoforge compile green. The designer was not
+    rebaked, since no code moved.
+
+Then START HERE.txt and Implementation advice.txt were folded away and deleted.
+    - The intake half went into /process-intake: one unit per context window and why;
+      retiring a unit from every intake file; the ways to search without burning context;
+      the hypothesis-and-disproving-check habit; the shape of a change (rules in common/
+      with typed results, server-authoritative config, extend the existing path, throttle
+      refusal notices).
+    - The bug half became a new skill, /fix-bug (.claude/skills/fix-bug/SKILL.md). It
+      takes one GitHub issue, checks whether it is already fixed (dating the report
+      against the release that carries the fix), finds the code through the symptom map,
+      sorts small from large the same way the run-tests routine does, reproduces it in a
+      failing test, fixes it, and closes it only on evidence.
+    - Implementation advice's four numbered plans (breeding caps, bond decay, cowboy
+      ownership, search/naming/loot) were not carried over. They were the old To do bug
+      bullets, and every one has shipped since (the crowding-cap, bond-decay,
+      foal-naming and chest-loot sessions).
+    - Every treatment that said "per START HERE step 3" now points at /process-intake.
+And, at the owner's request, intake/"How to report a bug (cloud session).txt": a
+report-only routine for a cloud session. It asks until the report is actionable, checks
+for duplicates and earlier fixes, finds the likely area read-only, labels the issue (bug,
+and needs-owner when it needs her), and writes it in the shape of issue #13, through the
+GitHub MCP tools. It never fixes, commits or pushes.
+
+Found on the way: the routing table on wiki/roadmap-execution.html still sends "built and
+wrong" to Known gaps. Since rule 9's amendment, that row should say GitHub issues. Left
+for the owner, because check-roadmap-execution.mjs reads that page.
+
+Then roadmap-execution.html was brought up to date, after an Explore audit against the code:
+- routing sends a bug to a GitHub issue and a feature to an intake treatment;
+- the stale gap-routing list is gone;
+- the six fix stages and the slices now say what is left: the record-by-UUID request
+  and registry, the H-menu row action, equip-all, and the info screen's tab strip;
+- the part-layer gate is marked partly settled, and the undead gate settled in intake;
+- thirteen coverage rows were corrected.
+
+And then procedures/. Every routine is now one plain-text file in procedures/, reachable
+from a cloud clone, in one format (FORMAT.txt), listed in INDEX.txt, and registered as a
+slash command by a thin .claude/skills wrapper that only points at the file.
+- Eleven procedures: end-session (moved out of CLAUDE.md, which fell from 300 lines to
+  263), process-intake, write-intake-document, fix-bug, report-bug, run-tests,
+  hand-over-a-test, launch-game, release, design-a-breed and survey-a-mod.
+- Two reference files without a command: look-it-up and FORMAT.
+- /show-procedures lists them all and checks the folder against the index.
+- Most of them were memories until today. Their content moved into the repo, and the
+  memories are now one-line pointers, with a keyword map (procedures-keywords).
+- What stays local is private or machine-specific: the overnight restart terms, the live
+  server, the safe modpack, the routine's trigger id, the testers, and the machine.
+- intake/ lost its two guide files to procedures/ and gained a short README.txt.
+INDEX.txt lists nine routines that could become procedures next.
+
+Then /review-server-logs (the live server's PCH log exports: read only, paths and the
+reviewed-folders record in local memory) and /add-a-gene. add-a-gene has one path for each
+kind of gene: coat (JSON first, Java when the vocabulary falls short), ability (an effects
+verb first, then a handler), and add-on grown part (PartKind, generator, sheet,
+GrownParts). An Explore agent checked every class, task and test it names against the
+code. At the owner's request, its first step asks every open question up front, in
+consecutive question-tool rounds, before any work.
+
+Found on the way: making-a-gene.html's Java tab still had four stale lines.
+- "This mod has no save compatibility" - wrong under hard rule 10, and wrong in fact,
+  because codes are keyed by gene.
+- "Add the page to SECTIONS in nav.js" - hard rule 7 makes that generated.
+- "Run :common:test" - the whole suite.
+- "Delete coat-golden.txt" - the goldens are copied back from common/build/.
+All four are fixed.
+
+Then three more procedures.
+- /rebake walks CLAUDE.md's regenerate table without copying it. It covers the order
+  inside a row, reading real exit codes, git diff over git status, reverting a wasm after
+  a data-only bake, and generated asset copies.
+- /test-tiers sets the rule that the longer a test runs, the more the moment must matter:
+  - tier 0: compile and node checks, in seconds;
+  - tier 1: one test class, about fifteen seconds;
+  - tier 2: gametests, browser checks and a server boot, about a minute;
+  - tier 3: the full suite, ten to fifteen minutes, only for a release or when the owner
+    asks.
+  The owner's new rule: every release runs every code test. CLAUDE.md's full-suite line
+  now says so.
+- /release became "Create a new release". An Explore agent read every release from
+  0.5.000 to 0.5.037 (39 in 21 days), and the pattern became step 1:
+  - crash and stuck-player fixes on a released jar ship within the hour;
+  - one finished feature a player will notice is enough for its own number;
+  - play-report fixes batch;
+  - docs, intake and debug work only ride along;
+  - Claude offers, the owner decides, and she often holds a cut to add one more thing.
+  Then one question round, then the full release set, then the cut. end-session's
+  summary now says whether a release looks due.
+Eight more memories became pointers.

@@ -1,0 +1,108 @@
+PROCEDURE  : Rebake what a change invalidated
+COMMAND    : /rebake
+SAY        : "rebake", "run the bakes", "regenerate", "re-bake everything this touched",
+             "is anything stale"
+RUNS       : local (most bakes are Gradle tasks or need headless Chrome)
+TAKES      : a set of changed files (uncommitted, or a commit range)
+LEAVES     : every derived, checked-in artefact current, and only the real changes
+             staged
+==============================================================================
+
+WHEN TO USE
+-----------
+After any change, before it is committed and pushed. This is step 1 of end-session, and
+part of add-a-gene, design-a-breed and every procedure that edits a source with a
+derived copy.
+Every artefact here is checked in, and fails SILENTLY when stale. A stale snapshot makes
+its own check pass by definition. The parity check stayed green for a day while the
+creator drew every horse with its spine and belly swapped.
+
+The table of what-to-rebake-for-what is CLAUDE.md's "Regenerate what you invalidate".
+It is the only copy, so read it there. This procedure is how to walk it.
+
+BEFORE YOU START
+----------------
+1. Get the list of changed files:
+   `git status --short` and `git diff --stat`, or `git diff --stat <from>..HEAD` for a
+   range.
+2. Make sure no game is running from this checkout. A bake rewrites jars and classes
+   under a running client, which then crashes with ClassNotFoundException for a class
+   that exists (launch-game, "before you start").
+3. If the owner edited an asset, find out WHERE. wiki/horse-designer/assets/ is
+   generated output, copied from common/src/main/resources/. An edit made there never
+   reaches the game, and the next bake silently reverts it. md5sum both copies, and
+   promote the edited one into common/ before baking.
+
+STEPS
+-----
+1. Match each changed path to its rows in CLAUDE.md's table. One file can hit several
+   rows: a gene file hits the gene row, the common/ row, and the prose row for its page.
+   Write down the rows you will run, in table order.
+
+2. Run the rows. Their order inside a row matters:
+   - Gene row: bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
+     bakeGeneCensus, bakeUnverifiedGenes, then bake-gene-timeline.mjs.
+     - The timeline dates a gene by the first commit that names its key, so commit the
+       code first, or a new gene lands in "Undated".
+     - bakeUnverifiedGenes reads the pages' Verified blocks, so it runs after the pages.
+   - Breed row: bakeBreedFiles, THEN bakeGeneCensus (the census reads the breed
+     sheets).
+   - spec/ row: bakeSpecFixtures, THEN check-parity.mjs. Parity against an old fixture
+     proves nothing. Also run bake-export-fixtures.mjs if the creator's metadata or
+     effects moved.
+   - Jumps then double gates: bake-jumps.mjs merges the axe tag that the gates are also
+     in, so re-run bake-double-gates.mjs after it, and check both families are in the
+     tag.
+   - A recipe change: bake-recipe-reference.mjs, then check-recipes.mjs.
+   - Anything in common/ or web/: :web:bakeDesignerAssets, then
+     check-designer-boots.mjs. TeaVM compiles only the reachable graph, so the task
+     can go green while the page comes up blank.
+   - Any wiki prose, LAST: build-search-index.mjs, check-links.mjs (add --orphans when
+     pages moved), then bake-agent-text.mjs.
+   - Any Verification or Roadmap tab touched: bake-verification-index.mjs and
+     bake-roadmap-index.mjs. Each hard-fails on a tab with no summary box.
+   - A part-sheet region changed: bake-part-sheet.mjs (not in the table; see
+     add-a-gene).
+
+3. Never regenerate R/genes/index.json from the folder (hard rule 6). An absence there
+   is a killswitch.
+
+4. Read each Gradle task's real exit code. Log to a file and read it. Never pipe
+   Gradle into tail or head: a pipeline's exit code is the last command's, so a red
+   build reports green. A long-running task piped into a filter that exits is left
+   wedged.
+
+5. Decide what actually changed. Every bake rewrites all its outputs, and `git status`
+   flags a rewritten file on its timestamp alone. `git diff --name-only` is the
+   authority.
+   - Commit what git diff shows.
+   - Never commit to quiet a status that git diff says is clean.
+   - The designer wasm (wiki/horse-designer/wasm/web.wasm) is not reproducible: two
+     builds of one tree differ. After a DATA-only bake, where no reachable common/ or
+     web/ code changed, revert the wasm (`git checkout -- wiki/horse-designer/wasm/`)
+     rather than commit 2 MB of noise. If code changed, commit it, and check that the
+     designer boots.
+
+6. Goldens move only by running their test classes (test-tiers, tier 1). Check WHICH
+   rows moved before copying the actuals from common/build/ back into
+   common/src/test/resources/.
+
+DONE WHEN
+---------
+- Every row the change hit has been run, in order, with its real exit code read.
+- `git diff` shows only real changes.
+- check-links, check-parity (if spec moved) and check-designer-boots (if code moved)
+  are green.
+
+NEVER
+-----
+- Never edit a generated file by hand (genes.json, gene-census.html, verification.html,
+  roadmap.html, wiki/text/, the generated spans). Edit the source and bake.
+- Never trust a green check whose snapshot was not rebaked first.
+- Never bake under the owner's running client.
+- Never rebuild genes/index.json from the folder.
+
+SEE ALSO
+--------
+CLAUDE.md ("Regenerate what you invalidate" - the table itself); test-tiers;
+end-session; add-a-gene; design-a-breed; launch-game.

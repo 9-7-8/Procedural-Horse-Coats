@@ -1,0 +1,181 @@
+PROCEDURE  : Process intake
+COMMAND    : /process-intake
+SAY        : "process intake", "pick something from intake", "do the next intake item",
+             "implement something from intake"
+RUNS       : local (it builds and runs tests)
+TAKES      : implementation treatments waiting in intake/
+LEAVES     : ONE unit built, written up on the wiki, deleted from intake/, pushed;
+             the session ended
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this to build the next new feature. intake/ holds new features only, as
+implementation treatments written by write-intake-document. Bugs are GitHub issues
+and go through fix-bug instead.
+
+One run builds ONE unit. Never start a second one in the same conversation. The owner
+clears context and runs this again for the next one, because the next unit's classes,
+pages and tests have nothing to do with this one's.
+
+This file is the routine, not the queue. Read what is in intake/ fresh every run.
+
+BEFORE YOU START
+----------------
+1. `git pull --ff-only origin main`. intake/To do.txt is edited on github.com, so the
+   local copy is routinely stale, and cloud routines push to main too.
+2. `git status --short`. Untracked files in intake/ are the owner queuing material:
+   commit around them, and never flag, add or delete them.
+3. Run `node wiki/tools/check-roadmap-execution.mjs`.
+4. Search the way look-it-up describes, for the whole run.
+
+STEPS
+-----
+1. List the units.
+   A unit is the smallest thing that ships alone, not a file:
+   - each bullet in To do.txt. Its first line is permanent: never delete it, never
+     count it;
+   - each piece, slice or tier a treatment names. A treatment that names no split is
+     one unit;
+   - a treatment marked PLAN ONLY with stages unchecked is a unit only at its first
+     stage.
+   These are not units, so leave them alone:
+   - intake/README.txt;
+   - potential-assets/. Use anything in it freely for the unit you are building:
+     copy, crop, recolour or transform it, without asking. Log each use in that pack's
+     USAGE.txt, add THIRD_PARTY_NOTICES.md on a pack's first use, and never put a
+     whole pack in git or a release;
+   - *-draft/ and tools/ folders. They retire with the treatment that uses them.
+   To list a treatment's units, read its header, its "What already exists" section and
+   any "Order and size" section, not the whole file. If more than a handful of
+   treatments need sizing, hand the sizing to an Explore agent.
+
+2. Throw out what is already done.
+   For each unit you might pick, grep wiki/session-log/ and wiki/text/ for its
+   keywords, and look for its classes in the code. Date the unit before deleting it.
+   Get the date it was written (`git log --date=short -S 'phrase' -- intake/`) and the
+   date the matching work landed. A unit written after that work asks for more than was
+   built, so it is still open.
+   If a unit is already done, delete its text (step 8) and say so in the session log.
+   That deletion is not this run's unit: carry on and pick one.
+
+3. Score every remaining unit, as a table in your reply:
+   - SIZE: S, M or L.
+       S = one screen or class, one test class, a few regenerate rows.
+       M = one session: a new gene or system slice, several bakes.
+       L = the treatment says it takes several sessions, or other units are waiting
+           on it as a foundation (a new part kind, a shared base class, a sheet
+           region, a structure bake, an entity type).
+   - IMPACT, highest first:
+       a. finishes something that has already shipped;
+       b. unblocks other units;
+       c. new content.
+       A unit the owner flagged in her own words ("most important", "next") goes to
+       the top of its tier.
+   - OWNER: can it be built without her? The answer is No if any of these is true:
+       - it has an Open: line that is a design call;
+       - it says "confirm with the owner";
+       - it designs or redesigns a breed (see design-a-breed);
+       - it touches wiki/philosophy.html.
+       Art from potential-assets/ never needs her. UNVERIFIED lines need the source
+       read, not the owner. "Recommended" lines may be taken as written.
+   - DEPENDS ON: a unit that needs another unit's foundation cannot go first.
+
+4. Pick, in this order:
+   Tier 1 - small and high impact: size S, impact a or b. Owner questions are allowed
+            only if they fit in one round (step 5).
+   Tier 2 - anything you can do without her: size S or M, no owner design calls, and
+            its dependencies have shipped.
+   Tier 3 - the big ones: size L, or open design calls. Build its foundation or first
+            slice only. If it is not on a wiki Roadmap tab yet, routing it there is
+            part of the unit.
+   Break ties by: unblocks the most units, then fewest regenerated artefacts, then
+   oldest in `git log -- intake/`.
+   Say in one line what you picked, its tier, and why the runner-up lost. Then carry
+   on without waiting, unless step 5 asks something.
+
+5. Ask once, up front, or not at all.
+   If the pick has owner calls, ask all of them in one question-tool round before any
+   code: 2-4 concrete options each, with the treatment's Recommended line first. If she
+   does not answer, or her answers open new questions, drop to the best Tier 2 unit and
+   leave this one's questions written into its treatment.
+   Anything you decide without her goes in the session log under "Calls made without
+   the owner", and on wiki/decisions.html if it is a design call.
+
+6. Build it.
+   - Before editing, write one sentence of hypothesis and one check that could disprove
+     it. Run that check straight after the first edit. If the check needs NeoForge
+     runtime state, write the exact manual reproduction on the owning page's
+     Verification tab, rather than widening the search.
+   - Resolve every UNVERIFIED line the unit relies on from the 26.1.2 sources or a
+     gametest. Grep for every API or past case the treatment cites: treatments have
+     named things that do not exist.
+   - Read the owning wiki page, then only the classes the treatment names.
+   - Shape: put the rules in common/, returning typed results, never chat text. The
+     NeoForge side does config, chat, persistence, navigation and rendering.
+     Gameplay config is server-authoritative. Extend the existing path rather than
+     adding a second one beside it. Throttle a refusal reported to a player: once per
+     meaningful attempt, never once per tick.
+   - Follow hard rules 1-10. Rule 10 is the one a feature breaks without noticing:
+     anything saved that the unit changes ships with its migration, and with a test
+     that loads the old shape. If the spawn-egg screen or the designer is involved,
+     change both (rule 5).
+   - Run tests by name only (--tests '*XTest'), never the full suite. Break the new
+     test on purpose once, to prove it can fail.
+   - Run every regenerate-table row the change touched.
+   - If the unit turns out bigger than its score, ship the part that stands alone and
+     put the rest back in the treatment as its next piece. Do not widen the run.
+
+7. Write it up on the wiki.
+   - What shipped goes on the owning page's Gameplay and Coding tabs.
+   - What nobody has seen in a game goes on its Verification tab.
+   - What is still planned goes on its Roadmap tab.
+   - If the subject has no page, write one.
+
+8. Retire it from intake/.
+   Delete the shipped unit's text from every intake file that mentions it. Leave no
+   "done" marker and no strike-through: a shipped unit still sitting here is a second
+   description competing with the wiki.
+   - The last piece of a treatment -> delete the whole file, plus any *-draft/ folder
+     only it used. Grep intake/ for that folder's name first.
+   - Not the last piece -> delete that piece's section. If the remaining pieces refer
+     to it, leave a one-line pointer to where it now lives on the wiki.
+   - A To do.txt bullet -> delete it, and its heading if the heading is now empty.
+
+9. End the session with end-session. Then release, as the treatment's Release: line says:
+   - own version -> run the release procedure. If the line says "when the last piece
+     ships" and this is not the last piece, do not release.
+   - rides the next release -> no release.
+   - bigger bump -> ask the owner first. The middle number never moves without her
+     word.
+   - no Release: line (an older treatment) -> no release; raise it as a question in the
+     report.
+
+10. Write the session log as wiki/session-log/d<date>-<slug>.txt, with:
+    - the owner's request, quoted;
+    - Done: the unit, the commit, what is green, and which treatment text was retired;
+    - Calls made without the owner;
+    - Found on the way;
+    - Tests run by name, and what a full :common:test run would still check;
+    - Where to look first in game: the Verification tab anchors.
+
+DONE WHEN
+---------
+The unit is pushed, written up and retired, the session has ended cleanly, and you
+have reported:
+1. what shipped, and its tier;
+2. what is newly waiting in wiki/verification.html;
+3. the next unit by this ranking, with its tier and any owner question it will need,
+   so she can answer it before the next run.
+Then stop. Do not start that next unit.
+
+NEVER
+-----
+- Never build two units in one conversation.
+- Never pick anything that needs the owner's live server.
+- Never design a breed without her (design-a-breed).
+- Never treat an UNVERIFIED line as true because the treatment sounds confident.
+
+SEE ALSO
+--------
+write-intake-document; look-it-up; end-session; release; design-a-breed; fix-bug.

@@ -6,7 +6,7 @@ first. Source of truth for what exists is wiki/model-parts.html and the unicorn 
 gene pages. This file is the handoff for ONE gene whose alleles are three mouth-and-muzzle growths:
 boar tusks, sabre fangs and a narwhal horn. It sits beside "Head parts - implementation treatment.txt"
 and "Body parts - implementation treatment.txt" and follows the same pattern. It is retired (deleted,
-per START HERE step 3) as each slice ships and moves onto that gene's Gameplay and Coding tabs.
+per /process-intake step 8) as each slice ships and moves onto that gene's Gameplay and Coding tabs.
 
 The gene, in one paragraph
 ==========================

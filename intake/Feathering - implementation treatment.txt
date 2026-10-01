@@ -6,7 +6,7 @@ first. Source of truth for what exists is wiki/model-parts.html (hoof feathering
 tab) and the unicorn horn and antler gene pages. This file is the handoff for ONE gene that grows
 feathering - long hair hanging from each fetlock, as on a Clydesdale or a Friesian. It sits beside
 "Head parts", "Body parts" and "Tusks gene" and follows the same pattern. It is retired (deleted, per
-START HERE step 3) when it ships and moves onto the gene page's Gameplay and Coding tabs.
+/process-intake step 8) when it ships and moves onto the gene page's Gameplay and Coding tabs.
 
 Scope
 =====
