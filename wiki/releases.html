@@ -61,6 +61,103 @@
     </p>
 </div>
 
+<h2 id="v0-5-037">0.5.037 &mdash; antlers, ram horns, and four new breeds</h2>
+
+<div class="note warn">
+    <p class="label">None of the new horns has been seen in a running game</p>
+    <p>
+        Everything builds, the game tests pass on a dedicated server, and every gene and breed
+        here is unit-tested &mdash; down to each breed's colour shares and horn shapes. But
+        nobody has yet looked at an antler or a ram's horn on a live horse, so how they sit on
+        the head, how big the biggest ones get and how each shape reads are all unchecked. Where
+        to look is on <a href="verification.html">the verification index</a>.
+    </p>
+</div>
+
+<h3 id="v0-5-037-antlers">Antlers</h3>
+<p>
+    A horse can now grow a rack of antlers. It is a rare dominant gene with two forms: one
+    gives antlers to mares and stallions alike, like a reindeer, and one only to stallions,
+    like a red deer &mdash; a mare carrying it looks like nothing at all. Every rack is its own:
+    how big, how many tines, how far it reaches, how thick and what shade of bone are inherited
+    and drift a little each generation, and a line bred for size really does grow a bigger rack.
+    Foals have none; the rack comes in when the horse grows up. Four more genes finish it:
+</p>
+<ul>
+    <li><a href="gene-antler-form.html">Antler form</a> &mdash; forked, brow-tined (reindeer),
+        palmate (moose), crowned, or a plain spike.</li>
+    <li><a href="gene-antler-glow.html">Antler glow</a> &mdash; the points glow in the dark.</li>
+    <li><a href="gene-antler-crystal.html">Crystal antlers</a> &mdash; see-through, in one of
+        seven gem colours, with solid points.</li>
+    <li><a href="gene-antler-bloom.html">Blooming antlers</a> &mdash; leaves, moss or blossom on
+        the tines.</li>
+</ul>
+<p>See <a href="gene-antlers.html">Antlers</a>.</p>
+
+<h3 id="v0-5-037-ram-horns">Ram horns</h3>
+<p>
+    Built the same way: a rare dominant, with one form horning both sexes and one only the
+    stallions, the way most sheep breeds have horned rams and polled ewes. Size, how far they
+    curl, thickness and shade are inherited. <a href="gene-ram-horn-form.html">Ram horn form</a>
+    makes them curled, corkscrew, four-horned like a Jacob sheep, or loose scurs, and
+    <a href="gene-ram-horn-tip.html">ram horn tip</a> fades the points into a colour of their
+    own. <a href="gene-molten-hooves.html">Molten hooves</a> gains a new allele, <code>MltH</code>,
+    whose glowing hoofprints come out in the colour of the horse's horn tips. See
+    <a href="gene-ram-horns.html">Ram horns</a>.
+</p>
+
+<h3 id="v0-5-037-breeds">Four new breeds</h3>
+<ul>
+    <li><strong><a href="breed-book.html#rimehart">Rimehart</a></strong> &mdash; a very large
+        black horse of the snow biomes, half of them grulla, a quarter grey and a quarter
+        silver, with a brow-tined rack on mares and stallions alike. About one in twenty carries
+        a single natural white gene &mdash; anything from roan to a tobiano patch.</li>
+    <li><strong><a href="breed-book.html#greenwood">Greenwood</a></strong> &mdash; a dark bay of
+        the forests with a fawn's spotted topline and a stag's rack. Every one plants something
+        as it goes &mdash; any of the six trees, mushrooms, flowers or bone meal, in every
+        combination &mdash; and spreads grass, moss or mycelium under its hooves.</li>
+    <li><strong><a href="breed-book.html#mirrorgazer">Mirrorgazer</a></strong> &mdash; Nether
+        only. All black, with black where the whites of its eyes should be and a red iris that
+        glows. Ram horns black at the root and any colour at the points, and glowing hoofprints
+        in that same colour. It watches you after dark, every one in its own way, and half are
+        shadowcreatures too. Fireproof.</li>
+    <li><strong><a href="breed-book.html#not_a_sheep">Not A Sheep</a></strong> &mdash; a
+        Shetland-sized horse that is a sheep in every way the mod can draw: mostly creamy white,
+        otherwise brown, black, roan-grey, pied or mouflon-bellied, with rams that are usually
+        horned and ewes that usually are not. It has no wool.</li>
+</ul>
+
+<h3 id="v0-5-037-covers">A stallion no longer gives up on a mare a few blocks away</h3>
+<p>
+    A stallion standing a block or more from a mare in an open field could silently fail to
+    reach her, because his path was asked to end on his own block. Wild bands and paddocks were
+    both affected. He now only has to get within a block of her. A fence or a wall still
+    stops a cover, as it is meant to.
+</p>
+
+<h3 id="v0-5-037-world">What this does to a world you already have</h3>
+<ul>
+    <li>Nothing about an existing horse changes. Every new gene arrives on old horses as its
+        plain, hornless form, and no existing allele moved &mdash; the new molten hooves allele
+        was added after the others.</li>
+    <li>New wild horses can now carry antlers or ram horns, rarely. The four new breeds spawn
+        mostly in land you have not explored yet.</li>
+</ul>
+
+<h3 id="v0-5-037-rough">Not played yet, and known rough edges</h3>
+<ul>
+    <li><strong>Placement is computed, not tuned.</strong> Antlers and ram horns sit just inside
+        the ears, worked out from the model's boxes. A massive rack or a full curl may clip a
+        low ceiling, a doorway, the neck or a bridle.</li>
+    <li><strong>Palmate antlers</strong> are built from square boxes and may look like a clump
+        rather than a plate.</li>
+    <li><strong>Crystal antlers</strong> are see-through, and see-through boxes can sort oddly
+        against each other as the camera turns.</li>
+    <li>The browser horse designer cannot draw horns or antlers; the spawn egg's preview can.</li>
+    <li>Everything waiting to be looked at is on
+        <a href="verification.html">the verification index</a>.</li>
+</ul>
+
 <h2 id="v0-5-036">0.5.036 &mdash; horses in modded biomes, and a real inventory for dressing a horse</h2>
 
 <div class="note warn">
