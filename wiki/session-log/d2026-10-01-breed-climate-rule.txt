@@ -1,0 +1,44 @@
+2026-10-01 - breed climate rule: Nether breeds heat tolerant, cold spawners cold tolerant
+
+    Owner: "Pick one thing from intake, and implement it following Start Here.txt"
+
+Done (code, commit 997df5c2, pushed; :neoforge-26.1.2:build green, creator parity green,
+designer boots)
+
+    intake/"Breed climate tolerance - spec.txt", whole, and the spec retired. To do.txt was
+    already empty, so this was picked from the treatments as the one the spec itself called
+    "small, one session".
+
+    The rule (common/breed/BreedClimate, held by BreedClimateRuleTest over every breed file
+    and every strain that names the locus):
+      - a breed listing any vanilla Nether biome pins magic_heat Htol/Htol at 100;
+      - a breed listing cold biomes carries magic_cold at least at the tier its share asks
+        for (>= 0.5 near-fixed, >= 0.25 partial, > 0 light), compared by expected Ctol
+        copies; the rule only raises.
+
+    What moved: Netherhorse, Nightmare, Mirrorgazer (heat, fixed); Bashkir Curly and
+    Percheron (cold partial, new); Enderpony and Yugoslavian Trotter (cold light, new);
+    Clydesdale (light -> near-fixed); Yili (light -> partial). Each file's notes say so.
+
+Found on the way
+
+    - The spec's cold-biome list was UNVERIFIED. Read from the 26.1.2 OverworldBiomes source,
+      it is right but one short: frozen_ocean is 0.0. No breed lists it, so nothing moved.
+      Deep frozen ocean is 0.5 and is not cold.
+    - The Mirrorgazer shipped after the spec's survey and spawns only in the Nether. It is
+      covered by the rule like the other two, and that is exactly the drift the test is for.
+    - The breeds page's neutral list was stale twice: Wielkopolski (the spec caught it) and
+      the Ukrainian Riding Horse (it did not) both carry light cold tolerance by their own
+      notes since 2026-09-15. Fixed on the page. The file was the right side in both cases.
+    - No cold-spawning breed carries Csen.
+    - The breed bake rewrote only the nine edited files, the coat goldens did not move, and
+      web.wasm was reverted after the designer bake as non-reproducible noise (BreedClimate is
+      reachable only from a test).
+
+Tests run by name: BreedClimateRuleTest, BreedFilesTest, NetherBreedsTest,
+BreedBandsReachTest, RimehartBreedTest, RamHornBreedsTest, BreedCrossTest, BreedsTest,
+CommonPortabilityTest, CoatBakeGoldenTest, CoatPipelineGoldenTest. The full :common:test
+suite was not run; it would still check anything else that rolls founders of the nine
+breeds with a fixed seed.
+
+Waiting: wiki/breeds.html#climate-rule-1001 - read the nine breeds off living horses.
