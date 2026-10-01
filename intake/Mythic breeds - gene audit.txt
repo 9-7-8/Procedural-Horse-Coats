@@ -1,0 +1,154 @@
+Mythic breeds - gene audit
+
+An AUDIT, NOT A SPEC. Nothing here has been changed in the repo and no decision has been made for the
+owner. It maps the eleven breeds in her table (Pegasus, Unicorn, Sleipnir, Kelpie, Hippocampus,
+Uchchaihshravas, Longma, Shadowfax, Mearas, Thestral, D&D Nightmare) onto what the mod already has
+(implemented genes, parts and breeds), what is already scoped in intake/ but not built, and what is
+still unscoped. Read from the shipped gene classes and gene files, the wiki gene pages, the shipped
+breed files and every treatment in intake/. UNVERIFIED lines are things I could not confirm.
+
+Legend
+======
+ HAVE     implemented and shipped today
+ INTAKE   scoped in intake/ but not built; named by file
+ ROADMAP  named on a page's Roadmap tab or inside a big intake note, but with no treatment of its own
+ GAP      nothing anywhere: still needs scoping
+
+How the table's columns map onto the mod
+========================================
+- Body colour, mane and tail colour: HAVE. White, grey, silver, black and "variable" are all reachable with the
+  base-coat genes (Extension, Agouti, Grey, Silver, extreme white and the rest) and the independent mane_color and
+  tail_color genes. Breeds already pin them.
+- Hoof colour: nothing in the table asks for one except the D&D Nightmare's flaming hooves, which is Molten Hooves
+  (HAVE). There is no hoof-COLOUR gene; hooves are painted by the coat pipeline's own region rules. Not a gap for any
+  breed in this table.
+- Speed / jump: HAVE. Breed stats run to 10 (the shipped Nightmare is jump 10), so "10+" means the cap. UNVERIFIED that
+  speed 10 is reachable in the stat curve; check BreedStatCurve before pinning a breed to it.
+- Special abilities: see the table below.
+- Attachments: the whole gap lives here.
+
+What the mod already covers (HAVE)
+==================================
+- Flight: the data gene "flying". Gliding is dominant (an elytra-like glide) and TRUE flight is recessive, two copies, "a
+  horse that goes wherever it is pointed". Painting nothing: a flying horse looks like any other until it leaves the ground.
+  Shipped breeds Cloudtouched and the small Nightmare already pin it. The third mode, cloud-treading, is unbuilt (Roadmap).
+- Fire: Fireproof, Emberveins (cracked glowing veins), Molten Hooves (glowing hoofprints, any colour), the 40-allele Particle
+  locus (flames, souls, snow, hearts, water wake, rain and more; recessive, two copies), the eye-colour and eye-glow loci.
+  Mane and tail colour can be fire-coloured through mane_color and tail_color.
+- Water: Waterborn (walks on water, leaves sparks), Ocean Born (cannot drown), Magic Water Breathing, Magic Swim Speed,
+  Hydrophobic (will not be ridden into water). Coat patterns that read as water on the coat: dripwork, ooze_drip,
+  rainbow_drip, foamed, tidefoam_sash, tidemark, tidewave, coral_bloom, gill_bloom, verdant. Visual only.
+- Healing and purity: Healer (mends nearby people), Cleansing Light (burns the undead), Holy Ward (no hostile spawns near),
+  Potion Milk. None "purifies water".
+- Scales and dragon coats (coat patterns, visual only): diamond_scutes ("a dragon's wing-scutes"), scuted (snake belly),
+  beadscale, fish_scales, dorsal_shield, serpentine, dragon_shroud (plumage, not scales).
+- Skeletal / light build: Riblines (rib and bone strokes on the coat), Bird Boned (light bones, no fall damage),
+  Shadowcreature (the front third goes black with tentacles).
+- Shapeshifting: Lycan, but only a matched pair, only at night, only into a peaceful LAND animal.
+- A horn: Unicorn Horn with horn colour, glow and dust; Ram Horns; Antlers.
+- Breeds that already exist and overlap the table: Unicorn (rare, 7/7), Nightmare (very rare; a tiny fast will-o'-the-wisp
+  that flies and flees, NOT the D&D steed), Cloudtouched (a glide horse), Netherhorse, Enderpony, Mirrorgazer, Rimehart,
+  Greenwood, Dhampir, Not A Sheep.
+
+Already scoped in intake/ but not built (INTAKE)
+================================================
+- Head parts (intake/Head parts - implementation treatment.txt): dragon horns, ear fins/frills, cheek spikes, brow ridge,
+  goat beard, ruff.
+- Body parts (intake/Body parts - implementation treatment.txt): back sail, dorsal spine row, shoulder and hip plates,
+  crystal growths.
+- Tusks gene (intake/Tusks gene - implementation treatment.txt): boar tusks, sabre fangs, narwhal horn.
+- Feathering (intake/Feathering - implementation treatment.txt): fetlock feathering coloured from the leg.
+- Other intake items that touch this table only indirectly: the Daily realm horse, Villagers in every village, Horse
+  shoes, Realm breeding pause. None grants a part or ability the table asks for.
+
+What is still unscoped
+======================
+ROADMAP only, no treatment (wiki/model-parts.html Roadmap tab, and Stage 6 of "intake/Attached model parts.txt"):
+ 1. WINGS. Feathered pegasus wings, leathery bat wings, dragon wings. The settled route is a copy of the elytra mesh textured
+    from Minecraft's own wings/elytra.png (so any elytra retexture pack is the wing art, no licence issue), two static poses,
+    and a flap as polish. It has never been broken into a treatment; the Roadmap tab lists pegasus wings as "lower" priority than the horn, antlers, spines and crystals. This is the
+    single biggest blocker in the table (Pegasus, Thestral, Uchchaihshravas, Longma).
+ 2. TAILS. A lion or tufted tail (the Unicorn's "tufted or lion-like tail") and a fish tail (Hippocampus), plus a dragon or
+    blade tail. Listed on the Roadmap tab; not scoped.
+ 3. FORCED RIDING, "the kelpie" (wiki/forced-riding.html Roadmap tab): a wild horse that lets you mount and will not let you off,
+    carrying you to deep water. Deferred, waiting on ride-lock and warning feedback. It is the Kelpie's defining behaviour.
+    Related and also Roadmap only: Block Preference (a locus pulling a horse toward water).
+ 4. CLOUD-TREADING flight (the gene-flying Roadmap tab), only if a Pegasus should stand on clouds.
+
+GAP, nothing anywhere:
+ 5. EXTRA LEGS (Sleipnir's eight). The part layer hangs boxes on existing bones; extra legs would be copies of leg bones that
+    must swing with the leg they copy. No part kind, no anchor, no plan.
+ 6. EXTRA HEADS (Uchchaihshravas's seven). A head is a big multi-box assembly on the neck; seven is a different order of work
+    from one horn. Could be a reduced count. No plan.
+ 7. HINDQUARTER REPLACEMENT (Hippocampus's fish rear, and webbed front feet instead of hooves). The machinery can ADD parts but
+    nothing HIDES a vanilla bone. Needs a "hide this part of the horse" capability, plus the fish tail above.
+ 8. CLOVEN HOOVES / HOOF CAPS. Dropped from the feet scope when feathering was chosen alone (claws, hoof caps and spurs are the
+    ones left). The Unicorn's "sometimes cloven hooves" lives here.
+ 9. VISIBLE ONLY TO THOSE WHO HAVE SEEN DEATH (Thestral): a per-player render rule. Nothing like it exists; it would need a
+    per-viewer visibility flag and a definition of "witnessed death" for a player.
+10. A DRAGON-LIKE FACE (Thestral) beyond head parts: the brow ridge, cheek spikes and dragon horns in the Head parts treatment
+    cover the look; a reshaped skull is a model change and would be its own plan.
+11. A DRAGON-LIKE MANE (Longma): mane COLOUR is there; mane SHAPE (flame-like, frill, crest) is not. A neck frill or ruff from the
+    head and body treatments gets part of the way.
+12. "JOURNEYS ASSOCIATED WITH OTHER REALMS" (Sleipnir): no ability for it. Flight and speed are present; realm travel needs a
+    design call (a portal-making ability, a dimension hop, or just lore).
+13. PURIFY WATER (Unicorn): no gene does it. Healer and Cleansing Light are the nearest. Optional per the table ("in some
+    traditions"); a design call, not a blocker.
+14. KELPIE SHAPESHIFTING into something other than a land animal (a person, a fish): Lycan cannot, by design.
+15. LONGEVITY (Mearas) and ENDURANCE (Shadowfax): UNVERIFIED that no lifespan system exists; I found none. Endurance maps loosely to
+    Momentum Sprint (Roadmap) and horse health, nothing exact. Both are lore the stats can carry; confirm with the owner.
+16. UNDERSTANDING OF SPEECH (Shadowfax): no gene. Pure lore; recommend leaving it as breed description text.
+
+Breed by breed
+==============
+Status: READY (all genes exist, build the breed JSON), PARTIAL (breed can ship without the gap), BLOCKED (the gap is the breed).
+Numbers refer to the lists above.
+
+ Pegasus ........ BLOCKED on 1 (wings). Everything else exists: white body and mane, true flight (two copies of the flying gene),
+                  a light fast build. Without wings it is close to the existing Cloudtouched (a glide horse), which has no wings either.
+ Unicorn ........ PARTIAL, and it already exists. Horn, glow, dust, white coat and rainbow mane are in. Missing from the table:
+                  goat beard (INTAKE), tufted/lion tail (2), cloven hooves (8), purify water (13); stats 7/7 against the table's 8/8.
+ Sleipnir ....... BLOCKED on 5 (eight legs), and 12 (realm travel) is a design call. Grey and 10/10 stats are in.
+ Kelpie ......... BLOCKED on 3 (forced riding), its whole point. In already: black body, water walking, no-drowning, swimming, water
+                  patterns and water-wake particles. 14 (non-animal shapes) is optional.
+ Hippocampus .... BLOCKED on 7 (hide the rear) and 2 (fish tail). Swimming and water breathing are in.
+ Uchchaihshravas  BLOCKED on 6 (seven heads), with 1 (wings) optional. Snow-white and flight are in.
+ Longma ......... MOSTLY COVERED by INTAKE: scale patterns exist now, dragon horns, ear fins, cheek spikes, brow ridge, ruff, a sail,
+                  spine row and plates are all scoped. Open: 1 (wings, "sometimes") and 11 (dragon mane). Shippable as a wingless
+                  dragon-horse once the head and body parts are built.
+ Shadowfax ...... READY as a breed (silver-grey via Grey and Silver, speed 10, the stats). 15 and 16 are lore. It is one named
+                  horse, which is a design question (below), not a gene one.
+ Mearas ......... READY as a breed, the lineage Shadowfax belongs to. 15 (longevity) is lore or a design call.
+ Thestral ....... BLOCKED on 1 (wings) and 9 (seen only by those who have seen death). In already: black, flight, a light skeletal
+                  build (Bird Boned, Riblines). 10 is partly covered by the head parts.
+ Nightmare (D&D)  READY on genes: black coat, flaming mane and tail (mane_color plus a flame particle), flaming hooves (Molten Hooves),
+                  true flight with no wings, Fireproof, heavy and fast. NAME CLASH: a breed called Nightmare already exists (the tiny
+                  will-o'-the-wisp). The D&D steed needs a new breed id, or the existing one is renamed. Owner's call.
+
+What this means for scoping
+===========================
+In priority order, by how many breeds each unblocks:
+  A. WINGS (Pegasus, Thestral, Uchchaihshravas, Longma). The biggest. A real treatment is needed; the elytra route is already researched.
+  B. TAILS (Unicorn, Hippocampus, a dragon blade). Small: a tail is a body-bone-adjacent part, like a spine row.
+  C. FORCED RIDING (Kelpie). Already researched and deferred; needs its dependencies decided, then a treatment.
+  D. THE THREE BODY-STRUCTURE PROBLEMS (extra legs, extra heads, hide-a-bone). Each unblocks exactly one breed (Sleipnir, Uchchaihshravas,
+     Hippocampus) and each is a different engineering problem. They should be scoped separately and only if the owner wants those breeds.
+  E. THE DESIGN CALLS with no engineering (purify water, realm travel, longevity, speech, "seen death" visibility, named individuals).
+
+Design questions this table raises that are not gene gaps
+=========================================================
+- Named individuals versus breeds. Pegasus, Sleipnir, Shadowfax and Uchchaihshravas are single beings; the mod's unit is a breed (a
+  population). Options: a breed called after the creature (the table's own "Mearas" row is the lineage Shadowfax would belong to; no Mearas breed exists in the repo), a unique spawn that can only exist
+  once per world, or a breed plus a named-founder mechanism. Nothing in the repo decides this.
+- The existing Nightmare breed. See above.
+- Which of these should be wild spawns, which creative/spawn-egg only, and which reachable only by breeding. The breed file's spawn
+  list already supports that; the table does not say.
+- Whether "10+" speed means a stat past the cap (a new magic-speed stack) or the cap. UNVERIFIED.
+
+What I could not verify
+=======================
+- Whether the breed stat curve can express speed 10 for a whole breed.
+- That no lifespan or age-death system exists.
+- The exact allele tokens of the flying gene's true-flight form; the Nightmare and Cloudtouched breed files already pin the gene, so
+  copy their pairs.
+- Whether a dragon-like mane can be done with the existing mane colour genes plus the head and body parts; it is a visual judgement.
