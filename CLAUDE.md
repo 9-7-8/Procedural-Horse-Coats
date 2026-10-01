@@ -131,7 +131,9 @@ file under `wiki/session-log/` from its index; those files are not baked.
 8. **Flag genuinely unverified API usage in a comment**, the way the existing
    code does. More useful to the next session than silent confidence.
 9. **Every open check is written on the page for the thing, never on `wiki/verification.html`.**
-   (Owner, and it is absolute.) Defects, runtime checks, design calls, documentation
+   (Owner, and it is absolute.) **Except bugs: a defect is a GitHub issue** labelled `bug` +
+   `found-in-yard`, opened even when fixed in the same run, closed on a yard PASS with the log
+   line and commit (owner, 2026-10-01). Runtime checks, design calls, documentation
    contradictions, compatibility checks and other unresolved follow-ups all live on the owning
    page's **Verification tab** - `data-tab="verification"` per `wiki/tabs.js` - opening with
    **one sentence in a `note verify-summary` box**. `wiki/verification.html` exists to do
