@@ -55,12 +55,14 @@
       { "pair": "n/n", "weight": 65 }
     ],
     "horsegenetics.magic_cold": [
-      { "pair": "Ctol/n", "weight": 15 },
-      { "pair": "n/n", "weight": 85 }
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
     "Heavy lower-leg feathering - roadmap render layer. Sabino + splash drive the big white legs and face.",
-    "CPL, sunburn: age-related, folded into heartiness."
+    "CPL, sunburn: age-related, folded into heartiness.",
+    "Cold tolerance raised from light to near-fixed (Ctol/Ctol 60, Ctol/n 35, n/n 5): half of its four spawn biomes are snowy, and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01). Its heat sensitivity is unchanged."
   ]
 }

@@ -1324,6 +1324,11 @@
     "horsegenetics.scn4a": [
       { "pair": "H/N", "weight": 1 },
       { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -1331,7 +1336,8 @@
     "The two strains the breed really has are strains of curl, so they are not written here: with no curly locus they would be two identical empty strains.",
     "The wide colour pool is the point - chestnut is the commonest, but bay, black, grey, every dilution, roan, pinto and leopard all occur, so a herd should look assorted.",
     "CA carries at the 2.8% figure reported for the breed. HYPP and PSSM1 are kept very low and are borrowed from stock-horse lines rather than measured here.",
-    "Curl tightness, seasonal shedding, mane and ear curl, and the breed's reputation for suiting some allergic riders are all outside what the mod models."
+    "Curl tightness, seasonal shedding, mane and ear curl, and the breed's reputation for suiting some allergic riders are all outside what the mod models.",
+    "Cold tolerance at the partial tier (Ctol/Ctol 5, Ctol/n 30, n/n 65): two of its six spawn biomes are snowy, a third, and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01)."
   ]
 },
 {
@@ -2141,13 +2147,15 @@
       { "pair": "n/n", "weight": 65 }
     ],
     "horsegenetics.magic_cold": [
-      { "pair": "Ctol/n", "weight": 15 },
-      { "pair": "n/n", "weight": 85 }
+      { "pair": "Ctol/Ctol", "weight": 60 },
+      { "pair": "Ctol/n", "weight": 35 },
+      { "pair": "n/n", "weight": 5 }
     ]
   },
   "notes": [
     "Heavy lower-leg feathering - roadmap render layer. Sabino + splash drive the big white legs and face.",
-    "CPL, sunburn: age-related, folded into heartiness."
+    "CPL, sunburn: age-related, folded into heartiness.",
+    "Cold tolerance raised from light to near-fixed (Ctol/Ctol 60, Ctol/n 35, n/n 5): half of its four spawn biomes are snowy, and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01). Its heat sensitivity is unchanged."
   ]
 },
 {
@@ -3242,6 +3250,10 @@
       { "pair": "Wun/n", "weight": 8 },
       { "pair": "Wbh/n", "weight": 8 },
       { "pair": "n/n", "weight": 40 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "strains": [
@@ -3338,7 +3350,8 @@
     "The watchers are unrestricted, which is the point. Both loci are in the pool with all five alleles, so an Enderpony may stand and stare, close on you, only move unseen, appear behind you, or do none of it, by night and independently by day - and only a matched pair shows anything, so the mixed and carrier pairs in the pool are horses that pass a watcher on without wearing one. Night is the commoner half.",
     "It is not from anywhere on earth, so it has no country. That is a real answer in this format rather than a gap.",
     "The Ender Echo carries its rider, so the flinch-teleport is survivable to sit through rather than a way of being thrown. It is flavour and an escape, not a reason the breed is strong: speed, jump, health and pull are all well under a breed anybody works.",
-    "The End, added 2026-09-30. The five vanilla End biomes, and through BiomeAnalogues Nullscape's three, which reshape all of it. The End has no sky light and no grass, so the floors are what Nullscape surfaces it with - end stone, the four dead coral blocks of its shadowlands, and the blackstone and basalt of its crystal peaks and void barrens - with the light waived over them only. This breed also lives in forty overworld biomes, and until this change a floor it named would have been a floor in all of them: smooth basalt lines every amethyst geode. That is why a floor now counts only in a Nether or End biome (Breeds.wildGroundAllows, owner's call). The End has no other creature spawn, so the quiet breed-only rate is the whole draw there - if Enderponies turn out to be a common sight on the islands, that rate is the lever."
+    "The End, added 2026-09-30. The five vanilla End biomes, and through BiomeAnalogues Nullscape's three, which reshape all of it. The End has no sky light and no grass, so the floors are what Nullscape surfaces it with - end stone, the four dead coral blocks of its shadowlands, and the blackstone and basalt of its crystal peaks and void barrens - with the light waived over them only. This breed also lives in forty overworld biomes, and until this change a floor it named would have been a floor in all of them: smooth basalt lines every amethyst geode. That is why a floor now counts only in a Nether or End biome (Breeds.wildGroundAllows, owner's call). The End has no other creature spawn, so the quiet breed-only rate is the whole draw there - if Enderponies turn out to be a common sight on the islands, that rate is the lever.",
+    "Cold tolerance at the light tier (Ctol/n 15, n/n 85): eight of its forty-five spawn biomes are snowy, under a quarter, and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01)."
   ]
 },
 {
@@ -6170,6 +6183,9 @@
     ],
     "horsegenetics.fireproof": [
       { "pair": "Frp/Frp", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 100 }
     ]
   },
   "bands": {
@@ -6185,7 +6201,8 @@
     "HORNS: Rh/Rh on every founder, so mares are horned too. All four shapes at a quarter each, each as a matched pair so the breed shows all four and breeds each true. Shade is pinned to 1.0, which is black, so the base is always black; Tip/Tip colours the points, and the tip colour is left wild - any colour, inherited and drifting with the line.",
     "PRINTS: MltH/MltH, the molten hooves allele that prints in the colour of the horn tips, so a Mirrorgazer's hoofprints always match its horns, horse by horse.",
     "Fireproof (Frp/Frp) was NOT in the owner's spec: added because a horse that spawns only in the Nether otherwise burns in its own biome, as both other Nether breeds are fireproof for. Remove the row if that was not wanted.",
-    "Spawns like the other Nether breeds: the same spawn_ground floor list and spawn_in_dark, since vanilla's animal rule wants grass and light the Nether does not have."
+    "Spawns like the other Nether breeds: the same spawn_ground floor list and spawn_in_dark, since vanilla's animal rule wants grass and light the Nether does not have.",
+    "Heat tolerance is Htol/Htol on every founder, fixed the way the Rimehart's cold tolerance is: every breed that spawns in the Nether is heat tolerant, as a rule (BreedClimate, owner's rule 2026-10-01)."
   ]
 },
 {
@@ -6883,6 +6900,9 @@
     ],
     "horsegenetics.tail_color": [
       { "pair": "Tlsld/Tlsld", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 100 }
     ]
   },
   "bands": {
@@ -6930,7 +6950,8 @@
     "Every biome named is in the Nether, and for a long time that meant the breed could not spawn at all - not rarely, never. Vanilla's animal rule tests the position, not the biome: the block underfoot must be in #minecraft:animals_spawnable_on, which in this SDK is the single entry minecraft:grass_block, and the raw brightness must be above 8. Generated Nether terrain has no grass block anywhere, so all five biomes duly got the spawn added by BreedHerdsBiomeModifier and rejected every position in it. That is what spawn_ground and spawn_in_dark are for (see SpawnGround): the blocks listed are the Nether floors, and the flag waives the light over them only. Both are additive - this horse still spawns on lit grass like any other, so an overworld hay portal or a grass platform down here works as it always did.",
     "Molten hooves is MltC/MltC (the colour form), banded on color_r/g/b toward red the same way the mane and tail are - so this horse leaves red hoofprints behind it as it moves, on top of the lava embers the particle locus already trails. The Nightmare breed shares this locus at the same MltC/MltC pair, banded gold instead, so the two breeds' hoofprints read as a matched pair from a distance.",
     "Suggested but not included here: Bloodstained (only shows inside white markings, and this breed has none), and a disorder or two for a truly punishing breeding project - neither was requested, so neither was forced onto the founder pool.",
-    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable."
+    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable.",
+    "Heat tolerance is Htol/Htol on every founder, fixed the way the Rimehart's cold tolerance is: every breed that spawns in the Nether is heat tolerant, as a rule (BreedClimate, owner's rule 2026-10-01)."
   ]
 },
 {
@@ -7176,6 +7197,9 @@
     ],
     "horsegenetics.mane_color": [
       { "pair": "Mnsld/Mnsld", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 100 }
     ]
   },
   "bands": {
@@ -7216,7 +7240,8 @@
     "Stats: speed 5 is the plain baseline (no locus is forced when a resolved band sits inside BreedStatCurve.NEUTRAL_LO..NEUTRAL_HI, so 'average speed' really does mean nothing is pushing it). Jump 10 is the ceiling, about x3.43 of baseline. Pull 1 is the floor pull score, padded out with no curve (BreedStatCurve treats pull as the resolved number itself). Size [0.32, 0.42] is below even a Falabella's [0.38, 0.51] and well outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws its own tiny size true. No health or milk-volume locus is named, so both roll at the ordinary wild rate - nothing was asked about either.",
     "Every biome named is in the Nether, and carries the same spawn_ground / spawn_in_dark block as the Netherhorse for the same reason: vanilla's animal rule wants minecraft:grass_block underfoot and brightness above 8, generated Nether terrain has neither, and until those fields existed neither breed could spawn wild at all. See SpawnGround, and the Netherhorse's note. The two share the floor list deliberately - they are one founder pool as far as the ground is concerned, and in the Nether they are the only two wild breeds, so a herd founded there is always one or the other and never Feral Mixed (Feral.DEFAULT gives it herdWeight 0, which means 'only where no breed may spawn').",
     "Suggested but not included here: bird-boned (fall immunity to go with true flight - a strong combination, but not asked for and arguably too strong stacked on a horse this hard to even approach), and Third Eye or a Shadowcreature-style extra glow for more hallucination flavour, held back so the breed stays readable as 'small, gold, and gone' rather than growing a second gimmick nobody requested.",
-    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable."
+    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable.",
+    "Heat tolerance is Htol/Htol on every founder, fixed the way the Rimehart's cold tolerance is: every breed that spawns in the Nether is heat tolerant, as a rule (BreedClimate, owner's rule 2026-10-01)."
   ]
 },
 {
@@ -7877,10 +7902,16 @@
     "horsegenetics.magic_heat": [
       { "pair": "Hsen/n", "weight": 15 },
       { "pair": "n/n", "weight": 85 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
-    "Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 carried at the wild rate (GYS1); anhidrosis is not modelled."
+    "Large draft with a straight profile and (for its size) fine legs. Grey or black. PSSM1 carried at the wild rate (GYS1); anhidrosis is not modelled.",
+    "Cold tolerance at the partial tier (Ctol/Ctol 5, Ctol/n 30, n/n 65): one of its four spawn biomes is snowy plains, a quarter, and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01). Its light heat sensitivity is unchanged."
   ]
 },
 {
@@ -10824,8 +10855,9 @@
       { "pair": "n/n", "weight": 85 }
     ],
     "horsegenetics.magic_cold": [
-      { "pair": "Ctol/n", "weight": 15 },
-      { "pair": "n/n", "weight": 85 }
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "strains": [
@@ -10879,7 +10911,7 @@
     "The metallic sheen the breed is described with is not a pigment gene and is not modelled. It is emphatically not silver, champagne or cream, and putting it in one of those would have changed the colour of the horse to fake a highlight.",
     "Three strains, 60 improved to 25 Kazakh-rooted to 15 race. The real groups differ in size and performance as much as in colour, and a strain may override gene pools and nothing else - so the stat band spans all three and the strains carry only a small difference in base colour and grey.",
     "All disorders clear. Don, Budyonny, Orlov and Thoroughbred ancestry is not a carrier rate, and the Yili genomic literature is about population structure, immunity and racing markers rather than disease alleles.",
-    "Tolerant both ways and lightly, for the continental extremes of a Xinjiang mountain basin.",
+    "Tolerant both ways, for the continental extremes of a Xinjiang mountain basin: heat lightly, cold at the partial tier (Ctol/Ctol 5, Ctol/n 30, n/n 65), raised from light because three of its ten spawn biomes are snowy and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01).",
     "Mare's milk and meat production, the local gallop, trot and pace racing types, harness action and traction are none of them modelled."
   ]
 },
@@ -11009,6 +11041,10 @@
       { "pair": "A/A", "weight": 80 },
       { "pair": "A/C", "weight": 18 },
       { "pair": "C/C", "weight": 2 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/n", "weight": 15 },
+      { "pair": "n/n", "weight": 85 }
     ]
   },
   "notes": [
@@ -11017,7 +11053,7 @@
     "DMRT3 sits high, as it should in a trotting breed - the gait-keeper allele is what holds a fast trot together under harness. The trot, the sulky and the racing itself are not modelled.",
     "Every dilution, every pinto pattern, roan and the leopard complex are forced wild; sabino and rabicano sit at a trace for ordinary markings. It is not a colour breed in any sense.",
     "All disorders clear. Being a trotter is not a reason to seed PSSM1 - that is a dominant mutation and needs a direct survey before a breed carries it.",
-    "Carries neither tolerance locus, like the other racing studbooks here.",
+    "No heat locus, like the other racing studbooks here, but cold tolerance at the light tier (Ctol/n 15, n/n 85): one of its seven spawn biomes is snowy, and the cold-spawn rule gives any breed that spawns in snow at least that (BreedClimate, owner's rule 2026-10-01).",
     "Managed only: cowboy, spawn egg and stable."
   ]
 },

@@ -64,8 +64,9 @@
       { "pair": "n/n", "weight": 85 }
     ],
     "horsegenetics.magic_cold": [
-      { "pair": "Ctol/n", "weight": 15 },
-      { "pair": "n/n", "weight": 85 }
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "strains": [
@@ -119,7 +120,7 @@
     "The metallic sheen the breed is described with is not a pigment gene and is not modelled. It is emphatically not silver, champagne or cream, and putting it in one of those would have changed the colour of the horse to fake a highlight.",
     "Three strains, 60 improved to 25 Kazakh-rooted to 15 race. The real groups differ in size and performance as much as in colour, and a strain may override gene pools and nothing else - so the stat band spans all three and the strains carry only a small difference in base colour and grey.",
     "All disorders clear. Don, Budyonny, Orlov and Thoroughbred ancestry is not a carrier rate, and the Yili genomic literature is about population structure, immunity and racing markers rather than disease alleles.",
-    "Tolerant both ways and lightly, for the continental extremes of a Xinjiang mountain basin.",
+    "Tolerant both ways, for the continental extremes of a Xinjiang mountain basin: heat lightly, cold at the partial tier (Ctol/Ctol 5, Ctol/n 30, n/n 65), raised from light because three of its ten spawn biomes are snowy and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01).",
     "Mare's milk and meat production, the local gallop, trot and pace racing types, harness action and traction are none of them modelled."
   ]
 }

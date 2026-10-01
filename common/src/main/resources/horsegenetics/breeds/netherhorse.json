@@ -98,6 +98,9 @@
     ],
     "horsegenetics.tail_color": [
       { "pair": "Tlsld/Tlsld", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 100 }
     ]
   },
   "bands": {
@@ -145,6 +148,7 @@
     "Every biome named is in the Nether, and for a long time that meant the breed could not spawn at all - not rarely, never. Vanilla's animal rule tests the position, not the biome: the block underfoot must be in #minecraft:animals_spawnable_on, which in this SDK is the single entry minecraft:grass_block, and the raw brightness must be above 8. Generated Nether terrain has no grass block anywhere, so all five biomes duly got the spawn added by BreedHerdsBiomeModifier and rejected every position in it. That is what spawn_ground and spawn_in_dark are for (see SpawnGround): the blocks listed are the Nether floors, and the flag waives the light over them only. Both are additive - this horse still spawns on lit grass like any other, so an overworld hay portal or a grass platform down here works as it always did.",
     "Molten hooves is MltC/MltC (the colour form), banded on color_r/g/b toward red the same way the mane and tail are - so this horse leaves red hoofprints behind it as it moves, on top of the lava embers the particle locus already trails. The Nightmare breed shares this locus at the same MltC/MltC pair, banded gold instead, so the two breeds' hoofprints read as a matched pair from a distance.",
     "Suggested but not included here: Bloodstained (only shows inside white markings, and this breed has none), and a disorder or two for a truly punishing breeding project - neither was requested, so neither was forced onto the founder pool.",
-    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable."
+    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable.",
+    "Heat tolerance is Htol/Htol on every founder, fixed the way the Rimehart's cold tolerance is: every breed that spawns in the Nether is heat tolerant, as a rule (BreedClimate, owner's rule 2026-10-01)."
   ]
 }

@@ -97,6 +97,9 @@
     ],
     "horsegenetics.mane_color": [
       { "pair": "Mnsld/Mnsld", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 100 }
     ]
   },
   "bands": {
@@ -137,6 +140,7 @@
     "Stats: speed 5 is the plain baseline (no locus is forced when a resolved band sits inside BreedStatCurve.NEUTRAL_LO..NEUTRAL_HI, so 'average speed' really does mean nothing is pushing it). Jump 10 is the ceiling, about x3.43 of baseline. Pull 1 is the floor pull score, padded out with no curve (BreedStatCurve treats pull as the resolved number itself). Size [0.32, 0.42] is below even a Falabella's [0.38, 0.51] and well outside the x0.7..x1.3 heterozygous band, so every founder is homozygous for size and the breed throws its own tiny size true. No health or milk-volume locus is named, so both roll at the ordinary wild rate - nothing was asked about either.",
     "Every biome named is in the Nether, and carries the same spawn_ground / spawn_in_dark block as the Netherhorse for the same reason: vanilla's animal rule wants minecraft:grass_block underfoot and brightness above 8, generated Nether terrain has neither, and until those fields existed neither breed could spawn wild at all. See SpawnGround, and the Netherhorse's note. The two share the floor list deliberately - they are one founder pool as far as the ground is concerned, and in the Nether they are the only two wild breeds, so a herd founded there is always one or the other and never Feral Mixed (Feral.DEFAULT gives it herdWeight 0, which means 'only where no breed may spawn').",
     "Suggested but not included here: bird-boned (fall immunity to go with true flight - a strong combination, but not asked for and arguably too strong stacked on a horse this hard to even approach), and Third Eye or a Shadowcreature-style extra glow for more hallucination flavour, held back so the breed stays readable as 'small, gold, and gone' rather than growing a second gimmick nobody requested.",
-    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable."
+    "Modded Nether ground, added 2026-09-30: Regions Unexplored's four nyliums (brimsprout, cobalt, glistering, mycotoxic - read off its surface rules) join the floors, because that mod's five Nether biomes count as vanilla Nether biomes through BiomeAnalogues. A floor counts only in a Nether or End biome (Breeds.wildGroundAllows), so none of these can ever make an overworld position walkable.",
+    "Heat tolerance is Htol/Htol on every founder, fixed the way the Rimehart's cold tolerance is: every breed that spawns in the Nether is heat tolerant, as a rule (BreedClimate, owner's rule 2026-10-01)."
   ]
 }

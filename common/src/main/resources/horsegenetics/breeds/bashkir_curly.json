@@ -112,6 +112,11 @@
     "horsegenetics.scn4a": [
       { "pair": "H/N", "weight": 1 },
       { "pair": "N/N", "weight": 99 }
+    ],
+    "horsegenetics.magic_cold": [
+      { "pair": "Ctol/Ctol", "weight": 5 },
+      { "pair": "Ctol/n", "weight": 30 },
+      { "pair": "n/n", "weight": 65 }
     ]
   },
   "notes": [
@@ -119,6 +124,7 @@
     "The two strains the breed really has are strains of curl, so they are not written here: with no curly locus they would be two identical empty strains.",
     "The wide colour pool is the point - chestnut is the commonest, but bay, black, grey, every dilution, roan, pinto and leopard all occur, so a herd should look assorted.",
     "CA carries at the 2.8% figure reported for the breed. HYPP and PSSM1 are kept very low and are borrowed from stock-horse lines rather than measured here.",
-    "Curl tightness, seasonal shedding, mane and ear curl, and the breed's reputation for suiting some allergic riders are all outside what the mod models."
+    "Curl tightness, seasonal shedding, mane and ear curl, and the breed's reputation for suiting some allergic riders are all outside what the mod models.",
+    "Cold tolerance at the partial tier (Ctol/Ctol 5, Ctol/n 30, n/n 65): two of its six spawn biomes are snowy, a third, and the cold-spawn rule sets the tier from that share (BreedClimate, owner's rule 2026-10-01)."
   ]
 }
