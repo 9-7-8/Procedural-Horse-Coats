@@ -276,7 +276,9 @@ public final class StablePopulator {
         StableSpawn.Rolled rolled = spawn.roll(rng);
         Genome genome = rolled.genome();
         HorseRecord record = HorseRecords.newFounder(horse, rng, genome);
-        BreedFounderLog.founder(rolled.breed(), genome.genotype(), "stable");
+        // The founder as BreedFounder rolled it, not the finished horse: the
+        // magic the stable then adds is its spec, not a sheet fault (#12).
+        BreedFounderLog.founder(rolled.breed(), rolled.founder(), "stable");
         record = record.withBreed(rolled.breed().id());
         HorseRecords.apply(horse, record);
         level.addFreshEntity(horse);

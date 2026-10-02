@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.stable;
 
 import com.example.horsegenetics.common.SeededRng;
+import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
@@ -217,6 +218,29 @@ class StableSpawnTest {
                                 + " " + pair + ", not on its sheet");
             }
         }
+    }
+
+    /**
+     * Issue #12. The founder log checks a stable horse against its breed's
+     * sheet, and the magic the stable then forces on it is the stable's spec, not
+     * a founder bug - so {@link StableSpawn.Rolled#founder} is the genotype from
+     * before those passes, and it must be clean. The Stables' own shape:
+     * Friesian, magic allowed, at least one homozygous magic trait. The control
+     * proves the stable really did add off-sheet magic to the finished horse,
+     * which is what the log used to report.
+     */
+    @Test
+    void theFounderLoggedIsTheOneBeforeTheStablesMagic() {
+        StableSpawn spawn = stable(StableSpawn.Magic.ALLOWED, 0, 1, 3, "friesian");
+        assertFalse(Breeds.get("friesian") == Breeds.FERAL_MIXED, "unknown breed friesian");
+        boolean stableAddedMagic = false;
+        for (long seed = 0; seed < 200; seed++) {
+            StableSpawn.Rolled rolled = spawn.roll(new SeededRng(seed));
+            assertEquals(List.of(), BreedFounder.offSheet(rolled.breed(), rolled.founder()),
+                    "seed " + seed + ": the logged founder carries genes its sheet does not list");
+            stableAddedMagic |= !BreedFounder.offSheet(rolled.breed(), rolled.genome().genotype()).isEmpty();
+        }
+        assertTrue(stableAddedMagic, "the stable never added off-sheet magic, so this test proves nothing");
     }
 
     @Test

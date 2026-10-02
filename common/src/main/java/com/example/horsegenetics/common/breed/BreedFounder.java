@@ -81,6 +81,26 @@ public final class BreedFounder {
     private BreedFounder() {
     }
 
+    /**
+     * Every disorder or magical gene {@code genotype} carries that {@code breed}'s
+     * sheet does not constrain - the founder log's {@code NOT ON ITS SHEET} list,
+     * so "a breed is exactly its sheet" can be checked off the server as well as
+     * on it. Body stats are excluded: they come from the stat bands, not the
+     * sheet. An empty list means the founder is clean.
+     */
+    public static List<Gene> offSheet(Breed breed, Genotype genotype) {
+        List<Gene> out = new ArrayList<>();
+        for (Gene gene : Genes.codeOrder()) {
+            boolean health = gene instanceof HealthContribution;
+            boolean magic = !BODY_STAT_KEYS.contains(gene.key()) && Genes.magicalOrder().contains(gene);
+            if ((health || magic) && !breed.constrains(gene.key())
+                    && !genotype.pair(gene).homozygousFor(gene.defaultAllele())) {
+                out.add(gene);
+            }
+        }
+        return out;
+    }
+
     /** {@link #roll(Breed, Rng)} with the sex locus forced - the herd systems need a stallion or a mare. */
     public static Genome roll(Breed breed, Rng rng, Sex sex) {
         Genome g = roll(breed, rng);
