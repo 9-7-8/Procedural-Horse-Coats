@@ -85,6 +85,85 @@
     </p>
 </div>
 
+<h2 id="v0-5-039">0.5.039 &mdash; dead horses kept by size, and a server setting for stallions</h2>
+
+<p>
+    A patch release with two server-side changes: dead horses that can be resurrected are now
+    kept until a storage budget fills up, not for an hour, and a new server setting controls
+    how many covers a stallion makes in a day before he tires.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners: an existing server.toml keeps the old time limit</p>
+    <p>
+        An existing <code>server.toml</code> keeps <code>ops.resurrect_grace_minutes = 60</code>
+        even though the new default is 0. To get the new behaviour (kept until the store is
+        full, with no time limit), set it to 0 yourself.
+    </p>
+</div>
+
+<h3 id="v0-5-039-afterlife">Dead horses are kept until the store is full (#15)</h3>
+<p>
+    An owned horse that dies can still be brought back with <code>/horseresurrect</code>. It
+    used to be let go after 60 minutes of its owner&rsquo;s time online, long before it took
+    up any real space. Now it is kept however long ago it died, until the store of dead horses
+    reaches <code>ops.resurrect_budget_mb</code> (100 MB by default). After that the
+    <strong>oldest deaths go first</strong>, only as many as it takes to fit. 0 means no cap.
+</p>
+<ul>
+    <li><code>ops.resurrect_grace_minutes</code> is still there as an optional extra time
+        limit. Its default is now 0 (off).</li>
+    <li><code>/horseresurrect list</code> shows how full the store is.</li>
+    <li>A horse that is let go keeps its pedigree record. No family tree loses it.</li>
+</ul>
+<p>Details: <a href="horse-afterlife.html">Bringing a dead horse back</a>.</p>
+
+<h3 id="v0-5-039-free-covers">A stallion&rsquo;s free covers are a server setting</h3>
+<p>
+    <code>fertility.free_covers_per_day</code> (default <strong>3</strong>, from 0 to 1,000)
+    is how many covers a stallion makes in a day before his chance of getting a mare in foal
+    halves until tomorrow. Before, this was fixed at three. Natural covers, breeding carrots
+    and seed-jar fills all count against it. A mare prefers a stallion who is still under it,
+    and the vet&rsquo;s kit quotes it when it calls him tired. It never stops a stallion: a
+    tired stallion still covers. 0 makes every stallion tired all day; 1,000 means none ever
+    tires. Details: <a href="fertility.html#setting-free-covers">the fertility settings</a>.
+</p>
+
+<h3 id="v0-5-039-worlds">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading.</strong> A world from 0.5.037 or later loads in this one.</li>
+    <li><strong>Dead horses already in the store</strong> are measured as the world loads and
+        count toward the budget from the first sweep. Nothing is dropped unless the store is
+        already over 100 MB.</li>
+    <li><strong>Your <code>server.toml</code> keeps its old values.</strong> NeoForge does not
+        rewrite a value already in the file when a default changes, so a server that ran
+        0.5.038 or earlier still has <code>ops.resurrect_grace_minutes = 60</code>. The
+        hour-long limit then applies alongside the budget until you set it to 0.</li>
+    <li><code>fertility.free_covers_per_day</code> is added at 3, which is the old behaviour.
+        Nothing changes until you change it.</li>
+</ul>
+
+<h3 id="v0-5-039-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a>
+        stays open until the live server&rsquo;s logs confirm the chunk loads are gone;
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/12">#12</a> (the founder
+        log flags a stable&rsquo;s magic as &ldquo;not on its sheet&rdquo;);
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (the stasis
+        bank&rsquo;s arrow shows on the wrong tab);
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/2">#2</a> (structure
+        spawns). New from the server&rsquo;s logs:
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/17">#17</a> (an arcane
+        dealer&rsquo;s horses can kill each other in his pen),
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/18">#18</a> (a dealer can
+        stand horses in powder snow, where they freeze) and
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/16">#16</a> (a harmless
+        warning about a mixin refmap on every start).</li>
+    <li>Neither change has been played in game. The budget is covered by unit tests and a
+        gametest, and the free covers by unit tests and a server boot. What is waiting on
+        someone&rsquo;s eyes is on <a href="verification.html">the verification page</a>.</li>
+</ul>
+
 <h2 id="v0-5-038">0.5.038 &mdash; Chaos, realm backups, and server fixes</h2>
 
 <p>

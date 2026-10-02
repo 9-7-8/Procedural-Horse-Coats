@@ -1,4 +1,4 @@
-2026-10-01 18:58 (end time) - fertility.free_covers_per_day: a stallion's free covers as a server setting
+2026-10-01 18:58 (end of the first part; updated 19:35) - fertility.free_covers_per_day, the server log review, and 0.5.039
 
 ASKED
 
@@ -10,6 +10,11 @@ ASKED
       config", fix #10.
     - Owner picked "To-do: free covers config" -> /process-intake on that one To-do
       bullet, built by procedures/add-a-config-option.txt, then end-session.
+    - End-session found a release due (the #15 fix plus this feature) and started
+      /release 0.5.039.
+    - "/whats-next" again, mid-release. Offered: release + review logs (recommended), just
+      the release, release then fix #12, hold the release. Owner picked "Release + review
+      logs": /review-server-logs ran while the full suite ran.
 
 DONE
 
@@ -44,6 +49,33 @@ DONE
     Verification #free-covers-setting-1001; wiki/item-seed-jars.html now names the key;
     verification.html, search index and wiki/text rebaked.
 
+    0.5.039 released (commit 241350a7, tag v0.5.039)
+      The release set, all green: every tier-0 node check; the full :common:test (21m 1s,
+      158 classes); :neoforge-26.1.2:test; runGameTest (all 25 passed); the seven browser
+      checks (designer-boots, creator-steps, path-canvas, colour-control, glow-control,
+      glow-render, ai); a runServer boot on 0.5.039 to Done (, nothing on the error grep,
+      run/phc and run/config restored byte-identical. The jar was opened: version
+      0.5.039, StallionDay and AfterlifeBudget present. GitHub release v0.5.039 lists
+      horsegenetics-0.5.039.jar; the same note is on wiki/releases.html#v0-5-039.
+
+    /review-server-logs: folders 2026-10-01, -run2, -run3, -run4 (window 17 Sep to
+    1 Oct 17:59, builds 0.5.017 to 0.5.037; the server is not on 0.5.038 yet, so #13's
+    tally still waits). Filed:
+      #16 (bug, COSMETIC) every start warns the mixin refmap is missing: the mixin config
+          names horsegenetics.refmap.json, which the build never makes.
+      #17 (bug, needs-owner, PLAYERS) an arcane dealer's horses kill each other: about 75
+          of the 98 named horse deaths were dealer strings killed by one of their own, whose
+          ArcaneStock-required behaviour gene was a horse-targeting aggression allele.
+          Four fix options in the issue.
+      #18 (bug, PLAYERS) CowboyHandler.roomForAHorse accepts powder snow, so a dealer's
+          string of six froze in five minutes on 25 Sep.
+    Not filed, in the report only: four horses suffocated in walls at once on 27 Sep, 1-16
+    s after their chunk loaded (cause cannot be told from the logs; one guess is a size
+    re-resolve on reload); unreadable alleles Xpl / lycan Bat, Prt (deliberate removals
+    before the saves baseline); recipe-book noise for items deleted 21 Sep; the
+    operator's KubeJS errors (horse_wild_spawn_stamp.js, unicorn_egg_grant.js). Chat held
+    no feature wants; To do.txt unchanged. The four folders are on the local record.
+
 DECIDED
 
     - The key, its section and default came from the owner's To-do bullet (owner,
@@ -52,36 +84,46 @@ DECIDED
       fertility.html#stallion-day-1001: range 0-1000 (0 = always tired, 1000 = never);
       no reload listener needed, since the accessor is read live on each cover; the
       constant renamed DEFAULT_ so a missed reader cannot compile.
+    - "Release + review logs" (owner).
+    - Release title and note: mine, from the audited range v0.5.038..241350a7.
 
 FOUND ON THE WAY
 
     - My mistake: the first code commit piped a PowerShell here-string into
       `git commit -F -`, which git read as a pathspec; nothing was committed and the push
       reported up to date. Recommitted from a message file. end-session step 3d now says so.
-    - Issues filed: none.
+    - My mistake: the first browser-check run reported green with empty output, because
+      the shell's directory had moved and `node` got no script. Rerun from the repo root,
+      all seven really green.
+    - Building on main overwrote the local neoforge-26.1.2/build/libs/horsegenetics-0.5.038.jar
+      with a rebuild (mod_version was still 0.5.038). Only the local copy; the published
+      v0.5.038 asset is untouched.
+    - Not a bug: half the dealers in the logs are arcane, but ArcaneWandererHandler is
+      their own spawn; ARCANE_CHANCE (1/12) is the village cowboys' roll.
+    - Issues filed: #16, #17, #18.
 
 PROCEDURES
 
     - add-a-config-option step 5: StallionDay as a second worked example, and rename the
       constant DEFAULT_X so a missed reader fails to compile.
     - end-session step 3d: commit from a message file in PowerShell.
+    - test-tiers: the four node checks that live in neoforge-26.1.2/tools/ are named; the
+      slowest-class list re-measured for 0.5.039.
 
 NOT RUN / NOT CHECKED
 
-    - The full :common:test suite was not run. Every common/ class that calls
-      Conception.attempt, NaturalCover or ReproText.vetMale has its test class above; a
-      full run would add only unrelated suites.
-    - Gametests not run; none reads the free covers.
-    - Never seen in game: the key set to anything but 3. Check:
-      fertility.html#free-covers-setting-1001.
+    - Everything in the release set ran (above).
+    - Never seen in game: the key set to anything but 3
+      (fertility.html#free-covers-setting-1001), and the afterlife budget against a real
+      store (horse-afterlife.html#verify-scale).
     - web.wasm not committed: the bake was build noise, web/ does not reach common/repro.
 
 RELEASE
 
-    Due: since v0.5.038, main holds the #15 fix and this new option (a feature), which
-    meets release step 1. Cut by /release straight after this session's docs commit.
+    0.5.039 cut and published this session (the #15 fix and the free covers option).
+    Nothing unreleased on main but docs.
 
 PICK UP FIRST
 
-    /review-server-logs on the four unreviewed 2026-10-01 PCH export folders, then
-    /fix-bug for #12.
+    /fix-bug for #18 (dealer horses in powder snow: small, needs nothing from the owner,
+    players are losing horses), then #12. #17 waits on the owner's pick of a fix option.
