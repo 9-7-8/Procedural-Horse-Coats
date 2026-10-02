@@ -301,16 +301,7 @@ public final class LightGene implements Gene, CoatOverlayContribution, AbilityCo
     @Override
     public CutieMarkGene.Mark modifyCutieMark(AllelePair pair, Genotype genotype, Epigenome epigenome,
                                               CutieMarkGene.Mark mark) {
-        return lightsHorse(pair) ? mark.withEmissive(true) : mark;
-    }
-
-    /**
-     * Is this horse a light horse - does any variant copy sit here? The one rule
-     * for the things this locus lights beyond its own regions: the cutie mark
-     * above, and a unicorn's horn ({@code GrownParts.dressHorn}).
-     */
-    public boolean lightsHorse(AllelePair pair) {
-        return pair.count(n) != 2;
+        return pair.count(n) == 2 ? mark : mark.withEmissive(true);
     }
 
 }

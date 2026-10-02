@@ -117,14 +117,13 @@ public final class GrownParts {
      * shed, and asks this method's answer for the dust's colours rather than
      * working them out again.)
      *
-     * <p>The light locus lights it too, as it lights the cutie mark: a horse whose
-     * hooves or mane glow should not wear one dull horn (owner's call, 2026-10-01).
+     * <p>Only horn glow makes it emissive - not the light locus, whatever the horse
+     * emits (owner's call, 2026-10-02, reversing the 2026-10-01 one).
      */
     private static AttachedPart dressHorn(AttachedPart horn, Genotype genotype, Epigenome epigenome) {
         HornColourGene.Tints tints = Genes.HORN_COLOUR.tintsFor(genotype, epigenome);
         return horn.dressed(tints.base(), tints.tip(),
-                Genes.HORN_GLOW.glows(genotype.pair(Genes.HORN_GLOW))
-                        || Genes.LIGHT.lightsHorse(genotype.pair(Genes.LIGHT)));
+                Genes.HORN_GLOW.glows(genotype.pair(Genes.HORN_GLOW)));
     }
 
     /**

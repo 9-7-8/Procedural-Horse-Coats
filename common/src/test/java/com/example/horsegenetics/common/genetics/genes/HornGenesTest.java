@@ -153,20 +153,16 @@ class HornGenesTest {
     }
 
     /**
-     * A light horse's horn glows whatever the horn glow locus says - the light
-     * locus's rule for the cutie mark, so the horse is never lit all over but
-     * for one dull horn. Any variant copy does it, eyes-only included.
+     * Only horn glow makes the horn emissive. A light horse still emits light, but
+     * that is a separate thing and does not reach the horn (owner, 2026-10-02).
      */
     @Test
-    void aLightHorsesHornGlowsWithoutTheHornGlowLocus() {
+    void theLightLocusDoesNotLightTheHorn() {
         for (String light : List.of("Lthf/n", "Ltmn/Ltmn", "Lteye/n", "Lthf/Ltmn")) {
-            AttachedPart horn = horn(unicorn("light", light), 5);
-            assertTrue(horn.emissive(), light + " should light the horn");
-            assertEquals(horn(unicorn(), 5).baseTint(), horn.baseTint(), "only the glow moves, not the colour");
+            assertFalse(horn(unicorn("light", light), 5).emissive(), light + " must not light the horn");
+            assertTrue(horn(unicorn("light", light, "horn_glow", "Glw/Glw"), 5).emissive(),
+                    "horn glow still lights it on a light horse");
         }
-        assertFalse(horn(unicorn("light", "n/n"), 5).emissive());
-        assertTrue(GrownParts.of(Genotype.parse(Codes.of("light", "Lthf/Lthf")), Epigenome.fromSeed(5)).isEmpty(),
-                "the light locus grows no horn of its own");
     }
 
     /** The dust asks the horn for its colours, so it can never disagree with what is drawn. */
