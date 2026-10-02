@@ -82,6 +82,41 @@ Release
   genes screen must not show them. Pad and saddlebag slots interact (bags: capacity from the
   saddle).
 
+4b. Probe round (owner, asked 2026-10-02)
+=========================================
+Decided (owner):
+- Cowboy-sold horses and generated-stable horses wear a BRIDLE in Headstall PLUS a basic
+  (lowest-tier) mod saddle. (CowboySale, StablePopulator, the stable tables must set both.)
+- A bolting horse (HorseEscapeGoal) loses the BRIDLE only; the saddle stays. The existing
+  rule that a phantom piece is never handed to the rider carries over.
+- Old dyed saddles: the SaddleTint component is untouched; the bridle shows its Bridle and
+  Fittings zones and ignores Seat; the mod's new saddle reads Seat.
+- Anyone riding a bridled horse may steer it (vanilla behaviour); tier-3 bareback stays
+  owner-only (BarebackSteeringHandler.eligibleRider).
+- Saddle bonus: small and capped, so breeding stays the main driver. Numbers are Open for
+  the building session, tuned in the yard (suggested scale 5-10% at top tier, not Decided).
+- Advancements and ProgressTask: ride_bareback and steer_bareback mean NO bridle and NO
+  saddle; a bridle-only ride does not count. STEER_BAREBACK still fires only on the tier-3 phantom case.
+- Bridle vs halter in the shared Headstall slot: putting one on swaps and returns the other to the
+  player. NOTE this is the owner's call and CONTRADICTS the gear "never swap" rule noted in
+  TackEquipHandler's comment (which refuses a second item). Keep the swap only for the Headstall
+  bridle/halter pair; everything else stays never-swap. (The halter does not exist yet.)
+- Untamed horse: unchanged vanilla (rears, throws). Only tamed horses may be mounted bare.
+
+Corrections found while reading:
+- BarebackSteeringHandler's class comment says "this module has no mixins", which is false:
+  the module has CartHorseMixin (overrides getControllingPassenger), HorseTwoRidersMixin,
+  FadingGearMixin and others. Steering for a bridle could therefore also be done in a mixin;
+  UNVERIFIED which of the phantom-saddle handler or a getControllingPassenger mixin is
+  safer next to CartHorseMixin. Read CartHorseMixin before choosing; carts are affected.
+- The leatherworker trades (data/horsegenetics/villager_trade/equestrian_leatherworker/
+  level_1..5, sell_saddle, sell_dyed_saddle, sell_lapis_saddle) sell the vanilla item, which is
+  now a bridle: the trades and their wiki text must be reworded, and a trade for the new saddle
+  is Open (owner).
+
+Not verifiable here: no 26.1.2 Minecraft sources were available in this session, so every claim
+about vanilla riding (getControllingPassenger, mobInteract, equip-on-interact) stays UNVERIFIED.
+
 5. Saves
 ========
 Item id kept, so inventories and loot are unchanged. One migration: a horse that wears an
