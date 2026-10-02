@@ -123,7 +123,7 @@ import java.util.Set;
  *   <li><i>"The void still kills. ... Fail: an unkillable horse, which is the bypasses_invulnerability check."</i>
  *       Horse C, full and armed, {@code fellOutOfWorld} for 1000. PASS: dead.</li>
  *   <li><i>"The save and the bolt are one behaviour. Pass: a saved horse is already running when the particles
- *       clear, and is still running when the immunity ends."</i> Horse D, saved at 100. PASS: at +10
+ *       clear, and is still running when the immunity ends."</i> Horse D, saved at 100. PASS: at +40
  *       {@code HorseEscapeGoal.bolting} with both {@code horsegenetics:escape/speed} and
  *       {@code horsegenetics:escape/jump} on, and still bolting at +I-2.</li>
  *   <li><i>"The boost is visible ... drop back when it calms. Fail: ... they stay high after it calms - which means
@@ -142,6 +142,8 @@ final class DebugYardBody {
     }
 
     private static final double EPS = 1.0e-6;
+    /** When the bolt is first looked for, in ticks after the save: two seconds, as the particles clear. */
+    private static final long BOLT_LOOK = 40L;
     /** Every check answers once, even if a step throws after answering some of them. */
     private static final Set<String> ANSWERED = new HashSet<>();
     /** Bumped by every build, so a step left on the clock from a yard before this one stops itself. */
@@ -702,7 +704,10 @@ final class DebugYardBody {
                 return;
             }
             boolean[] early = new boolean[3];
-            step(level, 10, thisRun, List.of(BOLTS, CALMS), () -> {
+            // +40, not +10 (2026-10-01): the first run sampled at +10 and read nothing - the escape goal is picked up
+            // by the goal selector about twenty ticks after the save (the trace said "bolting" one second later), and
+            // the page asks only that it is "already running when the particles clear", not on the same tick.
+            step(level, BOLT_LOOK, thisRun, List.of(BOLTS, CALMS), () -> {
                 early[0] = d.isAlive() && HorseEscapeGoal.bolting(d);
                 early[1] = has(d, Attributes.MOVEMENT_SPEED, ESCAPE_SPEED);
                 early[2] = has(d, Attributes.JUMP_STRENGTH, ESCAPE_JUMP);
@@ -713,7 +718,7 @@ final class DebugYardBody {
                 AttributeInstance speed = d.getAttribute(Attributes.MOVEMENT_SPEED);
                 String ratio = speed == null ? "?" : f(speed.getValue() / speed.getBaseValue());
                 pass(BOLTS, early[0] && early[1] && early[2] && still,
-                        "boosts on before the blow: " + boostedBefore + "; at +10: bolting " + early[0]
+                        "boosts on before the blow: " + boostedBefore + "; at +" + BOLT_LOOK + ": bolting " + early[0]
                                 + ", escape/speed " + early[1] + ", escape/jump " + early[2] + "; at +" + end
                                 + " (window " + window + "): bolting " + still + ", speed value/base x" + ratio
                                 + " (SPEED_BOOST " + Escape.SPEED_BOOST + "), health " + d.getHealth() + "/"
