@@ -42,15 +42,19 @@ STEPS
    - a treatment marked PLAN ONLY with stages unchecked is a unit only at its first
      stage.
    These are not units, so leave them alone:
-   - intake/README.txt;
+   - intake/README.txt and intake/Sizing.txt;
    - potential-assets/. Use anything in it freely for the unit you are building:
      copy, crop, recolour or transform it, without asking. Log each use in that pack's
      USAGE.txt, add THIRD_PARTY_NOTICES.md on a pack's first use, and never put a
      whole pack in git or a release;
    - *-draft/ and tools/ folders. They retire with the treatment that uses them.
-   To list a treatment's units, read its header, its "What already exists" section and
-   any "Order and size" section, not the whole file. If more than a handful of
-   treatments need sizing, hand the sizing to an Explore agent.
+   Start from intake/Sizing.txt: it holds every unit's size, impact, owner calls and
+   dependencies, dated per treatment. A block stands while
+   `git log --since=<its date> -- "intake/<file>"` is empty; re-size only the
+   treatments changed since, and new ones, and rewrite their blocks. To size a
+   treatment, read its header, its "What already exists" section and any "Order and
+   size" section, not the whole file. If more than a handful need sizing, hand it to
+   an Explore agent. Commit Sizing.txt with the run's docs, never as an untracked file.
 
 2. Throw out what is already done.
    For each unit you might pick, grep wiki/session-log/ and wiki/text/ for its
@@ -145,6 +149,8 @@ STEPS
    - Not the last piece -> delete that piece's section. If the remaining pieces refer
      to it, leave a one-line pointer to where it now lives on the wiki.
    - A To do.txt bullet -> delete it, and its heading if the heading is now empty.
+   - Every case -> delete the unit's row in intake/Sizing.txt (its block, for a whole
+     treatment). An already-done unit found in step 2 goes the same way.
 
 9. End the session with end-session. A finished feature counts toward release step 1's
    bar; it does not cut a release by itself, and the owner decides. The treatment's
