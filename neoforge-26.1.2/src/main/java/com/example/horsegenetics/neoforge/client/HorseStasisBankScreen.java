@@ -340,16 +340,26 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         return super.keyPressed(event);
     }
 
-    /** The box belongs to one tab, and an invisible box must not eat keystrokes. */
+    /** The box and its saved-search arrow belong to one tab, and an invisible box must not eat keystrokes. */
     private void applyTab() {
         this.menu.setTab(tab);
+        boolean browsing = tab == HorseStasisBankMenu.Tab.BROWSE;
         if (this.filterBox != null) {
-            boolean browsing = tab == HorseStasisBankMenu.Tab.BROWSE;
             this.filterBox.visible = browsing;
             this.filterBox.active = browsing;
             if (!browsing) {
                 this.filterBox.setFocused(false);
             }
+        }
+        // Runs once from init() before the arrow exists, hence the null check.
+        if (this.savedSearchButton != null) {
+            this.savedSearchButton.visible = browsing;
+            this.savedSearchButton.active = browsing;
+        }
+        // An open menu takes clicks first (mouseClicked); left open over Chambers
+        // it would swallow the slot clicks under it.
+        if (!browsing && this.savedSearches.isOpen()) {
+            this.savedSearches.close();
         }
     }
 
