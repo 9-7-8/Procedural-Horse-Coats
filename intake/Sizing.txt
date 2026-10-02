@@ -39,6 +39,13 @@ Body parts - implementation treatment.txt                         sized 2026-10-
 Built? No (SPINE is only a comment in PartAnchor).
 
 ------------------------------------------------------------------------------
+Tufted lion tail - implementation treatment.txt                   sized 2026-10-02
+- Piece 1: LionTailGene, TAIL_BASE anchor, hide vanilla tail, hair-patch tint   M-L c  owner-free (shares the hair sampler with Feathering and the body anchor with Body parts)
+- Piece 2: foal tail                                             S  c  owner-free; needs piece 1
+- Piece 3 (optional, not asked): segmented whipping tail         M  c  No: the owner has not said yes
+Built? No (no tail part, anchor or gene exists).
+
+------------------------------------------------------------------------------
 Head parts - implementation treatment.txt                         sized 2026-10-02
 (Slice A, dragon horns, shipped 2026-10-02.)
 - Slice B: ear fins, cheek spikes, brow ridge; EAR_/CHEEK_/BROW anchors   M  c  owner-free
