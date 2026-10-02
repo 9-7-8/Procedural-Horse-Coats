@@ -10,6 +10,8 @@ ASKED
   horn glow gene, she answered: "I forgot we had a glow gene: reverse my choice. The
   unicorn horn gene just makes a horn, and the glow gene makes it emissive". Done: the
   light-locus rule reversed (DONE, second entry).
+- "/end-session", with "update it so that anytime a session is safe to clear, the last
+  sentence should always be 'Safe to clear.'" Done: end-session.txt step 9 (PROCEDURES).
 
 DONE
 ----
@@ -65,6 +67,10 @@ PROCEDURES
 ----------
 - rebake.txt row g and add-a-gene.txt step 9: bakeUnverifiedGenes moved after the
   timeline bake, with the reason.
+- end-session.txt step 9 and DONE WHEN: the summary's last sentence is always "Safe to
+  clear." once the tree is clean and pushed and nothing is running, however end-session
+  was reached (owner, via "/end-session and update it so that anytime a session is safe
+  to clear, the last sentence should always be 'Safe to clear.'").
 
 NOT RUN / NOT CHECKED
 ---------------------

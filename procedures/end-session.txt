@@ -89,13 +89,17 @@ STEPS
    never a handful of fixes), ask the owner with the question tool and cut it only on a
    yes. Below the bar, say nothing about a release.
    Then stop: no new work, no "while I'm here" refactors.
+   The LAST sentence of the summary is always exactly "Safe to clear." - whether the
+   owner ran /end-session or another procedure (process-intake, fix-bug, release...)
+   reached this step - once steps 7 and 8 hold. If something is left unpushed or running,
+   say what instead and do not write it. (Owner, 2026-10-02.)
 
 DONE WHEN
 ---------
 - Both commits are on origin/main and the tree is clean.
 - CLAUDE.md is 300 lines or fewer.
 - No process this session started is still alive.
-- The summary is given.
+- The summary is given, ending "Safe to clear."
 
 NEVER
 -----
