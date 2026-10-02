@@ -1344,6 +1344,8 @@ public final class ModGameTests {
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
         // One horse spawned and three events posted, all inside a single tick.
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
+        // A small scratch box filled and read, all inside one tick.
+        register(event, environment, NO_HORSE_STANDS_IN_POWDER_SNOW, 100);
         // One horse spawned, two attachment writes, two calls; one tick.
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
         // Four horses spawned and seven interact events posted, all in one tick.
@@ -2437,6 +2439,60 @@ public final class ModGameTests {
         var got = com.example.horsegenetics.neoforge.server.ChaosRoster.classify(type, level);
         if (!got.equals(expected)) {
             helper.fail(BuiltInRegistries.ENTITY_TYPE.getKey(type) + " classified as " + got + ", expected " + expected);
+        }
+    }
+
+    /**
+     * <b>A cowboy never stands a horse in powder snow</b> (issue #18).
+     *
+     * <p>Powder snow has no collision shape for a box test, so the old
+     * {@code roomForAHorse} - solid below, no liquid, no collision - passed a
+     * spot full of it, and a dealer in a snowy biome froze his whole string in
+     * minutes. Four spots are asked about: a plain one first, so a check that
+     * refuses everything cannot pass; then powder snow at the feet, under the
+     * feet, and beside them inside the horse's own width, since a horse is
+     * wider than its block and touching the snow is enough to freeze.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> NO_HORSE_STANDS_IN_POWDER_SNOW =
+            TEST_FUNCTIONS.register("no_horse_stands_in_powder_snow",
+                    () -> ModGameTests::noHorseStandsInPowderSnow);
+
+    private static void noHorseStandsInPowderSnow(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos feet = helper.absolutePos(BlockPos.ZERO).above(40);
+        BlockState powder = Blocks.POWDER_SNOW.defaultBlockState();
+        try {
+            reset(level, feet);
+            if (!com.example.horsegenetics.neoforge.server.CowboyHandler.roomForAHorse(level, feet)) {
+                helper.fail("a plain spot on a stone floor was refused, so this test proves nothing.");
+                return;
+            }
+            String[] where = {"at its feet", "under its feet", "beside it, inside its width"};
+            BlockPos[] snow = {feet, feet.below(), feet.east()};
+            for (int i = 0; i < snow.length; i++) {
+                reset(level, feet);
+                level.setBlock(snow[i], powder, 2);
+                if (com.example.horsegenetics.neoforge.server.CowboyHandler.roomForAHorse(level, feet)) {
+                    helper.fail("a horse would be placed with powder snow " + where[i]
+                            + " - it cannot get out and freezes to death (#18).");
+                    return;
+                }
+            }
+        } finally {
+            fill(level, feet, Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
+    }
+
+    /** Air around {@code feet}, on a 7x7 stone floor one block down. */
+    private static void reset(ServerLevel level, BlockPos feet) {
+        for (int x = -3; x <= 3; x++) {
+            for (int y = -1; y <= 3; y++) {
+                for (int z = -3; z <= 3; z++) {
+                    level.setBlock(feet.offset(x, y, z),
+                            (y == -1 ? Blocks.STONE : Blocks.AIR).defaultBlockState(), 2);
+                }
+            }
         }
     }
 

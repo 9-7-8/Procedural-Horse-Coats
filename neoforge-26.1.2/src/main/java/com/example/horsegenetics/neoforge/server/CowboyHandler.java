@@ -28,6 +28,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -695,16 +697,28 @@ public final class CowboyHandler {
      * horses ended up with half of them embedded in the walls. Asking the level
      * whether the horse's own spawn box collides with anything is the same
      * question the game asks, and it cannot disagree with the game.
+     *
+     * <p>Except about powder snow, which has no collision shape for a box test,
+     * so a spot full of it passed and a dealer in a snowy biome froze his whole
+     * string (#18). A horse cannot climb out of it, so anywhere its box touches -
+     * or the block it would stand on - is refused outright. Public for the
+     * gametest that holds this.
      */
-    private static boolean roomForAHorse(ServerLevel level, BlockPos pos) {
-        if (!level.getBlockState(pos.below()).isSolidRender()) {
+    public static boolean roomForAHorse(ServerLevel level, BlockPos pos) {
+        BlockState ground = level.getBlockState(pos.below());
+        if (!ground.isSolidRender() || ground.is(Blocks.POWDER_SNOW)) {
             return false;
         }
         if (level.getBlockState(pos).liquid()) {
             return false;
         }
-        return level.noCollision(EntityType.HORSE.getSpawnAABB(
-                pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5));
+        AABB box = EntityType.HORSE.getSpawnAABB(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+        // getBlockStates(AABB) walks every block the box overlaps; that it is on
+        // ServerLevel under this name in 26.1.2 is from the compile, not a doc.
+        if (level.getBlockStates(box).anyMatch(state -> state.is(Blocks.POWDER_SNOW))) {
+            return false;
+        }
+        return level.noCollision(box);
     }
 
     // ------------------------------------------------------------------

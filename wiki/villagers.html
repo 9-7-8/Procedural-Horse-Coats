@@ -209,6 +209,11 @@
     now asks the level whether a <em>horse-sized box</em> fits, rather than whether a
     one-block column is clear. A clear column next to a wall still puts a horse's
     shoulders through it, which is exactly how the barn filled up with embedded horses.
+    That box test cannot see <strong>powder snow</strong>, which has no collision, so a
+    spot the box touches, or one standing on it, is refused by name: a horse cannot
+    climb out, and a dealer in a snowy biome once froze his whole string in minutes
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/18">#18</a>; held by
+    the <code>no_horse_stands_in_powder_snow</code> gametest).
 </p>
 
 <h3 id="herd">Their herd</h3>
