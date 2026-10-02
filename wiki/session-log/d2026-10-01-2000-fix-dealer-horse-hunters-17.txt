@@ -1,0 +1,77 @@
+2026-10-01 20:00 (end time) - Fix #17: the arcane dealer stocks no horse-hunters
+
+ASKED
+-----
+- "/fix-bug" (no issue named) -> took #17 by fix-bug step 1. Players hit it on the live
+  server, its cause was written in the issue, and the owner had picked fix option 1
+  earlier the same evening (d2026-10-01-1940-fix-powder-snow-18). Fixed and closed
+  (d0e6d6ad).
+
+DONE
+----
+- d0e6d6ad - Fix #17: an arcane dealer's horses killed each other in his pen.
+  Cause: ArcaneStock.REQUIRED_FAMILIES gives every dealer horse one showing
+  MAGIC_BEHAVIOUR gene, and ArcaneStock.eligible let aggression in with all its pairs.
+  The pairs that hunt "horses" or "all" therefore reached a string that stands within 5
+  blocks of itself. On the live server five dealers lost between 6 and 12 unsold horses
+  each (24 and 27 Sep).
+  Fix (the owner's option 1): ArcaneStock.stockedPairs(gene) is the showing pairs minus
+  those for which ArcaneStock.huntsHorses(gene, pair) is true. A pair hunts horses when
+  its own abilities hold an aggressive GeneAbility.Temper with a Continuous trigger
+  toward "horses" or "all". eligible, pool and showingTokens all go through
+  stockedPairs. Guardian (also aggressive toward "all") is still stocked, because its
+  trigger is OnOwnerHurt and unsold stock has no owner.
+  To ask one gene cheaply, HorseAbilities gains of(gene, genotype, epigenome), the body
+  of activeFor's loop lifted out; activeFor now loops over it, with no behaviour change.
+  Proof: ArcaneStockTest.noStockedHorseHuntsHorses walks every pooled pair (the required
+  families plus the optional one) and restates the rule against HorseAbilities.of. It
+  also asserts that aggression is still on sale. Red on the old code
+  ("aggression=Aaa/Aaa starts fights with all"), green with the fix, and red again with
+  huntsHorses forced to return false. The other HorseAbilities users are green:
+  ChaosMobLociTest, HornGenesTest, LycanGeneTest, MoltenHoovesGeneTest, ParticleGeneTest,
+  RainbowDustGeneTest, SpawnerGeneTest and GeneAbilitySpecTest.
+  :neoforge-26.1.2:build green, check-parity OK, :web:bakeDesignerAssets +
+  check-designer-boots OK (web.wasm committed: reachable common/ code changed).
+  Wiki: villagers.html#arcane-no-horse-hunters (new section), and one paragraph at the
+  end of the gene-aggression.html gameplay tab. Search index, agent text and check-links
+  rerun.
+  Issue #17: CLOSED by the commit, with a proof comment. The comment notes that a running
+  dealer who already holds a horse-hunter keeps it until it sells, rotates out or he
+  leaves.
+
+DECIDED
+-------
+- Fix option 1 for #17 (owner, 2026-10-01; recorded on the issue last session).
+- Made without the owner: the rule is read off abilities (an aggressive Continuous Temper
+  toward horses or all), not a list of aggression alleles. This follows ArcaneStock's
+  own "pools are generated" rule, and it also catches a later gene. Guardian stays in
+  because it is OnOwnerHurt. Recorded in the ArcaneStock.huntsHorses javadoc and on
+  villagers.html.
+
+FOUND ON THE WAY
+----------------
+- A mistake, put right before the build: a scripted PowerShell .Replace on ArcaneStock.java
+  removed the Genotype import as a side effect. It was put back with an Edit, and the
+  compile proved it.
+
+PROCEDURES
+----------
+None needed. fix-bug, rebake (row b, and the prose row) and end-session all fit as
+written. All three end-session questions were asked.
+
+NOT RUN / NOT CHECKED
+---------------------
+A full :common:test run was not done. It would also check every other test that reads
+HorseAbilities indirectly, through HorseTraits or the coat pipeline. The refactor is
+behaviour-preserving and the eight direct users are green. Nobody has seen a dealer
+spawn in game since the change. No runGameTest this session (no NeoForge code changed).
+No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered. Since v0.5.039 main holds two fixes (#18, #17) and docs, below release
+step 1's bar.
+
+PICK UP FIRST
+-------------
+/fix-bug for #12 (the founder log flags the Stables' intended magic as NOT ON ITS SHEET).
