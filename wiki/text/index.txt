@@ -3362,6 +3362,7 @@ wiki/texture-resolution.html#scales	all	Scale by scale
 wiki/texture-resolution.html#today	all	What 128 actually is
 wiki/texture-resolution.html#unverified	all	Unverified
 wiki/villagers.html#arcane	all	The arcane dealer
+wiki/villagers.html#arcane-no-horse-hunters	all	He does not stock a horse that hunts horses
 wiki/villagers.html#arcane-pools	all	The pools are generated, never listed
 wiki/villagers.html#arcane-quiet	all	He does not stock the genes that make a noise
 wiki/villagers.html#arcane-wandering	all	He is also out on the road

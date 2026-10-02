@@ -12,6 +12,10 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.genes.AggressionGene;
+import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HealthContribution;
 import org.junit.jupiter.api.Test;
@@ -132,6 +136,41 @@ class ArcaneStockTest {
         for (Gene gene : Genes.naturalOrder()) {
             assertFalse(ArcaneStock.eligible(gene), gene.key() + " is natural and he sells magic");
         }
+    }
+
+    /**
+     * <b>No horse he stocks hunts horses</b> (#17, owner's option 1). His string
+     * stands within a few blocks of itself, and one horse-hunter in it killed
+     * up to twelve of its pen-mates on the live server. Asked of every pooled
+     * pair's own abilities, so a horse-hunting gene added later is caught too.
+     * The control is that aggression is still on sale - just not that kind.
+     */
+    @Test
+    void noStockedHorseHuntsHorses() {
+        List<GeneFamily> families = new ArrayList<>(ArcaneStock.REQUIRED_FAMILIES);
+        families.add(ArcaneStock.OPTIONAL_FAMILY);
+        boolean aggressionStocked = false;
+        for (GeneFamily family : families) {
+            for (AllelePair pair : ArcaneStock.pool(family)) {
+                Gene gene = Genes.byKey(pair.geneKey());
+                // Restated here rather than calling ArcaneStock's own check, so
+                // the test cannot agree with a wrong rule.
+                for (GeneAbility ability : HorseAbilities.of(gene, Genotype.wildType().with(pair), null)) {
+                    if (ability instanceof GeneAbility.Temper t && "aggressive".equals(t.mood())
+                            && t.trigger() instanceof GeneAbility.Trigger.Continuous) {
+                        assertFalse("horses".equals(t.towards()) || "all".equals(t.towards()),
+                                token(pair) + " starts fights with " + t.towards());
+                    }
+                }
+                aggressionStocked |= pair.geneKey().equals(AggressionGene.KEY);
+            }
+        }
+        assertTrue(aggressionStocked, "aggression vanished from the dealer entirely - "
+                + "only its horse-hunting pairs were meant to go");
+    }
+
+    private static String token(AllelePair pair) {
+        return ArcaneStock.token(pair);
     }
 
     @Test

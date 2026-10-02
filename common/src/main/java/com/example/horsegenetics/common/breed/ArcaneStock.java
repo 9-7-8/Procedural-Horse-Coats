@@ -6,6 +6,8 @@ import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.GeneFamily;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.trait.HealthContribution;
 
 import java.util.ArrayList;
@@ -139,7 +141,47 @@ public final class ArcaneStock {
                 || gene instanceof HealthContribution) {
             return false;
         }
-        return !MagicalVariant.showingPairs(gene).isEmpty();
+        return !stockedPairs(gene).isEmpty();
+    }
+
+    /**
+     * The showing pairs of {@code gene} he will sell: every one but those that
+     * {@link #huntsHorses hunt horses}.
+     */
+    public static List<AllelePair> stockedPairs(Gene gene) {
+        List<AllelePair> out = new ArrayList<>();
+        for (AllelePair pair : MagicalVariant.showingPairs(gene)) {
+            if (!huntsHorses(gene, pair)) {
+                out.add(pair);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * <b>Does this pair start fights with horses?</b> Such a pair is not stocked
+     * (#17; owner's pick, 2026-10-01). His whole string stands within a few
+     * blocks of itself, so one horse-hunter in it kills its pen-mates - up to
+     * twelve of them in ten minutes on the live server, and nobody owned them
+     * to be told.
+     *
+     * <p>Read off the pair's own abilities, never a list of alleles, for the
+     * same reason the pools are generated: an aggressive {@code Temper} that
+     * starts on its own ({@code Continuous}) toward {@code horses} or
+     * {@code all}. Aggression toward players or monsters is still sold, and so
+     * is {@code guardian}, which only answers whatever hurts its owner and his
+     * stock has none. All of these can still be bred.
+     */
+    public static boolean huntsHorses(Gene gene, AllelePair pair) {
+        for (GeneAbility ability : HorseAbilities.of(gene, Genotype.wildType().with(pair), null)) {
+            if (ability instanceof GeneAbility.Temper temper
+                    && "aggressive".equals(temper.mood())
+                    && temper.trigger() instanceof GeneAbility.Trigger.Continuous
+                    && ("horses".equals(temper.towards()) || "all".equals(temper.towards()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -151,7 +193,7 @@ public final class ArcaneStock {
         List<AllelePair> out = new ArrayList<>();
         for (Gene gene : Genes.magicalOrder()) {
             if (GeneFamily.of(gene) == family && eligible(gene)) {
-                out.addAll(MagicalVariant.showingPairs(gene));
+                out.addAll(stockedPairs(gene));
             }
         }
         return out;
@@ -188,7 +230,7 @@ public final class ArcaneStock {
                 continue;
             }
             AllelePair pair = genotype.pair(gene);
-            if (pair != null && MagicalVariant.showingPairs(gene).contains(pair)) {
+            if (pair != null && stockedPairs(gene).contains(pair)) {
                 out.add(token(pair));
             }
         }

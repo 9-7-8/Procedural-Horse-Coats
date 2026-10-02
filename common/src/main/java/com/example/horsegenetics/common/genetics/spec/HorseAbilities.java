@@ -70,41 +70,48 @@ public final class HorseAbilities {
     public static List<Active> activeFor(Genotype genotype, Epigenome epigenome) {
         List<Active> out = new ArrayList<>();
         for (Gene gene : Genes.codeOrder()) {
-            AllelePair pair = genotype.pair(gene);
-            if (gene instanceof EpigeneticAbilityContribution contribution) {
-                GeneEpigenetics epi = GeneEpigenetics.forGene(gene, genotype, epigenome);
-                for (GeneAbility ability : contribution.abilitiesFor(pair, genotype, epi)) {
-                    out.add(new Active(gene.key(), ability));
-                }
-                continue;
-            }
-            if (gene instanceof AbilityContribution contribution) {
-                for (GeneAbility ability : contribution.abilitiesFor(pair, genotype)) {
-                    out.add(new Active(gene.key(), ability));
-                }
-                continue;
-            }
-            if (!(gene instanceof SpecGene spec) || !spec.spec().hasAbilities()) {
-                continue;
-            }
-            // expressionSpecIn, not expressionSpecOf: an expression that only
-            // applies when a second locus agrees may carry effects of its own,
-            // and the plain lookup would hand back the entry underneath it.
-            GeneSpec.ExpressionSpec expressed = spec.expressionSpecIn(pair, genotype);
-            if (expressed == null || expressed.abilities().isEmpty()) {
-                continue;
-            }
-            // abilityDose, NOT dose: minDose means "expressing copies", and on a
-            // gene with three or more alleles that is not the same as "copies of
-            // the first-declared allele". See SpecGene.abilityDose.
-            int dose = spec.abilityDose(pair);
-            for (GeneAbility ability : expressed.abilities()) {
-                if (dose >= ability.minDose()) {
-                    out.add(new Active(gene.key(), ability));
-                }
+            for (GeneAbility ability : of(gene, genotype, epigenome)) {
+                out.add(new Active(gene.key(), ability));
             }
         }
         return List.copyOf(out);
+    }
+
+    /**
+     * What <b>one</b> gene's pair in {@code genotype} does - {@link #activeFor}
+     * for a single locus, so a caller asking about one gene does not pay for
+     * every registered gene. {@code epigenome} may be {@code null}.
+     */
+    public static List<GeneAbility> of(Gene gene, Genotype genotype, Epigenome epigenome) {
+        AllelePair pair = genotype.pair(gene);
+        if (gene instanceof EpigeneticAbilityContribution contribution) {
+            return contribution.abilitiesFor(pair, genotype,
+                    GeneEpigenetics.forGene(gene, genotype, epigenome));
+        }
+        if (gene instanceof AbilityContribution contribution) {
+            return contribution.abilitiesFor(pair, genotype);
+        }
+        if (!(gene instanceof SpecGene spec) || !spec.spec().hasAbilities()) {
+            return List.of();
+        }
+        // expressionSpecIn, not expressionSpecOf: an expression that only
+        // applies when a second locus agrees may carry effects of its own,
+        // and the plain lookup would hand back the entry underneath it.
+        GeneSpec.ExpressionSpec expressed = spec.expressionSpecIn(pair, genotype);
+        if (expressed == null || expressed.abilities().isEmpty()) {
+            return List.of();
+        }
+        // abilityDose, NOT dose: minDose means "expressing copies", and on a
+        // gene with three or more alleles that is not the same as "copies of
+        // the first-declared allele". See SpecGene.abilityDose.
+        int dose = spec.abilityDose(pair);
+        List<GeneAbility> out = new ArrayList<>();
+        for (GeneAbility ability : expressed.abilities()) {
+            if (dose >= ability.minDose()) {
+                out.add(ability);
+            }
+        }
+        return out;
     }
 
     /**
