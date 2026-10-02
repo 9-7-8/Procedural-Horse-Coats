@@ -134,6 +134,10 @@ file under `wiki/session-log/` from its index; those files are not baked.
    only a substantial feature that cannot keep saves loading; only it may break them.
 11. **Ask the owner with the question tool** (AskUserQuestion: 2-4 options, recommendation
    first) - every question, unless it is genuinely too open-ended for options. (Owner.)
+12. **Stop processes only with `tools/stop-dev-java.ps1`** - never Stop-Process, taskkill or
+   kill, by PID or by pattern; a hook refuses them. The live server (`26.1.2-neoforge-server`,
+   not ours, players on it) shares our `nogui` command line and changes PID on restart; a
+   pattern kill took it down once. Anything the script leaves alone, ask the owner. (Owner.)
 **Adding a mask, an op, an `effects` verb or a gene-carrot recipe touches four or five
 files** - the lists are on `wiki/making-a-gene.html#contracts`; `procedures/add-a-gene.txt`
 walks them. A gene or item page is three tabs (gameplay, coding, science): `add-a-wiki-page`.

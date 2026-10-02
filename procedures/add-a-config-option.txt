@@ -84,8 +84,8 @@ STEPS
 8. Boot it (launch-game, step 8). Run `./gradlew :neoforge-26.1.2:runServer` with no
    client holding run/, wait for "Done (", and grep the WHOLE log for
    'ERROR|Couldn.t parse|Invalid|missing'. Then edit the new key in run/phc/server.toml
-   while it runs, and check the change takes effect if step 1d asked for that. Kill the
-   server, then DELETE every config file and .bak the boot generated under run/phc/ and
+   while it runs, and check the change takes effect if step 1d asked for that. Stop the
+   server with `pwsh -File tools/stop-dev-java.ps1` (never by hand), then DELETE every config file and .bak the boot generated under run/phc/ and
    run/config/. The owner's next session must start from defaults.
 
 9. Document it on the page of the feature it governs, the way the existing keys are

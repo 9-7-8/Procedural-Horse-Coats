@@ -93,8 +93,10 @@ STEPS
    - Run it in the background, logging to a file, and do other work. Never poll it with
      sleep.
    - Read the real exit code from the log. Never trust a piped command's exit code.
-   - Let it finish. If one must be killed, kill the Gradle test JVMs AND delete
-     common/build/test-results/test/ before running anything else. An orphaned worker
+   - Let it finish. If one must be stopped, run `./gradlew --stop` (it takes its test
+     workers with it) AND delete common/build/test-results/test/ before running anything
+     else. Never kill a JVM by hand: a hook refuses it, and a hand-picked kill took the
+     live server down on 2026-10-01. A worker that survives --stop is the owner's call. An orphaned worker
      wedges every later run.
 
 3. Report:

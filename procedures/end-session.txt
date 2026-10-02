@@ -70,9 +70,11 @@ STEPS
 
 7. Verify clean: `git status --short` empty, and `git log origin/main..HEAD` empty.
 
-8. Kill every process this session started.
+8. Stop every process this session started - through tools/stop-dev-java.ps1 only.
    This covers Gradle daemons and workers, any runClient or runServer, and every
-   background shell. Kill the game and server processes first, then
+   background shell. Stop the game and server processes first, with
+   `pwsh -File tools/stop-dev-java.ps1` (-WhatIf first; never Stop-Process, taskkill or kill, which
+   a hook refuses - a pattern kill took the live server down on 2026-10-01), then
    `./gradlew --stop`: a daemon still running a build ignores the stop.
    Leave the owner's own terminals alone. If a client is up that you did not launch,
    ask before closing it (see launch-game).
