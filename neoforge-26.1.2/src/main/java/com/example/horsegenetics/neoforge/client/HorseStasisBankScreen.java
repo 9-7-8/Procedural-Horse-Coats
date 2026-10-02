@@ -49,9 +49,10 @@ import java.util.Map;
  * A row is searchable only if its own chamber says so
  * ({@link StasisTier#searchable()}, never a tier compared by name). A Basic
  * chamber still lists its horse - the item's tooltip names it at every tier, so
- * hiding it here would make the bank contradict the bottle in your hand - but no
- * query can reach it, and the list says how many rows a query had to leave out
- * rather than letting a horse silently vanish from the list.
+ * hiding it here would make the bank contradict the bottle in your hand - and a
+ * query that is nothing but a name finds it by that name, but no other query can
+ * reach it, and the list says how many rows a query had to leave out rather than
+ * letting a horse silently vanish from the list.
  *
  * <h2>Where the details come from</h2>
  * A chamber carries the horse's whole entity tag, and decoding a bankful of
@@ -114,6 +115,15 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     private static final int SAVED_BUTTON_W = 14;
 
     private net.minecraft.client.gui.components.Button savedSearchButton;
+
+    /** "Eject empties (N)", on the Chambers tab only - where the empties are. */
+    private net.minecraft.client.gui.components.Button ejectButton;
+
+    /** Shorter than vanilla's 20: it sits in the 12 pixels between the grid and the inventory. */
+    private static final int EJECT_H = 12;
+
+    /** The count the button last showed, so its label and tooltip are rebuilt only when it moves. */
+    private int ejectShown = -1;
 
     /** Shared with the browser, reading one saved list - see SavedSearchPicker. */
     private final SavedSearchPicker savedSearches = new SavedSearchPicker();
@@ -187,6 +197,19 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         this.savedSearchButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
                 Component.literal("Saved searches - shared with every other filter box in the mod.")));
         this.addRenderableWidget(this.savedSearchButton);
+
+        // Right of the "Inventory" caption, the one stretch of the Chambers tab
+        // the grid does not use. Sized for the widest count the bank can hold, so
+        // the button does not resize as the number goes down.
+        int ejectW = this.font.width(Component.translatable("gui.horsegenetics.eject_empties",
+                HorseStasisBankBlockEntity.SLOTS)) + 8;
+        this.ejectButton = net.minecraft.client.gui.components.Button.builder(
+                        Component.translatable("gui.horsegenetics.eject_empties", 0),
+                        b -> ejectEmpties())
+                .bounds(leftPos + HorseStasisBankMenu.WIDTH - HorseStasisBankMenu.MARGIN - ejectW,
+                        topPos + HorseStasisBankMenu.INV_LABEL_Y - 2, ejectW, EJECT_H)
+                .build();
+        this.addRenderableWidget(this.ejectButton);
 
         applyTab();
 
@@ -360,6 +383,34 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         // it would swallow the slot clicks under it.
         if (!browsing && this.savedSearches.isOpen()) {
             this.savedSearches.close();
+        }
+        if (this.ejectButton != null) {
+            int empties = this.menu.empties();
+            this.ejectButton.visible = tab == HorseStasisBankMenu.Tab.CHAMBERS;
+            // Greyed at zero rather than hidden, so the player learns it is there.
+            this.ejectButton.active = this.ejectButton.visible && empties > 0;
+            // UNVERIFIED: that 26.1.2 shows a widget's tooltip while it is
+            // inactive. If it does not, the greyed button simply says nothing.
+            if (empties != ejectShown) {
+                ejectShown = empties;
+                this.ejectButton.setMessage(Component.translatable("gui.horsegenetics.eject_empties", empties));
+                this.ejectButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+                        Component.translatable(empties > 0
+                                ? "gui.horsegenetics.eject_empties.tooltip"
+                                : "gui.horsegenetics.eject_empties.none")));
+            }
+        }
+    }
+
+    /**
+     * One press, no confirmation - ejecting only moves items. The server walks
+     * the chambers itself and re-checks everything; see
+     * {@code HorseStasisBankMenu.ejectEmpties}.
+     */
+    private void ejectEmpties() {
+        if (this.minecraft != null && this.minecraft.gameMode != null) {
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId,
+                    HorseStasisBankMenu.EJECT_EMPTIES_BUTTON);
         }
     }
 
@@ -772,7 +823,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         if (!note.isEmpty()) {
             return note;
         }
-        if (StasisBrowseRow.locked(rows) > 0 && !builtQuery.trim().isEmpty()) {
+        if (StasisBrowseRow.locked(rows, builtQuery) > 0 && !builtQuery.trim().isEmpty()) {
             return lockedLine();
         }
         return studLine();
@@ -805,7 +856,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     /** Why the list is shorter than the bank: the rows no query can reach. */
     private String lockedLine() {
-        int locked = StasisBrowseRow.locked(rows);
+        int locked = StasisBrowseRow.locked(rows, builtQuery);
         if (locked == 0) {
             return "Every chamber here was searched.";
         }

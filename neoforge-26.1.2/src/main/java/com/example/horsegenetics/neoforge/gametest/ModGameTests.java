@@ -1318,6 +1318,96 @@ public final class ModGameTests {
         helper.succeed();
     }
 
+    /**
+     * <b>"Eject empties" takes out every empty chamber, and nothing else.</b>
+     * The Chambers tab's one-press button, driven through the real
+     * {@code clickMenuButton} id the screen sends.
+     *
+     * <p>Two empties of different tiers, one occupied chamber, and an empty
+     * chamber sitting in a drop-buffer slot - which is not a chamber slot and
+     * must not be walked. The player's pack has room for exactly one, so the
+     * first empty goes into it and the second drops at the bank. Then a second
+     * press, with nothing left to eject, must do nothing and say so.
+     *
+     * <p>The dropped chamber is cleared up afterwards: a test that leaves items
+     * on the floor is a test that fails its neighbours (see
+     * {@link #VANILLA_LEAD_COMES_BACK}).
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_BANK_EJECTS_EMPTIES =
+            TEST_FUNCTIONS.register("stasis_bank_ejects_empties", () -> ModGameTests::stasisBankEjectsEmpties);
+
+    private static void stasisBankEjectsEmpties(GameTestHelper helper) {
+        BlockPos at = new BlockPos(1, 1, 1);
+        helper.setBlock(at, com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_STASIS_BANK.get());
+        BlockPos abs = helper.absolutePos(at);
+        if (!(helper.getLevel().getBlockEntity(abs)
+                instanceof com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity bank)) {
+            helper.fail("placing a Horse Stasis Bank made no bank block entity - the premise is broken");
+            return;
+        }
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        player.setPos(abs.getCenter().add(0.0, 1.0, 0.0));
+        net.minecraft.world.entity.player.Inventory pack = player.getInventory();
+        for (int i = 1; i < 36; i++) {
+            pack.setItem(i, new ItemStack(Items.DIRT, 64));
+        }
+        pack.setItem(0, ItemStack.EMPTY);
+
+        net.minecraft.world.Container chambers = bank.chambers();
+        chambers.setItem(0, new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get()));
+        chambers.setItem(1, com.example.horsegenetics.neoforge.item.StasisChamberItem.withHorse(
+                new ItemStack(ModItems.INTERMEDIATE_STASIS_CHAMBER.get()),
+                new com.example.horsegenetics.neoforge.data.StasisSnapshot(
+                        "Keeper", UUID.randomUUID(), new net.minecraft.nbt.CompoundTag())));
+        chambers.setItem(2, new ItemStack(ModItems.ADVANCED_STASIS_CHAMBER.get()));
+        int dropSlot = com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity.FIRST_DROP_SLOT;
+        bank.supplies().setItem(dropSlot, new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get()));
+
+        com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu menu =
+                new com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu(0, pack, bank);
+        if (menu.empties() != 2) {
+            helper.fail("the bank counts " + menu.empties() + " empties, not 2 - the button's label "
+                    + "would be wrong before it was ever pressed");
+            return;
+        }
+        int button = com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu.EJECT_EMPTIES_BUTTON;
+        if (!menu.clickMenuButton(player, button)) {
+            helper.fail("pressing Eject empties with two empties in the bank was refused");
+            return;
+        }
+        if (!chambers.getItem(0).isEmpty() || !chambers.getItem(2).isEmpty()) {
+            helper.fail("an empty chamber was left in the bank after Eject empties");
+            return;
+        }
+        if (com.example.horsegenetics.neoforge.item.StasisChamberItem.snapshotOf(chambers.getItem(1)) == null) {
+            helper.fail("Eject empties took a chamber WITH A HORSE IN IT out of the bank");
+            return;
+        }
+        if (!bank.supplies().getItem(dropSlot).is(ModItems.BASIC_STASIS_CHAMBER.get())) {
+            helper.fail("Eject empties reached into the drop buffer - only chamber slots are its business");
+            return;
+        }
+        if (!pack.getItem(0).is(ModItems.BASIC_STASIS_CHAMBER.get())) {
+            helper.fail("the first empty did not reach the player's one free slot");
+            return;
+        }
+        if (menu.empties() != 0) {
+            helper.fail("the bank still counts " + menu.empties() + " empties after ejecting them");
+            return;
+        }
+        if (menu.clickMenuButton(player, button)) {
+            helper.fail("a second press with no empties left claimed to have done something");
+            return;
+        }
+        // The pack was full, so the second empty is on the ground at the bank.
+        helper.runAfterDelay(5L, () -> {
+            helper.assertItemEntityPresent(ModItems.ADVANCED_STASIS_CHAMBER.get(), at, 2.0);
+            helper.killAllEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class);
+            helper.succeed();
+        });
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -1393,6 +1483,9 @@ public final class ModGameTests {
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
         // Builds one instance of every mob it classifies, inside one tick.
         register(event, environment, CHAOS_ROSTER, 100);
+        // One bank filled and one button pressed twice, then five ticks for the
+        // dropped chamber to be findable on the ground.
+        register(event, environment, STASIS_BANK_EJECTS_EMPTIES, 100);
     }
 
     /**
