@@ -117,8 +117,8 @@ Sync: none new; the part list is computed on the client from CoatData (CoatSyncP
 HorseCoatBatchPayload, SpawnCustomHorsePayload). UNVERIFIED that no payload filters unknown genes.
 Config: none new. The existing client parts.* switches and the parts detail distance gate it; a horse with
 the gene whose parts are switched off MUST show its vanilla tail (the hide is gated by the same switch, or
-a player turning parts off would see a horse with no tail at all). Decided as a rule by the scoping session,
-not asked: it follows from the carrot-not-stick philosophy and the config's meaning.
+a player turning parts off would see a horse with no tail at all). Recommended by the scoping session, not
+asked: it follows from the carrot-not-stick philosophy and the config's meaning. Owner may amend.
 Tests: a common/ test pinning the allele table, dominance, GrownParts.of (one part for Tuft/n and
 Tuft/Tuft, none for n/n), the shape cache key for each size, and the "hides vanilla tail" rule; the
 existing parity snapshot and CommonPortabilityTest rerun; a genotype-code round-trip test with the new
@@ -235,9 +235,9 @@ Implications sweep (Part 5): one line each
 - The wiki: model-parts.html owns the part; a NEW gene page is required (hard rule 7, procedures/add-a-gene.txt;
   do not edit the generated spans in wiki/pages.js and index.html).
 The three most likely ways it goes wrong for a real player:
-1. Two tails: the hide flag is left from another horse because the HD models are shared (Decided handling:
+1. Two tails: the hide flag is left from another horse because the HD models are shared (Recommended handling:
    set the flag for every horse, every frame, and a play check in a pen of mixed horses).
-2. A horse with parts switched off or beyond the detail distance has NO tail (Decided handling: the hide is
+2. A horse with parts switched off or beyond the detail distance has NO tail (Recommended handling: the hide is
    gated by the same switches and distance as the part).
 3. The tuft is the wrong colour or flips colour while the coat is still baking (see UNVERIFIED 1, 3; Open:
    if the coat has no pixels yet, draw nothing for the part rather than a wrong colour, the Feathering call).
