@@ -126,14 +126,18 @@ public final class DebugPhotoShoot {
         level.addFreshEntity(horse);
         current = horse;
 
-        // The head is about 1.8 blocks up and a block west of the middle. Stand forward
-        // (west), to the south, a little above, and look at it.
-        double ex = hx - 3.2;
-        double ey = origin.getY() + 2.4;
-        double ez = hz + 3.4;
-        double tx = hx - 1.0;
-        double ty = origin.getY() + 1.8;
+        // A head-and-shoulders portrait. The head is about 1.8 blocks up and a block west
+        // of the middle; aim a little below it, at the throat, so the horns have room at
+        // the top of the frame and the neck and chest fill the bottom. Stand forward (west),
+        // to the south and a little above, about two and a half blocks off. (Owner,
+        // 2026-10-02: the first framing stood twice as far back and the gallery's crop
+        // cut the bodies off.)
+        double tx = hx - 0.8;
+        double ty = origin.getY() + 1.45;
         double tz = hz;
+        double ex = tx - 1.5;
+        double ey = ty + 0.5;
+        double ez = tz + 2.0;
         double dx = tx - ex;
         double dy = ty - ey;
         double dz = tz - ez;
