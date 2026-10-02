@@ -115,7 +115,6 @@ Built? No.
 ------------------------------------------------------------------------------
 Mythical antlered beasts - implementation treatment.txt              sized 2026-10-02
 - Piece 1: five breeds (Tarandrus, Leucrocotta first; ...)       S each c  No: creates breeds
-- Piece 2: plan lines on model-parts.html Roadmap tab            S  b  owner-free
 Built? No.
 
 ------------------------------------------------------------------------------
