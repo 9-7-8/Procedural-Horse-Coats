@@ -144,6 +144,24 @@ final class DebugYardLong {
         }
     }
 
+    /**
+     * <b>Row AW east: RATIO ACAN D5</b> (2026-10-01). {@code wiki/gene-acan.html}: <i>"ACAN D5 is not the severe
+     * variant. A D5/D5 or D5/D2 horse should be a surviving dwarf, not a dead foal - only D1/D1 is lethal."</i>
+     * D5/D2 x D5/D2, so every foal is an affected compound or homozygote - D5/D5, D5/D2 and D2/D2 at 1:2:1 - and
+     * none of them is D1/D1. PASS: forty born at 1:2:1 by the chi-square every ratio pen uses, and not one foal
+     * dead within FOAL_KEEP of birth. FAIL: any death (a non-severe dwarf treated as lethal), or the split off
+     * 1:2:1. Two to three hours, like the other ratio pens; the eight-hour deadline answers INCONCLUSIVE.
+     */
+    static void acanRow(ServerLevel level, int gy, int x0, int z0) {
+        try {
+            ratio(level, gy, x0, z0, "RATIO ACAN D5", "horsegenetics.acan", "D5/D2", "D5/D2", false,
+                    List.of("RATIO: ACAN D5", "D5/D2 x D5/D2: all", "dwarfs, and every", "one must live"),
+                    "about 1 D5/D5 : 2 D5/D2 : 1 D2/D2, and not one foal dead");
+        } catch (RuntimeException e) {
+            HorseGenetics.LOGGER.warn("[Debug] test yard: RATIO ACAN D5 failed to build", e);
+        }
+    }
+
     // ------------------------------------------------------------------
     // Dryads
     // ------------------------------------------------------------------
@@ -536,6 +554,8 @@ final class DebugYardLong {
         String mutant = "";
         /** HYPP and LETHAL WHITE: a homozygote alive when FOAL_KEEP ends is a FAIL. */
         boolean homozygoteDies;
+        /** ACAN D5: every foal is an affected dwarf and none may die - a death of any class is a FAIL. */
+        boolean allSurvive;
         long startTick;
         /** Born foals, and distinct conception draws, by copies of {@link #mutant}: [0, 1, 2]. */
         final int[] bornBy = new int[3];
@@ -598,6 +618,10 @@ final class DebugYardLong {
             case "RATIO KIT W5" -> judgeBy(tally, Rule.CONCEIVED_121, "W5", false);
             case "RATIO MITF SW3" -> judgeBy(tally, Rule.CONCEIVED_121, "SW3", false);
             case "RATIO MILK CLASH" -> judgeBy(tally, Rule.NO_FOAL, "", false);
+            case "RATIO ACAN D5" -> {
+                judgeBy(tally, Rule.BORN_121, "D5", false);
+                tally.allSurvive = true;
+            }
             default -> { }
         }
         // A world with lethals off carries a lethal embryo to term and lets a lethal foal live
@@ -753,6 +777,10 @@ final class DebugYardLong {
                     t.counts.computeIfAbsent(cls, k -> new int[2])[1]++;
                     t.died++;
                     ActionTrace.log("test yard", t.name + ": a " + cls + " foal died | " + t.summary());
+                    if (t.allSurvive) {
+                        fail(t, "at " + t.born + " foals", "a " + cls + " foal died inside " + FOAL_KEEP / 20
+                                + " s of birth; only D1/D1 is lethal, so every D5 dwarf must live");
+                    }
                     it.remove();
                     t.done.add(e.getKey());
                 } else if (now - e.getValue() >= FOAL_KEEP) {

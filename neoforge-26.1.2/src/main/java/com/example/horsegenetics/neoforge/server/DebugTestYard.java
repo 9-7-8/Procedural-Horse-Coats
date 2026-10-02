@@ -151,6 +151,27 @@ final class DebugTestYard {
     static final int ROW_W = ROW_U + ROW_U_D + PACKED_AISLE;
     static final int ROW_W_D = 10;
 
+    /*
+     * ROWS AR-AW (2026-10-01, owner: "see if there's any new pens you need to add, based off anything left in
+     * verification that you can run with a player you control or with just looking at the logs"). Every open
+     * Verification-tab check was read, and these are the ones a pen can settle with nobody at the keyboard. Each
+     * row is a class with one build(level, gy, x0, z0) over the full width - west half x0..x0+19, the walkway
+     * left clear, east half x0+25..x0+44 - and every check answers through DebugYardClockwork's verdict lines.
+     */
+    static final int NEW_ROW_D = 12;
+    /** STAT DOSES (west), LAST STAND (east) - {@link DebugYardBody}. */
+    static final int ROW_AR = ROW_W + ROW_W_D + PACKED_AISLE;
+    /** DEATH DROPS II (west), SHADOW LIGHT (east) - {@link DebugYardDeath}. */
+    static final int ROW_AS = ROW_AR + NEW_ROW_D + PACKED_AISLE;
+    /** KEEPING HORSES (west), STASIS BANK (east) - {@link DebugYardKeep}. */
+    static final int ROW_AT = ROW_AS + NEW_ROW_D + PACKED_AISLE;
+    /** GELDING and FOAL NAMES (west), COVER REACH (east) - {@link DebugYardStud}. */
+    static final int ROW_AU = ROW_AT + NEW_ROW_D + PACKED_AISLE;
+    /** BOND DECAY (west), VERDANT FLOORS (east) - {@link DebugYardCare}. */
+    static final int ROW_AV = ROW_AU + NEW_ROW_D + PACKED_AISLE;
+    /** WEATHER COPIES (west, {@link DebugYardWeather}), RATIO ACAN D5 (east, {@link DebugYardLong#acanRow}). */
+    static final int ROW_AW = ROW_AV + NEW_ROW_D + PACKED_AISLE;
+
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
      * bump.</b> It was a literal until 2026-09-13 and it was wrong: the yard
@@ -158,7 +179,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_W + ROW_W_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_AW + NEW_ROW_D + AISLE;
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -221,6 +242,17 @@ final class DebugTestYard {
         // and verdict lines for the next check that wants them, and builds nothing.
         // Row O east, U and W: the last dryad and the inheritance ratios, each with its own verdict.
         DebugYardLong.build(level, gy, cx, mouthZ);
+        // Rows AR-AW (2026-10-01): the night's new pens, one class a row.
+        int rowX = cx + WEST_MIN;
+        DebugYardBody.build(level, gy, rowX, mouthZ + ROW_AR);
+        DebugYardDeath.build(level, gy, rowX, mouthZ + ROW_AS);
+        DebugYardKeep.build(level, gy, rowX, mouthZ + ROW_AT);
+        DebugYardStud.build(level, gy, rowX, mouthZ + ROW_AU);
+        DebugYardCare.build(level, gy, rowX, mouthZ + ROW_AV);
+        DebugYardWeather.build(level, gy, rowX, mouthZ + ROW_AW);
+        DebugYardLong.acanRow(level, gy, cx + EAST_MIN + 1, mouthZ + ROW_AW);
+        // After every row has registered its checks: the summaries name whatever has not answered.
+        DebugYardClockwork.build(level, gy, cx, mouthZ);
         // HURT MARE, NIGHT SHY, REACH WALL, REACH FENCE, STATS and the ARCANE DEALER went on their own PASS
         // lines on 2026-09-30, and with them rows X, Y and AL; DebugYardFertility and DebugYardUnattended
         // stay only as helpers.

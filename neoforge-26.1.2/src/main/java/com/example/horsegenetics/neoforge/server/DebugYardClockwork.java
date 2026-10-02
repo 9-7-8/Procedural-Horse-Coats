@@ -172,7 +172,7 @@ final class DebugYardClockwork {
     }
 
     /** Fresh hands beside {@code at}, holding {@code held}; {@code creative} is the instabuild flag, nothing more. */
-    private static Hands hands(ServerLevel level, Entity at, ItemStack held, boolean creative) {
+    static Hands hands(ServerLevel level, Entity at, ItemStack held, boolean creative) {
         Hands h = new Hands(level);
         h.getAbilities().instabuild = creative;
         h.snapTo(at.getX(), at.getY(), at.getZ() - 1.5, 0.0F, 0.0F);
@@ -186,7 +186,7 @@ final class DebugYardClockwork {
      * The yard's older fake-player pens posted only the event, which skips the vanilla half (feeding wheat, golden
      * carrots); this one takes the same path a click does. The hit location is unused by a horse.
      */
-    private static InteractionResult use(Hands h, Entity target) {
+    static InteractionResult use(Hands h, Entity target) {
         return h.interactOn(target, InteractionHand.MAIN_HAND, Vec3.ZERO);
     }
 
@@ -209,13 +209,20 @@ final class DebugYardClockwork {
         }
     }
 
-    /** The tally at ten and thirty minutes, naming every check that has not answered as PENDING. */
+    /**
+     * The tally at ten and thirty minutes, naming every check that has not answered as PENDING - and, since rows
+     * AR-AW (2026-10-01) brought checks that run for hours (bond decay, the foal names, the stud pens), at two, four
+     * and seven hours too. A short check still PENDING at thirty minutes is a finding; a long one is not yet.
+     */
     static void scheduleSummaries(ServerLevel level) {
         DebugYardHerd.after(level, 12_000, () -> summary("10 minutes"));
-        DebugYardHerd.after(level, 36_000, () -> summary("30 minutes - every check should have answered"));
+        DebugYardHerd.after(level, 36_000, () -> summary("30 minutes - every short check should have answered"));
+        DebugYardHerd.after(level, 144_000, () -> summary("2 hours"));
+        DebugYardHerd.after(level, 288_000, () -> summary("4 hours"));
+        DebugYardHerd.after(level, 504_000, () -> summary("7 hours - every check should have answered"));
     }
 
-    private static @Nullable Horse horse(ServerLevel level, int gy, double x, double z, Sex sex, String code,
+    static @Nullable Horse horse(ServerLevel level, int gy, double x, double z, Sex sex, String code,
                                          String label) {
         return DebugYardUnattended.horse(level, gy, x, z, sex, code, true, label);
     }
@@ -224,7 +231,7 @@ final class DebugYardClockwork {
      * A glass box, walls two high, with a stone lid - one around the whole inclusive rectangle given. A monster
      * in a 3x3 one stays put and cannot see the sky; a horse in a 4x4 one has a 2x2 floor to stand on.
      */
-    private static void cell(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
+    static void cell(ServerLevel level, int gy, int x0, int x1, int z0, int z1) {
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
                 boolean wall = x == x0 || x == x1 || z == z0 || z == z1;
@@ -238,7 +245,7 @@ final class DebugYardClockwork {
     }
 
     /** A persistent, named mob in a 3x3 glass cell centred on {@code (x, z)}. */
-    private static @Nullable Mob caged(ServerLevel level, EntityType<? extends Mob> type, int gy, int x, int z,
+    static @Nullable Mob caged(ServerLevel level, EntityType<? extends Mob> type, int gy, int x, int z,
                                        String label) {
         cell(level, gy, x - 1, x + 1, z - 1, z + 1);
         Mob m = type.create(level, EntitySpawnReason.COMMAND);

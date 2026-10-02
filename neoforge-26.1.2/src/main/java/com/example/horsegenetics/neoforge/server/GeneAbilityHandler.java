@@ -87,6 +87,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -198,9 +199,19 @@ public final class GeneAbilityHandler {
 
         boolean moving = isMoving(horse);
         List<GeneAbility.Emitter> prints = null; // hoofprint emitters - laid by stride, after the loop
+        Map<String, Integer> modCopies = null; // check 304: which copy of its gene's attribute each modifier is
 
         for (HorseAbilities.Active active : abilities) {
             GeneAbility ability = active.ability();
+            // Counted before the condition is read, so a copy keeps its id whether or not it holds this tick -
+            // clearAttributes counts the same list the same way and so names the same ids.
+            int copy = 0;
+            if (ability instanceof GeneAbility.AttributeMod am) {
+                if (modCopies == null) {
+                    modCopies = new HashMap<>();
+                }
+                copy = copyIndex(modCopies, active.geneKey(), am.attribute());
+            }
             if (!conditionHolds(ability.when(), horse, record)) {
                 continue;
             }
@@ -219,7 +230,7 @@ public final class GeneAbilityHandler {
                         maybeEmit(e, horse, (ServerLevel) level, moving);
                     }
                 }
-                case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey());
+                case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey(), copy);
                 case GeneAbility.Breath b -> breathe(b, horse);
                 case GeneAbility.Swim ignored -> { /* read inside travelInWater by HorseSwimMixin, via SwimScaling */ }
                 case GeneAbility.MobAura ma -> mobAura(ma, horse, (ServerLevel) level);
@@ -321,7 +332,7 @@ public final class GeneAbilityHandler {
      * before it ever reaches here, so nothing would take the modifier off again.
      * {@link #clearAttributes} therefore runs unconditionally afterwards.
      */
-    private static void applyAttribute(GeneAbility.AttributeMod mod, Horse horse, String geneKey) {
+    private static void applyAttribute(GeneAbility.AttributeMod mod, Horse horse, String geneKey, int copy) {
         Holder<Attribute> attribute = ATTRIBUTES.get(mod.attribute());
         if (attribute == null) {
             warnUntranslated("attribute:" + mod.attribute(), geneKey);
@@ -340,7 +351,7 @@ public final class GeneAbilityHandler {
             default -> AttributeModifier.Operation.ADD_VALUE;
         };
         instance.addOrUpdateTransientModifier(
-                new AttributeModifier(attributeModifierId(geneKey, mod.attribute()), mod.amount(), op));
+                new AttributeModifier(attributeModifierId(geneKey, mod.attribute(), copy), mod.amount(), op));
     }
 
     /**
@@ -363,10 +374,26 @@ public final class GeneAbilityHandler {
         return horse.isInLava() && horse.getFluidHeight(FluidTags.LAVA) > horse.getFluidJumpThreshold();
     }
 
-    /** A stable, gene-scoped id, so two genes may move one attribute without fighting. */
-    private static Identifier attributeModifierId(String geneKey, String attribute) {
+    /**
+     * A stable, gene-scoped id, so two genes may move one attribute without fighting - and, since
+     * 2026-10-01, copy-scoped too, so one gene's two copies may move it without fighting either (check 304).
+     *
+     * <p>{@code AbstractWeatherGene.abilitiesFor} emits one conditioned modifier per allele copy, because each
+     * copy carries its own weather. With one id per gene and attribute, {@code addOrUpdateTransientModifier}
+     * let the second copy overwrite the first: an {@code R+/R+} horse moved by one percentage instead of two,
+     * and an {@code R+/Tv} horse in a storm (raining <i>and</i> thundering) carried whichever copy came last.
+     * The first copy keeps the old id, so a gene with one modifier per attribute - nearly all of them - names
+     * exactly what it named before, and a modifier still standing from an older build is swept by
+     * {@link #clearAttributes} like any other.
+     */
+    private static Identifier attributeModifierId(String geneKey, String attribute, int copy) {
         return Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
-                "gene/" + geneKey.replace('.', '_') + "/" + attribute);
+                "gene/" + geneKey.replace('.', '_') + "/" + attribute + (copy == 0 ? "" : "/" + (copy + 1)));
+    }
+
+    /** The next copy number for {@code geneKey}'s modifier on {@code attribute}, counting from 0, in list order. */
+    private static int copyIndex(Map<String, Integer> seen, String geneKey, String attribute) {
+        return seen.merge(geneKey + "|" + attribute, 1, Integer::sum) - 1;
     }
 
     /**
@@ -380,11 +407,14 @@ public final class GeneAbilityHandler {
     private static void clearAttributes(Horse horse, List<HorseAbilities.Active> wanted,
                                         HorseRecord record) {
         Set<Identifier> keep = new HashSet<>();
+        Map<String, Integer> modCopies = new HashMap<>();
         for (HorseAbilities.Active active : wanted) {
-            if (active.ability() instanceof GeneAbility.AttributeMod mod
-                    && attributeAllowed(mod.attribute())
-                    && conditionHolds(mod.when(), horse, record)) {
-                keep.add(attributeModifierId(active.geneKey(), mod.attribute()));
+            if (active.ability() instanceof GeneAbility.AttributeMod mod) {
+                // Counted for every modifier, held or not, exactly as the apply loop counts them.
+                int copy = copyIndex(modCopies, active.geneKey(), mod.attribute());
+                if (attributeAllowed(mod.attribute()) && conditionHolds(mod.when(), horse, record)) {
+                    keep.add(attributeModifierId(active.geneKey(), mod.attribute(), copy));
+                }
             }
             if (active.ability() instanceof GeneAbility.Traversal t
                     && "lava_swim".equals(t.flag())
