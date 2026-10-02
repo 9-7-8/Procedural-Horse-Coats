@@ -1,0 +1,90 @@
+2026-10-02 12:05 (start, local) - Release 0.5.041
+
+ASKED
+-----
+- "/release" - cut a release. Done: 0.5.041 tagged and published with the jar.
+- "/end-session" - this log, the procedure review, and the close.
+
+DONE
+----
+- 39d08ca5 "Release 0.5.041": mod_version 0.5.040 -> 0.5.041 in gradle.properties, the
+  only code change. Tag v0.5.041 points at 39d08ca5 (git rev-list -n 1). GitHub release
+  "0.5.041 - dragon horns, a free Send home, and papers that teach" carries
+  horsegenetics-0.5.041.jar (7,002,481 bytes, state uploaded). The jar's
+  META-INF/neoforge.mods.toml says version "0.5.041", and it holds SendHomePayment,
+  DragonHornsGene, DragonHornGenerator and AbstractPartColourGene.
+  Proof, the full release set, every exit code read from a log file:
+  - tier 0: check-links, check-roadmap-execution, check-gene-tabs, check-breed-heights,
+    check-recipes, check-block-models, check-duplicate-item-art, check-progress-tasks,
+    check-parity - all rc=0;
+  - full :common:test - 1491 tests, 0 failures, BUILD SUCCESSFUL in 19m 59s. Slowest
+    classes: CoatTextureIdTest 255s, RimehartBreedTest 164s, CoatTextureComposerTest
+    114s, ReproRulesTest 69s, GreenwoodBreedTest 64s, DeadLayerTest 57s,
+    GenotypeCatalogTest 49s, RamHornBreedsTest 45s. The same eight as test-tiers' tier 3
+    list, so that list was left as it is;
+  - :neoforge-26.1.2:test - exit 0 (up to date from its last run; its inputs had not
+    changed);
+  - :neoforge-26.1.2:runGameTest - "All 29 required tests passed", exit 0;
+  - browser checks: check-designer-boots, check-creator-steps, check-path-canvas,
+    check-colour-control, check-glow-control, check-glow-render, check-ai - all rc=0;
+  - runServer to "Done (" on port 25599, with run/logs, run/config and run/phc copied
+    aside first and put back afterwards (diffed equal). Level-marker grep: no /ERROR].
+    Ours among the WARNs: "phc/server.toml is not correct. Correcting" (the new
+    send_home keys being added - expected) and "Recipe horsegenetics:stasis_chamber
+    can't be placed due to empty ingredients" (pre-existing: it is in the owner's 09:43
+    client log too, and the recipe file is unchanged since 817282cc; a custom recipe
+    type with no ingredient list). The rest were vanilla command ambiguities and the
+    offline-mode notice.
+  The dev server was stopped with tools/stop-dev-java.ps1; the live server (PID 19224)
+  was left alone throughout.
+- The release note was audited over the whole range v0.5.040..HEAD (52 commits): lang
+  diff (none), recipe diff (none), added classes, config keys, and git show --stat on
+  every commit the note mentions. A subagent read the 2026-10-02 session logs and
+  marked each item player-facing or dev-only. Every Send home claim in the note was
+  checked against SendHome.java, SendHomePayment.java, HorseBrowserScreen.java and the
+  StallRecall diff (the USE_*_TICKET completions were removed).
+- 929052da "Docs: 0.5.041 release note on the wiki": the same note as
+  wiki/releases.html#v0-5-041; build-search-index, bake-agent-text and check-links OK.
+
+DECIDED
+-------
+- Patch number, not compat: nothing in the range breaks saves (the new genes arrive on
+  old horses in their wild form, as antlers did in 0.5.037). Made without asking, per
+  release step 2a.
+- The release title. Made without asking.
+- Left out of the note as dev-only or net-zero: the photo stage (DebugPhotoShoot), the
+  light-horse horn glow (f6143d97, reversed by cc455d51 - net behaviour as 0.5.040),
+  the config key table, intake planning, procedure edits.
+
+FOUND ON THE WAY
+----------------
+- The stasis_chamber "empty ingredients" WARN at every boot. Harmless and old; not
+  filed. Now named in release step 3 as a known warning.
+- No mistakes made this session.
+
+PROCEDURES
+----------
+- procedures/release.txt step 3: the server-boot grep pointed at a bare
+  'ERROR|...|missing', which launch-game step 8c says drowns in DEBUG noise. It now
+  defers to launch-game step 8 (back up the owner's logs and configs, grep level
+  markers) and names the two known harmless warnings.
+- procedures/release.txt step 9: adds bake-agent-text.mjs beside the search index and
+  check-links.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full suite ran, so nothing is owed there.
+- Nothing in 0.5.041 has been played in game apart from dragon horns on the photo
+  stage: Send home with a price, discovery by filing a paper, compressed sizes with
+  body.size off, the champagne foal eye on the real foal skin. These were already on
+  the owning pages' Verification tabs from the sessions that built them; this session
+  added no Verification-tab entries.
+
+RELEASE
+-------
+The owner asked for it (/release): 0.5.041 cut and published.
+
+PICK UP FIRST
+-------------
+/process-intake: the realm breeding pause, still next by ranking (see
+d2026-10-02-1145-champagne-foal-eyes.txt).
