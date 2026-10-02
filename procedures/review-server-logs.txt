@@ -89,6 +89,12 @@ STEPS
 
 3. If something is genuinely missing from the exports, the raw server logs folder
    (named in the memory) has more. debug-*.log.gz is not scanned by the exporter.
+   Chunk-load traces are one thing only the raw logs hold. The server runs Cupboard,
+   which logs "Trying to load chunk" with a stack trace each time something forces a
+   synchronous chunk load. Tally the top frame of ours in each trace, over the plain
+   logs AND the .log.gz ones (`zcat -f` reads both), and compare with any open issue
+   waiting on that tally. Issue #13 is one: its comment names the frames that should
+   be gone once the server runs the release carrying the fix.
 
 4. Commit and push any change to intake/To do.txt.
 

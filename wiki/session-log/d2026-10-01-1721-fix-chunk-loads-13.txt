@@ -1,0 +1,89 @@
+2026-10-01 17:21 (end time) - #13: horse AI and the realm forcing synchronous chunk loads
+
+ASKED
+
+    - "/whats-next". Surveyed every queue. The release has been due since the last
+      session and was held on #13. Open issues: #15 (tuning, urgency PLAYERS), #14, #13,
+      #12, #10, and #2 (no label). There are 14 intake units, plus 8 bullets in
+      intake/To do.txt. One PCH export folder (2026-10-01) has never been reviewed.
+      Offered: fix #13 (recommended, last session's pick-up-first), review the server
+      logs, fix #14, tuning #15.
+    - Owner picked "Fix #13", which ran /fix-bug #13 and then end-session.
+
+DONE
+
+    f9d604b1  #13: horse AI and the realm forced synchronous chunk loads
+      What was wrong. The live server runs Cupboard, which logs a stack trace for every
+      synchronous chunk load. Our frames were in about 250 of 911 traces (17 Sep to
+      1 Oct). One trace per site, pulled from the raw logs including the .log.gz files,
+      showed two causes:
+      - WRITES. HorseRealmLift.lift (101 traces) and HorseRealmTerrain.pool wrote with
+        setBlock(..., 2). Without flag 16 (UPDATE_KNOWN_SHAPE), vanilla re-shapes every
+        neighbour: setBlock -> markAndNotifyBlock -> updateNeighbourShapes. An edge
+        block's neighbour is in the next chunk, so each write loaded that chunk. Both
+        now write with 2 | 16. The lift moves whole columns, states and all, and water
+        re-shapes nothing, so neither needs neighbour shape updates.
+      - READS ON TICK PATHS. HungerFoodGoal.rungOf (reached from canContinueToUse, so
+        every tick), PortalEventHandler.portalBlockUnder (every horse and player, every
+        tick), and the "nowhere to put it" branch of GeneAbilityHandler.reconcileGlow
+        now skip a position whose chunk is not loaded. That branch keeps its GLOW_LIGHT
+        entry, so the old light is still cleared later.
+      - INTENDED LOADS, now commented as such: HorseRealmTerrain.decorateNow (arrival),
+        HorseRealm.safeReturn, TicketHandler.landingSpot (already commented),
+        StallDetector.forSign (sign placement and ticket time), and
+        GeneAbilityHandler.clearLight.
+      Proof. New gametest realm_lift_loads_no_neighbour (ModGameTests). It generates
+      chunk [-3907, 4111], marks it as old-floor, rings its edge with stone, runs the
+      real HorseRealmLift.liftNow, and asserts all four neighbours are still unloaded.
+      With the old flag 2 it went red: "loaded its neighbour [-3908, 4111]". With
+      2 | 16 it is green. All 24 gametests pass on the final tree.
+      :neoforge-26.1.2:build and check-parity are green.
+      Issue #13: OPEN, waiting on the live server's logs once it runs the release
+      carrying f9d604b1. The comment there names the frames that should be gone.
+
+DECIDED
+
+    - #13 stays open until the server's logs show the traces gone, rather than closing
+      on the gametest. Made without the owner, by fix-bug step 6: a runtime question
+      remains. Recorded on the issue.
+    - clearLight still loads the light's chunk instead of skipping it. Made without the
+      owner. Skipping would leak the light block, and this load happens at most once
+      per teleport. Recorded in the code comment.
+    - Where a load is intended, it is commented, not moved onto a pre-loaded ticket.
+      Made without the owner. These loads run once per player action, at the
+      destination, which the teleport loads anyway. Recorded in the code comments and
+      the issue.
+
+FOUND ON THE WAY
+
+    - My first version skipped clearLight on an unloaded chunk, which would have leaked
+      light blocks. Caught on re-reading the diff before the commit, and reverted to an
+      intended load.
+    - The other setBlock(…, 2) calls in HorseRealmTerrain (portal, perimeter, ring
+      clearing) appear in no trace and were left alone. A fence relies on shape updates
+      to connect, so flag 16 is not a blanket fix there.
+    - No new issues filed.
+
+PROCEDURES
+
+    - review-server-logs step 3: added how to tally Cupboard "Trying to load chunk"
+      traces from the raw logs, .log.gz included (`zcat -f`). The exporter does not
+      carry them, and closing #13 depends on that tally.
+    - fix-bug and whats-next ran as written. Nothing else changed.
+
+NOT RUN / NOT CHECKED
+
+    - The full :common:test suite. Nothing in common/ changed, so it checks nothing
+      this session moved.
+    - Nothing was seen in game. The hunger, portal and glow guards are proven by
+      reading only. Only the lift has a test. The pool fix is the same flag change on
+      the same mechanism.
+    - No Verification-tab anchors were added. The open check is issue #13 itself.
+
+RELEASE
+
+    Due: the Chaos allele, the breed climate rule, the #11 fix, and now #13. It was held
+    only for #13, which is now in, so nothing is holding it.
+
+PICK UP FIRST: /release for the next patch (it carries #13's fix to the live server),
+then /review-server-logs on the 2026-10-01 export.
