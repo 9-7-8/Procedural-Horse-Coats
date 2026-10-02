@@ -157,7 +157,7 @@ public final class NightBehaviourHandler {
         if (level.isClientSide() || !horse.isAlive()) {
             return;
         }
-        if (horse.tickCount % SCAN_INTERVAL != 0) {
+        if ((horse.tickCount + horse.getId()) % SCAN_INTERVAL != 0) {
             return;
         }
         scan(horse, level);

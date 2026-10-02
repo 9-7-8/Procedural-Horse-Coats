@@ -124,7 +124,24 @@ public final class HorseAbilities {
      * actually was.
      */
     public static boolean anyLoaded() {
-        for (Gene gene : Genes.codeOrder()) {
+        // Kept against the list it was read from (2026-10-02): Genes swaps in a new immutable list on every
+        // (re)load, so identity says when to look again. Uncached, this walked the gene list for every horse every
+        // tick - from the travel mixin through HorseFlight.of - and was ~1.6% of a thousand-horse server alone.
+        List<Gene> order = Genes.codeOrder();
+        if (order == anyLoadedFor) {
+            return anyLoadedValue;
+        }
+        boolean value = scan(order);
+        anyLoadedValue = value;
+        anyLoadedFor = order;
+        return value;
+    }
+
+    private static volatile List<Gene> anyLoadedFor;
+    private static volatile boolean anyLoadedValue;
+
+    private static boolean scan(List<Gene> order) {
+        for (Gene gene : order) {
             if (gene instanceof AbilityContribution || gene instanceof EpigeneticAbilityContribution) {
                 return true;
             }

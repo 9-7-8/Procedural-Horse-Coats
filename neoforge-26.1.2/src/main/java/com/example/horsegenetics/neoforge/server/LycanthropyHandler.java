@@ -141,7 +141,10 @@ public final class LycanthropyHandler {
             return;
         }
         if (entity instanceof Horse horse) {
-            if ((horse.tickCount + horse.getId()) % SUN_CHECK_INTERVAL == 0 && level.isDarkOutside()) {
+            // GenomeFacts first (2026-10-02): shift() parses the whole genotype and epigenome, and it ran for every
+            // horse in the world each check after dark - 12.9% of a thousand-horse server - to find the locus wild.
+            if ((horse.tickCount + horse.getId()) % SUN_CHECK_INTERVAL == 0 && level.isDarkOutside()
+                    && GenomeFacts.lycanCarrier(horse)) {
                 shift(horse, level);
             }
             return;
@@ -149,7 +152,7 @@ public final class LycanthropyHandler {
         if (!(entity instanceof Mob animal)) {
             return;
         }
-        LycanShift shift = animal.getData(ModAttachments.LYCAN_SHIFT.get());
+        LycanShift shift = shiftOf(animal);
         if (!shift.active()) {
             return;
         }
@@ -521,7 +524,7 @@ public final class LycanthropyHandler {
         if (!(animal.level() instanceof ServerLevel level)) {
             return;
         }
-        LycanShift shift = animal.getData(ModAttachments.LYCAN_SHIFT.get());
+        LycanShift shift = shiftOf(animal);
         if (!shift.active()) {
             return;
         }
@@ -584,7 +587,7 @@ public final class LycanthropyHandler {
         if (!(event.getEntity() instanceof Mob animal) || animal.level().isClientSide()) {
             return;
         }
-        if (!animal.getData(ModAttachments.LYCAN_SHIFT.get()).active()) {
+        if (!shiftOf(animal).active()) {
             return;
         }
         if (!(event.getSource().getEntity() instanceof LivingEntity attacker) || attacker == animal) {
@@ -610,7 +613,7 @@ public final class LycanthropyHandler {
             return;
         }
         if (event.getEntityBeingMounted() instanceof Mob animal
-                && animal.getData(ModAttachments.LYCAN_SHIFT.get()).active()) {
+                && shiftOf(animal).active()) {
             event.setCanceled(true);
         }
     }
@@ -625,7 +628,7 @@ public final class LycanthropyHandler {
         if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob animal)) {
             return;
         }
-        if (animal.getData(ModAttachments.LYCAN_SHIFT.get()).active()) {
+        if (shiftOf(animal).active()) {
             addTemper(animal);
         }
     }
@@ -654,5 +657,17 @@ public final class LycanthropyHandler {
             horse.saveWithoutId(out);
             return out.buildResult();
         }
+    }
+
+    /**
+     * <b>A mob's shift, without giving it one</b> (2026-10-02). NeoForge's {@code getData} stores the default when the
+     * attachment is missing, and this attachment always serialises - so reading it with {@code getData} from the
+     * every-mob tick and from {@code rewireOnJoin} wrote a {@code horsegenetics:lycan_shift} entry into the save of
+     * every mob in every world that ever loaded, wolves and zombies and all, and kept it on the tick for ever. A mob
+     * that is not a shifted horse now reads {@link LycanShift#NONE} and carries nothing.
+     */
+    private static LycanShift shiftOf(Mob animal) {
+        LycanShift shift = animal.getExistingDataOrNull(ModAttachments.LYCAN_SHIFT.get());
+        return shift == null ? LycanShift.NONE : shift;
     }
 }

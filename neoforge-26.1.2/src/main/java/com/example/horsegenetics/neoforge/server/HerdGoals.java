@@ -125,10 +125,10 @@ public final class HerdGoals {
 
         @Override
         public boolean canUse() {
-            if (!free(horse) || horse.isBaby() || !HorseRecords.of(horse).entire()
-                    || !(horse.level() instanceof ServerLevel level)) {
+            if (!free(horse) || horse.isBaby() || !(horse.level() instanceof ServerLevel level)) {
                 return false;
             }
+            // A bout is only ever struck between two entire stallions (below), so a horse in one needs no re-check.
             Bout bout = BOUTS.get(horse.getUUID());
             if (bout != null) {
                 partner = loaded(horse, bout.a().equals(horse.getUUID()) ? bout.b() : bout.a());
@@ -138,6 +138,11 @@ public final class HerdGoals {
                 return false;
             }
             checkCooldown = HerdSocialHandler.SCAN;
+            // entire() reads the sex off the genetic code - a string scan. It used to run before the cooldown, so
+            // every adult horse in the world paid it every other tick (2026-10-02, stress audit); now once a SCAN.
+            if (!HorseRecords.of(horse).entire()) {
+                return false;
+            }
             if (horse.getRandom().nextDouble() >= HerdRules.perScan(HerdRules.SPARS_PER_PAIR_PER_DAY, HerdSocialHandler.SCAN)) {
                 return false;
             }
@@ -653,10 +658,16 @@ public final class HerdGoals {
                 return;
             }
             horse.getLookControl().setLookAt(partner, 30.0F, 30.0F);
-            if (horse.getNavigation().isDone()) {
+            // Not every tick (2026-10-02, the stress run: 5.8% of a breeding thousand-horse server). A partner the
+            // pathfinder cannot reach - the 2x2 start-node problem against a wall, #23 - leaves the navigation done
+            // at once, and this asked for a fresh A* search on the very next tick, for as long as the heat lasted.
+            if (horse.getNavigation().isDone() && --repathCooldown <= 0) {
+                repathCooldown = 10;
                 horse.getNavigation().moveTo(partner, 1.0);
             }
         }
+
+        private int repathCooldown;
 
         @Override
         public void stop() {

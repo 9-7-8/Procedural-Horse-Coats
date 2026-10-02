@@ -350,8 +350,17 @@ public final class GeneAbilityHandler {
             case "multiply_total" -> AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
             default -> AttributeModifier.Operation.ADD_VALUE;
         };
-        instance.addOrUpdateTransientModifier(
-                new AttributeModifier(attributeModifierId(geneKey, mod.attribute(), copy), mod.amount(), op));
+        Identifier id = attributeModifierId(geneKey, mod.attribute(), copy);
+        // NOT EVERY TICK (2026-10-02, the stress run). addOrUpdateTransientModifier compares the old modifier with
+        // the new one by REFERENCE and marks the attribute dirty when they differ - and a modifier built here is
+        // always a new object. So every horse with a held attribute ability (weather, climate, eyesight, fireproof)
+        // was dirty every tick: a recalculation, an attribute packet to every player tracking it every few ticks,
+        // and for scale a refreshDimensions. An identical modifier already on is left alone.
+        AttributeModifier on = instance.getModifier(id);
+        if (on != null && on.amount() == mod.amount() && on.operation() == op) {
+            return;
+        }
+        instance.addOrUpdateTransientModifier(new AttributeModifier(id, mod.amount(), op));
     }
 
     /**
@@ -428,7 +437,8 @@ public final class GeneAbilityHandler {
             if (instance == null) {
                 continue;
             }
-            for (AttributeModifier existing : List.copyOf(instance.getModifiers())) {
+            // getModifiers() already hands back a copy, so it is safe to remove while walking it - no second copy.
+            for (AttributeModifier existing : instance.getModifiers()) {
                 // ONLY THE MODIFIERS THIS SWEEP OWNS (2026-09-15). It used to take off every modifier in the mod's
                 // namespace that no gene asked for - including ReproHandler's repro/late_pregnancy, which it put on
                 // every 40 ticks and this took off on the next gene tick. A heavily pregnant mare in the yard's

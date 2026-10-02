@@ -59,8 +59,19 @@ public class AvoidCartGoal<T extends AbstractDrawnEntity>
         this(pathfinderMob, class_, livingEntity -> true, f, d, predicate);
     }
 
+    /**
+     * Calls of {@link #canUse} left before the next look (2026-10-02). The goal selector asks every other tick, and
+     * each ask was an entity search round every mob carrying this goal - 2% of a thousand-horse server's time, in a
+     * world with no cart in it. One look in ten: a cart is noticed up to about a second later.
+     */
+    private int lookCooldown;
+
     @Override
     public boolean canUse() {
+        if (--this.lookCooldown > 0) {
+            return false;
+        }
+        this.lookCooldown = 10;
         List<? extends AbstractDrawnEntity> entityList = this.mob.level().getEntitiesOfClass(this.avoidClass, this.mob.getBoundingBox().inflate(this.maxDist, 3.0, this.maxDist), entity -> true);
         this.toAvoid = CartTargetingUtil.getNearestEntity(entityList, this.avoidEntityTargeting, this.mob, this.mob.getX(), this.mob.getY(), this.mob.getZ());
         if (this.toAvoid == null) {

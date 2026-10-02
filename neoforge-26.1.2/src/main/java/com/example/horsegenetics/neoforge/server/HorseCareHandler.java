@@ -177,11 +177,15 @@ public final class HorseCareHandler {
         HorseCareAttachment before = horse.getData(ModAttachments.HORSE_CARE.get());
         HorseCareAttachment after = before;
 
-        // --- herds: every horse ---
-        List<AbstractHorse> nearbyHorses = level.getEntitiesOfClass(AbstractHorse.class,
-                horse.getBoundingBox().inflate(HERD_RADIUS),
-                h -> h != horse && h.isAlive());
-        after = updateHerd(horse, after, nearbyHorses);
+        // --- herds: every horse that keeps its own herd ---
+        // The wild-herd and branded test is updateHerd's own first line; asked here too, BEFORE the search, because
+        // those horses - most horses in a world - threw the radius-10 result away unread (2026-10-02, stress audit).
+        if (!after.inWildHerd() && !horse.getData(ModAttachments.COWBOY_BRAND.get()).isBranded()) {
+            List<AbstractHorse> nearbyHorses = level.getEntitiesOfClass(AbstractHorse.class,
+                    horse.getBoundingBox().inflate(HERD_RADIUS),
+                    h -> h != horse && h.isAlive());
+            after = updateHerd(horse, after, nearbyHorses);
+        }
 
         // --- bond decay: one point a Minecraft day, down to a floor (owner, 2026-09-24).
         // Charged for every whole day since the last stamp rather than ticked, so a

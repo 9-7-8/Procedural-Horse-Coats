@@ -168,6 +168,14 @@ public final class PortalEventHandler {
             return;
         }
 
+        // The cheap half of the horse rule below, asked BEFORE the block reads (2026-10-02, stress audit): every
+        // horse in the world ran portalBlockUnder every tick only to be turned away here for not being escorted.
+        // Same outcome - a horse not already dwelling and not escorted keeps no timer either way.
+        if (!isPlayer && !DWELL.containsKey(id) && !escorted(entity)) {
+            LAST_COUNTDOWN.remove(id);
+            return;
+        }
+
         BlockPos at = portalBlockUnder(level, entity);
         if (at == null) {
             DWELL.remove(id);
