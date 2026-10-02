@@ -384,6 +384,20 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue JOCKEY_PASS_DAYS;
 
     /**
+     * <b>What the horse browser's Send home button costs.</b> An item id and a
+     * count per trip; blank, or a count of 0, is free - the default. A price
+     * replaces tickets for the button. See {@code common/care/SendHome} and
+     * {@code server/StallRecall}.
+     */
+    public static final ModConfigSpec.ConfigValue<String> SEND_HOME_PAYMENT_ITEM;
+
+    /** How many of {@link #SEND_HOME_PAYMENT_ITEM} one trip takes. */
+    public static final ModConfigSpec.IntValue SEND_HOME_PAYMENT_COUNT;
+
+    /** Seconds between two Send home trips by one player; 0 is off. */
+    public static final ModConfigSpec.IntValue SEND_HOME_COOLDOWN_SECONDS;
+
+    /**
      * <b>What a Chaos allele may never name.</b> The three mob loci each have one
      * {@code Cha} allele standing in for every modded mob ({@code server/ChaosRoster});
      * these take a whole mod, or one mob, off all three lists. Default is
@@ -737,6 +751,32 @@ public final class ServerConfig {
                         "Feeding a second pass ADDS another of these rather than replacing",
                         "what is left, so a three-day meeting is three passes.")
                 .defineInRange("behaviour.jockey_pass_days", 1, 1, 365);
+        SEND_HOME_PAYMENT_ITEM = builder
+                .comment("What the horse menu's Send home button costs per trip, as an item id. (default: \"\")",
+                        "Empty - the default - makes the button free: it sends a horse to its stall,",
+                        "or your holding pen if it has none, from any world and out of a stasis",
+                        "chamber, with nothing spent. Name any item, vanilla or modded, such as",
+                        "\"minecraft:emerald\", and each trip takes behaviour.send_home_payment_count",
+                        "of it. A trip that is refused takes nothing.",
+                        "A price REPLACES tickets for the button; it never charges both. Tickets and",
+                        "whistles still move a horse from the world with no menu, and the button's",
+                        "tooltip and refusal say so.",
+                        "An id that is not a registered item is logged once and treated as free.",
+                        "Server-side; clients read the synced value only to label the button.")
+                .define("behaviour.send_home_payment_item", "",
+                        o -> o instanceof String s && (s.isBlank()
+                                || net.minecraft.resources.Identifier.tryParse(s.trim()) != null));
+        SEND_HOME_PAYMENT_COUNT = builder
+                .comment("How many of behaviour.send_home_payment_item one Send home trip takes. (default: 1)",
+                        "0 makes the button free whatever item is named.")
+                .defineInRange("behaviour.send_home_payment_count", 1, 0, 64);
+        SEND_HOME_COOLDOWN_SECONDS = builder
+                .comment("Seconds a player waits between two Send home trips. (default: "
+                                + com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS + ")",
+                        "Per player, not per horse, and started only by a trip that happened - a",
+                        "refusal never starts it. 0 turns it off.")
+                .defineInRange("behaviour.send_home_cooldown_seconds",
+                        com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS, 0, 3600);
         CHAOS_EXCLUDE_MODS = builder
                 .comment("Mods whose mobs a Chaos allele may never name, by mod id. (default: [])",
                         "Lycanthropy, Leader of the pack and Spawner each have one Chaos allele that",
@@ -1056,6 +1096,29 @@ public final class ServerConfig {
             return JOCKEY_PASS_DAYS.get() * 24_000L;
         } catch (IllegalStateException notLoaded) {
             return 24_000L;
+        }
+    }
+
+    /**
+     * {@code behaviour.send_home_payment_item} and {@code _count}, safely, as
+     * one price. Read on the client too, for the button's label: a SERVER
+     * config is synced on connection, and before that lands this is free.
+     */
+    public static com.example.horsegenetics.common.care.SendHome.Price sendHomePrice() {
+        try {
+            return com.example.horsegenetics.common.care.SendHome.Price.of(
+                    SEND_HOME_PAYMENT_ITEM.get(), SEND_HOME_PAYMENT_COUNT.get());
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.SendHome.Price.FREE;
+        }
+    }
+
+    /** {@code behaviour.send_home_cooldown_seconds}, safely. */
+    public static int sendHomeCooldownSeconds() {
+        try {
+            return SEND_HOME_COOLDOWN_SECONDS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS;
         }
     }
 

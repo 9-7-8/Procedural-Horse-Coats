@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
-import com.example.horsegenetics.common.progress.ProgressTask;
+import com.example.horsegenetics.common.care.SendHome;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity;
 import com.example.horsegenetics.neoforge.data.HorseWhereabouts;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
@@ -9,9 +10,7 @@ import com.example.horsegenetics.neoforge.data.StallData;
 import com.example.horsegenetics.neoforge.data.StallRecord;
 import com.example.horsegenetics.neoforge.data.StasisBankIndex;
 import com.example.horsegenetics.neoforge.data.StasisSnapshot;
-import com.example.horsegenetics.neoforge.item.HoldingPenTicketItem;
 import com.example.horsegenetics.neoforge.item.StasisChamberItem;
-import com.example.horsegenetics.neoforge.item.TicketItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -37,32 +36,39 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * <b>"Send home" from the horse browser.</b> One button per row of <i>My
- * horses</i>: spend a ticket, and the horse goes to its own stall, or to the
- * player's holding pen if it has no stall of its own.
+ * horses</i>: the horse goes to its own stall, or to the player's holding pen if
+ * it has no stall of its own.
  *
- * <h2>It is the ticket items' rules, not a second set</h2>
- * Everything about where a horse may be sent, where in a stall it lands and
- * what a landing failure means lives in {@link TicketHandler}, and this calls
- * into it rather than restating it. That matters because the two <i>look</i>
- * separable and are not: the stall is re-measured live at spend time, the tier
- * decides which worlds a ticket reaches, and a refusal has to leave the ticket
- * unspent. A second copy of any of those drifts, and the drift would be a horse
- * teleported into a wall.
+ * <h2>Free, from anywhere, unless the server sets a price</h2>
+ * The owner's call (2026-10-01): the button costs nothing by default and does
+ * not care which world the horse is in, because the destination is the horse's
+ * own stall. A server may name one item and a count per trip
+ * ({@code behaviour.send_home_payment_*}); that price then <b>replaces</b>
+ * tickets for the button, and tickets and whistles stay the way to move a horse
+ * with no menu. A short per-player cooldown starts on each trip that actually
+ * happened. The rules and the wording are {@link SendHome}; the inventory side
+ * is {@link SendHomePayment}. Before this, the button spent the cheapest ticket
+ * whose tier reached the horse's world.
+ *
+ * <h2>It is the ticket items' landing rules, not a second set</h2>
+ * Everything about where in a stall a horse lands and what a landing failure
+ * means lives in {@link TicketHandler}, and this calls into it rather than
+ * restating it. That matters because the two <i>look</i> separable and are not:
+ * the stall is re-measured live at send time, and a refusal has to leave the
+ * price unpaid. A second copy drifts, and the drift would be a horse teleported
+ * into a wall.
  *
  * <p>The one behaviour that is genuinely new is the <b>fallback</b>. Right-click
  * a written ticket on a horse with no stall and it refuses; this sends it to the
  * holding pen instead, because "put this horse somewhere sensible" is the whole
  * point of a button on a list of horses you cannot see.
- *
- * <h2>Which ticket is spent</h2>
- * The cheapest one in the player's inventory that can actually make the trip -
- * see {@link #chooseTicket}. A pen trip prefers an actual holding-pen ticket,
- * which is the purpose-made item and is not tier-limited.
  *
  * <h2>Horses that are not loaded</h2>
  * Which is most of them, and the reason the button is worth having - a horse you
@@ -78,7 +84,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * ended up. So that case branches early into {@link #fromChamber}, which finds
  * the chamber, takes the horse out of it <b>into its stall</b> and leaves the
  * empty jar where the full one was. It is the same rules downstream - the same
- * destination, the same live stall measure, the same ticket spend - because the
+ * destination, the same live stall measure, the same price - because the
  * only thing that differs is where the horse was before it travelled.
  */
 @EventBusSubscriber
@@ -95,6 +101,12 @@ public final class StallRecall {
     }
 
     private static final List<Pending> PENDING = new CopyOnWriteArrayList<>();
+
+    /**
+     * Each player's last successful send, in server ticks. Not saved: a restart
+     * forgiving a five-second wait is not worth a migration.
+     */
+    private static final Map<UUID, Long> LAST_SEND = new ConcurrentHashMap<>();
 
     private StallRecall() {
     }
@@ -117,13 +129,16 @@ public final class StallRecall {
             say(player, "That horse is dead.");
             return;
         }
-        // Cheap pre-check before pulling a chunk in for nothing. It cannot be
-        // the real check - the tier needed depends on which world the horse
-        // turns out to be in, which is not known until it loads - so the
-        // authoritative one is in send(), after it is in hand.
-        if (!holdsAnyTicket(player)) {
-            say(player, "You have no tickets. A written ticket sends a horse to its stall, "
-                    + "a holding pen ticket sends it to your pen.");
+        long wait = SendHome.cooldownLeft(LAST_SEND.getOrDefault(player.getUUID(), -1L),
+                server.getTickCount(), ServerConfig.sendHomeCooldownSeconds());
+        if (wait > 0) {
+            say(player, SendHome.cooldownLine(wait));
+            return;
+        }
+        // Cheap pre-check before pulling a chunk in for nothing. send() asks
+        // again once the horse is in hand, because the pack can change while a
+        // chunk loads.
+        if (!canPay(player, SendHomePayment.current())) {
             return;
         }
 
@@ -183,8 +198,8 @@ public final class StallRecall {
     // ------------------------------------------------------------------
 
     /**
-     * The horse is in hand. Work out where home is, find a ticket that reaches
-     * it, and hand the actual move to {@link TicketHandler}.
+     * The horse is in hand. Work out where home is, check the price, and hand
+     * the actual move to {@link TicketHandler}.
      */
     private static void send(ServerPlayer player, Horse horse) {
         MinecraftServer server = player.level().getServer();
@@ -212,9 +227,8 @@ public final class StallRecall {
             return;
         }
 
-        ItemStack ticket = chooseTicket(player, from.dimension(), home.dimension(), home.pen());
-        if (ticket == null) {
-            say(player, noTicketReason(from.dimension(), home.dimension()));
+        SendHomePayment.Charge charge = SendHomePayment.current();
+        if (!canPay(player, charge)) {
             return;
         }
 
@@ -227,13 +241,9 @@ public final class StallRecall {
         }
 
         TicketHandler.arrive(from, target, horse, landing, player);
-        if (!player.getAbilities().instabuild) {
-            ticket.shrink(1);
-        }
+        paid(player, charge);
         String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
         say(player, name + home.arrivedLine());
-
-        creditTicket(player, ticket);
     }
 
     // ------------------------------------------------------------------
@@ -244,8 +254,7 @@ public final class StallRecall {
      * <b>Where a horse belongs, and the three sentences that go with it.</b>
      *
      * <p>Its own stall first; the holding pen only when it has none. A horse with
-     * a stall is never sent to the pen, even if a pen ticket is the cheaper spend
-     * - the stall is where that horse belongs.
+     * a stall is never sent to the pen - the stall is where that horse belongs.
      *
      * <p>The wording travels with the destination rather than being chosen again
      * at each refusal, because there are now two callers - a horse standing in a
@@ -285,23 +294,6 @@ public final class StallRecall {
         return pen == null ? null : new Home(pen.dimension(), pen.signPos(), true);
     }
 
-    /** The checklist tasks a spent ticket ticks off, whichever path spent it. */
-    private static void creditTicket(ServerPlayer player, ItemStack ticket) {
-        HorseProgress.complete(player, ProgressTask.USE_TICKET);
-        if (ticket.getItem() instanceof HoldingPenTicketItem) {
-            HorseProgress.complete(player, ProgressTask.USE_PEN_TICKET);
-        } else if (ticket.getItem() instanceof TicketItem written) {
-            switch (written.tier()) {
-                case BOUND -> HorseProgress.complete(player, ProgressTask.USE_BOUND_TICKET);
-                case INTERDIMENSIONAL ->
-                        HorseProgress.complete(player, ProgressTask.USE_INTERDIMENSIONAL_TICKET);
-                default -> {
-                    // BASIC, already credited above
-                }
-            }
-        }
-    }
-
     // ------------------------------------------------------------------
     // Out of the bottle
     // ------------------------------------------------------------------
@@ -318,7 +310,7 @@ public final class StallRecall {
      * <b>before</b> {@link HorseStasisHandler#place} is called: the chamber is
      * found, the destination resolved, the horse {@link
      * HorseStasisHandler#restore restored} but not put down, the stall measured
-     * against that horse's real box, and the ticket chosen. Any of those failing
+     * against that horse's real box, and the price checked. Any of those failing
      * leaves the chamber exactly as full as it was, which is the same promise
      * {@code StasisChamberItem.useOn} makes.
      *
@@ -374,11 +366,8 @@ public final class StallRecall {
             say(player, home.noRoomLine());
             return;
         }
-        // The trip starts where the bottle is, not where the horse went in, and
-        // that is what the tier has to reach across.
-        ItemStack ticket = chooseTicket(player, chamber.dimension(), home.dimension(), home.pen());
-        if (ticket == null) {
-            say(player, noTicketReason(chamber.dimension(), home.dimension()));
+        SendHomePayment.Charge charge = SendHomePayment.current();
+        if (!canPay(player, charge)) {
             return;
         }
 
@@ -387,9 +376,7 @@ public final class StallRecall {
             return;
         }
         chamber.empty();
-        if (!player.getAbilities().instabuild) {
-            ticket.shrink(1);
-        }
+        paid(player, charge);
         target.sendParticles(ParticleTypes.PORTAL, landing.x, landing.y + 0.8, landing.z,
                 24, 0.4, 0.6, 0.4, 0.2);
         target.playSound(null, landing.x, landing.y, landing.z, SoundEvents.ENDERMAN_TELEPORT,
@@ -398,7 +385,6 @@ public final class StallRecall {
         ActionTrace.log("stasis", snapshot.horseName() + " sent home out of a chamber "
                 + chamber.where() + " -> " + (home.pen() ? "holding pen" : "stall") + " at "
                 + home.signPos().toShortString());
-        creditTicket(player, ticket);
     }
 
     /**
@@ -473,79 +459,25 @@ public final class StallRecall {
     }
 
     // ------------------------------------------------------------------
-    // Tickets
+    // The price
     // ------------------------------------------------------------------
 
-    /**
-     * <b>The cheapest ticket that can actually make this trip</b>, or null when
-     * the player holds none that can.
-     *
-     * <p>A pen trip prefers a holding-pen ticket: it is the purpose-made item,
-     * and it is not tier-limited - {@code TicketHandler.sendToPen} reaches a pen
-     * from any world, which is deliberate, so it is always a legal spend.
-     *
-     * <p>Otherwise the written tickets are tried in <b>enum declaration
-     * order</b>, which is cheapest-first by construction - BASIC, BOUND,
-     * INTERDIMENSIONAL - and the first whose tier {@link TicketHandler#reaches}
-     * the destination wins. <b>That ordering is load-bearing</b>: reordering
-     * {@link TicketItem.Tier} would silently start spending the dearest ticket
-     * in a player's pocket.
-     */
-    private static @Nullable ItemStack chooseTicket(ServerPlayer player,
-                                                    ResourceKey<Level> from,
-                                                    ResourceKey<Level> to,
-                                                    boolean penTrip) {
-        Inventory inventory = player.getInventory();
-        ItemStack penTicket = null;
-        ItemStack[] byTier = new ItemStack[TicketItem.Tier.values().length];
-        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            ItemStack stack = inventory.getItem(slot);
-            if (stack.isEmpty()) {
-                continue;
-            }
-            if (stack.getItem() instanceof HoldingPenTicketItem) {
-                if (penTicket == null) {
-                    penTicket = stack;
-                }
-            } else if (stack.getItem() instanceof TicketItem written) {
-                int tier = written.tier().ordinal();
-                if (byTier[tier] == null) {
-                    byTier[tier] = stack;
-                }
-            }
+    /** Says the price and the alternatives when the player is short; spends nothing. */
+    private static boolean canPay(ServerPlayer player, SendHomePayment.Charge charge) {
+        if (SendHomePayment.canPay(player, charge)) {
+            return true;
         }
-        if (penTrip && penTicket != null) {
-            return penTicket;
-        }
-        for (TicketItem.Tier tier : TicketItem.Tier.values()) {
-            ItemStack candidate = byTier[tier.ordinal()];
-            if (candidate != null && TicketHandler.reaches(tier, from, to)) {
-                return candidate;
-            }
-        }
-        return null;
-    }
-
-    /** Is it worth pulling a chunk in at all? */
-    private static boolean holdsAnyTicket(ServerPlayer player) {
-        Inventory inventory = player.getInventory();
-        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            ItemStack stack = inventory.getItem(slot);
-            if (stack.getItem() instanceof TicketItem || stack.getItem() instanceof HoldingPenTicketItem) {
-                return true;
-            }
-        }
+        say(player, SendHome.cannotPayLine(charge.price(), charge.itemName(), SendHomePayment.alternatives()));
         return false;
     }
 
-    /** Says which ticket would have worked, rather than only that none did. */
-    private static String noTicketReason(ResourceKey<Level> from, ResourceKey<Level> to) {
-        if (!from.equals(to)) {
-            return "That horse is in another world. Only an interdimensional ticket reaches home from there.";
+    /** The trip happened: take the price and start the cooldown. */
+    private static void paid(ServerPlayer player, SendHomePayment.Charge charge) {
+        SendHomePayment.take(player, charge);
+        MinecraftServer server = player.level().getServer();
+        if (server != null) {
+            LAST_SEND.put(player.getUUID(), (long) server.getTickCount());
         }
-        return from.equals(Level.OVERWORLD)
-                ? "You have no ticket that reaches. A basic ticket would do this."
-                : "A basic ticket only works in the overworld. A bound ticket would do this.";
     }
 
     private static @Nullable Horse findLoaded(MinecraftServer server, UUID id) {

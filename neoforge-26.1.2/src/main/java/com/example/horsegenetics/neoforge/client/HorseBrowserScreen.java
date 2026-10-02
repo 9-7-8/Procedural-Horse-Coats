@@ -22,10 +22,11 @@ import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.item.HoldingPenTicketItem;
 import com.example.horsegenetics.neoforge.item.ModItems;
-import com.example.horsegenetics.neoforge.item.TicketItem;
 import com.example.horsegenetics.neoforge.menu.SpliceRecipeDisplay;
 import com.example.horsegenetics.neoforge.network.HorseLogRequestPayload;
 import com.example.horsegenetics.neoforge.network.HorseRecallPayload;
+import com.example.horsegenetics.neoforge.server.SendHomePayment;
+import com.example.horsegenetics.common.care.SendHome;
 import com.example.horsegenetics.neoforge.network.ClaimRealmHorsePayload;
 import com.example.horsegenetics.neoforge.network.HorseRosterRequestPayload;
 import com.example.horsegenetics.neoforge.network.RealmRosterRequestPayload;
@@ -1533,7 +1534,7 @@ public final class HorseBrowserScreen extends Screen {
             // and the more specific target has to win.
             HorseListing send = horseSendAt(event.x(), event.y());
             if (send != null) {
-                if (holdsTicket(showingRealm())) {
+                if (sendEnabled()) {
                     ClientPacketDistributor.sendToServer(showingRealm()
                             ? new ClaimRealmHorsePayload(send.id())
                             : new HorseRecallPayload(send.id()));
@@ -3816,7 +3817,7 @@ public final class HorseBrowserScreen extends Screen {
         g.enableScissor(l - 2, top, r + 2, bottom);
         // Once per frame, not once per row: the answer is the same for every
         // row and the scan walks the whole inventory.
-        boolean hasTicket = holdsTicket(showingRealm());
+        boolean hasTicket = sendEnabled();
         List<HorseListing> onScreen = new ArrayList<>();
         for (int i = horseScroll; i < horseRows.size() && i < horseScroll + horseVisibleRows(); i++) {
             HorseListing row = horseRows.get(i);
@@ -3935,10 +3936,12 @@ public final class HorseBrowserScreen extends Screen {
 
     /**
      * <b>Deliberately not disabled per row.</b> The only thing the client can
-     * honestly answer is "do you hold a ticket at all" - whether this horse has
-     * a stall, whether you have a holding pen, and whether the ticket you hold
-     * reaches the world the horse is in are all server-side facts, and two of
-     * them are about a horse this client has never seen.
+     * honestly answer is "can you pay at all": Send home is free unless the
+     * server set a price ({@link SendHomePayment}, read here from the synced
+     * server config), and the realm's Bring home wants a holding pen ticket.
+     * Whether this horse has a stall, whether you have a holding pen, and the
+     * cooldown are server-side facts, and some are about a horse this client
+     * has never seen.
      *
      * <p>So the button greys out on the one question it can answer and is live
      * otherwise, and every other refusal comes back from {@code StallRecall} as
@@ -3947,21 +3950,23 @@ public final class HorseBrowserScreen extends Screen {
      * getting it wrong in the direction that hides a button that would have
      * worked.
      */
-    private static boolean holdsTicket() {
-        return holdsTicket(false);
+    private boolean sendEnabled() {
+        if (showingRealm()) {
+            return holdsPenTicket();
+        }
+        LocalPlayer player = Minecraft.getInstance().player;
+        return player != null && SendHomePayment.canPay(player, SendHomePayment.current());
     }
 
     /**
-     * Any ticket, or specifically a holding pen one.
-     *
-     * <p>The realm tab asks for the narrow answer because it is the narrow item
-     * that pays: claiming a wild horse out of the field puts it in your
+     * A holding pen ticket - what the realm tab's Bring home spends, because it
+     * is the narrow item that pays: claiming a wild horse out of the field puts it in your
      * <i>pen</i>, and a stall ticket cannot do that - a horse nobody has ever
      * owned has no stall to be sent to. Greying the button is the honest
      * version of a refusal the server would otherwise have to make after the
      * click.
      */
-    private static boolean holdsTicket(boolean penOnly) {
+    private static boolean holdsPenTicket() {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
             return false;
@@ -3969,7 +3974,7 @@ public final class HorseBrowserScreen extends Screen {
         Inventory inventory = player.getInventory();
         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             Item item = inventory.getItem(slot).getItem();
-            if (item instanceof HoldingPenTicketItem || (!penOnly && item instanceof TicketItem)) {
+            if (item instanceof HoldingPenTicketItem) {
                 return true;
             }
         }
@@ -3990,7 +3995,8 @@ public final class HorseBrowserScreen extends Screen {
         g.fill(x, y, x + 1, y + h, BORDER);
         g.fill(x + w - 1, y, x + w, y + h, BORDER);
 
-        String label = showingRealm() ? "Bring home" : "Send home";
+        SendHomePayment.Charge charge = SendHomePayment.current();
+        String label = showingRealm() ? "Bring home" : SendHome.buttonLabel(charge.price(), charge.itemName());
         int textX = x + Math.max(2, (w - this.font.width(label)) / 2);
         drawFitted(g, label, textX, y + (h - this.font.lineHeight) / 2 + 1, w - 4,
                 enabled ? NAME : EXPR_OFF);
@@ -4007,14 +4013,10 @@ public final class HorseBrowserScreen extends Screen {
                         : "Spend a holding pen ticket to tame this horse and put it in your holding pen. "
                                 + "It keeps its name, its genes and its whole pedigree.";
             } else {
+                String alternatives = charge.free() ? "" : SendHomePayment.alternatives();
                 said = !enabled
-                        ? "You have no tickets. A written ticket sends a horse to its stall; "
-                                + "a holding pen ticket sends it to your pen."
-                        : inStasis
-                                ? "Spend a ticket to take this horse out of its stasis chamber and put it "
-                                        + "in its stall. The empty chamber is left where it was."
-                                : "Spend a ticket to send this horse to its stall - or to your holding pen, "
-                                        + "if it has no stall of its own.";
+                        ? SendHome.cannotPayLine(charge.price(), charge.itemName(), alternatives)
+                        : SendHome.tooltip(charge.price(), charge.itemName(), inStasis, alternatives);
             }
             g.setTooltipForNextFrame(Component.literal(said), mouseX, mouseY);
         }

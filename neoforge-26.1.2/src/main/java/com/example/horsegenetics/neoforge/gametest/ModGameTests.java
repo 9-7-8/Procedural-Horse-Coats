@@ -1408,6 +1408,92 @@ public final class ModGameTests {
         });
     }
 
+    /**
+     * <b>Send home is free by default, and a set price is all-or-nothing.</b>
+     *
+     * <p>The browser's button runs through {@code StallRecall}, which needs a
+     * {@code ServerPlayer} - and a gametest cannot make one without joining the
+     * player list (see {@link #VANILLA_LEAD_COMES_BACK}). So this drives the part
+     * that decides money, {@code SendHomePayment}, against a mock player's real
+     * inventory, and leaves the landing in a stall to the in-game check on
+     * wiki/horse-browser.html's Verification tab. The cooldown is pure arithmetic
+     * and pinned by {@code SendHomeTest}.
+     *
+     * <p>Asserted: this run's default config is free and lets an empty pack
+     * through; a price the pack cannot meet is refused <b>and takes nothing</b>;
+     * a price it can meet is taken exactly, across split stacks; a creative
+     * player is never charged; and an id naming no item is free rather than a
+     * lock-out.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SEND_HOME_PAYMENT =
+            TEST_FUNCTIONS.register("send_home_payment", () -> ModGameTests::sendHomePayment);
+
+    private static void sendHomePayment(GameTestHelper helper) {
+        com.example.horsegenetics.neoforge.server.SendHomePayment.Charge configured =
+                com.example.horsegenetics.neoforge.server.SendHomePayment.current();
+        if (!configured.free()) {
+            helper.fail("behaviour.send_home_payment_* sets a price in this run's server config, so the"
+                    + " free default is not what is being run - reset it rather than deleting the test");
+            return;
+        }
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.player.Inventory pack = player.getInventory();
+        pack.clearContent();
+        if (!com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(player, configured)) {
+            helper.fail("the free default refused a player with an empty pack");
+            return;
+        }
+
+        com.example.horsegenetics.neoforge.server.SendHomePayment.Charge emeralds =
+                com.example.horsegenetics.neoforge.server.SendHomePayment.resolve(
+                        com.example.horsegenetics.common.care.SendHome.Price.of("minecraft:emerald", 3));
+        if (emeralds.free() || emeralds.item() != Items.EMERALD) {
+            helper.fail("minecraft:emerald x3 did not resolve to a price in emeralds");
+            return;
+        }
+        pack.setItem(4, new ItemStack(Items.EMERALD, 2));
+        if (com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(player, emeralds)) {
+            helper.fail("two emeralds were accepted for a price of three");
+            return;
+        }
+        if (pack.countItem(Items.EMERALD) != 2) {
+            helper.fail("a refused price took something from the pack");
+            return;
+        }
+        pack.setItem(9, new ItemStack(Items.EMERALD, 5));
+        if (!com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(player, emeralds)) {
+            helper.fail("seven emeralds in two stacks were refused for a price of three");
+            return;
+        }
+        com.example.horsegenetics.neoforge.server.SendHomePayment.take(player, emeralds);
+        if (pack.countItem(Items.EMERALD) != 4) {
+            helper.fail("paying three of seven emeralds left " + pack.countItem(Items.EMERALD) + ", not 4");
+            return;
+        }
+
+        net.minecraft.world.entity.player.Player creative =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.CREATIVE);
+        creative.getInventory().clearContent();
+        // The mock's game type overrides isCreative() and nothing else; its
+        // abilities are a fresh survival set. instabuild is what the real game
+        // sets for creative and what every spend in this mod checks.
+        creative.getAbilities().instabuild = true;
+        if (!com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(creative, emeralds)) {
+            helper.fail("a creative player was asked to pay");
+            return;
+        }
+
+        com.example.horsegenetics.neoforge.server.SendHomePayment.Charge typo =
+                com.example.horsegenetics.neoforge.server.SendHomePayment.resolve(
+                        com.example.horsegenetics.common.care.SendHome.Price.of("minecraft:emerlad", 3));
+        if (!typo.free()) {
+            helper.fail("an id naming no item became a price nobody can pay, not free");
+            return;
+        }
+        helper.succeed();
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -1486,6 +1572,8 @@ public final class ModGameTests {
         // One bank filled and one button pressed twice, then five ticks for the
         // dropped chamber to be findable on the ground.
         register(event, environment, STASIS_BANK_EJECTS_EMPTIES, 100);
+        // Two mock players and a dozen inventory reads, all inside one tick.
+        register(event, environment, SEND_HOME_PAYMENT, 100);
     }
 
     /**
