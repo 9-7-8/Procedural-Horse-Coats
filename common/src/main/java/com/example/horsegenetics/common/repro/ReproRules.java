@@ -28,8 +28,18 @@ public final class ReproRules {
     /** However fertile the pair, a breeding is never a certainty. */
     public static final double MAX_CHANCE = 0.95;
 
-    /** Covers (or jar fills) a stallion makes in one day before his odds drop. */
-    public static final int FREE_COVERS_PER_DAY = 3;
+    /**
+     * Covers (or jar fills) a stallion makes in one day before his odds drop -
+     * unless the world says otherwise. The number a world actually plays with is
+     * {@link StallionDay#free()}, which the game module fills from
+     * {@code fertility.free_covers_per_day}; this is only the default.
+     */
+    public static final int DEFAULT_FREE_COVERS_PER_DAY = 3;
+    /**
+     * The highest a server may set the allowance to. Not a balance number: past
+     * any real day's covers it simply means "never tired".
+     */
+    public static final int MAX_FREE_COVERS_PER_DAY = 1_000;
     /**
      * What his odds are multiplied by once he is past them, on <b>every</b> path
      * - carrot, jar and natural cover alike.
@@ -240,11 +250,6 @@ public final class ReproRules {
     // ------------------------------------------------------------------
     // Conception
     // ------------------------------------------------------------------
-
-    /** A stallion's multiplier, given the covers he has already made today. */
-    public static double stallionFactor(int coversAlreadyToday) {
-        return coversAlreadyToday >= FREE_COVERS_PER_DAY ? TIRED_STALLION_FACTOR : 1.0;
-    }
 
     /**
      * The chance one breeding takes: the stage's base chance times everything

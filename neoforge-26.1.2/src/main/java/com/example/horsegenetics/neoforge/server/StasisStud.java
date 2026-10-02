@@ -234,7 +234,7 @@ public final class StasisStud {
         Rng rng = new NeoRng(level.getRandom());
         Conception.Result result = Conception.attempt(
                 StasisMating.mating(record, sireRecord, ""), repro, now, timing,
-                sireRepro.coversOn(now, timing.dayTicks()),
+                ServerConfig.stallionDay(sireRepro.coversOn(now, timing.dayTicks())),
                 ServerConfig.healthGeneticsActive(), ServerConfig.lethalsActive(), rng);
 
         // HER ONE TRY THIS HEAT IS SPENT EITHER WAY. That is what makes a bank a

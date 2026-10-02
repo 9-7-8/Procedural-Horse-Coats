@@ -157,6 +157,13 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue NEARBY_HORSE_CAP;
 
     /**
+     * <b>How many covers a stallion makes in a day before his odds halve.</b>
+     * Server-side for the same reason as {@link #NEARBY_HORSE_CAP}. See
+     * {@code common/repro/StallionDay}, which carries it to every rule that asks.
+     */
+    public static final ModConfigSpec.IntValue FREE_COVERS_PER_DAY;
+
+    /**
      * <b>Does an owner hear about their horse being hurt?</b> See
      * {@code server/HorseHurtNoticeHandler} for who is told and how often.
      */
@@ -506,6 +513,16 @@ public final class ServerConfig {
                 .defineInRange("fertility.nearby_horse_cap",
                         com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_CAP, 1,
                         com.example.horsegenetics.common.repro.ReproRules.MAX_NATURAL_CAP);
+        FREE_COVERS_PER_DAY = builder
+                .comment("How many covers a stallion makes in one day before his chance of getting",
+                        "a mare in foal is halved until tomorrow. (default: 3, range 0 to 1000)",
+                        "Natural covers, breeding carrots and seed-jar fills all count against it,",
+                        "and a mare prefers a stallion still under it. It is a taper, never a stop:",
+                        "a tired stallion still covers. 0 is always tired; 1000 is never.",
+                        "Server-side: a client cannot raise its own.")
+                .defineInRange("fertility.free_covers_per_day",
+                        com.example.horsegenetics.common.repro.ReproRules.DEFAULT_FREE_COVERS_PER_DAY, 0,
+                        com.example.horsegenetics.common.repro.ReproRules.MAX_FREE_COVERS_PER_DAY);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -851,6 +868,24 @@ public final class ServerConfig {
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_CAP;
         }
+    }
+
+    /** {@code fertility.free_covers_per_day}, safely. */
+    public static int freeCoversPerDay() {
+        try {
+            return FREE_COVERS_PER_DAY.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.repro.ReproRules.DEFAULT_FREE_COVERS_PER_DAY;
+        }
+    }
+
+    /**
+     * <b>A stallion's day, on this world's allowance</b> - the only way the game
+     * module hands a cover count to {@code common/}, so no caller can fall back
+     * to the default by forgetting the config.
+     */
+    public static com.example.horsegenetics.common.repro.StallionDay stallionDay(int coversToday) {
+        return new com.example.horsegenetics.common.repro.StallionDay(coversToday, freeCoversPerDay());
     }
 
     /** {@code realm.breeding_rate_percent}, safely. */

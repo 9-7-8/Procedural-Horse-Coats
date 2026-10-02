@@ -158,7 +158,7 @@ public final class StallionSeedJarHandler {
             }
         }
         stallion.resetLove(); // consume the breeding window, like a real pairing does
-        ReproHandler.recordCover(stallion); // a fill counts against his three a day
+        ReproHandler.recordCover(stallion); // a fill counts against his free covers (fertility.free_covers_per_day)
         ReproHandler.disarm(stallion);      // ...and his carrots left with the jar
         message(player, "Collected a seed sample from " + record.displayName() + ".");
         return true;

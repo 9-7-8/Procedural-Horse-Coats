@@ -7,6 +7,7 @@ import com.example.horsegenetics.common.repro.Conception;
 import com.example.horsegenetics.common.repro.Pregnancy;
 import com.example.horsegenetics.common.repro.ReproTiming;
 import com.example.horsegenetics.common.repro.Reproduction;
+import com.example.horsegenetics.common.repro.StallionDay;
 import com.example.horsegenetics.common.trait.MiscarriageSigns;
 import org.junit.jupiter.api.Test;
 
@@ -83,7 +84,7 @@ class ConceivableTest {
         int pregnancies = 0;
         int lost = 0;
         for (long seed = 0; seed < 3000; seed++) {
-            Optional<Pregnancy> p = Conception.attempt(mating, inHeat, peak, ReproTiming.STANDARD, 0,
+            Optional<Pregnancy> p = Conception.attempt(mating, inHeat, peak, ReproTiming.STANDARD, StallionDay.of(0),
                     true, true, new SeededRng(seed)).pregnancy();
             if (p.isPresent()) {
                 pregnancies++;

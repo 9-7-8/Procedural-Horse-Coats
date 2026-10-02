@@ -122,17 +122,17 @@ public final class ReproText {
      * a tired stallion gets the sentence that tells the breeder what it costs him
      * - otherwise the kit would report "5 of 3 covers made today".
      */
-    public static List<String> vetMale(String name, boolean adult, boolean gelded, int coversToday) {
+    public static List<String> vetMale(String name, boolean adult, boolean gelded, StallionDay day) {
         List<String> lines = new ArrayList<>();
         if (gelded) {
             lines.add(name + " is a gelding.");
         } else if (!adult) {
             lines.add(name + " is a colt, too young to breed.");
         } else {
-            lines.add(name + " is an entire stallion: " + coversToday
-                    + (coversToday == 1 ? " cover" : " covers") + " made today.");
-            if (coversToday >= ReproRules.FREE_COVERS_PER_DAY) {
-                lines.add("He is tired: past " + ReproRules.FREE_COVERS_PER_DAY
+            lines.add(name + " is an entire stallion: " + day.covers()
+                    + (day.covers() == 1 ? " cover" : " covers") + " made today.");
+            if (day.tired()) {
+                lines.add("He is tired: past " + day.free()
                         + " a day, his chance of getting a mare in foal is halved until tomorrow.");
             }
         }

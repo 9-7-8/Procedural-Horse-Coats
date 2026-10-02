@@ -153,8 +153,8 @@ class ReproRulesTest {
     void chanceIsCappedAndZeroStaysZero() {
         assertEquals(ReproRules.MAX_CHANCE, ReproRules.conceptionChance(0.8, 1.3, 1.0));
         assertEquals(0.0, ReproRules.conceptionChance(0.0, 5.0, 5.0));
-        assertEquals(0.4, ReproRules.conceptionChance(0.8, 1.0, ReproRules.stallionFactor(3)), 1e-9);
-        assertEquals(1.0, ReproRules.stallionFactor(2));
+        assertEquals(0.4, ReproRules.conceptionChance(0.8, 1.0, StallionDay.of(3).factor()), 1e-9);
+        assertEquals(1.0, StallionDay.of(2).factor());
     }
 
     @Test
@@ -223,7 +223,7 @@ class ReproRulesTest {
     void aMareOutOfHeatIsNotReceptiveAndNothingIsDrawn() {
         Reproduction mare = cycleStart();
         Conception.Result r = Conception.attempt(mating(Genotype.wildType(), Genotype.wildType()),
-                mare, DAY + 10, T, 0, true, true, new SeededRng(1));
+                mare, DAY + 10, T, StallionDay.of(0), true, true, new SeededRng(1));
         assertEquals(Conception.Outcome.NOT_RECEPTIVE, r.outcome());
         assertTrue(r.pregnancy().isEmpty());
     }
@@ -234,7 +234,7 @@ class ReproRulesTest {
         int n = 2000;
         for (long seed = 0; seed < n; seed++) {
             Conception.Result r = Conception.attempt(mating(Genotype.wildType(), Genotype.wildType()),
-                    cycleStart(), DAY * 3 / 4, T, 0, true, true, new SeededRng(seed));
+                    cycleStart(), DAY * 3 / 4, T, StallionDay.of(0), true, true, new SeededRng(seed));
             if (r.outcome() == Conception.Outcome.CONCEIVED) {
                 took++;
                 Pregnancy p = r.pregnancy().orElseThrow();
@@ -251,7 +251,7 @@ class ReproRulesTest {
         int took = 0;
         int n = 2000;
         for (long seed = 0; seed < n; seed++) {
-            if (Conception.attempt(mating(sf, Genotype.wildType()), cycleStart(), DAY * 3 / 4, T, 0, true, true,
+            if (Conception.attempt(mating(sf, Genotype.wildType()), cycleStart(), DAY * 3 / 4, T, StallionDay.of(0), true, true,
                     new SeededRng(seed)).outcome() == Conception.Outcome.CONCEIVED) {
                 took++;
             }
@@ -266,7 +266,7 @@ class ReproRulesTest {
         int twins = 0;
         for (long seed = 0; seed < 4000; seed++) {
             Optional<Pregnancy> p = Conception.attempt(mating(twTw, Genotype.wildType()), cycleStart(),
-                    DAY * 3 / 4, T, 0, true, true, new SeededRng(seed)).pregnancy();
+                    DAY * 3 / 4, T, StallionDay.of(0), true, true, new SeededRng(seed)).pregnancy();
             if (p.isPresent()) {
                 pregnancies++;
                 if (p.get().twins()) {
@@ -290,7 +290,7 @@ class ReproRulesTest {
         int identical = 0;
         for (long seed = 0; seed < 8000; seed++) {
             Optional<Pregnancy> p = Conception.attempt(mating(twTw, Genotype.wildType()), cycleStart(),
-                    DAY * 3 / 4, T, 0, true, true, new SeededRng(seed)).pregnancy();
+                    DAY * 3 / 4, T, StallionDay.of(0), true, true, new SeededRng(seed)).pregnancy();
             if (p.isEmpty() || !p.get().twins()) {
                 continue;
             }
@@ -313,7 +313,7 @@ class ReproRulesTest {
         int pregnancies = 0;
         int withLoss = 0;
         for (long seed = 0; seed < 3000; seed++) {
-            Optional<Pregnancy> p = Conception.attempt(mating(dam, sire), cycleStart(), DAY * 3 / 4, T, 0,
+            Optional<Pregnancy> p = Conception.attempt(mating(dam, sire), cycleStart(), DAY * 3 / 4, T, StallionDay.of(0),
                     true, true, new SeededRng(seed)).pregnancy();
             if (p.isEmpty()) {
                 continue;
@@ -336,7 +336,7 @@ class ReproRulesTest {
         AllelePair affected = new AllelePair(Genes.MET.variant, Genes.MET.variant);
         Genotype g = Genotype.wildType().with(affected);
         for (long seed = 0; seed < 200; seed++) {
-            Conception.attempt(mating(g, g), cycleStart(), DAY * 3 / 4, T, 0, true, false, new SeededRng(seed))
+            Conception.attempt(mating(g, g), cycleStart(), DAY * 3 / 4, T, StallionDay.of(0), true, false, new SeededRng(seed))
                     .pregnancy().ifPresent(p -> assertFalse(p.hasEarlyLoss()));
         }
     }

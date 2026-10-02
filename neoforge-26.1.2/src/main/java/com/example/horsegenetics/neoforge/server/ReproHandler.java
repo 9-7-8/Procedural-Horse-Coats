@@ -232,7 +232,7 @@ public final class ReproHandler {
         Conception.Mating mating = new Conception.Mating(mareGenome, mareRecord.lineage(),
                 sireGenome, sireRecord.lineage(), sireRecord.id(), sireRecord.firstName(), sireRecord.lastName(),
                 sireRecord.generation(), damBias, sireBias, bredBy);
-        Conception.Result result = Conception.attempt(mating, of(mare), now, t, covers,
+        Conception.Result result = Conception.attempt(mating, of(mare), now, t, ServerConfig.stallionDay(covers),
                 ServerConfig.healthGeneticsActive(), ServerConfig.lethalsActive(), HorseRecords.rng(mare));
 
         if (result.outcome() != Conception.Outcome.NOT_RECEPTIVE && liveSire != null) {
@@ -308,7 +308,8 @@ public final class ReproHandler {
         ReproTiming t = ServerConfig.reproTiming();
         Reproduction r = of(horse);
         if (record.sex() == Sex.MALE) {
-            return ReproText.vetMale(nameOf(horse), !horse.isBaby(), record.gelded(), r.coversOn(now, t.dayTicks()));
+            return ReproText.vetMale(nameOf(horse), !horse.isBaby(), record.gelded(),
+                    ServerConfig.stallionDay(r.coversOn(now, t.dayTicks())));
         }
         return ReproText.vetMare(nameOf(horse), !horse.isBaby(), r, now, t);
     }

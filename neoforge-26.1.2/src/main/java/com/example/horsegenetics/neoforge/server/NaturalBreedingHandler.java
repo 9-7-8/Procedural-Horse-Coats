@@ -36,7 +36,7 @@ import java.util.List;
  * ({@link ReproRules#COVER_HEALTH}), not ridden or leashed, no geldings, the
  * local cap, cowboy stock exempt - is {@link NaturalCover#decide}, which is
  * unit-tested. A stallion's day is not capped: past
- * {@link ReproRules#FREE_COVERS_PER_DAY} his odds halve and he keeps covering. The cover goes
+ * {@code fertility.free_covers_per_day} his odds halve and he keeps covering. The cover goes
  * through {@link ReproHandler#breed}, so carrot effects armed on either horse act
  * on it, and it is credited to the mare's owner. It runs off the entity tick, so it
  * only ever happens in loaded chunks. The heat-attraction goal
@@ -208,7 +208,7 @@ public final class NaturalBreedingHandler {
         List<NaturalCover.Stallion> candidates = new ArrayList<>(near.size());
         for (Horse h : near) {
             candidates.add(new NaturalCover.Stallion(party(h), h.distanceToSqr(mare),
-                    ReproHandler.of(h).coversOn(HorseRealmRepro.reproTime(h), t.dayTicks())));
+                    ServerConfig.stallionDay(ReproHandler.of(h).coversOn(HorseRealmRepro.reproTime(h), t.dayTicks()))));
         }
         NaturalCover.Crowd crowd = new NaturalCover.Crowd(level.getEntitiesOfClass(Horse.class,
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS),
