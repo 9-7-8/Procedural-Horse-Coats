@@ -20,7 +20,8 @@ BEFORE YOU START
 ----------------
 1. Find the value as it is today: the constant (ideally in common/), and every place
    that reads it.
-2. Read the convention on wiki/text/config.txt. It is a Roadmap page, not a key table.
+2. Read wiki/text/config.all.txt: the Gameplay tab is every key that exists
+   (generated), the Roadmap tab the server/client convention.
 
 STEPS
 -----
@@ -96,10 +97,10 @@ STEPS
    (fertility.html for the crowding cap, rider-comfort.html for leads, gene-lycan.html
    for Chaos). Give the key, the default, the range, server or client, and what it does
    to play, as a sentence on Gameplay and the detail on Coding. Add a Verification-tab
-   check, e.g. "turn it down to 3, and read the limit off the chat line". Rebake rows k
-   and i.
-   wiki/config.html has no key table today; do not start one in passing. Its Roadmap
-   tab plans the sweep.
+   check, e.g. "turn it down to 3, and read the limit off the chat line".
+   Then add the key to HOME in wiki/tools/bake-config-keys.mjs (the page#anchor you
+   just wrote) and run it: it writes the key table on wiki/config.html, and fails on a
+   key with no HOME. Never edit that table by hand. Rebake rows y, k and i.
 
 10. Finish with the build and end-session. A new option rides the next release
     (release, step 1). Under hard rule 10, its default must keep existing worlds behaving as
@@ -126,4 +127,4 @@ NEVER
 SEE ALSO
 --------
 launch-game (step 8, the boot); test-tiers; rebake; release; add-an-item;
-wiki/config.html (Roadmap: the convention sweep).
+wiki/config.html (Gameplay: every key, generated; Roadmap: the convention sweep).

@@ -39,7 +39,8 @@ window.HG.pages = {
                 { href: "villagers.html", text: "Villagers & transfer papers", kind: "core", views: ["gameplay","coding"] },
                 { href: "horse-realm.html", text: "The horse realm", kind: "core", views: ["gameplay","coding"] },
                 { href: "horse-dimension.html", text: "Hay portals & the horse dimension", kind: "core", views: ["gameplay","coding"] },
-                { href: "stables.html", text: "Generated stables", kind: "core", views: ["gameplay","coding"] }
+                { href: "stables.html", text: "Generated stables", kind: "core", views: ["gameplay","coding"] },
+                { href: "config.html", text: "Config: every setting", kind: "core", views: ["gameplay","coding"] }
             ]
         },
         {
@@ -125,10 +126,9 @@ window.HG.pages = {
            purpose: a reader looking under Items for a block that does not exist
            is being lied to. When the first piece of one ships, its page grows a
            Gameplay and a Coding tab and the entry MOVES to the section it now
-           belongs in - it does not get a second entry. Two of them are already
-           part-built and are here because their built half is documented
-           elsewhere: horse-browser.html (the H screen, on breeding.html) and
-           config.html (the options, nowhere yet). */
+           belongs in - it does not get a second entry. One of them is already
+           part-built and is here because its built half is documented
+           elsewhere: horse-browser.html (the H screen, on breeding.html). */
         {
             title: "Planned",
             items: [
@@ -136,7 +136,6 @@ window.HG.pages = {
                 { href: "block-preference.html", text: "Block preference", kind: "magical", views: ["coding"] },
                 { href: "cart-bench.html", text: "The cart and jump bench", kind: "core", views: ["coding"] },
                 { href: "chase-gene.html", text: "The chase gene", kind: "magical", views: ["coding"] },
-                { href: "config.html", text: "Config", kind: "core", views: ["coding"] },
                 { href: "curly-coat.html", text: "Curly coat", kind: "natural", views: ["coding"] },
                 { href: "forced-riding.html", text: "Forced riding: the kelpie", kind: "magical", views: ["coding"] },
                 { href: "horse-browser.html", text: "The horse browser", kind: "core", views: ["gameplay","coding"] },

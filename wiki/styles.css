@@ -282,6 +282,13 @@ tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: rgba(255,255,255,0.02); }
 td code, th code { white-space: nowrap; }
 
+/* config.html's generated key table (wiki/tools/bake-config-keys.mjs) */
+table.config-keys { min-width: 44rem; }
+table.config-keys td:nth-child(3) { white-space: nowrap; }
+table.config-keys td:nth-child(4) { min-width: 22rem; }
+table.config-keys a.config-home { font-size: 0.8rem; white-space: nowrap; }
+.config-keys-foot { color: var(--text-dim); font-size: 0.86rem; }
+
 /* a two-column "facts" table with no header */
 table.facts th {
     background: transparent;

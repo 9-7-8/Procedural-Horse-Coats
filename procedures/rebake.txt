@@ -213,6 +213,16 @@ STEPS
              id, a paint() call or a PAINTED entry disagrees.
       COMMIT N/assets/horsegenetics/textures/entity/horse/part_sheet.png
 
+   y. A config key: added, removed or renamed, or its default, bounds or comment
+      changed, in ServerConfig, ClientConfig, BreedSpawningConfig or carts/CartsConfig;
+      or a feature-page anchor a key's HOME points at moved
+      RUN    node wiki/tools/bake-config-keys.mjs (--check only reports), then row i.
+             It reads the builders' source, resolving constants from common/, and
+             fails on a key with no HOME entry in the script, a HOME anchor that does
+             not exist, or a define call it could not read. Add the HOME; never
+             hand-edit the table.
+      COMMIT wiki/config.html
+
    A row is missing if a derived, checked-in file has no row. Add the row here in the
    same change, never to CLAUDE.md.
 

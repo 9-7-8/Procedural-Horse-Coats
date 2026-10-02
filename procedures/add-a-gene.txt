@@ -222,8 +222,9 @@ STEPS
       AbilityType is on the spec/ row of rebake's table (row d), so run bakeSpecFixtures,
       then check-parity.mjs.
    6. Config: server keys in N/ServerConfig.java, each with a safe accessor and a
-      default. A bad value must never crash a world load. Document each key on
-      wiki/config.html.
+      default. A bad value must never crash a world load. Document each key on the
+      gene's page, give it a HOME in wiki/tools/bake-config-keys.mjs, and run that bake
+      (add-a-config-option step 9).
    7. Saved state: a new attachment goes in N/data/ModAttachments.java. Under rule 10,
       any change to an existing one ships with its migration and a test that loads the
       old shape.

@@ -15,7 +15,6 @@ or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on
 
 ------------------------------------------------------------------------------
 To do.txt                                                         sized 2026-10-02
-- Config key table on wiki/config.html (new bake row)            S  b  owner-free
 - Champagne foal eye blue-green until adult                      S-M a  owner-free (coat cache key)
 - Cutie-mark pool bias / four studbook kinds                     -  -  No: "needs a few more owner answers"
 - Procedure write-ups (compat-test, measure-worldgen,
