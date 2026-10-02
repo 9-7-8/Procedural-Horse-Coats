@@ -1,0 +1,59 @@
+Session hand-off - mythic scoping and probe-a-scope (2026-10-02)
+
+Written at the owner's request as a plain record of where the scoping session ended. It is a
+hand-off, not a treatment: nothing here is built or decided beyond what the files named below say.
+Delete it once the items under "Pick up first" are taken.
+
+What shipped (docs and procedures only; no game code, no build, no tests)
+-------------------------------------------------------------------------
+- intake/To do.txt: the section "Mythic breeds - features still to SCOPE" lists every unscoped
+  mythic-breed feature in priority order, one treatment each: wings; forced riding (kelpie) with
+  Block Preference; tails; ONE design call on immortality, rider protection and realm-night-journey
+  travel; fire breath; extra legs; extra heads; hide-a-bone (fish rear, webbed feet, rooster
+  foreparts); cloven hooves and hoof caps (claws, spurs); dragon-like mane shape; skinless coat;
+  human torso plus leg fins (Nuckelavee); poison/disease breath aura; Momentum Sprint; two- and
+  four-horse hitches. Optional: cloud-treading, purify water, non-land kelpie shapeshift. The
+  natural dapple gene is already listed. Breeds the audit marks READY need no scoping and go
+  through design-a-breed.
+- procedures/probe-a-scope.txt, its row in procedures/INDEX.txt and .claude/skills/probe-a-scope/
+  SKILL.md: probes the ONE treatment currently being scoped for unverified claims, vague wording,
+  silent decisions and risks, and always asks at least three questions with the question tool.
+  Never sweeps other treatments.
+- Probe results recorded in intake/Tufted lion tail - implementation treatment.txt (section
+  "Probe results"), all owner calls:
+    * hide the vanilla tail through NEW setupAnim overrides on HdHorseModel and HdBabyHorseModel
+      (neither overrides it today);
+    * default tail longer and much thinner than vanilla (about 18-20 long, 1-1.5 wide), final
+      numbers by eye in the yard;
+    * the lion tail fades with RiderFade like the other parts (check by eye that it looks right);
+    * later tail genes are separate genes and ALL DRAW; the vanilla tail hides if any carried tail
+      gene says so, one OR-ed rule in common/.
+  A later commit from another session (9506bac9) trimmed that treatment to a single tail gene;
+  read the treatment as it now stands before building.
+- Session log: wiki/session-log/d2026-10-02-1940-probe-a-scope-procedure.txt, entry at the top of
+  wiki/session-log.html.
+
+Mistake made, and how it was put right
+--------------------------------------
+The first probe run picked the Feathering treatment instead of the lion tail. The question round
+was rejected and discarded; nothing was recorded on Feathering. probe-a-scope now says to ask which
+treatment when more than one was edited this session.
+
+Still open or unchecked
+-----------------------
+- Feathering and the lion tail share one unknown, whether the coat's pixels can be read for a
+  leg or tail colour. Reading GeneticCoatTextureFactory.registerCoat shows the pixels exist as an
+  argb[] at bake time, so a small colour record can be taken there. Settle it once, in whichever
+  builds first, and do not build a second sampler. Not yet written into the Feathering file.
+- The tail hide, anchor offsets and rider fade are UNVERIFIED until built and seen in the yard.
+- The allele token "Lt" was not found under common/; still unverified against every token in genes/.
+- GitHub issue 15 (dead horses kept until the afterlife file reaches about 100 MB) is open and
+  waits for /fix-bug.
+- Nothing was built, so no tests ran; a full :common:test run would still check all of common/.
+
+Pick up first
+-------------
+1. Scope Wings with /write-intake-document, then run /probe-a-scope on it.
+2. The lion tail treatment is ready for /process-intake.
+3. Forced riding, then tails, then the one immortality / rider protection / realm travel design
+   call, are the next scoping items in that order.
