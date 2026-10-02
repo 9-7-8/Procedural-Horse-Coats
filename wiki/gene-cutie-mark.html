@@ -190,12 +190,33 @@
     differently.
 </p>
 
-<p class="muted">
-    Still open: which genes and breeds should bias the <strong>item pool</strong> (a
-    <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle icons), and
-    mark <em>colour</em> &mdash; a per-instance tint is not reachable through
-    <code>ItemStackRenderState.submit</code>, so it would need a custom render type.
-    <a href="decisions.html#decisions">Roadmap</a>.
+<h3 id="cutie-mark-policy">The pool may be biased; the colour stays (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled:</strong> genes and breeds may bias the <strong>item pool</strong> a mark
+    draws from (a <a href="gene-milk.html">milk</a> horse leaning toward bucket and bottle
+    icons). Mark <em>colour</em> is not worth a custom render type. A per-instance tint is not
+    reachable through <code>ItemStackRenderState.submit</code>, so marks keep their items&rsquo;
+    own colours. The pool bias is not built yet: <a href="#roadmap">Roadmap</a>.
+</p>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>Genes and breeds get to <strong>bias the item pool</strong> a cutie mark is drawn from, a milk horse toward buckets and bottles, with no change to mark colour.</p>
+</div>
+
+<h3 id="plan-pool-bias">A biased item pool (owner&rsquo;s call, 2026-10-01)</h3>
+<p>
+    A gene or a breed may weight which items a mark draws from. The milk horse leaning toward
+    bucket and bottle icons is the first case. Still needed: which genes and breeds carry a
+    bias, and where it is declared (a gene&rsquo;s <code>effects</code> block or the breed
+    file). Ask the owner both before building. Colour is out: the decision is above,
+    <a href="#cutie-mark-policy">on the Coding tab</a>.
 </p>
 
 </section>
@@ -207,14 +228,6 @@
     <span class="label">What needs verifying here</span>
     <p>Performance comes first &mdash; a paddock of <code>Cutmrk/Cutmrk</code> horses must not stutter, since <code>CutieMarkLayer</code> resolves up to six item models per horse per frame &mdash; then the emblem&rsquo;s placement, upright unmirrored icons, no block items, and a glow under any light allele.</p>
 </div>
-
-<h3 id="open-cutie-mark-policy">Cutie-mark content and colour remain unresolved</h3>
-<p>
-    The contribution hook and light gene are settled. The remaining design call is which genes
-    and breeds should bias the item pool, and whether per-instance colour is worth a custom
-    render type. A milk horse leaning toward bucket and bottle icons is one candidate; no pool
-    or colour rule should be added until that choice is made.
-</p>
 
 <h3 id="open-older-gene-cutie-mark">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>

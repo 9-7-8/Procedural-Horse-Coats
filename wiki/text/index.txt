@@ -61,6 +61,7 @@ wiki/breed-format.html#herd-shape	all	The shape of a founded herd
 wiki/breed-format.html#pull	all	Pull
 wiki/breed-format.html#size	all	Size
 wiki/breed-format.html#strain-stats	all	A strain that scores its own stats
+wiki/breed-format.html#studbook-kinds	all	Studbook kinds: decided, not yet in the format
 wiki/breed-format.html#where	all	Where a breed may come from
 wiki/breeding.html#H	coding	H. Client sync, the information screen, family tree
 wiki/breeding.html#breeding-debug	coding	Every draw, written down (dev builds)
@@ -517,6 +518,7 @@ wiki/gene-body-size.html#distribution	coding	A normal distribution, centred on a
 wiki/gene-body-size.html#gait	coding	It needed a rendering fix
 wiki/gene-body-size.html#inheritance	gameplay	Crossing two of them
 wiki/gene-body-size.html#only-size	coding	Deliberately size only
+wiki/gene-body-size.html#size-setting-decided	coding	The size setting compresses; the preview says what it is (owner, 2026-10-01)
 wiki/gene-body-size.html#table	coding	The combination table
 wiki/gene-body-size.html#wild	gameplay	Only heterozygotes are born wild
 wiki/gene-bracket.html#carrot	gameplay	Its gene carrot
@@ -578,6 +580,7 @@ wiki/gene-champagne.html#both-pigments	science	It dilutes both pigments, which i
 wiki/gene-champagne.html#breeds	science	Breeds and frequency
 wiki/gene-champagne.html#carrot	gameplay	Its gene carrot
 wiki/gene-champagne.html#eye	coding	The eye is the one thing about it that varies
+wiki/gene-champagne.html#foal-eyes-decided	coding	A champagne foal’s eye is blue-green (owner, 2026-10-01)
 wiki/gene-champagne.html#health	science	Health, build, performance
 wiki/gene-champagne.html#identity	science	Genetic identity
 wiki/gene-champagne.html#inheritance	gameplay	Crossing two of them
@@ -713,6 +716,7 @@ wiki/gene-crescents.html#inheritance	gameplay	Crossing two of them
 wiki/gene-crescents.html#layers	coding	What it paints
 wiki/gene-crescents.html#outcomes	gameplay	What it can come out as
 wiki/gene-cutie-mark.html#carrot	gameplay	Its gene carrot
+wiki/gene-cutie-mark.html#cutie-mark-policy	coding	The pool may be biased; the colour stays (owner, 2026-10-01)
 wiki/gene-cutie-mark.html#epigenetics	coding	Everything about the emblem is epigenetic
 wiki/gene-cutie-mark.html#inheritance	gameplay	Crossing two of them
 wiki/gene-cutie-mark.html#items	coding	The item pool
@@ -2851,6 +2855,7 @@ wiki/horse-body.html#notbuilt	all	What this is not
 wiki/horse-body.html#pull	all	Pulling ability, the one that is a score
 wiki/horse-body.html#reference-numbers	all	Why the reference’s percentages are not the numbers
 wiki/horse-body.html#resolve	all	One walk, one record
+wiki/horse-body.html#severity-stays-flat	all	Severity stays flat (owner, 2026-10-01)
 wiki/horse-body.html#units	all	What those numbers are in metres
 wiki/horse-body.html#verified	all	Verified
 wiki/horse-browser.html#log	gameplay	The Log tab — what has been happening to your horses
@@ -3148,6 +3153,7 @@ wiki/item-research-papers.html#topic	coding	Why it is strings, and where it norm
 wiki/item-research-papers.html#use	gameplay	What it does
 wiki/item-research-papers.html#verified	coding	Verified
 wiki/item-research-shelf.html#art-0929	coding	The block finally looks like itself
+wiki/item-research-shelf.html#filing-discovers	coding	Filing a paper discovers its gene (owner, 2026-10-01)
 wiki/item-research-shelf.html#furnace	coding	The copy runs on the block, like a furnace
 wiki/item-research-shelf.html#loop	gameplay	Where the papers come from
 wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each
@@ -3173,6 +3179,7 @@ wiki/item-splice-carrots.html#known	gameplay	Known Gene Splice — the targeted 
 wiki/item-splice-carrots.html#mark	gameplay	A splice that lands marks the foal
 wiki/item-splice-carrots.html#random	gameplay	Unknown Gene Splice — the random one
 wiki/item-splice-carrots.html#recipe-type	coding	The Known Gene Splice is a custom recipe type
+wiki/item-splice-carrots.html#splice-policy	coding	What a splice does to the next foal (owner, 2026-10-01)
 wiki/item-splice-carrots.html#themed	gameplay	The five themed splices
 wiki/item-splice-carrots.html#verified	coding	Verified
 wiki/item-stall-signs.html#art-0929	coding	Three signs that are three different drawings

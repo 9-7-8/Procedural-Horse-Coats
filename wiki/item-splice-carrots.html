@@ -138,6 +138,20 @@
     <a href="carrots.html">the carrot family page</a>.
 </p>
 
+<h3 id="splice-policy">What a splice does to the next foal (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled, and it is what the code already does.</strong> A splice carrot is made
+    from whatever allele <em>pair</em> its paper contributes. Feeding it makes the parent act,
+    for its next breeding only, as though it carried that pair. The parent&rsquo;s gamete for
+    the locus is drawn from the paper&rsquo;s pair instead of its own
+    (<code>GameteBias.substitutePairs</code>). So an <code>n/G</code> paper passes
+    <code>G</code> half the time and a <code>G/G</code> paper passes it every time, and the
+    other parent still decides what shows. The alternative was weighed and rejected:
+    guaranteeing the chosen allele reaches the foal whatever pair the paper names. The
+    theme and safety rules above are unchanged.
+</p>
+
 <h3 id="verified">Verified</h3>
 
 <p id="verified-splice-breeds">
@@ -206,14 +220,6 @@
     <span class="label">What needs verifying here</span>
     <p>Lineage labelling is the risk: a spliced foal should read <strong>&ldquo;Spliced (Breed)&rdquo;</strong>, keep it through a backcross, and be priced by the cowboy without counting toward his purebred string &mdash; after which the five themed recipes still have to craft into named carrots rather than raw lang keys.</p>
 </div>
-
-<h3 id="open-splice-policy">Deterministic parent-to-foal splice policy</h3>
-<p>
-    Confirm the policy before changing the recipe: a splice carrot may guarantee that the fed
-    parent&rsquo;s selected allele reaches the foal, while uncertainty remains only in whether the
-    other parent makes that allele visible. This is deliberately not a flat 25% roll, and the
-    existing theme and safety rules must remain intact if the policy changes.
-</p>
 
 <h3 id="open-performance-baseline">The performance carrot never makes a horse smaller or slower (NOT seen in a world)</h3>
 <p>

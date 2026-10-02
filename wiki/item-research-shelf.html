@@ -238,6 +238,35 @@
     two workstations read as a matched pair of furniture rather than two unrelated blocks.
 </p>
 
+<h3 id="filing-discovers">Filing a paper discovers its gene (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled:</strong> the shelf accepts a paper for a gene the player has not
+    discovered, and filing it <em>counts as</em> discovering that gene. Discovery never
+    refuses a paper. Filing is one more way to learn a gene, alongside the others. Today the
+    shelf never consults discovery, so it files anything but discovers nothing:
+    <a href="#roadmap">Roadmap</a>.
+</p>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>Filing a paper on the shelf is to <strong>discover its gene</strong> for the player who filed it.</p>
+</div>
+
+<h3 id="plan-filing-discovers">Filing discovers (owner&rsquo;s call, 2026-10-01)</h3>
+<p>
+    When a paper lands in the filing slot on the server, mark its gene discovered for the
+    player who put it there, through the same path the other discovery routes use, so the
+    gene database and recipe display update. Two things to settle while building: whether a
+    hopper or other automation feeding the shelf discovers anything (there is no player), and
+    whether the player is told. Why: <a href="#filing-discovers">the decision</a>.
+</p>
+
 </section>
 
 
@@ -259,13 +288,6 @@ list is five rows and is now much longer than it was, and the flat list was chos
 grouping under gene headings on the argument that it needed no new UI. If it is unusable,
 grouping is the alternative that was weighed and set aside, not a new idea.
 </div>
-
-<h3 id="open-research-shelf-policy">May an undiscovered gene be filed?</h3>
-<p>
-    Decide whether the shelf may accept and hand off a gene the player has not discovered, or
-    whether discovery must gate filing as well as the recipe display. This is a policy question,
-    not a defect in the shelf&rsquo;s storage logic.
-</p>
 
 <h3 id="open-older-item-research-shelf">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>

@@ -312,6 +312,40 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     <code>Attributes.SCALE</code> scales the model <em>and</em> the hitbox.
 </p>
 
+<h3 id="size-setting-decided">The size setting compresses; the preview says what it is (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled:</strong> turning the size setting off <em>compresses</em> body scale
+    toward 1.0 instead of flattening it. A Shire still stands visibly taller than a
+    Falabella, just less so. The horse designer cannot know a server&rsquo;s settings, so it
+    labels itself a <strong>genotype preview</strong> (&ldquo;server settings may
+    differ&rdquo;) and does not pretend to show the server&rsquo;s result. Today
+    <code>body.size=false</code> still holds every horse at exactly 1.0, so this is not
+    built yet: <a href="#roadmap">Roadmap</a>.
+</p>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>With <code>body.size</code> off, scale is to be <strong>compressed toward 1.0</strong> rather than flattened, and the horse designer is to label itself a genotype preview.</p>
+</div>
+
+<h3 id="plan-compress">Compress, don&rsquo;t flatten (owner&rsquo;s call, 2026-10-01)</h3>
+<p>
+    When <code>body.size</code> is false, map the resolved scale into a narrow band around 1.0
+    instead of writing 1.0. The setting exists so a big horse&rsquo;s hitbox does not
+    break stables and tack (see its comment in <code>ServerConfig</code>), so the band has to
+    stay small enough for that to hold. Measure it against a stable stall before choosing the
+    width. The key&rsquo;s comment and the config page change with it. The designer gets its
+    &ldquo;genotype preview; server settings may differ&rdquo; label, and so does
+    <code>CustomHorseSpawnScreen</code> if it shows scale (hard rule 5). Why:
+    <a href="#size-setting-decided">the decision</a>.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -325,14 +359,6 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     1.0&times; <em>without</em> switching the gene off, and that a 2&times; horse does not
     suffocate in an ordinary stable.</p>
 </div>
-
-<h3 id="open-body-size-setting">Body-size setting and preview truth</h3>
-<p>
-    Decide whether the breed-height setting flattens the scale range to 1.0 or compresses it
-    toward 1.0 while preserving a recognisable Falabella/Shire contrast. The designer preview
-    must either receive the server&rsquo;s body-size flag before drawing or identify itself as a
-    genotype-only model preview; it must not silently imply a different server result.
-</p>
 
 <h3 id="open-gene-body-size">Still open (NOT played)</h3>
 

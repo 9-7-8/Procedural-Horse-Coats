@@ -625,9 +625,19 @@ public interface GeneEpigenetics {
     So every locus is calibrated against the disorders that already ship &mdash; a
     survivable disorder costs 3 to 8 hearts&rsquo; worth, a lethal 11 to 18 &mdash; and
     the reference is used for the <em>ordering</em> of the disorders against each
-    other. If the severity model on
-    <a href="decisions.html#decisions">roadmap &sect;3</a> ever lands, it does not get to
-    inherit those percentages either.
+    other. If a severity model ever lands, it does not get to inherit those percentages
+    either.
+</p>
+
+<h3 id="severity-stays-flat">Severity stays flat (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled: <code>Condition</code> keeps the flat model.</strong> A locus is lethal at
+    birth, lethal at conception, or a flat heart reduction with stat multipliers. It does not
+    migrate to a magnitude plus an <code>EPISODIC</code>, <code>CHRONIC</code> or
+    <code>PROGRESSIVE</code> kind, and nothing ticks a horse&rsquo;s condition. A richer
+    model is scoped through intake only when a specific disorder needs one, and even then the
+    shipped disorders keep their calibrated values.
 </p>
 
 <h2 id="lethals">The two kinds of lethal</h2>
@@ -899,18 +909,6 @@ public interface GeneEpigenetics {
     <span class="label">What needs verifying here</span>
     <p>Nobody has ever raced the horse screen&rsquo;s new metre readout &mdash; ride a measured run and build a pillar to the printed jump height, because the <code>&times;43.17</code> constant behind it is unproven and the fit assumes body scale 1.0 &mdash; and a pregnancy lost to a lethal pairing must never name the gene in chat.</p>
 </div>
-
-<h3 id="open-condition-severity">Condition severity and onset remain unresolved</h3>
-<p>
-    The shipped health model is intentionally binary: a locus is lethal at birth, lethal at
-    conception, or a flat heart reduction. The richer disorder reference distinguishes health,
-    speed and jump effects from episodic, chronic and progressive onset. The open question is
-    whether to migrate <code>Condition</code> to a magnitude plus an
-    <code>EPISODIC</code>, <code>CHRONIC</code> or <code>PROGRESSIVE</code> kind, with a
-    future status tick reading it, or keep the current flat heart and stat multipliers. The
-    four disorders already shipped use the current model; their calibrated values must not be
-    replaced by the reference percentages merely because a richer model is considered.
-</p>
 
 <h3 id="stat-units-0918">Speed and jump in metres on the horse screen (2026-09-18, NOT played)</h3>
 
