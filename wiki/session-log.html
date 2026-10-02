@@ -22,11 +22,12 @@
 </p>
 <ul>
     <li><a href="session-log/d2026-10-01-1721-fix-chunk-loads-13.txt">2026-10-01 17:21
-        &mdash; <strong>#13: synchronous chunk loads</strong>: the realm lift and the realm
-        pool were loading the chunk next door on every edge write (neighbour shape updates).
-        They now write with flag 16, and a new gametest proves it. The hunger goal, portal
-        check and glow light no longer read unloaded chunks on a tick. #13 stays open until
-        the server's logs show the traces gone. Next: #14, then the patch release.</a></li>
+        &mdash; <strong>#13, realm backups, #14, and 0.5.038</strong>: horses and the realm no
+        longer force chunk loads (#13, open until the server's logs confirm); the horse realm is
+        backed up before any change that could lose horses, with <code>/horserealm restore</code>;
+        no armour for a mod that is not installed (#14); 0.5.038 released. A dev-server stop
+        killed the live server by mistake &mdash; process kills are now blocked by a hook and go
+        through <code>tools/stop-dev-java.ps1</code> only.</a></li>
     <li><a href="session-log/d2026-10-01-1650-fix-stable-breed-label.txt">2026-10-01 16:50
         &mdash; <strong>Fix #11, and a session-log procedure</strong>: a generated stable
         drew a horse's breed twice, so multi-breed stables labelled most horses with a breed

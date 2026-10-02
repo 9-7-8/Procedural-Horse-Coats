@@ -1,4 +1,5 @@
-2026-10-01 17:21 (end time) - #13: horse AI and the realm forcing synchronous chunk loads
+2026-10-01 17:21 (first end time; continued to 18:20) - #13, realm backups, the live-server
+guard, #14, and 0.5.038
 
 ASKED
 
@@ -9,6 +10,16 @@ ASKED
       Offered: fix #13 (recommended, last session's pick-up-first), review the server
       logs, fix #14, tuning #15.
     - Owner picked "Fix #13", which ran /fix-bug #13 and then end-session.
+    - "Before you do anything in the horse realm which could kill horses on a live server,
+      add a method that backs up their horse realm first, and can teleport/resurrect all
+      horses previously in the realm after the change is done." Three design calls asked
+      and answered (owner, all recommendations): back up the realm's entity files; take
+      backups automatically before each realm change plus a command; restore raises the
+      dead or lost, rescues the stuck, leaves the rest. Built: 152ef68c.
+    - "Killing the live server is a huge, major problem. Make sure that never happens
+      again." Built the guard: e40d1c18.
+    - "Commit it as it stands, then cut a new release following procedure", then, part way
+      through the release set: "Complete issue 14 and then create the release." Both done.
 
 DONE
 
@@ -41,6 +52,34 @@ DONE
       Issue #13: OPEN, waiting on the live server's logs once it runs the release
       carrying f9d604b1. The comment there names the frames that should be gone.
 
+    152ef68c  Back the horse realm up before changing it, and restore its horses after
+      RealmBackup copies the realm's entity region files after a flushing save, into
+      <world>/horsegenetics/realm-backups/ (newest 10 kept). Every realm change that could
+      lose horses is listed in RealmBackup.CHANGES (the floor lift today), backed up once
+      per world at server start, and does not run until RealmBackup.ready says so.
+      /horserealm backup | backups | restore [name] [confirm]; the per-horse decision is
+      common/realm/RealmRestore. Proof: RealmRestoreTest; gametest
+      realm_backup_raises_a_lost_horse (red with the raise disabled); a dev server boot
+      took the start-up backup cleanly. Not verified in game.
+
+    e40d1c18  Guard the live server: processes stop only through tools/stop-dev-java.ps1
+      See FOUND ON THE WAY. tools/stop-dev-java.ps1 is an allowlist (command line must
+      name this repo); .claude/hooks/guard-process-kill.mjs, registered in a new
+      .claude/settings.json, refuses every hand-written kill in Bash and PowerShell;
+      CLAUDE.md hard rule 12; launch-game, end-session, add-a-config-option and test-tiers
+      rewritten. Proof: pipe-tested against the exact command that caused it, live-tested
+      in both shells, and used for the release boot (left the live server alone).
+
+    fb54927e + bbbc5c12  Fix #14: no horse armour for a metal whose mod is not installed
+      MaterialScan.of drops a metal whose namespace is not a loaded mod (items are
+      registered before other mods' items exist, so the mod list is what can be asked);
+      the fingerprint moves, so cached packs rebuild; GeneratedArmour sells no armour that
+      nothing forges; each dropped armour id is aliased to iron horse armour for old saves
+      (unverified against a real save). Proof: MaterialScanTest.
+      aMetalWhoseModIsNotInstalledIsDropped, red with the filter off. Issue #14: CLOSED.
+
+    33569494  0.5.038 released - see RELEASE.
+
 DECIDED
 
     - #13 stays open until the server's logs show the traces gone, rather than closing
@@ -54,7 +93,21 @@ DECIDED
       destination, which the teleport loads anyway. Recorded in the code comments and
       the issue.
 
+    - Realm backup design: entity files, automatic plus a command, raise/rescue/leave
+      (owner). Automatic backups at server start rather than inside the lift, because the
+      lift and the decoration run mid-teleport where a flushing save is unsafe (made
+      without the owner; in RealmBackup's class doc).
+    - #14: "mod loaded" stands in for "item registered", and dropped armours alias to iron
+      (made without the owner; on the issue and wiki/compatibility.html#generated-installed).
+
 FOUND ON THE WAY
+
+    - I KILLED THE LIVE SERVER. Stopping a dev runServer, I matched Java command lines on
+      'nogui' and excluded the live server by a PID seen earlier. It had restarted under a
+      new PID; its command line also ends in 'nogui'. It was hard-killed at about 17:35
+      with three players on, last saved at 17:31. launch-game step 8b had said "kill the
+      --nogui java process". Someone restarted it. Answered by e40d1c18; it is now
+      impossible to repeat by hand from this repo.
 
     - My first version skipped clearLight on an unloaded chunk, which would have leaked
       light blocks. Caught on re-reading the diff before the commit, and reverted to an
@@ -65,6 +118,10 @@ FOUND ON THE WAY
     - No new issues filed.
 
 PROCEDURES
+
+    - launch-game, end-session, add-a-config-option, test-tiers: every kill step now goes
+      through tools/stop-dev-java.ps1 (e40d1c18). test-tiers tier 3 now records the
+      slowest classes of the 0.5.038 full run.
 
     - review-server-logs step 3: added how to tally Cupboard "Trying to load chunk"
       traces from the raw logs, .log.gz included (`zcat -f`). The exporter does not
@@ -82,9 +139,11 @@ NOT RUN / NOT CHECKED
 
 RELEASE
 
-    Due: the Chaos allele, the breed climate rule, the #11 fix, and now #13. It was held
-    for #13, which is now in. The owner then chose to fix #14 first and ship both together.
+    0.5.038 cut and published: https://github.com/9-7-8/Procedural-Horse-Coats/releases/tag/v0.5.038
+    (Chaos, the breed climate rule, realm backups, fixes #11 #13 #14), with the same note
+    at wiki/releases.html#v0-5-038. Release set green: tier-0 node checks, the full
+    :common:test (20m 54s), :neoforge-26.1.2:test, 25 gametests, seven browser checks, a
+    clean server boot.
 
-PICK UP FIRST: /fix-bug #14 (owner, at the end of this session: fix it before the
-release), then /release for the next patch, then /review-server-logs on the 2026-10-01
-export.
+PICK UP FIRST: /review-server-logs on the 2026-10-01 export - and, once the live server
+runs 0.5.038, tally its Cupboard chunk-load traces to close #13.
