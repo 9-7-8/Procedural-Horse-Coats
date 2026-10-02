@@ -115,7 +115,31 @@ public final class HorseTraits {
     public static final double MAGICAL_MIN_FACTOR = 0.1;
     public static final double MAGICAL_MAX_FACTOR = 10.0;
 
+    /**
+     * How far from 1.0 a horse may stand when a world switches body size off -
+     * see {@link #compressScale}. Measured, not picked: vanilla's horse is
+     * 1.6 tall with its eye at 1.52 (26.1.2 {@code EntityType.HORSE}), and a
+     * stall is a standing spot with two blocks of air ({@code StablePopulator}).
+     * The hitbox reaches the roof at 1.25 and the eye suffocates past 1.316, so
+     * 1.15 keeps the top at 1.84 and the eye at 1.75, with room to spare.
+     */
+    public static final double COMPRESSED_SCALE_BAND = 0.15;
+
     private HorseTraits() {
+    }
+
+    /**
+     * The scale a world with body size switched off gives the entity, in place
+     * of a flat 1.0 (owner, 2026-10-01): a Shire still stands taller than a
+     * Falabella, only less so. Squashed with a {@code tanh} rather than clamped,
+     * so the order is kept everywhere - two horses who differ in size still
+     * differ, even a magically doubled one and a merely large one - and a
+     * horse near 1.0 is barely moved. Never leaves
+     * {@code 1 +/- }{@link #COMPRESSED_SCALE_BAND}.
+     */
+    public static double compressScale(double scale) {
+        double w = COMPRESSED_SCALE_BAND;
+        return BASE_SCALE + w * Math.tanh((scale - BASE_SCALE) / w);
     }
 
     /**

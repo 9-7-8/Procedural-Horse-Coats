@@ -28,6 +28,7 @@ import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.neoforge.NeoRng;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.network.SpawnCustomHorsePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -1844,6 +1845,15 @@ public final class CustomHorseSpawnScreen extends Screen {
      *
      * <p>Only drawn when the horse is not ordinary size, so a screen with the
      * size locus untouched looks exactly as it did.
+     *
+     * <p>The number is the genotype's. When this world has {@code body.size}
+     * off it also prints what the horse will really stand at - the compressed
+     * scale - because this screen, unlike the wiki's horse designer, can know:
+     * {@link ServerConfig} is a SERVER config, synced to clients on connection
+     * (see {@code MountedMiningHandler}). The designer cannot, so it labels its
+     * number a genotype preview instead - a deliberate divergence (hard rule 5),
+     * noted on {@code wiki/horse-designer/js/gui.js} too. The preview model keeps
+     * the genotype's size either way: it is the genotype being designed.
      */
     private void drawSizeReadout(GuiGraphicsExtractor g, int x0, int x1, int y1) {
         double scale = previewTraits().scale();
@@ -1851,7 +1861,9 @@ public final class CustomHorseSpawnScreen extends Screen {
             return;
         }
         String text = String.format(java.util.Locale.ROOT, "size %.2fx", scale);
-        if (scale > PREVIEW_SCALE_CAP) {
+        if (!ServerConfig.bodySizeActive()) {
+            text += String.format(java.util.Locale.ROOT, " (%.2fx in this world)", HorseTraits.compressScale(scale));
+        } else if (scale > PREVIEW_SCALE_CAP) {
             text += " (preview capped)";
         }
         int colour = scale > 1.0 ? 0xFFE0C070 : 0xFF80B8D0;

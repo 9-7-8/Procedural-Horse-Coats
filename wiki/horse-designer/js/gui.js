@@ -668,10 +668,20 @@ window.HG = window.HG || {};
 
       // The size readout, centred under the preview - only when the horse is
       // not ordinary size, so an untouched screen looks exactly as it did.
+      // DELIBERATE DIVERGENCE (hard rule 5): it says "genotype", because this
+      // page cannot know a server's body.size setting, and a server with it off
+      // compresses every horse into 0.85-1.15 (owner, 2026-10-01). The game's
+      // screen can read that setting, so it prints the compressed scale instead -
+      // see drawSizeReadout in CustomHorseSpawnScreen.
       if (Math.abs(state.scale - 1) >= 0.005) {
-        var s = "size " + state.scale.toFixed(2) + "x";
-        centred(s, previewLeft(), previewRight(), vh - 41,
-          state.scale > 1 ? C_BIG : C_SMALL);
+        var s = "size " + state.scale.toFixed(2) + "x (genotype; servers may differ)";
+        var room = previewRight() - previewLeft() - 4;
+        var colour = state.scale > 1 ? C_BIG : C_SMALL;
+        if (widthOf(s) <= room) {
+          centred(s, previewLeft(), previewRight(), vh - 41, colour);
+        } else {
+          fitted(s, previewLeft() + 2, vh - 41, room, colour);
+        }
       }
     }
 

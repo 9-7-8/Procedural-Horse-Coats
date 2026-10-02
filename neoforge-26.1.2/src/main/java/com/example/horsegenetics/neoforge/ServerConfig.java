@@ -35,8 +35,11 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * scales the model <i>and</i> the hitbox from it. That second half is the catch:
  * a saddle, a lead, an arrow and a fence gap all meet a Falabella somewhere
  * other than where they meet a Percheron, and a player who would rather have
- * every horse fit the way vanilla horses fit can turn the size write off here.
- * Every horse then renders and collides at scale 1.0 while still carrying,
+ * every horse fit near the way vanilla horses fit can turn the size write off
+ * here. Every horse's scale is then compressed into 0.85-1.15
+ * ({@code HorseTraits.compressScale}) rather than flattened to 1.0 (owner,
+ * 2026-10-01), so a Shire still stands over a Falabella and every horse still
+ * fits a two-block stall, while still carrying,
  * showing and inheriting exactly the size alleles it always did - the info
  * panel and the paper both keep reporting what the genotype says, because that
  * has not changed.
@@ -99,7 +102,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * settings would be breeding different animals, and a horse traded between them
  * would change genotype on the way. All they govern is whether what a horse
  * <i>carries</i> is allowed to affect the horse standing in front of you. The
- * same is true of {@code body.size}: it gates one attribute write, not a gene.
+ * same is true of {@code body.size}: it shapes one attribute write, not a gene.
  */
 public final class ServerConfig {
 
@@ -429,8 +432,9 @@ public final class ServerConfig {
                 .comment("Whether the size loci actually resize the horse. (default: true)",
                         "  true  - a Falabella is genuinely small and a Percheron genuinely",
                         "          large: vanilla scales the model AND the hitbox from it.",
-                        "  false - every horse is rendered and collides at scale 1.0, so tack",
-                        "          and hitboxes sit exactly where vanilla puts them.",
+                        "  false - every horse's scale is compressed into 0.85-1.15: big",
+                        "          horses are still bigger, but every one fits a two-block",
+                        "          stall and tack and hitboxes sit near where vanilla puts them.",
                         "The size genes are registered, inherited and reported either way -",
                         "this only governs whether the resolved scale reaches the entity.",
                         "SERVER-SIDE: it moves hitboxes, so the server's answer is the one",
@@ -851,7 +855,7 @@ public final class ServerConfig {
 
     /**
      * <b>May the resolved body scale reach {@code Attributes.SCALE}?</b> False
-     * means every horse is the vanilla size - see the {@code body.size} section
+     * means every horse is compressed to near the vanilla size - see the {@code body.size} section
      * above for why a world would want that.
      */
     /** Safe read - falls back to the default if the config isn't loaded yet. */
