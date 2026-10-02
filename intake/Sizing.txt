@@ -202,3 +202,8 @@ Sheep horns and body genes - implementation treatment.txt   (LOWEST PRIORITY)   
 - Piece 2: quantitative layer: frame, muscle, size               M-L c No: which loci Open; the kind
 - Piece 3: callipyge parent-of-origin plan (Roadmap entry)       S  c  owner-free; the kind; with P1
 Built? No.
+
+------------------------------------------------------------------------------
+Wild horse turnover - implementation treatment.txt                sized 2026-10-02
+- One unit: 3-day wild lifetime (touched horses to the realm), cell top-up (<5 per 8x8-chunk cell)   L  c  owner-free; no Open needs the owner
+Built? No (no wild despawn, cell ledger or spawn stamp exists).
