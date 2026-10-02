@@ -12,3 +12,23 @@ Routines to write up as procedures (procedures/FORMAT.txt; then a row in procedu
 
 Genes:
 - Make a natural dapple gene. (No explicit dapple gene exists today: Shade is the bay-shade locus, and the nearest are Grey, Sooty and the data gene Scarab Dapple. Balius, in intake/Mythic breeds - gene audit.txt, is a dappled horse and wants one.)
+
+Mythic breeds - features still to SCOPE (one write-intake-document treatment each; source and breed lists: intake/Mythic breeds - gene audit.txt, biomes: intake/Mythic breeds - biome assignments.txt). In the audit's priority order, by how many breeds each unblocks:
+- Wings: feathered and dragon wings, by the researched elytra-mesh route (wiki/model-parts.html Roadmap tab). Unblocks Pegasus, Uchchaihshravas, Longma; optional for Tulpar, Buraq, Chollima, the Helios horses.
+- Forced riding, "the kelpie" (wiki/forced-riding.html Roadmap tab), with Block Preference for water. Unblocks Kelpie and Each-uisge; the Puca's wild journeys are its gentler variant.
+- Tails: a lion or tufted tail, a fish tail, a dragon or blade tail (model-parts.html Roadmap tab). For the Unicorn, Hippocampus, Qilin.
+- ONE design call on death and worlds: immortality (three meanings), rider protection, and realm or night-journey travel. Arion, Balius, Xanthus, Podarkes, Kyllaros, Phlogeus, Harpagos; Enbarr; Sleipnir, Buraq, Niamh's horse.
+- Fire breath (a flame attack that sets targets alight; today nothing does). Aithon, Konabos, Phobos. A cosmetic flame from the head works now.
+- Extra legs (Sleipnir's eight): part kinds that copy a leg bone and swing with it.
+- Extra heads (Uchchaihshravas's seven, or fewer).
+- Hide-a-bone, so a part of the vanilla horse can be removed: fish hindquarters and webbed forefeet (Hippocampus), rooster foreparts (Hippalektryon, with a beak, comb and talons).
+- Cloven hooves / hoof caps (and fetlock claws and spurs, dropped from the feet scope): Unicorn, Qilin.
+- A dragon-like mane shape (Longma): flame, frill or crest, beyond mane colour.
+- A skinless, exposed-flesh coat gene (Nuckelavee); cheap, a data-file coat gene.
+- A human torso on the horse's back, and fin-like leg appendages (Nuckelavee); the torso is very large, and the leg fins could reuse Feathering's per-leg anchors. Consider whether Nuckelavee is rideable at all.
+- A poison or disease breath aura (Nuckelavee); a small effects-block gene (Blight only kills growth today).
+- Momentum Sprint (wiki/momentum-sprint.html Roadmap tab): Chollima's defining feat, and the page also names Arion and Sleipnir.
+- Two- and four-horse hitches to one wagon (carts Roadmap): only the matched chariot teams (Arvakr and Alsvidr, the Horses of Helios, Lampos and Phaethon, the Irish pair) wait on it.
+- Optional, low priority: cloud-treading flight (gene-flying Roadmap tab, for a Pegasus on clouds); purify water (Unicorn); Kelpie shapeshifting into something other than a land animal.
+- Already on this list above: a natural dapple gene (Balius).
+- Not scoping, just building: the breeds the audit marks READY and READY-minus-a-design-call go through design-a-breed, one session per small group, using the biome file.
