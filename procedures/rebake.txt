@@ -124,8 +124,11 @@ STEPS
    k. Any Verification or Roadmap tab: added, deleted, or its summary sentence reworded
       RUN    node wiki/tools/bake-verification-index.mjs and
              node wiki/tools/bake-roadmap-index.mjs. Each hard-fails on a tab with no
-             summary box, rather than write an index that omits a page.
-      COMMIT wiki/verification.html, wiki/roadmap.html
+             summary box, rather than write an index that omits a page. Then
+             node wiki/tools/check-roadmap-execution.mjs: a page whose Roadmap tab
+             gained its first entry needs a row in roadmap-execution.html's coverage
+             table, with its lane and order taken from that entry (#19).
+      COMMIT wiki/verification.html, wiki/roadmap.html, wiki/roadmap-execution.html
 
    l. ProgressTask: a checklist task added, deleted or retitled
       RUN    node T/bake-advancements.mjs (a new task needs an icon in its ICON map
