@@ -94,12 +94,17 @@ brush of hair, the same colour as its own tail hair, swishing as the horse moves
 - Decided: rigid thin tail + tuft, boxes parented to the tail bone (owner). No chain in this piece.
 - Decided: colour sampled from the tail/mane hair patch (owner), so TailColorGene, stripes and prismtail
   show through it.
-- Recommended, not asked: the hide is driven from the render state in HdHorseModel.setupAnim (the
-  model is shared across horses and layers, so the visible flag must be SET FOR EVERY horse, true or
-  false, never left from the previous one).
+- Decided (owner, probe 2026-10-02): the hide is driven by a NEW setupAnim override on both HdHorseModel and
+  HdBabyHorseModel, reading the render state (the model is shared across horses and layers, so the visible
+  flag must be SET FOR EVERY horse, true or false, never left from the previous one). Read from the code:
+  neither model overrides setupAnim today (they inherit vanilla's), so this override is new work; the cart
+  models (ReaperModel, CargoCartModel) show the pattern of setting a .visible flag after super.setupAnim.
 - Recommended: a new anchor TAIL_BASE; PartKind LION_TAIL (one kind: a PartKind carries one anchor; it is
   not paired).
-- Open (building session): the exact thickness and length in model units; tune in the dev yard.
+- Decided (owner, probe): default size is LONGER and MUCH THINNER than the vanilla HD tail (3 wide, 14 long, 4
+  deep): about 18-20 long and 1-1.5 wide, with the tuft adding a few more units, reaching near the hock. The
+  epigenome varies length and tuft fullness around that. Open (building session): the final numbers, by eye in
+  the dev yard, recorded on the gene page; the target above is the start.
 Where the code lives:
 - common/: the gene (LionTailGene, alleles, expressionOf, isNatural() false, founder entry, label), the
   PartKind value and its switch cases, the generator (LionTailGenerator + a size class beside
@@ -152,6 +157,21 @@ Play checks: a newborn foal shows the tuft in place, tiny, no vanilla tail; it f
 with no pop.
 Docs: wiki/model-parts.html; the lion tail gene page.
 
+Probe results, 2026-10-02 (both apply to piece 1 and to every later tail)
+------------------------------------------------------------------------
+Decided (owner, probe 2026-10-02) - rider fade: the lion tail FADES like the other parts when a rider looks
+down (RiderFade, the same 25% floor and the same ClientConfig setting), for consistency. Consequence for the
+building session: the tail sits behind the rider, so check by eye that the fade is not odd (a half-visible tail
+while the rider looks down); if it is, report to the owner rather than quietly exempting it.
+Decided (owner, probe 2026-10-02) - clash with later tail genes: SEPARATE genes, ALL DRAW. Each future tail
+(blade, club, dragon, fish) is its own gene and its own PartKind; a horse that carries two draws both, and the
+vanilla tail is hidden if ANY carried tail gene says so. The lion tail's hide rule is therefore written as "this
+genotype hides the vanilla tail", one boolean per tail gene, OR-ed in common/ (not a lion-tail-only flag), so a
+second tail gene adds a term instead of changing this one. Visible overlap of two tails at one anchor is
+accepted. Open (building session): the OR-ed rule's home (GrownParts or a small helper), chosen so the second
+tail gene needs no change to HdHorseModel.
+
+
 Piece 3 (optional, not asked, Recommended to offer later) - A whipping tail
 ---------------------------------------------------------------------------
 What the player sees: the tail curves along its length as it swishes, instead of moving as one stiff rod.
@@ -178,7 +198,7 @@ C. How met: by spawning (founder frequency) and breeding; survival-reachable; no
    common/. Recommended: no feedback messages.
 D. Genetics: magical (owner), dominant tuft + wild (owner); alleles appended, never reordered; token must
    not clash with any existing token (check every allele token in genes/ before choosing; UNVERIFIED which
-   token is free; Recommended "Lt" / "n" if free). Epigenome numbers on the copy: length and tuft fullness
+   token is free; Recommended "Lt" / "n"; a search of common/ found no existing "Lt" token, still UNVERIFIED against the resource genes/ folder and every allele token). Epigenome numbers on the copy: length and tuft fullness
    (ranges set in the generator; Recommended). Not sex-linked, not lethal, no health effect. Shown on foals
    (owner). Rarity: rare and hand-seeded like antlers (owner), not in every breed's pool; starts near the antlers' share, tuned in the yard, expressing combinations
    in the founder table so there are no invisible carriers in the wild; tune in the yard. Both editors

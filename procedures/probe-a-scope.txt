@@ -1,0 +1,83 @@
+PROCEDURE  : Probe a scope
+COMMAND    : /probe-a-scope
+SAY        : "probe this scope", "probe the treatment", "what's unverified here",
+             "poke holes in this", "what are we missing"
+RUNS       : either (it only reads code and edits the one treatment being scoped)
+TAKES      : the ONE implementation treatment currently being written in intake/
+LEAVES     : that treatment with every vague point, risk and hidden decision either
+             settled by the owner, marked Recommended, or marked Open
+==============================================================================
+
+WHEN TO USE
+-----------
+Run it on the treatment you are in the middle of scoping, once its first draft exists
+and before it is called finished. It looks for what the draft leaves unsaid: unverified
+claims, vague wording, quiet decisions and problems nobody has met yet.
+It applies to THAT ONE treatment only. Never sweep other files in intake/ or the whole
+folder; they belong to other scopes. If it is not clear which treatment is in progress
+(more than one was edited this session, or none), ask which one, with the question tool.
+Not for writing a treatment from nothing (use write-intake-document), and not for a
+bug (use report-bug).
+
+BEFORE YOU START
+----------------
+Read the treatment in full. Read wiki/text/philosophy.txt and wiki/text/decisions.txt,
+and the wiki/text/ page of every system the treatment names. Reading is required;
+changing code, wiki or any other intake file is not allowed.
+
+STEPS
+-----
+1. Collect findings in four lists, as you read:
+   a. UNVERIFIED: every claim about existing code, an API or a file that the treatment
+      states as fact. Check each against the source (grep or Explore agent). Mark what
+      you confirmed, what is wrong, and what you could not check. Anything about a
+      Minecraft or NeoForge API you have not read in the 26.1.2 sources stays
+      UNVERIFIED (CLAUDE.md hard rule 8).
+   b. VAGUE: every sentence a building session could read two ways, or that has no
+      number, name or file where one is needed ("some", "roughly", "as needed", "etc").
+   c. DECISIONS: every choice the draft made without a "Decided" from the owner and
+      without a "Recommended" or "Open" tag. A silent choice is a decision.
+   d. RISKS: what could break it or be broken by it. Walk saves (hard rule 10), multiplayer
+      and server/client split, existing breeds and coats, the designer twin (hard rule 5),
+      performance, modded interaction, config, and what a player could do with it
+      together with other features that nobody planned for.
+2. Throw out any finding the treatment or the code already answers. Merge duplicates.
+   Rank the rest by how much building work it could waste if left unanswered.
+3. ASK, with the question tool (AskUserQuestion). Always at least THREE questions in
+   total, even if the draft looks tight: if you found fewer than three real ones, ask
+   about the next-riskiest assumptions or the consequence of a Decided line, saying so.
+   - Rounds of up to four questions; 2-4 options each, recommendation first and marked
+     "(Recommended)". State the consequence in the question text.
+   - Questions come from the findings, highest rank first. Never ask what the code or
+     wiki already answers; read it instead.
+   - After each round, a new answer may raise new findings. Ask again until nothing
+     that only the owner can settle is left.
+4. Write the results into the treatment (the owner's answers as "Decided", your own
+   picks as "Recommended", what neither can settle as "Open", each unproven fact as
+   "UNVERIFIED"). Correct anything in it you found to be wrong, and tell the owner.
+5. Commit and push the treatment on the working branch, if the session is committing.
+
+DONE WHEN
+---------
+- At least three questions were asked with the question tool.
+- Every finding in the four lists is settled, Recommended, Open, UNVERIFIED, or
+  dropped with a reason.
+- The treatment has no silent decision and no sentence that reads two ways.
+- Report to the owner in a few lines: questions asked, answers recorded, what is still
+  Open, and any claim in the draft that turned out wrong.
+
+NEVER
+-----
+- Never probe more than the one treatment in progress. Other scopes have other owners'
+  answers; touching them mixes decisions.
+- Never ask fewer than three questions. A probe that finds nothing has not looked hard.
+- Never turn a guess into "Decided". Only the owner's answer earns it.
+- Never ask something the code or wiki answers. It wastes her time and hides what you
+  did not read.
+- Never change code, wiki or other intake files. This is scoping.
+
+SEE ALSO
+--------
+write-intake-document (the full scoping routine and its implications sweep),
+process-intake, report-bug, wiki/philosophy.html, wiki/decisions.html, CLAUDE.md hard
+rules 5, 8 and 10.
