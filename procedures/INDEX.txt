@@ -34,6 +34,8 @@ Command                  Runs    Say (any of)                         What it le
 /launch-game             local   "launch the game", "restart",        exactly one game running,
                                  "launch into the yard",              confirmed from a fresh log
                                  "boot a server"
+/photograph-horses       local   "show me pictures", "photograph      photo-*.png per shot, described
+                                 the horses"                          and shown to the owner
 /release                 local   "ship a release", "new version",     owner's decision; if yes, every
                                  "is it worth a release"              code test green, jar + wiki note
 /rebake                  local   "rebake", "run the bakes",           every derived artefact current,

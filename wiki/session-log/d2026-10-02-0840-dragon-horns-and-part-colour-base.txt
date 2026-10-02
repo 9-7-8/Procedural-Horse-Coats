@@ -114,6 +114,27 @@ RELEASE
 Not offered: one new part and its foundation is below release step 1's bar, and 0.5.040
 was cut just before this session.
 
+LATER IN THE SESSION (09:20-09:30)
+----------------------------------
+- Asked: "Can you show me ten examples of horses with horns by spawning them in game and
+  then showing me pictures in this chat?"
+- Built a dev-only photo stage: N/server/DebugPhotoShoot.java (SHOTS, the stage, a founder
+  re-rolled until a dragon horn form is met) and N/client/DebugPhotoShootClient.java (camera
+  timing, Screenshot.grab to run/screenshots/photo-*.png), switched on by
+  runClientTestWorld -PphotoShoot. Ten shots: two unicorns, four dragon horn horses, three
+  ram horn forms, one horse with every part. All saved; no /ERROR] in the log.
+- SendUserFile could not attach in this session (no project thread), so the shots went to a
+  private gallery artifact: https://claude.ai/artifact/XZfD73C9kzhLVUfGRwRMjQ
+- Seen: all three dragon horn forms render behind the ears, clear of a unicorn horn, both
+  sides coloured. At wild length they are short hooks. The every-part shot was too far away
+  to judge stacking. Written on gene-dragon-horns.html#open-dragon-placement; check open.
+- Owner chose: keep and commit the tool (now procedures/photograph-horses.txt, its INDEX row,
+  the /photograph-horses wrapper and the keyword memory), and close the client (closed by
+  tools/stop-dev-java.ps1 after reading the log).
+- Two warnings in that log, both pre-existing: the yard soundness check flags a jukebox at
+  head height (-16, 129, 158), and the stasis_chamber recipe is ignored for empty ingredients.
+  Not investigated this session.
+
 PICK UP FIRST
 -------------
 Head parts Slice B (ear fins, cheek spikes, brow ridge) by procedures/process-intake.txt -
