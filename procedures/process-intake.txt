@@ -50,7 +50,8 @@ STEPS
    - *-draft/ and tools/ folders. They retire with the treatment that uses them.
    Start from intake/Sizing.txt: it holds every unit's size, impact, owner calls and
    dependencies, dated per treatment. A block stands while
-   `git log --since=<its date> -- "intake/<file>"` is empty; re-size only the
+   `git log --since=<its date>T00:00 -- "intake/<file>"` is empty (a bare date counts
+   from the current time of day and misses same-day edits); re-size only the
    treatments changed since, and new ones, and rewrite their blocks. To size a
    treatment, read its header, its "What already exists" section and any "Order and
    size" section, not the whole file. If more than a handful need sizing, hand it to

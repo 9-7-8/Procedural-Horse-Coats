@@ -741,9 +741,23 @@ public interface GeneEpigenetics {
 <p>
     A boolean, <b>true by default</b>. The size loci resolve a body scale and
     <code>HorseRecords.applyTraitsToEntity</code> writes it to
-    <code>Attributes.SCALE</code>; setting this false writes a flat
-    <code>1.0</code> there instead. That is the whole mechanism &mdash; one
-    expression, in the one place listed in the table below.
+    <code>Attributes.SCALE</code>; setting this false writes the same scale
+    <strong>compressed into 0.85&ndash;1.15</strong> there instead
+    (<code>HorseTraits.compressScale</code>, since 2026-10-02 &mdash; it used to be a
+    flat <code>1.0</code>). That is the whole mechanism &mdash; one expression, in the
+    one place listed in the table below.
+</p>
+
+<p>
+    <strong>Compressed, not flattened</strong> (owner, 2026-10-01). The squash is a
+    <code>tanh</code>, so order survives everywhere: a Shire still stands over a
+    Falabella and a magical giant over a merely large horse, and a horse within a few
+    percent of 1.0 barely moves. The band is measured, not picked: vanilla&rsquo;s horse
+    is 1.6 tall with its eye at 1.52, and a stall is two blocks of air
+    (<a href="stables.html">how stalls are found</a>), so 1.25 is where the hitbox
+    meets the roof and 1.316 where the eye suffocates. At 1.15 the top is at 1.84.
+    <strong>The default is untouched:</strong> with the setting on, absurd giants
+    stay absurd (owner, 2026-10-02 &mdash; an opted-out server compresses giants too).
 </p>
 
 <div class="note">
@@ -764,10 +778,14 @@ public interface GeneEpigenetics {
     Nothing else is gated. The size genes are registered, drawn from the same
     founder tables and inherited identically; <code>Traits.scale()</code> still
     resolves to what the alleles say, so the info screen, the
-    inspect paper and the breeding debug line all keep reporting the real number. Only the entity is held at 1.0. The one other
+    inspect paper and the breeding debug line all keep reporting the real number. Only the entity is compressed. The custom
+    spawn egg&rsquo;s size readout adds &ldquo;(1.12x in this world)&rdquo; when the setting is off &mdash; the
+    setting is a synced SERVER config, so the client can read it &mdash; while the
+    <a href="horse-designer/index.html">horse designer</a>, which cannot, labels its number
+    &ldquo;genotype; servers may differ&rdquo;. The one other
     route to <code>SCALE</code> &mdash; an <a href="making-a-gene.html#block">effects</a>
     <code>attribute</code> verb naming <code>scale</code> &mdash; answers to the
-    same setting, and <code>GeneAbilityHandler.clearAttributes</code> takes a
+    same setting by being switched off outright (a modifier is not compressed), and <code>GeneAbilityHandler.clearAttributes</code> takes a
     standing modifier back off rather than leaving it frozen on the horse.
 </p>
 

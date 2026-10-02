@@ -3,7 +3,8 @@ every treatment each run. NOT a treatment and NOT a unit: never build from it, n
 
 How to use it (process-intake step 1):
 - Trust a row only while its treatment is unchanged since the date at the top of its block:
-  `git log --since=<date> --oneline -- "intake/<file>"` empty -> the row stands.
+  `git log --since=<date>T00:00 --oneline -- "intake/<file>"` empty -> the row stands.
+  (The T00:00 matters: a bare date counts from the current time of day.)
 - A treatment changed since, or a new one -> re-size that file alone, and rewrite its block.
 - A unit shipped -> delete its row in the same change that retires it from the treatment.
 - A treatment deleted -> delete its block.
@@ -16,7 +17,6 @@ or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on
 To do.txt                                                         sized 2026-10-02
 - Config key table on wiki/config.html (new bake row)            S  b  owner-free
 - Champagne foal eye blue-green until adult                      S-M a  owner-free (coat cache key)
-- body.size off compresses scale; designer "genotype preview"    S  a  owner-free; measure a stall band in game first
 - Cutie-mark pool bias / four studbook kinds                     -  -  No: "needs a few more owner answers"
 - Procedure write-ups (compat-test, measure-worldgen,
   add-a-wood-family, answer-a-tester)                            S each, owner-free
