@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragon horns &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Dragon horns</h1>
+
+<p class="lede">
+    Two copies and the horse grows a pair of horns behind its ears, swept back over the
+    neck. Whether they curve, stand straight or curl, and how long, thick, swept and
+    splayed they are, is written on the allele. Their colour is a gene of its own,
+    <a href="gene-dragon-horn-colour.html">dragon horn colour</a>. The first of the
+    head parts, and the fourth grown part after the
+    <a href="gene-unicorn-horn.html">unicorn horn</a>, <a href="gene-antlers.html">antlers</a>
+    and <a href="gene-ram-horns.html">ram horns</a>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.dragon_horns"></div>
+
+<h2 id="recessive">Two copies, either sex</h2>
+
+<p>
+    Recessive, like the unicorn horn: <code>Drg/Drg</code> grows the pair, and a
+    <code>Drg/n</code> carrier looks like any other horse. Two carriers bred together are
+    the reliable way to get one. It is <strong>not</strong> sex-limited &mdash; mares and
+    stallions grow them alike, unlike the stallion-only antler and ram horn alleles. Foals
+    grow none; the pair comes in when the horse grows up, and stays.
+</p>
+
+<h2 id="finding">Finding them</h2>
+
+<p>
+    Rare in the wild &mdash; about one horse in four hundred has a pair, and about one in
+    ten carries a copy without showing it. No breed carries them yet.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Form</strong> &mdash; <em>swept</em> (raked back, curving along the neck),
+        <em>straight</em> (an angled spike) or <em>curled</em> (a ram-style curl that opens
+        outward).</li>
+    <li><strong>Length</strong> &mdash; five classes, <em>budding</em> to <em>great</em>; budding
+        to long in the wild, and a line bred for length reaches great and stops.</li>
+    <li><strong>Sweep</strong> &mdash; how far a swept horn bends back (from still pointing up to
+        tipping down past the neck), how far a spike leans, how far round a curl goes.</li>
+    <li><strong>Splay</strong> &mdash; how wide the pair angle out from the skull.</li>
+    <li><strong>Girth</strong> &mdash; thicker or thinner.</li>
+</ul>
+
+<p>
+    Both horns of a pair are the same: the numbers come from one copy. Everything stacks
+    &mdash; a horse can wear a unicorn horn, antlers, ram&rsquo;s horns and dragon horns at
+    once, each at its own place on the head.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no attack, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.dragon_horns"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.dragon_horns</dd></div>
+    <div><dt>Class</dt><dd><code>DragonHornsGene</code></dd></div>
+    <div><dt>Priority</dt><dd>239 (magical band), with its colour locus at 240; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Drg</span> <span class="allele wild">n</span>, recessive</dd></div>
+    <div><dt>Founders</dt><dd>Hardy&ndash;Weinberg at <code>Drg</code> 0.05 per allele &mdash; the unicorn&rsquo;s figure</dd></div>
+    <div><dt>Epigenome</dt><dd><code>length</code> (0&ndash;0.7, clamp 0&ndash;1), <code>girth</code> (0.80&ndash;1.25), <code>form</code> (one of three), <code>sweep</code> (0&ndash;1), <code>splay</code> (0&ndash;1)</dd></div>
+    <div><dt>Parts</dt><dd><code>DRAGON_HORN_RIGHT</code> / <code>LEFT</code> at the <code>NAPE_RIGHT</code> / <code>LEFT</code> anchors, sheet <code>HORN</code> and <code>HORN_TIP</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">The ram horn pattern, with the unicorn&rsquo;s inheritance</h2>
+
+<p>
+    Slice A of the head parts treatment: one part end to end, to settle the pattern the
+    other five head parts reuse. Two kinds, one mesh per side (a mirrored copy by negative
+    scale turns culled boxes inside out); a new pair of anchors, <code>NAPE_RIGHT</code> and
+    <code>NAPE_LEFT</code>, with one offset per horse model in
+    <code>AttachedPartLayer.anchor</code>; <code>DragonHornGenerator</code> and
+    <code>DragonHornSize</code> beside the ram horn&rsquo;s; and one line in
+    <code>GrownParts.of</code>, which dresses the pair with
+    <a href="gene-dragon-horn-colour.html">its colour locus</a>. No new layer, render-state
+    field or config key. The granting locus is in <code>GrownParts.shapes</code>&rsquo;s
+    every-part baseline, so the editors see the colour locus as changing the look.
+</p>
+
+<h2 id="numbers">The epigenome, by cost</h2>
+
+<ul>
+    <li><code>length</code>: the class is the mesh&rsquo;s size bucket (five; a longer horn is
+        more segments), the remainder a uniform stretch, the ram horn&rsquo;s rule.</li>
+    <li><code>form</code>, <code>sweep</code> and <code>splay</code>: all baked into the mesh
+        &mdash; <code>DragonHornGenerator.style(form, sweep, splay)</code>, three forms by four
+        sweep buckets by three splay buckets. Splay is baked rather than a transform because the
+        layer&rsquo;s only free rotation is the lean about <code>x</code>; an outward angle on a
+        pair needs a <code>z</code> rotation that differs by side, and adding one was not worth a
+        new field for a number that drifts slowly.</li>
+    <li><code>girth</code>: a draw-time scale across the horn.</li>
+</ul>
+
+<p>
+    Thirty-six styles by five classes by two sides is 360 meshes at most, each at most
+    <code>DragonHornGenerator.MAX_NODES</code> boxes, inside <code>PartGeneratorTest</code>&rsquo;s
+    box budget; baked lazily, so a world with no dragon horns bakes none.
+</p>
+
+<h2 id="anchor">The nape anchor</h2>
+
+<p>
+    Head-local, on the adult: <code>x &plusmn;2.6</code> (just outside the ear, which spans
+    <code>x 0.55..2.55</code>), <code>y -9.5</code>, <code>z 4.5</code> (half a unit inside the back
+    of the skull). That keeps the root two units behind the antlers&rsquo; <code>CROWN</code>
+    root and well behind the horn&rsquo;s <code>FOREHEAD</code>. The foal&rsquo;s offset exists
+    because the switch must answer for every anchor, and is never drawn.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No horse, and no real animal, has a locus that grows horns behind the ears; this is
+    fantasy, and makes no claim about any real gene. The inheritance is the unicorn
+    horn&rsquo;s on purpose &mdash; rare and recessive &mdash; so that a pair is something a
+    breeder works toward by crossing carriers, rather than something that turns up in every
+    second foal.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No dragon horn has been seen in a running game: where the nape anchor puts the root, and how each form, sweep and size reads against the ears and neck, are unchecked.</p>
+</div>
+
+<h3 id="open-dragon-placement">Where the pair roots, and whether it clears the head</h3>
+<p>
+    The nape anchor was placed from the vanilla head and ear boxes, not by eye. Spawn a
+    <code>Drg/Drg</code> adult and look from the side and from behind: the roots should sit
+    behind and just outside the ears, clear of an antler rack&rsquo;s roots. Check every form at
+    standard and great length, walking, grazing and rearing: a great swept horn at the
+    highest sweep tips down past the crest and may cut into the neck or the mane; a curl may
+    cut the neck. Clipping at the extremes is accepted (owner); clipping at the defaults is not.
+</p>
+
+<h3 id="open-dragon-stacking">All four parts at once</h3>
+<p>
+    A horse with a unicorn horn, antlers, ram&rsquo;s horns and dragon horns: each should sit at
+    its own place. The ram&rsquo;s horns share the antlers&rsquo; crown anchor, so the crowded
+    one is crown against nape.
+</p>
+
+<h3 id="open-dragon-foal-size">The foal gate and the size gene</h3>
+<p>
+    A <code>Drg/Drg</code> foal should be bare until it grows up. A tiny and a huge adult should
+    carry horns scaled with them &mdash; the size gene scales parts through the pose stack, a
+    claim from reading the code.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

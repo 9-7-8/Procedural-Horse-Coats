@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dragon horn colour &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> codominant <span class="sep">/</span> colours the dragon horns, paints nothing</p>
+
+<h1>Dragon horn colour</h1>
+
+<p class="lede">
+    What colour a horse&rsquo;s <a href="gene-dragon-horns.html">dragon horns</a> are. The
+    same colours and the same rules as <a href="gene-horn-colour.html">horn colour</a>
+    &mdash; white, the rainbow, pink, black, grey or chaos, and two different copies make a
+    two-tone pair &mdash; on a locus of its own, so a unicorn with dragon horns can wear a
+    white horn and black dragon horns. On a horse without dragon horns it does nothing.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.dragon_horn_colour"></div>
+
+<h2 id="colours">The colours, and two-tone pairs</h2>
+
+<p>
+    Exactly the <a href="gene-horn-colour.html#colours">horn colour table</a>: white in most
+    copies, a few percent each of red, orange, yellow, green, blue, indigo, violet, pink, black
+    and grey, and chaos rarest. Two copies of one colour give a pair of that colour; two
+    different ones give horns of the earlier colour in that list with tips of the other,
+    fading between. Both horns of a pair are coloured alike. Every copy carries a little
+    shade of its own, so no two red pairs are quite the same red.
+</p>
+
+<h2 id="separate">Its own gene, not the horn&rsquo;s</h2>
+
+<p>
+    Horn colour colours only a unicorn horn, and this colours only dragon horns. A horse
+    with both carries both genes, and you breed each colour separately.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all. It is only the colour of the horns.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.dragon_horn_colour"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.dragon_horn_colour</dd></div>
+    <div><dt>Class</dt><dd><code>DragonHornColourGene extends AbstractPartColourGene</code></dd></div>
+    <div><dt>Priority</dt><dd>240 (magical band), beside <a href="gene-dragon-horns.html">dragon horns</a> at 239</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha &mdash; the base-before-tip order</dd></div>
+    <div><dt>Outcomes</dt><dd><code>dragon-horns-white</code> &hellip; <code>dragon-horns-chaos</code>, plus <code>dragon-horns-two-tone</code>; all wild types</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="base">One short subclass</h2>
+
+<p>
+    The whole gene is a key, a name, a priority and the words its outcomes are written in.
+    The alleles, the two-tone rule, the per-copy <code>hue</code>, <code>tone</code> and
+    <code>chaos</code> numbers and the founders are <code>AbstractPartColourGene</code>&rsquo;s,
+    which was cut out of <a href="gene-horn-colour.html">horn colour</a> for this; see
+    <a href="model-parts.html">model parts</a> on how a part gets its colour locus.
+    <code>GrownParts.of</code> asks <code>tintsFor</code> once and dresses both sides with the
+    same base and tip.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    Dragon horns are not real, so neither is their colour. It is a separate locus from the
+    unicorn horn&rsquo;s because the owner chose one colour gene per part: a shared colour gene
+    would force every part on a horse to match, and a breeder who wants a white horn over black
+    dragon horns would have nothing to select.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No coloured dragon horn has been seen in a running game: the colours and the two-tone fade along a swept or curled horn are unit-tested, not watched.</p>
+</div>
+
+<h3 id="open-dragon-colour-fade">The two-tone fade along a curve</h3>
+<p>
+    Check a <code>Wht/Red</code> and a <code>Red/Blu</code> pair in each form: the root colour
+    should hold for the lower part and the tips be the second colour. A curled horn has the most
+    segments and the smoothest fade; a budding one the coarsest.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

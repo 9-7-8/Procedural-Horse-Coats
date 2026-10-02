@@ -258,5 +258,7 @@ horsegenetics.extension
 horsegenetics.accretion_field
 horsegenetics.census
 horsegenetics.cleave_side
+horsegenetics.dragon_horn_colour
+horsegenetics.dragon_horns
 horsegenetics.shade
 horsegenetics.wing_cloak
