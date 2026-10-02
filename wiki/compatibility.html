@@ -405,6 +405,25 @@
     actually put in it and has to know every one.
 </p>
 
+<p id="generated-installed">
+    <strong>A metal counts only if its own mod is installed</strong> (owner, issue #14). A
+    <code>c:</code> tag can name another mod&rsquo;s item as an optional entry &mdash;
+    <code>actuallyadditions:black_quartz</code> in somebody else&rsquo;s <code>c:gems</code>
+    &mdash; and the tag file is read whether or not that mod is there. Taken at face value it
+    gave a server with neither Actually Additions nor Mana and Artifice a Black Quartz and a
+    Chimerite Horse Armor that the metalsmith sold and nothing could forge. So
+    <code>MaterialScan.of</code> drops a metal whose namespace is not a loaded mod before
+    anything is built from it, which also moves the fingerprint and rebuilds an old pack. The
+    test is the namespace and not the item because the armour items are registered in the mod
+    constructor, before anybody else&rsquo;s items exist. A loaded mod that still registers
+    none of a material&rsquo;s items (a config flag) keeps its armour item, but gets no recipe
+    and no trade. A world from an older jar may still hold a dropped armour, in a chest or
+    in a villager&rsquo;s offers, so each dropped id is registered as an <strong>alias of
+    iron horse armour</strong> (<code>ModdedArmour</code>): it loads as iron, the tier it
+    was modelled on, rather than naming an item that is gone. Not yet seen against a real
+    save.
+</p>
+
 <div class="note">
     <span class="label">Collapsing is the honest answer, not only the safe one</span>
     <p>
