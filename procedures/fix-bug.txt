@@ -98,6 +98,9 @@ STEPS
      - Extend the existing path; never add a second, screen-only copy of a rule.
      - If the spawn-egg screen or the designer is involved, change both (rule 5).
      - Flag any unverified API (rule 8).
+     - A fix that adds or changes a config key owes add-a-config-option steps 3, 4, 8
+       and 9 too: the default once as a common/ constant, the safe accessor, a server
+       boot, and the key on the feature's page.
    - Break the fix on purpose once, and watch the test go red.
    - Run tests by name only. If a gametest goes red, run HEAD without your diff
      (`git stash`) before blaming the diff: gametests are sensitive to tick phase.

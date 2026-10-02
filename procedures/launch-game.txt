@@ -101,7 +101,8 @@ STEPS
 
 8. A server boot, for anything that runs at mod load (config specs, registries, the mod
    constructor, drop-in folders):
-   a. Run `./gradlew :neoforge-26.1.2:runServer` in the background, after checking that
+   a. Run `./gradlew :neoforge-26.1.2:runServer` detached, in step 5's Start-Process
+      form with -FilePath gradlew.bat (a cmd.exe /c wrapper launches nothing), after checking that
       no client holds the run directory. A DirectoryLock IOException means the owner's
       game is open; it does not mean a bad registration.
    b. Poll the log for "Done (" or "BUILD FAILED", then stop it with `pwsh -File tools/stop-dev-java.ps1`

@@ -86,7 +86,9 @@ STEPS
    'ERROR|Couldn.t parse|Invalid|missing'. Then edit the new key in run/phc/server.toml
    while it runs, and check the change takes effect if step 1d asked for that. Stop the
    server with `pwsh -File tools/stop-dev-java.ps1` (never by hand), then DELETE every config file and .bak the boot generated under run/phc/ and
-   run/config/. The owner's next session must start from defaults.
+   run/config/. The owner's next session must start from defaults. A server.toml that
+   was there BEFORE the boot holds the owner's settings, not generated ones: copy
+   run/phc/ and run/config/ aside before booting, and put that copy back exactly after.
 
 9. Document it on the page of the feature it governs, the way the existing keys are
    (fertility.html for the crowding cap, rider-comfort.html for leads, gene-lycan.html
