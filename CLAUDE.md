@@ -182,8 +182,8 @@ the template `procedures/FORMAT.txt` - and each is also a slash command. When th
 says a procedure's words ("end the session", "run tests", "process intake", "fix a bug",
 "report a bug", "ship a release", "launch the game", the rest in the index), read that
 file and follow it; never work a routine from memory. **"End the session" is
-`procedures/end-session.txt`**: regenerate, build, code commit, docs commit, this file's
-audit (`audit-claude-md`), verify clean, kill what you started, summarise.
+`procedures/end-session.txt`**: regenerate, build, code commit, procedure review, a new
+session log (`write-session-log`), docs commit, this file's audit, verify clean, kill, summarise.
 
 ---
 ## License

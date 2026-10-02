@@ -81,9 +81,9 @@ through. They are not optional and are not satisfied by doing them once.
    coat, gene pool and weights, biomes, size, stats and rarity.
 
 7. FINISH CLEANLY. Save the file in intake/, run the self-check (Part 6), commit and
-   push it to main, and add a session log entry the way earlier scoping sessions did
-   (wiki/session-log/d2026-09-29-scoping-troughs.txt). In that entry, say that no code
-   was touched and what the building session should pick up first.
+   push it to main, and write the session log by procedures/write-session-log.txt (a
+   new timestamped file; d2026-09-29-scoping-troughs.txt is an older example). In it, say
+   that no code was touched, and make PICK UP FIRST what the building session starts on.
 
 
 PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS

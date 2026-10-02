@@ -1,0 +1,102 @@
+PROCEDURE  : Write the session log
+COMMAND    : /write-session-log
+SAY        : "write the session log", "log this session", "write up the session"
+RUNS       : either
+TAKES      : a session's worth of work, pushed or about to be
+LEAVES     : one new timestamped file in wiki/session-log/ holding everything the next
+             session needs, and its entry at the top of wiki/session-log.html
+==============================================================================
+
+WHEN TO USE
+-----------
+Once per session, as end-session step 4b. process-intake, fix-bug and release all end
+through end-session, so they reach it too. Every session gets its OWN file, even when
+another session already wrote one today. Run it on its own only when the owner asks for
+the session to be written up without ending it.
+Do not use it for a design call (its owning page's Coding or Verification tab), a bug (a
+GitHub issue), or a plan (a Roadmap tab). The log records what happened; those pages
+record what is true.
+
+BEFORE YOU START
+----------------
+1. Gather the session's record:
+   - the session's commits: `git log --date=iso --pretty='%h %ad %s' --since='<start>'`;
+   - `git status --short`;
+   - the issues opened, closed, commented on or relabelled this session (gh issue list
+     --state all --search "updated:>=<today>");
+   - the conversation itself: every owner request and every owner answer.
+2. Get the local time: `Get-Date -Format 'yyyy-MM-dd HHmm'` (PowerShell) or
+   `date '+%Y-%m-%d %H%M'` (bash). Use the time the session STARTED if you know it,
+   otherwise the time now, and write which one it is in the header.
+
+STEPS
+-----
+1. Name the file: wiki/session-log/d<YYYY-MM-DD>-<HHMM>-<slug>.txt
+   - HHMM is 24-hour local time, so files from the same day sort in the order they ran.
+   - The slug is 2-6 lowercase words, joined by hyphens, naming the main thing done
+     (for example fix-stable-breed-label).
+   - Check that the name is free: `Test-Path` or `ls`. If it is taken (two sessions in
+     the same minute), add -2, then -3. Never overwrite or append to another session's
+     file, even one from the same day on the same subject.
+   - If this session already wrote its own log earlier (a routine that writes one, then
+     the owner asks for more work), update that file, and rename it to this scheme if
+     its name has no time. Fix its link in wiki/session-log.html in the same change.
+   Older files, named d<date>-<slug>.txt with no time, stay as they are: renaming them
+   breaks links from other pages.
+
+2. Write the file. Plain text, wrapped at about 90 columns. Every section below is
+   required; write "None." under one that has nothing, rather than leaving it out.
+   a. First line: "<YYYY-MM-DD HH:MM> - <title>". Say if the time is the start or the end.
+   b. ASKED: every request the owner made this session, quoted, in order, each with a
+      note of what came of it. Include the requests that changed direction partway.
+   c. DONE: each piece of work, with:
+      - its commit hash;
+      - what was wrong or missing, and why the change fixes it;
+      - its proof: the tests run by name, the checks run, and what was seen in game;
+      - the GitHub issue, if there is one, and its state now (closed, or open and
+        waiting on what).
+   d. DECIDED: every call made this session, and who made it. Mark the owner's answers
+      "(owner)", and the calls made without her as such. Say where each is recorded now:
+      the issue, or the page's Coding tab.
+   e. FOUND ON THE WAY: bugs filed (issue numbers), oddities left alone and why, and any
+      mistake made this session and how it was put right.
+   f. PROCEDURES: procedures written or changed this session, and why (end-session's
+      procedure review produces this list).
+   g. NOT RUN / NOT CHECKED: what a full :common:test run would still check, what
+      nobody has seen in game, and the Verification-tab anchors added.
+   h. RELEASE: due or not, by release step 1, and what is holding it if it is due.
+   i. PICK UP FIRST: one line naming the next session's first piece of work, and the
+      procedure that runs it. whats-next reads this line, so it must be there.
+   Write it for a reader who has none of this conversation. Name files, classes,
+   commits and issue numbers. Do not write "as discussed" or "the bug above".
+
+3. Add the entry at the TOP of the list in wiki/session-log.html, above every older
+   entry: `<li><a href="session-log/<file>"><date> <HH:MM> &mdash; <strong><topic>
+   </strong>: <two or three sentences></a></li>`. The list is newest first. whats-next
+   and look-it-up take the top entry as the latest session, so order it by time, not by
+   filename.
+
+4. Run node wiki/tools/check-links.mjs, so the new link is proven to resolve. Session
+   files are not baked into wiki/text/; the search index and agent text are rebuilt by
+   end-session step 4g.
+
+DONE WHEN
+---------
+- One new file exists under wiki/session-log/ with a timestamped name that collides with
+  none, and sections a-i are all present.
+- Its entry is the first one in wiki/session-log.html, and check-links is OK.
+- The PICK UP FIRST line names a procedure.
+
+NEVER
+-----
+- Never write into another session's log file. Same-day sessions each keep their own
+  record, and an appended file loses which session did what.
+- Never leave out a section. A missing "Not run" reads as "everything was checked".
+- Never put a defect, a design call or a plan only in the log. It also goes to an issue
+  or the owning page; the log only says where.
+- Never rename an older session-log file. Other pages link to it by name.
+
+SEE ALSO
+--------
+end-session (step 4b runs this); whats-next (reads PICK UP FIRST); look-it-up (finds a
+dated record); release (reads the logs for a tag range); wiki/session-log.html.

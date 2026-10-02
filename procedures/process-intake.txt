@@ -150,7 +150,8 @@ STEPS
    - "compat bump" -> the release procedure confirms it with the owner before cutting;
    - no Release: line (an older treatment) -> a patch release.
 
-10. Write the session log as wiki/session-log/d<date>-<slug>.txt, with:
+10. Write the session log by procedures/write-session-log.txt (a new timestamped file;
+    end-session step 4b runs it). Under its sections, make sure it has:
     - the owner's request, quoted;
     - Done: the unit, the commit, what is green, and which treatment text was retired;
     - Calls made without the owner;

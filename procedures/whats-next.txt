@@ -39,7 +39,8 @@ STEPS
    e. THE SERVER: unreviewed PCH log export folders (review-server-logs; the local
       memory holds the record). A local session only.
    f. OPEN DESIGN CALLS: the "Current owners" list on wiki/decisions.html.
-   g. LAST SESSION'S HAND-OFF: the newest wiki/session-log/ file's "pick up first" line.
+   g. LAST SESSION'S HAND-OFF: the "pick up first" line of the TOP entry in
+      wiki/session-log.html (newest first; filename order is not time order).
 
 2. Rank, highest first. The order follows the owner's own priorities:
    a. A released jar that is broken for players (the DAMAGE urgency) -> fix-bug.
@@ -54,7 +55,9 @@ STEPS
    f. The big ones: Tier 3 intake units, foundations, long Roadmap items.
    g. Visual-only checks come last, always.
    Never offer two options that are really one. Never offer work whose prerequisite has
-   not shipped.
+   not shipped. Never bundle two pieces of work in one option when their procedure
+   takes one per conversation (fix-bug, process-intake): offer the first, and name the
+   rest as what follows it.
 
 3. Present 2-4 options with the question tool. Each option says:
    - what it is, in one line;

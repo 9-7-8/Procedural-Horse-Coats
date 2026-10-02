@@ -38,14 +38,29 @@ STEPS
 
 4. Update the docs to what is true now, not to "what I changed today".
    Walk CLAUDE.md's page map and honour the source-of-truth rule. At minimum:
-   a. a new dated file in wiki/session-log/, plus its entry in wiki/session-log.html;
-   b. the Verification tab of each page the session built on: what is newly unplayed,
+   a. Review the procedures against this session. Ask three questions:
+      - Did a procedure followed this session say something wrong, stale or missing?
+        Did a step fail, or get skipped because it did not fit, or did the owner correct
+        how a routine was done? -> fix that procedure file now.
+      - Was something done this session that is likely to be done again the same way,
+        and has no procedure? -> write one by procedures/FORMAT.txt ("ADDING ONE": the
+        file, its INDEX.txt row, the .claude/skills wrapper, the keyword memory). If it
+        is too big to write now, add a bullet under "Routines to write up as
+        procedures" in intake/To do.txt.
+      - Does a change made this session (a new file, a renamed tool, a new rule) make
+        another procedure's steps untrue? -> fix it. Grep procedures/ for the name.
+      List what changed, for the session log. "None needed" is a valid answer, but only
+      after asking all three questions.
+   b. this session's own log, by procedures/write-session-log.txt: a NEW file with the
+      time in its name, never appended to another session's file, plus its entry at the
+      top of wiki/session-log.html;
+   c. the Verification tab of each page the session built on: what is newly unplayed,
       and where to look. Delete only what the owner confirmed in game, or what an
       automated PASS answered. Then run bake-verification-index.mjs;
-   c. any bug discovered goes in a GitHub issue (see report-bug), never on a page;
-   d. any gene or system page the session moved;
-   e. wiki/pages.js, if a page was added (hard rule 7);
-   f. build-search-index.mjs, check-links.mjs and bake-agent-text.mjs, for any prose.
+   d. any bug discovered goes in a GitHub issue (see report-bug), never on a page;
+   e. any gene or system page the session moved;
+   f. wiki/pages.js, if a page was added (hard rule 7);
+   g. build-search-index.mjs, check-links.mjs and bake-agent-text.mjs, for any prose.
 
 5. Audit CLAUDE.md with audit-claude-md: wc -l (at most 300), every line the session
    added run through the "every task?" test, dates and derived numbers moved out,
@@ -63,7 +78,8 @@ STEPS
    ask before closing it (see launch-game).
 
 9. Stop, with a short summary. Say what shipped, what is newly waiting in
-   wiki/verification.html, and the one thing the next session should pick up first.
+   wiki/verification.html, which procedures step 4a changed or added, and the one thing
+   the next session should pick up first.
    Say too whether a release is due, by release step 1: a bunch of bug fixes (crash
    fixes included) or a new feature. If one is, cut the patch release by that procedure, unless the owner has
    said to hold it.

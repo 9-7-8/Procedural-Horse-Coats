@@ -105,9 +105,11 @@ STEPS
    - If the fix turns out larger than step 4 judged, stop and treat the bug as large.
 
 6. Close it on evidence.
-   - Commit as "Fix #N: <what was wrong>", saying why, not which files changed. Do not
-     write "Fixes #N" unless the proof is already in hand: a push to main
-     auto-closes the issue.
+   - Commit as "Fix #N: <what was wrong>", saying why, not which files changed. That
+     form closes the issue when it reaches main ("fix", "fixes", "closes", "resolves"
+     are all GitHub closing keywords), so use it only when the proof is already in hand,
+     and post the proof comment right after the push. Without the proof, write
+     "#N: <what was wrong>" instead.
    - A test proves it and no runtime question remains -> close the issue, with a
      comment naming the commit and the test.
    - Only the game can prove it -> leave the issue open, and comment "fixed in
