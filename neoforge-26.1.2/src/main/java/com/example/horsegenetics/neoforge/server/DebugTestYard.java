@@ -164,7 +164,7 @@ final class DebugTestYard {
      * SHADOW LIGHT, KEEPING HORSES, STASIS BANK, GELDING, FOAL NAMES, COVER REACH, BOND DECAY and VERDANT FLOORS - each
      * check closed on its own page's Coding tab. The letters are names: AW follows W directly now.
      */
-    /** WEATHER COPIES re-aimed at jump in a storm (west, {@link DebugYardWeather}); WALL PAIR and FENCE PAIR (east, {@link DebugYardReach}). */
+    /** WALL PAIR and FENCE PAIR (east, {@link DebugYardReach}); WEATHER COPIES (west) answered on 2026-10-02 and went. */
     static final int ROW_AW = ROW_W + ROW_W_D + PACKED_AISLE;
     /** RESEARCH SHELF (west), STALL SHAPES (east) - {@link DebugYardShelf}. */
     static final int ROW_AX = ROW_AW + NEW_ROW_D + PACKED_AISLE;
@@ -172,12 +172,8 @@ final class DebugTestYard {
     static final int ROW_AY = ROW_AX + NEW_ROW_D + PACKED_AISLE;
     /** GRAZING (west), HANDS AT FEEDING (east) - {@link DebugYardDiet}. */
     static final int ROW_AZ = ROW_AY + NEW_ROW_D + PACKED_AISLE;
-    /** FIREPROOF (west), BREATH (east) - {@link DebugYardTraits}. */
-    static final int ROW_BA = ROW_AZ + NEW_ROW_D + PACKED_AISLE;
     /** MUSIC (west), PACK LEADER (east) - {@link DebugYardSocial}. */
-    static final int ROW_BB = ROW_BA + NEW_ROW_D + PACKED_AISLE;
-    /** DRAUGHT (west), STALLION DAY and FRESHER (east) - {@link DebugYardHarness}. */
-    static final int ROW_BC = ROW_BB + NEW_ROW_D + PACKED_AISLE;
+    static final int ROW_BB = ROW_AZ + NEW_ROW_D + PACKED_AISLE;   // BA (FIREPROOF, BREATH) answered and went
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -186,7 +182,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_BC + NEW_ROW_D + AISLE;
+    private static final int YARD_DEPTH_Z = ROW_BB + NEW_ROW_D + AISLE;   // BC (DRAUGHT, STALLION DAY) went too
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -251,14 +247,11 @@ final class DebugTestYard {
         DebugYardLong.build(level, gy, cx, mouthZ);
         // Rows AW-BC (2026-10-02): the second night's pens, one class a row.
         int rowX = cx + WEST_MIN;
-        DebugYardWeather.build(level, gy, rowX, mouthZ + ROW_AW);
         DebugYardReach.build(level, gy, rowX, mouthZ + ROW_AW);
         DebugYardShelf.build(level, gy, rowX, mouthZ + ROW_AX);
         DebugYardLoot.build(level, gy, rowX, mouthZ + ROW_AY);
         DebugYardDiet.build(level, gy, rowX, mouthZ + ROW_AZ);
-        DebugYardTraits.build(level, gy, rowX, mouthZ + ROW_BA);
         DebugYardSocial.build(level, gy, rowX, mouthZ + ROW_BB);
-        DebugYardHarness.build(level, gy, rowX, mouthZ + ROW_BC);
         // After every row has registered its checks: the summaries name whatever has not answered.
         DebugYardClockwork.build(level, gy, cx, mouthZ);
         // HURT MARE, NIGHT SHY, REACH WALL, REACH FENCE, STATS and the ARCANE DEALER went on their own PASS

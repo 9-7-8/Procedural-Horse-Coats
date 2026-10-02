@@ -36,9 +36,11 @@ final class DebugYardReach {
     private static final String FENCE = "FENCE PAIR - a mare and a stallion pressed to either side of a fence never conceive";
     private static final long DEADLINE_TICKS = 24_000L;
     private static int run;
+    private static boolean wallEverPregnant;
 
     static void build(ServerLevel level, int gy, int x0, int z0) {
         int thisRun = ++run;
+        wallEverPregnant = false;
         try {
             DebugYardClockwork.expect(WALL);
             DebugYardClockwork.expect(FENCE);
@@ -107,7 +109,12 @@ final class DebugYardReach {
                     p.horse().snapTo(p.x(), p.y(), p.z(), p.horse().getYRot(), 0.0F);
                 }
                 long t = level.getGameTime() - start;
-                boolean wallPregnant = ReproHandler.of(wallMare).pregnant();
+                // LATCHED (2026-10-02): the first run asked "pregnant now?" at the deadline, and a debug pregnancy
+                // lasts a minute - the mare had conceived nine times and the verdict read FAIL. Any conception counts.
+                if (ReproHandler.of(wallMare).pregnant()) {
+                    wallEverPregnant = true;
+                }
+                boolean wallPregnant = wallEverPregnant;
                 boolean fencePregnant = ReproHandler.of(fenceMare).pregnant();
                 if (fencePregnant) {
                     DebugYardClockwork.verdict(FENCE, false, "the fence mare conceived at " + t + " ticks - the"

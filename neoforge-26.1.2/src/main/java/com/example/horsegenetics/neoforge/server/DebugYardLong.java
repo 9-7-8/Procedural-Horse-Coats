@@ -100,18 +100,8 @@ final class DebugYardLong {
         int east = cx + EAST_MIN + 1;
         TALLIES.clear();
         try {
-            // THE DRYAD ROW IS ROW O EAST now (2026-09-30): DRYAD FLOWER passed and went, and its row held
-            // only this. Stone and floor light over the east half only - HURT MARE, west, eats the grass.
-            stoneBand(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
-            dryad(level, gy, east, mouthZ + ROW_O, 6, ROW_O_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
-                    List.of("DRYAD OAK+BIRCH", "both, each at half", "rate - and still", "no tree?"),
-                    Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
-            dryadVerdict(level, gy, east, mouthZ + ROW_O, east + 6, mouthZ + ROW_O + ROW_O_D);
-            lightFromTheFloor(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
-
-            ratio(level, gy, east, mouthZ + ROW_U, "RATIO BRINDLE", "horsegenetics.brindle", "n/n", "Brn/Y", true,
-                    List.of("RATIO: BRINDLE", "Brn/Y carrier x", "n/n mare: every", "filly Brn/n, no Brn colt"),
-                    "every filly Brn/n, every colt n/Y - a brindle colt is a FAIL");
+            // DRYAD OAK+BIRCH and RATIO BRINDLE passed on the morning of 2026-10-02 (the dryad at 145 min, brindle at 40
+            // foals) and went; the dryad helpers below stay for the next dryad question.
 
             // ANSWERED AND GONE (2026-10-02): RATIO HYPP, LETHAL WHITE, SIZE, KIT W5 and MILK CLASH logged their own
             // PASS on the night of 2026-10-01 - with RATIO ACAN D5 - and were closed on their pages. What is left is the
@@ -124,10 +114,8 @@ final class DebugYardLong {
             ratio(level, gy, west + 9, mouthZ + ROW_W, "RATIO MITF SW3", "horsegenetics.mitf", "SW3/N", "SW3/N", false,
                     List.of("RATIO: MITF SW3", "SW3/N x SW3/N:", "SW3/SW3 impossible", "- lost, never born"),
                     "no SW3/SW3 foal ever; about 1 in 4 conceptions lost early, 2 SW3/N : 1 N/N born");
-            ratio(level, gy, east + 9, mouthZ + ROW_W, "RATIO STARBURST", "horsegenetics.starburst", "W/n", "W/n", false,
-                    List.of("RATIO: STARBURST", "W/n x W/n all day:", "1 W/W : 2 W/n : 1 n/n", "(knob inheritance)"),
-                    "about 1 W/W : 2 W/n : 1 n/n");
-            ActionTrace.log("test yard", "all-day pens built (row O east: the dryad; rows U and W: inheritance ratios)");
+            // RATIO STARBURST passed the same morning (40 foals, 6 : 23 : 11, p 0.341) and went.
+            ActionTrace.log("test yard", "all-day pens built (row W: RATIO MITF SW3)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }
