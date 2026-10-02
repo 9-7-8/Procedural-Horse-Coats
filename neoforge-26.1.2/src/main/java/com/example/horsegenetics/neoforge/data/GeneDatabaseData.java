@@ -190,15 +190,16 @@ public final class GeneDatabaseData extends SavedData {
     // ------------------------------------------------------------------
 
     /**
-     * <b>Discover a gene by owning a horse that carries it.</b> Taming, breeding
-     * or otherwise coming to own one is the only way in - and discovering it
+     * <b>Discover a gene.</b> Taming or breeding a horse that carries it, or
+     * filing a paper about it on the research shelf - and discovering it
      * unlocks its carrot recipe at the same moment, because there is no longer a
      * second step to take.
      *
-     * <p>There used to be one: a research paper could be <i>read</i>, which
-     * discovered the gene and unlocked the carrot. That made a paper a shortcut
-     * past the animals - find one in a chest and you knew a gene you had never
-     * met - so it is gone. A paper is a component now, not a lesson.
+     * <p>A paper could once be <i>read</i>, from the hand, which made it a
+     * shortcut past the animals, and that went. Filing came back as a route on
+     * the owner's call (2026-10-01) - one more way to learn a gene, and the
+     * shelf never refuses a paper for one you do not know
+     * (wiki/item-research-shelf.html#filing-discovers).
      */
     public void discover(ServerPlayer player, Gene gene, List<String> seenTokens) {
         UUID id = player.getUUID();
