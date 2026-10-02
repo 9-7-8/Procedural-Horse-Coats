@@ -111,7 +111,18 @@
 
 <p>
     So the loop is: meet horses, take what they will tell you, file it, and copy it from
-    then on. A pair you have filed is a pair you can hand to somebody else as often as
+    then on.
+</p>
+
+<p>
+    <strong>Filing a paper teaches you its gene.</strong> Put a paper for a gene you have
+    never met onto the shelf with your own hands and that gene is discovered for you, as if
+    you had tamed a horse carrying it: it shows in your gene database and its carrot recipe
+    opens up. A paper for the plain, wild pair
+    teaches nothing, because the ordinary horse tells you nothing new.
+</p>
+
+<p> A pair you have filed is a pair you can hand to somebody else as often as
     you like &mdash; which is what makes knowledge shareable rather than hoardable.
 </p>
 
@@ -262,36 +273,47 @@
     two workstations read as a matched pair of furniture rather than two unrelated blocks.
 </p>
 
-<h3 id="filing-discovers">Filing a paper discovers its gene (owner, 2026-10-01)</h3>
+<h3 id="filing-discovers">Filing a paper discovers its gene (owner, 2026-10-01; built 2026-10-02)</h3>
 
 <p>
     <strong>Settled:</strong> the shelf accepts a paper for a gene the player has not
     discovered, and filing it <em>counts as</em> discovering that gene. Discovery never
-    refuses a paper. Filing is one more way to learn a gene, alongside the others. Today the
-    shelf never consults discovery, so it files anything but discovers nothing:
-    <a href="#roadmap">Roadmap</a>.
+    refuses a paper. Filing is one more way to learn a gene, alongside taming and breeding.
 </p>
 
-</section>
-
-<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
-
-<div class="note roadmap-summary">
-    <span class="label">What is still planned here</span>
-    <p>Filing a paper on the shelf is to <strong>discover its gene</strong> for the player who filed it.</p>
-</div>
-
-<h3 id="plan-filing-discovers">Filing discovers (owner&rsquo;s call, 2026-10-01)</h3>
 <p>
-    When a paper lands in the filing slot on the server, mark its gene discovered for the
-    player who put it there, through the same path the other discovery routes use, so the
-    gene database and recipe display update. Two things to settle while building: whether a
-    hopper or other automation feeding the shelf discovers anything (there is no player), and
-    whether the player is told. Why: <a href="#filing-discovers">the decision</a>.
+    <strong>Built:</strong> the menu&rsquo;s <code>PaperSlot.setByPlayer</code> calls
+    <code>GeneDiscoveryHandler.discoverFromPaper(player, topic)</code>, which marks the gene
+    discovered through <code>GeneDatabaseData.discover</code> &mdash; the same call taming
+    and breeding make, so the carrot recipe unlocks and the database syncs to the client
+    &mdash; and ticks the <code>DISCOVER_GENE</code> (and, for a magical gene,
+    <code>MAGICAL_GENE_DISCOVERED</code>) progress tasks. What a paper teaches is decided in
+    <code>common/</code>: <code>ResearchTopic.discoveryTokens()</code> is the paper&rsquo;s two
+    allele tokens, or nothing for the wild pair (taming&rsquo;s rule: the ordinary horse
+    teaches nothing) and for a paper this build cannot read. <code>ResearchTopicTest</code>
+    pins that every paper a chest or a villager can hand out teaches its pair.
 </p>
 
+<p>
+    The two questions left open by the decision, settled while building (not the
+    owner&rsquo;s calls, so on the session log):
+</p>
+<ul>
+    <li><strong>Automation discovers nothing.</strong> Every way a hand places a paper
+        &mdash; click, swap, shift-click, drag, number key &mdash; goes through
+        <code>Slot.setByPlayer</code> in vanilla&rsquo;s 26.1.2 sources. A hopper cannot
+        reach the shelf today (it registers no item capability), and if one is ever added
+        it will write to the container directly and discover nothing. A <code>FakePlayer</code> (another mod&rsquo;s
+        automation, or the test yard&rsquo;s own) is refused too, so it never fills the
+        saved database with entries for a player who does not exist.</li>
+    <li><strong>The player is told the way the other routes tell them</strong>: the gene
+        database and the recipe update, and the progress tasks tick. There is no chat line
+        of its own, because taming and breeding have none.</li>
+</ul>
+
 </section>
+
+
 
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -299,7 +321,18 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The storage layer is proven (<a href="item-research-shelf.html?view=coding#verified-storage-0802">2026-10-02</a>); what is left is the screen &mdash; whether hidden slots really refuse clicks, whether a long Copy list of pairs still reads, the two-player case &mdash; and the new art, none of it yet seen by a player.</p>
+    <p>The storage layer is proven (<a href="item-research-shelf.html?view=coding#verified-storage-0802">2026-10-02</a>); what is left is the screen &mdash; whether hidden slots really refuse clicks, whether a long Copy list of pairs still reads, the two-player case &mdash; whether filing a paper really discovers its gene, and the new art, none of it yet seen by a player.</p>
+</div>
+
+<h3 id="check-filing-discovers" data-check-kind="open-gap">Does filing a paper discover its gene? (built 2026-10-02, NOT played)</h3>
+<div class="open-check">
+<strong>Open, shipped 2026-10-02 with <a href="?view=coding#filing-discovers">filing discovers</a>.</strong>
+The rule is unit-tested; the hook in the menu has never run in a game, and the test yard cannot drive
+it (its shelf pens use a <code>FakePlayer</code>, which is refused on purpose). To check by hand: in a
+fresh world, open the gene database and note a gene you have not discovered; get a research paper for
+it (<code>/give</code>, or the supplier); file it on a shelf by clicking it in, then by shift-clicking a
+second pair of a second undiscovered gene. <strong>PASS:</strong> both genes now show discovered in the
+database and their carrot recipes show, without reopening anything.
 </div>
 
 <h3 id="check-pair-filing" data-check-kind="open-gap">Does a long list of pairs still read? (NOT played)</h3>

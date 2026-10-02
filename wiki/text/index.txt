@@ -3176,7 +3176,7 @@ wiki/item-research-papers.html#topic	coding	Why it is strings, and where it norm
 wiki/item-research-papers.html#use	gameplay	What it does
 wiki/item-research-papers.html#verified	coding	Verified
 wiki/item-research-shelf.html#art-0929	coding	The block finally looks like itself
-wiki/item-research-shelf.html#filing-discovers	coding	Filing a paper discovers its gene (owner, 2026-10-01)
+wiki/item-research-shelf.html#filing-discovers	coding	Filing a paper discovers its gene (owner, 2026-10-01; built 2026-10-02)
 wiki/item-research-shelf.html#furnace	coding	The copy runs on the block, like a furnace
 wiki/item-research-shelf.html#loop	gameplay	Where the papers come from
 wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each

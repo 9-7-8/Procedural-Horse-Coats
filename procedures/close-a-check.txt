@@ -53,6 +53,10 @@ STEPS
 4. If the tab is now empty, remove the whole tab section, its summary box included.
    The page leaves verification.html or roadmap.html by itself. If the summary
    sentence no longer describes what is left, reword it.
+   A removed ROADMAP tab also loses its coverage row in wiki/roadmap-execution.html
+   (the row linking page.html#roadmap): delete it by hand. check-roadmap-execution.mjs
+   compares those rows with the pages roadmap.html lists, so it fails until both the
+   row is gone and bake-roadmap-index has run.
 
 5. Remove what served only this item:
    - the yard pen that asked this question (DebugTestYard);
@@ -71,6 +75,7 @@ STEPS
      node wiki/tools/build-search-index.mjs
      node wiki/tools/check-links.mjs
      node wiki/tools/bake-agent-text.mjs
+     node wiki/tools/check-roadmap-execution.mjs   (if a Roadmap tab was removed)
    For a gene page: also :common:bakeUnverifiedGenes, which reads the Verified blocks
    and feeds the horse dimension's coat column.
 
