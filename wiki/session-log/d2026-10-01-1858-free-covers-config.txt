@@ -1,0 +1,87 @@
+2026-10-01 18:58 (end time) - fertility.free_covers_per_day: a stallion's free covers as a server setting
+
+ASKED
+
+    - "/whats-next". Surveyed every queue. Unreleased on main since v0.5.038: the #15
+      fix and docs. Open issues: #13 (waits on the live server's logs), #12, #10, #2; none
+      labelled needs-owner. Four PCH export folders unreviewed (2026-10-01, -run2, -run3,
+      -run4). Last session's pick-up-first: /review-server-logs, then /fix-bug #12.
+      Offered: review the server logs (recommended), fix #12, the To-do item "free covers
+      config", fix #10.
+    - Owner picked "To-do: free covers config" -> /process-intake on that one To-do
+      bullet, built by procedures/add-a-config-option.txt, then end-session.
+
+DONE
+
+    1767690f  fertility.free_covers_per_day: a stallion's free covers are a server setting
+      What was missing. ReproRules.FREE_COVERS_PER_DAY (3) was read directly in four
+      places: ReproRules.stallionFactor (the conception odds on every path),
+      NaturalCover.better (a mare prefers a rested stallion), ReproText.vetMale (the
+      vet's "past 3 a day") and their tests. A server could not change it.
+      The change:
+      - common/repro/StallionDay(covers, free): tired() is covers >= free, factor() is
+        TIRED_STALLION_FACTOR when tired. The same shape as NaturalCover.Crowd.
+      - ReproRules.FREE_COVERS_PER_DAY renamed DEFAULT_FREE_COVERS_PER_DAY, plus
+        MAX_FREE_COVERS_PER_DAY = 1000; stallionFactor(int) deleted.
+      - Conception.attempt, NaturalCover.Stallion and ReproText.vetMale take a
+        StallionDay instead of an int.
+      - ServerConfig: fertility.free_covers_per_day (default 3, range 0-1000), the safe
+        accessor freeCoversPerDay(), and stallionDay(int), the one way NeoForge code
+        builds the record. Callers: ReproHandler (carrot/jar conception and the vet
+        report), NaturalBreedingHandler (natural covers), StasisStud (the stasis bank).
+      - intake/To do.txt: the bullet deleted.
+      Proof. NaturalCoverTest, ReproTextTest, ReproRulesTest, StasisMatingTest,
+      ConceivableTest green; new NaturalCoverTest.aWorldMaySetTheFreeCovers pins the odds,
+      the preference and the vet text against a strict (2) and a generous (10) allowance.
+      Mutated (vet text quoting the default) -> that test red. runServer: Done (, no
+      ERROR / Couldn't parse / Invalid / missing lines, server.toml gained
+      free_covers_per_day = 3, and a live edit logged "Config file ../phc/server.toml
+      changed, re-loading". run/phc/ and run/config/ snapshotted before and restored
+      byte-identical after. :neoforge-26.1.2:build, check-parity, check-designer-boots,
+      check-links green.
+
+    Docs: wiki/fertility.html Gameplay #setting-free-covers, Coding #stallion-day-1001,
+    Verification #free-covers-setting-1001; wiki/item-seed-jars.html now names the key;
+    verification.html, search index and wiki/text rebaked.
+
+DECIDED
+
+    - The key, its section and default came from the owner's To-do bullet (owner,
+      2026-10-01).
+    - Calls made without her, recorded in ServerConfig's comment and
+      fertility.html#stallion-day-1001: range 0-1000 (0 = always tired, 1000 = never);
+      no reload listener needed, since the accessor is read live on each cover; the
+      constant renamed DEFAULT_ so a missed reader cannot compile.
+
+FOUND ON THE WAY
+
+    - My mistake: the first code commit piped a PowerShell here-string into
+      `git commit -F -`, which git read as a pathspec; nothing was committed and the push
+      reported up to date. Recommitted from a message file. end-session step 3d now says so.
+    - Issues filed: none.
+
+PROCEDURES
+
+    - add-a-config-option step 5: StallionDay as a second worked example, and rename the
+      constant DEFAULT_X so a missed reader fails to compile.
+    - end-session step 3d: commit from a message file in PowerShell.
+
+NOT RUN / NOT CHECKED
+
+    - The full :common:test suite was not run. Every common/ class that calls
+      Conception.attempt, NaturalCover or ReproText.vetMale has its test class above; a
+      full run would add only unrelated suites.
+    - Gametests not run; none reads the free covers.
+    - Never seen in game: the key set to anything but 3. Check:
+      fertility.html#free-covers-setting-1001.
+    - web.wasm not committed: the bake was build noise, web/ does not reach common/repro.
+
+RELEASE
+
+    Due: since v0.5.038, main holds the #15 fix and this new option (a feature), which
+    meets release step 1. Cut by /release straight after this session's docs commit.
+
+PICK UP FIRST
+
+    /review-server-logs on the four unreviewed 2026-10-01 PCH export folders, then
+    /fix-bug for #12.

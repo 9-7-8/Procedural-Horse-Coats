@@ -64,9 +64,11 @@ STEPS
 
 5. Pass it into common/ as a value. common/ never reads config, so the NeoForge caller
    reads the accessor and passes the value in. Prefer a record that carries the value
-   AND its limit (NaturalCover.Crowd(othersNearby, cap)): then no downstream code, chat
-   line or log can fall back to the old constant. Pin it with a common test, as
-   NaturalCoverTest.aWorldMayRaiseOrLowerTheCap does.
+   AND its limit (NaturalCover.Crowd(othersNearby, cap); StallionDay(covers, free), built
+   only by ServerConfig.stallionDay): then no downstream code, chat line or log can fall
+   back to the old constant. Rename the constant DEFAULT_X so a missed reader fails to
+   compile instead of silently reading it. Pin it with a common test, as
+   NaturalCoverTest.aWorldMayRaiseOrLowerTheCap and aWorldMaySetTheFreeCovers do.
 
 6. Reload. Accessors read live, so the file watcher's re-read just works. A CACHE built
    from the value must be keyed on it: ChaosRoster.configKey() rebuilds when the lists

@@ -211,6 +211,16 @@
     on purpose: whether a foal exists has to be one answer for everyone on the server.
 </p>
 
+<p id="setting-free-covers">
+    <code>fertility.free_covers_per_day</code>, from 0 to 1,000, and <strong>3 by
+    default</strong>. This is how many covers a stallion makes in a day before his chance of
+    getting a mare in foal is halved until tomorrow. Natural covers, breeding carrots and
+    seed-jar fills all count against it, a mare prefers a stallion still under it, and the
+    vet&rsquo;s kit quotes it when it calls him tired. It is a taper, never a stop: a tired
+    stallion still covers. 0 makes every stallion tired all day; 1,000 means none ever is.
+    Server-side, like the crowding cap.
+</p>
+
 <p>
     <code>fertility.gestation_days</code>, from 1 to 340. Every other
     stage grows with it in proportion, but is never shorter than one day, so at 340 a mare
@@ -418,12 +428,27 @@
     mares if there's no other, more virile, stallion around&rdquo;</em>. That is
     <code>NaturalCover.better</code>: rested beats tired at any distance inside
     <code>NATURAL_REACH</code>, and distance decides only within a group. <strong>The split sits at
-    <code>&gt;= FREE_COVERS_PER_DAY</code>, not above it</strong> &mdash; a stallion who has made his
-    third cover is already halved for his fourth, so counting him fresh would have her prefer the
-    halved one. What remains unbuilt is the owner's other half of the same ask, that a stallion cover
+    <code>StallionDay.tired()</code>, covers <code>&gt;=</code> the allowance, not above it</strong>
+    &mdash; a stallion who has made his third cover is already halved for his fourth, so counting him
+    fresh would have her prefer the halved one. What remains unbuilt is the owner's other half of the same ask, that a stallion cover
     freely unless he carries a negative fertility gene: the halving still applies to every stallion,
     sound or <a href="gene-fertility.html">subfertile</a>. <em>Not played yet</em> &mdash;
     <a href="#no-daily-cap-0924">&sect;the paddock below</a>.
+</p>
+<p id="stallion-day-1001">
+    <strong>The free covers are a server setting</strong> (the owner, 2026-10-01):
+    <code>fertility.free_covers_per_day</code>, read by <code>ServerConfig.freeCoversPerDay()</code>
+    and handed to <code>common/</code> only as <code>common/repro/StallionDay(covers, free)</code>,
+    built by <code>ServerConfig.stallionDay(int)</code>. The same shape as
+    <code>NaturalCover.Crowd</code>: the count travels with the world&rsquo;s limit, so the three
+    readers &mdash; <code>Conception.attempt</code> (the odds, via <code>StallionDay.factor()</code>),
+    <code>NaturalCover.better</code> (her preference) and <code>ReproText.vetMale</code> (the
+    kit&rsquo;s &ldquo;past N a day&rdquo;) &mdash; cannot disagree, and none can fall back to
+    <code>ReproRules.DEFAULT_FREE_COVERS_PER_DAY</code>, which only <code>StallionDay.of</code> and
+    the accessor&rsquo;s not-loaded fallback read. <code>ReproRules.stallionFactor(int)</code> is
+    gone. <code>NaturalCoverTest.aWorldMaySetTheFreeCovers</code> pins all three against a strict
+    and a generous allowance; it fails if the kit quotes the default instead (checked by mutation).
+    A dev server boots clean with the key and re-reads it on a live edit.
 </p>
 
 <p id="settled-repro-timing">
@@ -1071,6 +1096,25 @@
         <strong>Pass:</strong> &ldquo;<em>N covers made today</em>&rdquo; and a second line
         saying he is tired and his chance is halved. <strong>Fail:</strong> any &ldquo;of
         3&rdquo;, which would mean an untranslated copy of the old wording somewhere.</li>
+</ul>
+
+<h3 id="free-covers-setting-1001">The free covers are a server setting (2026-10-01, NOT played)</h3>
+
+<p>
+    <code>fertility.free_covers_per_day</code> decides when a stallion tires; the rule, the
+    preference and the kit&rsquo;s wording are tested against it, but nobody has set it in a game.
+</p>
+
+<h4>What to look at</h4>
+
+<ul>
+    <li><strong>The setting is read at all.</strong> Set <code>fertility.free_covers_per_day</code>
+        to 1 on the server, let a stallion make one cover (a breeding carrot or a seed-jar fill is
+        quickest), then use a vet&rsquo;s kit on him without sneaking.
+        <strong>Pass:</strong> &ldquo;<em>He is tired: past 1 a day</em>&rdquo;.
+        <strong>Fail:</strong> no tired line, or &ldquo;past 3&rdquo;, which would mean a caller
+        is still handing <code>common/</code> the default rather than
+        <code>ServerConfig.stallionDay</code>.</li>
 </ul>
 
 <h3 id="cover-notice-0924">Why she was not covered, in chat (2026-09-24, NOT played)</h3>

@@ -35,6 +35,9 @@ STEPS
    b. Untracked files in intake/ are the owner queuing material. Commit around them.
    c. Work on main; do not branch. Pull first: cloud routines also push to main.
    d. Write one descriptive commit that says what changed and why, not a file list.
+      In PowerShell, write the message to a scratchpad file and `git commit -F <file>`:
+      piping a here-string into `git commit -F -` is read as a pathspec, commits nothing,
+      and the push after it reports "up to date".
 
 4. Update the docs to what is true now, not to "what I changed today".
    Walk CLAUDE.md's page map and honour the source-of-truth rule. At minimum:
