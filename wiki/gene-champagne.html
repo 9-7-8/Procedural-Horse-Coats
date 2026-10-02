@@ -51,6 +51,13 @@
 
 <p>Champagne on a <a href="gene-kit.html">dominant white</a> horse is invisible.</p>
 
+<p id="foal-eyes">
+    <strong>A champagne foal has blue-green eyes.</strong> They turn to its adult colour
+    &mdash; amber, hazel or a rare olive &mdash; the moment it grows up, the same moment
+    its coat swaps to the adult skin. A splashed or otherwise blue-eyed champagne is
+    blue-eyed as a foal too. The horse designer shows it with <em>Age: Foal</em>.
+</p>
+
 <div class="note good">
     <span class="label">Owner-verified in-game, 2026-09-01</span>
     <p>An amber champagne keeps its chocolate points over a gold body.</p>
@@ -214,24 +221,43 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
         horse already carries something that varies (bay's black climb, grey's dapples),
         so the marginal number of forked textures is small.
     </p>
-    <p>
-        A real champagne <em>foal</em> is born blue-green and matures to amber or hazel.
-        Here it is still the adult colour from birth, because the eye-colour hook is not told
-        which skin it is baking. The owner has decided that should change:
-        <a href="#foal-eyes-decided">below</a>.
-    </p>
 </div>
 
-<h3 id="foal-eyes-decided">A champagne foal&rsquo;s eye is blue-green (owner, 2026-10-01)</h3>
+<h3 id="foal-eyes-decided">A champagne foal&rsquo;s eye is blue-green (built 2026-10-02)</h3>
 
 <p>
-    <strong>Settled:</strong> a champagne foal wears a blue-green eye, and the eye turns to the
-    rolled adult colour when the horse grows up. This does not reopen
-    <a href="philosophy.html">aging</a>. The game already draws a foal and an adult
-    differently, so all the hook needs is to be told which one it is baking: an
-    <code>adult</code> signal on <code>EyeColorContribution</code>. That hook is reusable
-    by any other gene with a foal eye. Not built yet: <a href="#roadmap">Roadmap</a>.
+    A real champagne <em>foal</em> is born blue-green and matures to amber or hazel. The
+    owner settled on 2026-10-01 that the mod should do the same, without reopening
+    <a href="philosophy.html">aging</a>: the game already bakes a foal and an adult texture
+    separately, so the eye only had to be told which one it is in.
 </p>
+<ul>
+    <li><strong>The hook</strong> is a default method on
+        <a href="eye-colour.html#requests"><code>EyeRequestContribution</code></a>,
+        <code>foalIris(pair, genotype, epigenome)</code>: an <code>0xRRGGBB</code> the
+        gene&rsquo;s eyes wear before the horse grows up, or <code>null</code>. It is
+        <em>not</em> an allele and is never written onto the horse: a foal&rsquo;s eye is a
+        stage, and the adult colour it grows into is the allele <code>requestEyes</code>
+        already wrote. The treatment planned this on <code>EyeColorContribution</code>,
+        but that channel is magical-only now and champagne no longer implements it.</li>
+    <li><strong><code>Eyes.resolve(genotype, epigenome, adult)</code></strong> applies it.
+        An iris takes the foal colour only if the gene was the <em>last</em> writer on that
+        iris locus and the horse still carries the allele it asked for. So a splashed
+        champagne, whose white locus asked for blue after champagne asked for amber, is a
+        blue-eyed foal; and a genotype that was never forced shows its adult eye.</li>
+    <li><strong>The composer</strong> passes its <code>adult</code> flag through. The hue
+        is kept and only the colour swapped, so the iris paints and varies exactly as the
+        adult&rsquo;s does. The client&rsquo;s texture cache already keys every coat on
+        <code>:foal</code> / <code>:adult</code> (<code>GeneticCoatTextureFactory</code>),
+        so no key changed.</li>
+    <li><strong>The colour</strong> is <code>ChampagneGene.FOAL_BLUE_GREEN</code>,
+        <code>#5B9A92</code>, one for every foal: the variation belongs to the adult eye.</li>
+    <li><strong>Proof:</strong> <code>EyeColorTest</code>
+        (<code>aChampagneFoalHasBlueGreenEyesAndGrowsIntoItsRolledOnes</code>,
+        <code>aSplashedChampagneFoalKeepsItsBlueEyes</code>) bakes one horse through the real
+        composer with only the age flag changed. In <code>coat-golden.txt</code> eleven
+        champagne foal rows moved; the four that did not are all splashed.</li>
+</ul>
 
 <h2>What makes it nearly the simplest gene</h2>
 
@@ -252,22 +278,27 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
 
 </section>
 
-<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
-         data-tab-hint="Planned, not built">
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
 
-<div class="note roadmap-summary">
-    <span class="label">What is still planned here</span>
-    <p>A champagne <strong>foal gets a blue-green eye</strong> that turns to its rolled adult colour when it grows up. This needs an adult signal on the eye-colour hook.</p>
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>A champagne <strong>foal&rsquo;s blue-green eye</strong> has only been seen in a unit test, so the question is whether it reads as blue-green on the real foal model and turns to the adult colour when the foal grows up.</p>
 </div>
 
-<h3 id="plan-foal-eyes">Blue-green foal eyes (owner&rsquo;s call, 2026-10-01)</h3>
+<h3 id="verify-foal-eyes">Blue-green foal eyes, in game (built 2026-10-02, NOT played)</h3>
+<ol>
+    <li>Breed two champagnes (or spawn a champagne foal from the spawn egg, Age: Foal).
+        Its eyes should be blue-green (<code>#5B9A92</code>), not amber or hazel.</li>
+    <li>Feed it until it grows up. The eyes should turn to its adult colour, the one
+        the info screen&rsquo;s eye line names, at the same moment the coat swaps to
+        the adult skin.</li>
+    <li>A splashed champagne foal should be blue-eyed, not blue-green.</li>
+</ol>
 <p>
-    Add an <code>adult</code> signal to <code>EyeColorContribution</code>. Champagne requests a
-    blue-green iris when it is false and the rolled adult allele when it is true. The
-    foal and adult textures then differ, so the coat cache key must include the age
-    flag. Otherwise a foal and its grown self would share one baked texture. The horse
-    designer (hard rule 5) previews an adult unless it gains a foal toggle. Why:
-    <a href="#foal-eyes-decided">the decision</a>.
+    Fear: the foal template&rsquo;s eye texels are not where the adult&rsquo;s are, and
+    the test bakes on the adult skin. If the foal&rsquo;s eye still looks amber, the age
+    flag reached the composer but the foal skin&rsquo;s iris was never repainted.
 </p>
 
 </section>
