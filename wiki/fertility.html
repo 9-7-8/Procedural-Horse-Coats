@@ -537,6 +537,19 @@
     outright, so the overlapping-hitbox fallback was not what carried the cover.
 </p>
 
+<p id="fixed-cover-beside-wall">
+    <strong>A pair beside a wall can breed; a fence still parts a pair</strong> (2026-10-02,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/23">#23</a>, commit b9d0cb4e). The pathfinder plans a
+    horse as a 2&times;2 mob, so a mare standing against a wall had no start node and <code>canMeet</code> refused
+    her &ldquo;no walkable path &hellip; (1.6 blocks)&rdquo; however near her stallion: three of the yard&rsquo;s ratio
+    pens stood refused for two and a half hours on the night of 2026-10-01. <code>canMeet</code> now also accepts two
+    horses whose hitboxes are within a block of each other with no block collision shape on the line between their
+    bodies, asked before the (dearer) path. In the 03:52 yard run, WALL PAIR (mare pinned against the pen wall, stallion
+    1.6 blocks along it) conceived 9 times in 20 minutes, and FENCE PAIR (the two pressed to either side of an oak fence,
+    hitboxes 0.25 apart, one pen group) conceived 0 times with 21 refusals - the 2026-09-30 rule that a fence blocks a
+    cover stands. Counted from the fertility trace; the pen's own WALL verdict misread a finished pregnancy as none.
+</p>
+
 <p id="verified-gelding-band">
     <strong>A gelding in a band never covers and never challenges</strong> (2026-09-15, the band half of gap 229;
     the horse browser's stallion picker is still open there). The yard's GELDING BAND pen puts a stallion, two mares in
