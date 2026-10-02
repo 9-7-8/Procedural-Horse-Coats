@@ -86,6 +86,132 @@
     </p>
 </div>
 
+<h2 id="v0-5-040">0.5.040 &mdash; level stables, dealer and stasis fixes, and a lighter server</h2>
+
+<p>
+    A patch release of fixes and speed. It fixes ten bugs, most of them reported from the live
+    server: stables that floated over valleys, dealer horses freezing in powder snow or killing
+    each other, a hopper that drained a stasis bank, and a mare beside a wall who could not be
+    covered. A server with many horses now spends about a quarter less time on them each tick.
+    The stasis bank also learns two small tricks.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners: new stables are rarer</p>
+    <p>
+        New stables now only go on fairly level ground, so about half the sites that used to
+        get one are skipped. Stables already built in your world stay where they are.
+    </p>
+</div>
+
+<h3 id="v0-5-040-stables">Stables stand on the ground (#2)</h3>
+<p>
+    A stable used to be set at the height of the ground under its centre, so on a hillside or
+    over a valley it hung in the air on a hollow slab. Each site is now measured at its corners
+    and centre. If the ground varies by more than 10 blocks the site is skipped; otherwise the
+    stable is lowered to the lowest of those points. About 56% of the old sites are kept, so
+    stables are roughly half as common as before.
+    Details: <a href="stables.html">Generated stables</a>.
+</p>
+
+<h3 id="v0-5-040-dealers">Horse dealers</h3>
+<ul>
+    <li><strong>No more horses frozen in powder snow (#18).</strong> The cowboy and the dealers
+        never stand a horse in or over powder snow.</li>
+    <li><strong>The arcane dealer&rsquo;s horses stop killing each other (#17).</strong> He no
+        longer stocks horses whose aggression hunts other horses. Guardians are still stocked.
+        A dealer who already holds a horse-hunter keeps it until it sells, rotates out, or he
+        leaves.</li>
+    <li><strong>A horse sold to a wandering trader leaves with him (#21).</strong> Before, it
+        stayed behind when he despawned.</li>
+</ul>
+
+<h3 id="v0-5-040-breeding">Breeding and genes</h3>
+<ul>
+    <li><strong>A mare beside a wall can be covered (#23).</strong> Natural covers were refused
+        when the mare stood against a wall. A fence between the pair still keeps them
+        apart.</li>
+    <li><strong>Both copies of a gene count (#20).</strong> A horse with two copies of an allele
+        that changes an attribute now gets both effects; before, the second copy replaced the
+        first. The weather genes are the ones a player will notice: a horse with two
+        rain-speed copies now really is faster in the rain than one with a single copy.</li>
+</ul>
+
+<h3 id="v0-5-040-stasis">Stasis bank</h3>
+<ul>
+    <li><strong>A hopper underneath takes only the outputs (#22).</strong> It used to pull the
+        hay and water straight back out of the feed slots.</li>
+    <li><strong>Find a Basic horse by name.</strong> In Browse, typing a horse&rsquo;s name now
+        finds it even in a Basic-tier chamber. A search with operators
+        (<code>cinder OR amber</code>) still does not look inside Basic chambers.</li>
+    <li><strong>Eject empties.</strong> A new &ldquo;Eject empties (N)&rdquo; button on the
+        Chambers tab takes every empty chamber out in one press. They go into your inventory,
+        and any that do not fit drop at the bank.</li>
+    <li>The saved-searches arrow no longer shows on the Chambers tab, and an open saved-search
+        menu closes when you leave Browse. Before, that menu could catch clicks meant for the
+        chamber slots (#10).</li>
+</ul>
+<p>Details: <a href="horse-stasis.html">The horse stasis bank</a>.</p>
+
+<h3 id="v0-5-040-performance">A lighter server with many horses</h3>
+<p>
+    The horse handlers were measured on a server stepped up to 1,000 horses, and the expensive
+    ones were fixed. Mean tick time:
+</p>
+<table class="facts">
+    <tr><th>Horses</th><th>Before</th><th>After</th></tr>
+    <tr><td>100</td><td>3.1 ms</td><td>2.4 ms</td></tr>
+    <tr><td>600</td><td>27.4 ms</td><td>18.7 ms</td></tr>
+    <tr><td>1,000</td><td>48.4 ms (worst 5%: 57.6)</td><td>35.7 ms (worst 5%: 41.7)</td></tr>
+</table>
+<p>
+    At 1,000 horses the slowest ticks used to go over Minecraft&rsquo;s 50 ms budget. They now
+    stay under it. Most of the saving came from not re-reading a horse&rsquo;s genome every
+    tick for night, sunlight and foal checks, and from not rebuilding attribute modifiers that
+    had not changed. Horses behave exactly as before.
+</p>
+<p>
+    Also, mobs no longer save an empty werewolf-shift record (#24), so world saves get a
+    little smaller.
+</p>
+
+<h3 id="v0-5-040-logs">Server logs</h3>
+<ul>
+    <li>Every start no longer warns that a mixin refmap is missing (#16). The warning was
+        harmless.</li>
+    <li>The breed-founder log no longer flags magic that a Stables horse was given on purpose
+        as &ldquo;NOT ON ITS SHEET&rdquo; (#12).</li>
+</ul>
+
+<h3 id="v0-5-040-worlds">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading.</strong> A world from 0.5.037 or later loads in this one.</li>
+    <li><strong>Stables already generated stay as they are.</strong> Only land generated from
+        now on uses the level-ground rule, so an old stable may still float. Newly explored
+        land gets about half as many stables as before.</li>
+    <li><strong>Mobs drop their empty werewolf-shift record</strong> the next time they are
+        saved. Nothing a player can see changes.</li>
+    <li><strong>An arcane dealer already holding a horse-hunter</strong> keeps it until it sells
+        or rotates out.</li>
+    <li>No config keys, defaults, recipes or breed frequencies changed.</li>
+</ul>
+
+<h3 id="v0-5-040-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>
+        (a hungry horse starved beside a plain hay bale in a test pen; the pen itself is not
+        ruled out yet), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a>
+        (the stall detector refuses a slab-floored stall, and splits a stall with a one-block
+        step), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a> (open
+        until the live server&rsquo;s logs show its chunk loads are gone), and
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (fixed in
+        this release, open until someone checks it in game).</li>
+    <li>Not seen in game yet: the level stables and how rare they now are, the powder-snow and
+        arcane-dealer fixes, and the stasis bank&rsquo;s name search and Eject empties. Each is
+        covered by a unit test or gametest. What is waiting on someone&rsquo;s eyes is on
+        <a href="verification.html">the verification page</a>.</li>
+</ul>
+
 <h2 id="v0-5-039">0.5.039 &mdash; dead horses kept by size, and a server setting for stallions</h2>
 
 <p>
