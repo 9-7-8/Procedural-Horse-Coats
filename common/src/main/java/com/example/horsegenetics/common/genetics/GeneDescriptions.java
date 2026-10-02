@@ -286,6 +286,17 @@ public final class GeneDescriptions {
                     "A magical recessive that paints nothing: two copies and neither the horse "
                             + "nor its rider takes any falling damage, from any height. It removes fall "
                             + "damage, not falling."),
+            Map.entry("horsegenetics.skeleton",
+                    "A magical recessive, and one of the two undeath loci. Two copies and the horse "
+                            + "is its own bones: vanilla's skeleton horse, cut out of the horse's own coat, "
+                            + "so its colours are the colours of its bones. It never drowns, and counts "
+                            + "as undead. No wild horse carries it; a vanilla skeleton horse converts into "
+                            + "a breed that does."),
+            Map.entry("horsegenetics.zombie",
+                    "A magical recessive, and one of the two undeath loci. Two copies and the horse "
+                            + "is dead flesh: vanilla's zombie horse hide replaces its natural colour, and "
+                            + "magical markings still show over it. It counts as undead. No wild horse "
+                            + "carries it; a vanilla zombie horse converts into a breed that does."),
             Map.entry("horsegenetics.ocean_born",
                     "A magical recessive that paints nothing: two copies and neither the horse "
                             + "nor its rider can drown. It says nothing about how fast the horse swims or "

@@ -80,7 +80,76 @@ public record Breed(
         List<Strain> strains,
         boolean magicalVariant,
         BreedHerd herd,
-        SpawnGround spawnGround) {
+        SpawnGround spawnGround,
+        String undeadOf,
+        List<CountGroup> countGroups) {
+
+    /** {@link #undeadOf()} for a breed in no undead pool - every breed but two. */
+    public static final String NOT_UNDEAD = "";
+
+    /** The undead pools a breed may join (undead treatment D12): which vanilla undead horse it replaces. */
+    public static final List<String> UNDEAD_POOLS = List.of("skeleton", "zombie");
+
+    /** One locus of a {@link CountGroup}: the pair it gets when the group picks it. */
+    public record GroupLocus(String gene, String a, String b) {}
+
+    /**
+     * <b>"Some of these, rarely several"</b> - a set of loci where the breed sheet
+     * says how likely it is that exactly 0, 1, 2 ... of them express, and the
+     * founder then picks which ones at random. Every locus the group does not pick
+     * is its gene's wild pair.
+     *
+     * <p>Per-locus pools cannot say this: four loci at ten percent each fix how
+     * often two show against how often one does, with nothing left to tune. It
+     * exists for the skeleton horse, whose every horn-like part is in its pool - a
+     * horn of some kind on about one founder in six, and each further kind much
+     * rarer than the last (owner, 2026-10-02: {@code P(k) = P(k-1) / 2^(k-1)} from
+     * ten percent).
+     *
+     * @param counts relative weights, index = how many of the loci express; an
+     *               index past the end weighs zero
+     */
+    public record CountGroup(String name, List<Double> counts, List<GroupLocus> loci) {
+        public CountGroup {
+            name = name == null ? "" : name;
+            counts = List.copyOf(counts);
+            loci = List.copyOf(loci);
+        }
+
+        /** The share of founders expected to express any one locus - the mean count over the loci. */
+        public double shareEach() {
+            double total = 0.0, mean = 0.0;
+            for (int k = 0; k < counts.size() && k <= loci.size(); k++) {
+                total += Math.max(0.0, counts.get(k));
+                mean += k * Math.max(0.0, counts.get(k));
+            }
+            return total <= 0.0 || loci.isEmpty() ? 0.0 : mean / total / loci.size();
+        }
+
+        /** How many loci this founder expresses: an index into {@link #counts}, at most the number of loci. */
+        public int drawCount(com.example.horsegenetics.common.Rng rng) {
+            double total = 0.0;
+            for (int k = 0; k < counts.size() && k <= loci.size(); k++) {
+                total += Math.max(0.0, counts.get(k));
+            }
+            if (total <= 0.0) {
+                return 0;
+            }
+            double roll = rng.nextFloat() * total;
+            int last = 0;
+            for (int k = 0; k < counts.size() && k <= loci.size(); k++) {
+                double w = Math.max(0.0, counts.get(k));
+                if (w > 0.0) {
+                    last = k;
+                }
+                roll -= w;
+                if (roll < 0.0) {
+                    return k;
+                }
+            }
+            return last;
+        }
+    }
 
     /** One weighted allele combination in a breed's pool for a gene, as tokens. */
     public record Combo(String a, String b, double weight) {}
@@ -234,6 +303,25 @@ public record Breed(
         strains = strains == null ? List.of() : List.copyOf(strains);
         herd = herd == null ? BreedHerd.DEFAULT : herd;
         spawnGround = spawnGround == null ? SpawnGround.NONE : spawnGround;
+        undeadOf = undeadOf == null ? NOT_UNDEAD : undeadOf;
+        countGroups = countGroups == null ? List.of() : List.copyOf(countGroups);
+    }
+
+    /** Is this breed in an undead pool - does a vanilla undead horse convert into it? */
+    public boolean undead() {
+        return !undeadOf.isEmpty();
+    }
+
+    /** The count group that draws {@code geneKey}, or {@code null}. */
+    public CountGroup groupOf(String geneKey) {
+        for (CountGroup g : countGroups) {
+            for (GroupLocus l : g.loci()) {
+                if (l.gene().equals(geneKey)) {
+                    return g;
+                }
+            }
+        }
+        return null;
     }
 
     private static Map<String, List<Combo>> ordered(Map<String, List<Combo>> pools) {
@@ -246,7 +334,7 @@ public record Breed(
 
     /** Does the breed sheet name this gene anywhere - in its own pools or in any strain's? */
     public boolean constrains(String geneKey) {
-        if (genePools.containsKey(geneKey)) {
+        if (genePools.containsKey(geneKey) || groupOf(geneKey) != null) {
             return true;
         }
         for (Strain s : strains) {
@@ -259,7 +347,7 @@ public record Breed(
 
     /** Does a founder of {@code strain} (or of no strain, when {@code null}) have this gene on its sheet? */
     public boolean constrains(String geneKey, Strain strain) {
-        return genePools.containsKey(geneKey)
+        return genePools.containsKey(geneKey) || groupOf(geneKey) != null
                 || (strain != null && strain.genePools().containsKey(geneKey));
     }
 
@@ -360,6 +448,10 @@ public record Breed(
             }
         }
         if (pool == null) {
+            CountGroup group = groupOf(geneKey);
+            if (group != null) {
+                return marginal(gene, group, geneKey);
+            }
             throw new IllegalArgumentException(id + " does not name " + geneKey);
         }
         double total = 0.0;
@@ -371,6 +463,24 @@ public record Breed(
         for (Combo c : pool) {
             b.weight(alleleOf(gene, c.a()), alleleOf(gene, c.b()), c.weight() * scale);
         }
+        return b.build();
+    }
+
+    /**
+     * What one grouped locus looks like on its own - its pair at the group's share
+     * per locus, wild otherwise. Founders never draw from this ({@code BreedFounder}
+     * draws the group as one decision); it is the answer for a caller asking about
+     * the sheet - the census and the band checks.
+     */
+    private static FounderTable marginal(Gene gene, CountGroup group, String geneKey) {
+        double share = 100.0 * group.shareEach();
+        FounderTable.Builder b = FounderTable.builder();
+        for (GroupLocus l : group.loci()) {
+            if (l.gene().equals(geneKey)) {
+                b.weight(alleleOf(gene, l.a()), alleleOf(gene, l.b()), share);
+            }
+        }
+        b.weight(gene.defaultAllele(), gene.defaultAllele(), 100.0 - share);
         return b.build();
     }
 
@@ -414,6 +524,8 @@ public record Breed(
         private boolean magicalVariant = true;
         private BreedHerd herd = BreedHerd.DEFAULT;
         private SpawnGround spawnGround = SpawnGround.NONE;
+        private String undeadOf = NOT_UNDEAD;
+        private final List<CountGroup> countGroups = new ArrayList<>();
 
         private Builder(String id, String name) {
             this.id = id;
@@ -659,12 +771,25 @@ public record Breed(
             return this;
         }
 
+        /** Join an undead pool - {@code "skeleton"} or {@code "zombie"}; see {@link #UNDEAD_POOLS}. */
+        public Builder undeadOf(String pool) {
+            this.undeadOf = pool == null ? NOT_UNDEAD : pool;
+            return this;
+        }
+
+        /** Add a {@link CountGroup}. */
+        public Builder countGroup(CountGroup group) {
+            countGroups.add(group);
+            return this;
+        }
+
         public Breed build() {
             return new Breed(id, name, country, magical, biomes, spawnWeight,
                     sourcesNamed ? sources : BreedSource.ALL, pools,
                     new StatScores(speed, jump, health, size, pull), bands.build(),
                     notes, price,
-                    description, spawnTime, strains, magicalVariant, herd, spawnGround);
+                    description, spawnTime, strains, magicalVariant, herd, spawnGround,
+                    undeadOf, countGroups);
         }
     }
 }

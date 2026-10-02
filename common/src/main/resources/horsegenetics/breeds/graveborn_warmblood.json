@@ -1,0 +1,82 @@
+{
+  "id": "graveborn_warmblood",
+  "name": "Graveborn Warmblood",
+  "description": "A heavy, sturdy warmblood that looks like it was buried and did not stay. It is slow, hard to kill, eats raw meat and is hostile to anything that rides it after dark. Rotten flesh calms it for a while, and a calm horse can be tamed.",
+  "kind": "magical",
+  "magical_variant": false,
+  "commonness": "very_rare",
+  "spawn": ["spawn_egg"],
+  "undead_of": "zombie",
+  "stats": {
+    "speed": 2,
+    "jump": 4,
+    "health": 10,
+    "size": [0.86, 0.95],
+    "pull": 7
+  },
+  "genes": {
+    "horsegenetics.zombie": [
+      { "pair": "Zomb/Zomb", "weight": 100 }
+    ],
+    "horsegenetics.diet": [
+      { "pair": "Dmeat/Dmeat", "weight": 100 }
+    ],
+    "horsegenetics.aggression": [
+      { "pair": "Anp/Anp", "weight": 100 }
+    ],
+    "horsegenetics.passification": [
+      { "pair": "Tmp/Tmp", "weight": 100 }
+    ],
+    "horsegenetics.magic_item_drop": [
+      { "pair": "Rot/Rot", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ]
+  },
+  "strains": [
+    {
+      "name": "Fresh",
+      "weight": 60,
+      "genes": {
+        "horsegenetics.dust": [
+          { "pair": "n/n", "weight": 100 }
+        ]
+      }
+    },
+    {
+      "name": "Long-buried",
+      "weight": 40,
+      "genes": {
+        "horsegenetics.dust": [
+          { "pair": "Dsk/Dsk", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "bands": {
+    "horsegenetics.passification": {
+      "offering": 15,
+      "amount": [2, 4],
+      "duration": [1200, 3600],
+      "cooldown": [600, 1800]
+    }
+  },
+  "notes": [
+    "The breed a vanilla zombie horse converts into (\"undead_of\": \"zombie\"). Zombie is the undeath locus; the raw-meat diet, the after-dark temper, the rotten-flesh calm, the flesh drops and the black eyes are separate loci the breed pins.",
+    "Unsellable and never placed: \"spawn\" is the spawn egg only. New ones come from /summon, eggs and old saves, through the converter.",
+    "Passification is Tmp/Tmp: TEMPORARY, at any age, two to four minecraft:rotten_flesh (offering 15), calm for one to three minutes, offerable again after half a minute to a minute and a half. The player has to tame it inside the calm - the contrast with the skeleton's single permanent bone.",
+    "Diet Dmeat/Dmeat, raw meat only. Drops Rot/Rot: one to three rotten flesh instead of leather. Does not burn in daylight.",
+    "Stats: slow (2), a poor jumper (4), very hard to kill (health 10, about 2.2 times the baseline - as close to double hearts as the curve reaches), strong (pull 7). Size [0.86, 0.95] matches vanilla's undead horses.",
+    "The look: the zombie locus stamps vanilla's zombie horse sheet in as the base coat, so its natural colour never shows, and magical genes paint over it. Fresh 60 is the sheet as it is (dust pinned off); Long-buried 40 adds dust, grave dirt up the legs, along the belly and over the muzzle."
+  ]
+}

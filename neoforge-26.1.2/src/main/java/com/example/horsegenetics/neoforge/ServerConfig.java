@@ -390,6 +390,15 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue HORSE_JOCKEY_COMMAND;
 
     /**
+     * <b>{@code undead.convert}</b> - does a vanilla zombie or skeleton horse become
+     * one of this mod's horses the first time it is ticked? On by default (undead
+     * treatment D2). Off, the converter returns at once and every vanilla undead
+     * horse is left exactly as vanilla made it; horses already converted stay the
+     * horses they became. See {@code server/UndeadHorseConverter}.
+     */
+    public static final ModConfigSpec.BooleanValue UNDEAD_CONVERT;
+
+    /**
      * <b>{@code behaviour.jockey_pass_days}</b> - how many Minecraft days one
      * jockey pass, or one bare {@code /horsejockey}, is worth. The owner's
      * number is 1. Zero is not allowed: a pass worth nothing is an item that
@@ -771,6 +780,15 @@ public final class ServerConfig {
                         "for a while - the same thing a jockey pass buys with an item, which",
                         "this does not affect. Off, the command is not registered at all.")
                 .define("commands.horse_jockey", true);
+        UNDEAD_CONVERT = builder
+                .comment("Whether vanilla zombie and skeleton horses become this mod's horses. (default: true)",
+                        "Each one converts the first time it is ticked - old saves included - into a",
+                        "Graveborn Warmblood or a Great Valley Skeleton Horse, keeping its name, owner,",
+                        "saddle, armour, lead, age and health fraction; its stats are re-rolled from its",
+                        "genes. A skeleton trap converts only after it has sprung, and a horse with a",
+                        "player on it waits for the rider to get off. Off, vanilla undead horses are",
+                        "left alone; ones already converted stay converted.")
+                .define("undead.convert", true);
         JOCKEY_PASS_DAYS = builder
                 .comment("How many Minecraft days one jockey pass is worth. (default: 1)",
                         "Also the length of a bare /horsejockey with no number given.",
@@ -1117,6 +1135,15 @@ public final class ServerConfig {
     public static boolean horseGiveCommand() {
         try {
             return HORSE_GIVE_COMMAND.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code undead.convert}, safely. */
+    public static boolean undeadConvert() {
+        try {
+            return UNDEAD_CONVERT.get();
         } catch (IllegalStateException notLoaded) {
             return true;
         }

@@ -165,6 +165,6 @@ public final class BreedSpawnSettings {
                               SpawnTime time) {
         return new Breed(b.id(), b.name(), b.country(), b.magical(), biomes, weight, sources, b.genePools(),
                 b.scores(), b.bands(), b.notes(), b.price(), b.description(), time, b.strains(), b.magicalVariant(),
-                b.herd(), b.spawnGround());
+                b.herd(), b.spawnGround(), b.undeadOf(), b.countGroups());
     }
 }

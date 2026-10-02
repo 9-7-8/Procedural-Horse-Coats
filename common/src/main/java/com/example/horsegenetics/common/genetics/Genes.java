@@ -3,6 +3,8 @@ package com.example.horsegenetics.common.genetics;
 import com.example.horsegenetics.common.CommonMaps;
 import com.example.horsegenetics.common.genetics.genes.AcanGene;
 import com.example.horsegenetics.common.genetics.genes.AgoutiGene;
+import com.example.horsegenetics.common.genetics.genes.SkeletonGene;
+import com.example.horsegenetics.common.genetics.genes.ZombieGene;
 import com.example.horsegenetics.common.genetics.genes.B4galt7Gene;
 import com.example.horsegenetics.common.genetics.genes.BrindleGene;
 import com.example.horsegenetics.common.genetics.genes.ChampagneGene;
@@ -600,6 +602,10 @@ public final class Genes {
     public static final DragonHornsGene DRAGON_HORNS = new DragonHornsGene();
     /** Dragon horn colour - codominant, the horn colour rule; silent without dragon horns. */
     public static final DragonHornColourGene DRAGON_HORN_COLOUR = new DragonHornColourGene();
+    /** Skeleton - recessive; two copies and the horse is its own bones (vanilla's skeleton sheet). Undead. */
+    public static final SkeletonGene SKELETON = new SkeletonGene();
+    /** Zombie - recessive; two copies and the horse is dead flesh (vanilla's zombie sheet). Undead. */
+    public static final ZombieGene ZOMBIE = new ZombieGene();
     public static final HealerGene HEALER = new HealerGene();
     /**
      * Magic sectoral heterochromia - two different colour alleles and the horse
@@ -727,7 +733,7 @@ public final class Genes {
             HORN_COLOUR, HORN_GLOW, HORN_DUST,
             ANTLERS, ANTLER_FORM, ANTLER_GLOW, ANTLER_CRYSTAL, ANTLER_BLOOM,
             RAM_HORNS, RAM_HORN_FORM, RAM_HORN_TIP,
-            DRAGON_HORNS, DRAGON_HORN_COLOUR,
+            DRAGON_HORNS, DRAGON_HORN_COLOUR, SKELETON, ZOMBIE,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

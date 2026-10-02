@@ -85,6 +85,8 @@ public final class DesignerApi {
 
     private static GradientLut baseLut;
     private static final Map<String, GradientLut> altLuts = new LinkedHashMap<>();
+    /** The undeath loci's whole-sheet art - see {@link #setSheet}. */
+    private static final Map<String, GradientLut> sheets = new LinkedHashMap<>();
     private static int[] adultTemplate;
     private static int[] babyTemplate;
 
@@ -143,6 +145,16 @@ public final class DesignerApi {
     @JSExport
     public static void setAlternateGradient(String key, int[] argb, int width, int height) {
         altLuts.put(key, new GradientLut(argb, width, height));
+    }
+
+    /**
+     * One undeath sheet - {@code "skeleton_adult"} and its three siblings - keyed
+     * exactly as {@code CoatSheetContribution.sheetResources()} keys it. A sheet
+     * that never arrives skips that gene's pass: the horse previews as its coat.
+     */
+    @JSExport
+    public static void setSheet(String key, int[] argb, int width, int height) {
+        sheets.put(key, new GradientLut(argb, width, height));
     }
 
     /** The white horse template, adult or foal. */
@@ -207,7 +219,7 @@ public final class DesignerApi {
                 editor().genotype(), editor().epigenome(),
                 adult ? Skin.ADULT : Skin.BABY, adult,
                 adult ? adultTemplate : babyTemplate,
-                new LutSet(baseLut, altLuts));
+                new LutSet(baseLut, altLuts, sheets));
     }
 
     /**
@@ -235,7 +247,7 @@ public final class DesignerApi {
         int[] glow = CoatTextureComposer.bake(
                         editor().genotype(), editor().epigenome(), skin, adult,
                         adult ? adultTemplate : babyTemplate,
-                        new LutSet(baseLut, altLuts))
+                        new LutSet(baseLut, altLuts, sheets))
                 .glowSheet(skin, editor().genotype());
         return glow == null ? new int[0] : glow;
     }
@@ -900,7 +912,7 @@ public final class DesignerApi {
                     Genotype.parse(genotypeCode), Epigenome.parse(epigenomeCode),
                     adult ? Skin.ADULT : Skin.BABY, adult,
                     adult ? adultTemplate : babyTemplate,
-                    new LutSet(baseLut, altLuts));
+                    new LutSet(baseLut, altLuts, sheets));
         } catch (RuntimeException bad) {
             return new int[blank];
         }
@@ -926,7 +938,7 @@ public final class DesignerApi {
             int[] glow = CoatTextureComposer.bake(
                             genotype, Epigenome.parse(epigenomeCode), skin, adult,
                             adult ? adultTemplate : babyTemplate,
-                            new LutSet(baseLut, altLuts))
+                            new LutSet(baseLut, altLuts, sheets))
                     .glowSheet(skin, genotype);
             return glow == null ? new int[0] : glow;
         } catch (RuntimeException bad) {

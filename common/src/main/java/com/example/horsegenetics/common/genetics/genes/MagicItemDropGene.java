@@ -21,6 +21,8 @@ import java.util.List;
  *   <tr><td>{@code Dia/Dia}</td><td>{@code diamonds} - {@value #DIAMOND_MIN} to {@value #DIAMOND_MAX} diamonds instead of the leather</td></tr>
  *   <tr><td>{@code Egg/Egg}</td><td>{@code spawn-egg} - an egg that puts <b>this horse</b> back</td></tr>
  *   <tr><td>{@code Swd/Swd}</td><td>{@code sword} - an enchanted sword, the enchantment rolled at the time</td></tr>
+ *   <tr><td>{@code Bne/Bne}</td><td>{@code bones} - {@value #CARCASS_MIN} to {@value #CARCASS_MAX} bones instead of the leather</td></tr>
+ *   <tr><td>{@code Rot/Rot}</td><td>{@code rotten-flesh} - the same count of rotten flesh instead</td></tr>
  *   <tr><td>anything with an {@code n}, or two different variants</td><td>wild type - vanilla leather</td></tr>
  * </table>
  *
@@ -60,11 +62,23 @@ public final class MagicItemDropGene implements Gene, AbilityContribution {
     public static final double WILD_EGG_PERCENT = 0.04;
     public static final double WILD_SWORD_PERCENT = 0.10;
 
+    /**
+     * How many bones, or how much rotten flesh, an undead horse leaves. The two
+     * carcass alleles are not in the wild at all: they belong to the two undead
+     * breeds (the skeleton's bones, the zombie's flesh - undead treatment D15), so
+     * no feral founder rolls them and the wild table is exactly as it was.
+     */
+    public static final int CARCASS_MIN = 1;
+    public static final int CARCASS_MAX = 3;
+
     public final Allele Dia = new Allele(KEY, 0, "Dia", "Diamond-bearing (Dia)");
     public final Allele Egg = new Allele(KEY, 1, "Egg", "Self-seeding (Egg)");
     public final Allele Swd = new Allele(KEY, 2, "Swd", "Sword-bearing (Swd)");
-    public final Allele n = new Allele(KEY, 3, "n", "Wild-type (n)");
-    private final List<Allele> alleles = List.of(Dia, Egg, Swd, n);
+    // Appended before n (2026-10-02): saves name alleles by token, n stays last.
+    public final Allele Bne = new Allele(KEY, 3, "Bne", "Bone-bearing (Bne)");
+    public final Allele Rot = new Allele(KEY, 4, "Rot", "Rot-bearing (Rot)");
+    public final Allele n = new Allele(KEY, 5, "n", "Wild-type (n)");
+    private final List<Allele> alleles = List.of(Dia, Egg, Swd, Bne, Rot, n);
 
     private final Expression WILD = Expression.wildType(
             "Whatever a horse normally drops, which is leather. This covers every combination "
@@ -91,7 +105,17 @@ public final class MagicItemDropGene implements Gene, AbilityContribution {
                     + "genotype do not leave identical swords, and this is the one drop here that "
                     + "is a gamble rather than a certainty.");
 
-    private final List<Expression> expressions = List.of(WILD, DIAMONDS, SPAWN_EGG, SWORD);
+    private final Expression BONES = Expression.wildType("bones", "Bone-bearing",
+            "Two bone copies. The horse drops " + CARCASS_MIN + " to " + CARCASS_MAX
+                    + " bones instead of its leather - what a skeleton horse is made of. No wild "
+                    + "horse carries it; the Great Valley Skeleton Horse does.");
+
+    private final Expression ROTTEN_FLESH = Expression.wildType("rotten-flesh", "Rot-bearing",
+            "Two rot copies. The horse drops " + CARCASS_MIN + " to " + CARCASS_MAX
+                    + " rotten flesh instead of its leather. No wild horse carries it; the "
+                    + "Graveborn Warmblood does.");
+
+    private final List<Expression> expressions = List.of(WILD, DIAMONDS, SPAWN_EGG, SWORD, BONES, ROTTEN_FLESH);
 
     /** The expressing combinations and the plain horse - no invisible carriers in the wild. */
     private final FounderTable founders = FounderTable.builder()
@@ -105,6 +129,8 @@ public final class MagicItemDropGene implements Gene, AbilityContribution {
             one("diamonds", DIAMOND_MIN, DIAMOND_MAX);
     private final List<GeneAbility> egg = one("spawn_egg", 1, 1);
     private final List<GeneAbility> sword = one("enchanted_sword", 1, 1);
+    private final List<GeneAbility> bones = one("bones", CARCASS_MIN, CARCASS_MAX);
+    private final List<GeneAbility> flesh = one("rotten_flesh", CARCASS_MIN, CARCASS_MAX);
 
     private static List<GeneAbility> one(String drop, int min, int max) {
         return List.of(new GeneAbility.ItemDrop(drop, min, max, GeneAbility.Condition.ALWAYS, 1));
@@ -127,6 +153,12 @@ public final class MagicItemDropGene implements Gene, AbilityContribution {
         if (pair.homozygousFor(Egg)) {
             return SPAWN_EGG;
         }
+        if (pair.homozygousFor(Bne)) {
+            return BONES;
+        }
+        if (pair.homozygousFor(Rot)) {
+            return ROTTEN_FLESH;
+        }
         return pair.homozygousFor(Swd) ? SWORD : WILD;
     }
 
@@ -137,6 +169,12 @@ public final class MagicItemDropGene implements Gene, AbilityContribution {
         }
         if (pair.homozygousFor(Egg)) {
             return egg;
+        }
+        if (pair.homozygousFor(Bne)) {
+            return bones;
+        }
+        if (pair.homozygousFor(Rot)) {
+            return flesh;
         }
         return pair.homozygousFor(Swd) ? sword : List.of();
     }

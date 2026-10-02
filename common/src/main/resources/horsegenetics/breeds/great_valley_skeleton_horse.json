@@ -1,0 +1,185 @@
+{
+  "id": "great_valley_skeleton_horse",
+  "name": "Great Valley Skeleton Horse",
+  "description": "A horse the valley kept after everything else was taken back. It is light, quick and hollow, it eats only what it is made of, and it is hostile to anything that climbs on it after dark until somebody gives it a bone. One bone is enough, once, for good.",
+  "kind": "magical",
+  "magical_variant": false,
+  "commonness": "very_rare",
+  "spawn": ["spawn_egg"],
+  "undead_of": "skeleton",
+  "stats": {
+    "speed": 8,
+    "jump": 7,
+    "health": 2,
+    "size": [0.86, 0.95],
+    "pull": 3
+  },
+  "genes": {
+    "horsegenetics.skeleton": [
+      { "pair": "Skel/Skel", "weight": 100 }
+    ],
+    "horsegenetics.diet": [
+      { "pair": "Dbone/Dbone", "weight": 100 }
+    ],
+    "horsegenetics.aggression": [
+      { "pair": "Anp/Anp", "weight": 100 }
+    ],
+    "horsegenetics.passification": [
+      { "pair": "Prm/Prm", "weight": 100 }
+    ],
+    "horsegenetics.magic_item_drop": [
+      { "pair": "Bne/Bne", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.particle": [
+      { "pair": "Bflm/Bflm", "weight": 100 }
+    ],
+    "horsegenetics.horn_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.horn_glow": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.horn_dust": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.antler_form": [
+      { "pair": "n/n", "weight": 20 },
+      { "pair": "Frk/Frk", "weight": 20 },
+      { "pair": "Brw/Brw", "weight": 20 },
+      { "pair": "Pal/Pal", "weight": 20 },
+      { "pair": "Crn/Crn", "weight": 20 }
+    ],
+    "horsegenetics.antler_glow": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.antler_crystal": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.antler_bloom": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.ram_horn_form": [
+      { "pair": "Crl/Crl", "weight": 40 },
+      { "pair": "Crk/Crk", "weight": 25 },
+      { "pair": "Fhn/Fhn", "weight": 20 },
+      { "pair": "Scr/Scr", "weight": 15 }
+    ],
+    "horsegenetics.ram_horn_tip": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.dragon_horn_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
+    ]
+  },
+  "count_groups": [
+    {
+      "name": "horns",
+      "counts": [5350, 640, 320, 80, 10],
+      "loci": {
+        "horsegenetics.unicorn_horn": "Horn/Horn",
+        "horsegenetics.antlers": "Ant/Ant",
+        "horsegenetics.ram_horns": "Rh/Rh",
+        "horsegenetics.dragon_horns": "Drg/Drg"
+      }
+    }
+  ],
+  "strains": [
+    {
+      "name": "Bleached",
+      "weight": 65,
+      "genes": {
+        "horsegenetics.magic_white": [
+          { "pair": "Wm/Wm", "weight": 100 }
+        ],
+        "horsegenetics.extreme_white_dominant": [
+          { "pair": "EWD/EWD", "weight": 100 }
+        ],
+        "horsegenetics.tobiano": [
+          { "pair": "to/to", "weight": 65 },
+          { "pair": "To/to", "weight": 35 }
+        ],
+        "horsegenetics.ednrb": [
+          { "pair": "N/N", "weight": 70 },
+          { "pair": "O/N", "weight": 30 }
+        ],
+        "horsegenetics.pax3": [
+          { "pair": "N/N", "weight": 70 },
+          { "pair": "SW2/N", "weight": 30 }
+        ],
+        "horsegenetics.mitf": [
+          { "pair": "N/N", "weight": 75 },
+          { "pair": "SW1/N", "weight": 25 }
+        ],
+        "horsegenetics.kit": [
+          { "pair": "N/N", "weight": 75 },
+          { "pair": "W1/N", "weight": 25 }
+        ]
+      }
+    },
+    {
+      "name": "Weathered",
+      "weight": 35,
+      "genes": {
+        "horsegenetics.magic_white": [
+          { "pair": "n/n", "weight": 100 }
+        ],
+        "horsegenetics.extreme_white_dominant": [
+          { "pair": "n/n", "weight": 100 }
+        ],
+        "horsegenetics.extension": [
+          { "pair": "e/e", "weight": 100 }
+        ],
+        "horsegenetics.dun": [
+          { "pair": "D/D", "weight": 100 }
+        ],
+        "horsegenetics.matp": [
+          { "pair": "Cr/N", "weight": 100 }
+        ],
+        "horsegenetics.cracked_porcelain": [
+          { "pair": "Cpk/Cpk", "weight": 100 }
+        ],
+        "horsegenetics.dust": [
+          { "pair": "Dsk/Dsk", "weight": 100 }
+        ]
+      }
+    }
+  ],
+  "bands": {
+    "horsegenetics.passification": {
+      "offering": 14,
+      "amount": 1
+    },
+    "horsegenetics.particle": {
+      "site": 2
+    },
+    "horsegenetics.antlers": {
+      "tint": [0, 0.06]
+    },
+    "horsegenetics.ram_horns": {
+      "shade": [0, 0.05]
+    }
+  },
+  "notes": [
+    "The breed a vanilla skeleton horse converts into (\"undead_of\": \"skeleton\"). Skeleton is the undeath locus; everything else that makes it a skeleton horse - the bone diet, the after-dark temper, the bone offering, the bone drops, the black eyes - is a separate locus the breed pins. The breed sets the bundle; the gene is only the bones.",
+    "Unsellable and never placed: \"spawn\" is the spawn egg only, so no cowboy, barn or stable stocks it, and no biome or herd founds it. New ones come from vanilla's skeleton traps, /summon, eggs and old saves, all through the converter.",
+    "Passification is Prm/Prm: permanent, one minecraft:bone (offering 14). The offering is an index into PassificationGene.OFFERINGS; check it if that list is ever edited. Diet is Dbone/Dbone, the same item on purpose: hostile until given what it is made of, and kept alive by it after.",
+    "Drops Bne/Bne: one to three bones instead of leather. It never drowns - the skeleton locus itself grants the horse underwater breathing - and does not burn in daylight.",
+    "Soul fire trails from all four hooves: Bflm/Bflm on the particle locus, site 2 (hooves).",
+    "Every horn-like part is in its pool, all bone and none of them glowing or shedding: the count group draws how many kinds a founder wears - none for about 84 in 100, one kind for 10, two for 5, three for 1.25, all four for about 1 in 640 - and then which. Horn and dragon-horn colour are pinned Bon (bone); antler tint and ram-horn shade are banded to their pale-bone ends; glow, crystal, bloom, dust and coloured tips are pinned off.",
+    "Size [0.86, 0.95] matches vanilla's undead horses, which vanilla draws at 1/1.1 of a horse.",
+    "Strains. Bleached 65: Wm/Wm white under EWD/EWD, so the bones are locked clean white; a few natural white genes ride along heterozygous as hidden carriers for later generations, never homozygous (several are lethal or nonviable that way). Weathered 35: a dunalino - a red dun (e/e, D/D) with one cream (Cr/N, owner 2026-10-02: it takes the pink out and leaves yellowed bone; double cream washed out and champagne went grey in the preview) - worked over with cracked porcelain and dust, yellowed old bone; Wm and EWD pinned off so neither can land on it.",
+    "The look: the skeleton locus lays vanilla's skeleton horse sheet over the finished coat - its alpha cuts away all but the bones, its colour shows through the coat, and its shading is laid back over the top. Both numbers are on the skeleton allele copy and may be banded here once they have been looked at in a game."
+  ]
+}

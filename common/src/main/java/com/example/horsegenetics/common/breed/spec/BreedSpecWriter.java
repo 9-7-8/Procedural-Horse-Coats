@@ -69,6 +69,9 @@ public final class BreedSpecWriter {
             }
             fields.add(field("spawn", inlineArray(tokens)));
         }
+        if (breed.undead()) {
+            fields.add(field("undead_of", quote(breed.undeadOf())));
+        }
         if (breed.spawnTime() != SpawnTime.ANY) {
             fields.add(field("spawn_time", quote(breed.spawnTime().id())));
         }
@@ -99,6 +102,9 @@ public final class BreedSpecWriter {
         }
         if (!breed.genePools().isEmpty()) {
             fields.add(field("genes", genes(breed.genePools(), 2)));
+        }
+        if (!breed.countGroups().isEmpty()) {
+            fields.add(field("count_groups", countGroups(breed.countGroups())));
         }
         if (!breed.strains().isEmpty()) {
             fields.add(field("strains", strains(breed.strains())));
@@ -179,6 +185,28 @@ public final class BreedSpecWriter {
                     + String.join(",\n", combos) + "\n" + keyPad + "]");
         }
         return "{\n" + String.join(",\n", byGene) + "\n" + " ".repeat(indent) + "}";
+    }
+
+    private static String countGroups(List<Breed.CountGroup> groups) {
+        List<String> out = new ArrayList<>();
+        for (Breed.CountGroup g : groups) {
+            List<String> parts = new ArrayList<>();
+            if (!g.name().isEmpty()) {
+                parts.add(field("name", quote(g.name()), 6));
+            }
+            List<String> counts = new ArrayList<>();
+            for (double c : g.counts()) {
+                counts.add(number(c));
+            }
+            parts.add(field("counts", inlineArray(counts), 6));
+            List<String> loci = new ArrayList<>();
+            for (Breed.GroupLocus l : g.loci()) {
+                loci.add("        " + quote(l.gene()) + ": " + quote(l.a() + "/" + l.b()));
+            }
+            parts.add(field("loci", "{\n" + String.join(",\n", loci) + "\n      }", 6));
+            out.add("    {\n" + String.join(",\n", parts) + "\n    }");
+        }
+        return "[\n" + String.join(",\n", out) + "\n  ]";
     }
 
     private static String strains(List<Breed.Strain> strains) {

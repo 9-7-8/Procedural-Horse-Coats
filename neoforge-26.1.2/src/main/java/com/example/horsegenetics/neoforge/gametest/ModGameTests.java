@@ -1494,6 +1494,143 @@ public final class ModGameTests {
         helper.succeed();
     }
 
+    // ------------------------------------------------------------------
+    // Undead horses - UndeadHorseConverter (wiki/undead-horses.html)
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>A vanilla zombie and skeleton horse become this mod's horses, whole.</b>
+     * The zombie is the hard case: tamed by a player, named, saddled and at half
+     * health. Afterwards each UUID must hold exactly one entity, a
+     * {@code minecraft:horse} with a real record expressing its undeath gene, of the
+     * right breed; the zombie must keep its owner, its tame flag, its name (as the
+     * barn name), its saddle and its health <i>fraction</i>, and arrive passified
+     * for its owner so it never turns on them after dark (D25).
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_HORSES_CONVERT =
+            TEST_FUNCTIONS.register("undead_horses_convert", () -> ModGameTests::undeadHorsesConvert);
+
+    private static void undeadHorsesConvert(GameTestHelper helper) {
+        net.minecraft.world.entity.player.Player owner =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.ZombieHorse zombie =
+                helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE_HORSE, BlockPos.ZERO);
+        zombie.tameWithName(owner);
+        zombie.setCustomName(Component.literal("Mortimer"));
+        zombie.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+        zombie.setHealth(zombie.getMaxHealth() / 2f);
+        // The test spot nicks a horse a point now and then; invulnerable (which the
+        // tag carries across too) so the fraction measured is the converter's alone.
+        zombie.setInvulnerable(true);
+        net.minecraft.world.entity.animal.equine.SkeletonHorse skeleton =
+                helper.spawn(net.minecraft.world.entity.EntityType.SKELETON_HORSE, new BlockPos(2, 0, 0));
+        UUID zombieId = zombie.getUUID();
+        UUID skeletonId = skeleton.getUUID();
+        UUID ownerId = owner.getUUID();
+        ServerLevel level = helper.getLevel();
+        helper.succeedWhen(() -> {
+            net.minecraft.world.entity.animal.equine.Horse z = convertedOrFail(level, zombieId, "the zombie horse",
+                    com.example.horsegenetics.common.genetics.Undeath.Kind.ZOMBIE, "graveborn_warmblood");
+            convertedOrFail(level, skeletonId, "the skeleton horse",
+                    com.example.horsegenetics.common.genetics.Undeath.Kind.SKELETON, "great_valley_skeleton_horse");
+            if (!z.isTamed() || z.getOwnerReference() == null || !ownerId.equals(z.getOwnerReference().getUUID())) {
+                throw new GameTestAssertException(Component.literal("the converted zombie lost its owner or its tame flag"), 0);
+            }
+            com.example.horsegenetics.common.horse.HorseRecord record =
+                    com.example.horsegenetics.neoforge.server.HorseRecords.of(z);
+            if (!record.ownerId().equals(java.util.Optional.of(ownerId))) {
+                throw new GameTestAssertException(Component.literal("the record's owner does not mirror the entity's"), 0);
+            }
+            if (!"Mortimer".equals(record.displayName())) {
+                throw new GameTestAssertException(Component.literal(
+                        "the converted zombie is called \"" + record.displayName() + "\", not Mortimer"), 0);
+            }
+            if (!z.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.SADDLE).is(Items.SADDLE)) {
+                throw new GameTestAssertException(Component.literal("the converted zombie lost its saddle"), 0);
+            }
+            float fraction = z.getHealth() / z.getMaxHealth();
+            if (Math.abs(fraction - 0.5f) > 0.02f) {
+                throw new GameTestAssertException(Component.literal(
+                        "the converted zombie is at " + fraction + " of its health, not half"), 0);
+            }
+            if (!z.getData(com.example.horsegenetics.neoforge.data.ModAttachments.PASSIFICATION.get()).permanent(ownerId)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a converted horse its owner already had is not passified toward them"), 0);
+            }
+        });
+    }
+
+    /** The entity under {@code id} is a converted horse of {@code kind} and {@code breed}, and the only one. */
+    private static net.minecraft.world.entity.animal.equine.Horse convertedOrFail(ServerLevel level, UUID id,
+            String what, com.example.horsegenetics.common.genetics.Undeath.Kind kind, String breed) {
+        net.minecraft.world.entity.Entity e = level.getEntity(id);
+        if (!(e instanceof net.minecraft.world.entity.animal.equine.Horse h) || !h.isAlive()) {
+            throw new GameTestAssertException(Component.literal(what + " has not been converted yet ("
+                    + (e == null ? "nothing" : e.getType().toShortString()) + " under its UUID)"), 0);
+        }
+        if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(h)) {
+            throw new GameTestAssertException(Component.literal(what + " converted with no record"), 0);
+        }
+        if (com.example.horsegenetics.neoforge.server.UndeadHorses.kindOf(h) != kind) {
+            throw new GameTestAssertException(Component.literal(what + " converted without its undeath gene"), 0);
+        }
+        String token = com.example.horsegenetics.neoforge.server.HorseRecords.of(h).breed().orElse("");
+        if (!token.contains(breed)) {
+            throw new GameTestAssertException(Component.literal(what + " converted as " + token + ", not " + breed), 0);
+        }
+        long same = level.getEntities(net.minecraft.world.level.entity.EntityTypeTest.forClass(
+                net.minecraft.world.entity.Entity.class), o -> o.getUUID().equals(id)).size();
+        if (same != 1) {
+            throw new GameTestAssertException(Component.literal(same + " entities hold " + what + "'s UUID"), 0);
+        }
+        return h;
+    }
+
+    /**
+     * <b>An unsprung skeleton trap is vanilla's, and only the horse it leaves is
+     * ours</b> (D5). Armed, it must still be a vanilla skeleton horse a dozen ticks
+     * on; disarmed, it converts like any other.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_TRAP_WAITS =
+            TEST_FUNCTIONS.register("undead_trap_waits", () -> ModGameTests::undeadTrapWaits);
+
+    private static void undeadTrapWaits(GameTestHelper helper) {
+        net.minecraft.world.entity.animal.equine.SkeletonHorse trap =
+                helper.spawn(net.minecraft.world.entity.EntityType.SKELETON_HORSE, BlockPos.ZERO);
+        trap.setTrap(true);
+        UUID id = trap.getUUID();
+        ServerLevel level = helper.getLevel();
+        helper.runAfterDelay(12L, () -> {
+            if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.SkeletonHorse still)
+                    || !still.isTrap()) {
+                throw new GameTestAssertException(Component.literal(
+                        "an armed skeleton trap was converted - the trap is disarmed for good"), 0);
+            }
+            still.setTrap(false);
+            helper.succeedWhen(() -> convertedOrFail(level, id, "the sprung trap's horse",
+                    com.example.horsegenetics.common.genetics.Undeath.Kind.SKELETON, "great_valley_skeleton_horse"));
+        });
+    }
+
+    /** <b>A horse marked to stay vanilla stays vanilla</b> - the debug pens' control case. */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_KEEP_VANILLA =
+            TEST_FUNCTIONS.register("undead_keep_vanilla", () -> ModGameTests::undeadKeepVanilla);
+
+    private static void undeadKeepVanilla(GameTestHelper helper) {
+        net.minecraft.world.entity.animal.equine.ZombieHorse zombie =
+                helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE_HORSE, BlockPos.ZERO);
+        zombie.getPersistentData().putBoolean(
+                com.example.horsegenetics.neoforge.server.UndeadHorseConverter.KEEP_VANILLA, true);
+        UUID id = zombie.getUUID();
+        helper.runAfterDelay(12L, () -> {
+            if (!(helper.getLevel().getEntity(id) instanceof net.minecraft.world.entity.animal.equine.ZombieHorse)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a zombie horse marked keep_vanilla was converted anyway"), 0);
+            }
+            helper.succeed();
+        });
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -1574,6 +1711,11 @@ public final class ModGameTests {
         register(event, environment, STASIS_BANK_EJECTS_EMPTIES, 100);
         // Two mock players and a dozen inventory reads, all inside one tick.
         register(event, environment, SEND_HOME_PAYMENT, 100);
+        // A converted zombie and skeleton: one tick to convert, a few to settle.
+        register(event, environment, UNDEAD_HORSES_CONVERT, 100);
+        // Twelve ticks armed, then disarmed and converted.
+        register(event, environment, UNDEAD_TRAP_WAITS, 100);
+        register(event, environment, UNDEAD_KEEP_VANILLA, 100);
     }
 
     /**

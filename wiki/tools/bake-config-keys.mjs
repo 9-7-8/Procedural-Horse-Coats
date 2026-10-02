@@ -99,6 +99,7 @@ const HOME = {
     'behaviour.riding_allows_teams': 'horse-care.html#riding',
     'commands.horse_give': 'item-transfer-papers.html#horsegive',
     'commands.horse_jockey': 'item-jockey-passes.html#command',
+    'undead.convert': 'undead-horses.html#config',
     'behaviour.jockey_pass_days': 'item-jockey-passes.html#command',
     'behaviour.send_home_payment_item': 'horse-browser.html#send-home',
     'behaviour.send_home_payment_count': 'horse-browser.html#send-home',

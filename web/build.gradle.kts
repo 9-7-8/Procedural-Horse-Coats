@@ -80,6 +80,9 @@ tasks.register<Copy>("bakeDesignerAssets") {
         // unreferenced PNG in the coat folder does not quietly ship.
         include("coat/redblackgradient.png", "coat/lutbluepink.png", "coat/lutgreenpink.png")
         include("entity/horse/horse_white.png", "entity/horse/horse_white_baby.png")
+        // The undeath loci's sheets (CoatSheetContribution), and java.js's SHEETS.
+        include("entity/horse/horse_skeleton.png", "entity/horse/horse_skeleton_baby.png",
+                "entity/horse/horse_zombie.png", "entity/horse/horse_zombie_baby.png")
         eachFile { path = "assets/" + name }
         includeEmptyDirs = false
     }

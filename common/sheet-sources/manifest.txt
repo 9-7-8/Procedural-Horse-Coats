@@ -1,0 +1,19 @@
+# Every coat sheet this mod ships that was CONVERTED from a sheet painted on the
+# vanilla horse mesh. :common:convertHorseSheets regenerates each output from its
+# source (HorseSheetConvertTool, HorseSheetConverter); nothing below is drawn by hand.
+#
+# This list is also the list THIRD_PARTY_NOTICES.md has to match: every source here
+# is Mojang art, and a new line here is a new line there, in the same change.
+#
+# source | output | adult or baby | straight or vanilla (mirror mode) | origin
+# Paths are relative to the repository root. 'straight' copies a shared leg patch as
+# it is (how the white template was first made, kept so it reproduces to the pixel);
+# 'vanilla' applies vanilla's cube mirror to the left legs - the default for any new
+# source.
+
+common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_white_vanilla64.png | common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_white.png | adult | straight | Minecraft 26.1.2 assets/minecraft/textures/entity/horse/horse_white.png (Mojang)
+common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_white_baby_vanilla64.png | common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_white_baby.png | baby | straight | Minecraft 26.1.2 assets/minecraft/textures/entity/horse/horse_white_baby.png (Mojang)
+common/sheet-sources/minecraft/horse_skeleton.png | common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_skeleton.png | adult | vanilla | Minecraft 26.1.2 assets/minecraft/textures/entity/horse/horse_skeleton.png (Mojang)
+common/sheet-sources/minecraft/horse_skeleton_baby.png | common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_skeleton_baby.png | baby | vanilla | Minecraft 26.1.2 assets/minecraft/textures/entity/horse/horse_skeleton_baby.png (Mojang)
+common/sheet-sources/minecraft/horse_zombie.png | common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_zombie.png | adult | vanilla | Minecraft 26.1.2 assets/minecraft/textures/entity/horse/horse_zombie.png (Mojang)
+common/sheet-sources/minecraft/horse_zombie_baby.png | common/src/main/resources/assets/horsegenetics/textures/entity/horse/horse_zombie_baby.png | baby | vanilla | Minecraft 26.1.2 assets/minecraft/textures/entity/horse/horse_zombie_baby.png (Mojang)

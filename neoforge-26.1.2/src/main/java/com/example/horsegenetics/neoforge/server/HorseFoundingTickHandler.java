@@ -157,7 +157,8 @@ public final class HorseFoundingTickHandler {
      * and {@code HerdManager} derives the herd from the lead's UUID rather than
      * from who happened to go first.
      */
-    private static boolean mayFound(ServerLevel level) {
+    /** Shared with {@link UndeadHorseConverter}: one budget for every kind of founding. */
+    static boolean mayFound(ServerLevel level) {
         int tick = level.getServer().getTickCount();
         if (tick != budgetTick) {
             budgetTick = tick;
@@ -171,7 +172,7 @@ public final class HorseFoundingTickHandler {
         return false;
     }
 
-    private static void charge(ServerLevel level, long nanos) {
+    static void charge(ServerLevel level, long nanos) {
         foundedThisTick = true;
         spentThisTick += nanos;
         foundedSinceReport++;

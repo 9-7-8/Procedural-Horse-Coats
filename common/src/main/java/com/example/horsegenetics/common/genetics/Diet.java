@@ -75,7 +75,15 @@ public enum Diet {
     /** One metal, chosen per horse - see {@link #variants()}. */
     INGOT("ingot", "One metal only", -1.0, 4),   // FULL
     /** One gem, chosen per horse - see {@link #variants()}. */
-    GEM("gem", "One gem only", -1.0, 5);   // FULL
+    GEM("gem", "One gem only", -1.0, 5),   // FULL
+
+    /**
+     * Bones, and nothing else - the Great Valley Skeleton Horse's diet. One bone
+     * heals it completely, the way one bar heals a metal-eater: it eats what it is
+     * made of (undead treatment D17). The same item is that breed's passification
+     * offering, on purpose.
+     */
+    BONE("bone", "Bones only", -1.0, 0);   // FULL
 
     /**
      * {@link #healPoints()} sentinel: this diet heals the horse completely.

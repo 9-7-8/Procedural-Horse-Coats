@@ -166,6 +166,9 @@ public final class BreedFounder {
             if (key.equals("horsegenetics.sex")) {
                 continue; // 50/50 from the base roll, not a breed trait
             }
+            if (breed.groupOf(key) != null) {
+                continue; // drawn below, as one decision with the rest of its group
+            }
             // A pool the sheet names wins, body-stat loci included: a breed that
             // pins the vampiric allele on magic health means exactly that pair,
             // and the stats block steps aside on that axis.
@@ -197,11 +200,38 @@ public final class BreedFounder {
             }
             // otherwise: keep the base roll (the natural performance genes)
         }
+        g = drawCountGroups(breed, g, rng);
         // Before the epigenome exists, so the magical copies get their numbers like any other allele.
         g = stamp(g, forced);
 
         return stampBands(breed,
                 stampStatTargets(breed, strain, targets, Genome.of(g, rng), rng, size), rng);
+    }
+
+    /**
+     * Each {@link Breed.CountGroup}: how many of its loci express, then which -
+     * every one picked gets its pair, every other its wild pair. After the
+     * per-locus loop, so a breed without groups draws exactly what it always did.
+     */
+    private static Genotype drawCountGroups(Breed breed, Genotype genotype, Rng rng) {
+        Genotype g = genotype;
+        for (Breed.CountGroup group : breed.countGroups()) {
+            List<Breed.GroupLocus> left = new java.util.ArrayList<>(group.loci());
+            int k = group.drawCount(rng);
+            java.util.Set<Breed.GroupLocus> picked = new java.util.HashSet<>();
+            for (int i = 0; i < k && !left.isEmpty(); i++) {
+                picked.add(left.remove(Math.min(left.size() - 1, (int) (rng.nextFloat() * left.size()))));
+            }
+            for (Breed.GroupLocus locus : group.loci()) {
+                Gene gene = Genes.byKey(locus.gene());
+                if (picked.contains(locus)) {
+                    g = g.with(new AllelePair(gene.fromToken(locus.a()), gene.fromToken(locus.b())));
+                } else {
+                    g = g.with(wild(gene));
+                }
+            }
+        }
+        return g;
     }
 
     /** The forced pairs, in the order given; a later pair on the same locus wins. */

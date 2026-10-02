@@ -609,7 +609,8 @@ public final class AbilityType {
     public static final AbilityType ITEM_DROP = register(new AbilityType("item_drop",
             List.of(
                     Param.requiredChoice("drop",
-                            List.of("vanilla", "diamonds", "spawn_egg", "enchanted_sword", "meat"),
+                            List.of("vanilla", "diamonds", "spawn_egg", "enchanted_sword", "meat",
+                                    "bones", "rotten_flesh"),
                             "what the horse drops. Every value but 'meat' REPLACES the vanilla "
                                     + "drop; 'meat' is added beside it"),
                     Param.num("min", 1, "fewest items, 0.." + MAX_DROP_COUNT),

@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.pattern.GradientLut;
 import com.example.horsegenetics.common.coat.pattern.LutSet;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
+import com.example.horsegenetics.common.genetics.CoatSheetContribution;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.LutContribution;
@@ -499,7 +500,29 @@ public final class GeneticCoatTextureFactory {
                 }
             });
         }
-        lutSet = new LutSet(base, alternates);
+        // The undeath loci's whole-sheet art (CoatSheetContribution) - vanilla's skeleton
+        // and zombie horses, converted to this mod's layout. Carried in a GradientLut
+        // only because that is the image loadLut returns. A missing one skips that
+        // gene's pass, so the horse bakes as an ordinary coat rather than crashing.
+        Map<String, GradientLut> sheets = new HashMap<>();
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof CoatSheetContribution art)) {
+                continue;
+            }
+            art.sheetResources().forEach((key, path) -> {
+                if (sheets.containsKey(key)) {
+                    return;
+                }
+                Identifier id = Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, path);
+                try {
+                    sheets.put(key, loadLut(id));
+                } catch (RuntimeException e) {
+                    HorseGenetics.LOGGER.warn("could not load coat sheet '{}' ({}) - horses that wear it "
+                            + "will render as an ordinary coat", key, id, e);
+                }
+            });
+        }
+        lutSet = new LutSet(base, alternates, sheets);
     }
 
     private static GradientLut loadLut(Identifier location) {

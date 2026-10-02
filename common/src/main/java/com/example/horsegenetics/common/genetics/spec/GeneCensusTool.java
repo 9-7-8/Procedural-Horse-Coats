@@ -641,6 +641,22 @@ public final class GeneCensusTool {
         Map<String, Map<String, Map<String, Credit>>> out = new LinkedHashMap<>();
         for (Breed breed : Breeds.shipped()) {
             accumulate(out, breed, null, breed.genePools());
+            // A count group's loci, each at its share of the group - the pair when
+            // picked, wild otherwise - as one pool, which is what a founder sees.
+            for (Breed.CountGroup group : breed.countGroups()) {
+                Map<String, List<Breed.Combo>> pools = new LinkedHashMap<>();
+                double share = group.shareEach();
+                for (Breed.GroupLocus l : group.loci()) {
+                    Gene gene = Genes.byKeyOrNull(l.gene());
+                    if (gene == null) {
+                        continue;
+                    }
+                    String wild = gene.defaultAllele().token();
+                    pools.put(l.gene(), List.of(new Breed.Combo(l.a(), l.b(), share),
+                            new Breed.Combo(wild, wild, 1.0 - share)));
+                }
+                accumulate(out, breed, null, pools);
+            }
             for (Breed.Strain strain : breed.strains()) {
                 accumulate(out, breed, strain.name(), strain.genePools());
             }
@@ -695,7 +711,8 @@ public final class GeneCensusTool {
                         .computeIfAbsent(outcome.getKey(),
                                 k -> new TreeMap<>(String.CASE_INSENSITIVE_ORDER))
                         .computeIfAbsent(breed.name(), k -> new Credit(breed.name()));
-                credit.ownNamesGene = breed.genePools().containsKey(gene.key());
+                credit.ownNamesGene = breed.genePools().containsKey(gene.key())
+                        || breed.groupOf(gene.key()) != null;
                 if (strainName != null && !credit.strains.contains(strainName)) {
                     credit.strains.add(strainName);
                 }

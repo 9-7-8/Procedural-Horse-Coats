@@ -34,6 +34,7 @@ import java.util.Map;
  *   <tr><td>{@code Red Org Yel Grn Blu Ind Vio}</td><td>the rainbow, in order</td></tr>
  *   <tr><td>{@code Pnk Blk Gry}</td><td>pink, black, grey</td></tr>
  *   <tr><td>{@code Cha}</td><td>chaos - a colour written on the allele copy</td></tr>
+ *   <tr><td>{@code Bon}</td><td>bone - warm ivory; no wild horse carries it</td></tr>
  * </table>
  *
  * <h2>Two different copies make a two-tone part</h2>
@@ -118,10 +119,15 @@ public abstract class AbstractPartColourGene implements Gene {
             new Hue("Pnk", "Pink", 0.917, 0.40, 0.98, 0.027),
             new Hue("Blk", "Black", -1, 0.00, 0.16, 0.027),
             new Hue("Gry", "Grey", -1, 0.00, 0.58, 0.027),
-            new Hue("Cha", "Chaos", -1, 0.00, 1.00, 0.03));
+            new Hue("Cha", "Chaos", -1, 0.00, 1.00, 0.03),
+            // Appended after chaos (2026-10-02), so no saved horse's allele moves. Warm
+            // ivory bone, the antler's own pale end (AntlersGene.PALE_BONE, #EFE6D2). No
+            // wild share: a breed has to have kept it - the skeleton horse, whose every
+            // horn is bone (owner, 2026-10-02).
+            new Hue("Bon", "Bone", 0.114, 0.12, 0.94, 0.0));
 
     /** The chaos allele's index - its copy's colour is {@link #CHAOS}, not its row. */
-    private static final int CHAOS_INDEX = HUES.size() - 1;
+    private static final int CHAOS_INDEX = 11;
 
     private final String key;
     private final String name;

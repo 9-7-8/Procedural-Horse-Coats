@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Skin;
 import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.CoatSheetContribution;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Expression;
 import com.example.horsegenetics.common.genetics.GeneEpigenetics;
@@ -58,6 +59,10 @@ import java.util.Set;
  *       {@link CoatOverlayContribution} gets to write final pixels over the
  *       finished coat and to mark texels <b>emissive</b>. Almost nothing runs
  *       here; see {@link CoatOverlay} for the two things that have to.</li>
+ *   <li><b>sheet</b> - the undeath loci ({@link CoatSheetContribution}): a
+ *       zombie's hide was seeded in after phase 2, and here a skeleton's sheet
+ *       cuts, underlays and shades the finished coat, and every sheet's alpha
+ *       cuts its holes.</li>
  * </ol>
  *
  * <p>The composer owns both fields; genes only ever see read-only views and
@@ -273,6 +278,14 @@ public final class CoatTextureComposer {
             colour.setArgb(px, py, (nearBlackAlpha(rgb) << 24) | rgb);
         });
 
+        // 2a. sheet seed - a zombie's hide replaces what the natural genes resolved,
+        // before any magical gene paints, so they paint over it (CoatSheetContribution).
+        SheetPass seed = sheetPass(genotype, epigenome, skin, luts, CoatSheetContribution.Pass.SEED);
+        SheetPass shape = sheetPass(genotype, epigenome, skin, luts, CoatSheetContribution.Pass.SHAPE);
+        if (seed != null) {
+            seedFromSheet(colour, seed.sheet(), template, skin);
+        }
+
         // The white lock, if any gene asks for one. Seeded with the white the
         // melanin genes made, and grown after every magical gene paints - see
         // whiteLock / extendWhiteLock.
@@ -351,7 +364,142 @@ public final class CoatTextureComposer {
         }
         overlay.applyTo(out);
 
+        // 6. sheet shape - the skeleton's cut-outs, bone underlay and shading, after
+        // everything else so the white lock cannot refuse them; then every sheet's
+        // own alpha, the zombie's few holes included.
+        if (shape != null) {
+            shapeFromSheet(out, shape, eyeMask(skin));
+        }
+        if (seed != null) {
+            cutToSheet(out, seed.sheet());
+        }
+
         return new Baked(out, overlay.emissiveMask());
+    }
+
+    /** One sheet pass a horse wears: the art, and the gene's numbers for it. */
+    private record SheetPass(GradientLut sheet, CoatSheetContribution.SheetUse use) {
+    }
+
+    /**
+     * The first {@link CoatSheetContribution} that dresses this horse in {@code pass},
+     * or {@code null} - a horse with no undeath, or a host that did not load the art
+     * (the browser before its sheets arrive, a test's synthetic set). A sheet that is
+     * not this mod's sheet size is treated as absent rather than read out of bounds.
+     */
+    private static SheetPass sheetPass(Genotype genotype, Epigenome epigenome, Skin skin, LutSet luts,
+                                       CoatSheetContribution.Pass pass) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        for (Gene gene : Genes.codeOrder()) {
+            if (!(gene instanceof CoatSheetContribution art)) {
+                continue;
+            }
+            Optional<CoatSheetContribution.SheetUse> use =
+                    art.sheetUse(genotype.pair(gene), genotype, epigenome, skin);
+            if (use.isEmpty() || use.get().pass() != pass) {
+                continue;
+            }
+            GradientLut sheet = luts.sheet(use.get().sheet());
+            if (sheet == null || sheet.width() != n || sheet.height() != n) {
+                continue;
+            }
+            return new SheetPass(sheet, use.get());
+        }
+        return null;
+    }
+
+    /**
+     * Stamp the sheet into the colour field as the base coat. The composite that
+     * follows multiplies the field onto the white template, and the template has
+     * shading of its own, so the template is divided back out here: an unmarked
+     * zombie then comes out as vanilla's zombie horse, not a shade darker.
+     */
+    private static void seedFromSheet(ColorField colour, GradientLut sheet, int[] template, Skin skin) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        HorseSkinGeometry.forEachTexel(skin, (px, py, part, face, point) -> {
+            int s = sheet.pixel(px, py);
+            if ((s >>> 24) == 0) {
+                colour.setArgb(px, py, 0);
+                return;
+            }
+            int t = template[py * n + px];
+            colour.setArgb(px, py, 0xFF000000
+                    | divide((s >> 16) & 0xFF, (t >> 16) & 0xFF) << 16
+                    | divide((s >> 8) & 0xFF, (t >> 8) & 0xFF) << 8
+                    | divide(s & 0xFF, t & 0xFF));
+        });
+    }
+
+    private static int divide(int want, int under) {
+        if (under <= 0) {
+            return want;
+        }
+        int v = Math.round(want * 255f / under);
+        return v > 255 ? 255 : v;
+    }
+
+    /** Every texel the sheet leaves transparent goes transparent - binary, as vanilla's art is. */
+    private static void cutToSheet(int[] out, GradientLut sheet) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        for (int i = 0; i < out.length; i++) {
+            if ((sheet.pixel(i % n, i / n) >>> 24) == 0) {
+                out[i] &= 0x00FFFFFF;
+            }
+        }
+    }
+
+    /**
+     * The skeleton's pass, on the finished coat {@code out}, with S the sheet:
+     * <ol>
+     *   <li>alpha: S's - a transparent texel of the sheet is cut away;</li>
+     *   <li>underlay: {@code lerp(S, coat, coatOpacity * coat.a)}, so the bone's own
+     *       colour shows through whatever colour the horse is;</li>
+     *   <li>shading: times {@code lerp(1, L, shadeStrength)}, L being the sheet's
+     *       luminance over its own brightest, so the highlights stay and the
+     *       recesses darken. A multiply, because it is the blend that still shows on
+     *       a white coat - and a bleached skeleton is a white horse.</li>
+     * </ol>
+     * The eyes keep the coat's own colour (the undead breeds' black) - only the
+     * alpha applies to them.
+     */
+    private static void shapeFromSheet(int[] out, SheetPass pass, boolean[] eyes) {
+        int n = HorseSkinGeometry.SHEET_SIZE;
+        double brightest = 0.0;
+        for (int y = 0; y < n; y++) {
+            for (int x = 0; x < n; x++) {
+                int s = pass.sheet().pixel(x, y);
+                if ((s >>> 24) != 0) {
+                    brightest = Math.max(brightest, lumaOf(s));
+                }
+            }
+        }
+        if (brightest <= 0.0) {
+            brightest = 1.0;
+        }
+        double opacity = pass.use().coatOpacity();
+        double strength = pass.use().shadeStrength();
+        for (int i = 0; i < out.length; i++) {
+            int s = pass.sheet().pixel(i % n, i / n);
+            int c = out[i];
+            if ((s >>> 24) == 0) {
+                out[i] = c & 0x00FFFFFF;
+                continue;
+            }
+            if ((c >>> 24) == 0 || eyes[i]) {
+                continue;
+            }
+            double a = opacity * ((c >>> 24) / 255.0);
+            double shade = 1.0 - strength * (1.0 - Math.min(1.0, lumaOf(s) / brightest));
+            int r = mixShade((s >> 16) & 0xFF, (c >> 16) & 0xFF, a, shade);
+            int g = mixShade((s >> 8) & 0xFF, (c >> 8) & 0xFF, a, shade);
+            int b = mixShade(s & 0xFF, c & 0xFF, a, shade);
+            out[i] = 0xFF000000 | r << 16 | g << 8 | b;
+        }
+    }
+
+    private static int mixShade(int sheet, int coat, double a, double shade) {
+        long v = Math.round((sheet + (coat - sheet) * a) * shade);
+        return v < 0 ? 0 : (v > 255 ? 255 : (int) v);
     }
 
     /**

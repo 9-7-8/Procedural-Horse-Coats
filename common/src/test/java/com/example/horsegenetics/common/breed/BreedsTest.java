@@ -41,7 +41,12 @@ class BreedsTest {
     @Test
     void everyBreedHasBiomesAndAPositiveWeight() {
         for (Breed b : Breeds.all()) {
-            assertFalse(b.biomes().isEmpty(), b.id() + " has no biomes");
+            // A breed that only ever comes out of an egg (the undead breeds, which a
+            // vanilla undead horse converts into) is placed by nothing, so it needs no
+            // biome to be placed in.
+            if (!b.sources().equals(java.util.Set.of(BreedSource.SPAWN_EGG))) {
+                assertFalse(b.biomes().isEmpty(), b.id() + " has no biomes");
+            }
             assertTrue(b.spawnWeight() > 0, b.id() + " has non-positive weight");
             for (String biome : b.biomes()) {
                 assertTrue(biome.startsWith("minecraft:"), b.id() + " biome not namespaced: " + biome);
