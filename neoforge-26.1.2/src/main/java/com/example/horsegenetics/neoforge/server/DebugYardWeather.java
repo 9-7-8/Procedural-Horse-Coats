@@ -70,8 +70,17 @@ final class DebugYardWeather {
     private static final String PEN = "WEATHER COPIES";
     private static final String CHECK_TWO = PEN + " - two R+ copies both move speed and jump in rain (check 304)";
     private static final String CHECK_ONE = PEN + " - one R+ copy moves its stat by its own rolled percentage";
-    private static final String CHECK_STORM = PEN + " - a storm applies T+ copies, and both halves of R+/Tv";
+    private static final String CHECK_STORM = PEN + " - on jump too, a storm applies T+ copies and both halves of R+/Tv";
     private static final String CHECK_OFF = PEN + " - every weather modifier comes off in clear weather";
+
+    /**
+     * <b>What this pen still asks</b> (2026-10-02). The first night answered every speed question and the two-copies
+     * and comes-off questions on jump (wiki/gene-weather-speed.html and gene-weather-jump.html, #verified-copies), so
+     * those horses are gone. Left open on the jump page: "A storm is not just rain again" was read only on
+     * movement_speed. So the pen now stocks jump horses only - R+/Tv, T+/T+ and an n/n control - and asks the storm
+     * question of jump_strength, with the comes-off reading as its control.
+     */
+    private static final List<String> ASKED = List.of(CHECK_STORM, CHECK_OFF);
 
     private record Subject(UUID id, String label, String geneKey, boolean jump) {
     }
@@ -88,12 +97,10 @@ final class DebugYardWeather {
         try {
             Run run = new Run();
             // Four glass cells a row, two rows: a 2x2 floor each, so nobody wanders or bolts.
-            stock(level, gy, x0, z0 + 1, run, WeatherSpeedGene.KEY, false, "R+/R+", "R+/n", "R+/Tv", "T+/T+");
-            stock(level, gy, x0, z0 + 7, run, WeatherSpeedGene.KEY, false, "n/n");
-            stock(level, gy, x0 + 5, z0 + 7, run, WeatherJumpGene.KEY, true, "R+/R+", "R+/n", "n/n");
+            stock(level, gy, x0, z0 + 1, run, WeatherJumpGene.KEY, true, "R+/Tv", "T+/T+", "n/n");
             DebugPenManager.placeSign(level, new BlockPos(x0 + 1, gy + 1, z0 - 1), Direction.NORTH,
-                    List.of("WEATHER COPIES", "dry, rain, storm,", "clear - two copies", "must both count"));
-            for (String c : List.of(CHECK_TWO, CHECK_ONE, CHECK_STORM, CHECK_OFF)) {
+                    List.of("WEATHER COPIES", "dry, rain, storm,", "clear - does a storm", "move jump too?"));
+            for (String c : ASKED) {
                 DebugYardClockwork.expect(c);
             }
             sequence(level, run);
@@ -268,12 +275,16 @@ final class DebugYardWeather {
             offDetail.append(offDetail.length() == 0 ? "" : "; ").append(String.format(Locale.ROOT, "%s %.6f -> %.6f%s",
                     s.label().substring(PEN.length() + 1), dry, after[i], back ? "" : " STUCK"));
         }
-        if (twos < 2) {
+        if (!ASKED.contains(CHECK_TWO)) {
+            // answered on 2026-10-01; not asked any more
+        } else if (twos < 2) {
             DebugYardClockwork.inconclusive(CHECK_TWO, "only " + twos + " R+/R+ horse(s) stocked; " + twoDetail);
         } else {
             DebugYardClockwork.verdict(CHECK_TWO, twoOk, twoDetail.toString());
         }
-        if (ones < 3) {
+        if (!ASKED.contains(CHECK_ONE)) {
+            // answered on 2026-10-01; not asked any more
+        } else if (ones < 3) {
             DebugYardClockwork.inconclusive(CHECK_ONE, "only " + ones + " control horse(s) stocked; " + oneDetail);
         } else {
             DebugYardClockwork.verdict(CHECK_ONE, oneOk, oneDetail.toString());
@@ -296,7 +307,7 @@ final class DebugYardWeather {
     }
 
     private static void allInconclusive(String why) {
-        for (String c : List.of(CHECK_TWO, CHECK_ONE, CHECK_STORM, CHECK_OFF)) {
+        for (String c : ASKED) {
             DebugYardClockwork.inconclusive(c, why);
         }
     }

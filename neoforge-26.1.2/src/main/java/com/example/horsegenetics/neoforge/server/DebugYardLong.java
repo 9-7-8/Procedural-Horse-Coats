@@ -109,56 +109,27 @@ final class DebugYardLong {
             dryadVerdict(level, gy, east, mouthZ + ROW_O, east + 6, mouthZ + ROW_O + ROW_O_D);
             lightFromTheFloor(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
 
-            ratio(level, gy, west, mouthZ + ROW_U, "RATIO HYPP", "horsegenetics.scn4a", "H/N", "H/N", false,
-                    List.of("RATIO: HYPP", "H/N x H/N all day:", "1 in 4 H/H, and", "every H/H dies"),
-                    "about 1 in 4 H/H, 1 in 2 H/N; every H/H dies at birth");
-            ratio(level, gy, west + 9, mouthZ + ROW_U, "RATIO LETHAL WHITE", "horsegenetics.ednrb", "O/N", "O/N", false,
-                    List.of("RATIO: OVERO", "O/N x O/N all day:", "1 in 4 O/O, and", "every O/O dies"),
-                    "about 1 in 4 O/O, 1 in 2 O/N; every O/O dies at birth");
             ratio(level, gy, east, mouthZ + ROW_U, "RATIO BRINDLE", "horsegenetics.brindle", "n/n", "Brn/Y", true,
                     List.of("RATIO: BRINDLE", "Brn/Y carrier x", "n/n mare: every", "filly Brn/n, no Brn colt"),
                     "every filly Brn/n, every colt n/Y - a brindle colt is a FAIL");
-            ratio(level, gy, east + 9, mouthZ + ROW_U, "RATIO SIZE", "horsegenetics.body_size", "Big/n", "Big/n", false,
-                    List.of("RATIO: SIZE", "Big/n x Big/n all", "day: 1 Big/Big to", "2 Big/n to 1 n/n"),
-                    "about 1 Big/Big : 2 Big/n : 1 n/n");
+
+            // ANSWERED AND GONE (2026-10-02): RATIO HYPP, LETHAL WHITE, SIZE, KIT W5 and MILK CLASH logged their own
+            // PASS on the night of 2026-10-01 - with RATIO ACAN D5 - and were closed on their pages. What is left is the
+            // three that stalled behind #23 (covers refused against a wall), started over with that fixed.
 
             // ROW W (2026-09-15, owner: every unattended test into the yard). Two genotypes a gene rules
             // out (gap 225): the doubled allele must be lost at conception, never born. A milk clash
             // whose every foal would be Watr/Lava, which MilkGene forbids. And a colour gene with knobs,
             // for inheritance of its epigenetic values. The conception log (gap 245) covers all four.
-            ratio(level, gy, west, mouthZ + ROW_W, "RATIO KIT W5", "horsegenetics.kit", "W5/N", "W5/N", false,
-                    List.of("RATIO: KIT W5", "W5/N x W5/N:", "W5/W5 is impossible", "- lost, never born"),
-                    "no W5/W5 foal ever; about 1 in 4 conceptions lost early as nonviable, 2 W5/N : 1 N/N born");
             ratio(level, gy, west + 9, mouthZ + ROW_W, "RATIO MITF SW3", "horsegenetics.mitf", "SW3/N", "SW3/N", false,
                     List.of("RATIO: MITF SW3", "SW3/N x SW3/N:", "SW3/SW3 impossible", "- lost, never born"),
                     "no SW3/SW3 foal ever; about 1 in 4 conceptions lost early, 2 SW3/N : 1 N/N born");
-            ratio(level, gy, east, mouthZ + ROW_W, "RATIO MILK CLASH", "horsegenetics.milk", "Watr/Watr", "Lava/Lava", false,
-                    List.of("RATIO: MILK CLASH", "Watr x Lava: every", "foal Watr/Lava, and", "that cannot be born"),
-                    "no foal ever: every conception lost early, with a cause that is not MET's");
             ratio(level, gy, east + 9, mouthZ + ROW_W, "RATIO STARBURST", "horsegenetics.starburst", "W/n", "W/n", false,
                     List.of("RATIO: STARBURST", "W/n x W/n all day:", "1 W/W : 2 W/n : 1 n/n", "(knob inheritance)"),
                     "about 1 W/W : 2 W/n : 1 n/n");
             ActionTrace.log("test yard", "all-day pens built (row O east: the dryad; rows U and W: inheritance ratios)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
-        }
-    }
-
-    /**
-     * <b>Row AW east: RATIO ACAN D5</b> (2026-10-01). {@code wiki/gene-acan.html}: <i>"ACAN D5 is not the severe
-     * variant. A D5/D5 or D5/D2 horse should be a surviving dwarf, not a dead foal - only D1/D1 is lethal."</i>
-     * D5/D2 x D5/D2, so every foal is an affected compound or homozygote - D5/D5, D5/D2 and D2/D2 at 1:2:1 - and
-     * none of them is D1/D1. PASS: forty born at 1:2:1 by the chi-square every ratio pen uses, and not one foal
-     * dead within FOAL_KEEP of birth. FAIL: any death (a non-severe dwarf treated as lethal), or the split off
-     * 1:2:1. Two to three hours, like the other ratio pens; the eight-hour deadline answers INCONCLUSIVE.
-     */
-    static void acanRow(ServerLevel level, int gy, int x0, int z0) {
-        try {
-            ratio(level, gy, x0, z0, "RATIO ACAN D5", "horsegenetics.acan", "D5/D2", "D5/D2", false,
-                    List.of("RATIO: ACAN D5", "D5/D2 x D5/D2: all", "dwarfs, and every", "one must live"),
-                    "about 1 D5/D5 : 2 D5/D2 : 1 D2/D2, and not one foal dead");
-        } catch (RuntimeException e) {
-            HorseGenetics.LOGGER.warn("[Debug] test yard: RATIO ACAN D5 failed to build", e);
         }
     }
 

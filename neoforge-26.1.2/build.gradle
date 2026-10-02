@@ -49,6 +49,18 @@ neoForge {
             server()
             programArgument '--nogui'
         }
+        // The horse stress run (2026-10-02): ./gradlew :neoforge-26.1.2:runStressServer [-PstressStages=0,100,300]
+        // A dedicated server in its own directory (a client or the yard can be running beside it), which spawns
+        // horses in stages and logs ms/tick per stage (server/DebugStress), recording a JFR profile to run-stress/.
+        stressServer {
+            server()
+            gameDirectory = project.layout.projectDirectory.dir(project.hasProperty('stressDir') ? project.property('stressDir').toString() : 'run-stress')
+            programArgument '--nogui'
+            systemProperty 'horsegenetics.stress',
+                    project.hasProperty('stressStages') ? project.property('stressStages').toString() : '0,100,300,600'
+            jvmArgument '-Xmx2G'
+            jvmArgument '-XX:StartFlightRecording=filename=' + project.layout.projectDirectory.file((project.hasProperty('stressDir') ? project.property('stressDir').toString() : 'run-stress') + '/stress.jfr').asFile.absolutePath + ',settings=profile,dumponexit=true'
+        }
         // Headless in-game tests: ./gradlew :neoforge-26.1.2:runGameTest
         // There is no gameTestServer() helper in ModDevGradle - the run type is a
         // plain string, and 'gameTestServer' is a real key in the userdev config
@@ -67,7 +79,8 @@ neoForge {
         }
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
+            // The stress run measures what a player's server pays, and a DEBUG log is not that.
+            logLevel = name == 'stressServer' ? org.slf4j.event.Level.INFO : org.slf4j.event.Level.DEBUG
         }
     }
 
