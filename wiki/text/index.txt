@@ -1250,7 +1250,7 @@ wiki/gene-horn-glow.html#door	coding	How it reaches the horn
 wiki/gene-horn-glow.html#finding	gameplay	Finding one
 wiki/gene-horn-glow.html#health	gameplay	Is it good for the horse?
 wiki/gene-horn-glow.html#inheritance	gameplay	Crossing two of them
-wiki/gene-horn-glow.html#open-glow-light-locus	coding	Settled 2026-10-01: a light horse's horn glows too
+wiki/gene-horn-glow.html#open-glow-light-locus	coding	A light horse's horn glows too (shipped 2026-10-02)
 wiki/gene-horn-glow.html#real-horses	science	There is no real locus here
 wiki/gene-horn-glow.html#what-it-does	gameplay	What it looks like
 wiki/gene-hot-blooded.html#health	gameplay	Health

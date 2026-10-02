@@ -90,11 +90,13 @@ STEPS
                :common:bakeGeneWikiPages
                :common:bakeMarkingFacts
                :common:bakeGeneCensus
-               :common:bakeUnverifiedGenes
                node wiki/tools/bake-gene-timeline.mjs
+               :common:bakeUnverifiedGenes
              The timeline dates a gene by the first commit naming its key, so commit
              the code first, or a new gene lands in "Undated". bakeUnverifiedGenes reads
-             the pages' Verified blocks, so it runs after the pages exist.
+             the pages' Verified blocks AND sorts by the timeline, so it runs last: run
+             before the timeline, a new gene sits at the bottom of the dimension's list
+             until some later session's bake (it did for the dragon horns, 2026-10-02).
       COMMIT - wiki/horse-designer/assets/genes.json
              - wiki/assets/gene-icons/
              - the gene's wiki/gene-*.html

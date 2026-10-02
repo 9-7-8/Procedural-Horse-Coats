@@ -1,0 +1,68 @@
+2026-10-02 10:13 (end time) - A light horse's horn glows
+
+ASKED
+-----
+- "/process-intake" (process-intake.txt): take ONE unit out of intake/, build it, retire
+  it, end the session. Done: the To do.txt bullet "A light horse's horn glows too".
+
+DONE
+----
+- f6143d97 A light horse's horn glows: the horn follows the light locus.
+  Missing: GrownParts.dressHorn asked only HornGlowGene.glows, so a unicorn whose hooves,
+  mane or eyes glow from the light locus wore a dull horn - while its cutie mark already
+  glowed through LightGene.modifyCutieMark. New LightGene.lightsHorse(pair) (any variant
+  copy, Lteye included) is the one rule; modifyCutieMark now asks it, and dressHorn ORs it
+  with horn glow. Only the emissive flag moves; colours stay horn colour's.
+  Proof: HornGenesTest.aLightHorsesHornGlowsWithoutTheHornGlowLocus written first and
+  seen failing ("Lthf/n should light the horn"), then green. Also green by name:
+  HornGenesTest, CutieMarkGeneTest, MagicalUtilityGenesTest, UnicornHornGeneTest,
+  AntlersGeneTest, DragonHornsGeneTest, RamHornsGeneTest, CoatBakeGoldenTest,
+  CoatPipelineGoldenTest. :neoforge-26.1.2:build green, check-parity OK,
+  check-designer-boots OK, check-links OK.
+  Rebaked: designer wasm (committed - code changed), the gene row g (only
+  unverified-genes.txt moved, see FOUND), verification index, search index, agent text.
+  Tier 1 of process-intake (S, impact a: finishes the shipped horn glow; no owner call).
+  Runner-up: "Send home free" (Horse exits treatment, piece 2), also S/a, lost on fewest
+  regenerated artefacts (it adds a config key and a NeoForge flow).
+  Retired: the bullet from intake/To do.txt. Written up on wiki/gene-horn-glow.html
+  (Gameplay "What it looks like", Coding #open-glow-light-locus, Verification
+  #open-light-horn-look), wiki/gene-light.html #cutie-mark, decisions.html loses "(queued)".
+
+DECIDED
+-------
+- (owner, 2026-10-01, already recorded) the horn follows the light locus.
+- Without the owner: Lteye (eyes-only) lights the horn too, because the owner's words were
+  "as the cutie mark does" and the cutie mark lights on any variant copy. Recorded on
+  gene-horn-glow.html#open-glow-light-locus.
+
+FOUND ON THE WAY
+----------------
+- unverified-genes.txt had the dragon horns at the bottom, undated: rebake row g ran
+  bakeUnverifiedGenes BEFORE bake-gene-timeline, which it sorts by. Fixed the order in
+  rebake.txt and add-a-gene.txt; the file's correct order is in f6143d97.
+- The intake sizing agent reports that "Realm breeding pause" may be mostly built:
+  HorseRealmRepro (added 2026-09-25) already shifts a horse's repro clock by the gap
+  since it was last seen, while the treatment (2026-10-01) says an unloaded realm mare is
+  not frozen. Not checked further; whoever picks that unit must read HorseRealmRepro
+  first and date the treatment against it (process-intake step 2).
+
+PROCEDURES
+----------
+- rebake.txt row g and add-a-gene.txt step 9: bakeUnverifiedGenes moved after the
+  timeline bake, with the reason.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Full :common:test not run; it would still check every other gene's tests against the
+  LightGene change (only modifyCutieMark's body moved to a helper, same rule).
+- Nobody has seen a light unicorn's horn glow in game:
+  wiki/gene-horn-glow.html#open-light-horn-look.
+
+RELEASE
+-------
+Not offered: one small feature is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+process-intake: the To do.txt bullet "The horse designer lists each grown part as a
+trait" (Tier 1, S, no owner question; hard rule 5 divergence comment on both editors).

@@ -50,6 +50,13 @@
     <code>parts.glow</code> in the client config turns the glow off and keeps the horn.
 </p>
 
+<p>
+    A unicorn that carries <a href="gene-light.html">light</a> &mdash; glowing hooves, mane
+    or eyes &mdash; has a glowing horn even without two copies of this gene, the same way its
+    <a href="gene-cutie-mark.html">cutie mark</a> glows. A horse that shines everywhere else
+    never wears one dull horn.
+</p>
+
 <h2 id="health">Is it good for the horse?</h2>
 
 <p>
@@ -93,13 +100,18 @@
 </p>
 
 
-<h3 id="open-glow-light-locus">Settled 2026-10-01: a light horse's horn glows too</h3>
+<h3 id="open-glow-light-locus">A light horse's horn glows too (shipped 2026-10-02)</h3>
 <p>
-    The owner's call: the horn follows the <a href="gene-light.html">light</a> locus, the way the
-    <a href="gene-cutie-mark.html">cutie mark</a> does. A horse whose mane and hooves glow from
-    the light locus gets a glowing horn whatever this locus says. This locus still lights a horn on
-    its own. <strong>Not built yet</strong>: it is queued in <code>intake/To do.txt</code>, and
-    moves to Gameplay when it ships.
+    The owner's call (2026-10-01): the horn follows the <a href="gene-light.html">light</a>
+    locus, the way the <a href="gene-cutie-mark.html">cutie mark</a> does.
+    <code>GrownParts.dressHorn</code> sets the horn emissive when
+    <code>HornGlowGene.glows</code> <em>or</em> <code>LightGene.lightsHorse</code> says so.
+    <code>lightsHorse</code> is the one rule both share &mdash; any variant copy at the light
+    locus, eyes-only <code>Lteye</code> included &mdash; and <code>LightGene.modifyCutieMark</code>
+    now asks it too, so the mark and the horn cannot disagree. Only the glow moves; the horn's
+    colours are still horn colour's. The light locus grows no horn of its own. Pinned by
+    <code>HornGenesTest.aLightHorsesHornGlowsWithoutTheHornGlowLocus</code>, which failed before
+    the change.
 </p>
 </section>
 
@@ -123,8 +135,15 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A glowing horn has not been seen since glow became its own gene.</p>
+    <p>A glowing horn has not been seen since glow became its own gene, nor a light unicorn's horn lit by the light locus.</p>
 </div>
+
+<h3 id="open-light-horn-look">A light unicorn's horn, at night</h3>
+<p>
+    Spawn a unicorn with <code>light Lthf/n</code> and <code>horn_glow n/n</code> beside one with
+    <code>light n/n</code>, and look at both at night: the first horn should glow in its own colour
+    like the hooves, the second stay dull. An <code>Lteye/n</code> unicorn should glow too.
+</p>
 
 <h3 id="open-glow-look">A glowing horn of each kind, at night</h3>
 <p>

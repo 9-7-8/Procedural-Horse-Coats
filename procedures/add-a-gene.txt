@@ -326,8 +326,9 @@ STEPS
 9. The bake list, in this order. The timeline dates a gene by the first commit that
    names its key, so commit the code before baking the timeline.
      :common:bakeGeneBundle   :common:bakeGeneIcons   :common:bakeGeneWikiPages
-     :common:bakeMarkingFacts :common:bakeGeneCensus  :common:bakeUnverifiedGenes
+     :common:bakeMarkingFacts :common:bakeGeneCensus
      node wiki/tools/bake-gene-timeline.mjs
+     :common:bakeUnverifiedGenes  (after the timeline: it sorts by it)
      :web:bakeDesignerAssets  then  node wiki/tools/check-designer-boots.mjs
      node wiki/tools/bake-verification-index.mjs  (and bake-roadmap-index.mjs)
      node wiki/tools/build-search-index.mjs, check-links.mjs, bake-agent-text.mjs
