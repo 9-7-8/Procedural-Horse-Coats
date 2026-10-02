@@ -8,6 +8,11 @@ and the antler / unicorn-horn gene pages. This file is retired (deleted, per /pr
 each piece ships and moves onto those pages' Gameplay and Coding tabs.
 Release: patch per piece (each piece is something a player notices); saves keep loading.
 
+REVISED 2026-10-02 (owner): the lion tail is no longer a gene of its own. It is the Lt ALLELE of the single
+tail gene scoped in "Tail gene - implementation treatment.txt", which builds the locus, the dominance list, the
+hide rule and the TAIL_BASE anchor. This file keeps only what is lion-specific: the tuft's shape and sizes, its
+colour, the foal tail, the optional whip. It waits on the Tail gene file's piece 1 (or ships in the same session).
+
 1. The request, as given
 ========================
 "Help me scope out a tufted lion tail attachment. Making the pixels on the horse skin where the tail is
@@ -17,11 +22,13 @@ Reading: a new grown part, a thin tail ending in a tuft, that replaces the horse
 that carry the gene. Her first idea for hiding the vanilla tail was alpha-0 pixels on the coat's tail
 region. When asked, she chose instead to HIDE THE MODEL PART in the layer (Decided, section 4 piece 1),
 so the alpha-cutout trick is NOT in this file; see "In scope, and what is not".
+Overturned later the same day (owner): one tail gene for all tails, wild = horse tail, ranked alleles, one tail
+shown. See the Tail gene file.
 
 2. In scope, and what is not
 ============================
 In scope:
-- One new magical gene (dominant tuft allele + wild type) granting one grown part, a rigid thin tail with
+- The lion allele Lt of the single tail gene (the locus is the Tail gene file's), granting one grown part, a rigid thin tail with
   a tuft of boxes at its end, parented to the tail bone so it swishes with the vanilla animation.
 - The vanilla tail hidden on horses that have the part, adult AND foal (Decided).
 - The part's colour sampled from the horse's own tail/mane hair patch (Decided).
@@ -30,8 +37,7 @@ In scope:
 Not in scope (all re-askable):
 - Alpha-0 coat pixels as the hiding mechanism (she chose hiding the part). Do not build a second path.
 - A segmented, whip-curving chain (Recommended as a later optional piece, not asked beyond "rigid").
-- Blade and club tails (the body-parts treatment lists "tails (tufted, blade, club)" as later), and a
-  multi-allele form gene: she chose the two-allele dominant shape.
+- Blade, club, fish and dragon tails (later alleles of the same tail gene, each its own treatment).
 - A tuft colour gene of its own (she chose hair sampling).
 - Drawing the rescuing braid, tail stripes or tail glow on the lion tail (they stay on the hidden
   vanilla tail and are therefore not drawn - Decided, section 5).
@@ -85,9 +91,9 @@ Piece 1 - A lion-tailed horse (the adult, rigid)
 ------------------------------------------------
 What the player sees: a horse with the tuft allele has no ordinary tail; it has a thin tail ending in a
 brush of hair, the same colour as its own tail hair, swishing as the horse moves.
-- Decided: magical gene (owner). A new locus, appended after the last, so the genotype code only
-  lengthens.
-- Decided: dominant tuft allele and a wild type (owner): one copy shows. Tuft size comes from an
+- Decided: magical gene (owner), now the single tail gene (Tail gene file): the locus, its append to the genotype
+  code and its dominance list are built there, not here.
+- Decided: dominant Lt allele over wild n (owner): one copy shows; a higher-ranked tail allele, once one exists, wins. Tuft size comes from an
   epigenome number on the allele copy: length and tuft fullness only, no thickness (owner; a size category if the
   existing PartKind.sizeBuckets pattern fits).
 - Decided: hide the vanilla tail by HIDING THE MODEL PART in the layer, not by alpha-0 pixels (owner).
@@ -106,16 +112,13 @@ brush of hair, the same colour as its own tail hair, swishing as the horse moves
   epigenome varies length and tuft fullness around that. Open (building session): the final numbers, by eye in
   the dev yard, recorded on the gene page; the target above is the start.
 Where the code lives:
-- common/: the gene (LionTailGene, alleles, expressionOf, isNatural() false, founder entry, label), the
-  PartKind value and its switch cases, the generator (LionTailGenerator + a size class beside
-  HornSize/AntlerSize), PartGenerators/PartShape cases, GrownParts.of and shapes. A pure rule
-  "this genotype hides the vanilla tail" belongs here too (a method on the gene or GrownParts) so the
-  designer and the unit tests read the same answer.
+- common/: the PartKind value and its switch cases, the generator (LionTailGenerator + a size class beside
+  HornSize/AntlerSize), PartGenerators/PartShape cases, GrownParts.of and shapes. The hide rule
+  ("the shown tail allele is not wild") is the Tail gene file's, one method in common/, not a lion-only flag.
 - NeoForge: the PartAnchor case in AttachedPartLayer.anchor (walks root, body, tail bone, translateAndRotate,
   adult offset), the tail.visible handling in HdHorseModel, the hair-patch tint, the sheet bake.
-Data and saves: a new locus lengthens the genotype code; existing worlds load with every horse reading
-"wild type" at the new locus (the migration the other appended genes used; the building session names it
-from the last appended gene). Nothing else is stored: the part is recomputed client-side from the
+Data and saves: the locus and its migration are the Tail gene file's (it lengthens the code; old horses read n/n).
+Nothing else is stored here: the part is recomputed client-side from the
 genotype and epigenome. If the gene is parked later, the genes/index.json killswitch rule applies (hard rule
 6: never regenerate the index from the folder).
 Sync: none new; the part list is computed on the client from CoatData (CoatSyncPayload,
@@ -124,15 +127,14 @@ Config: none new. The existing client parts.* switches and the parts detail dist
 the gene whose parts are switched off MUST show its vanilla tail (the hide is gated by the same switch, or
 a player turning parts off would see a horse with no tail at all). Decided (owner): a lion-tailed horse shows its
 normal vanilla tail when parts are off or beyond the detail distance (a pop at the distance is accepted).
-Tests: a common/ test pinning the allele table, dominance, GrownParts.of (one part for Tuft/n and
-Tuft/Tuft, none for n/n), the shape cache key for each size, and the "hides vanilla tail" rule; the
+Tests: the allele table and dominance are the Tail gene file's; here a common/ test pins GrownParts.of's lion part (one for Lt/n and
+Lt/Lt, none for n/n), the shape cache key for each size, and the "hides vanilla tail" rule; the
 existing parity snapshot and CommonPortabilityTest rerun; a genotype-code round-trip test with the new
 locus appended; a designer test (web/) that the part is listed.
 Play checks (become the page's Verification tab): the tail is fully hidden and never doubled at rest,
 walking, trotting, galloping, rearing and while grazing; the tuft is the horse's tail colour on a bay, a
 grey, a dilute and a pied horse; it swishes; a horse with parts switched off shows a normal tail.
-Docs: wiki/model-parts.html (Gameplay, Coding); a new gene page for the lion tail (add-a-gene,
-three tabs); wiki/horse-designer.html; wiki/gene-tail-color.html gets a one-line note that the lion tail
+Docs: wiki/model-parts.html (Gameplay, Coding); the Tail gene file's new page wiki/gene-tail.html (the lion allele is described there); wiki/horse-designer.html; wiki/gene-tail-color.html gets a one-line note that the lion tail
 hides it; wiki/genetics-model.html's priorities if a slot is claimed.
 
 Piece 2 - The foal's lion tail
@@ -155,7 +157,7 @@ Config: none.
 Tests: the showsOnFoal() case in the PartKind test.
 Play checks: a newborn foal shows the tuft in place, tiny, no vanilla tail; it follows the growth to adult
 with no pop.
-Docs: wiki/model-parts.html; the lion tail gene page.
+Docs: wiki/model-parts.html; wiki/gene-tail.html.
 
 Probe results, 2026-10-02 (both apply to piece 1 and to every later tail)
 ------------------------------------------------------------------------
@@ -163,13 +165,11 @@ Decided (owner, probe 2026-10-02) - rider fade: the lion tail FADES like the oth
 down (RiderFade, the same 25% floor and the same ClientConfig setting), for consistency. Consequence for the
 building session: the tail sits behind the rider, so check by eye that the fade is not odd (a half-visible tail
 while the rider looks down); if it is, report to the owner rather than quietly exempting it.
-Decided (owner, probe 2026-10-02) - clash with later tail genes: SEPARATE genes, ALL DRAW. Each future tail
-(blade, club, dragon, fish) is its own gene and its own PartKind; a horse that carries two draws both, and the
-vanilla tail is hidden if ANY carried tail gene says so. The lion tail's hide rule is therefore written as "this
-genotype hides the vanilla tail", one boolean per tail gene, OR-ed in common/ (not a lion-tail-only flag), so a
-second tail gene adds a term instead of changing this one. Visible overlap of two tails at one anchor is
-accepted. Open (building session): the OR-ed rule's home (GrownParts or a small helper), chosen so the second
-tail gene needs no change to HdHorseModel.
+Decided (owner, probe 2026-10-02, then OVERTURNED by her the same day) - clash with later tails: there are NO
+separate tail genes. All tails are alleles of the one tail gene; the highest-ranked allele a horse carries is the
+only tail drawn, and the vanilla tail is hidden whenever that winner is not wild. The earlier "separate genes,
+ALL DRAW" call, the OR-ed per-gene hide rule and "visible overlap of two tails is accepted" are withdrawn. The
+rank and the hide rule are written in the Tail gene file.
 
 
 Piece 3 (optional, not asked, Recommended to offer later) - A whipping tail
@@ -196,7 +196,7 @@ B. Fit: horses-only, vanilla intact (a client look on the same entity; nothing r
 C. How met: by spawning (founder frequency) and breeding; survival-reachable; no new item. Explained by the
    gene page, the horse info screen, and the designer. No ProgressTask. Wording of its info line lives in
    common/. Recommended: no feedback messages.
-D. Genetics: magical (owner), dominant tuft + wild (owner); alleles appended, never reordered; token must
+D. Genetics: now the Lt allele of the single tail gene (Tail gene file; magical, Lt > n); alleles appended, never reordered; token must
    not clash with any existing token (check every allele token in genes/ before choosing; UNVERIFIED which
    token is free; Recommended "Lt" / "n"; a search of common/ found no existing "Lt" token, still UNVERIFIED against the resource genes/ folder and every allele token). Epigenome numbers on the copy: length and tuft fullness
    (ranges set in the generator; Recommended). Not sex-linked, not lethal, no health effect. Shown on foals
@@ -286,10 +286,10 @@ The three most likely ways it goes wrong for a real player:
 
 7. Order and size
 =================
-Order: piece 1 (the part, adult), then piece 2 (the foal), then optionally piece 3. Piece 1 proves the
+Order: the Tail gene file's piece 1 first (or in the same session), then this file's piece 1 (the part, adult), then piece 2 (the foal), then optionally piece 3. Piece 1 proves the
 hide and the anchor; piece 2 is only an offset and a flag. Sizes: piece 1 M (M-L if it also has to build the
 shared "walk root to body bone" branch and the hair sampler); piece 2 S; piece 3 M (not scheduled).
-Waits on: nothing hard. Shares machinery with Body parts (the first non-head anchor) and Feathering (the
+Waits on: the Tail gene file's piece 1 (the locus). Shares machinery with Body parts (the first non-head anchor) and Feathering (the
 hair-patch colour); whichever of the three builds first builds the shared piece, and the other two reuse it.
 Unblocks: a lion-tailed breed, blade/club tails, the chain.
 Do NOT do in the same session: piece 1 and a new breed; piece 1 and piece 3; any change to the coat pipeline
@@ -306,7 +306,7 @@ Rebake rows (procedures/rebake.txt, walk the table): the gene census / gene spec
 pages (:common:bakeGeneWikiPages), the part sheet (neoforge-26.1.2/tools/bake-part-sheet.mjs if a new region
 is touched), the parity snapshot and golden for the longer genotype code, wiki/text (bake-agent-text.mjs),
 verification and roadmap indexes, and :web for the designer.
-Wiki landing: piece 1 and 2 on wiki/model-parts.html (Gameplay, Coding) and on the new lion-tail gene page
-(Gameplay, Coding, Science); open checks on that page's Verification tab (not on wiki/verification.html).
-A NEW wiki page must be written: the lion-tail gene page (procedures/add-a-gene.txt, add-a-wiki-page).
+Wiki landing: piece 1 and 2 on wiki/model-parts.html (Gameplay, Coding) and on wiki/gene-tail.html
+(Gameplay, Coding); open checks on that page's Verification tab (not on wiki/verification.html).
+No new page here: wiki/gene-tail.html is written by the Tail gene file.
 The "lion and tufted tails" line on model-parts.html's Roadmap tab is retired when piece 1 ships.

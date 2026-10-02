@@ -41,8 +41,14 @@ Body parts - implementation treatment.txt                         sized 2026-10-
 Built? No (SPINE is only a comment in PartAnchor).
 
 ------------------------------------------------------------------------------
+Tail gene - implementation treatment.txt                          sized 2026-10-02
+- Piece 1: TailGene locus (Lt, n; ranked dominance), hide rule, TAIL_BASE anchor, lion part   M-L c  owner-free (shares the hair sampler with Feathering and the body anchor with Body parts)
+Built? No (no tail gene, anchor or part exists).
+
+------------------------------------------------------------------------------
 Tufted lion tail - implementation treatment.txt                   sized 2026-10-02
-- Piece 1: LionTailGene, TAIL_BASE anchor, hide vanilla tail, hair-patch tint   M-L c  owner-free (shares the hair sampler with Feathering and the body anchor with Body parts)
+(Now the Lt allele of the Tail gene; piece 1 here is the lion shape, tuft and hair-patch tint.)
+- Piece 1: LionTailGenerator, LION_TAIL part, hair-patch tint    M  c  owner-free; needs Tail gene piece 1
 - Piece 2: foal tail                                             S  c  owner-free; needs piece 1
 - Piece 3 (optional, not asked): segmented whipping tail         M  c  No: the owner has not said yes
 Built? No (no tail part, anchor or gene exists).
