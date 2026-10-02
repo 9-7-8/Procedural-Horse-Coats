@@ -14,6 +14,8 @@ ASKED
    ... be ready with a report in a couple of hours" - DebugStress + JFR, eleven fixes measured; report below.
 5. "I hit my usage limit while you were working, but it has reset now. Please continue" - four wave-2 agents had
    died mid-report; their files turned out complete and compiled.
+6. "Good morning, end session please" (07:20) - the yard's overnight verdicts read, closed on their pages, answered
+   pens removed (ec347d66), procedures reviewed, everything stopped.
 
 DONE
 ----
@@ -121,17 +123,30 @@ FOUND ON THE WAY
   allowlist and was left for the owner (it was gone by 03:54).
 - A wiki/text bake showed most of wiki/text as modified on mtime; the commit held 23 real files.
 
+MORNING (07:20 read of the 03:52 run)
+-------------------------------------
+PASS and closed on their pages: RATIO STARBURST (6:23:11), RATIO BRINDLE (23 fillies all Brn/n, 17 colts none),
+DRYAD OAK+BIRCH (each species on its own copy's beat, 145 min), MUSIC (5), RESEARCH SHELF (6), STALL SHAPES (all but
+#25's two), CHEST LOOT rates/weights/tints/controls, CARROT CROP growth, FIREPROOF (5), BREATH (3), PACK LEADER (3),
+HANDS AT FEEDING (4, incl. Lava/Lava Mlk/Mlk 80 of 80 tries vs 40), GRAZING dropped food and narrow diet, DRAUGHT
+(3), STALLION DAY and FRESHER, WEATHER COPIES on jump. food-preference's Verification tab emptied and went. Pens for
+all of those removed (ec347d66). Still open: RATIO MITF SW3 (18 foals by 07:12, slow); MUSIC's finished-record
+question (the care day never rolled over for the test mare - worth a look).
+New: #26 - the GRAZING hay-bale horse starved beside a plain hay_block (pen not yet ruled out).
+
 PROCEDURES
 ----------
-None changed. Worth adding to test-tiers or a new procedure: the stress run's command, and that run-stress dirs need
-pause-when-empty-seconds=0 and their own server-port.
+Added procedures/stress-test.txt (+ INDEX.txt row, .claude/skills/stress-test, keyword memory): the stress run as
+done tonight, including the two traps it hit - an empty dedicated server pauses after 60 s
+(pause-when-empty-seconds=0), and a Java process started from a git worktree is outside stop-dev-java.ps1's
+allowlist (only start ones that halt themselves). No other procedure was wrong this session.
 
 NOT RUN / NOT CHECKED
 ---------------------
-- :common:bakeUnverifiedGenes was not run after the gene-page closures (gradle under the running yard); every page
-  that gained a verified- id already had a Verified block, so its output should not change - run it next session.
 - No full :common:test after the performance commits (one common/ change: HorseAbilities.anyLoaded; GeneAbilitySpecTest
   and CommonPortabilityTest pass).
+- :common:bakeUnverifiedGenes and the gene bakes WERE run at end-session (music_enjoyer, food_preference,
+  magic_meat, shadowcreature left the unverified list).
 - #24 needs a save inspected (an existing mob's NBT loses the empty lycan_shift on its next save).
 - The yard at session end: RATIO BRINDLE / STARBURST / MITF SW3 restarted, the dryad,
   MUSIC and CARROT CROP growth still timing.
@@ -143,5 +158,6 @@ Not offered by this routine; four player-facing fixes (#20-#24 minus #25) and a 
 
 PICK UP FIRST
 -------------
-Read the yard's remaining verdicts (ratio pens, dryad, MUSIC), fix the WALL PAIR latch and the three pen-side FAILs,
-and close what passed (procedures/run-tests.txt); then #25 via procedures/fix-bug.txt.
+#26 first (a horse that will not eat hay is the invisible-failure kind) via procedures/fix-bug.txt, ruling out the
+GRAZING pen before the code; then #25; then fix the pen-side FAILs (CARROT CROP drops/planting, CHEST LOOT paper
+order) under procedures/run-tests.txt.

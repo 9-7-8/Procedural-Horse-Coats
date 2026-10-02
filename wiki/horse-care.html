@@ -1484,6 +1484,17 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     (<a href="item-stall-signs.html#verification">the stall-sign rewrite&rsquo;s verification tab</a>).
 </p>
 
+<p id="verified-ground-food">
+    <strong>Dropped food is judged by what a horse grazes</strong> (pen GRAZING, the run of 2026-10-02 03:52 on
+    <code>a56afcbb</code>, two clockwork PASS lines). In a stone-floored glass cell with nothing else to eat, a hungry
+    ordinary mare (hunger 20) ate a dropped beetroot, melon slice and potato &mdash; none of them in vanilla&rsquo;s
+    horse-food tag &mdash; within 300 ticks, her hunger rising 74.4 in all (03:53:01). Beside her a hungry
+    <code>Dwht/Dwht</code> wheat-eater with the same three and a wheat ate the wheat at +200 and left all three for
+    the full ten minutes while her hunger drained back to 20 (04:02:46), so the widening stops at
+    <code>NORMAL</code>/<code>ANYTHING</code>. The modded-grain, peckish-horse and hand-feeding halves are still open on
+    <a href="#ground-food-0924">the Verification tab</a>.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -2646,17 +2657,13 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     modded server is in. It now asks <code>DietFoods.acceptsFromGround</code>: crops, fruit,
     vegetables, berries, mushrooms, small flowers and cake, vanilla&rsquo;s and any mod&rsquo;s, by
     the common tags. A grazing horse also takes a dropped mouthful within 2 blocks before it takes
-    the grass.
+    the grass. The yard has seen a hungry horse eat dropped vanilla crops and a wheat-eater refuse them
+    (&sect;<a href="#verified-ground-food">Verified</a>); what is below is the rest.
 </p>
 
 <h4>In the game, with your hands</h4>
 
 <ul>
-    <li><strong>A dropped potato is eaten.</strong> Drop a potato, a beetroot or a melon slice
-        &mdash; none of them in vanilla&rsquo;s horse-food tag &mdash; beside a hungry ordinary
-        horse. <strong>Pass:</strong> it walks over and eats it, and <code>hunger</code> logs
-        <code>ate minecraft:potato (dropped)</code>. <strong>Fail:</strong> it walks past to the
-        grass, which means the tag lookup is not matching.</li>
     <li><strong>A modded grain is eaten</strong> &mdash; the case that prompted this. On the modded
         server, drop another mod&rsquo;s crop or fruit by a hungry horse. <strong>Pass:</strong> the
         same log line with that mod&rsquo;s item id. <strong>Fail:</strong> it is ignored, which
@@ -2665,10 +2672,6 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <li><strong>A horse that is only peckish still takes what is at its feet.</strong> Drop food
         beside a horse that is below three quarters full but not yet hungry. <strong>Pass:</strong>
         within a couple of minutes it eats it without walking anywhere.</li>
-    <li><strong>A narrow diet still refuses.</strong> Drop a potato by a hungry
-        <a href="gene-diet.html">wheat-eater</a>. <strong>Pass:</strong> ignored; hay and wheat only.
-        <strong>Fail:</strong> it eats it, which means the widening leaked past
-        <code>NORMAL</code>/<code>ANYTHING</code>.</li>
     <li><strong>Hand-feeding is unchanged.</strong> Hold a plain potato out to an ordinary horse.
         <strong>Pass:</strong> nothing happens, exactly as before &mdash; this change is about the
         floor, not the hand.</li>

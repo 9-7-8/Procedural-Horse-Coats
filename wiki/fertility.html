@@ -432,8 +432,9 @@
     &mdash; a stallion who has made his third cover is already halved for his fourth, so counting him
     fresh would have her prefer the halved one. What remains unbuilt is the owner's other half of the same ask, that a stallion cover
     freely unless he carries a negative fertility gene: the halving still applies to every stallion,
-    sound or <a href="gene-fertility.html">subfertile</a>. <em>Not played yet</em> &mdash;
-    <a href="#no-daily-cap-0924">&sect;the paddock below</a>.
+    sound or <a href="gene-fertility.html">subfertile</a>. Seen in the yard on 2026-10-02
+    (&sect;<a href="#verified-stallion-day">Verified</a>); the vet&rsquo;s wording is
+    <a href="#no-daily-cap-0924">not played yet</a>.
 </p>
 <p id="stallion-day-1001">
     <strong>The free covers are a server setting</strong> (the owner, 2026-10-01):
@@ -620,6 +621,17 @@
         07:26:48 and healed a point at a time. Through eight minutes of heats at part health she was never
         covered, and she was covered at 07:34:32, seconds after reaching full health.</li>
 </ul>
+
+<p id="verified-stallion-day">
+    <strong>A stallion&rsquo;s day is uncapped, and a mare takes the fresher stallion</strong> (pens STALLION DAY and
+    STALLION DAY FRESHER, the run of 2026-10-02 03:52 on <code>a56afcbb</code>, two clockwork PASS lines;
+    <code>debug.tools</code> on, so a reproductive day is 1,200 ticks). One tamed stallion with six tamed mares in heat
+    covered five different mares inside day 0 against 3 free covers; his first three went in at the fresh chance
+    (0.78, 0.74, 0.82) and his fourth and fifth at exactly <code>TIRED_STALLION_FACTOR</code> 0.5 of it (0.38 against
+    0.76, 0.39 against 0.78), with his own counter agreeing with every cover seen (03:52:54). In a 4&times;4 box a mare
+    in heat 1.50 from a stallion held at his free covers and 2.22 from a rested one, both in reach and passing the
+    path test, was covered by the further, rested stallion; the tired one&rsquo;s record did not move (03:52:51).
+</p>
 
 </section>
 
@@ -993,7 +1005,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers refusing through walls: the yard has seen a wall and a fence refuse and, under the path test loosened on 2026-09-30, a gate, a corner and a one-wide stall breed, which leaves the touching fallback never yet needed and the cost of a crowded paddock.</p>
+    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it the vet&rsquo;s wording for a stallion whose day is no longer capped (the paddock itself is seen), the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers refusing through walls: the yard has seen a wall and a fence refuse and, under the path test loosened on 2026-09-30, a gate, a corner and a one-wide stall breed, which leaves the touching fallback never yet needed and the cost of a crowded paddock.</p>
 </div>
 
 <h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25; the wall, a gate, a corner and a stall seen in the yard, the rest NOT played)</h3>
@@ -1090,29 +1102,15 @@
     <code>TIRED_STALLION_FACTOR</code> odds past his third, and a mare with a choice takes
     the stallion who still has covers in hand
     (<a href="#settled-no-daily-cap">the call</a>). <code>NaturalCoverTest</code> pins the
-    decision and <code>ReproTextTest</code> the vet&rsquo;s new wording; what no test can
-    reach is whether a real paddock now behaves the way the owner wanted.
+    decision and <code>ReproTextTest</code> the vet&rsquo;s new wording. The yard has since
+    watched a paddock do it &mdash; past three mares in a day, and the fresher stallion chosen
+    (&sect;<a href="#verified-stallion-day">Verified</a>); what is left is the kit&rsquo;s words on a
+    real stallion.
 </p>
 
 <h4>What to look at</h4>
 
 <ul>
-    <li><strong>One stallion, six mares.</strong> Pen one entire stallion with six tamed
-        mares and keep the total under <code>fertility.nearby_horse_cap</code> (50 by
-        default) or that will stop it first, which is a different bullet.
-        Run a few in-game days with <code>debug.tools</code> on so a heat is a minute.
-        <strong>Pass:</strong> <code>natural cover:</code> lines under <code>fertility</code>
-        in the log naming more than three different mares inside one day, with
-        <code>(chance ...)</code> visibly lower on the later ones.
-        <strong>Fail:</strong> exactly three a day, which would mean something else is still
-        capping him &mdash; check it is not the crowding cap by counting the pen.</li>
-    <li><strong>She takes the fresher stallion.</strong> Two entire stallions and a mare in
-        heat, one stallion already past three covers today and standing nearer than the
-        other. <strong>Pass:</strong> the <code>natural cover:</code> line names the
-        <em>further, rested</em> stallion. <strong>Fail:</strong> it names the nearer tired
-        one, which would mean the gathering in <code>NaturalBreedingHandler</code> is handing
-        <code>NaturalCover</code> a stale <code>coversToday</code> rather than the decision
-        being wrong &mdash; the decision itself is tested.</li>
     <li><strong>The vet&rsquo;s kit never says &ldquo;5 of 3&rdquo;.</strong> Use a vet&rsquo;s
         kit without sneaking on a stallion who has covered more than three times today.
         <strong>Pass:</strong> &ldquo;<em>N covers made today</em>&rdquo; and a second line

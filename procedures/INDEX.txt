@@ -27,6 +27,8 @@ Command                  Runs    Say (any of)                         What it le
                                  "this is broken"                     bug; no code changed
 /run-tests               local   "run tests", "run the yard"          passes closed, pens built, bugs
                                                                       filed, a report
+/stress-test             local   "stress test", "how much do horses   ms/tick per horse count, a ranked
+                                 cost", "profile the horses"          JFR profile, fixes before/after
 /hand-over-a-test        local   "what should I test", "update the    a re-aimed kit and a numbered
                                  test kit"                            list in chat
 /launch-game             local   "launch the game", "restart",        exactly one game running,

@@ -139,6 +139,7 @@ wiki/carts.html#textures	coding	23. No cart texture is shipped
 wiki/carts.html#two-riders	gameplay	14. Two riders
 wiki/carts.html#two-sources	coding	22. The contract that lives twice
 wiki/carts.html#vehicles	gameplay	1. The six vehicles
+wiki/carts.html#verified-draught	coding	Verified in the test yard: the draught goes on, grows with the load, and comes off clean
 wiki/carts.html#wagon	gameplay	5. The wagon
 wiki/carts.html#weight	gameplay	4. Weight: what a full cart costs
 wiki/carts.html#woods	gameplay	15. Every wood, including modded ones
@@ -1034,6 +1035,7 @@ wiki/gene-food-preference.html#breed	science	The most breed-defining invisible g
 wiki/gene-food-preference.html#contradiction	gameplay	A carnivore that loves carrots
 wiki/gene-food-preference.html#health	gameplay	Health
 wiki/gene-food-preference.html#order	coding	Which locus is asked first
+wiki/gene-food-preference.html#verified	coding	Verified
 wiki/gene-food-preference.html#what	gameplay	What it does
 wiki/gene-foxglove.html#about	coding	Why it is built this way
 wiki/gene-foxglove.html#carrot	gameplay	Its gene carrot
@@ -1793,6 +1795,7 @@ wiki/gene-music-enjoyer.html#cap	gameplay	It still respects the daily limit
 wiki/gene-music-enjoyer.html#care	science	Bond as something a gene can touch
 wiki/gene-music-enjoyer.html#health	gameplay	Health
 wiki/gene-music-enjoyer.html#verb	coding	A small verb with more users than it looks
+wiki/gene-music-enjoyer.html#verified	coding	Verified
 wiki/gene-music-enjoyer.html#what	gameplay	What it does
 wiki/gene-myo5a.html#at-a-glance	science	At a glance
 wiki/gene-myo5a.html#breeds	science	Breeds and frequency
@@ -3245,6 +3248,8 @@ wiki/items.html#tack-derived	gameplay	The textures are derived, not drawn
 wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
 wiki/items.html#tack-found	gameplay	Somebody else’s tack, in a chest
 wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
+wiki/items.html#verified-carrot-growth	coding	Verified: the crop grows
+wiki/items.html#verified-chest-loot	coding	Verified: the rates are the configured ones
 wiki/known-gaps.html#migrated	all	Migrated open checks
 wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform

@@ -181,6 +181,16 @@
     pair on <a href="gene-weather-speed.html#verified-copies">the speed locus</a> only.
 </p>
 
+<p id="verified-storm">
+    <strong>A storm moves the jump too.</strong> Read 2026-10-02 by the same WEATHER COPIES pen (the run of 03:52 on
+    <code>a56afcbb</code>, two clockwork PASS lines at 03:58:44), now on <code>jump_strength</code>. <code>T+/T+</code>
+    read x1.00000 in plain rain and x1.25348 in a storm (copies 0.1230 and 0.1162 predict exactly that).
+    <code>R+/Tv</code> read x1.18030 in rain off its <code>R+</code> copy and x0.89544 in a storm &mdash; the
+    prediction with <em>both</em> copies applied, since <code>isRaining</code> is also true in a storm, so its storm
+    reading is not its rain reading and the two copies keep their own modifier ids. After clear weather
+    <code>R+/Tv</code>, <code>T+/T+</code> and <code>n/n</code> were all back at exactly 0.500000.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -202,10 +212,9 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Rain, both copies and the clean removal are measured on weather sensitive (jump); its
-    storm and snowfall pairs, the founder table, the loci&rsquo;s independence and whether the
-    effect can be felt are not, and whether a storm should also count as rain is the
-    owner&rsquo;s call.</p>
+    <p>Rain, storm, both copies and the clean removal are measured on weather sensitive (jump);
+    its snowfall pair, the founder table, the loci&rsquo;s independence and whether the effect can
+    be felt are not, and whether a storm should also count as rain is the owner&rsquo;s call.</p>
 </div>
 
 <h3 id="open-weather-jump">Still open (NOT played)</h3>
@@ -224,19 +233,6 @@
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>A storm is not just rain again.</strong> <code>raining</code> reads
-        <code>isRaining</code> and <code>thundering</code> reads <code>isThundering</code>, and
-        a Minecraft thunderstorm <em>is</em> raining &mdash; so the claim that two weathers
-        never both hold needs testing rather than believing. Spawn <code>T+/T+</code> and
-        <code>R+/Tv</code> horses and read the pen dry, under <code>/weather rain</code>, and
-        under <code>/weather thunder</code>. <strong>Pass:</strong> the <code>T+/T+</code> horse
-        is at baseline in plain rain and raised in a storm; the compound horse is raised in rain
-        and lowered in a storm. A compound horse whose storm reading equals its rain reading is
-        both conditions holding at once with one modifier id between them. Partial evidence:
-        the WEATHER COPIES pen (2026-10-01) read this pair on
-        <a href="gene-weather-speed.html#verified-copies">the speed locus</a>, which shares
-        <code>AbstractWeatherGene</code> with this one, and it passed there; nothing has read
-        <code>jump_strength</code> in a storm.</li>
     <li><strong>The snowfall pair works at all.</strong> <code>snowing</code> is not a weather
         flag &mdash; it is raining <em>and</em> the biome cold enough to snow at the
         horse&rsquo;s height, sampled on an interval and cached, and every world-sampled flag
@@ -274,7 +270,8 @@
     <li><strong>In a storm, does the rain copy still apply?</strong> Vanilla&rsquo;s
         <code>isRaining</code> is also true in a thunderstorm, so an <code>R+/Tv</code> horse
         in a storm carries <em>both</em> copies (WEATHER COPIES, 2026-10-01, read on the speed locus: rain x1.02000,
-        storm x0.77136, the product of the two). This page, and the &ldquo;Mixed weather
+        storm x0.77136, the product of the two; and 2026-10-02 on this locus: rain x1.18030, storm x0.89544,
+        &sect;<a href="#verified-storm">Verified</a>). This page, and the &ldquo;Mixed weather
         sense&rdquo; text in <code>AbstractWeatherGene</code>, say two weathers never both hold.
         Either keep both applying and correct the text, or make a storm replace rain for these
         loci.</li>

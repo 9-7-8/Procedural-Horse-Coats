@@ -2268,7 +2268,9 @@
         grazing hay stopped being a hardcoded block and became a tag lookup, so if the tag
         is wrong every horse silently stops eating hay everywhere. The gametest
         <code>hay_is_still_a_bale</code> covers the tag itself; this covers the goal that
-        reads it.</li>
+        reads it. <em>Failed in the yard (2026-10-02):</em> a hungry mare spent ten minutes beside
+        a plain <code>minecraft:hay_block</code>, starved to 0, and never ate it &mdash;
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">issue #26</a>.</li>
     <li><strong>Hand a hay bale to a hurt tamed horse.</strong> It should heal, consume the
         bale and give bond exactly as before &mdash; vanilla's own bale is deliberately
         excluded from the new handler, so any change here is a bug.</li>

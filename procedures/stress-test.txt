@@ -1,0 +1,61 @@
+PROCEDURE  : Stress-test the horses' tick cost
+COMMAND    : /stress-test
+SAY        : "stress test", "how much do horses cost", "profile the horses", "measure ms per tick"
+RUNS       : local (a dedicated server and a JFR recording)
+TAKES      : a built tree; about 15 minutes per run and 2-3 GB of free memory
+LEAVES     : ms/tick per horse count, a JFR profile ranked by the mod's entry points, and any
+             fixes measured before and after
+==============================================================================
+
+WHEN TO USE
+-----------
+When the owner asks how expensive horses are, after a change to anything that runs per horse
+per tick (an EntityTickEvent handler, a horse goal, a mixin on horse tick or travel), or
+before and after a performance fix. Not for "does it work": that is test-tiers or the yard.
+
+BEFORE YOU START
+----------------
+1. Free memory: `./gradlew --stop`. A stress server takes 2 GB (-Xmx2G in the run).
+2. A yard client may run beside it, but never build under it (launch-game step 3). To keep
+   the yard running, do this in a git worktree (`git worktree add <dir> -b <branch> HEAD`)
+   and build there. A Java process started from a worktree is outside
+   tools/stop-dev-java.ps1's allowlist: it can only end itself (DebugStress halts the server
+   after its last stage), so never start one that does not end on its own.
+
+STEPS
+-----
+1. Make a fresh run directory under neoforge-26.1.2/ (gitignored), e.g. run-stress5, holding:
+   - eula.txt: eula=true
+   - defaultconfigs/horsegenetics-server.toml: [debug] tools = false, announce = false
+     (a player's server, not a dev one)
+   - server.properties, at least: online-mode=false, level-type=minecraft\:flat,
+     spawn-monsters=false, simulation-distance=6, max-tick-time=-1,
+     pause-when-empty-seconds=0 (or the empty server stops ticking after 60 s and the run
+     silently measures nothing), and a server-port no other server holds.
+2. Launch detached (launch-game step 5's Start-Process form) with
+   `:neoforge-26.1.2:runStressServer -PstressStages=0,100,300,600,1000 -PstressDir=<dir>`.
+3. Wait for `[stress] done` in <dir>/logs/latest.log (a background shell, never a sleep poll).
+   Each stage logs `[stress] <n> horses alive ... mean, p50, p95, max ms/tick`.
+4. Read the profile: `jfr print --events jdk.ExecutionSample --stack-depth 64 <dir>/stress.jfr`,
+   keep the Server thread samples, and count each sample's OUTERMOST com.example.horsegenetics
+   frame (the entry point) and its innermost one (the hot code). `jfr view hot-methods` alone
+   mixes start-up founding into the picture.
+5. Compare like with like: a run where horses bred (the alive count above the asked count)
+   is not comparable with one where they did not. Compare per-entry-point shares instead.
+6. For each fix, measure again in a new run directory and report before -> after.
+
+DONE WHEN
+---------
+The owner has, in chat and in the session log: the ms/tick table, the top entry points by
+share of samples, what was fixed with before/after numbers, and what was left and why.
+
+NEVER
+-----
+- Never measure with debug.tools on: trace strings and debug handlers are not what a
+  player's server pays.
+- Never start a stress server that does not halt itself.
+- Never call a change faster from one run: compare stages with equal horse counts.
+
+SEE ALSO
+--------
+test-tiers; launch-game; the 2026-10-01 23:15 session log (the first run and its report).

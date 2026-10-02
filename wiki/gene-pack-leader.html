@@ -179,6 +179,16 @@
     the dimension, which is its baseline. A stable with several pack leaders in it is fine.
 </p>
 
+<p id="verified-retinue">
+    <strong>A retinue forms and follows, a mismatched pair leads none, and the cap holds</strong> (test yard, pen
+    PACK LEADER, the run of 2026-10-02 03:52 on <code>a56afcbb</code>, three clockwork PASS lines). A
+    <code>Cow/Cow</code> horse re-pathed cows to itself on 21 of 21 beats; the ten cows&rsquo; mean distance fell
+    9.3 &rarr; 4.8 while it shuffled, and the eight within 6 blocks then walked 13 blocks east after it, ending 2.9
+    from it against 12.3 had they stood still (03:53:55). No beat re-pathed more than 6 cows
+    (<code>MAX_TARGETS</code>), on 21 beats with up to 10 in the radius (03:53:55). Before it, a <code>Cow/Shp</code>
+    horse walked the same steps past the same cows and drew none to its block in 10 samples (03:53:07).
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -199,9 +209,9 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Leader of the pack has been measured as cheap but never watched working: nobody has confirmed
-    that a retinue actually forms, that a mismatched pair produces none, or that the followers are
-    released when the horse is gone. The Chaos allele (2026-10-01) has never met a modded mob.</p>
+    <p>Leader of the pack is confirmed cheap and working &mdash; a retinue forms, follows, stays
+    capped, and a mismatched pair leads none &mdash; but its followers are not released at once when the
+    horse dies, and the Chaos allele (2026-10-01) has never met a modded mob.</p>
 </div>
 
 <h3 id="chaos-unplayed">Chaos (2026-10-01, NOT played)</h3>
@@ -221,37 +231,29 @@
     follower a <em>path</em> per beat rather than adding a goal to it. That matters twice: a
     pathfinder beats a velocity nudge, which is why the mirror-image repel aura had to be rewritten
     after three unattended hours proved a shove does nothing; and a path expires by itself, which is
-    the whole argument that this cannot be left behind on another mod&rsquo;s mob. Neither has been
-    seen here. The cost question is already answered &mdash; see
-    &sect;<a href="#verified-retinue-cost">Verified</a>.
+    the whole argument that this cannot be left behind on another mod&rsquo;s mob. The yard has
+    seen the paths work and the cost stay flat (&sect;<a href="#verified">Verified</a>); the expiry is
+    what is left.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>A retinue forms.</strong> Spawn a matched pair for a mob you can put in a pen
-        &mdash; cows are the case the cost pen already used &mdash; with several of them inside
-        sixteen blocks, then ride or lead the horse away.
-        <strong>Pass:</strong> they walk after it, and give up once it is well outside the radius.
-        Nothing else here matters if they do not move.</li>
-    <li><strong>A mismatched pair leads nothing.</strong> Two <em>different</em> following alleles,
-        with both mobs in range. <strong>Pass:</strong> neither species follows, and the gene row
-        reads the mismatched expression. This is most crosses between two carriers, so it is the
-        normal outcome and not the corner case.</li>
+    <li><strong>They give up outside the radius.</strong> The yard saw cows walk after a
+        <code>Cow/Cow</code> horse (&sect;<a href="#verified-retinue">Verified</a>) but never led it
+        away from them. Ride it well past sixteen blocks. <strong>Pass:</strong> the followers stop
+        and go back to grazing.</li>
     <li><strong>It does not create them.</strong> Take an expressing horse somewhere with none of
         its mob at all. <strong>Pass:</strong> nothing happens &mdash; and record it as the gene
         working. The allele description says this outright because it is the single most likely
         reason to file the locus as broken.</li>
-    <li><strong>The cap bounds the pathfinding.</strong> Put more of the mob in range than
-        <code>PackLeaderGene.MAX_TARGETS</code>. <strong>Pass:</strong> only that many trail the
-        horse per beat and the rest carry on grazing. The cap is the design rather than tuning, and a
-        cap that is not applied shows up as tick time long before it shows up as a wrong-looking
-        retinue.</li>
     <li><strong>Nothing is left behind.</strong> Kill or remove the horse while a retinue is
         following it. <strong>Pass:</strong> the followers go back to wandering at once, and no mob
         keeps walking toward where the horse was. A leak here is the exact lifecycle failure the
         stateless design exists to prevent, and it would only ever be noticed as mobs behaving oddly
-        long afterwards.</li>
+        long afterwards. <em>Failed in the yard (2026-10-02 03:53:59):</em> one and two beats after the
+        leader was killed, two and then one cow were still walking out the last 2&ndash;3 blocks of their
+        path to the block it died on &mdash; the path expires, but not at once.</li>
     <li><strong>No wild horse leads anything.</strong> The founder table for a matched-pair locus
         puts only carriers in the wild. <strong>Pass:</strong> you find carriers at roughly
         <code>WILD_CARRIER_PERCENT</code> and never a wild horse with a retinue.</li>
@@ -260,6 +262,11 @@
 <h4>In the game, with your hands</h4>
 
 <ul>
+    <li><strong>The gene row reads a mismatched pair.</strong> The yard proved a <code>Cow/Shp</code>
+        horse leads no cow (&sect;<a href="#verified-retinue">Verified</a>), but had no sheep and did not
+        read the screen. Open one&rsquo;s info screen beside sheep. <strong>Pass:</strong> no sheep
+        follow, and the gene row shows the mismatched expression &mdash; most crosses between two
+        carriers land here.</li>
     <li><strong>It reads as a retinue rather than a tow rope.</strong> Ride one at speed with a
         following pack. <strong>Pass:</strong> they trail behind and drift, plainly untamed and
         plainly not commanded &mdash; the tone the page promises. A pack that moves in lockstep with

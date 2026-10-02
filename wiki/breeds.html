@@ -1059,6 +1059,18 @@
     All three fixed.
 </p>
 
+<p id="verified-nether-hands">
+    <strong>Wart settles only a grown Netherhorse, its lava comes several times a day, and the Nightmare&rsquo;s
+    bottle carries both curses</strong> (test yard, pen HANDS AT FEEDING, the run of 2026-10-02 03:52 on
+    <code>a56afcbb</code>, four clockwork PASS lines). Both horses spawned as the breed, a pair of hands offered six
+    of eight nether wart to each: the foal took none and held nothing for anyone five minutes on, still a foal, while
+    the adult took three (its route&rsquo;s amount) and was settled permanently for everyone (03:57:54). A
+    <code>Lava/Lava Mlk/Mlk</code> mare filled a lava bucket on all 80 tries 600 ticks apart against a
+    <code>Lava/Lava</code> control&rsquo;s 40 (04:32:34). A tamed <code>Wkn/Drk</code> mare filled one bottle carrying
+    weakness and darkness, both amplifier 0 (03:52:59). The <code>APr/APr</code> adult window is asked, and a compound
+    heterozygote at potion milk expresses both alleles.
+</p>
+
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
 
@@ -1193,7 +1205,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament, a milk or true flight at all, and the first that may now spawn wild somewhere with no grass, which has never once been seen happen &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, a harem that should cap at four mares, and herds in modded overworld, Nether and End biomes - the End's the first there ever - which no world has generated yet; and nine breeds whose climate genes the new spawn-biome rule moved, not yet read off a living horse.</p>
+    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament or true flight at all, and the first that may now spawn wild somewhere with no grass, which has never once been seen happen &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, a harem that should cap at four mares, and herds in modded overworld, Nether and End biomes - the End's the first there ever - which no world has generated yet; and nine breeds whose climate genes the new spawn-biome rule moved, not yet read off a living horse.</p>
 </div>
 
 <h3 id="climate-rule-1001">The climate rule moved nine breeds (2026-10-01, NOT played)</h3>
@@ -1273,11 +1285,6 @@
         still come for the person who tamed it. <strong>Pass:</strong> it attacks mobs, other
         horses and you, before and after taming. <strong>Fail:</strong> taming quietly exempts the
         owner somewhere, which would make the breed's entire premise ornamental.</li>
-    <li><strong>The adults-only way in really refuses a foal.</strong> <code>APr/APr</code> is
-        <code>Window.ADULT</code>, and it is the first time a foal-or-adult window has been on a
-        horse anybody could meet. <strong>Pass:</strong> nether wart does nothing at all to a foal
-        Netherhorse and permanently settles the grown one. <strong>Fail:</strong> the foal takes
-        the wart, which would mean the window is not being asked.</li>
     <li><strong>Skittishness pinned, and aggression pinned off.</strong> The Nightmare is
         <code>Faa/Faa</code> with <code>n/n</code> aggression, so it must flee everything and be
         incapable of fighting anything. <strong>Pass:</strong> it runs from mobs, from you, from
@@ -1295,14 +1302,6 @@
         hovers, and a wild Cloudtouched still only glides. <strong>Fail:</strong> either half
         &mdash; a Nightmare that glides, or a wild true-flying Cloudtouched &mdash; and the second
         is the one nobody would think to look for.</li>
-    <li><strong>Both milk loci do something a bottle can show.</strong> The Netherhorse is
-        <code>Lava/Lava</code> at <a href="gene-milk.html">milk</a> with
-        <code>Mlk/Mlk</code> volume on top, so a grown one should yield <em>lava</em>, and several
-        fillings a day rather than one. The Nightmare is <code>Wkn/Drk</code> at
-        <a href="gene-potion-milk.html">potion milk</a>, a compound heterozygote and the locus's
-        first negative brews: <strong>Pass:</strong> one bottle, both Weakness and Darkness, both
-        at the weak grade. <strong>Fail:</strong> one effect only, which would mean a compound
-        heterozygote is resolving to a single allele rather than expressing both.</li>
     <li><strong>One locus, two colour bands, and they must stay apart.</strong>
         <a href="gene-molten-hooves.html">Molten hooves</a> is <code>MltC/MltC</code> on both
         breeds and banded red on one, gold on the other &mdash; the first time any locus has been

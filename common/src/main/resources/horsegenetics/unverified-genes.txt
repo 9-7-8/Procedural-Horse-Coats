@@ -44,8 +44,6 @@ horsegenetics.tidewave
 horsegenetics.tribal_claw
 horsegenetics.wishstar
 horsegenetics.echolocate
-horsegenetics.food_preference
-horsegenetics.music_enjoyer
 horsegenetics.ocean_born
 horsegenetics.agatebound
 horsegenetics.bargello
@@ -96,10 +94,8 @@ horsegenetics.petaled
 horsegenetics.tidefoam_sash
 horsegenetics.bloodstained
 horsegenetics.magic_fighter
-horsegenetics.magic_meat
 horsegenetics.nyxborn
 horsegenetics.ocular
-horsegenetics.shadowcreature
 horsegenetics.stained_glass
 horsegenetics.banded_socks
 horsegenetics.beetle_pearl
