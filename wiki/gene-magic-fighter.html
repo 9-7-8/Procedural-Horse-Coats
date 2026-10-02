@@ -51,17 +51,20 @@
         <tr><td><code>Gld/Gld</code></td><td><code>double-more</code></td><td><strong>both</strong> percentages, added &mdash; no ceiling</td></tr>
         <tr><td><code>Wmp/n</code></td><td><code>less</code></td><td>a share off</td></tr>
         <tr><td><code>Wmp/Wmp</code></td><td><code>double-less</code></td><td>both off, floored at 1 point</td></tr>
-        <tr><td><code>Gld/Wmp</code></td><td><code>balanced</code></td><td>the two cancel</td></tr>
+        <tr><td><code>Gld/Wmp</code></td><td><code>balanced</code></td><td>the two partly cancel &mdash; 2.2 to 5.55 from wild copies</td></tr>
     </tbody>
 </table>
 
-<h2 id="cancel">A wimp copy cancels a gladiator copy</h2>
+<h2 id="cancel">A wimp copy works against a gladiator copy</h2>
 
 <p>
     This is the part worth knowing before breeding for it. A
     <code>Gld/Wmp</code> horse is not &ldquo;a gladiator that also carries a
-    wimp&rdquo; &mdash; the two percentages are added with opposite signs and the
-    horse comes out near the baseline while throwing both extremes.
+    wimp&rdquo; &mdash; the two percentages are added with opposite signs, so the
+    horse lands wherever its own two copies put it while throwing both extremes.
+    From wild copies that is anywhere from 2.2 to 5.55 points, and usually a little
+    above the plain horse&rsquo;s 3 (about 3.9 on average), because a gladiator copy
+    adds more than a wimp copy takes off.
 </p>
 
 <p>
@@ -110,7 +113,7 @@
 <div class="note warn">
     <span class="label">Newly built, not yet play-tested</span>
     <p>
-        Nothing on this page has been seen in game. The translator was written
+        Only the base values <a href="#yard-fighter">below</a> have been read in game. The translator was written
         against the 26.1.2 sources and is flagged as unverified in its own
         comments. Checklist on the <a href="#verification">Verification tab</a>.
     </p>
@@ -171,6 +174,14 @@
     comparison rather than an attribute write on every tick of every horse.
 </p>
 
+<p id="yard-fighter">
+    <strong>The base value is the code&rsquo;s number</strong> (2026-10-01, the yard&rsquo;s STAT DOSES pen, row AR
+    west, log 23:54:40.266&ndash;.268). Two plain controls both read <code>attack_damage</code> 3.0000, the
+    registration default <code>BASELINE_DAMAGE</code>. A <code>Gld/Wmp</code> horse read 3.9844, exactly
+    <code>max(1, 3 &times; (1 + 0.5063 &minus; 0.1782))</code> off its own two copies: it sits where its copies put
+    it, which for this pair is anywhere from 2.2 to 5.55.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -211,14 +222,14 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Magic fighter has never been in a world and its whole effect is one number, so until somebody reads a horse&rsquo;s <code>ATTACK_DAMAGE</code> a gladiator that writes nothing and a plain horse are <strong>the same animal</strong> &mdash; and nothing has confirmed that a kick lands double on a monster.</p>
+    <p>A plain horse and a <code>Gld/Wmp</code> horse read the code&rsquo;s <code>ATTACK_DAMAGE</code> in the yard, but <code>Gld/Gld</code>, the <code>Wmp/Wmp</code> floor, the kick doubling on a monster and how a gladiator fights have never been in a world.</p>
 </div>
 
 <h3 id="open-magic-fighter">Still open (NOT played)</h3>
 
 <p>
-    There is no test-yard pen for this locus, so every reading below is a spawn from the custom
-    horse spawn egg and an <code>/attribute &lt;horse&gt; minecraft:attack_damage base get</code>.
+    The STAT DOSES pen read only a plain horse and a <code>Gld/Wmp</code> one, so every reading
+    below is a spawn from the custom horse spawn egg and an <code>/attribute &lt;horse&gt; minecraft:attack_damage base get</code>.
     The failure this orders for is the silent one: the gene emits no ability at all for a wild type,
     and a translator that never writes the base value leaves every genotype reading the
     registration default of 3.
@@ -227,9 +238,6 @@
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>A plain horse reads exactly 3.</strong> This is the control, and it comes from
-        <code>HorseAggroHandler</code>&rsquo;s registration rather than from the gene &mdash; a wild
-        type emits no <code>combat</code> ability at all. <strong>Pass:</strong> base value 3.0.</li>
     <li><strong>A <code>Gld/Gld</code> horse reads higher, and two of them read
         <em>differently</em>.</strong> Two wild-range gladiator copies are worth between +2 and +6.
         <strong>Pass:</strong> base value above 3.0 on both, and not the same number on both &mdash;
@@ -237,10 +245,6 @@
     <li><strong>A <code>Wmp/Wmp</code> horse never reads below 1.</strong> The floor is on the
         damage, not on the percentage. <strong>Pass:</strong> base value at or above 1.0, never 0
         &mdash; a horse that cannot attack at all is a different animal from a weak one.</li>
-    <li><strong>A <code>Gld/Wmp</code> horse sits near the baseline.</strong>
-        <strong>Pass:</strong> base value within about a point of 3.0 while the horse&rsquo;s sheet
-        shows it carrying both alleles &mdash; the two percentages are added with opposite signs,
-        and nothing checks for the pair.</li>
     <li><strong>A kick lands double on a monster and single on a player.</strong> Provoke an
         untamed plain horse into kicking a zombie. <strong>Pass:</strong> the zombie&rsquo;s 20
         health goes in <em>four</em> kicks (6 each), not seven (3 each), and the same horse takes

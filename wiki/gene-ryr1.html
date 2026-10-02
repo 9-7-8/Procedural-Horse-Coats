@@ -118,6 +118,14 @@
 </table>
 </div>
 
+<p id="yard-ryr1">
+    <strong>An affected horse really does keep everything</strong> (2026-10-01, the yard&rsquo;s STAT DOSES pen,
+    row AR west, log 23:54:40.262&ndash;.263). Against a plain black control (health 22.0, speed 0.1875, jump
+    0.5000), <code>MH/N</code> read exactly the same on all three and named
+    <code>malignant-hyperthermia</code>; <code>MH/MH</code> read health 16.0 (control &minus; 6.0), speed
+    &minus;0.0300 and jump &minus;0.1000, and named <code>malignant-hyperthermia-severe</code>.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -201,23 +209,20 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Designed to look like a bug: an <code>MH/N</code> horse names malignant hyperthermia yet must keep <strong>full hearts, speed and jump</strong>, since one missing heart breaks the informational path and nothing else would reveal it &mdash; while <code>MH/MH</code> costs six health and no founder may carry it.</p>
+    <p>The numbers are measured, so what is left is that <strong>no founder is ever <code>MH/MH</code></strong> and that the horse&rsquo;s own panel shows the name.</p>
 </div>
 
-<h3 id="health-loci-0917-ryr1">RYR1 must cost an affected horse nothing (2026-09-17, NOT played)</h3>
+<h3 id="health-loci-0917-ryr1">RYR1 in a real herd (2026-09-17, NOT played)</h3>
 
 <p>
-    RYR1 (malignant hyperthermia) shipped with three other health loci and has
-    <strong>not been seen in a world</strong>. The quickest way in is the custom spawn egg:
-    adding a health gene defaults it to the affected genotype.
+    What an affected horse costs is <a href="#yard-ryr1">measured</a>. What a pen of built
+    horses cannot show is the wild population and the panel.
 </p>
 <ul>
-    <li><strong>RYR1 must cost an affected horse nothing.</strong> This is the one designed to
-        look like a bug. A wild Azteca can be born with <code>MH/N</code>
-        and will <em>name</em> malignant hyperthermia on its panel while having <b>full hearts,
-        full speed and full jump</b>. <strong>If an <code>MH/N</code> horse is short even one
-        heart, the informational path is broken</strong> &mdash; and nothing else would reveal
-        it. <code>MH/MH</code> should cost six health, and no founder should ever have it.</li>
+    <li><strong>No founder is ever <code>MH/MH</code>, and the panel names it.</strong> Over a lot
+        of wild Aztecas, some are <code>MH/N</code> and none is <code>MH/MH</code>; open the info
+        screen on an <code>MH/N</code> one. <strong>Pass:</strong> it names malignant
+        hyperthermia while showing full hearts.</li>
 </ul>
 
 </section>

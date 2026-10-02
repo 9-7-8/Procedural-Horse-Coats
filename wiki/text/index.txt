@@ -1472,7 +1472,7 @@ wiki/gene-magic-day-watch.html#founders	gameplay	Rare in the wild
 wiki/gene-magic-day-watch.html#inheritance	gameplay	Crossing two of them
 wiki/gene-magic-day-watch.html#what	gameplay	The five
 wiki/gene-magic-fighter.html#baseline	coding	Where the baseline lives
-wiki/gene-magic-fighter.html#cancel	gameplay	A wimp copy cancels a gladiator copy
+wiki/gene-magic-fighter.html#cancel	gameplay	A wimp copy works against a gladiator copy
 wiki/gene-magic-fighter.html#carrot	gameplay	Its gene carrot
 wiki/gene-magic-fighter.html#ceiling	gameplay	No ceiling, but nothing to catch
 wiki/gene-magic-fighter.html#codominant	science	Why codominance is the whole design
@@ -1529,6 +1529,7 @@ wiki/gene-magic-meat.html#inheritance	gameplay	Crossing two of them
 wiki/gene-magic-meat.html#recessive	science	Why the carrier is silent
 wiki/gene-magic-meat.html#stacking	gameplay	It stacks with the other drop locus
 wiki/gene-magic-meat.html#verb	coding	It shares a verb with the treasure locus
+wiki/gene-magic-meat.html#verified	coding	Verified
 wiki/gene-magic-meat.html#what	gameplay	What it does
 wiki/gene-magic-milk-volume.html#carrot	gameplay	Its gene carrot
 wiki/gene-magic-milk-volume.html#codominant	science	Codominant, because a dairy trait is
@@ -2339,6 +2340,7 @@ wiki/gene-shadowcreature.html#phases	coding	Three things, three phases
 wiki/gene-shadowcreature.html#sclera	coding	shadeEyes, not tintIris
 wiki/gene-shadowcreature.html#strokes	coding	The tentacles are the STROKES shape
 wiki/gene-shadowcreature.html#tentacles	gameplay	The join
+wiki/gene-shadowcreature.html#verified	coding	Verified
 wiki/gene-shadowcreature.html#what	gameplay	What it looks like
 wiki/gene-shadowcreature.html#wild	gameplay	What you can catch
 wiki/gene-shallows.html#about	coding	Why it is built this way

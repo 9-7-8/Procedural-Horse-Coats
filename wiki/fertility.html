@@ -519,9 +519,22 @@
     That does not open a fence, since two horses either side of one stand two blocks apart at the closest. In
     run 12 the log held 174 <code>natural cover:</code> lines and 11 path refusals: ten from the two REACH pens,
     which should refuse, and one stray <code>RATIO LETHAL WHITE MARE</code> at 2.6 blocks that did not recur.
-    <em>Outside the yard this is unverified</em>: nothing logs a path refusal there, so whether a real
-    stable&rsquo;s gates and corners now breed is <a href="?view=verification#cover-wall-check-0925">still
-    open</a>.
+    A gate, a corner and a touching pair have since been seen breeding in the yard
+    (<a href="#verified-cover-gate-corner">below</a>).
+</p>
+
+<p id="verified-cover-gate-corner">
+    <strong>The path test still lets a gate, a corner and a one-wide stall breed</strong> (2026-10-01). The
+    yard&rsquo;s COVER REACH pens (row AU east) each hold a tamed stallion and a mare kept in heat, and repeat the
+    handler&rsquo;s own path test on every 40-tick look. GATE, the pair either side of a two-wide open oak gate:
+    <em>&ldquo;at 0.2 min: the mare is pregnant; 6 looks &hellip; stallion in reach 3 (path 3, touching only 0, NEITHER
+    0); covers 1&rdquo;</em> (23:53:53). CORNER, the pair starting at the two ends of an L-shaped pen with a stone
+    block between them: <em>&ldquo;at 2.1 min: the mare is pregnant; 63 looks &hellip; stallion in reach 8 (path 8,
+    touching only 0, NEITHER 0); covers 3; re-heats 4&rdquo;</em> (23:55:47). STALL, the pair spawned overlapping in a
+    one-wide fenced stall: <em>&ldquo;at 0.1 min: the mare is pregnant; 3 looks &hellip; stallion in reach 2 (path 2,
+    touching only 0, NEITHER 0); covers 1; closest 1.35 blocks&rdquo;</em> (23:53:47). All <code>CLOCKWORK
+    PASS</code>; no look anywhere was one the path test would have refused. In the stall the path test passed
+    outright, so the overlapping-hitbox fallback was not what carried the cover.
 </p>
 
 <p id="verified-gelding-band">
@@ -967,10 +980,10 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers refusing through walls: the yard has seen a wall and a fence refuse, but the path test behind them was found refusing mares in open pens and loosened on 2026-09-30, so a gate, a corner, two horses touching and a crowded paddock are all still unseen in a real world.</p>
+    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it a stallion's day no longer being capped, the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers refusing through walls: the yard has seen a wall and a fence refuse and, under the path test loosened on 2026-09-30, a gate, a corner and a one-wide stall breed, which leaves the touching fallback never yet needed and the cost of a crowded paddock.</p>
 </div>
 
-<h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25; the wall seen in the yard, the rest NOT played)</h3>
+<h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25; the wall, a gate, a corner and a stall seen in the yard, the rest NOT played)</h3>
 
 <div class="note">
     <p>
@@ -996,21 +1009,17 @@
     <a href="?view=coding#verified-cover-reach">seen in the yard</a> on 2026-09-30, and the fence
     is the owner&rsquo;s call, not a fault. The same runs found the path test itself too strict
     (<a href="?view=coding#fixed-path-beside">it asked for the stallion&rsquo;s own block</a>) and
-    loosened it to &ldquo;beside him&rdquo;, which makes the checks below more pressing, not less:
-    they are the ordinary stables that change could still be refusing, and outside the yard a
-    refusal logs nothing.
+    loosened it to &ldquo;beside him&rdquo;; a gate, an L-shaped pen and a one-wide stall have
+    since <a href="?view=coding#verified-cover-gate-corner">bred in the yard</a> under the loosened
+    test. What is left below is the fallback the stall turned out not to need, and the cost.
 </p>
 
 <ul>
-    <li><strong>A gate does not.</strong> Same pair with an open gate between them.
-        <strong>Pass:</strong> a cover, as before. This is the one that matters: the test
-        must not have made ordinary penned breeding impossible.</li>
-    <li><strong>Round a corner still works.</strong> Two horses at opposite ends of one
-        L-shaped pen, out of sight of each other. <strong>Pass:</strong> a cover &mdash;
-        this is why it is a path and not a line of sight.</li>
-    <li><strong>Touching still works.</strong> Two horses pressed together in a one-wide
-        stall, where there may be no path to compute at all. <strong>Pass:</strong> a
-        cover, by way of the overlapping-hitbox fallback.</li>
+    <li><strong>The touching fallback ever carries a cover.</strong> A pair pressed together
+        in a one-wide stall is <a href="?view=coding#verified-cover-gate-corner">covered</a>, but
+        there the path test passed and the overlapping-hitbox fallback was never needed. Find a
+        pair the path test refuses while their boxes overlap. <strong>Pass:</strong> a cover,
+        by way of the fallback.</li>
     <li><strong>The cost.</strong> A paddock of thirty horses in heat, watched for a
         minute. <strong>Pass:</strong> no tick lag &mdash; the path is only built for a
         mare already past <code>mayTryNaturally</code> and only over horses within three

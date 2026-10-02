@@ -133,6 +133,15 @@ f.dilute(px, py,
     Machinery on <a href="horse-body.html">the horse&rsquo;s body</a>.
 </p>
 
+<p id="yard-mcoa">
+    <strong>The dose split is what the code does</strong> (2026-10-01, the yard&rsquo;s STAT DOSES pen, row AR
+    west, log 23:54:40.260&ndash;.262). Against a plain black control at 22.0 max health, <code>Z/z</code> read
+    22.0 and named <code>mcoa-cyst</code> only; <code>Z/Z</code> read 20.0 and named <code>mcoa</code> &mdash;
+    exactly <code>MCOA_HEALTH_PENALTY</code> (2.0 health points, so <strong>one</strong> heart, matching the table
+    above and not the &ldquo;two hearts&rdquo; in the prose; which is meant is an open question on the
+    Verification tab).
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -181,7 +190,7 @@ f.dilute(px, py,
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Silver's new dapples were checked against a single offline render, which cannot show the population: dapple strength must <strong>vary between horses and reach zero</strong>, inherit from dappled parents, and hold steady across a reload &mdash; and a <code>Z/z</code> horse must name ocular cysts while losing no hearts at all.</p>
+    <p>Silver's new dapples were checked against a single offline render, which cannot show the population: dapple strength must <strong>vary between horses and reach zero</strong>, inherit from dappled parents, and hold steady across a reload &mdash; and whether MCOA should cost one heart or two is the owner&rsquo;s call.</p>
 </div>
 
 <h3 id="silver-dapples-0917">Silver finally draws its dapples (2026-09-17, NOT played)</h3>
@@ -219,19 +228,14 @@ f.dilute(px, py,
 </ul>
 
 
-<h3 id="health-loci-0917-silver">Silver's MCOA split by dose (2026-09-17, NOT played)</h3>
+<h3 id="health-loci-0917-silver">Silver's MCOA: one heart or two? (owner)</h3>
 
-<p>
-    Silver&rsquo;s MCOA now splits by dose, and shipped alongside four new health loci.
-    <strong>It has not been seen in a world.</strong> The quickest way in is the custom spawn
-    egg.
-</p>
 <ul>
-    <li><strong>Silver's dose split.</strong> On a <a href="breed-book.html">Rocky Mountain
-        Horse</a> (12% <code>Z/Z</code>, 46% <code>Z/z</code>): a <code>Z/z</code> horse names
-        ocular cysts and loses <b>nothing</b>; a <code>Z/Z</code> horse names the ocular
-        anomalies and is down two hearts. A <code>Z/z</code> horse short a heart means the dose
-        split is inverted or collapsed.</li>
+    <li><strong>MCOA costs one heart in the code and two on this page.</strong> The coding
+        tab&rsquo;s prose says a <code>Z/Z</code> horse is down &ldquo;two hearts&rdquo;;
+        <code>SilverGene</code> takes <code>MCOA_HEALTH_PENALTY</code> = 2.0 health points, which is
+        one heart, and the yard read exactly that (<a href="#yard-mcoa">22.0 to 20.0</a>). Which is
+        meant &mdash; correct the page, or raise the penalty to 4.0?</li>
 </ul>
 
 <h3 id="open-older-gene-silver">Still open from before 2026-09-13 (NOT played)</h3>

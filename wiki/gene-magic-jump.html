@@ -254,6 +254,15 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     inheritance (<a href="horse-body.html#verification">the body stats verification tab</a>).
 </p>
 
+<p id="verified-stat-doses">
+    <strong><code>Vmp</code> is fixed, and <code>Leaden</code> takes jump off by its own copies</strong>
+    (2026-10-01, the yard&rsquo;s STAT DOSES pen, row AR west, log 23:54:40.266). Against a plain black control at
+    0.5000: <code>Vmp/n</code> read 0.7500 (&times;1.5) and two <code>Vmp/Vmp</code> horses read 1.0000 and 1.0000
+    (&times;2), <code>vampiricPerCopy()</code> 0.5. <code>Leaden/Leaden</code> read 0.4254 (&times;0.8508), exactly
+    what its two copies&rsquo; deltas (0.0892 + 0.0601) predict &mdash; &ldquo;about four fifths&rdquo; is the mean,
+    and each horse sits where its own copies put it.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -261,7 +270,7 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Magic jump&rsquo;s upward multiplier has been read off the attribute in the yard, but the <code>Leaden</code> mirror, the <code>Vmp</code> allele&rsquo;s fixed &times;1.5 and &times;2, and whether a jump-strength number is a fence a horse can actually clear have never been in a world.</p>
+    <p>Magic jump&rsquo;s multiplier, its <code>Leaden</code> mirror and the <code>Vmp</code> allele&rsquo;s fixed &times;1.5 and &times;2 have been read off the attribute in the yard, but inheritance and whether a jump-strength number is a fence a horse can actually clear have never been in a world.</p>
 </div>
 
 <h3 id="open-magic-jump">Still open (NOT played)</h3>
@@ -278,15 +287,6 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The mirror allele takes jump off.</strong> A <code>Leaden/Leaden</code> horse.
-        <strong>Pass:</strong> clearly below the plain control &mdash; about four fifths of it. A
-        <code>Leaden</code> horse reading the same as the control means only the positive direction
-        is wired.</li>
-    <li><strong><code>Vmp</code> is fixed, and the same on every horse.</strong>
-        <code>Vmp/n</code> should be exactly half again the control and <code>Vmp/Vmp</code> exactly
-        twice it. <strong>Pass:</strong> both land on the multiple, and two <code>Vmp/Vmp</code>
-        horses read <em>identically</em> &mdash; unlike two <code>Springy/Springy</code> horses,
-        which must not.</li>
     <li><strong>The percentage is inherited, not re-rolled.</strong> Breed two
         <code>Springy/n</code> horses whose own multipliers you have read.
         <strong>Pass:</strong> a <code>Springy/Springy</code> foal reads close to the sum of its

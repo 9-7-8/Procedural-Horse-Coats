@@ -179,6 +179,21 @@
     not pictures.
 </p>
 
+<p id="verified-copies">
+    <strong>Both copies count, a storm applies its own copies, and every modifier comes back off.</strong>
+    Read 2026-10-01 by the WEATHER COPIES pen (row AW west, <code>DebugYardWeather</code>), the proof of
+    the fix for <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/20">issue #20</a> (commit <code>26ef727d</code>): until then <code>GeneAbilityHandler.attributeModifierId</code>
+    named one modifier per gene and attribute, so a second live copy silently replaced the first; the id now
+    carries the copy number. The pen reads each copy&rsquo;s rolled delta off the horse&rsquo;s own record and
+    predicts the exact factor. &ldquo;Two copies add&rdquo; holds in the sense that both apply:
+    <code>multiply_total</code> stacks multiplicatively, so two copies give (1&nbsp;+&nbsp;d1)(1&nbsp;+&nbsp;d2),
+    not 1&nbsp;+&nbsp;d1&nbsp;+&nbsp;d2. In rain <code>R+/R+</code> read x1.65728 (copies 0.3857 and 0.1960
+    predict x1.65728), <code>R+/n</code> x1.10429 off its one copy, <code>n/n</code> x1.00000. <code>T+/T+</code>
+    read x1.00000 in rain and x1.37756 in a storm; <code>R+/Tv</code> read x1.02000 in rain and x0.77136 in a
+    storm, the product of both its copies, because a storm is also rain (an open question on the Verification
+    tab). After <code>/weather clear</code> every horse was back at exactly 0.187500. Log 23:59:40.254.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -200,10 +215,9 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Rain is measured to move <code>movement_speed</code> on weather sensitive (speed), but
-    only one of its three weathers: the storm and snowfall pairs have never been read, and
-    nothing has yet shown that <strong>two copies add</strong> rather than one quietly replacing
-    the other.</p>
+    <p>Rain, storm, both copies and the clean removal are measured on weather sensitive (speed);
+    the snowfall pair, the founder table, the loci&rsquo;s independence and whether the effect
+    can be felt are not, and whether a storm should also count as rain is the owner&rsquo;s call.</p>
 </div>
 
 <h3 id="open-weather-speed">Still open (NOT played)</h3>
@@ -222,25 +236,6 @@
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>Two copies add.</strong> This is the page&rsquo;s central claim and the thing
-        most likely to be wrong: the gene emits one modifier <em>per allele copy</em>, and the
-        attribute path names its modifier <code>gene/&lt;gene key&gt;/&lt;attribute&gt;</code>
-        &mdash; one id per gene per attribute. Spawn an <code>R+/R+</code> horse and an
-        <code>R+/n</code> horse in one watched pen and read the range in rain.
-        <strong>Pass:</strong> the homozygote&rsquo;s value is about twice as far off the dry
-        baseline as the heterozygote&rsquo;s. Two readings that differ only by the per-copy roll
-        mean one copy is overwriting the other, and &ldquo;both percentages, added&rdquo; is
-        fiction.</li>
-    <li><strong>A storm is not just rain again.</strong> <code>raining</code> reads
-        <code>isRaining</code> and <code>thundering</code> reads <code>isThundering</code>, and
-        a Minecraft thunderstorm <em>is</em> raining &mdash; so the claim that a compound
-        heterozygote&rsquo;s two halves never both apply needs testing rather than believing.
-        Spawn <code>T+/T+</code> and <code>R+/Tv</code> horses and read the pen dry, under
-        <code>/weather rain</code>, and under <code>/weather thunder</code>.
-        <strong>Pass:</strong> the <code>T+/T+</code> horse is at baseline in plain rain and
-        raised in a storm; the compound horse is faster in rain and slower in a storm. A
-        compound horse whose storm reading equals its rain reading is both conditions holding at
-        once with one modifier id between them.</li>
     <li><strong>The snowfall pair works at all.</strong> <code>snowing</code> is not a weather
         flag &mdash; it is raining <em>and</em> the biome cold enough to snow at the
         horse&rsquo;s height, sampled on an interval and cached, and every world-sampled flag
@@ -249,10 +244,6 @@
         one, and make it rain over both. <strong>Pass:</strong> the cold one is raised and the
         warm one is at baseline. Both at baseline means the flag is off again, and it would log
         nothing.</li>
-    <li><strong>The modifier comes back off.</strong> <code>/weather clear</code> after each
-        reading. <strong>Pass:</strong> the pen returns to <em>exactly</em> its dry baseline. A
-        rain bonus left standing in sunshine is the failure the &ldquo;removal is already
-        handled&rdquo; note calls impossible, and only a second dry reading disproves it.</li>
     <li><strong>The founder frequency is what the table says.</strong> About a fifth of founders
         carry one weather-speed allele, spread across all six variants, and none carry two.
         <strong>Pass:</strong> over a lot of wild horses the genotype codes show roughly that
@@ -276,26 +267,18 @@
         attribute. If you cannot, the mean delta is too small, and that is the finding.</li>
 </ul>
 
-<h3 id="gap-304" data-check-kind="open-gap">Open check 304</h3>
-<div class="open-check">
-<strong>Open, found 2026-09-21 while writing the weather loci's checklists: a gene&rsquo;s two allele copies cannot both move the same attribute &mdash; the second silently replaces the first.</strong>
-    <code>AbstractWeatherGene.abilitiesFor</code> deliberately emits <strong>one conditioned
-    <code>AttributeMod</code> per copy</strong> rather than summing them, because each copy carries its
-    own weather condition. But <code>GeneAbilityHandler.attributeModifierId</code> names a modifier
-    <code>gene/&lt;geneKey&gt;/&lt;attribute&gt;</code> &mdash; one id per gene <em>and attribute</em>, with no
-    room for a second copy &mdash; and <code>addOrUpdateTransientModifier</code> then overwrites. So a
-    horse whose both copies are live carries <strong>one</strong> of them, not their sum, and which one
-    depends on emission order. Both <a href="gene-weather-speed.html">weather speed</a> and
-    <a href="gene-weather-jump.html">weather jump</a> promise on their own pages that two copies add.
-    <strong>A thunderstorm makes this reachable with one horse</strong>: vanilla raises
-    <code>isRaining()</code> <em>and</em> <code>isThundering()</code> in a storm, so an
-    <code>R+/Tv</code> horse has two conditions holding and one modifier slot &mdash; which also
-    falsifies both pages&rsquo; claim that the two conditions can never hold at once. Unproven in
-    game, and invisible when it happens: the horse simply moves by one percentage instead of two.
-    The fix is an id that includes the copy, which <code>clearAttributes</code> must then agree with.
-    Checks on <a href="gene-weather-speed.html#verification">weather speed</a> and
-    <a href="gene-weather-jump.html#verification">weather jump</a>.
-</div>
+<h4>A design call for the owner</h4>
+
+<ul>
+    <li><strong>In a storm, does the rain copy still apply?</strong> Vanilla&rsquo;s
+        <code>isRaining</code> is also true in a thunderstorm, so an <code>R+/Tv</code> horse
+        in a storm carries <em>both</em> copies (WEATHER COPIES, 2026-10-01: rain x1.02000,
+        storm x0.77136, the product of the two). This page, and the &ldquo;Mixed weather
+        sense&rdquo; text in <code>AbstractWeatherGene</code>, say two weathers never both hold.
+        Either keep both applying and correct the text, or make a storm replace rain for these
+        loci.</li>
+</ul>
+
 </section>
 
 <div class="page-foot">

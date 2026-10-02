@@ -116,8 +116,33 @@
     <code>[watch] item dropped | 5x minecraft:diamond</code> and then <code>DEATH DIAMONDS at 2 s: items
     {minecraft:diamond=5} - 2 to 5 diamonds and no leather: PASS</code>. The pen has since been taken out of the yard.
     <em>Still a tester's check:</em>
-    that the egg's horse is a true clone, with the same coat, numbers and epigenome
+    that the clone's body numbers and looks match
     (<a href="#verification">the Verification tab</a>).
+</p>
+
+<p id="verified-egg-clone">
+    <strong>The egg puts back the same horse, not one with the same alleles</strong> (2026-10-01). The yard&rsquo;s
+    DEATH DROPS II pen (row AS) read a named <code>Egg/Egg</code> horse&rsquo;s two codes, killed it, and hatched its
+    egg through <code>HorseEggSpawner.spawnPreset</code>, the call the egg item makes: <em>&ldquo;dead &ldquo;Wild
+    Snorf&rdquo; vs hatched &ldquo;Guarding Dragon&rdquo; 20 ticks after hatching: genetic code identical (9814 chars),
+    epigenome code identical (87 chars)&rdquo;</em> (<code>CLOCKWORK PASS</code>, 23:53:48).
+</p>
+
+<p id="verified-two-variants">
+    <strong>Two variants together are silent</strong> (2026-10-01). The same pen killed three <code>Dia/Egg</code>
+    horses: <em>&ldquo;Dia/Egg 1: 1x minecraft:leather; Dia/Egg 2: nothing; Dia/Egg 3: nothing | totals: leather 1,
+    diamonds 0, eggs 0&rdquo;</em> (<code>CLOCKWORK PASS</code>, 23:53:47). And two <code>Swd/Swd</code> kills each
+    dropped an iron sword with <strong>exactly one</strong> enchantment (<code>bane_of_arthropods 3</code> and
+    <code>unbreaking 2</code>, same line); two swords cannot say whether the roll varies, so that half stays open.
+</p>
+
+<p id="verified-unnamed-egg">
+    <strong>An untagged horse still leaves its egg</strong> (2026-10-01). <code>GeneDeathHandler.cloneEgg</code>
+    returns no egg when the horse&rsquo;s <em>record</em> has no name, but every founder is given a registered name at
+    spawn (<code>HorseRecords.newFounder</code>), so for a spawned horse that branch is unreachable: a nameless
+    record is only the pre-join sentinel. The pen killed an <code>Egg/Egg</code> horse that never wore a name tag:
+    <em>&ldquo;no custom name on the horse; its record hasName true (&ldquo;Thundering Rattle&rdquo;); dropped 1x
+    horsegenetics:preset_horse_spawn_egg (holding a genome)&rdquo;</em> (<code>CLOCKWORK PASS</code>, 23:53:47).
 </p>
 
 <h2 id="replace">Replace, except meat</h2>
@@ -199,37 +224,28 @@ if (replace) {
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>All three of magic item drop&rsquo;s drops have been seen replacing the leather, so what is left is whether the egg puts back a <strong>clone</strong> &mdash; the same coat, the same numbers, the same epigenome &mdash; and whether a two-variant horse really is silent.</p>
+    <p>The drops replace the leather, the egg carries the dead horse&rsquo;s exact codes and a two-variant horse is silent, so what is left is whether the clone&rsquo;s <strong>body numbers and looks</strong> match and whether the sword&rsquo;s enchantment really varies.</p>
 </div>
 
 <h3 id="open-magic-item-drop">Still open (NOT played)</h3>
 
 <p>
-    The yard&rsquo;s DEATH ITEMS pen answered what lands on the ground. What it cannot answer is what
-    is <em>inside</em> the egg: an egg holding the right alleles but a fresh epigenome would look
-    perfectly correct on the ground and produce a different horse, which is the only way this locus
-    can be quietly wrong.
+    The yard&rsquo;s DEATH ITEMS pen answered what lands on the ground, and DEATH DROPS II showed the
+    egg holds the dead horse&rsquo;s own genetic and epigenome codes. What is left is downstream of
+    those codes, and a spread across more swords than two.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The egg&rsquo;s horse is the same horse, not a horse with the same alleles.</strong>
-        Note an <code>Egg/Egg</code> horse&rsquo;s genetic code <em>and</em> its epigenome code, kill
-        it, and place the egg it leaves. <strong>Pass:</strong> both codes on the new horse are
-        identical to the dead one&rsquo;s. The epigenome is the half that can silently be re-rolled,
-        and it is every per-copy percentage the horse was bred for.</li>
     <li><strong>The clone&rsquo;s body numbers match.</strong> Read <code>max_health</code>,
         <code>jump_strength</code> and <code>movement_speed</code> on both.
         <strong>Pass:</strong> the same numbers, which is what a matching epigenome must mean
         downstream.</li>
-    <li><strong>Two variants together drop the ordinary leather.</strong> A <code>Dia/Egg</code>
-        horse. <strong>Pass:</strong> leather and nothing else &mdash; no diamonds, no egg. The
-        compound heterozygote is stated as silent rather than as &ldquo;whichever the loop reached
-        first&rdquo;, and a loop that reaches one anyway would look like a feature.</li>
-    <li><strong>The sword is rolled per death, not fixed by the gene.</strong> Kill two
-        <code>Swd/Swd</code> horses of the same genotype. <strong>Pass:</strong> each sword carries
-        exactly one enchantment, and the two are not reliably the same one.</li>
+    <li><strong>The sword is rolled per death, not fixed by the gene.</strong> Kill several
+        <code>Swd/Swd</code> horses of the same genotype. <strong>Pass:</strong> the enchantments are not
+        reliably the same one. (Exactly one per sword is <a href="#verified-two-variants">verified</a>;
+        this needs more than two swords.)</li>
 </ul>
 
 <h4>In the game, with your hands</h4>

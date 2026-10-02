@@ -733,6 +733,25 @@
     drop-buffer chamber left alone, one into the pack and one on the ground, and a second press
     that does nothing.
 </p>
+<p id="verified-bank-breaks">
+    <strong>A broken bank drops every chamber, each still holding its horse</strong> (2026-10-01,
+    the test yard's STASIS BANK pen, row AT east). Three Basic chambers filled by the mod's own
+    capture path sat in slots 0, 30 and 200, and <code>level.destroyBlock(pos, true)</code> took
+    the bank: <code>occupied before 3 (slots 0, 30, 200), destroyBlock returned true, block still a
+    bank false; dropped chamber items 3, carrying 3 of the 3 horses, 0 with an empty entity
+    tag</code> &mdash; <code>CLOCKWORK PASS</code>, 23:53:50. The one
+    <code>preRemoveSideEffects</code> override that guards a bankful of horses works.
+</p>
+<p id="verified-bank-fireproof">
+    <strong>It does not burn, in fire or in lava</strong> (2026-10-01, the same pen, a live
+    test). Two sealed basins, each a bank with a filled chamber in it: one ringed with fire on
+    netherrack, re-lit every ten seconds, the other with eight lava sources. Both stood for three
+    minutes with the horse still in slot 0, and the fire and the lava really were burning: each
+    line reads <code>present in 144 of 144 ring readings ... could tick true
+    (fire_spread_radius_around_player 128)</code>, with <code>max getFlammability over 6 faces 0,
+    ignitedByLava on any face false</code> (<code>CLOCKWORK PASS</code>, both 23:56:43). So the
+    omitted <code>ignitedByLava()</code> is enough; no explicit fire-resistance route is needed.
+</p>
 
 <h2 id="upkeep-coding">The upkeep: four refusals, then one horse</h2>
 <p>
@@ -813,6 +832,19 @@
         argument for having written that test at all.
     </p>
 </div>
+<p id="verified-upkeep">
+    <strong>A bank mends a horse in a world, hands the bucket back, and a Basic bank does
+    nothing</strong> (2026-10-01, the test yard's STASIS BANK pen, row AT east). A horse put in at
+    30% health and hunger 60, in an Intermediate chamber, with a hay bale and a water bucket in the
+    supply row: <code>stored health 6.6/22.0 hunger 60.0 -&gt; health 22.0/22.0 hunger 69.2; feed
+    slot hay 0, water slot buckets 0, empties slot 1 (empty buckets 1), water meter 79</code>
+    &mdash; <code>CLOCKWORK PASS</code>, 23:54:13. The health is read where the bank reads it,
+    <code>StasisCare.health</code> on the chamber's tag; the empty bucket is vanilla's crafting
+    remainder for the water bucket, landing in the empties slot. The same supplies beside a Basic
+    chamber, after five minutes: <code>health 6.6/22.0 hunger 60.0 -&gt; health 6.6/22.0 hunger
+    60.0; feed slot hay 1, water slot buckets 1, empties slot 0, water meter 0</code> &mdash;
+    <code>CLOCKWORK PASS</code>, 23:58:43. The gate in the first refusal above holds.
+</p>
 
 <h2 id="pipes">Why the goods slots are on the wire and the chambers are not</h2>
 <p>
@@ -824,11 +856,36 @@
     call stands untouched: nothing outside the bank can file or fetch a live animal.
 </p>
 <p>
-    <strong>The slot rules are written once.</strong> NeoForge's
-    <code>VanillaContainerWrapper</code> asks <code>Container.canPlaceItem</code> before it
-    inserts, so the per-slot predicates the block entity already writes for the menu are the same
-    rules a pipe obeys &mdash; feed in the feed slot, water in the water slot, nothing at all
-    into the empties or the buffer, which are outputs. There is no second copy to drift.
+    <strong>The slot rules are written once.</strong> The goods container is a
+    <code>WorldlyContainer</code> (<code>HorseStasisBankBlockEntity.Supplies</code>) behind
+    NeoForge's <code>WorldlyContainerWrapper</code>, and its <code>canPlaceItemThroughFace</code>
+    is just <code>canPlaceItem</code>, so the per-slot predicates the block entity already writes
+    for the menu are the same rules a pipe obeys &mdash; feed in the feed slot, water in the water
+    slot, nothing at all into the empties or the buffer, which are outputs. There is no second
+    copy to drift.
+</p>
+<p id="pipes-outputs-only">
+    <strong>A pipe takes out only the outputs</strong> (2026-10-01,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/22">issue #22</a>, fixed in
+    <code>449e1787</code>). The capability used to be a plain <code>VanillaContainerWrapper</code>,
+    which checks nothing on the way out, so a hopper under the bank pulled the hay and the water
+    buckets back out of the supply row as fast as one above put them in: the yard's STASIS BANK
+    pen read <em>16 drained on into the low hopper + chest, 0 in the feed slot</em> &mdash; the
+    bank was a pipe for its own hay. <code>canTakeItemThroughFace</code> now refuses the feed and
+    water slots, so the inputs stay and the empties and the drop buffer leave. The menu is not a
+    face, so a player still takes anything back by hand. The same pen, re-run on the fix (row AT
+    east, 23:55:43): <code>hay: 16/16 left the top hopper, 16 in the feed slot, 0 drained on into
+    the low hopper + chest</code> &mdash; <code>CLOCKWORK PASS</code>.
+</p>
+<p id="verified-pipes">
+    <strong>No hopper reaches a chamber, and a real hopper feeds the bank</strong> (2026-10-01,
+    the same pen and line). Three Basic chambers with horses in slots 0, 54 and 206 and one empty
+    Intermediate chamber sat between a hopper of sixteen hay bales above and a hopper and chest
+    below for two minutes: <code>chambers: filed 4 -&gt; 4, occupied 3 -&gt; 3, 0 in the low
+    hopper + chest; slot 0 same horse, slot 54 same horse, slot 206 same horse</code>, while all
+    sixteen bales went through the capability into the feed slot. So a vanilla hopper does reach
+    the goods container through <code>Capabilities.Item.BLOCK</code>, and the chamber grid is
+    reachable from neither direction.
 </p>
 <div class="note">
     <span class="label">The buffer is in that container on purpose, not for tidiness</span>
@@ -848,7 +905,8 @@
 <div class="note warn">
     <span class="label">26.1.2 has no <code>IItemHandler</code></span>
     <p>
-        <strong>Not verified in a running game.</strong> Written against the 26.1.2 sources: the
+        Written against the 26.1.2 sources, and <a href="#verified-pipes">watched working</a>
+        with a real hopper in the yard on 2026-10-01: the
         item capability is <code>Capabilities.Item.BLOCK</code> and its type is
         <code>ResourceHandler&lt;ItemResource&gt;</code>, NeoForge's newer transfer API, not the
         <code>IItemHandler</code> every tutorial still shows. The patched
@@ -1703,11 +1761,13 @@
         leaving a chamber now swaps the item underneath it &mdash; which is unplayed at all four
         swap sites</strong>; beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
-        gametests, but <strong>no horse has yet gone into one in a running game</strong> &mdash;
+        gametests, and the unattended yard has watched a bank mend a horse, refuse every
+        hopper at its chambers, drop them all when broken and stand in fire and lava, but
+        <strong>no player has yet put a horse into one</strong> &mdash;
         so the whole capture/release round trip, the water-container remainder for a modded
-        bucket, the tier upgrade carrying an occupied chamber, every one of the bank's slots,
-        drops and sync costs, every line the Browse tab draws, the healing upkeep and its hopper
-        plumbing, the drop buffer, <strong>every part of in-bank breeding up to a mare
+        bucket, the tier upgrade carrying an occupied chamber, the bank's slots and sync costs,
+        every line the Browse tab draws, the rest of the upkeep, the hoppers taking out the
+        empties and the buffer, the drop buffer, <strong>every part of in-bank breeding up to a mare
         letting herself out to foal</strong>, <strong>the newly deepened grid and the scrolling
         that reaches it</strong>, and <strong>the emergency chamber firing at all</strong> are
         unplayed &mdash; now including <strong>a chamber being spent out of a bank</strong>,
@@ -1954,21 +2014,25 @@
 <h3 id="verify-upkeep">The bank actually mends a horse (NOT played)</h3>
 <p>
     The gametest proves the tag can be read and written and that one turn moves the health
-    inside a chamber. What it does not prove is any of the rest of the loop.
+    inside a chamber, and the yard has since watched a bank mend a horse from hay and water,
+    hand the bucket back, and a Basic bank touch nothing
+    (<a href="?view=coding#verified-upkeep">2026-10-01</a>). The rest of the loop is unwatched.
 </p>
 <ul>
-    <li><strong>It heals at all, in a world.</strong> Hurt a horse, capture it into an
-        Intermediate chamber, file it, put a hay bale and a water bucket in the supply slots and
-        walk away. Come back: is its health up? Release it and check the bar is really higher,
-        not just the number in the tooltip.</li>
+    <li><strong>The mended health survives release.</strong> That the bank heals the stored
+        horse is <a href="?view=coding#verified-upkeep">proven in the yard</a>, read off the
+        chamber's tag. Release a mended horse and check the bar is really higher, not just the
+        number in the tooltip.</li>
     <li><strong>It stops.</strong> A horse healed to full must stop costing supplies. Leave a
         bank with one mended horse and a full feed slot overnight and check the feed is
         untouched.</li>
-    <li><strong>The gate holds.</strong> A bank of nothing but <em>Basic</em> chambers must
-        consume nothing at all and say so on the Supply tab. Upgrade one to Intermediate with
-        the horse inside and check the same bank starts working.</li>
-    <li><strong>The empty bucket comes back</strong>, into the third slot, and a full empties
-        slot stops the bank drinking rather than destroying a bucket.</li>
+    <li><strong>The gate, on screen and on upgrade.</strong> A Basic bank consuming nothing is
+        <a href="?view=coding#verified-upkeep">proven</a>; check the Supply tab says so, then
+        upgrade one chamber to Intermediate with the horse inside and check the same bank starts
+        working.</li>
+    <li><strong>A full empties slot</strong> stops the bank drinking rather than destroying a
+        bucket. (The bucket coming back into that slot is
+        <a href="?view=coding#verified-upkeep">proven</a>.)</li>
     <li><strong>Hunger is really being charged.</strong> Capture a horse, let the bank mend it
         with <em>no</em> feed in the slot, and it should stall part-way rather than heal to full
         for free &mdash; that is the whole economy, and free healing would be the failure that
@@ -1978,22 +2042,19 @@
 </ul>
 <h3 id="verify-pipes">Hoppers and pipes reach the supply slots and nothing else (NOT played)</h3>
 <p>
-    The capability is written against the 26.1.2 sources and <strong>has never been exercised by
-    a real hopper</strong>. In particular <code>Capabilities.Item.BLOCK</code> being
-    <code>ResourceHandler&lt;ItemResource&gt;</code> rather than <code>IItemHandler</code> is a
-    reading of those sources, not a thing anyone has watched work.
+    A real hopper feeding hay into the feed slot, no hopper reaching a chamber in either
+    direction, and a lower hopper leaving the feed alone are
+    <a href="?view=coding#verified-pipes">proven in the yard</a> (2026-10-01); the outputs and
+    the refusals are not.
 </p>
 <ul>
-    <li>A hopper pointing into the bank from above feeds hay into the feed slot.</li>
-    <li>A hopper under the bank pulls empty buckets out &mdash; and, worth knowing either way,
-        whether it also pulls the feed back out. That is allowed today; if it turns out to be
-        annoying in practice it is a per-slot extraction rule, not a bug.</li>
+    <li>A hopper under the bank pulls empty buckets out. Nothing has watched it, and it is the
+        half of <a href="?view=coding#pipes-outputs-only">the output rule</a> that has to work for
+        the bank to keep drinking unattended.</li>
     <li><strong>A hopper under the bank empties the drop buffer.</strong> This is the whole
         reason the buffer lives in the same container as the supply slots, and if it does not
         work then that decision bought nothing. Nine slots of eggs should end up in a chest
         without anyone opening the bank.</li>
-    <li><strong>No hopper can reach a chamber</strong>, in either direction. This is the one
-        that matters: a hopper that can drain a bank of horses is a disaster, not a nuisance.</li>
     <li>A water bucket cannot be pushed into the feed slot, nor anything at all into the
         empties.</li>
 </ul>
@@ -2101,11 +2162,6 @@
         <strong>Fail:</strong> a wrong number means the snapshot component is not reaching the
         client, because the count is a client-side loop over the synced stacks rather than
         anything sent.</li>
-    <li><strong>The one worth being paranoid about: break it with chambers inside.</strong>
-        <strong>Pass:</strong> every chamber drops. <strong>Fail:</strong> they are gone, and a
-        bankful of pedigreed horses went with them. Guarded by one
-        <code>preRemoveSideEffects</code> override, with nothing testing it and nothing logged if
-        it is wrong.</li>
 </ul>
 
 <h3 id="verify-browse">The Browse tab, in one pass (NOT played)</h3>
@@ -2293,20 +2349,6 @@
         yield stamps a cooldown into the horse's tag, and a cover writes a whole reproductive
         record into it. Both re-sync that chamber's entire entity tag, both are far rarer than a
         heal turn, and neither has been measured either.</li>
-</ul>
-
-<h3 id="verify-bank-flammable">That it does not burn (reasoning unverified)</h3>
-<p>
-    The block deliberately omits <code>ignitedByLava()</code>, on the reasoning that mod blocks
-    are absent from <code>FireBlock</code>'s flammability table unless they register themselves.
-    That reasoning has not been checked in a game.
-</p>
-<ul>
-    <li><strong>Set fire to a bank, and drop another in lava</strong>, each with a chamber
-        inside. <strong>Pass:</strong> neither block is destroyed. <strong>Fail:</strong> it
-        needs an explicit fire-resistance route rather than an omission &mdash; and the chambers
-        that dropped into the fire that did it are the reason this is not a cosmetic
-        question.</li>
 </ul>
 
 <h3 id="bank-art-0929-check">Its new art, in a world (2026-09-29, NOT played)</h3>

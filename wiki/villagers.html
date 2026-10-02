@@ -1956,6 +1956,22 @@
     2026-09-14 and 15, nor the one after that, has a <code>Couldn't load tag</code> line.
 </p>
 
+<p id="verified-trader-leaves">
+    <strong>A horse sold to a wandering trader leaves the world with him</strong> (2026-10-01, the test yard's
+    KEEPING HORSES pen, row AT west). <a href="#trader">&sect;The wandering trader</a> promised it from the start
+    and nothing did it: vanilla's trader llamas remove themselves by copying his despawn delay, a horse has no such
+    logic, so on his despawn the rope dropped and the horse stayed, persistent and unowned, for ever. The yard's
+    first run failed on exactly that &mdash;
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/21">issue #21</a>. The fix
+    (<code>6b24fe7e</code>) is <code>TraderSale.onTraderLeave</code>, on <code>EntityLeaveLevelEvent</code>: a
+    trader removed as <code>DISCARDED</code>, which is how <code>WanderingTrader.maybeDespawn</code> removes him,
+    takes with him every horse still on <em>his</em> rope and not ridden. One killed, or whose chunk unloads, leaves
+    the horse where it is, as vanilla leaves his llamas. The pen sells a horse by the real crouch-click path, then
+    shortens his despawn delay: <code>sold for 4 emeralds, on his rope, tamed false, persistent true; the trader
+    despawned and the horse went with him (no live entity with its UUID)</code> &mdash; <code>CLOCKWORK PASS</code>,
+    23:53:55, on <code>449e1787</code>.
+</p>
+
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
 
@@ -2138,11 +2154,11 @@
         the emeralds</strong>: they must arrive as more than one stack and total the
         quoted number. This is the case <code>CowboySale.pay</code> was rewritten for, and
         a short payout is the failure it is guarding against.</li>
-    <li><strong>The horse leaves on a rope.</strong> It should be leashed to him, untamed
-        and unowned, and should follow him as he wanders. Then the part no test can reach:
-        when he despawns, <strong>the horse must go with him and not be left standing
-        there</strong> as an unowned persistent animal accumulating in the world. Watch one
-        out, or chunk-unload and come back.</li>
+    <li><strong>The horse follows him on the rope.</strong> That it goes on his lead, untamed,
+        and leaves the world when he despawns is
+        <a href="#verified-trader-leaves">proven in the yard</a>; what is left is the walk
+        &mdash; it should follow him as he wanders rather than snap the lead, and its owner
+        should read as nobody.</li>
     <li><strong>The three refusals</strong>, each with its own line: no papers, a foal, and
         a horse that is not yours.</li>
     <li><strong>Nothing regressed at the cowboy.</strong> His price must be
