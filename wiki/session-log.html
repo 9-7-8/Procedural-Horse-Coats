@@ -21,6 +21,11 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-10-01-2151-fix-stable-ground-2.txt">2026-10-01 21:51
+        &mdash; <strong>#2: stables no longer float over valleys</strong>: they are now
+        <code>horsegenetics:level_jigsaw</code>, which skips a site whose ground spreads more
+        than 10 blocks and drops the rest to the lowest corner. Measured on 216 sites: 56%
+        kept, worst kept spread 10 (was 116). #19 filed for the failing roadmap check.</a></li>
     <li><a href="session-log/d2026-10-01-2110-fix-mixin-refmap-16.txt">2026-10-01 21:10
         &mdash; <strong>#16: the mixin config no longer names a refmap</strong>: NeoForge 26
         never remaps, so none was ever built, and every start warned about it. A server boot

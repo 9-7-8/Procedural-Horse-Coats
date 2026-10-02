@@ -106,8 +106,14 @@ STEPS
      (`git stash`) before blaming the diff: gametests are sensitive to tick phase.
    - Run every rebake row the change touched.
    - If the fix turns out larger than step 4 judged, stop and treat the bug as large.
+   - When the owner already picked the fix, measure its cost before committing. If it
+     costs more than the issue predicted (a rate, a balance number, something players
+     will notice), take the numbers back to her with the question tool first. Example:
+     #2's "a bit rarer" measured as two-thirds of the stables gone.
 
 6. Close it on evidence.
+   - Run end-session step 2's build first. This commit is end-session's code commit,
+     and it reaches main before end-session runs, so a red build here goes out with it.
    - Commit as "Fix #N: <what was wrong>", saying why, not which files changed. That
      form closes the issue when it reaches main ("fix", "fixes", "closes", "resolves"
      are all GitHub closing keywords), so use it only when the proof is already in hand,
