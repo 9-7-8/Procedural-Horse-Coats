@@ -1,0 +1,105 @@
+2026-10-02 18:40 - intake treatments for a dozen features, and the mythic-breeds audit (written at the END of the session)
+
+
+    A long intake session on the branch claude/beautiful-ptolemy-3a5k63. No game code was written,
+    nothing was built or played. Everything below is a plain-text treatment, spec or audit in
+    intake/, plus one GitHub issue. Earlier logs from the same conversation, written before the
+    procedures existed, are d2026-09-29-scoping-rider-comfort-and-chaos.txt,
+    d2026-10-01-scoping-exits-and-model-parts.txt and d2026-10-01-mythic-breeds-audit.txt; they
+    stay as they are and this file is the whole-session record.
+
+ASKED
+-----
+ 1. "What's a new thing we can scope a treatment for in intake/ based off of the roadmap? ...
+    smaller, but more noticeable stuff" -> offered rider comfort, gene-lut palettes and others.
+ 2. "Let's scope rider-comfort", then "ask me questions using your tool" -> intake/Rider comfort
+    - implementation treatment.txt, every call put to the owner.
+ 3. "Add the fade-when-looking down ... not totally invisible, and configurable", "ask me about all
+    unverified assumptions", "the person who placed the lead gets the returned lead, even if
+    they're far away" -> all three added to that treatment.
+ 4. "merge this scope first, then scope the runtime registry genes" -> PR #6 merged; the runtime
+    registry genes scoped around a Chaos allele (intake/Runtime registry genes - implementation
+    treatment.txt).
+ 5. "Add the fade ... ", "Merge everything to main" -> PR #7 (antler treatment, written by another
+    session) merged; "Merge everything to the origin/Main, then end this session" -> PR #8, #9.
+ 6. "I want there to be a new tab ... exits" plus "Teleporting a horse to their stall should be
+    free ... configurable" -> intake/Horse exits and free send home - implementation treatment.txt.
+ 7. "make it so pregnancies in the horse realm progress at a normal speed, but only while a player is
+    in there" -> intake/Realm breeding pause - implementation treatment.txt (owner: per-mare, whole
+    breeding cycle, shown as paused, config default on).
+ 8. "search by-name for basic stasis chambers", "a button to eject all empty stasis chambers", "the
+    saved searches arrow is rendering on the inventory screen" -> intake/Stasis bank - implementation
+    treatment.txt (the arrow's cause read from the code, not seen in game).
+ 9. "all nether horse breeds should get heat tolerant ... cold tolerant for cold biomes ... Write this
+    as a spec, don't implement it" -> intake/Breed climate tolerance - spec.txt.
+10. "What are other stuff like horns we could add ..." then "Scope out dragon horns, ear fins, cheek
+    spikes, brow ridge, goat beard, ruff", "the body attachment parts, like the spinosaurus sail",
+    "tusks and sabertooth and narwhal horn as a single gene", "all the feet parts" (owner chose
+    feathering only) -> four treatments: Head parts, Body parts, Tusks gene, Feathering.
+11. Seven pasted tables of mythical horses, "audit through our genes", "skip anything not in the public
+    domain", "leave out the horse's talking", "make a natural dapple gene [to-do]", "assign minecraft
+    biomes to each" -> intake/Mythic breeds - gene audit.txt, intake/Mythic breeds - biome
+    assignments.txt, and a dapple bullet in intake/To do.txt.
+12. "Dead horses stay in that data file until ~100 megabytes ... Open it as a bug ... a tuning request"
+    -> GitHub issue #15, through procedures/report-bug.txt.
+13. "end session" -> this log.
+
+DONE
+----
+ - Rider comfort, Runtime registry genes, Antler genes (another session's file): merged to main in
+   PR #6 and #7. Rider comfort's pieces were then built by other sessions and the file retired.
+ - Horse exits and free send home, Realm breeding pause, Stasis bank, Breed climate tolerance (spec),
+   Head parts, Body parts, Tusks gene, Feathering, Mythic breeds audit and biome assignments, and
+   two treatments written by other sessions on the same branch (Daily realm horse, Villagers in every
+   village): merged in PR #8. The send-home half was meanwhile built on main by another session
+   (d2026-10-02-1110-send-home-free.txt); check intake/Horse exits and free send home before
+   building the Exits tab, which is still unbuilt.
+ - Session log for 2026-10-01 and the mythic-breeds audit: PR #9.
+ - intake/To do.txt: the natural dapple gene bullet. GitHub issue #15 (open, label bug): the afterlife
+   store should keep dead horses until it nears 100 MB, then drop the oldest dead horse first; the
+   ancestry store is untouched. Proof for all of the above: none, nothing was built. Commits are on the
+   branch and merged through PR #6 to #9; the final merge commit of this session is on the branch.
+
+DECIDED
+-------
+ Every one of these is recorded in the treatment named, as "Decided". Owner's calls, by file:
+ - Rider comfort: mounted mining fix on by default; ALT+E inventory key working on foot; right-click
+   equips into any accepting empty slot, owner only, never swaps; leads return via a mixin to the placer,
+   falling back to vanilla's drop; fade floor 25 percent, ridden horse only, client config.
+ - Runtime registry genes: a Chaos allele per locus (seed on the allele copy, as the eye colour Chaos),
+   mob Chaos covers modded mobs only, items under a blocklist plus config.
+ - Exits: a permanent per-owner ledger, four chips, seeded from the Log, row opens the horse's record;
+   Send home free, optional single consumed item, 5-second per-player cooldown.
+ - Realm pause, stasis bank, climate rule (Nether heat tolerance fixed, cold ladder by share of cold
+   biomes), head and body parts, tusks (dominant, forms combine), feathering (coloured from the leg).
+ - Public domain only; no talking horses (owner, mythic audit).
+ - Calls made without the owner, flagged "Recommended" in the files: dominant feathering, the colour
+   mapping of a sail's membrane and spines, the pose of the vanilla-bone anchors, and every biome and
+   rarity tier in the biome file.
+
+FOUND ON THE WAY
+----------------
+ - Issue #15 (above).
+ - A wrong example of mine, corrected in the climate spec: Thoroughbred spawns in a hot biome, not a cold one.
+ - A merge-conflict on To do.txt and session-log.html with main's newer sessions, resolved by keeping both.
+ - Observation left in the biome file: several shipped breeds name biomes that are not on the herd list.
+
+PROCEDURES
+----------
+ None changed. The three questions were asked: report-bug fitted a tuning request without a change; no
+ step failed; and the session's repeatable work (writing intake treatments) already has write-intake-document,
+ which these files pre-date. UNCHANGED, but worth noting: the treatments here were written before that procedure
+ existed, so they do not each carry its "does it count as a new version" answer.
+
+NOT RUN / NOT CHECKED
+---------------------
+ Nothing was compiled or run. A full :common:test would still check everything the treatments name; none of it is
+ written. Each treatment lists its own UNVERIFIED items. No Verification-tab anchors were added.
+
+RELEASE
+-------
+ Not offered: nothing player-facing shipped from this session.
+
+PICK UP FIRST
+-------------
+ The audit's own order: scope wings with write-intake-document, then forced riding. Or fix issue #15 with fix-bug.
