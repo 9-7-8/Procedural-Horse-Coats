@@ -1,9 +1,15 @@
-2026-10-02 10:13 (end time) - A light horse's horn glows
+2026-10-02 10:13 (end of the first part) - A light horse's horn glows, then reversed
 
 ASKED
 -----
 - "/process-intake" (process-intake.txt): take ONE unit out of intake/, build it, retire
   it, end the session. Done: the To do.txt bullet "A light horse's horn glows too".
+- After it shipped: "Glow regardless. The unicorn horn should always glow... by glowing,
+  I mean an emissive texture, not that they emit light. Unicorns that have that light
+  hoof gene will still emit light, but that's separate." Asked what then becomes of the
+  horn glow gene, she answered: "I forgot we had a glow gene: reverse my choice. The
+  unicorn horn gene just makes a horn, and the glow gene makes it emissive". Done: the
+  light-locus rule reversed (DONE, second entry).
 
 DONE
 ----
@@ -27,13 +33,22 @@ DONE
   Retired: the bullet from intake/To do.txt. Written up on wiki/gene-horn-glow.html
   (Gameplay "What it looks like", Coding #open-glow-light-locus, Verification
   #open-light-horn-look), wiki/gene-light.html #cutie-mark, decisions.html loses "(queued)".
+- The next commit after d9c2c8c4 ("Reverse: only horn glow lights a unicorn's horn").
+  GrownParts and LightGene restored to their f94a97f8 state, plus one comment in
+  dressHorn naming the call, so LightGene.lightsHorse is gone again. The test became
+  HornGenesTest.theLightLocusDoesNotLightTheHorn (light alone: dull horn; light plus
+  Glw/Glw: lit). It is the exact negation of f6143d97's passing test, so it fails on that
+  code. Green by name: HornGenesTest, CutieMarkGeneTest, MagicalUtilityGenesTest. The
+  designer wasm was restored from f94a97f8 (the code is identical bar a comment) and
+  check-designer-boots is OK. Verification check #open-light-horn-look deleted. The To
+  do.txt bullet stays retired: the call is now settled the other way.
 
 DECIDED
 -------
-- (owner, 2026-10-01, already recorded) the horn follows the light locus.
-- Without the owner: Lteye (eyes-only) lights the horn too, because the owner's words were
-  "as the cutie mark does" and the cutie mark lights on any variant copy. Recorded on
-  gene-horn-glow.html#open-glow-light-locus.
+- (owner, 2026-10-02) only horn glow makes a horn emissive; the light locus does not,
+  reversing her 2026-10-01 call. Recorded on gene-horn-glow.html#open-glow-light-locus
+  and decisions.html.
+- Lteye lighting the horn (made without the owner in the first part) is moot.
 
 FOUND ON THE WAY
 ----------------
@@ -55,8 +70,7 @@ NOT RUN / NOT CHECKED
 ---------------------
 - Full :common:test not run; it would still check every other gene's tests against the
   LightGene change (only modifyCutieMark's body moved to a helper, same rule).
-- Nobody has seen a light unicorn's horn glow in game:
-  wiki/gene-horn-glow.html#open-light-horn-look.
+- No new in-game check: the horn behaves as it did before this session.
 
 RELEASE
 -------
