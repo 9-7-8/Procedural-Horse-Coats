@@ -16,7 +16,9 @@ and go through fix-bug instead.
 
 One run builds ONE unit. Never start a second one in the same conversation. The owner
 clears context and runs this again for the next one, because the next unit's classes,
-pages and tests have nothing to do with this one's.
+pages and tests have nothing to do with this one's. The one exception is hers to make:
+pieces of ONE treatment that share a screen and a test class may be one run if she says
+so when asked (step 5). Then they are one commit and one session log.
 
 This file is the routine, not the queue. Read what is in intake/ fresh every run.
 
@@ -171,7 +173,8 @@ Then stop. Do not start that next unit.
 
 NEVER
 -----
-- Never build two units in one conversation.
+- Never build two units in one conversation, unless the owner said so for pieces of one
+  treatment (WHEN TO USE).
 - Never pick anything that needs the owner's live server.
 - Never design a breed without her (design-a-breed).
 - Never treat an UNVERIFIED line as true because the treatment sounds confident.

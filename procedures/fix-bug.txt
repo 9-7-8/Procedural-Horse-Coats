@@ -22,6 +22,10 @@ run-tests finds bugs in the yard and fixes the small ones in passing. report-bug
 a player's report into an issue. This procedure fixes one issue.
 
 One run fixes ONE issue. The owner clears context and runs this again for the next.
+Asked to run several at once (parallel agents, one bug each): count the issues with work
+left first. An issue whose fix is in and only waits on a check is not one. Then say that
+parallel runs collide on one checkout, one Gradle and end-session's commits, and offer
+them in sequence, or one per worktree with the commits made one at a time.
 
 BEFORE YOU START
 ----------------

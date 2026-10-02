@@ -100,8 +100,8 @@
         <td>Glass bottle + wheat + horse hair + a container of water, in any arrangement. Any
             modded water container matches, by tag. <strong>The container is not
             consumed.</strong></td>
-        <td>Storage only. The horse is listed by name on the Browse tab and nothing else
-            about it can be asked for.</td></tr>
+        <td>Storage only. The horse is listed by name on the Browse tab, and a search for
+            that name finds it; nothing else about it can be asked for.</td></tr>
     <tr><td><strong>Intermediate Horse Stasis Chamber</strong></td>
         <td>A Basic chamber + a book.</td>
         <td>The bank can see inside. All of the horse's information becomes searchable &mdash;
@@ -245,6 +245,14 @@
     what is in there, so a glance tells you <em>nine horses of twelve</em> rather than nothing at
     all.
 </p>
+<p id="eject-empties">
+    <strong>Eject empties (N)</strong>, to the right of the <em>Inventory</em> caption on this
+    tab, takes every empty chamber out of the bank in one press: any tier, never one with a horse
+    in it, and never anything in the supply row or the drop buffer. They go into your inventory,
+    and whatever does not fit drops on the ground at the bank, so nothing gets stuck and nothing
+    is lost. There is no confirmation, because it only moves items. With no empties in the bank
+    the button is greyed out.
+</p>
 
 <h2 id="jars-gameplay">You can see which horse is in which jar</h2>
 <p>
@@ -297,7 +305,11 @@
         chamber's own tooltip already tells you that and a bank that hid it would be arguing
         with the bottle in your hand &mdash; but it says
         <em>&ldquo;a basic chamber cannot be looked into&rdquo;</em> where the details go, and
-        <strong>no search will ever return it</strong>. When a filter hides rows, the list says
+        <strong>the only search that returns it is its name</strong>. Type <code>cinder</code>
+        and Cinder comes up from her Basic bottle; type <code>cinder mare</code>,
+        <code>cinder gen&gt;2</code> or <code>name:cinder</code> and she does not, because every
+        one of those asks something the bank would have to look inside to answer. A
+        <code>-</code> in front of a name works as well. When a filter hides rows, the list says
         how many it could not reach, so a horse never just vanishes from the bank. An eye of
         ender is what fixes that, and it upgrades the chamber with the horse still inside.
     </p>
@@ -706,6 +718,21 @@
         was asked for by name &mdash; see below.
     </p>
 </div>
+<p id="eject-empties-coding">
+    <strong>Eject empties is a third <code>clickMenuButton</code> verb</strong>,
+    <code>HorseStasisBankMenu.EJECT_EMPTIES_BUTTON</code>, one past the stud and withdraw ranges
+    (<code>2 * SLOTS</code>), so it needs no payload. The server re-checks
+    <code>stillValid</code>, walks only the chamber container, and moves each chamber with no
+    <code>STASIS_SNAPSHOT</code> through <code>setItem</code>, ending in one
+    <code>setChanged</code> so the tick gate is recomputed. Overflow goes through
+    <code>Containers.dropItemStack</code> at the bank's position, which is what
+    <code>dropContents</code> does per stack when the bank is broken. The button's count is
+    <code>menu.empties()</code>, <code>filed() - occupied()</code>: <code>snapshotOf</code> is one
+    component read, so counting every frame costs nothing. The gametest
+    <code>stasis_bank_ejects_empties</code> covers it: two empties out, the occupied chamber and a
+    drop-buffer chamber left alone, one into the pack and one on the ground, and a second press
+    that does nothing.
+</p>
 
 <h2 id="upkeep-coding">The upkeep: four refusals, then one horse</h2>
 <p>
@@ -882,8 +909,22 @@
 <p>
     <code>StasisBrowseRow</code> is in <code>common/</code>, and holds the gate: a row is
     searchable only if its own chamber's <code>StasisTier.searchable()</code> says so
-    <em>and</em> there is a listing behind it, and <code>locked()</code> counts the rows that
-    fail that test so the screen can say how many a query could not reach. Both halves are
+    <em>and</em> there is a listing behind it, and <code>locked(rows, query)</code> counts the
+    rows that query could not reach so the screen can say how many.
+</p>
+<p id="basic-by-name">
+    <strong>A Basic chamber answers to its name, and only to a query that is nothing but a
+    name</strong> (owner, 2026-10-01). <code>StasisBrowseRow.plainNameQuery</code> decides
+    that from <code>QueryExpr.tokenize</code> and <code>HorseQuery.flags()</code>, so the
+    language has one parser: plain means every token is a bare word, optionally led by
+    <code>-</code>, with no operator, bracket, comma or quote, no keyword (<code>AND</code>,
+    <code>OR</code>, <code>NOT</code>, <code>IN</code>, <code>LIKE</code>) and no flag. Each word
+    must then be a case-folded substring of the row's name, and each negated word must not be.
+    Reading the flag list rather than copying it means a new flag cannot quietly become part of a
+    name. A mixed query never pulls a Basic horse in on the strength of its name, and leaves it
+    in the locked count exactly as before. The rule is the <em>chamber's</em>: a horse with no
+    papers in a searchable chamber is still out of reach of every query, because its chamber is
+    not the reason it cannot be asked about. The gate and the count are both
     <code>StasisBrowseTest</code>'s subject, because a horse silently disappearing from a
     filtered bank is the one failure this tab must not have: the player's next thought is that
     the bank lost it.
@@ -1673,9 +1714,28 @@
         <strong>the tick a rider is set down for</strong>, <strong>the whereabouts column
         saying a horse is in a chamber</strong>, and newest of all <strong>the horse drawn
         through the jar's new window</strong> and <strong>Send home taking a horse out of a
-        chamber and leaving the empty one behind</strong>.
+        chamber and leaving the empty one behind</strong>, and since 2026-10-01
+        the Eject empties button and finding a Basic horse by its name.
     </p>
 </div>
+
+<h3 id="verify-eject-and-name-search">Eject empties, and finding a Basic horse by name (2026-10-01, NOT played)</h3>
+<p>
+    Both are proven below the screen (<code>StasisBrowseTest</code> and the
+    <code>stasis_bank_ejects_empties</code> gametest); what nobody has seen is the window.
+</p>
+<ul>
+    <li><strong>The button.</strong> On Chambers, <em>Eject empties (N)</em> sits right of the
+        <em>Inventory</em> caption without overlapping the grid's bottom row or the inventory
+        slots. N matches the empties, it greys out at zero, and it is gone on Browse and
+        Supply. Its tooltip may not show while it is greyed out: that is unverified on 26.1.2.</li>
+    <li><strong>A press</strong> with a nearly full inventory fills the free slots and drops the
+        rest at the bank. No horse leaves, and nothing in the supply row or drop buffer moves.</li>
+    <li><strong>Browse.</strong> A horse in a Basic chamber comes up when you type part of its
+        name, and does not when you add <code>mare</code> or <code>gen&gt;2</code>. The
+        &ldquo;cannot reach&rdquo; line counts it for the mixed query and not for the plain
+        one.</li>
+</ul>
 
 <h3 id="verify-bank-insurance">A bank's spare chamber saves a horse (2026-09-25, NOT played)</h3>
 <p>
