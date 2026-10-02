@@ -1,0 +1,138 @@
+2026-10-02 14:20 (start, approximate) - Undead horses: genes, breeds, art and the converter
+
+ASKED
+-----
+1. "please implement the undead horses, drawing from our plans for them in intake. one
+   more detail, the skeleton horse should also have every single "horn"-like add on added
+   to its pool, all in bone color with no glow and no emission, just plain old bones as
+   much as flavorfully possible"
+   -> Built stages 1-3 of intake/Undead horse conversion.txt (owner's choice, below);
+   stage 4 routed to wiki/undead-horses.html's Roadmap tab; the treatment retired.
+2. Mid-session: "Maybe just add a cream or champagne allele to the weathered bone horse?"
+   -> Previewed Cr/N, Cr/Cr, Ch/c and Ch/Ch on Weathered founders side by side; Cr/N
+   (dunalino) read best and is pinned.
+
+DONE
+----
+5363f8e7 (code) - everything below; the docs commit follows it.
+- Sheet converter (D36, D37): common/coat/skin/HorseSheetConverter + HorseSheetConvertTool,
+  ./gradlew :common:convertHorseSheets from common/sheet-sources/manifest.txt. Layout read
+  from the new HorseSkinGeometry.patches (no coordinate typed twice). Vanilla's cube
+  mirror read from 26.1.2's ModelPart$Cube / $Polygon with javap: x bounds swapped, UVs
+  kept, so a mirrored box = every face flipped + side strips swapped; only the adult's
+  left legs are mirrored (not the ears, nothing on the foal). Proof:
+  HorseSheetConverterTest (8) - straight mode reproduces horse_white.png and
+  horse_white_baby.png to the pixel, the manifest outputs are current, an asymmetry probe,
+  refusal of a non-horse sheet; mutating the mirror turned 2 red. Drawn-pixel counts match
+  the treatment's Appendix C (skeleton 1036, zombie 2218, 0 off-mesh).
+- THIRD_PARTY_NOTICES.md: a "Horse coat sheets (Mojang)" section listing all six
+  converted sheets, the cart sentence qualified (D35). Wording is mine - see DECIDED.
+- Composer (D28, D38, Appendix F): CoatSheetContribution; zombie SEED pass after phase 2
+  (template divided back out, so Fresh = vanilla's zombie), skeleton SHAPE pass as step
+  6 after the overlay (alpha, lerp underlay, luminance shading), every sheet's alpha cut
+  last. Sheets ride in LutSet.sheets, loaded by LutSet.fromRegistry (all tools), the game's
+  GeneticCoatTextureFactory, and DesignerApi.setSheet + java.js SHEETS. The model's render
+  type is ENTITY_CUTOUT_NO_CULL (GeneticHorseRenderer's own comment + LivingEntityRenderer
+  bytecode), so the binary holes draw - that UNVERIFIED item is settled.
+- Genes: SkeletonGene (Skel, 191) and ZombieGene (Zomb, 192) on AbstractUndeathGene:
+  recessive, n/n founders, no carrot, not spliceable; both request Blk irises/sclerae and
+  the WT sector (EyeRequestContribution) - added after the first render showed blue eyes
+  and a blue sector on Bleached skeletons from their hidden white carriers; skeleton grants
+  traversal underwater_breathing (self). Undeath.kindOf is the one "is it undead" answer.
+- Appended alleles, none with a wild share (so no feral roll moved): Diet.BONE + Dbone,
+  MagicItemDropGene Bne/Rot (item_drop "bones"/"rotten_flesh" in AbilityType, schema.js,
+  GeneDeathHandler), EyeColourGene/IRIS_PALETTE BLACK, part colour Bon (CHAOS_INDEX now a
+  literal 11), PassificationGene.OFFERINGS 14 bone, 15 rotten_flesh.
+- Breed format: "undead_of" and "count_groups" (Breed record components; parser, writer,
+  BreedSpawnSettings.copy, census, bd-core.js passthrough). BreedFounder draws a group as
+  one decision after the per-locus loop, so no other breed's roll changed.
+- Breeds: great_valley_skeleton_horse and graveborn_warmblood (index.json by hand, then
+  bakeBreedFiles, which rewrote only those two). Skeleton horns: count group
+  [5350, 640, 320, 80, 10] over unicorn horn, antlers, ram horns, dragon horns; horn and
+  dragon-horn colour Bon/Bon, antler tint and ram-horn shade banded pale, glow, crystal,
+  bloom, dust and tip pinned off; forms spread.
+- Game side: server/UndeadHorseConverter (save whole, load into minecraft:horse, found from
+  the pool seeded by UUID, discard-then-add with a vanilla rollback), UndeadHorses cache,
+  MobGroups "undead" clause, mixin/HorseUndeadVoiceMixin, ServerConfig undead.convert
+  (default true), DietFoods bone, Passification.onOffer at HIGH and releasing a paid item.
+  HorseFoundingTickHandler.mayFound/charge are now package-visible and shared.
+- Gametests: undead_horses_convert, undead_trap_waits, undead_keep_vanilla; all 32 green.
+  Disabling the trap guard turned undead_trap_waits red. The first run failed the health
+  fraction (0.26) - the test spot nicks a horse; the converter's own fraction was right
+  (logged 0.46 -> 0.46); the test zombie is now invulnerable.
+- Common tests by name, all green: UndeadBreedsTest (15; mutating the count-group draw
+  failed it), HorseSheetConverterTest, and 38 existing classes incl. BreedFilesTest,
+  BreedSpecParserTest, BreedFounderTest, BreedBandsReachTest, BreedsTest, DhampirBreedTest,
+  PartColourGeneTest, EyeColorTest, DietGeneTest, AggressionGenesTest, GenotypeTest,
+  CommonPortabilityTest, GeneFilesTest, DeadLayerTest, StableSpawnTest, both coat goldens.
+- Goldens: pipeline 0 of 1092 hashes moved (keys only); bake golden only added rows, plus
+  eye_third Def moved because the third eye's iris category grew to 11 - a fresh-roll
+  change only, since ThirdEyeGene reads floorMod(stored, count).
+- Designer: :web:bakeDesignerAssets, check-designer-boots OK, and a headless probe:
+  the Graveborn bakes 7433 green-dominant texels, the skeleton far fewer opaque ones.
+- Bakes: bakeSpecFixtures + check-parity (7163 checks OK), bakeCreatorAssets,
+  bakeGeneBundle, bakeGeneIcons (skeleton.png, zombie.png looked at), bakeGeneWikiPages,
+  bakeMarkingFacts, bakeGeneCensus, gene timeline, bakeUnverifiedGenes, bake-config-keys,
+  sync-page-views, verification/roadmap indexes, check-roadmap-execution, check-breed-heights,
+  check-gene-tabs, check-links, search index, agent text. :neoforge-26.1.2:build green.
+- Wiki: undead-horses.html rewritten (Gameplay, Coding, Verification, Roadmap); new
+  gene-skeleton.html, gene-zombie.html; breed-book and breeds.html entries; breed-format
+  rows #undead-of and #count-groups; the appended alleles on gene-diet, gene-passification
+  (offering arithmetic now 2 of 16), gene-magic-item-drop, gene-horn-colour,
+  gene-dragon-horn-colour, eye-colour; compatibility #undead-converter; pipeline
+  #sheet-passes; making-a-gene capability row; architecture; README one line.
+- Retired: intake/Undead horse conversion.txt, intake/undead-breeds-draft/, its Sizing block.
+
+DECIDED
+-------
+- (owner) Scope: stages 1-3 this session; stage 4 later.
+- (owner) Skeleton horns: P(k) = P(k-1)/2^(k-1) from 10% - 10, 5, 1.25, 0.156%.
+- (owner) A count-group breed field, not 32 strains. Recorded: breed-format#count-groups.
+- (owner) A Bon allele on the part-colour genes.
+- (owner) "Cannot drown" = the absolute underwater_breathing flag on the skeleton gene.
+- (owner) Weathered: red dun base, then (owner's suggestion) one cream - dunalino.
+- (owner) Converter in common/ Java with a Gradle task.
+- Without the owner: the THIRD_PARTY_NOTICES wording (D35 said it is her call - please
+  read the "Horse coat sheets (Mojang)" section); tokens Skel/Zomb (the treatment's own
+  suggestion); undeath itself requests black eyes (D29 had it on the breed only); bone kept
+  out of the wild diet and splice tables; Bne/Rot drop 1-3; a player's custom name becomes
+  the barn name; KEEP_VANILLA persistent-data marker; save-whole/load as the swap
+  mechanism; Passification at HIGH priority; BreedsTest and DhampirBreedTest exemptions
+  for egg-only / undead breeds. All on undead-horses.html's Coding tab.
+
+FOUND ON THE WAY
+----------------
+- Long heredocs truncated again (memory already says so); patches went through scratchpad
+  scripts. A python rewrite of GeneFamily.java with no change left a line-ending diff;
+  reverted.
+- Without the HIGH priority, a passified skeleton could never be fed a bone (the offering
+  handler claimed and swallowed it). Fixed in the same commit.
+- No GitHub issues filed.
+
+PROCEDURES
+----------
+- rebake.txt: new row z (sheet sources, manifest, converter, patch table).
+- add-a-gene.txt: Path B step 5 - a CoatSheetContribution gene must be added to the
+  designer by hand (web/build.gradle.kts include list, java.js SHEETS).
+- process-intake: none needed (the owner named the unit and the stage split up front).
+
+NOT RUN / NOT CHECKED
+---------------------
+- No full :common:test. It would still check every other gene and breed class against the
+  new registry (gene counts, code-order snapshots, any test that rolls Genotype.random with
+  a fixed seed and the passification / third-eye categories that grew).
+- Nothing has been seen in a running game. New Verification anchors: undead-horses.html
+  #open-undead-old-save, -ridden, -trap, -lead, -flash, -herd, -sounds, -taming, -horns,
+  -tuning, -off; gene-skeleton.html #open-skeleton-look, -foal, -drown; gene-zombie.html
+  #open-zombie-look.
+- No runServer boot; the gametest server loaded the mod and applied the new mixin.
+
+RELEASE
+-------
+Not offered. Conversion is on by default (D2) and the treatment's rule is that it ships only
+after the genes and breeds have been seen in game.
+
+PICK UP FIRST
+-------------
+Hand the owner the undead test (procedures/hand-over-a-test.txt): skeleton and zombie
+eggs of each strain, a vanilla zombie horse to convert, a skeleton trap.

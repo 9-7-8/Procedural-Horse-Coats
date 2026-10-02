@@ -181,6 +181,12 @@ STEPS
    3. Write T/genetics/genes/<Name>GeneTest.java. GeneCoatHookTest is the pattern.
    4. The page is HAND-WRITTEN, with tabs gameplay, coding and science, plus
       verification. bakeGeneWikiPages still registers it.
+   5. A gene whose look is a whole sheet of art (the undeath loci) implements
+      CoatSheetContribution and names its sheets in sheetResources(). The game and
+      every tool load them from that by themselves; the horse designer does NOT:
+      add the PNGs to web/build.gradle.kts's include list and the keys to java.js's
+      SHEETS, or the browser silently bakes the plain coat. Sheets converted from
+      vanilla art go through common/sheet-sources/manifest.txt (rebake row z).
 
 5. ABILITY gene.
    1. Pick the shape, in this order of preference:

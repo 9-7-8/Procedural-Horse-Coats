@@ -86,15 +86,6 @@ Gate: after the feeding rules are fixed (check-roadmap-execution).
 Built? No.
 
 ------------------------------------------------------------------------------
-Undead horse conversion.txt   (PLAN ONLY)                         sized 2026-10-02
-Release: stages 1-4 all finished before any is released; stage 4 may be a later release.
-- Stage 1: sheet converter, alpha op, art, skeleton/zombie genes, two breeds   L  b  No: breeds, philosophy.html, D27/D28
-- Stage 2: wire the reused machinery                             M     needs 1
-- Stage 3: the converter                                         L     needs 1-2 seen in game
-- Stage 4: spawning overhaul                                     M     needs 3
-Built? No.
-
-------------------------------------------------------------------------------
 Villagers in every village - implementation treatment.txt         sized 2026-10-02
 - Piece 1: barns in all five village pools (run-time palette swap) M c owner-free (answered 2026-10-02)
 - Piece 2: /horsevillage list + backfill (dry-run default)      L  c  owner-free (answered 2026-10-02)

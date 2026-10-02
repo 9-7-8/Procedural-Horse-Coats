@@ -152,7 +152,7 @@ window.HG.pages = {
                 { href: "saddle-pads.html", text: "Saddle pads", kind: "core", views: ["coding"] },
                 { href: "storm-fed.html", text: "Storm fed", kind: "magical", views: ["coding"] },
                 { href: "troughs.html", text: "Troughs and salt licks", kind: "core", views: ["coding"] },
-                { href: "undead-horses.html", text: "Undead horses", kind: "core", views: ["coding"] },
+                { href: "undead-horses.html", text: "Undead horses", kind: "core", views: ["gameplay","coding"] },
                 { href: "virtual-stables.html", text: "Virtual stables", kind: "core", views: ["coding"] }
             ]
         },

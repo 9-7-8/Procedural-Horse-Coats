@@ -122,6 +122,17 @@
             stick / clock.</td>
         <td class="warn">Medium &mdash; first handler wins</td>
     </tr>
+    <tr id="undead-converter">
+        <td>Vanilla undead horses</td>
+        <td><strong>Replaced.</strong> A <code>minecraft:zombie_horse</code> or
+            <code>minecraft:skeleton_horse</code> is swapped for a <code>minecraft:horse</code>
+            on its first tick (same UUID, name, owner, tack and lead; new stats) &mdash; see
+            <a href="undead-horses.html#converter">undead horses</a>. Exact types only, so
+            another mod&rsquo;s subclass is left alone; a mod holding a reference to the old
+            entity (a waypoint, a mount list) loses it. <code>undead.convert = false</code> is
+            the escape hatch.</td>
+        <td class="warn">Medium &mdash; the entity changes type under anything that keyed on it</td>
+    </tr>
     <tr>
         <td>Recipes / items / blocks</td>
         <td>All namespaced under <code>horsegenetics</code>. One block

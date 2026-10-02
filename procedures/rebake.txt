@@ -223,6 +223,15 @@ STEPS
              hand-edit the table.
       COMMIT wiki/config.html
 
+   z. A sheet in common/sheet-sources/, its manifest, HorseSheetConverter, or the leg/ear
+      patch table in HorseSkinGeometry.patches
+      RUN    ./gradlew :common:convertHorseSheets (rewrites a sheet only if its pixels
+             change), then --tests '*HorseSheetConverterTest' (it fails on any output a
+             re-run would change), then row e (the designer carries its own copies) and,
+             if the white template moved at all, row a. A new Mojang source is a new line
+             in THIRD_PARTY_NOTICES.md in the same change.
+      COMMIT the regenerated textures/entity/horse/*.png, THIRD_PARTY_NOTICES.md
+
    A row is missing if a derived, checked-in file has no row. Add the row here in the
    same change, never to CLAUDE.md.
 

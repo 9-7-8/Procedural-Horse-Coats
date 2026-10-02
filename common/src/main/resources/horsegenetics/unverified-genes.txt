@@ -15,6 +15,8 @@ horsegenetics.horn_colour
 horsegenetics.horn_dust
 horsegenetics.horn_glow
 horsegenetics.unicorn_horn
+horsegenetics.skeleton
+horsegenetics.zombie
 horsegenetics.magic_pull
 horsegenetics.smoke_scroll
 horsegenetics.endless_knot

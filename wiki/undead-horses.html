@@ -15,167 +15,324 @@
 <main class="content">
 <article class="doc">
 
-<p class="eyebrow core">Planned <span class="sep">/</span> not built</p>
+<p class="eyebrow core">Breeds &amp; spawning <span class="sep">/</span> built, not yet seen in game</p>
 <h1 id="undead-horses">Undead horses</h1>
 <p class="lede">
-    <strong>Two genes, and a spawning overhaul.</strong> This used to be an open question
-    and now it is a design. The question was how much of the mod an undead horse gets; the
-    answer the owner has given is <em>all of it</em> &mdash; a skeleton horse is
-    <strong>any breed</strong> that happens to carry a skeleton gene, and a zombie horse is
-    any breed carrying a zombie gene. Undeath stops being an entity type this mod stands
-    beside and becomes two loci, which is the answer that costs the least new machinery and
-    the most spawning work. <strong>None of it is built.</strong>
+    <strong>Undeath is two genes, not two entity types.</strong> A skeleton horse is a horse
+    with two copies of the <a href="gene-skeleton.html">skeleton</a> allele, and a zombie horse
+    one with two copies of <a href="gene-zombie.html">zombie</a>, so the genome, the coat
+    pipeline, breeding, records, bond and the body stats all reach them because they reach every
+    horse. Vanilla&rsquo;s own zombie and skeleton horses &mdash; in old saves, from skeleton
+    traps, from <code>/summon</code> and eggs &mdash; turn into this mod&rsquo;s horses the first
+    time they are ticked: a <a href="breed-book.html#graveborn-warmblood">Graveborn Warmblood</a>
+    or a <a href="breed-book.html#great-valley-skeleton-horse">Great Valley Skeleton Horse</a>.
 </p>
 
-<div class="note warn">
-    <span class="label">Nothing on this page exists in the game</span>
-    <p>
-        Everything below is a plan. It was moved here whole from the main
-        <a href="roadmap.html">roadmap</a>, which is now an index of pages like this one
-        rather than a place plans are written. When a piece of this ships, it comes
-        <em>off</em> the Roadmap tab and is written up on a Gameplay and a Coding tab
-        here &mdash; the page grows tabs as the thing grows.
-    </p>
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="your-old-horses">What happens to your vanilla undead horses</h2>
+<p>
+    Each one becomes one of this mod&rsquo;s horses the first time its chunk loads, with nothing
+    to do. It keeps its <strong>name, owner, tame state, saddle, armour, lead, age and the share
+    of its health it had left</strong>, and gets a pedigree and a coat of its own.
+    <strong>Its speed, jump and hearts are re-rolled from its new genes</strong>, so a zombie
+    horse comes out slower and much tougher than it was, a skeleton horse quicker and frailer. A
+    horse you already owned arrives calm toward you and stays that way; an untamed one is as
+    hostile as the breed is (below) until it is offered its item. Its bond starts at zero.
+</p>
+<ul>
+    <li><strong>A horse with you on it waits</strong> until you get off.</li>
+    <li><strong>A skeleton trap is still a trap.</strong> It springs as vanilla&rsquo;s does; the
+        horse it leaves behind converts after.</li>
+    <li><strong>Other mods&rsquo; undead horses are left alone.</strong></li>
+    <li><strong>A server can switch it off:</strong> <code>undead.convert</code> in the server
+        config (<a href="#config">below</a>). Off, vanilla undead horses stay vanilla; ones already
+        converted stay what they became.</li>
+</ul>
+
+<h2 id="the-breeds">The two breeds</h2>
+<p>
+    Neither is sold, stabled or found in a wild herd: they come only from conversion and from
+    their spawn eggs. Both are <strong>hostile to their rider after dark</strong> until passified,
+    have <strong>black eyes</strong>, do not burn in daylight, and are drawn at the size of
+    vanilla&rsquo;s undead horses.
+</p>
+<table>
+    <thead><tr><th></th><th>Great Valley Skeleton Horse</th><th>Graveborn Warmblood</th></tr></thead>
+    <tbody>
+    <tr><td>Body</td><td>quick (speed 8), a good jumper, fragile</td><td>slow (speed 2), a poor jumper, very hard to kill (health 10), strong</td></tr>
+    <tr><td>Eats</td><td><strong>bones</strong> &mdash; one heals it completely</td><td>raw meat</td></tr>
+    <tr><td>Passified by</td><td><strong>one bone, for good</strong></td><td>two to four <strong>rotten flesh</strong>, for one to three minutes &mdash; tame it inside the calm</td></tr>
+    <tr><td>Drops</td><td>one to three bones instead of leather</td><td>one to three rotten flesh instead of leather</td></tr>
+    <tr><td>Also</td><td>never drowns; soul fire at its hooves; sometimes a horn of bone (below)</td><td>&mdash;</td></tr>
+    <tr><td>Strains</td><td>Bleached (clean white bone), Weathered (yellowed, crazed and dusty)</td><td>Fresh, Long-buried (grave dust)</td></tr>
+    </tbody>
+</table>
+
+<h3 id="skeleton-horns">Horns of bone</h3>
+<p>
+    Every horn-like part a horse can grow is in the skeleton&rsquo;s pool &mdash; a unicorn horn,
+    antlers, ram&rsquo;s horns and dragon horns &mdash; all in bone, none glowing or shedding.
+    About one skeleton in ten wears one kind, one in twenty two kinds, one in eighty three, and
+    about one in 640 all four. The rest have none.
+</p>
+
+<h2 id="breeding">Breeding them</h2>
+<p>
+    They breed as any horse does. Two skeletons give skeleton foals; a skeleton and an ordinary
+    horse give ordinary-looking foals that <em>carry</em> it, and two carriers can surprise you.
+    The diet, temper and drops ride on their own genes, so a bred-down skeleton can have an
+    ordinary appetite and a gentle temper and still be bones.
+</p>
+
+<h2 id="config">The switch</h2>
+<p>
+    <code>undead.convert</code> (server config, default <code>true</code>). Removing the mod, or
+    turning this off, leaves any converted horse as a plain <code>minecraft:horse</code>, as every
+    other horse of this mod is left.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="bundle">The breed sets the bundle (settled 2026-10-01)</h2>
+<p>
+    The question was whether one undead locus may bundle several effects, against
+    <a href="philosophy.html#concepts-are-breeds">&ldquo;a concept is a breed, not a gene&rdquo;</a>.
+    It does not need to: <strong>each undeath gene is only the visible undeath</strong> (the look,
+    the black eyes, &ldquo;undead&rdquo; to the mob groups, and the skeleton&rsquo;s breathing).
+    Diet, temper, passification, drops, particles and stats are separate, existing loci the two
+    breeds pin. The only new genes are the two undeath loci; the rest is new alleles on old ones:
+    <code>Dbone</code> on <a href="gene-diet.html">diet</a>, <code>Bne</code>/<code>Rot</code> on
+    magic item drop, <code>Blk</code> on both iris loci, <code>Bon</code> on horn colour and
+    dragon horn colour, and offerings 14 (<code>minecraft:bone</code>) and 15
+    (<code>minecraft:rotten_flesh</code>) on <a href="gene-passification.html">passification</a>.
+    Every one was appended, so no saved horse&rsquo;s allele moved, and none has a wild share.
+</p>
+
+<h2 id="converter">The converter &mdash; <code>server/UndeadHorseConverter</code></h2>
+<p>
+    On <code>EntityTickEvent.Post</code>, under <code>HorseFoundingTickHandler</code>&rsquo;s budget
+    (one budget for every founding), never on the join event: writing <code>Attributes.SCALE</code>
+    from anywhere else has crashed the chunk system before. A small table maps an exact
+    <code>EntityType</code> to a pool name &mdash; <code>SKELETON_HORSE</code> to
+    <code>skeleton</code>, <code>ZOMBIE_HORSE</code> to <code>zombie</code> &mdash; and is the
+    extension point for another mod&rsquo;s undead horse; subclasses are not converted.
+</p>
+<ol>
+    <li><strong>Waits</strong> while a player rides it, while it is an armed skeleton trap
+        (<code>SkeletonHorse.isTrap()</code>, public in 26.1.2), while it is dead or dying. Skips for
+        good a horse whose persistent data carries <code>horsegenetics:keep_vanilla</code>.</li>
+    <li><strong>Saves the undead horse whole</strong> (<code>saveWithoutId</code>) and loads the tag
+        into a new <code>minecraft:horse</code> created with <code>EntitySpawnReason.CONVERSION</code>.
+        The two share <code>AbstractHorse</code>&rsquo;s save format, so the UUID, position, age,
+        custom name, tame flag and owner, saddle and armour, lead, tags, persistence and other
+        mods&rsquo; persistent data all come across with no copying here.</li>
+    <li><strong>Founds it</strong> from a breed whose sheet says <code>"undead_of"</code> that pool,
+        picked uniformly with <code>SeededRng(uuid, "undead-conversion")</code> &mdash; the same seed
+        for the sex, genome and name, so a replay makes the same horse. A custom name becomes the
+        record&rsquo;s barn name over a rolled registered name. The record&rsquo;s owner mirrors the
+        entity&rsquo;s. The body is re-resolved and the health <em>fraction</em> restored. A tamed
+        horse has every passification route settled <code>FOREVER</code> for its owner (D25).</li>
+    <li><strong>Swaps</strong>: lets the old lead go without its item (the tag holds the same lead;
+        dropping it too would duplicate it), ejects passengers, <code>discard()</code>s the old
+        entity (no death, drops or notices), adds the new one, remounts the non-player passengers
+        and syncs coat and care to trackers. Discard comes first because two live entities cannot
+        share a UUID.</li>
+    <li><strong>Fails safe.</strong> If the level refuses the new horse, a vanilla copy is rebuilt
+        from the same tag and put back. Any exception leaves the original untouched; after five tries
+        it is left vanilla until the level reloads. The failure mode is the horse still being there,
+        and still vanilla.</li>
+</ol>
+<p>
+    Gametests: <code>undead_horses_convert</code> (a tamed, named, saddled, half-health zombie and a
+    plain skeleton: one entity per UUID, a real record, the gene, the breed, owner, name, saddle,
+    health fraction and passification all kept), <code>undead_trap_waits</code>,
+    <code>undead_keep_vanilla</code>.
+</p>
+
+<h2 id="sheets">The art &mdash; vanilla&rsquo;s own sheets, converted</h2>
+<p>
+    Vanilla&rsquo;s zombie and skeleton horses are the horse mesh with another texture &mdash; one
+    layer definition in <code>LayerDefinitions</code>, stored at 1/1.1 of the horse&rsquo;s scale,
+    which is why both breeds are size <code>[0.86, 0.95]</code>. Their sheets are copied into
+    <code>common/sheet-sources/minecraft/</code> and converted to this mod&rsquo;s layout by
+    <code>coat/skin/HorseSheetConverter</code> (<code>./gradlew :common:convertHorseSheets</code>,
+    from <code>common/sheet-sources/manifest.txt</code>). It scales by an integer factor (nearest
+    neighbour up, box average down), re-lays the adult&rsquo;s shared leg and ear patches into the
+    HD mesh&rsquo;s own patches as read from <code>HorseSkinGeometry.patches</code>, and in
+    <code>vanilla</code> mode applies vanilla&rsquo;s cube mirror to the left legs (every face
+    flipped and the two side strips swapped &mdash; read from 26.1.2&rsquo;s
+    <code>ModelPart$Cube</code>). In <code>straight</code> mode it reproduces the shipped white
+    template to the pixel, which <code>HorseSheetConverterTest</code> holds it to. The notice is in
+    <code>THIRD_PARTY_NOTICES.md</code>.
+</p>
+<p>
+    The undeath genes reach the art through <code>CoatSheetContribution</code>: each names its
+    sheets (<code>skeleton_adult</code> &hellip;), every host loads them into the
+    <code>LutSet</code>&rsquo;s <code>sheets</code> beside the LUTs (the game&rsquo;s texture
+    factory, <code>LutSet.fromRegistry</code> for every tool, and <code>DesignerApi.setSheet</code>
+    from <code>java.js</code>), and the composer runs the zombie&rsquo;s seed and the
+    skeleton&rsquo;s shape pass. See the two gene pages.
+</p>
+
+<h2 id="breed-fields">Two breed-file fields</h2>
+<ul>
+    <li><code>"undead_of": "skeleton" | "zombie"</code> joins a breed to a pool. Joining a pool is
+        editing that breed&rsquo;s file; the converter needs no change.</li>
+    <li><code>"count_groups"</code>: a set of loci where the sheet weighs how many of them
+        express and the founder then picks which &mdash; how the skeleton&rsquo;s horns are
+        drawn (weights <code>[5350, 640, 320, 80, 10]</code>). See
+        <a href="breed-format.html#count-groups">the breed format</a>.</li>
+</ul>
+
+<h2 id="also">Also built with it</h2>
+<ul>
+    <li><code>MobGroups</code>: the <code>undead</code> group adds a horse that
+        <code>Undeath.kindOf</code> says is undead (two copies, never a carrier).</li>
+    <li><code>mixin/HorseUndeadVoiceMixin</code>: vanilla&rsquo;s undead horse sounds on an undead
+        horse &mdash; a mixin because the <code>sound</code> verb plays beside a horse&rsquo;s voice
+        and cannot replace it.</li>
+    <li><code>Passification.onOffer</code> runs at <code>HIGH</code> and lets go of an item once
+        that player&rsquo;s calm is permanent, so the skeleton&rsquo;s bone is its offering until paid
+        and its food after.</li>
+    <li>The bone diet, the two drops (<code>bones</code>, <code>rotten_flesh</code> on the
+        <code>item_drop</code> verb), and the undead breeds&rsquo; black-eye request.</li>
+</ul>
+
+<h2 id="decisions">Owner&rsquo;s calls (2026-10-02)</h2>
+<ul>
+    <li>Every horn-like part in the skeleton&rsquo;s pool, all bone, no glow or emission; a
+        <code>Bon</code> allele for the two horn colour loci. Odds
+        <code>P(k) = P(k&minus;1) / 2<sup>k&minus;1</sup></code> from ten percent, through a new count
+        group rather than independent loci or strains.</li>
+    <li>&ldquo;Cannot drown&rdquo; is the absolute <code>underwater_breathing</code> flag on the skeleton
+        gene, not the graded water-breathing locus.</li>
+    <li>Weathered is a dunalino &mdash; red dun with one cream &mdash; which took the pink out of the
+        old bone in the preview (double cream washed out; champagne went grey).</li>
+    <li>The converter is Java in <code>common/</code> with a Gradle task, not a script.</li>
+</ul>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>Conversion is proved by gametests and the looks by side-view renders, but no undead horse of this mod has been seen in a running game - an old save converting, a ridden horse, a sprung trap, the sounds and the first-frame coat are all unwatched.</p>
 </div>
+
+<h3 id="open-undead-old-save">An old save</h3>
+<p>
+    Load a world with a saddled, owned, named zombie horse and a saddled skeleton horse: both convert
+    on first load with tack, name and owner intact, the owner can mount (the owner-only riding rule
+    must see the owner), and the log has no duplicate-UUID or <code>ProblemReporter</code> lines.
+</p>
+
+<h3 id="open-undead-ridden">Ridden, and across a chunk border</h3>
+<p>Ride a vanilla zombie horse, get off, and watch it convert; ride a converted one across a chunk border and log out and in on it.</p>
+
+<h3 id="open-undead-trap">A skeleton trap</h3>
+<p>Walk into one: it springs as vanilla&rsquo;s does, and the horse converts afterwards with its skeleton rider still on.</p>
+
+<h3 id="open-undead-lead">A leashed horse</h3>
+<p>A vanilla undead horse on a lead to a fence converts still tied, and no second lead appears on the ground.</p>
+
+<h3 id="open-undead-flash">No white flash</h3>
+<p>The converted horse&rsquo;s coat is right on its first frame for a player standing beside it.</p>
+
+<h3 id="open-undead-herd">A stable of them</h3>
+<p>A dozen undead horses loaded at once convert over a few ticks; DebugAnnounce reports the founding budget deferring rather than the tick stalling.</p>
+
+<h3 id="open-undead-sounds">The sounds</h3>
+<p>A converted horse makes vanilla&rsquo;s undead horse ambient, hurt and death sounds, on both sides of a dedicated server (which side plays each is unverified).</p>
+
+<h3 id="open-undead-taming">Passification and taming</h3>
+<p>
+    An untamed skeleton turns on a rider after dark until given one bone, then never again for that
+    player, and a second bone heals it. An untamed zombie calms for one to three minutes on two to four
+    rotten flesh and can be tamed inside the calm. A converted horse its owner already had never turns
+    on them.
+</p>
+
+<h3 id="open-undead-horns">The horns on a skeleton</h3>
+<p>Spawn skeleton eggs until one wears a horn: the part should be bone-coloured, unlit and shed nothing.</p>
+
+<h3 id="open-undead-tuning">Numbers to tune by eye</h3>
+<p>
+    The skeleton&rsquo;s <code>coat_opacity</code> and <code>shade_strength</code>; the Weathered
+    strain&rsquo;s colour; both breeds&rsquo; stat scores (the zombie&rsquo;s health 10 is about 2.2
+    times baseline, not a true doubling); the offering amounts and the zombie&rsquo;s calm window;
+    the drop counts; the size band. None has been looked at in a game.
+</p>
+
+<h3 id="open-undead-off">Switched off</h3>
+<p>With <code>undead.convert = false</code>, vanilla undead horses stay vanilla and converted ones keep working as horses.</p>
+
+</section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
 
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
-    <p>
-        A recessive skeleton gene that heals without eating and is pacified forever by one
-        bone, a zombie gene with <strong>double hearts</strong> at a heavy speed cost, and the
-        spawning overhaul that suppresses vanilla&rsquo;s two undead entities so that any
-        breed can carry either.
-    </p>
+    <p>The spawning overhaul - new undead horses founded as gene-carrying horses rather than converted a tick after vanilla spawns them - and the undeath loci joining other breeds' founder tables.</p>
 </div>
 
-<div class="note rule" id="open-undead-locus">
-    <span class="label">Settled 2026-10-01: the breed sets the bundle</span>
-    <p>
-        The question was whether one undead locus may bundle several effects, against
-        <a href="philosophy.html#concepts-are-breeds">&ldquo;a concept is a breed, not a
-        gene&rdquo;</a>. The owner's answer, recorded as D-bundle in the intake treatment for
-        undead conversion, is that it does not need to. <strong>Each undead gene is only the
-        visible undeath locus.</strong> Diet, temper and stats are separate, existing loci,
-        and the two undead breeds pin them in their founder tables. The zombie breed pins a
-        raw-meat diet and an aggression allele. The skeleton breed pins a new diet allele
-        (eats nothing, and heals on its own) and an aggression allele.
-    </p>
-    <p>
-        So no exception to the rule is needed. The look of undeath can still turn up in a horse
-        of any breed, because the undeath locus is an ordinary gene. The full bundle (diet,
-        temper, stats) comes with the breed. The only new genes are the two undeath loci.
-    </p>
-</div>
-
-<div class="note">
-    <span class="label">Why this is much cheaper than the version it replaces</span>
-    <p>
-        Making undeath a gene means the genome, the coat pipeline, breeding, records, bond and
-        the body stats all reach these horses <em>for free</em>, because they reach every
-        <code>Horse</code>. <strong>The alternative was never small.</strong> Scoping to the
-        concrete <code>Horse</code> class is not one guard in one place &mdash; it is
-        <strong>125 <code>instanceof Horse</code> checks</strong> across the NeoForge module
-        against 22 for <code>AbstractHorse</code>, done in the handlers with plain
-        <code>instanceof</code> rather than in a mixin that could be retargeted. Teaching all of
-        that about two more entity types is the expensive version, and it is now off the table.
-    </p>
-</div>
-
-<h2 id="skeleton-gene">The skeleton gene</h2>
-
-<ul>
-    <li><strong>Recessive.</strong> Which means it is carried invisibly and can surface from two
-        ordinary-looking parents &mdash; the thing the mod is for.</li>
-    <li><strong>It heals without eating, and cannot eat at all.</strong> A clean inversion of
-        the existing feeding loop rather than an addition to it. Note this collides with
-        <a href="horse-care.html">gated healing</a> and with the diet gene, both of which assume
-        food is how a horse recovers; the gene has to turn that off rather than compete with
-        it.</li>
-    <li><strong>It looks like a skeleton.</strong> The one genuinely hard part, because the
-        <a href="pipeline.html">coat pipeline</a> paints a coat and a skeleton is the absence of
-        one. Whether this is a painting gene at extreme priority, a whole-texture override, or a
-        model swap is the open question, and it should be settled before either gene is
-        started.</li>
-    <li><strong>Aggressive, and permanently pacified by a bone.</strong> One bone, once, forever
-        &mdash; which is carrot-not-stick and is also a nice inversion of taming, since the
-        horse is hostile until you give it the thing it is made of.</li>
-</ul>
-
-<h2 id="zombie-gene">The zombie gene</h2>
-
-<ul>
-    <li><strong>Literally twice the hearts, at a large speed penalty.</strong> Both are
-        attributes the body genes already write, so the mechanism exists; the
-        <em>number</em> is the design, and doubling health is the largest single stat effect in
-        the mod by a distance.</li>
-    <li><strong>Obligate carnivore.</strong> Feeding is the loop here rather than a flavour
-        note, and it has to answer what happens when a carnivore is offered the carrots that
-        everything else in the mod runs on &mdash; <a href="carrots.html">breeding carrots</a>
-        especially, which are how a player steers a genome.</li>
-    <li><strong>Aggressive, and only <em>temporarily</em> pacified with raw meat, until
-        tamed.</strong> The deliberate contrast with the skeleton's single bone: one is a
-        permanent bargain, the other is a rope you keep paying out until the horse is
-        yours.</li>
-</ul>
-
-<h2 id="undead-spawning">The spawning overhaul, which is the actual work</h2>
-
+<h2 id="undead-spawning">The spawning overhaul</h2>
 <p>
-    <strong>&ldquo;Spawn as any breed, but with these genes&rdquo; is not how undead horses
-    spawn today</strong> &mdash; vanilla's skeleton horse arrives from a lightning trap and its
-    zombie horse does not spawn naturally at all, and neither is a <code>Horse</code>, so
-    <code>BreedSpawnHandler</code> never sees them. Replacing that means deciding what the
-    vanilla entities become: suppressed and substituted with a gene-carrying
-    <code>minecraft:horse</code>, or left alone beside their genetic counterparts. The first is
-    the version that matches the ask and is also the one that touches another mod's undead
-    horses, so it wants a config gate from the start.
+    <strong>A server option <code>undead.suppressVanillaSpawns</code></strong>, separate from
+    <code>undead.convert</code>: new undead horses founded as <code>minecraft:horse</code> carrying the
+    gene rather than spawned vanilla and converted a tick later. Skeleton trap horses come from the
+    thunderstorm tick, not <code>FinalizeSpawnEvent</code>; which event, if any, is cleanly
+    cancellable for them in 26.1.2 is unread, and if none is, the converter already handles them
+    and suppression stays an optimisation.
 </p>
 <p>
-    <strong>The founder distribution is the part that decides whether this is fun.</strong>
-    Both genes are recessive, and <a href="breeds.html">the founder table</a> rule is that a
-    recessive particle-style gene puts its <em>expressing</em> combinations into the wild
-    population rather than carriers &mdash; otherwise the gene exists and nobody ever sees one.
-    Which breeds carry it, and at what frequency, is a per-breed-sheet line and is where the
-    flavour lives: an undead Shire and an undead Falabella are different jokes.
+    <strong>The founder distribution is where the flavour lives.</strong> Both genes are recessive,
+    and the founder rule is that a recessive puts its <em>expressing</em> combinations into the wild,
+    never carriers. Which other breeds carry an undeath pair, and how often, is one line per breed
+    sheet &mdash; an undead Shire and an undead Falabella are different jokes. The owner&rsquo;s call
+    for the first release was none (&ldquo;add per breed later&rdquo;).
+</p>
+<p>
+    <strong>What does not become dead code.</strong> <code>ModAttributes</code>&rsquo;s
+    <code>SKELETON_HORSE</code>/<code>ZOMBIE_HORSE</code> entries and the two undead saddle assets
+    stay even with suppression on: other mods&rsquo; undead horses (left alone) and a server with
+    <code>undead.convert</code> off still reach them.
 </p>
 
-<p class="muted">
-    <strong>More of the mod already reaches them than the old version of this section
-    said</strong>, and it matters because it is what would become dead code.
-    <code>entity/ModAttributes</code> adds <code>LAVA_MOVEMENT</code> and
-    <code>DRAFT_POWER</code> to a set that names <code>SKELETON_HORSE</code> and
-    <code>ZOMBIE_HORSE</code> explicitly; the replaced saddle asset carries
-    <code>skeleton_horse_saddle</code> and <code>zombie_horse_saddle</code> with the same three
-    dyeable layers as a horse's, so bench-dyed tack renders on them; and
-    <strong>every mixin targeting <code>AbstractHorse</code> reaches them already</strong>
-    &mdash; carts, flight while ridden, instant jump, rearing, regeneration and two riders. If
-    the vanilla entities are suppressed, all of that becomes dead code and should go in the same
-    change. A fourth option named in the old version of this section &mdash; leave them alone
-    and let <a href="breed-book.html#dhampir">the magical breeds</a> be this mod's undead horses
-    &mdash; is superseded by the above, and recorded here only so it is not re-proposed.
-</p>
+<h2 id="undead-later">Smaller follow-ups</h2>
+<ul>
+    <li>The breed designer offering <code>undead_of</code> and <code>count_groups</code>; today the
+        game and the designer read both, and only a hand-edited file writes them.</li>
+    <li>An adapter for a specific mod&rsquo;s undead horse (one table entry, behind its own switch).</li>
+    <li>Inverted healing and harming potions on an undead horse &mdash; a mixin or event, deliberately
+        not promised.</li>
+    <li>Reading <code>minecraft:</code>&rsquo;s undead sheets at run time instead of shipping copies, so
+        a resource pack retexturing them reaches these horses &mdash; the converter is already the code
+        that would do it.</li>
+</ul>
 
 <p class="muted">
     <em>Undead Horses Plus</em> (Bedrock addon) is on
-    <a href="compatibility.html#mod-survey">the survey list</a> for ideas to fold in here before
-    any of this is built.
+    <a href="compatibility.html#mod-survey">the survey list</a> for ideas to fold in here.
 </p>
 
 </section>
 
-
 <div class="page-foot">
     <div class="seealso">
-        <a href="roadmap.html">Roadmap &mdash; every page with plans</a>
-        <a href="breeds.html">Breeds &amp; spawning</a>
+        <a href="gene-skeleton.html">Skeleton</a>
+        <a href="gene-zombie.html">Zombie</a>
         <a href="breed-book.html">The breed book</a>
-        <a href="decisions.html">Design decisions</a>
+        <a href="breed-format.html">Breed format</a>
+        <a href="compatibility.html">Compatibility</a>
     </div>
-    The locus-or-breed question is settled: the breed sets the bundle. What is left open is
-    the art, and how a pipeline that paints a coat paints the absence of one.
+    Undeath is two genes on an ordinary horse; vanilla&rsquo;s undead horses convert into the two
+    breeds that pin them. Still planned: suppressing vanilla&rsquo;s undead spawns.
 </div>
 
 </article>

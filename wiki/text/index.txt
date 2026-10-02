@@ -749,6 +749,7 @@ wiki/gene-diamond-scutes.html#inheritance	gameplay	Crossing two of them
 wiki/gene-diamond-scutes.html#layers	coding	What it paints
 wiki/gene-diamond-scutes.html#outcomes	gameplay	What it can come out as
 wiki/gene-diet.html#blood	gameplay	Blood diet
+wiki/gene-diet.html#bone	gameplay	Bone diet
 wiki/gene-diet.html#breed	science	Does breed change the diet?
 wiki/gene-diet.html#carrot	gameplay	Its gene carrot
 wiki/gene-diet.html#heritable	science	Is dietary preference actually heritable?
@@ -2054,10 +2055,11 @@ wiki/gene-passification.html#bargain	science	A bargain, not a switch
 wiki/gene-passification.html#dominance	gameplay	One copy is enough, and two different ones stack
 wiki/gene-passification.html#limits	gameplay	What it does not do
 wiki/gene-passification.html#offering	gameplay	What it wants is written on the horse
-wiki/gene-passification.html#offering-pool	gameplay	Two of the fourteen offerings are not overworld food
+wiki/gene-passification.html#offering-pool	gameplay	Two of the sixteen offerings are not overworld food
 wiki/gene-passification.html#perplayer	science	Why the calm is per player
 wiki/gene-passification.html#priority	coding	“Extremely high priority” is not the priority number
 wiki/gene-passification.html#split	coding	Why it is not an effect verb
+wiki/gene-passification.html#undead-offerings	gameplay	Bone and rotten flesh (offerings 14 and 15)
 wiki/gene-passification.html#what	gameplay	The six ways in
 wiki/gene-passification.html#why	gameplay	What it is for
 wiki/gene-patina.html#carrot	gameplay	Its gene carrot
@@ -2414,6 +2416,14 @@ wiki/gene-singer.html#silly	science	Deliberately frivolous
 wiki/gene-singer.html#verified	coding	Verified
 wiki/gene-singer.html#what	gameplay	What it does
 wiki/gene-singer.html#why-opening	gameplay	Why only the opening
+wiki/gene-skeleton.html#carrier	gameplay	One copy
+wiki/gene-skeleton.html#eyes	coding	Black eyes
+wiki/gene-skeleton.html#health	gameplay	Is it good for the horse?
+wiki/gene-skeleton.html#inheritance	gameplay	Crossing two of them
+wiki/gene-skeleton.html#invented	science	Invented
+wiki/gene-skeleton.html#sheet	coding	The sheet pass
+wiki/gene-skeleton.html#undead-check	coding	Undead, for the rest of the mod
+wiki/gene-skeleton.html#what	gameplay	What two copies do
 wiki/gene-skittish.html#common	science	Shy is commoner than dangerous
 wiki/gene-skittish.html#health	gameplay	Health
 wiki/gene-skittish.html#path	coding	There is no vanilla avoid-goal to borrow
@@ -2847,6 +2857,12 @@ wiki/gene-zebras-coat.html#finding	gameplay	Finding one
 wiki/gene-zebras-coat.html#inheritance	gameplay	Crossing two of them
 wiki/gene-zebras-coat.html#layers	coding	What it paints
 wiki/gene-zebras-coat.html#outcomes	gameplay	What it can come out as
+wiki/gene-zombie.html#carrier	gameplay	One copy
+wiki/gene-zombie.html#health	gameplay	Is it good for the horse?
+wiki/gene-zombie.html#inheritance	gameplay	Crossing two of them
+wiki/gene-zombie.html#invented	science	Invented
+wiki/gene-zombie.html#sheet	coding	The seed pass
+wiki/gene-zombie.html#what	gameplay	What two copies do
 wiki/genetics-model.html#catalogue	all	The genotype catalogue
 wiki/genetics-model.html#combinations	all	Alleles, combinations and expressions
 wiki/genetics-model.html#epigenetics	all	Epigenetics ride on the allele, not on the horse
@@ -3405,6 +3421,17 @@ wiki/texture-resolution.html#pack-template	all	Planned: paint on the player’s 
 wiki/texture-resolution.html#scales	all	Scale by scale
 wiki/texture-resolution.html#today	all	What 128 actually is
 wiki/texture-resolution.html#unverified	all	Unverified
+wiki/undead-horses.html#also	coding	Also built with it
+wiki/undead-horses.html#breed-fields	coding	Two breed-file fields
+wiki/undead-horses.html#breeding	gameplay	Breeding them
+wiki/undead-horses.html#bundle	coding	The breed sets the bundle (settled 2026-10-01)
+wiki/undead-horses.html#config	gameplay	The switch
+wiki/undead-horses.html#converter	coding	The converter — server/UndeadHorseConverter
+wiki/undead-horses.html#decisions	coding	Owner’s calls (2026-10-02)
+wiki/undead-horses.html#sheets	coding	The art — vanilla’s own sheets, converted
+wiki/undead-horses.html#skeleton-horns	gameplay	Horns of bone
+wiki/undead-horses.html#the-breeds	gameplay	The two breeds
+wiki/undead-horses.html#your-old-horses	gameplay	What happens to your vanilla undead horses
 wiki/villagers.html#arcane	all	The arcane dealer
 wiki/villagers.html#arcane-no-horse-hunters	all	He does not stock a horse that hunts horses
 wiki/villagers.html#arcane-pools	all	The pools are generated, never listed

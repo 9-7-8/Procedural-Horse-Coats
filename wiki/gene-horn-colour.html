@@ -44,6 +44,7 @@
         <tr><td><span class="allele">Pnk</span> <span class="allele">Blk</span> <span class="allele">Gry</span></td>
             <td>Pink, black, grey</td><td>A few percent each</td></tr>
         <tr><td><span class="allele">Cha</span></td><td>Chaos &mdash; any colour at all, different on every copy</td><td>Rarest</td></tr>
+        <tr><td><span class="allele">Bon</span></td><td>Bone &mdash; warm ivory; the <a href="breed-book.html#great-valley-skeleton-horse">skeleton horse</a>&rsquo;s</td><td>Never wild (appended 2026-10-02)</td></tr>
     </tbody>
 </table>
 
@@ -101,7 +102,7 @@
     <div><dt>Class</dt><dd><code>HornColourGene extends AbstractPartColourGene</code></dd></div>
     <div><dt>Priority</dt><dd>227 (magical band), in a free run with horn glow and horn dust; only a code-order slot</dd></div>
     <div><dt>Family</dt><dd><strong>Grown parts</strong>, beside the <a href="gene-unicorn-horn.html">unicorn horn</a></dd></div>
-    <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha &mdash; that order is also the base-before-tip order</dd></div>
+    <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha Bon &mdash; that order is also the base-before-tip order. <code>Bon</code> was appended after chaos and has no wild share; <code>PartColourGeneTest</code> still pins the first twelve to their original snapshot</dd></div>
     <div><dt>Outcomes</dt><dd>one per colour, plus <code>horn-two-tone</code>; all wild types</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; the bake golden's twelve new rows all hash to the unchanged baseline sheet, and no pipeline coat hash moved when it was added</dd></div>
 </dl>

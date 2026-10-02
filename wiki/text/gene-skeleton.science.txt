@@ -1,0 +1,5 @@
+Skeleton
+(Magical gene / recessive / one of the two undeath loci)
+Two copies and the horse is its own bones. Everything that is not skeleton is cut away, the bone shows through the horse’s coat, and whatever colour the horse carries is the colour of its bones. It never drowns, and it counts as undead . One copy is a carrier that looks and acts like any other horse. No wild horse has it: every one comes from a vanilla skeleton horse that converted into a Great Valley Skeleton Horse , or from breeding them.
+
+Invented There is no skeleton horse in nature. The gene is the owner’s answer to how much of the mod an undead horse gets: all of it, by making undeath a locus on an ordinary horse rather than an entity type beside it. It is recessive so that it can surface, rarely, from two ordinary-looking parents — the thing the mod is for — and it is only the bones: the diet, temper and stats are other loci the breed pins ( the breed sets the bundle ).

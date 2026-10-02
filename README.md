@@ -61,6 +61,13 @@ to Falabellas - spawn in herds keyed to biome, each with its own build, color
 pool, and temperament, and cross-breeding produces properly labeled crosses
 and mixes.
 
+**Your zombie and skeleton horses come along.** Vanilla's undead horses - in
+an old world, from a skeleton trap, from an egg - quietly become this mod's
+horses the first time they load: a Graveborn Warmblood or a Great Valley
+Skeleton Horse, keeping their name, owner, saddle, armour and lead, with new
+stats from their genes. Undeath is two genes, so skeletons and zombies breed
+like any horse. A server can turn this off with `undead.convert`.
+
 **Genes beyond real biology.** Alongside the natural coat genes, there's a
 whole layer of magical genes with no real-world counterpart: particle
 trails, glowing manes, size and speed genes, water-walking, milk that isn't
