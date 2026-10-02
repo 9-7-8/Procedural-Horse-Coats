@@ -2114,6 +2114,22 @@
     <p>Predicted from other mods&rsquo; jars, never observed: a wood scan falling from 287 to 39, one steel armour where a tester&rsquo;s 319-jar pack found six, a hay-bale tag lookup that would silently stop every horse in the world eating hay, and two whole integrations written entirely by reading a jar &mdash; the <a href="compatibility.html#verify-waystones">Waystones hook</a> and the <a href="compatibility.html#verify-ftbteams">FTB Teams one</a> &mdash; and <strong>no generated recipe has ever once been parsed by the game</strong>.</p>
 </div>
 
+<h3 id="verify-armour-alias">A dropped armour loads as iron in an old world (2026-10-01, NOT played)</h3>
+<p>
+    0.5.038 drops a horse armour whose metal&rsquo;s mod is not installed and
+    <a href="#generated-installed">aliases its id to iron horse armour</a>
+    (<code>ModdedArmour</code>), so a world from an older jar that holds one still loads. The
+    scan side is unit-tested; the alias has never met a real save.
+</p>
+<ul>
+    <li><strong>Pass:</strong> on the server that reported #14, after updating, a Black Quartz
+        or Chimerite Horse Armor that was in a chest is iron horse armour, and a metalsmith
+        that offered one offers iron in its place. No error naming
+        <code>horsegenetics:black_quartz_horse_armor</code> in the log.</li>
+    <li><strong>Fail:</strong> the stack has vanished, or a villager lost its whole offer list
+        &mdash; the alias did not apply where NeoForge reads saved items.</li>
+</ul>
+
 <h3 id="verify-ftbteams">Teams and allies riding each other&rsquo;s horses (NOT played, needs a second player)</h3>
 
 <p>

@@ -2941,6 +2941,7 @@ wiki/horse-gear.html#using	gameplay	Putting something on
 wiki/horse-gear.html#verify	coding	The roster checks itself at boot
 wiki/horse-gear.html#where	gameplay	Where it is
 wiki/horse-realm.html#arrival	coding	One exit, at the origin
+wiki/horse-realm.html#backup	coding	Back the realm up before changing it
 wiki/horse-realm.html#breeding	gameplay	They breed, slowly
 wiki/horse-realm.html#census	coding	Counting horses that are not there
 wiki/horse-realm.html#circle	coding	The field is a circle, and it grows

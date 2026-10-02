@@ -130,12 +130,15 @@ PROCEDURES
 
 NOT RUN / NOT CHECKED
 
-    - The full :common:test suite. Nothing in common/ changed, so it checks nothing
-      this session moved.
-    - Nothing was seen in game. The hunger, portal and glow guards are proven by
-      reading only. Only the lift has a test. The pool fix is the same flag change on
-      the same mechanism.
-    - No Verification-tab anchors were added. The open check is issue #13 itself.
+    - The full :common:test suite DID run, for the release, green in 20m 54s.
+    - Nothing was seen in game. The #13 hunger, portal and glow guards are proven by
+      reading only; only the lift has a test, and the pool fix is the same flag change
+      on the same mechanism. The realm backup and restore, and the #14 armour alias,
+      have automated tests and no in-game run.
+    - The live server's own logs after it updates are the real proof for #13 (on the
+      issue). Verification-tab checks added: horse-realm.html#verify-realm-backup and
+      compatibility.html#verify-armour-alias. The rule for future realm changes is on
+      horse-realm.html#backup (Coding tab).
 
 RELEASE
 
