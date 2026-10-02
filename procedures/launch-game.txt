@@ -109,8 +109,9 @@ STEPS
       (-WhatIf first). NEVER by matching "nogui": the live server's command line ends in
       "nogui" too, and that match is what killed it on 2026-10-01.
    c. Reaching "Done (" is not a clean boot. Also grep the whole log for
-      'ERROR|Couldn.t parse|Invalid|missing', and triage each hit as ours or another
-      mod's. Datapack failures are logged once and then the game runs without that
+      '/ERROR\]|/WARN\]|Couldn.t parse|Invalid', and triage each hit as ours or another
+      mod's. Match the level marker, not a bare ERROR: the dev log is at DEBUG, and a
+      bare 'ERROR|missing' drowns in lines like "Masking access to .../error.png". Datapack failures are logged once and then the game runs without that
       content.
    d. Delete any config file the boot generated, so the owner's next session starts from
       defaults.
