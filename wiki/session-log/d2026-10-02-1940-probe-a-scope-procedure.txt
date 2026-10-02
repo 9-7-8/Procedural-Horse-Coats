@@ -20,11 +20,7 @@ ASKED
 - "You're still asking me about stuff outside of the lion tail, which is the treatment we're
   currently developing" -> the first run had picked the Feathering treatment; that question round
   was rejected and discarded, and the run was redone on the lion tail treatment.
-- /end-session (run once; the session then continued).
-- A bridle/saddle split scoping round (the owner's answers on: saddle-only passenger riding below
-  bond tier 3, saddle stats, vanilla saddles becoming bridles, bridle crafting and dyeing), then
-  "Commit all of that into a document in intake, then end the session" -> written up as
-  intake/Bridle and saddle split - implementation treatment.txt.
+- /end-session.
 
 DONE
 ----
@@ -33,17 +29,9 @@ DONE
   SKILL.md; probe results written into intake/Tufted lion tail - implementation treatment.txt.
   Proof: read-only checks in the code (HdHorseModel does not override setupAnim; no "Lt" allele
   token found under common/); no tests apply (text only).
-- 705cc5e7: intake/Bridle and saddle split - implementation treatment.txt. The question text was not
-  preserved, so the treatment records the owner's answers and marks every gap Open (slot for the
-  bridle, keep-the-id versus a new item, saddle stats, source of the saddle, tier 3+ steering,
-  bridle with no saddle, passenger-only mechanics).
 
 DECIDED
 -------
-- Bridle/saddle (owner): below bond tier 3 a saddle with no bridle is passenger-only; the saddle
-  carries stats; every vanilla saddle becomes a bridle (renamed, retextured) and the mod adds
-  its own saddles; the bridle is crafted from leather plus iron or string and dyed at the Tack
-  Bench. Recorded in the treatment above.
 All on intake/Tufted lion tail - implementation treatment.txt, section "Probe results":
 - Hide the vanilla tail through new setupAnim overrides on HdHorseModel and HdBabyHorseModel (owner).
 - Default tail longer and much thinner than the vanilla one, about 18-20 long and 1-1.5 wide, final
@@ -83,5 +71,5 @@ Not offered: no code shipped.
 
 PICK UP FIRST
 -------------
-Run /probe-a-scope on the bridle and saddle treatment (its section 4 holds the open calls), or scope the first mythic feature, Wings, with /write-intake-document (then /probe-a-scope on it);
+Scope the first mythic feature, Wings, with /write-intake-document (then /probe-a-scope on it);
 the lion tail treatment is ready for /process-intake.

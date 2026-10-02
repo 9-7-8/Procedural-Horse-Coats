@@ -61,6 +61,13 @@ Head parts - implementation treatment.txt                         sized 2026-10-
 Built? No.
 
 ------------------------------------------------------------------------------
+Bridle and saddle split - implementation treatment.txt            sized 2026-10-02
+- Piece 1: vanilla saddle relabelled bridle, Headstall, migration  M  b  owner-free; verify vanilla riding first
+- Piece 2: passenger-only below tier 3, server switch, herd walk   M  b  owner-free; needs 1
+- Piece 3: mod saddle, tiers, ridden-only speed/jump, bags         L  c  Open: numbers, trade for it; needs 2
+Built? No.
+
+------------------------------------------------------------------------------
 Tusks gene - implementation treatment.txt                         sized 2026-10-02
 - Slice A: TusksGene + colour gene, SNOUT anchor, narwhal horn   M  c  owner-free; no breed changed
 - Slice B: boar tusks, sabre fangs; JAW_/LIP_ anchors            M  c  owner-free; needs A
