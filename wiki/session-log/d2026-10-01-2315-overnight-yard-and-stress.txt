@@ -40,8 +40,9 @@ DONE
 - b9d0cb4e  Fix #23 - natural covers refused for a mare standing beside a wall: the pathfinder plans a horse as a
   2x2 mob, so against a wall no path starts. RATIO BRINDLE, STARBURST and MITF stood "no walkable path ... (1.6
   blocks)" for 2.5 hours. canMeet now accepts hitboxes within a block with no collision shape on the line between
-  them (checked before the path). WALL PAIR / FENCE PAIR (DebugYardReach) prove both halves - running at the end
-  of the session. #23 open until they answer.
+  them (checked before the path). Proven in the 03:52 run: WALL PAIR 9 conceptions in 20 min, FENCE PAIR 0 with
+  21 refusals (counted from the fertility trace - the pen's WALL verdict wrongly read FAIL because it tested for a
+  pregnancy AT the deadline, not ever; DebugYardReach needs a latch). #23 closed with the counts.
 - a56afcbb  Yard second wave, rows AW-BC: RESEARCH SHELF, STALL SHAPES, CHEST LOOT, CARROT CROP, GRAZING, HANDS AT
   FEEDING, FIREPROOF, BREATH, MUSIC, PACK LEADER, DRAUGHT, STALLION DAY/FRESHER, WEATHER COPIES (jump storm only),
   WALL/FENCE PAIR. Answered pens removed. DebugStress + the runStressServer task (build.gradle).
@@ -132,7 +133,7 @@ NOT RUN / NOT CHECKED
 - No full :common:test after the performance commits (one common/ change: HorseAbilities.anyLoaded; GeneAbilitySpecTest
   and CommonPortabilityTest pass).
 - #24 needs a save inspected (an existing mob's NBT loses the empty lycan_shift on its next save).
-- The yard at session end: WALL PAIR / FENCE PAIR (#23), RATIO BRINDLE / STARBURST / MITF SW3 restarted, the dryad,
+- The yard at session end: RATIO BRINDLE / STARBURST / MITF SW3 restarted, the dryad,
   MUSIC and CARROT CROP growth still timing.
 
 RELEASE
@@ -142,4 +143,5 @@ Not offered by this routine; four player-facing fixes (#20-#24 minus #25) and a 
 
 PICK UP FIRST
 -------------
-Read the yard's verdicts for WALL PAIR / FENCE PAIR and close #23 and the remaining pens (procedures/run-tests.txt).
+Read the yard's remaining verdicts (ratio pens, dryad, MUSIC), fix the WALL PAIR latch and the three pen-side FAILs,
+and close what passed (procedures/run-tests.txt); then #25 via procedures/fix-bug.txt.
