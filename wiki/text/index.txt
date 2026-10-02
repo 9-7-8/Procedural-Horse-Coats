@@ -3350,6 +3350,7 @@ wiki/roadmap-execution.html#symptom-map	all	Symptom-to-anchor map
 wiki/roadmap-execution.html#ui-and-gear-fixes	all	6. UI and equipment actions - partly built
 wiki/stables.html#adding	all	Adding one: two files and no Java
 wiki/stables.html#debug-announce	all	Turning the commentary on
+wiki/stables.html#level-ground	all	Level ground: horsegenetics:level_jigsaw
 wiki/stables.html#rarity	all	How often they generate
 wiki/stables.html#safety	all	What a stable may never do
 wiki/stables.html#stalls	all	How it finds the stalls

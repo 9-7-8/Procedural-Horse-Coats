@@ -164,9 +164,39 @@
     <code>worldgen/structure/&lt;id&gt;.json</code>,
     <code>worldgen/structure_set/&lt;id&gt;.json</code> and
     <code>worldgen/template_pool/&lt;id&gt;.json</code>. Copy this mod&rsquo;s and
-    change the ids; the structures here are <code>minecraft:jigsaw</code> with a
-    single-element start pool, <code>terrain_adaptation: beard_thin</code>, and a
-    <code>random_spread</code> placement.
+    change the ids; the structures here are <code>horsegenetics:level_jigsaw</code>
+    (below) with a single-element start pool, <code>terrain_adaptation: beard_box</code>,
+    and a <code>random_spread</code> placement. Plain <code>minecraft:jigsaw</code> works
+    too, but it builds on any slope.
+</p>
+
+<h3 id="level-ground">Level ground: <code>horsegenetics:level_jigsaw</code></h3>
+<p>
+    A vanilla jigsaw gives a rigid building <b>one</b> height, the surface under its
+    centre, and never looks at the rest of the footprint. A big stable started on a
+    hilltop ran on over the valley beside it, and the beard under it (which fills only
+    a limited depth) left a thin hollow slab with open air and mobs below. That was
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/2">issue #2</a>.
+</p>
+<p>
+    <code>level_jigsaw</code> takes a <code>minecraft:jigsaw</code> structure&rsquo;s JSON
+    unchanged, plus one field, <code>max_ground_spread</code> (blocks, default 10). Once
+    the pieces are placed, it samples the ground under the footprint&rsquo;s four corners
+    and the centre. If the highest and lowest samples differ by more than the limit, that
+    chunk gets no stable. Otherwise the whole building drops to the <b>lowest</b> sample:
+    the high side is cut into the slope, and the beard has at most the limit to fill. The
+    rule is <code>common/stable/StableSite</code>; the type is
+    <code>worldgen/LevelJigsawStructure</code>.
+</p>
+<p id="level-ground-measured">
+    <b>Measured 2026-10-01</b> by <code>worldgen/StableSiteCensus</code> (the
+    <code>stables_stand_on_level_ground</code> gametest), 12 seeds and 216 stable sites,
+    the same sites with and without the check. Before it, 95 of the 216 stood on ground
+    spreading more than 10 blocks, and the worst was 116. The median spread was 7 under
+    Horse Stable, 10 under Stables and 12 under TM U Stable. With the check, 121 are kept
+    (<b>56%</b>), and none spreads more than 10. A limit of 6 kept only 34%, and the owner
+    chose 10. So stables are now about half as common as the spacing table below
+    suggests, and the big TM U Stable loses the most.
 </p>
 
 <div class="note warn">
@@ -364,7 +394,9 @@
     horses a player could not have bred yet, and the smallest, plainest building is
     the most common of the three. All three share one biome tag, which is open,
     grassy, buildable ground &mdash; a stable on a mountainside is a stable
-    half-buried in a mountainside.
+    half-buried in a mountainside. On top of the spacing, a site whose ground is too
+    uneven is skipped (<a href="#level-ground">level ground</a>), which drops a little
+    under half of them.
 </p>
 
 <p class="muted">

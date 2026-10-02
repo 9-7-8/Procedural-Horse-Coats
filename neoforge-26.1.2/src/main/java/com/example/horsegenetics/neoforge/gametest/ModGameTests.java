@@ -14,6 +14,7 @@ import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.server.HorseRealm;
 import com.example.horsegenetics.neoforge.server.StasisCare;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
+import com.example.horsegenetics.neoforge.worldgen.StableSiteCensus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -245,6 +246,44 @@ public final class ModGameTests {
             helper.fail(String.format(
                     "the homestead is down to %.1f%% of plains villages (floor %.0f%%): %s",
                     result.rate() * 100.0, CENSUS_FLOOR * 100.0, result.line()));
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>No generated stable stands on ground spreading more than ten blocks</b>
+     * (issue #2). The jigsaw gave a stable one height, the surface under its
+     * centre, so a big one started on a hilltop floated over the valley beside it.
+     * {@link StableSiteCensus} generates every stable chunk near spawn twice on
+     * the same seeds: the wrapped vanilla jigsaw as the control, and the real
+     * structure. It re-measures the ground under each stable that was kept.
+     *
+     * <p>The limit is written here rather than read from the structure, so
+     * loosening {@code max_ground_spread} in the JSON turns this red. The census
+     * size can be raised with {@code PHC_STABLE_SEEDS} / {@code PHC_STABLE_SITES}.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STABLES_STAND_ON_LEVEL_GROUND =
+            TEST_FUNCTIONS.register("stables_stand_on_level_ground", () -> ModGameTests::stablesStandOnLevelGround);
+
+    private static final int STABLE_GROUND_LIMIT = 10;
+
+    private static void stablesStandOnLevelGround(GameTestHelper helper) {
+        int seeds = fromEnv("PHC_STABLE_SEEDS", 4);
+        int sites = fromEnv("PHC_STABLE_SITES", 6);
+        StableSiteCensus.Result result = StableSiteCensus.run(
+                helper.getLevel().getServer(), seeds, sites, STABLE_GROUND_LIMIT);
+        HorseGenetics.LOGGER.info("[census] stable ground: {}", result.line());
+        HorseGenetics.LOGGER.info("[census] stable ground spread before, per stable: {}", result.spreads());
+
+        if (result.sites() == 0) {
+            helper.fail("the census found no stable sites at all - the harness is broken, not the stables");
+        }
+        if (result.accepted() == 0) {
+            helper.fail("no stable was kept anywhere: " + result.line());
+        }
+        if (result.worstAfter() > STABLE_GROUND_LIMIT) {
+            helper.fail("a stable stands on ground spreading " + result.worstAfter()
+                    + " blocks (limit " + STABLE_GROUND_LIMIT + "): " + result.line());
         }
         helper.succeed();
     }
@@ -1310,6 +1349,8 @@ public final class ModGameTests {
         // size is. The generous number is for the environment overrides, which
         // are meant to be raised a long way.
         register(event, environment, HOMESTEAD_STILL_GENERATES, 400);
+        // The same kind of census, for the stables' ground.
+        register(event, environment, STABLES_STAND_ON_LEVEL_GROUND, 400);
         // One pass over the recipe list inside a single tick; the budget is slack.
         register(event, environment, EVERY_RECIPE_ENCODES, 100);
         // Five recipe lookups in one tick.

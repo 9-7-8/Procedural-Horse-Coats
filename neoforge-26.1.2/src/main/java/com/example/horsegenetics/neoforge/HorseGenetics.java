@@ -86,6 +86,8 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.data.loot.ModLootFunctions.register(modEventBus);
         com.example.horsegenetics.neoforge.data.loot.ModLootConditions.register(modEventBus);
         com.example.horsegenetics.neoforge.world.ModBiomeModifiers.register(modEventBus);
+        // The stables' structure type, which refuses uneven ground (issue #2).
+        com.example.horsegenetics.neoforge.worldgen.ModStructureTypes.register(modEventBus);
         // The one criterion trigger behind every advancement this mod ships -
         // all of which are baked off ProgressTask. See ModTriggers.
         com.example.horsegenetics.neoforge.advancement.ModTriggers.register(modEventBus);
