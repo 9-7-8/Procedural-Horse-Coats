@@ -28,8 +28,9 @@ STEPS
 1. Write the shots. Edit DebugPhotoShoot.SHOTS: a file name, a sex, a genetic code
    (full keys, horsegenetics.<gene>=<a>/<b>, joined with "-"), and a dragon horn form or
    -1. Genes left out are wild type. Epigenetic numbers (length, girth, shade) are rolled
-   per horse; to pin one, extend record() to re-roll until it is met, as the dragon horn
-   form already does. Grep every allele token before using it.
+   per horse and differ every run; to pin one, extend record() to re-roll until it is met,
+   as the dragon horn form already does. The camera frames head and shoulders; a long
+   unicorn horn still leaves the top of the frame. Grep every allele token before using it.
 2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
 3. Launch by launch-game step 5, with the task :neoforge-26.1.2:runClientTestWorld and
    the extra argument -PphotoShoot. Use -WindowStyle Normal: a minimized window renders
@@ -41,7 +42,16 @@ STEPS
    including what is too small or hidden to judge. A picture is not a pass.
 6. Show them. If a file cannot be attached in this session, publish one private gallery
    artifact with the shots embedded as data URIs (artifact-design first), and give the
-   link.
+   link. The owner often reads it on a phone:
+   - Show the whole frame. Do not crop or zoom in CSS; move the camera instead (stage()).
+   - Give every grid that holds a picture grid-template-columns: minmax(0, 1fr), or the
+     picture's natural 854px width forces the column wider than the screen.
+   - After any scripted edit to the page's CSS, count its { and } before publishing. An
+     unclosed @media block silently drops every rule after it.
+   - To check phone width, wrap a copy in the publish skeleton's viewport meta and
+     screenshot it in headless Chrome. On Windows it lays out at no less than 500px
+     whatever --window-size says, so print innerWidth and scrollWidth into the page:
+     equal means no sideways overflow.
 7. Close the client by launch-game steps 2 and 4: read the log, then
    tools/stop-dev-java.ps1 (-WhatIf first).
 8. Revert any SHOTS edit that only served this run, unless the owner wants it kept.

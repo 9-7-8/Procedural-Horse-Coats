@@ -135,6 +135,19 @@ LATER IN THE SESSION (09:20-09:30)
   head height (-16, 129, 158), and the stasis_chamber recipe is ignored for empty ingredients.
   Not investigated this session.
 
+- Asked: "Most of the horse's body is being cut off in those images. Can you move the horse
+  up, and then move closer to its head?" The cut was the gallery's CSS zoom on distant
+  shots. The camera now aims just below the head from about 2.5 blocks (d596ba06); all ten
+  reshot whole at twice the size. Long unicorn horns (shots 1, 2) still leave the top.
+- Asked: "I'm on mobile and the css is still cropping them weird". My scripted CSS edit had
+  left the image rule inside an unclosed @media (prefers-reduced-motion) block, so phones
+  kept each image at 480px tall while its width shrank. Repaired, with grid columns that
+  can shrink. Checked in headless Chrome (which lays out at 500px minimum on Windows; the
+  page's scrollWidth equalled its innerWidth). Gallery version 3; the owner confirmed
+  "Looks good now".
+- photograph-horses.txt gained the phone rules for the gallery and the note that
+  epigenetic numbers re-roll every run.
+
 PICK UP FIRST
 -------------
 Head parts Slice B (ear fins, cheek spikes, brow ridge) by procedures/process-intake.txt -
