@@ -1,5 +1,12 @@
 Body parts - implementation treatment
 
+BONE VERSIONS (owner, 2026-10-02): every grown part that realistically has bone in it gets a BONE VERSION: a set of
+alleles and/or bands that draws it as bare bone on a skeleton horse - bone-coloured,
+unlit, nothing soft on it (no keratin sheen, membrane, feathers, leaves, glow or dust).
+Wings, for instance, become the bones alone with no membrane.
+Every part here with bone in it needs one, and the skeleton breeds may carry it;
+see wiki/model-parts.html#bone-versions and procedures/add-a-gene.txt (dd, 10b).
+
 Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are mine, not
 asked; "UNVERIFIED" lines are facts this file has not proved and the building session must check
 first. Source of truth for what exists is wiki/model-parts.html and the antler pages. This file is the

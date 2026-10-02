@@ -25,7 +25,9 @@
     horse. Vanilla&rsquo;s own zombie and skeleton horses &mdash; in old saves, from skeleton
     traps, from <code>/summon</code> and eggs &mdash; turn into this mod&rsquo;s horses the first
     time they are ticked: a <a href="breed-book.html#graveborn-warmblood">Graveborn Warmblood</a>
-    or a <a href="breed-book.html#great-valley-skeleton-horse">Great Valley Skeleton Horse</a>.
+    or a <a href="breed-book.html#great-valley-skeleton-horse">Great Valley Skeleton Horse</a>
+    &mdash; or, in the Nether, a <a href="breed-book.html#blackened-skeleton-horse">Blackened
+    Skeleton Horse</a>, which also runs wild there.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -53,7 +55,7 @@
 <h2 id="the-breeds">The two breeds</h2>
 <p>
     Neither is sold, stabled or found in a wild herd: they come only from conversion and from
-    their spawn eggs. Both are <strong>hostile to their rider after dark</strong> until passified,
+    their spawn eggs (the Nether&rsquo;s <a href="#blackened">Blackened</a> is the wild one). Both are <strong>hostile to their rider after dark</strong> until passified,
     have <strong>black eyes</strong>, do not burn in daylight, and are drawn at the size of
     vanilla&rsquo;s undead horses.
 </p>
@@ -69,12 +71,23 @@
     </tbody>
 </table>
 
+<h3 id="blackened">The Blackened Skeleton Horse</h3>
+<p>
+    The Nether&rsquo;s skeleton horse, and the commonest horse there &mdash; rare, but more common
+    than the Netherhorse, the Nightmare or the Mirrorgazer. Everything the Great Valley horse is,
+    charred black (its horns stay bone), <strong>fireproof</strong>, and wild: herds of it on the
+    Nether&rsquo;s floors, in the dark. A vanilla skeleton horse that converts in the Nether
+    becomes one; anywhere else it becomes a Great Valley.
+</p>
+
 <h3 id="skeleton-horns">Horns of bone</h3>
 <p>
     Every horn-like part a horse can grow is in the skeleton&rsquo;s pool &mdash; a unicorn horn,
     antlers, ram&rsquo;s horns and dragon horns &mdash; all in bone, none glowing or shedding.
     About one skeleton in ten wears one kind, one in twenty two kinds, one in eighty three, and
-    about one in 640 all four. The rest have none.
+    about one in 640 all four. The rest have none. Every part with bone in it has a
+    <a href="model-parts.html#bone-versions">bone version</a> like this, so a part that ships
+    later can join them.
 </p>
 
 <h2 id="breeding">Breeding them</h2>
@@ -129,7 +142,9 @@
         The two share <code>AbstractHorse</code>&rsquo;s save format, so the UUID, position, age,
         custom name, tame flag and owner, saddle and armour, lead, tags, persistence and other
         mods&rsquo; persistent data all come across with no copying here.</li>
-    <li><strong>Founds it</strong> from a breed whose sheet says <code>"undead_of"</code> that pool,
+    <li><strong>Founds it</strong> from a breed whose sheet says <code>"undead_of"</code> that pool
+        (<code>common/breed/UndeadPools.pick</code>: a pool breed that lives in the horse&rsquo;s
+        biome first &mdash; the Blackened in the Nether &mdash; else one that lives nowhere wild),
         picked uniformly with <code>SeededRng(uuid, "undead-conversion")</code> &mdash; the same seed
         for the sex, genome and name, so a replay makes the same horse. A custom name becomes the
         record&rsquo;s barn name over a rolled registered name. The record&rsquo;s owner mirrors the
@@ -212,6 +227,12 @@
     <li>Weathered is a dunalino &mdash; red dun with one cream &mdash; which took the pink out of the
         old bone in the preview (double cream washed out; champagne went grey).</li>
     <li>The converter is Java in <code>common/</code> with a Gradle task, not a script.</li>
+    <li>The Blackened Skeleton Horse: its own breed (spawning is a breed field, not a strain one),
+        charred bone with bone horns, fireproof, wild in the Nether at <code>spawn_weight</code> 2
+        (&ldquo;rare in general, but the most common type of nether horse&rdquo;), and the breed a
+        skeleton converting in the Nether becomes.</li>
+    <li>Every part with bone in it has a bone version (<a href="model-parts.html#bone-versions">the
+        rule</a>); the ram&rsquo;s horns gained theirs, a shade below the wild range.</li>
 </ul>
 
 </section>
@@ -259,6 +280,14 @@
 
 <h3 id="open-undead-horns">The horns on a skeleton</h3>
 <p>Spawn skeleton eggs until one wears a horn: the part should be bone-coloured, unlit and shed nothing.</p>
+
+<h3 id="open-undead-blackened">The Blackened in the Nether</h3>
+<p>
+    Visit soul sand valleys and the wastes: Blackened herds should be the horses seen most there,
+    not drowning out the others; one should stand in lava unharmed; and a vanilla skeleton horse
+    taken through a portal should convert into a Blackened, not a Great Valley. Its charred bone
+    has been seen in the side-view render only.
+</p>
 
 <h3 id="open-undead-tuning">Numbers to tune by eye</h3>
 <p>

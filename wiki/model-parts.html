@@ -415,6 +415,31 @@
     same horse as a foal. Neither the game screen's row change nor the panel has been seen by
     a person yet. See <a href="#open-editor-part-rows">the check</a>.
 </p>
+
+<h2 id="bone-versions">Every part with bone in it has a bone version</h2>
+<p>
+    <strong>The owner&rsquo;s rule (2026-10-02):</strong> a grown part that realistically has
+    bone in it ships with a <em>bone version</em> &mdash; the alleles or bands that draw it as
+    bare bone on a <a href="undead-horses.html">skeleton horse</a>: bone-coloured, unlit, and
+    with nothing soft on it. A wing&rsquo;s bone version is the bones alone, with no membrane.
+    It is built on the part&rsquo;s own loci, never as a special case in the renderer, so a
+    bred skeleton can lose it and an ordinary horse can carry it.
+    <code>procedures/add-a-gene.txt</code> (question dd, step 10b) and
+    <code>write-intake-document.txt</code> (5b) ask for it.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Part</th><th>Its bone version</th><th>On the skeleton breeds</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-unicorn-horn.html">Unicorn horn</a></td><td><code>Bon/Bon</code> on <a href="gene-horn-colour.html">horn colour</a>; horn glow and horn dust <code>n/n</code></td><td>in the horn count group</td></tr>
+<tr><td><a href="gene-antlers.html">Antlers</a></td><td>antler <code>tint</code> banded to its pale-bone end; crystal, glow and bloom <code>n/n</code></td><td>in the horn count group</td></tr>
+<tr><td><a href="gene-ram-horns.html">Ram&rsquo;s horns</a></td><td><code>shade</code> below 0, the bone end no wild horse rolls; tip <code>n/n</code></td><td>in the horn count group</td></tr>
+<tr><td><a href="gene-dragon-horns.html">Dragon horns</a></td><td><code>Bon/Bon</code> on <a href="gene-dragon-horn-colour.html">dragon horn colour</a></td><td>in the horn count group</td></tr>
+<tr><td>Wings (not built)</td><td>the bones alone, no membrane</td><td>to ask when the wing part is built</td></tr>
+</tbody>
+</table>
+</div>
+
 </section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
@@ -532,6 +557,17 @@
         <code>AttachedPart</code> list. Saddle pads follow. Not settled: whether a worn item may
         ever replace a grown part &mdash; a helmet over a horn.</li>
 </ul>
+
+<div class="note" id="bone-wings">
+    <span class="label">The wing&rsquo;s bone version (owner, 2026-10-02)</span>
+    <p>
+        When the wing part is built it ships a bone version: the wing bones alone, no
+        membrane, in bone and unlit (<a href="#bone-versions">the rule</a>). A membrane
+        drawn on the elytra mesh is a texture, so &ldquo;no membrane&rdquo; is a locus that
+        turns the membrane off and a bone sheet region for what is left &mdash; to settle
+        with the owner, with whether the skeleton breeds carry wings at all.
+    </p>
+</div>
 
 <h2 id="elytra-wings">Wings off the elytra &mdash; what transfers and what does not</h2>
 <p>

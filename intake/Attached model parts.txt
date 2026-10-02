@@ -221,6 +221,9 @@ Stage 5 - the worn side.
   by deleting the bespoke-layer language from it.
 
 Stage 6 - wings.
+  BONE VERSION (owner, 2026-10-02): the wing ships a bone version - the wing bones
+  alone, no membrane, bone-coloured and unlit (wiki/model-parts.html#bone-versions).
+  Ask how the membrane is switched off and whether the skeleton breeds carry wings.
   The settled route from model-parts.html: a copy of the elytra mesh (left_wing and
   right_wing, 10x20x2 boxes, CubeDeformation(1.0F), texOffs(22,0), right mirrored,
   64x32 LayerDefinition), texture pointed at minecraft's own wings/elytra.png so

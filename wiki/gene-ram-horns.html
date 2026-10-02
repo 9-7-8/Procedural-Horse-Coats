@@ -92,7 +92,7 @@
     <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
     <div><dt>Alleles</dt><dd><span class="allele dom">Rh</span> <span class="allele dom">Rhm</span> <span class="allele wild">n</span>, dominance <code>Rh &gt; Rhm &gt; n</code></dd></div>
     <div><dt>Founders</dt><dd>written as pairs: <code>Rh/n</code> 0.14%, <code>Rhm/n</code> 0.26%, <code>n/n</code> the rest</dd></div>
-    <div><dt>Epigenome</dt><dd><code>size</code> (0&ndash;0.6, clamp 0&ndash;1), <code>curl</code> (0&ndash;1), <code>girth</code> (0.85&ndash;1.15), <code>shade</code> (0&ndash;1)</dd></div>
+    <div><dt>Epigenome</dt><dd><code>size</code> (0&ndash;0.6, clamp 0&ndash;1), <code>curl</code> (0&ndash;1), <code>girth</code> (0.85&ndash;1.15), <code>shade</code> (0&ndash;1, clamp &minus;1&ndash;1)</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none</strong> &mdash; measured: no coat hash moved in either golden</dd></div>
 </dl>
 
@@ -118,7 +118,12 @@
     <li><code>curl</code>: one of <code>RamHornGenerator.CURLS</code> buckets, in the mesh key with
         the shape &mdash; how far round a curl turns, or how much a corkscrew rolls per segment.</li>
     <li><code>girth</code> and <code>shade</code>: a draw-time scale and colour. Shade is pale horn to
-        black; with a <a href="gene-ram-horn-tip.html">coloured tip</a> it is the base colour.</li>
+        black; with a <a href="gene-ram-horn-tip.html">coloured tip</a> it is the base colour.
+        Below 0 it runs on from pale horn to bare <strong>bone</strong> at &minus;1 (the
+        antler&rsquo;s <code>PALE_BONE</code>) &mdash; the part&rsquo;s
+        <a href="model-parts.html#bone-versions">bone version</a>. No wild horse rolls below 0;
+        the skeleton breeds band it to &minus;1&ndash;&minus;0.95. Added 2026-10-02, with the clamp
+        widened from 0&ndash;1, so no saved horse&rsquo;s horn changed.</li>
 </ul>
 
 <h2 id="branches">Two-tone colour now runs along each branch</h2>

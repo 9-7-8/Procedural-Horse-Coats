@@ -3297,6 +3297,7 @@ wiki/items.html#verified-chest-loot	coding	Verified: the rates are the configure
 wiki/known-gaps.html#migrated	all	Migrated open checks
 wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
+wiki/model-parts.html#bone-versions	coding	Every part with bone in it has a bone version
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
 wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
@@ -3422,6 +3423,7 @@ wiki/texture-resolution.html#scales	all	Scale by scale
 wiki/texture-resolution.html#today	all	What 128 actually is
 wiki/texture-resolution.html#unverified	all	Unverified
 wiki/undead-horses.html#also	coding	Also built with it
+wiki/undead-horses.html#blackened	gameplay	The Blackened Skeleton Horse
 wiki/undead-horses.html#breed-fields	coding	Two breed-file fields
 wiki/undead-horses.html#breeding	gameplay	Breeding them
 wiki/undead-horses.html#bundle	coding	The breed sets the bundle (settled 2026-10-01)

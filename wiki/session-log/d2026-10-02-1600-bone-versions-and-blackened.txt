@@ -1,0 +1,71 @@
+2026-10-02 16:00 (start, approximate) - Undead photos, bone versions, the Blackened Skeleton Horse
+
+ASKED
+-----
+1. "once you've generated the horses, use your photo procedure to show me what they look
+   like" -> 14 in-game shots by procedures/photograph-horses.txt, published as a private
+   gallery (https://claude.ai/artifact/SZgo2BSjGzqRyVKPpwhWp8; files cannot be attached in
+   this session). Photo tool extended (543d9de7).
+2. "Give the ram's horn gene a bone shade, and make it a standard procedure that any
+   attachment that realistically has bones should have a bone version to it-- so a set of
+   alleles that would properly represent it on a skeleton horse. So for wings, this would
+   end up being just bones with no membrane" -> done (9591eca3 code; docs commit).
+3. "can you also create a "blackened" strain of the skeleton horse which is fireproof,
+   spawns in the nether, and black?" -> built as its own breed after four questions (below).
+
+DONE
+----
+- 543d9de7: DebugPhotoShoot shots may be rolled from a breed (code breed:<id>, "|+key=a/b"
+  stamped, "|key=a/b" re-rolled for) with Framing.WIDE / FOAL. The first shoot showed two
+  faults - single-horn shots wearing a second kind (the count group rolls them together)
+  and an empty all-four shot (a 1-in-640 re-roll outran the camera) - so rare pairs are now
+  stamped. Every picture was looked at; no ERROR in either client log; client closed.
+- 9591eca3: RamHornsGene shade clamp -1..1, roll still 0..1; below 0 it runs from pale horn
+  to AntlersGene.PALE_BONE. Both skeleton breeds band it -1..-0.95. Proof: UndeadBreedsTest
+  aSkeletonsRamHornsAreBone, wildRamHornsNeverRollBone; both coat goldens unchanged.
+- 9591eca3: blackened_skeleton_horse (index.json by hand, bakeBreedFiles): Great Valley's
+  bundle on E/E a/a with skeleton coat_opacity banded 0.85-0.92, Frp/Frp, Htol (every Nether
+  breed pins it), Netherhorse's biomes and floors, spawn_weight 2. UndeadPools.pick (common)
+  replaces the converter's pick: a pool breed living in the horse's biome first, else one
+  living nowhere wild. Proof: UndeadBreedsTest (+3), BreedFilesTest, BreedsTest,
+  BreedClimateRuleTest, NetherBreedsTest, BreedBandsReachTest, the goldens; all 32
+  gametests; a side-view render (charred bone, shape still reads).
+- Docs: model-parts.html#bone-versions (rule + table) and #bone-wings; gene-ram-horns;
+  undead-horses (#blackened, #open-undead-blackened, owner's calls); breed-book and
+  breeds.html (both tables); decisions.html; README; intake treatments for wings (Attached
+  model parts stage 6), body parts, head parts and tusks each gained the bone-version line.
+
+DECIDED
+-------
+- (owner) Bone versions for every grown part with bone; wings = bones, no membrane.
+- (owner) Blackened is its own breed (spawning is a breed field), charred bone with bone
+  horns, Nether conversions become it, "rare in general, but the most common type of nether
+  horse" (spawn_weight 2 > Mirrorgazer 1.5).
+- Without the owner: the bone end lives below the ram shade's wild range rather than as a
+  new locus; the pool rule is biome-first then breeds with no biomes; Blackened keeps the
+  soul flame and the Great Valley stats and size.
+
+FOUND ON THE WAY
+----------------
+- The converter's breed pick moved into common/ as UndeadPools so it is unit-testable.
+- A Bash heredoc again ate a regex escape in Java (split("\\|")); replaced with
+  Pattern.quote. No issues filed.
+
+PROCEDURES
+----------
+- add-a-gene.txt: question dd and step 10b (bone versions).
+- write-intake-document.txt: step 5b (bone versions).
+- photograph-horses.txt: the breed:/stamp syntax and the framings.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No full :common:test. Nothing seen in a played game: new anchor
+  undead-horses.html#open-undead-blackened (Nether herds, lava, portal conversion).
+
+RELEASE
+-------
+Not offered: conversion is unwatched in play.
+
+PICK UP FIRST
+-------------
+Hand the owner the undead test, now with a Nether leg (procedures/hand-over-a-test.txt).

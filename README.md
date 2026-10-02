@@ -64,7 +64,7 @@ and mixes.
 **Your zombie and skeleton horses come along.** Vanilla's undead horses - in
 an old world, from a skeleton trap, from an egg - quietly become this mod's
 horses the first time they load: a Graveborn Warmblood or a Great Valley
-Skeleton Horse, keeping their name, owner, saddle, armour and lead, with new
+Skeleton Horse (a Blackened one, in the Nether, where they also run wild), keeping their name, owner, saddle, armour and lead, with new
 stats from their genes. Undeath is two genes, so skeletons and zombies breed
 like any horse. A server can turn this off with `undead.convert`.
 

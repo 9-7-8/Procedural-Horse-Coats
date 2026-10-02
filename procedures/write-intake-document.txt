@@ -76,6 +76,12 @@ through. They are not optional and are not satisfied by doing them once.
    decision, tell the owner which decision and ask. Never reopen a settled decision
    quietly.
 
+5b. A GROWN PART WITH BONE IN IT HAS A BONE VERSION (owner, 2026-10-02). If the feature
+   grows a part that realistically has bone - a horn, a wing, a tusk, a tail club - the
+   treatment says what its bone version is (wings: the bones alone, no membrane) and which
+   alleles or bands draw it, and asks whether the skeleton breeds carry it. See
+   wiki/model-parts.html#bone-versions.
+
 6. BREEDS ARE DESIGNED WITH THE OWNER. If the feature needs a new breed, or changes
    one, settle every part of it with her before writing it down. That means name,
    coat, gene pool and weights, biomes, size, stats and rarity.
