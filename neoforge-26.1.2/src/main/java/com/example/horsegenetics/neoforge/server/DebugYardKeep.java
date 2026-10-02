@@ -153,6 +153,7 @@ final class DebugYardKeep {
     static final String OWNED = "KEEPING HORSES - an owned horse can never be removed for distance (horse-care check 300)";
     static final String SOLD = "KEEPING HORSES - a horse sold to a wandering trader goes when he despawns (villagers)";
     static final String HOPPERS = "STASIS BANK - no hopper reaches a chamber, in either direction";
+    static final String FEED_STAYS = "STASIS BANK - a hopper under the bank pulls no feed: the hay stays in the feed slot";
     static final String BROKEN = "STASIS BANK - a broken bank drops every chamber, each still holding its horse";
     static final String FIRE = "STASIS BANK - a bank in fire is not destroyed";
     static final String LAVA = "STASIS BANK - a bank in lava is not destroyed";
@@ -174,7 +175,7 @@ final class DebugYardKeep {
 
     static void build(ServerLevel level, int gy, int x0, int z0) {
         try {
-            for (String c : List.of(OWNED, SOLD, HOPPERS, BROKEN, FIRE, LAVA, MENDS, BASIC_IDLE)) {
+            for (String c : List.of(OWNED, SOLD, HOPPERS, FEED_STAYS, BROKEN, FIRE, LAVA, MENDS, BASIC_IDLE)) {
                 DebugYardClockwork.expect(c);
             }
             keeping(level, gy, x0, z0);
@@ -496,10 +497,15 @@ final class DebugYardKeep {
             if (hayLeftTop == HAY_IN_HOPPER) {
                 DebugYardClockwork.inconclusive(HOPPERS, "the top hopper moved nothing into the bank, so no hopper"
                         + " is connected and the chamber count shows nothing | " + detail);
+                DebugYardClockwork.inconclusive(FEED_STAYS, "the top hopper moved nothing into the bank | " + detail);
                 return;
             }
             DebugYardClockwork.verdict(HOPPERS, out == 0 && filed == filed0 && occupied == occupied0 && sameHorses,
                     detail);
+            // The first run (2026-10-01) passed HOPPERS with "16 drained on into the low hopper + chest, 0 in the feed
+            // slot": the bank was a pipe for its own hay. StasisBankCapability now lets a face take only the outputs.
+            int moved = HAY_IN_HOPPER - hayLeftTop;
+            DebugYardClockwork.verdict(FEED_STAYS, hayBelow == 0 && hayInFeed == moved, detail);
         });
     }
 
