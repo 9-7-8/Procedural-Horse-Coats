@@ -115,6 +115,20 @@ public final class ModdedArmour {
             ModItems.TAB_ITEMS.add(item);
             ARMOURS.add(new Armour(metal, item));
         }
+        // Issue #14. An armour whose only metal belongs to a mod that is not
+        // installed is no longer registered, but a world from an older jar may
+        // hold one: bought from the metalsmith, or sitting in a villager's
+        // offers. An alias makes those load as iron horse armour - the tier it
+        // was modelled on - instead of naming an id that does not exist. NeoForge
+        // applies an alias only when the id itself is absent, so it can never
+        // shadow an armour that is registered. Not verified against a real save.
+        for (String id : ModdedMaterials.droppedArmours()) {
+            if (!registered.contains(id)) {
+                ModItems.ITEMS.addAlias(
+                        net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, id),
+                        net.minecraft.resources.Identifier.withDefaultNamespace("iron_horse_armor"));
+            }
+        }
     }
 
     private ModdedArmour() {
