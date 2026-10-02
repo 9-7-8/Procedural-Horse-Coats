@@ -102,8 +102,7 @@ All kind magical, "wild" and "spawn_egg" only (as the deer, goats and rams). Row
    biomes: minecraft:savanna, minecraft:savanna_plateau, minecraft:plains
    stats: speed 9, jump 8, health 6; size standard (light to medium). Coat: black with the natural zebra striping, the dark bands
    black and the gaps white; zebras_coat as the alternative (UNVERIFIED which reads better; bake and look). The "white at first,
-   then scorch-stripes" tale is lore (a foal grey is not built). Kick: lore only. Commonness Open (owner): rare as a type, or
-   very_rare as a named tale; asked as "same as the deer", Recommended rare.
+   then scorch-stripes" tale is lore (a foal grey is not built). Kick: lore only. Commonness Decided (owner, 2026-10-02): rare.
  Where: the breed JSON; breeds.html and breed-book.html (an Equids section).
  Tests: *BreedsTest per breed; BreedFilesTest; BreedBandsReachTest.
  Play checks: each breed in a yard pen; the wild ass's head, eyes and horn together; a wild herd in each biome.

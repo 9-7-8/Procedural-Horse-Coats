@@ -296,11 +296,12 @@ Answered by the owner, 2026-10-02 (recorded on wiki/breed-book.html#plan-mythic-
 - The plain horses (eight Aesir steeds, Freyfaxi, the Irish trio): ONE breed with all twelve names,
   biomes the union of theirs, uncommon.
 - The sun teams (Helios, Arvakr and Alsvidr, Lampos and Phaethon): ONE sun breed with all the names,
-  spawn_time day, biomes the union of theirs. Its commonness is for design-a-breed to ask.
+  spawn_time day, biomes the union of theirs, rare.
 - Coasts: as proposed; the blocked sea breeds stay unspawned until built, then recheck the shares.
 - NEW PREREQUISITE: the breed format has no names list (HorseNameGenerator reads none), so those two
   merged breeds wait on a "names" field, a format change.
-- Still open: named lineages (below). The per-entry blocks above for the merged horses are now
+- Named lineages: NO breed; pedigree flavour only (named ancestors, later).
+- The per-entry blocks above for the merged horses are now
   superseded by the two merged breeds.
 
 Original open questions (kept for the record)

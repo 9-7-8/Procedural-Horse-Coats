@@ -1,5 +1,15 @@
 Villagers in every village - implementation treatment
 
+OWNER'S ANSWERS, 2026-10-02 (these override any "Open" line below)
+- "The villagers" = the cowboy (via the barn) AND the four equestrian posts. Reading confirmed.
+- Barn style: option (c), ONE barn with a RUN-TIME palette swap by a StructureProcessor keyed on the
+  village style (and the mossify processor chosen per style).
+- Other mods' villages: a CONFIG LIST of terminator pools, default the five vanilla styles, plus a
+  compatibility.html line. No registry scan.
+- Command: /horsevillage list AND /horsevillage backfill [radius], dry-run by default, acting only with
+  a confirm word; op-only, permission style of HorseResurrectCommand.
+- Still the building session's: the per-style weight (HomesteadCensus), the road run (nice-to-have).
+
 Drafted in a session confined to intake/ (nothing outside this folder was touched).
 Nothing here is built or run. "Decided" lines are the owner's request as given;
 "Open" lines are for the building session to settle; "UNVERIFIED" lines are facts

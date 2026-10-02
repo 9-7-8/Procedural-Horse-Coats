@@ -45,8 +45,8 @@
     <span class="label">What is still planned here</span>
     <p>
         A trough a horse actually eats from &mdash; the first block in the mod that feeds one
-        &mdash; buildable in any rectangle out of any mod's wood, plus salt licks that must grant
-        something rather than punish their absence.
+        &mdash; buildable in any connected shape out of any mod's wood, plus salt licks crafted
+        from sand that must grant something rather than punish their absence.
     </p>
 </div>
 
@@ -88,6 +88,24 @@
     <li><strong>Any mod's trough-alike should work</strong>, the way
         <code>compat/HayBales</code> made every mod's hay bale grazeable with a tag rather than a
         list. Same trick, same reason.</li>
+</ul>
+
+<h3 id="plan-owner-answers">The owner&rsquo;s answers (2026-10-02)</h3>
+<ul>
+    <li><strong>Shape:</strong> any connected set of trough blocks is one trough, including
+        L-shapes, rings and mixed woods. Only adjacency counts and the wood is cosmetic. This
+        widens the original &ldquo;any rectangle&rdquo;.</li>
+    <li><strong>Rung:</strong> a stocked trough sits just above hay in the hunger order and
+        below cake and the horse&rsquo;s favourite. A hay bale in a trough counts as hay.</li>
+    <li><strong>An empty trough in a stall:</strong> the horse stays in the stall until its
+        hunger reaches zero, and only then goes looking elsewhere.</li>
+    <li><strong>Hoppers</strong> may fill a trough, so automatic feeding is allowed.</li>
+    <li><strong>Salt:</strong> the mod adds no salt item and no ore. A salt lick is crafted from
+        sand (sand stands in for salt). It also turns up as a cowboy trade and in loot. Any
+        other mod&rsquo;s salt is accepted through a tag. We support those mods, we do not add
+        salt ourselves.</li>
+    <li><strong>Wear:</strong> each licking session uses some of a lick up, so a herd wears it
+        down faster than one horse.</li>
 </ul>
 
 </section>

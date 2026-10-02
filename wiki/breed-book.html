@@ -1293,8 +1293,10 @@
     existing strain system is the nearest hook and cannot express any of these. This is a
     format change, so it lands in the four places
     <a href="breed-format.html">the format page</a> lists, and the cross labels on
-    <a href="breeds.html">breeds</a> have to read it. Before building, ask the owner how a
-    performance book admits a horse, since the mod has no competitions. Settled on
+    <a href="breeds.html">breeds</a> have to read it. The mod has no competitions, so an open
+    performance book admits a horse of any parentage <strong>once its resolved stats (speed,
+    jump, health) meet the book&rsquo;s minimums</strong> (owner, 2026-10-02). The breed file
+    declares those minimums. Settled on
     <a href="breed-format.html#studbook-kinds">the format page</a>.
 </p>
 
@@ -1339,7 +1341,7 @@
 <p>
     The mythic breeds of <code>intake/Mythic breeds - gene audit.txt</code> take their biomes,
     <code>spawn_time</code> and commonness from <code>intake/Mythic breeds - biome
-    assignments.txt</code>, with these four answers from the owner:
+    assignments.txt</code>, with these answers from the owner:
 </p>
 <ul>
     <li><strong>Spawn kinds: <code>["wild", "spawn_egg"]</code></strong>, the same as the
@@ -1350,8 +1352,13 @@
         union of theirs, at <code>uncommon</code>.</li>
     <li><strong>The sun teams are one breed with all their names.</strong> These are the Horses
         of Helios, Arvakr and Alsvidr, and Lampos and Phaethon. The breed spawns by day, and its
-        biomes are the union of the teams&rsquo; biomes. Whether three <code>very_rare</code>
-        pools merged into one stay <code>very_rare</code> is for design-a-breed to ask.</li>
+        biomes are the union of the teams&rsquo; biomes. It is <code>rare</code>, about the
+        weight of the three <code>very_rare</code> pools it replaces.</li>
+    <li><strong>Named lineages get no breed.</strong> Hofvarpnir&rsquo;s parents and the sire of
+        Askhetos and Kygnos have no tale of their own. They never spawn, and later they may
+        appear as named ancestors in those breeds&rsquo; pedigrees.</li>
+    <li><strong>Zebra of the waterhole is <code>rare</code></strong>: it is a type, not a named
+        individual.</li>
     <li><strong>Coast crowding stays as proposed.</strong> The blocked sea breeds (Hippocampus,
         Kelpie, Each-uisge, Nuckelavee) do not spawn until they are built, so most of that
         crowding never happens yet. Recheck the beach and stony-shore shares when they ship.</li>

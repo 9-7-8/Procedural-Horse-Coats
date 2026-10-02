@@ -15,7 +15,7 @@ or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on
 
 ------------------------------------------------------------------------------
 To do.txt                                                         sized 2026-10-02
-- Cutie-mark pool bias / four studbook kinds                     -  -  No: "needs a few more owner answers"
+- Cutie-mark pool bias / four studbook kinds                     M  c  owner answered 2026-10-02 (bias: gene+breed, breed wins; performance = stat minimums)
 - Procedure write-ups (compat-test, measure-worldgen,
   add-a-wood-family, answer-a-tester)                            S each, owner-free
 - Natural dapple gene (Balius wants one)                         M  c  near-owner: add-a-gene asks its design calls
@@ -61,7 +61,7 @@ Built? No.
 
 ------------------------------------------------------------------------------
 Daily realm horse - implementation treatment.txt                  sized 2026-10-02
-- One unit                                                       M  c  No: seven Open lines (SLEEP and /time set,
+- One unit                                                       M  c  owner answered 2026-10-02 (any breed uniform, catch-up 7, area cap; was: SLEEP and /time set,
   ticking with no players, breed weighting - recommends Feral Mixed 1 in 4 -, non-WILD breeds,
   placement, NBT tag, soft cap)
 Built? No.
@@ -74,15 +74,15 @@ Piece 2 (Send home free) shipped 2026-10-02. Built? Piece 1 no.
 ------------------------------------------------------------------------------
 Horse shoes.txt                                                   sized 2026-10-02
 - One unit: shoe items per metal, the four SHOE_* tags,
-  effects/enchantments, HorseShoeLayer (needs hoof anchors)      M-L c  near-owner: which 1-2 enchantments ship first
+  effects/enchantments, HorseShoeLayer (needs hoof anchors)      M-L c  owner-free: Grip + a speed one (2026-10-02)
 Built? No.
 
 ------------------------------------------------------------------------------
 Troughs and salt licks - implementation treatment.txt             sized 2026-10-02
 Gate: after the feeding rules are fixed (check-roadmap-execution).
-- Piece 1: wooden trough, the first block entity, every wood     L  b  No: Open lines (rung, foreign troughs, ...)
+- Piece 1: wooden trough, the first block entity, every wood     L  b  owner answered 2026-10-02 (rung, shape, hoppers)
 - Piece 2: connected troughs share an inventory                  M  c  needs 1
-- Piece 3a fill readout S; 3b stall trough M; 3c salt lick M     c     No: "where the salt comes from" etc.
+- Piece 3a fill readout S; 3b stall trough M; 3c salt lick M     c     owner answered 2026-10-02 (salt from sand/cowboy/loot/tag)
 Built? No.
 
 ------------------------------------------------------------------------------
@@ -96,8 +96,8 @@ Built? No.
 
 ------------------------------------------------------------------------------
 Villagers in every village - implementation treatment.txt         sized 2026-10-02
-- Piece 1: barns in all five village pools (option a first)      M  c  No: "confirm with the owner", one barn vs per style
-- Piece 2: /horsevillage backfill command                        L  c  No: command name, list command, ...
+- Piece 1: barns in all five village pools (run-time palette swap) M c owner-free (answered 2026-10-02)
+- Piece 2: /horsevillage list + backfill (dry-run default)      L  c  owner-free (answered 2026-10-02)
 Built? No.
 
 ------------------------------------------------------------------------------
@@ -133,7 +133,7 @@ Built? No.
 Mythical equids - implementation treatment.txt                       sized 2026-10-02
 - Piece 1: head colour coat gene (Red, Black)                    M  b  owner-free (L if no head mask)
 - Piece 2: three-band horn colour allele "Tri"                   S-M b owner-free
-- Piece 3a: Zebra of the waterhole                               S  c  No: creates breed; commonness Open
+- Piece 3a: Zebra of the waterhole                               S  c  No: creates breed; commonness rare (2026-10-02)
 - Piece 3b: One-horned Indian wild ass                           S  c  No: creates breed; needs P1, P2
 Built? No.
 
