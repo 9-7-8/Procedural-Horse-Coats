@@ -1,0 +1,99 @@
+2026-10-02 11:45 (start, approximate) - Champagne foals' blue-green eyes (process-intake)
+
+ASKED
+-----
+- "/process-intake" - take one new-feature unit out of intake/, build it, retire it and
+  end the session. Came of it: the champagne foal-eye bullet from intake/To do.txt,
+  Tier 1, built, written up and retired.
+
+DONE
+----
+- Sizing. intake/Sizing.txt was missing twelve tracked treatments (the six Mythical *
+  files, the two Mythic breeds files, and the four natural-sheep/sheep files). An Explore
+  agent sized them and their blocks were added. The To do block gained the dapple-gene
+  bullet and the mythic features still to scope (pulled in from origin during the push).
+  None of the new units beat the pick: the owner-free ones are impact b, size M or more
+  (hoof colour, head colour, the Sci/Hzt horn shapes), and every breed unit needs her.
+- Pick: "A champagne foal's eye is blue-green" (To do.txt), Tier 1 (S, impact a:
+  finishes the shipped champagne eye; owner-free). Runner-up: the realm breeding pause
+  (S-M, a). It lost on size: it needs an inventory of every heat, cooldown and weaning
+  timer, and it carries an UNVERIFIED line.
+- Code commit ce80a098 "A champagne foal has blue-green eyes until it grows up".
+  - The treatment named the wrong hook. It asked for an adult signal on
+    EyeColorContribution, but that channel is magical-only now. Champagne implements
+    EyeRequestContribution and writes an eye allele at birth.
+  - So EyeRequestContribution gained a default foalIris(pair, genotype, epigenome):
+    the 0xRRGGBB a gene's eyes wear before adulthood, or null. It is never an allele.
+  - Eyes.resolve(genotype, epigenome, adult) applies it only to an iris whose last
+    request writer is that gene and whose current allele is still the one it asked for.
+  - CoatTextureComposer.bake passes its existing adult flag through.
+  - ChampagneGene.FOAL_BLUE_GREEN = #5B9A92.
+  - The treatment's "age flag in the coat cache key" was already true:
+    GeneticCoatTextureFactory keys every texture ":foal"/":adult". The designer already
+    has an Age: Foal toggle (designer.js calls api.coat(!state.baby)), so rule 5 needed
+    no change.
+  - Proof:
+    - EyeColorTest (51 tests green, incl. the new
+      aChampagneFoalHasBlueGreenEyesAndGrowsIntoItsRolledOnes and
+      aSplashedChampagneFoalKeepsItsBlueEyes). Mutation: passing true instead of adult
+      in the composer fails the first one.
+    - CoatPipelineGoldenTest: coat-golden.txt moved exactly eleven rows, all champagne
+      foals. The four champagne foal rows that did not move are all mitf=SW1 (splash
+      wins the iris). The golden was then promoted.
+    - CoatBakeGoldenTest, CoatTextureComposerTest, GeneCoatHookTest and
+      CommonPortabilityTest all green.
+    - :web:bakeDesignerAssets + check-designer-boots OK; :neoforge-26.1.2:build green;
+      check-parity OK.
+- Docs commit (this one):
+  - wiki/gene-champagne.html: the Gameplay tab says what a player sees. The Coding tab
+    (#foal-eyes-decided) describes the build. The Roadmap tab is gone, replaced by a
+    Verification tab (#verify-foal-eyes).
+  - The roadmap-execution coverage row is deleted.
+  - eye-colour.html: the "not modelled" bullet is removed and foalIris is named in the
+    hooks table.
+  - decisions.html: the entry says built, plus a session-call line.
+  - To do.txt bullet deleted; Sizing.txt updated.
+  - Rebaked: sync-page-views, the gene row g (no real diff), the verification and
+    roadmap indexes, the search index, check-links and the agent text.
+
+DECIDED
+-------
+- Without the owner: the hook lives on EyeRequestContribution (a colour, not an allele),
+  not on EyeColorContribution as the treatment said. Recorded on
+  wiki/decisions.html and gene-champagne.html#foal-eyes-decided.
+- Without the owner: the foal colour is #5B9A92, one value for every champagne foal.
+- Without the owner: a foal eye applies only where the gene's request won, so splashed
+  and tiger-eyed champagnes keep their eye as foals.
+
+FOUND ON THE WAY
+----------------
+- end-session step 3c's `git pull --rebase` refuses to run on a dirty tree, and the tree
+  is always dirty at that point after process-intake (the docs are written first).
+  Fixed in the procedure (--autostash).
+- gene-champagne.html's spec still says "Deterministic: yes", which is true of the coat
+  but not the iris. Left alone: that block describes the coat.
+
+PROCEDURES
+----------
+- procedures/end-session.txt step 3c: `git pull --rebase --autostash`, with the reason.
+- Reviewed and unchanged: process-intake (its "treatments name things that do not exist"
+  line covered the wrong hook) and rebake.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Full :common:test not run. It would still check every other bake that reads the eye
+  phenotype at foal age (breed and catalogue tests, BreedsTest pools) and any parity
+  fixture keyed on foal coats.
+- Not seen in game: the foal eye on the real foal skin. The unit tests bake on the adult
+  skin with adult=false, so the foal template's iris texels are untested.
+  Check: wiki/gene-champagne.html#verify-foal-eyes.
+
+RELEASE
+-------
+Not offered: one small feature is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/process-intake: next by ranking is the realm breeding pause (Tier 1, S-M, impact a,
+owner-free). Its first job is to settle the UNVERIFIED claim that the realm scales no
+time, and to inventory every absolute-tick timer.

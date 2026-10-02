@@ -588,7 +588,7 @@ wiki/gene-champagne.html#both-pigments	science	It dilutes both pigments, which i
 wiki/gene-champagne.html#breeds	science	Breeds and frequency
 wiki/gene-champagne.html#carrot	gameplay	Its gene carrot
 wiki/gene-champagne.html#eye	coding	The eye is the one thing about it that varies
-wiki/gene-champagne.html#foal-eyes-decided	coding	A champagne foal’s eye is blue-green (owner, 2026-10-01)
+wiki/gene-champagne.html#foal-eyes-decided	coding	A champagne foal’s eye is blue-green (built 2026-10-02)
 wiki/gene-champagne.html#health	science	Health, build, performance
 wiki/gene-champagne.html#identity	science	Genetic identity
 wiki/gene-champagne.html#inheritance	gameplay	Crossing two of them

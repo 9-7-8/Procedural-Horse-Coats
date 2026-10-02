@@ -170,4 +170,16 @@ public final class ChampagneGene implements Gene, EyeRequestContribution {
         }
         return EyeRequest.none().bothIrises(hue);
     }
+
+    /**
+     * A champagne <b>foal</b> is born with a blue-green eye that darkens to the
+     * rolled amber, hazel or olive as it grows up (owner, 2026-10-01). One colour
+     * for every foal - the variation is the adult's, and arrives with it.
+     */
+    public static final int FOAL_BLUE_GREEN = 0x5B9A92;
+
+    @Override
+    public Integer foalIris(AllelePair pair, Genotype genotype, Epigenome epigenome) {
+        return pair.has(Ch) ? FOAL_BLUE_GREEN : null;
+    }
 }

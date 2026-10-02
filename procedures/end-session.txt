@@ -34,9 +34,11 @@ STEPS
       pattern is wrong: fix the pattern, never `git add` around it.
    b. Untracked files in intake/ are the owner queuing material. Commit around them.
    c. Work on main; do not branch. Cloud routines also push to main, so commit, THEN
-      `git pull --rebase origin main`, then push. A pull made with the tree still dirty
-      aborts when upstream touched a file you edited (intake/To do.txt is the usual
-      one), prints that on a line a `| Select -Last 1` hides, and leaves HEAD behind:
+      `git pull --rebase --autostash origin main`, then push. The tree is still dirty
+      here whenever docs were written before this step (process-intake and fix-bug write
+      them first), and a plain `--rebase` then refuses to run at all. A pull can still
+      abort when upstream touched a file you edited (intake/To do.txt is the usual
+      one), print that on a line a `| Select -Last 1` hides, and leave HEAD behind:
       the push is then rejected. Read the whole pull output.
    d. Write one descriptive commit that says what changed and why, not a file list.
       In PowerShell, write the message to a scratchpad file and `git commit -F <file>`:

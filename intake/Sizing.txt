@@ -15,10 +15,12 @@ or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on
 
 ------------------------------------------------------------------------------
 To do.txt                                                         sized 2026-10-02
-- Champagne foal eye blue-green until adult                      S-M a  owner-free (coat cache key)
 - Cutie-mark pool bias / four studbook kinds                     -  -  No: "needs a few more owner answers"
 - Procedure write-ups (compat-test, measure-worldgen,
   add-a-wood-family, answer-a-tester)                            S each, owner-free
+- Natural dapple gene (Balius wants one)                         M  c  near-owner: add-a-gene asks its design calls
+- Mythic features still to SCOPE (wings, forced riding, tails,
+  immortality call, fire breath, extra legs/heads, ...)          -  -  No: each needs write-intake-document first
 
 ------------------------------------------------------------------------------
 Attached model parts.txt   (PLAN ONLY)                            sized 2026-10-02
@@ -109,4 +111,88 @@ Built? No.
 Villagers in every village - implementation treatment.txt         sized 2026-10-02
 - Piece 1: barns in all five village pools (option a first)      M  c  No: "confirm with the owner", one barn vs per style
 - Piece 2: /horsevillage backfill command                        L  c  No: command name, list command, ...
+Built? No.
+
+------------------------------------------------------------------------------
+Mythic breeds - biome assignments.txt   (A PROPOSAL)                  sized 2026-10-02
+- One unit: biome/spawn_time/commonness for 59 entries          S  a  No: owner questions (spawn kinds;
+  plain horses one breed or many); rides with each breed as it ships
+Built? No.
+
+------------------------------------------------------------------------------
+Mythic breeds - gene audit.txt   (AN AUDIT, NOT A SPEC)               sized 2026-10-02
+- One unit: the READY-now mythic breeds (~40, no engineering)   L  c  No: creates breeds; "named
+  individuals versus breeds" undecided; needs biome assignments
+Built? No.
+
+------------------------------------------------------------------------------
+Mythical antlered beasts - implementation treatment.txt              sized 2026-10-02
+- Piece 1: five breeds (Tarandrus, Leucrocotta first; ...)       S each c  No: creates breeds
+- Piece 2: plan lines on model-parts.html Roadmap tab            S  b  owner-free
+Built? No.
+
+------------------------------------------------------------------------------
+Mythical deer - implementation treatment.txt                         sized 2026-10-02
+- Piece 1: mane-and-tail shape gene                              L  b  owner-free (file says M; foundation
+  for deer 4a, reindeer, goats 2c, the Criosphinx mane)
+- Piece 2: hoof colour gene (metal/gem, codominant)              M  b  owner-free; unblocks breeds + Horse shoes
+- Piece 3a: nine-colour coat (data gene)                         S  c  owner-free
+- Piece 3b: crown cross (new part kind + CROWN_CENTRE anchor)    L  c  owner-free; not with Piece 1
+- Piece 4a/4b: the deer breeds                                   S each c  No: creates breeds; need P1-P3
+- Piece 5: deer-build.html plan page (Roadmap only)              S  b  owner-free
+Built? No.
+
+------------------------------------------------------------------------------
+Mythical equids - implementation treatment.txt                       sized 2026-10-02
+- Piece 1: head colour coat gene (Red, Black)                    M  b  owner-free (L if no head mask)
+- Piece 2: three-band horn colour allele "Tri"                   S-M b owner-free
+- Piece 3a: Zebra of the waterhole                               S  c  No: creates breed; commonness Open
+- Piece 3b: One-horned Indian wild ass                           S  c  No: creates breed; needs P1, P2
+Built? No.
+
+------------------------------------------------------------------------------
+Mythical goats - implementation treatment.txt                        sized 2026-10-02
+- Piece 1: scimitar ram-horn shape (Sci)                         S-M b owner-free; never with rams' P1
+- Piece 2a-2c: the goat breeds                                   S each c  No: creates breeds; P1 (+deer P1-2)
+- Piece 3: goat-build.html plan page                             S  b  No: "one locus or separate loci" Open
+Built? No.
+
+------------------------------------------------------------------------------
+Mythical rams - implementation treatment.txt                         sized 2026-10-02
+- Piece 1: horizontal-twist ram-horn shape (Hzt)                 S-M b owner-free; never with goats' P1
+- Piece 2a/2b: the ram breeds                                    S each c  No: creates breeds
+- Piece 3: sheep-build.html plan page                            S  b  No: build-gene shape Open
+Built? No.
+
+------------------------------------------------------------------------------
+Mythical reindeer - implementation treatment.txt                     sized 2026-10-02
+- Pieces 1a-1c: the reindeer breeds                              S each c  No: creates breeds; deer P1 (+equids P1)
+Built? No.
+
+------------------------------------------------------------------------------
+Natural-sheep gene kind - implementation treatment.txt  (LOWEST PRIORITY, owner)  sized 2026-10-02
+- Piece 1: the kind exists                                       L  b  owner-free; the sheep files wait on it
+- Piece 2: kind in GeneFamily, RandomizeMode, editors, wiki      M  b  No: creator offering Open; P1
+- Piece 3: the philosophy change written down                    S  c  No: touches philosophy.html; P2
+Built? No.
+
+------------------------------------------------------------------------------
+Sheep coat genes - implementation treatment.txt   (LOWEST PRIORITY)  sized 2026-10-02
+- Piece 1: sheep ASIP, MC1R, TYRP1                               L  c  No: Soay allele Open; kind P1-2
+- Piece 2: white spotting (S locus)                              M  c  No: extent Open; P1
+- Piece 3: fading/dilution (Roadmap entry only)                  S  c  owner-free; needs the kind
+Built? No.
+
+------------------------------------------------------------------------------
+Sheep disorders - implementation treatment.txt   (LOWEST PRIORITY)   sized 2026-10-02
+- Piece 1: EDNRB white (sheep)                                   M  c  No: "ASK FIRST"; the kind
+- Piece 2: spider lamb (FGFR3 analogue)                          S-M c No: severity cost Open; P1
+- Piece 3: conditional risks                                     S  c  No: penetrance storage Open
+Built? No.
+
+------------------------------------------------------------------------------
+Sheep horns and body genes - implementation treatment.txt   (LOWEST PRIORITY)   sized 2026-10-02
+- Piece 1: horn audit + sheep sex-influence (prose)              S  a  No: RXFP2 locus Open; the kind
+- Piece 2: quantitative layer: frame, muscle, size               M-L c No: which loci Open; the kind
+- Piece 3: callipyge parent-of-origin plan (Roadmap entry)       S  c  owner-free; the kind; with P1
 Built? No.

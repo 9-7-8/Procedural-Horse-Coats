@@ -1,7 +1,6 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
 
-Decided by the owner on 2026-10-01; each is small, and needs only building:
-- A champagne foal's eye is blue-green, turning to its rolled adult colour on growing up: an adult signal on EyeColorContribution, and the age flag in the coat cache key (wiki/gene-champagne.html#plan-foal-eyes).
+Decided by the owner on 2026-10-01:
 - Decided 2026-10-01 but each needs a few more owner answers before building: cutie marks get a gene/breed-biased item pool (wiki/gene-cutie-mark.html#plan-pool-bias), and the breed format gets all four studbook kinds before any sport horse (wiki/breed-book.html#plan-studbooks).
 
 Routines to write up as procedures (procedures/FORMAT.txt; then a row in procedures/INDEX.txt, a .claude/skills wrapper and the keyword memory):
