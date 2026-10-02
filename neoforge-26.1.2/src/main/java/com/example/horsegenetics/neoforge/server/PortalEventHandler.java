@@ -299,6 +299,13 @@ public final class PortalEventHandler {
 
     private static BlockPos portalBlockUnder(ServerLevel level, Entity entity) {
         BlockPos feet = entity.blockPosition();
+        // An entity can tick standing in a chunk that is not loaded - just
+        // teleported, or at the edge of the loaded area - and this runs for every
+        // horse and player every tick, so a read here would load it: issue #13.
+        // The mid block is the same column, so the same chunk.
+        if (!level.hasChunkAt(feet)) {
+            return null;
+        }
         if (level.getBlockState(feet).getBlock() instanceof HayPortalBlock) {
             return feet.immutable();
         }

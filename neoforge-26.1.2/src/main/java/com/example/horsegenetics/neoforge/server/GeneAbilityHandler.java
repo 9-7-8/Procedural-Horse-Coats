@@ -1143,7 +1143,11 @@ public final class GeneAbilityHandler {
             // Nowhere within reach will take it this tick. Keep what we have if
             // it is still really there; forget it if it is not, so that the
             // next tick tries afresh rather than trusting a block that is gone.
-            if (current != null && !level.getBlockState(current).is(Blocks.LIGHT)) {
+            // Not read while its chunk is unloaded (issue #13: this branch can run
+            // every tick). The entry is kept, so the light is still cleared once
+            // the horse has somewhere new to put it.
+            if (current != null && level.hasChunkAt(current)
+                    && !level.getBlockState(current).is(Blocks.LIGHT)) {
                 GLOW_LIGHT.remove(id);
             }
             return;
@@ -1201,6 +1205,10 @@ public final class GeneAbilityHandler {
     }
 
     private static void clearLight(Level level, BlockPos pos) {
+        // MAY LOAD the light's chunk, on purpose (issue #13). Only when the horse
+        // has moved off a light whose chunk has since unloaded - a teleport, not a
+        // walk - so once, not per tick; and skipping it would leave the light
+        // behind in the world with nothing left that remembers it.
         BlockState state = level.getBlockState(pos);
         if (state.is(Blocks.LIGHT)) {
             level.removeBlock(pos, false);

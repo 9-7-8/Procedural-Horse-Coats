@@ -921,6 +921,72 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>The realm lift loads no chunk but its own.</b> Issue #13: the live
+     * server logged {@code HorseRealmLift.lift} forcing a synchronous chunk load
+     * 101 times. Not by reading - every block it reads is in the chunk it is
+     * lifting - but by writing: {@code setBlock} without flag 16 asks each
+     * neighbour to re-shape, and the neighbour of an edge block is in the next
+     * chunk over, which nothing had loaded.
+     *
+     * <p>So: a chunk nobody has a ticket on, given the old floor's bedrock mark
+     * and a ring of stone round its edge, lifted through the real
+     * {@link com.example.horsegenetics.neoforge.server.HorseRealmLift#liftNow}
+     * in whatever level the harness has (the lift does not ask which). All four
+     * neighbours must still be unloaded afterwards. The setup writes with 16 for
+     * the same reason the fix does, or it would load them itself.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> REALM_LIFT_LOADS_NO_NEIGHBOUR =
+            TEST_FUNCTIONS.register("realm_lift_loads_no_neighbour", () -> ModGameTests::realmLiftLoadsNoNeighbour);
+
+    private static void realmLiftLoadsNoNeighbour(GameTestHelper helper) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        // A long way from the test structures and the spawn chunks.
+        net.minecraft.world.level.ChunkPos at = new net.minecraft.world.level.ChunkPos(-3907, 4111);
+        net.minecraft.world.level.ChunkPos[] around = {
+                new net.minecraft.world.level.ChunkPos(at.x() - 1, at.z()),
+                new net.minecraft.world.level.ChunkPos(at.x() + 1, at.z()),
+                new net.minecraft.world.level.ChunkPos(at.x(), at.z() - 1),
+                new net.minecraft.world.level.ChunkPos(at.x(), at.z() + 1)};
+        level.getChunk(at.x(), at.z());
+        for (net.minecraft.world.level.ChunkPos n : around) {
+            if (level.hasChunk(n.x(), n.z())) {
+                helper.fail("chunk " + n + " was loaded before the lift ran - the test proves "
+                        + "nothing from here; move it somewhere nobody has been");
+                return;
+            }
+        }
+
+        int x0 = at.getMinBlockX();
+        int z0 = at.getMinBlockZ();
+        int y = com.example.horsegenetics.neoforge.server.HorseRealmLift.BUILT_AT_Y;
+        BlockState stone = Blocks.STONE.defaultBlockState();
+        level.setBlock(new BlockPos(x0, y - 1, z0), Blocks.BEDROCK.defaultBlockState(), 2 | 16);
+        for (int i = 0; i < 16; i++) {
+            level.setBlock(new BlockPos(x0, y, z0 + i), stone, 2 | 16);
+            level.setBlock(new BlockPos(x0 + 15, y, z0 + i), stone, 2 | 16);
+            level.setBlock(new BlockPos(x0 + i, y, z0), stone, 2 | 16);
+            level.setBlock(new BlockPos(x0 + i, y, z0 + 15), stone, 2 | 16);
+        }
+
+        com.example.horsegenetics.neoforge.server.HorseRealmLift.liftNow(level, at);
+
+        BlockPos lifted = new BlockPos(x0 + 15, y + com.example.horsegenetics.neoforge.server.HorseRealmLift.OFFSET, z0 + 7);
+        if (!level.getBlockState(lifted).is(Blocks.STONE)) {
+            helper.fail("the lift did not run - no stone at " + lifted.toShortString()
+                    + ", so the neighbour check below would be checking nothing");
+            return;
+        }
+        for (net.minecraft.world.level.ChunkPos n : around) {
+            if (level.hasChunk(n.x(), n.z())) {
+                helper.fail("lifting chunk " + at + " loaded its neighbour " + n
+                        + " - a shape update crossed the edge (issue #13)");
+                return;
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
      * <b>The freedom stick crafts, and is drawable.</b> A feather, a stick and one
      * horse hair. Same three flags as every other recipe here: an item that is
      * craftable but not <i>findable</i> is an item nobody will ever make, and this
@@ -1200,6 +1266,8 @@ public final class ModGameTests {
         register(event, environment, HORSE_REALM_IS_BUILT, 200);
         // Four thousand hashes; no world touched at all.
         register(event, environment, HORSE_REALM_GRID_IS_STABLE, 100);
+        // One chunk generated, one lifted; all in one tick.
+        register(event, environment, REALM_LIFT_LOADS_NO_NEIGHBOUR, 200);
         // One recipe lookup in a single tick.
         register(event, environment, FREEDOM_STICK_CRAFTS, 100);
         // Spawn, ten ticks to be founded, kill, raise - then read the result.

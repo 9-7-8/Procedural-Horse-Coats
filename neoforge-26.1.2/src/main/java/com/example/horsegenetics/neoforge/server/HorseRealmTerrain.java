@@ -98,7 +98,13 @@ public final class HorseRealmTerrain {
         }
     }
 
-    /** Decorate a chunk right now - used on arrival, so nobody lands beside a missing exit. */
+    /**
+     * Decorate a chunk right now - used on arrival, so nobody lands beside a missing exit.
+     *
+     * <p><b>This loads the chunk if it is not loaded, on purpose</b> (issue #13): it
+     * is the chunk somebody is arriving in this tick, which the teleport is about to
+     * load anyway.
+     */
     public static void decorateNow(ServerLevel realm, ChunkPos at) {
         MinecraftServer server = realm.getServer();
         if (server == null) {
@@ -172,7 +178,11 @@ public final class HorseRealmTerrain {
             for (int dz = 0; dz < HorseRealm.POOL_SIZE; dz++) {
                 BlockPos p = new BlockPos(at.getMinBlockX() + dx, HorseRealm.GROUND_Y, at.getMinBlockZ() + dz);
                 if (!realm.getBlockState(p).is(Blocks.WATER)) {
-                    realm.setBlock(p, water, 2);
+                    // 2 | 16, as HorseRealmLift and for its reason (issue #13):
+                    // the pool is at the chunk's north-west corner, so a shape
+                    // update reaches into the chunks west and north of it.
+                    // Water re-shapes nothing round it.
+                    realm.setBlock(p, water, 2 | 16);
                 }
             }
         }

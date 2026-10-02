@@ -336,6 +336,8 @@ public final class HorseRealm {
      * you step out where you stepped in.
      */
     private static BlockPos safeReturn(ServerLevel target, BlockPos remembered) {
+        // LOADS the chunk if it is not loaded, on purpose (issue #13): it is where
+        // the player is about to be put, and the teleport loads it anyway.
         if (target.getBlockState(remembered).is(com.example.horsegenetics.neoforge.block.ModBlocks.HAY_PORTAL.get())) {
             return remembered;
         }
