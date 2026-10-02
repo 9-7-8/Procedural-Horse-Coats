@@ -158,9 +158,15 @@
     <em>What was wrong before:</em> <code>LethalFoalHandler</code> skipped the whole
     <code>debug_pens</code> dimension to spare the gallery, and the yard is in that dimension, so no yard
     foal took <code>genetic_defect</code> damage all day. <em>Fix:</em> the skip applies only inside the
-    corridor (<code>|z| &lt;= DebugPenManager.corridorWallZ()</code>). <em>Not verified:</em> the share of
-    <code>H/H</code> foals, which has swung both ways run to run
-    (<a href="known-gaps.html#gap-245">gap 245</a>).
+    corridor (<code>|z| &lt;= DebugPenManager.corridorWallZ()</code>). The share of <code>H/H</code> foals,
+    which once swung both ways run to run (<a href="breeding.html#gap-245">gap 245</a>), is
+    <a href="#verified-ratio">now judged by the pen itself</a>.
+</p>
+<p id="verified-ratio">
+    <strong>Two carriers throw 1&nbsp;:&nbsp;2&nbsp;:&nbsp;1, and every <code>H/H</code> dies</strong> (2026-10-01,
+    the 23:53 yard run on 449e1787, RATIO HYPP judging itself at 40 foals by chi-square at p&nbsp;&lt;&nbsp;0.01):
+    &ldquo;H/H 8, H/N 18, N/N 14 against 1:2:1, chi-square 2.20 (2 df, p 0.333 ...); every H/H dead within
+    120 s of birth - PASS&rdquo; (01:49:11 on 2026-10-02).
 </p>
 
 </section>

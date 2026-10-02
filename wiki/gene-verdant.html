@@ -76,11 +76,11 @@
 </dl>
 
 <div class="note warn">
-    <span class="label">Built 2026-09-04, not yet play-tested</span>
+    <span class="label">Built 2026-09-04, seen in the test yard only</span>
     <p>
-        Nothing has watched a horse change a floor. The conversion lists in
-        particular want a look: the risk is a horse eating something a player built
-        with, and the lists are narrow specifically to avoid that. Checklist on the
+        The yard has watched each cover change a floor (<a href="#yard-floors">below</a>),
+        and a moss horse ate a cobblestone floor there: whether cobblestone and stone
+        stay on its list is an open question. Nobody has played it. Checklist on the
         <a href="#verification">Verification tab</a>.
     </p>
 </div>
@@ -165,6 +165,20 @@
     corridor from the test yard rather than treat the whole dimension as a display case.
 </p>
 
+<p id="yard-floors">
+    <strong>Each cover converts its own list, and a carrier converts nothing</strong> (2026-10-01, the 23:53
+    yard run on 449e1787, row AV east, the VERDANT FLOORS pen: four glass cells, one horse each, every floor
+    block compared after 60 minutes and 1,200 beats; <code>CLOCKWORK PASS</code> at 00:53:44 on 2026-10-02).
+    The <code>mush/moss</code> carrier on dirt and cobblestone: &ldquo;floor unchanged, gene conversions
+    0&rdquo;. <code>mush/mush</code>: &ldquo;podzol-&gt;mycelium=9&rdquo; and no stone changed.
+    <code>grass/grass</code>: &ldquo;dirt-&gt;grass_block=9&rdquo; (4 by the gene, the rest vanilla&rsquo;s
+    own grass spread), podzol and stone untouched. <code>moss/moss</code> on cobblestone with a stone footing:
+    &ldquo;stone-&gt;moss_block=10, cobblestone-&gt;moss_block=15&rdquo; &mdash; so the moss list does eat
+    what players build with, contrary to <a href="#cover">the claim above</a>; which should give is an open
+    question on the Verification tab. Nothing outside the cells changed. These are the dimension&rsquo;s
+    floors, so verdant also spreads in the horse dimension with the guard off.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -172,11 +186,11 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Nothing has watched a verdant horse change a floor, and the gene paints nothing at all,
-    so every check here is a block count off a log &mdash; starting with the one the warn box
-    is actually worried about: <strong>moss eats stone, cobblestone and andesite</strong>, which
-    are things players build with, so a moss horse stabled on a cobbled floor may well eat
-    it.</p>
+    <p>The yard has shown each cover eating its own list and a carrier eating nothing, and
+    that <strong>a moss horse does eat a cobbled floor</strong>, so the question first is the
+    owner&rsquo;s &mdash; whether cobblestone and stone stay on moss&rsquo;s list &mdash; and what
+    is left after it is rooted and coarse dirt, the patch in an open field, the wild rate and
+    the ragged edge.</p>
 </div>
 
 <h3 id="open-gene-verdant">Still open (NOT played)</h3>
@@ -192,46 +206,32 @@
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The carrier does nothing, and that is the control.</strong> A
-        <code>mush/moss</code> horse is <code>verdant-carrier</code>: two variants that are
-        mutually recessive, so it is inert and passes both on. Stand one on its own ground for
-        hours. <strong>Pass:</strong> not one block converted. This is the check that tells a
-        working gene from one that never runs, because a gene that converts nothing looks
-        identical either way.</li>
-    <li><strong>A moss horse on a cobblestone floor &mdash; the one worth doing first.</strong>
-        <code>moss</code>&rsquo;s list is stone, cobblestone, andesite, gravel, dirt, coarse
-        dirt and grass block. <strong>Pass, as the page claims it:</strong> nothing a player
-        built with is eaten. <strong>What the code will actually do:</strong> convert the floor,
-        because cobblestone and stone are on the list. Stable a <code>moss/moss</code> horse on
-        a cobbled floor for an hour and count the moss blocks. If it eats the floor, the list is
-        what is wrong, not the horse &mdash; and this page&rsquo;s claim that &ldquo;nothing on
-        the lists is a block anyone builds with&rdquo; needs correcting either way.</li>
-    <li><strong>Each cover eats only its own list.</strong> Give three matched pairs a floor
-        that is half something on their list and half something that is not.
-        <strong>Pass:</strong> <code>mush/mush</code> takes podzol and rooted dirt;
-        <code>grass/grass</code> takes dirt, coarse dirt and rooted dirt and leaves
-        <em>podzol alone</em>; neither touches stone. The podzol split between mycelium and
-        grass is the sharpest pair, because the two lists differ on exactly that block.</li>
+    <li><strong>Owner's call: should moss eat cobblestone and stone?</strong> It does: the yard's
+        <code>moss/moss</code> horse turned 15 cobblestone and 10 stone into moss blocks in an hour
+        (<a href="#yard-floors">the record</a>), because both are on its list (stone, cobblestone,
+        andesite, gravel, dirt, coarse dirt, grass block). The <a href="#cover">Coding tab</a>
+        still says &ldquo;nothing on the lists is a block anyone builds with&rdquo;. Keep them on
+        the list and correct the page, or take them off?</li>
+    <li><strong>Rooted and coarse dirt.</strong> The yard showed <code>mush/mush</code> taking
+        podzol, <code>grass/grass</code> taking dirt and leaving podzol alone, and neither
+        touching stone (<a href="#yard-floors">the record</a>). Its floors had no rooted or coarse
+        dirt. <strong>Pass:</strong> <code>mush/mush</code> takes rooted dirt;
+        <code>grass/grass</code> takes coarse dirt and rooted dirt.</li>
     <li><strong>It is one block a beat and it stays a patch.</strong>
         <code>SPREAD_RADIUS</code> 2, <code>SPREAD_INTERVAL_TICKS</code> 60,
         <code>SPREAD_CHANCE</code> 0.35, and at most one conversion per beat.
         <strong>Pass:</strong> a horse left in a field for a real session leaves a patch a few
         blocks across, not a new biome, and the count over a measured hour comes out well under
         the theoretical ceiling &mdash; the way <a href="known-gaps.html#gap-208">gap 208</a>
-        predicts for every spreading gene.</li>
+        predicts for every spreading gene. <em>Not answered by the yard:</em> its cells were 7&times;3
+        and 6&times;3, so their hour (25 conversions at most, against 1,200 beats) could not
+        exceed the cap whatever the code did; it needs open ground.</li>
     <li><strong>About one wild horse in a hundred and fifty spreads grass.</strong>
         <code>grass</code> is the commonest variant at 8% per allele, and a matched pair is what
         it takes. <strong>Pass:</strong> the gene row reads <code>grass</code>,
         <code>moss</code> or <code>mycelium</code> at roughly that rate over a lot of wild
         horses, and <code>verdant-carrier</code> far more often &mdash; carriers look exactly
         like everything else, so the row is the only way to see them.</li>
-    <li><strong>It spreads in the horse dimension now the guard is off.</strong> The dimension
-        check in <code>GeneAbilityHandler.spread</code> is commented out (<em>RESTORE BEFORE
-        1.0</em>), which is what made <a href="gene-dryad.html">dryad</a> visible there on
-        2026-09-13 &mdash; but no <em>verdant</em> horse has been stood in the gallery since.
-        <strong>Pass:</strong> a <code>moss/moss</code> horse rewrites the floor it stands on,
-        the same as it would in the overworld. <strong>Fail:</strong> nothing happens, which
-        means the spreading genes differ in a way nothing in the code says they should.</li>
 </ul>
 
 <h4>In the game, with your hands</h4>

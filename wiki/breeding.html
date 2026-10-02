@@ -1794,6 +1794,17 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
     what replaced it.
 </p>
 
+<p id="verified-foal-surnames">
+    <strong>A filly carries her dam&rsquo;s last name and a colt his sire&rsquo;s</strong> (2026-10-01, the
+    23:53 yard run on 449e1787, row AU, the FOAL NAMES pen). One tamed, unowned stallion covered two mares
+    in heat all night, so every foal was named under the default policy; the pen read 48 foals between
+    23:54 and 00:53, 21 fillies and 27 colts, and every one had the right parent&rsquo;s surname
+    (&ldquo;foal 3 is a filly 'Ohio Doge' of dam Shakespearean Doge ... last name is her/his dam
+    Shakespearean Doge's&rdquo;; &ldquo;foal 1 is a colt 'Piebald Sodom' ... his sire Pansexual
+    Sodom's&rdquo;). One full name repeated (foal 6, &ldquo;Rough-Riding Cadance&rdquo;); whether that
+    should be allowed is an <a href="#foal-naming-0924">open question</a>.
+</p>
+
 <p id="verified-family-tree">
     <strong>The family tree&rsquo;s default shrink-to-fit chart reads correctly</strong> (owner-confirmed
     in an early play session; the checklist row carried no date). The other path,
@@ -2326,11 +2337,15 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
     ones. The mechanism is on <a href="#naming-policy">the Coding tab</a>.
 </p>
 <ul>
-    <li><strong>The default, read off a herd rather than a pair.</strong> Breed one pair three
-        or four times over. Every filly should carry her dam's last name and every colt his
-        sire's, and <em>no two foals should share a full name</em> &mdash; that second half is
-        the whole point of the change, and it is what the old schedule failed at only once a
-        herd existed.</li>
+    <li><strong>Owner's call: should full siblings' names be guaranteed unique?</strong> The
+        surname half is <a href="#verified-foal-surnames">verified</a>; the other half of this
+        check was that no two foals share a full name, and the yard's FOAL NAMES pen failed it
+        on 2026-10-02 at 00:00: &ldquo;foal 6 repeats the full name 'Rough-Riding Cadance' of an
+        earlier foal&rdquo;, two fillies of dam Sunset Cadance. That is chance, not a defect:
+        <code>HorseNames.foal</code> rolls the first name from a table of several hundred words
+        and promises nothing about uniqueness, and over the 448 foals born in the yard that night
+        no first name came up more than 5 times, which an even draw gives. <em>Should a clash
+        with a living sibling be re-rolled, or is a rare repeat acceptable?</em></li>
     <li><strong>Both settings do what they say.</strong> In <code>phc/client.toml</code> set
         <code>naming.parentSource = DAM</code>, rejoin, breed: colts now take the dam's last
         name too. Then <code>naming.inheritedHalf = FIRST</code>: the foal keeps the parent's
@@ -2498,6 +2513,10 @@ mare AND (bond &gt;= 50 OR tamed)</code></pre>
     creation and at every chunk load, and no mod code reseeds it.
     <strong>The owner's call:</strong> close this if a third long run is clean, or keep the shadow logging until
     something explains the 0 in 35.
+    <em>A third long run, for that call:</em> the 2026-10-01 23:53 yard run's ratio pens judged themselves at 40
+    foals each, all PASS - HYPP 8&nbsp;:&nbsp;18&nbsp;:&nbsp;14 (chi-square 2.20), lethal white
+    11&nbsp;:&nbsp;21&nbsp;:&nbsp;8 (0.55), size 8&nbsp;:&nbsp;17&nbsp;:&nbsp;15 (3.35), every lethal homozygote dead
+    within 120&nbsp;s. Their shadow tallies were not read for this note.
 </div>
 </section>
 

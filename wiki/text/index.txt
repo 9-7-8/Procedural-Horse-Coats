@@ -3209,6 +3209,7 @@ wiki/item-vet-kit.html#code	coding	Where it lives
 wiki/item-vet-kit.html#fertility-gelding	coding	Gelding reaches the record (shown 2026-09-30)
 wiki/item-vet-kit.html#gaps	coding	Known gaps
 wiki/item-vet-kit.html#gelding	gameplay	What gelding does
+wiki/item-vet-kit.html#gelding-never-covers	coding	A gelding never covers (shown 2026-10-01)
 wiki/item-vet-kit.html#use	gameplay	How to use it
 wiki/item-whistles.html#blow-key	gameplay	One key blows every whistle you carry
 wiki/item-whistles.html#blow-key-code	coding	One key, every whistle (2026-09-29)
