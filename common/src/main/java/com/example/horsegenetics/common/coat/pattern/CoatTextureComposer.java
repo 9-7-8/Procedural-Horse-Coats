@@ -319,8 +319,9 @@ public final class CoatTextureComposer {
         // there is a third eye. Resolved HERE rather than in the overlay pass
         // because an INVISIBLE iris or sclera is not a colour - it means those
         // texels must not be copied back off the template at all, and this is
-        // the copy. See CoatRegions.EyeRedraw.
-        EyePhenotype eyes = Eyes.resolve(genotype, epigenome);
+        // the copy. See CoatRegions.EyeRedraw. A foal's eyes can differ from the
+        // adult's (champagne's blue-green); the texture cache already keys on age.
+        EyePhenotype eyes = Eyes.resolve(genotype, epigenome, adult);
         CoatRegions.EyeRedraw redraw = redrawFor(eyes);
         clearInvisibleEyeTexels(skin, out, template, colour, redraw);
         CoatRegions.redrawEyes(skin, out, template, redraw);

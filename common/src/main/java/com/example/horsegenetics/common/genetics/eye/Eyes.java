@@ -70,6 +70,62 @@ public final class Eyes {
         return new EyePhenotype(right, left, forehead);
     }
 
+    /**
+     * What this horse's eyes look like <b>at this age</b>. An adult is
+     * {@link #resolve(Genotype, Epigenome)}; a foal is the same, except that an
+     * iris whose colour some gene requested with a
+     * {@linkplain EyeRequestContribution#foalIris foal iris} wears that instead.
+     *
+     * <p>"Whose colour some gene requested" is checked twice over: the gene must
+     * be the <b>last</b> writer on that iris locus (the merge rule of
+     * {@link EyeRequest#merge}), and the horse must still <b>carry</b> the allele
+     * it asked for. A horse that was never forced - a genotype-only question, or
+     * an eye allele inherited over the request - fails the second check and shows
+     * its adult eye, which is the honest fallback.
+     *
+     * <p>The hue is kept and only the colour swapped, so the iris still paints,
+     * and still varies, exactly as the adult's does. The third eye is left alone.
+     */
+    public static EyePhenotype resolve(Genotype genotype, Epigenome epigenome, boolean adult) {
+        EyePhenotype eyes = resolve(genotype, epigenome);
+        if (adult) {
+            return eyes;
+        }
+        String[] wonWith = new String[2];
+        Integer[] foal = new Integer[2];
+        int[] sides = {EyeLocus.EyeSideRef.RIGHT, EyeLocus.EyeSideRef.LEFT};
+        for (Gene g : Genes.codeOrder()) {
+            if (!(g instanceof EyeRequestContribution contribution)) {
+                continue;
+            }
+            AllelePair pair = genotype.pair(g);
+            EyeRequest request = contribution.requestEyes(pair, genotype, epigenome);
+            if (request == null || request.isEmpty()) {
+                continue;
+            }
+            for (int i = 0; i < 2; i++) {
+                String token = request.forced().get(EyeLocus.iris(sides[i]));
+                if (token != null) {
+                    wonWith[i] = token;
+                    foal[i] = contribution.foalIris(pair, genotype, epigenome);
+                }
+            }
+        }
+        if (foal[0] == null && foal[1] == null) {
+            return eyes;
+        }
+        return new EyePhenotype(foalEye(eyes.right(), wonWith[0], foal[0]),
+                foalEye(eyes.left(), wonWith[1], foal[1]), eyes.third());
+    }
+
+    private static EyeRender foalEye(EyeRender eye, String wonWith, Integer foalRgb) {
+        if (foalRgb == null || !eye.iris().hue().token().equals(wonWith)) {
+            return eye;
+        }
+        return new EyeRender(new EyeInk(eye.iris().hue(), foalRgb), eye.sector(), eye.sectorInk(),
+                eye.glowIris(), eye.sclera(), eye.glowSclera());
+    }
+
     private static EyeRender eye(Genotype genotype, Epigenome epigenome, int side) {
         EyeColourGene iris = (EyeColourGene) gene(EyeLocus.iris(side));
         EyeSectorGene sector = (EyeSectorGene) gene(EyeLocus.sector(side));

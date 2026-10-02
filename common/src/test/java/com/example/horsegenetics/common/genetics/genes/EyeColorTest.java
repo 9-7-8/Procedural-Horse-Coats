@@ -457,6 +457,46 @@ class EyeColorTest {
                 "the same horse regenerates the same eye");
     }
 
+    /**
+     * <b>A champagne foal is born blue-green</b> (owner, 2026-10-01) and grows
+     * into the rolled adult hue. Baked through the real composer with only the
+     * {@code adult} flag changed, on the same template, so the age signal is
+     * the one thing that can move the iris.
+     */
+    @Test
+    void aChampagneFoalHasBlueGreenEyesAndGrowsIntoItsRolledOnes() {
+        String champagne = with("champagne", "Ch/c");
+        for (long seed : new long[]{3L, 11L, 29L}) {
+            Epigenome epi = Epigenome.fromSeed(seed);
+            Genotype gt = Eyes.force(Genotype.parse(champagne), epi);
+            int[] foal = CoatTextureComposer.compose(gt, epi, Skin.ADULT, false, template(), greyLut());
+            int[] adult = CoatTextureComposer.compose(gt, epi, Skin.ADULT, true, template(), greyLut());
+            assertTrue(bothEyesAre(foal, ChampagneGene.FOAL_BLUE_GREEN), "foal iris is blue-green");
+            assertTrue(bothEyesAre(adult, Eyes.resolve(gt, epi).right().iris().rgb()),
+                    "adult iris is the rolled allele");
+            assertNotEquals(ChampagneGene.FOAL_BLUE_GREEN, iris(adult, 0)[0]);
+        }
+        // A horse with no champagne is the same foal and adult.
+        Epigenome epi = Epigenome.fromSeed(7L);
+        Genotype bay = Eyes.force(Genotype.parse(BAY), epi);
+        assertEquals(Eyes.resolve(bay, epi), Eyes.resolve(bay, epi, false));
+    }
+
+    /**
+     * The foal eye goes only on an iris champagne's request <b>won</b>: a
+     * splashed champagne asked for blue after champagne asked for amber, so it
+     * is blue as a foal too.
+     */
+    @Test
+    void aSplashedChampagneFoalKeepsItsBlueEyes() {
+        String code = with("champagne", "Ch/c", "mitf", "SW1/N");
+        long seed = seedWhere(code, img -> bothEyesAre(img, BLUE));
+        Epigenome epi = Epigenome.fromSeed(seed);
+        Genotype gt = Eyes.force(Genotype.parse(code), epi);
+        int[] foal = CoatTextureComposer.compose(gt, epi, Skin.ADULT, false, template(), greyLut());
+        assertTrue(bothEyesAre(foal, BLUE));
+    }
+
     /** Splash is the blue-eyed pattern, diagnostic even when the white is modest. */
     @Test
     void aSplashHorseHasBlueEyes() {

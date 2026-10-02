@@ -60,4 +60,20 @@ public interface EyeRequestContribution {
      *                  genotype-only question
      */
     EyeRequest requestEyes(AllelePair pair, Genotype genotype, Epigenome epigenome);
+
+    /**
+     * The iris this gene's eyes wear <b>before the horse grows up</b>, as
+     * {@code 0xRRGGBB}, or {@code null} for "the same as the adult's" - which is
+     * every gene but champagne, whose foals are born blue-green.
+     *
+     * <p>Not an allele and never written onto the horse: a foal's eye is a stage,
+     * not a heritable trait, and the adult colour it grows into is the allele
+     * {@link #requestEyes} already wrote. {@link Eyes#resolve(Genotype, Epigenome, boolean)}
+     * applies it only to an iris this gene's request actually <i>won</i> - so a
+     * splashed champagne, whose white locus asked for blue after champagne asked
+     * for amber, is a blue-eyed foal as well as a blue-eyed adult.
+     */
+    default Integer foalIris(AllelePair pair, Genotype genotype, Epigenome epigenome) {
+        return null;
+    }
 }
