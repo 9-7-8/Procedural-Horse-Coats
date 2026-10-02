@@ -1,0 +1,101 @@
+2026-10-02 11:41 (end, local time) - The config key table on wiki/config.html, generated
+
+ASKED
+-----
+- "/process-intake can you do the config one now" - the owner named the To do.txt bullet
+  "A GENERATED config key table on wiki/config.html (owner, 2026-10-01)". Built, retired
+  from intake/To do.txt and intake/Sizing.txt.
+
+DONE
+----
+- d38c3b76 Config key table on wiki/config.html, baked from the four config classes.
+  Missing: no page listed the config keys; config.html said "the option list is not
+  documented anywhere in the wiki yet", and the bullet counted at least eleven server
+  keys named nowhere else.
+  New wiki/tools/bake-config-keys.mjs reads ServerConfig, ClientConfig,
+  BreedSpawningConfig and carts/CartsConfig as source, with ModConfigSpec.Builder's own
+  rules (a comment waits for the next define or push; push/pop build the dotted key),
+  resolves defaults and bounds that name constants from the same file or common/
+  (ReproRules.DEFAULT_NATURAL_CAP and the like), reads an enum key's allowed values off
+  the enum, and writes every key - default, allowed values, its file comment, a link to
+  its feature page - into a BEGIN/END generated span on config.html's new Gameplay tab.
+  Per-breed and per-cart sections are one templated row each (breeds.<breed id>.*,
+  carts.<cart id>.*). The only hand-written part is the script's HOME map, key -> page#anchor.
+  It hard-fails on: a define call it could not read (count of `.define*(` vs rows read),
+  a key with no HOME, a HOME anchor that does not exist, a default it cannot evaluate.
+  --check exits 1 on a stale span.
+  Result: 74 keys (38 server, 18 client, 10 breed-spawning, 2 + 6 carts); 12 are named on
+  no feature page yet and the table marks each one: ride.instant_jump,
+  ride.jump_cooldown_ticks, ride.jump_forward_boost,
+  behaviour.send_home_cooldown_seconds, and the eight cart keys.
+  config.html: eyebrow "Built / the sweep still planned", a Gameplay tab (intro to the
+  three sides, then the table) and a Coding tab (how the bake works, why source rather
+  than a booted spec); the Roadmap tab's hand-written option inventory, which was stale
+  ("right-click to open" is not a client key), replaced by a pointer to the table; footer
+  rewritten. pages.js: config.html moved from "Planned" to "Gameplay" as "Config: every
+  setting"; the section comment updated. styles.css: four rules for table.config-keys.
+  Proof: the bake run green; mutation tests, each reverted - a HOME entry deleted (fails
+  "has no HOME page"), a HOME anchor broken (fails "does not exist"), an uncommented
+  define added to ServerConfig (fails "has no comment"), an unknown defineFancy( added
+  (fails "39 define calls but 38 rows read"), the page hand-edited (--check fails
+  "stale"). Rendered in headless Chrome via wiki/tools/chrome.mjs:
+  config.html#key-server-fertility_nearby_horse_cap opens the Gameplay tab on that row,
+  74 rows, no console errors. :neoforge-26.1.2:build green (no Java changed),
+  check-parity green, check-links --orphans OK, check-roadmap-execution OK.
+- (docs commit) wiki/architecture.html's config bullet said the client file had "one key
+  so far"; it now points at config.html#keys. Search index and wiki/text rebaked
+  (config.txt became config.all/coding/gameplay.txt, as a tabbed page's text does).
+- bake-config-keys.mjs fixed after the code push to keep the page's own line endings:
+  the rebake checked config.html out CRLF (core.autocrlf) and the LF span read as stale
+  on --check. Proven both ways (LF and CRLF copies pass --check). In the docs commit.
+
+DECIDED
+-------
+All without the owner (the bullet settled the what, not the how):
+- Read the Java source rather than boot a game and walk the built ModConfigSpec: the
+  NeoForge module's test classpath has no Minecraft on purpose, and a bake needing a
+  server boot would run less often. A builder shape it does not know fails it. Recorded
+  on config.html's Coding tab (#bake).
+- One templated row per per-breed / per-cart key instead of one per breed.
+- Keys their feature page does not name yet are flagged in the table, not written up on
+  those pages in this run (that would have widened it to carts.html and horse-body.html).
+- Rebake row letter y; the table itself is "a generated span" under rebake's NEVER list.
+
+FOUND ON THE WAY
+----------------
+- wiki/horse-body.html#jumps-0920-meter, the only writing on the instant jump, sits on
+  that page's Verification tab although its heading says "confirmed in play". Left as is;
+  the three ride.* keys link there.
+- My mistake: end-session's pull ran with intake/To do.txt still edited, upstream had
+  changed it (PR #27, 18:40 UTC), so the pull aborted - the abort line was hidden by
+  `| Select-Object -Last 1` - and the push was rejected. Put right with
+  `git pull --rebase --autostash`; nothing lost. end-session step 3c now says so.
+- The previous entry in session-log.html (18:40) is a cloud session stamped in UTC; this
+  one, 11:41 local, is later in real time, so it goes above it.
+
+PROCEDURES
+----------
+- rebake.txt: new row y (bake-config-keys.mjs, then row i).
+- add-a-config-option.txt: step 9 adds the HOME entry and runs the bake (the old "no key
+  table today; do not start one" is gone); before-you-start 2 and see-also point at the
+  table.
+- add-a-gene.txt step 6: a gene's config key gets a HOME and the bake, not a hand entry on
+  config.html.
+- end-session.txt step 3c: commit, then pull --rebase, and read the whole pull output.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No Java changed, so no :common:test class was run; a full :common:test run would check
+  nothing this session touched.
+- Nothing in game. No Verification-tab check added: the table is checked by its bake.
+- The twelve keys named on no feature page are still documented only in the table.
+
+RELEASE
+-------
+Not offered: a wiki-only change, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/process-intake: re-size the treatments PR #27 added (sheep kind, mythical goats, rams,
+reindeer and others) in intake/Sizing.txt first; the next ranked unit is the champagne
+foal blue-green eye (To do.txt, S-M, impact a, owner-free).

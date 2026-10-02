@@ -226,6 +226,13 @@ wiki/compatibility.html#unverified-generated	all	What the generated content has 
 wiki/compatibility.html#waystones	all	Waystones — and the setting that cannot work
 wiki/compatibility.html#waystones-build	all	Three dependencies, and a fourth that is not where you would look
 wiki/compatibility.html#waystones-landing	all	Where the horse comes out — the 3×3×3
+wiki/config.html#bake	coding	How the table is made
+wiki/config.html#keys	gameplay	Every key
+wiki/config.html#keys-breeds	gameplay	Common — .minecraft/phc/breed-spawning.toml
+wiki/config.html#keys-carts	gameplay	Common — .minecraft/config/horsegenetics-carts.toml
+wiki/config.html#keys-carts-client	gameplay	Client — .minecraft/config/horsegenetics-carts-client.toml
+wiki/config.html#keys-client	gameplay	Client — .minecraft/phc/client.toml
+wiki/config.html#keys-server	gameplay	Server — .minecraft/phc/server.toml , overridden per world by <world>/phc/server.toml
 wiki/decisions.html#compatibility-anchors	all	Former anchors
 wiki/decisions.html#decisions	all	Current owners
 wiki/decisions.html#settled	all	Settled owners

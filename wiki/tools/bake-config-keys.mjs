@@ -593,7 +593,10 @@ if (a < 0 || b < 0) {
     console.error(`bake-config-keys: ${PAGE} has no generated span (${BEGIN} ... ${END})`);
     process.exit(1);
 }
-const next = page.slice(0, a) + html + page.slice(b + END.length);
+// In the page's own line endings: a checkout with core.autocrlf hands it back CRLF,
+// and an LF span inside it would read as stale on every --check.
+const nl = page.includes('\r\n') ? '\r\n' : '\n';
+const next = page.slice(0, a) + html.replace(/\n/g, nl) + page.slice(b + END.length);
 if (process.argv.includes('--check')) {
     if (next !== page) {
         console.error(`bake-config-keys: ${PAGE} is stale - run node wiki/tools/bake-config-keys.mjs`);
