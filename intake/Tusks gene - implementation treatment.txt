@@ -57,7 +57,7 @@ Carried over from the head parts, NOT re-asked (Recommended, change if she says 
   type, the rainbow, pink, black, grey, and chaos), two different copies giving a two-tone part from base to tip,
   hue and tone on each copy. ONE colour gene for the whole tusks gene, so every form on a horse is tinted by the same
   gene (a horse with fangs and a horn has both ivory, or both red). White is the wild type, which reads as ivory.
-  It subclasses the shared AbstractPartColourGene, from the foundation unit "Part colour base and hair region".
+  It subclasses the shared AbstractPartColourGene (shipped 2026-10-02; how to subclass it: wiki/model-parts.html#adding).
 - Everything can stack with every other grown part (horn, antlers, the head and body parts).
 
 How each form is built
@@ -114,8 +114,7 @@ Slices (one bullet per session, each shippable alone)
            the colour gene once.
   Slice B: the boar tusks and the sabre fangs together (the two new generators, the four new anchors JAW_* and LIP_*,
            the mixed-pair behaviour made visible: fangs plus a horn on one horse).
-The colour gene subclasses AbstractPartColourGene, from the foundation unit "Part colour base and hair region",
-which ships first (owner, 2026-10-01).
+The colour gene subclasses AbstractPartColourGene (shipped 2026-10-02; how to subclass it: wiki/model-parts.html#adding).
 
 Tests and checks (CLAUDE.md: no full suite; run by name)
 =========================================================

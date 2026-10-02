@@ -73,7 +73,9 @@ STEPS
        b. unblocks other units;
        c. new content.
        A unit the owner flagged in her own words ("most important", "next") goes to
-       the top of its tier.
+       the top of its tier. A unit she NAMES in the command's arguments is the pick; if a
+       foundation it depends on has not shipped, ask once (question tool) whether to
+       build the foundation first in this same run - two commits, one session log.
    - OWNER: can it be built without her? The answer is No if any of these is true:
        - it has an Open: line that is a design call;
        - it says "confirm with the owner";

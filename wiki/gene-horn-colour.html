@@ -98,7 +98,7 @@
 
 <dl class="spec">
     <div><dt>Gene key</dt><dd>horsegenetics.horn_colour</dd></div>
-    <div><dt>Class</dt><dd><code>HornColourGene</code></dd></div>
+    <div><dt>Class</dt><dd><code>HornColourGene extends AbstractPartColourGene</code></dd></div>
     <div><dt>Priority</dt><dd>227 (magical band), in a free run with horn glow and horn dust; only a code-order slot</dd></div>
     <div><dt>Family</dt><dd><strong>Grown parts</strong>, beside the <a href="gene-unicorn-horn.html">unicorn horn</a></dd></div>
     <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha &mdash; that order is also the base-before-tip order</dd></div>
@@ -141,6 +141,17 @@
     Both copies are read, one each, through <code>GeneEpigenetics.copy(slot)</code>
     &mdash; the codominant pattern &mdash; not the expressed copy, which would count one
     allele twice.
+</p>
+
+<h2 id="base">The shared base</h2>
+
+<p>
+    Since 2026-10-02 the rules here live in <code>AbstractPartColourGene</code>, cut out of this
+    class so every grown part can have a colour locus of its own; the first other one is
+    <a href="gene-dragon-horn-colour.html">dragon horn colour</a>. <code>HornColourGene</code> is
+    now a key, a name, a priority and its wording. Nothing about this gene moved:
+    <code>PartColourGeneTest</code> pins its tokens and their order, outcome text, founder shares,
+    epigenome schema and resolved colours to a checksum taken before the move.
 </p>
 
 <h2 id="founders">Founders</h2>
@@ -188,7 +199,7 @@
     The tint multiplies a greyscale sheet, so a colour on the horn is darker than the
     same colour in a swatch. Look at one horn of each colour in daylight and at night:
     red should read red, not brown; yellow should not look olive; black should still
-    show its grain. Adjust the HSV rows in <code>HornColourGene.HUES</code> if not.
+    show its grain. Adjust the HSV rows in <code>AbstractPartColourGene.HUES</code> if not &mdash; shared, so every part colour gene moves with them.
 </p>
 
 <h3 id="open-colour-two-tone">The two-tone fade</h3>

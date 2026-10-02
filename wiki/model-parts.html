@@ -50,7 +50,7 @@
 <h2 id="what-you-see">What a player sees</h2>
 
 <p>
-    One thing, so far: a <a href="gene-unicorn-horn.html">unicorn</a> &mdash; a horse with two
+    First, a <a href="gene-unicorn-horn.html">unicorn</a> &mdash; a horse with two
     copies of a rare recessive grows a tapering horn on its forehead, and about one of those in
     eight has a horn that shines in the dark. How long it is, how thick, how tightly it spirals,
     how far it leans and what colour it is are inherited with the allele and drift over
@@ -74,6 +74,16 @@
     makes them curled, corkscrew, four-horned or scurs, and a tip gene fades the points into a
     colour of their own. The <a href="breed-book.html#mirrorgazer">Mirrorgazer</a> and the
     <a href="breed-book.html#not_a_sheep">Not A Sheep</a> carry them.
+</p>
+
+<p>
+    And <a href="gene-dragon-horns.html">dragon horns</a>, the first of the head parts: two copies
+    of a rare recessive grow a pair behind the ears, swept back over the neck &mdash; swept,
+    straight or curled, and as long, thick, swept back and splayed as the allele says &mdash; on
+    mares and stallions alike, never on a foal. Their colour is
+    <a href="gene-dragon-horn-colour.html">a gene of its own</a> with the horn colour&rsquo;s
+    rules, so a horse&rsquo;s dragon horns and unicorn horn are bred for colour separately. Every
+    part stacks: one horse can wear all four.
 </p>
 
 <p>
@@ -142,8 +152,8 @@
                 region. A tree of these is a part.</td></tr>
         <tr><td><code>PartKind</code></td><td>common</td>
             <td>What a gene asks for. Carries the anchor and the default sheet region. One value
-                today (<code>HORN</code>); a kind arrives <em>with</em> its geometry, never
-                ahead of it.</td></tr>
+                per part, and one per side for a pair (the antlers, ram&rsquo;s horns and dragon
+                horns); a kind arrives <em>with</em> its geometry, never ahead of it.</td></tr>
         <tr><td><code>PartAnchor</code></td><td>common</td>
             <td>Where it roots, as an enum and <strong>never a bone name</strong> &mdash; so
                 <code>common/</code> imports nothing from Minecraft and retargeting an anchor is
@@ -192,7 +202,19 @@
         &mdash; the adult and the foal share bone names and nothing else.</li>
     <li>A region in <code>PartSheet</code> and a <code>paint()</code> call in
         <code>bake-part-sheet.mjs</code>. Keep it a uniform grain; see below.</li>
-    <li>A gene that returns one, and a line in <code>GrownParts.of</code>.</li>
+    <li>A gene that returns one, and a line in <code>GrownParts.of</code> &mdash; and the
+        granting locus added to the every-part baseline in <code>GrownParts.shapes</code>, or its
+        modifier loci look invisible to the editors.</li>
+    <li>Its colour, if it has one of its own (owner, 2026-10-01: colour is its own gene per
+        part): a short subclass of <code>AbstractPartColourGene</code> &mdash; a key, a name, a
+        priority and the <code>Words</code> its outcomes are written in. The alleles, the two-tone
+        rule, the per-copy <code>hue</code>/<code>tone</code>/<code>chaos</code> numbers and the
+        founders come with it. <code>GrownParts.of</code> asks its <code>tintsFor</code> and
+        <code>dressed</code> puts the base and tip on. <a href="gene-dragon-horn-colour.html">Dragon
+        horn colour</a> is the worked example.</li>
+    <li>A soft part (a beard, a ruff, feathering) samples <code>PartSheet.HAIR</code>, a fine
+        lengthwise fibre grain laid down ahead of them; a hard one <code>HORN</code> or
+        <code>BONE</code>.</li>
 </ol>
 
 <p>
@@ -211,6 +233,13 @@
     <code>Slice.regions</code>). Plus a foal gate, as data on the kind. The antlers are also two
     kinds, one per side, rather than one mirrored mesh: a negative scale would turn a culled
     box inside out, and an asymmetric rack wants the sides to differ anyway.
+</p>
+
+<p>
+    <strong>The dragon horns were the head-parts proof</strong> (2026-10-02): a new pair of
+    anchors (<code>NAPE_RIGHT</code>/<code>LEFT</code>, behind the ears), a generator and size
+    ladder beside the ram horn&rsquo;s, and the first part to take its colour from a subclass of
+    the shared colour base. Nothing else moved.
 </p>
 
 <h2 id="three-tiers">The rule that keeps a herd cheap</h2>
@@ -318,9 +347,12 @@
 
 <p>
     <code>part_sheet.png</code> is 64&times;64, cut into a 4&times;4 grid of 16&times;16 regions,
-    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Five regions are
-    painted &mdash; horn and horn tip, antler bone and antler point, and the bloom clumps &mdash; and
-    the rest are room for the parts that have not been written.
+    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Eight regions are
+    painted &mdash; horn and horn tip, antler bone and antler point, the bloom clumps, ram horn and
+    ram tip, and hair &mdash; and the rest are room for the parts that have not been written.
+    The baker repeats every region id by value; <code>PartGeneratorTest.theSheetBakerAgreesWithPartSheet</code>
+    reads it and fails if an id, a <code>paint()</code> call or a <code>PAINTED</code> entry
+    disagrees with <code>PartSheet</code>.
 </p>
 
 <p>
@@ -363,8 +395,8 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        The parts the built machinery has no generator for yet &mdash; dorsal spines and
-        crystalline growths first, then hoof feathering, tufted tails and wings &mdash; plus the
+        The parts the built machinery has no generator for yet &mdash; the five head parts
+        after the dragon horns, dorsal spines and crystalline growths, then hoof feathering, tufted tails and wings &mdash; plus the
         two hooks that would let something other than one gene ask for a part: a breed file, and
         the worn side, so a horse shoe draws through this layer rather than a bespoke one.
     </p>
@@ -404,6 +436,13 @@
     <a href="#adding">the Coding tab</a> &mdash; and none of them needs a new layer.
 </p>
 <ul>
+    <li><strong>The rest of the head parts.</strong> Dragon horns shipped as the proof; five more
+        are scoped with the owner&rsquo;s calls: ear fins or frills (recessive), cheek spikes and a
+        brow ridge (dominant) &mdash; hard parts, new anchors on the head, the count-shown
+        machinery &mdash; then a goat beard (dominant) and a ruff round the neck (recessive), the
+        soft parts on <code>HAIR</code> that foals wear too. Each with its own colour locus on
+        <code>AbstractPartColourGene</code>. The treatment is in <code>intake/</code> until each
+        slice ships.</li>
     <li><strong>Dorsal spines.</strong> A row along the back; needs a <code>SPINE</code> anchor,
         which is the first anchor on the body rather than the head and therefore the first one
         that has to be checked against a body-armour layer.</li>

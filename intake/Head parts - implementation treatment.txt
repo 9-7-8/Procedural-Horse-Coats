@@ -4,12 +4,13 @@ Scoped with the owner. Every "Decided" line below is her call; "Recommended" lin
 mine, not asked; "UNVERIFIED" lines are facts this file has not proved and the building
 session must check first. Source of truth for what exists is wiki/model-parts.html (the
 attached-parts layer) plus the unicorn and antler gene pages. This file is the handoff for
-six new parts that all grow on the head or neck. It is retired (deleted, per /process-intake
+the head and neck parts; the dragon horns (Slice A) shipped 2026-10-02 and are written up on
+wiki/gene-dragon-horns.html and model-parts.html, which is the worked example for the rest. It is retired (deleted, per /process-intake
 step 7) as each slice ships and moves onto those pages' Gameplay and Coding tabs.
 
-The six parts, and nothing more
-===============================
-Dragon horns, ear fins/frills, cheek spikes, brow ridge, goat beard, ruff. Decided: only
+The parts, and nothing more
+===========================
+Ear fins/frills, cheek spikes, brow ridge, goat beard, ruff. Decided: only
 parts stuck to the head (the ruff rides the neck, which is the same bone as the head's
 parent - see its section). NOT in this file: dorsal spines, crystalline growths, wings,
 tails, hoof feathering, tusks (all on model-parts.html's Roadmap tab, unchanged).
@@ -24,7 +25,7 @@ What already exists, so the building session does not redo it
   bone name; FOREHEAD, CROWN_RIGHT, CROWN_LEFT today), PartNode (one box), PartShape (the cache
   key: kind, style, size bucket), PartGenerators (the one door from a shape to a box list),
   HornGenerator and AntlerGenerator (the two worked examples), PartSheet (the 64x64 greyscale
-  sheet in 16x16 regions; five of sixteen painted), AttachedPart (a shape plus the numbers
+  sheet in 16x16 regions; eight of sixteen painted, HAIR among them), AttachedPart (a shape plus the numbers
   applied at draw time, with a base and a tip colour).
 - genetics/GrownParts.of is the ONE door the client asks; the render layer never learns which
   loci grant parts. A new part is a line there, not a change on the Minecraft side.
@@ -52,26 +53,26 @@ What already exists, so the building session does not redo it
 - The part's config is only the client's parts.* switches (parts.enabled and friends); every part is
   gated by them and nothing else. Do not add any.
 
-Decisions that apply to all six
-===============================
+Decisions that apply to all of them
+===================================
 - Decided: everything CAN STACK. A horse may wear a unicorn horn, antlers and dragon horns together,
   each at its own anchor and offsets. There is no exclusion rule and nothing is suppressed. The offsets
   below are chosen so the DEFAULT sizes do not intersect, but extremes of the epigenetic ranges can clip
   through each other; that is accepted, and is a Verification-tab check, not a bug to engineer away.
-- Decided: COLOUR IS ITS OWN GENE PER PART, the way the unicorn horn's is: six new colour genes, each a
+- Decided: COLOUR IS ITS OWN GENE PER PART, the way the unicorn horn's is: one colour gene per part, each a
   codominant locus with the horn's allele set (white wild type, the rainbow, pink, black, grey, and chaos),
   two different copies giving a two-tone part, each copy carrying hue and tone numbers. A colour gene does
-  nothing to a horse without its part. Each is a subclass of AbstractPartColourGene, the shared base built
-  by the foundation unit "Part colour base and hair region" (owner, 2026-10-01: a foundation unit first).
-- Decided: foals wear the SOFT parts only: ear fins/frills, goat beard and ruff. The hard parts - dragon
-  horns, cheek spikes, brow ridge - do not show on a foal, like antlers. This is PartKind.showsOnFoal().
+  nothing to a horse without its part. Each is a subclass of AbstractPartColourGene (shipped 2026-10-02);
+  DragonHornColourGene is the three-line example.
+- Decided: foals wear the SOFT parts only: ear fins/frills, goat beard and ruff. The hard parts - cheek
+  spikes, brow ridge - do not show on a foal, like antlers. This is PartKind.showsOnFoal().
   Soft parts on a foal are scaled with the foal like the horn is (the anchor already applies FOAL_SCALE).
 - Decided: inheritance is per part (below). No part is sex-limited (unlike the antlers' Antm); say so on
   each page so nobody assumes it.
 - Decided: THE PART DOES NOTHING. Like every grown part, no stat, no ability, no hitbox change. Say it plainly
   on each Gameplay tab.
 - Mirrored pairs are TWO KINDS, one per side, not one mesh with a negative scale (a negative scale turns a
-  culled box inside out; the antlers settled this). Dragon horns, ear fins and cheek spikes are pairs; brow
+  culled box inside out; the antlers settled this). Ear fins and cheek spikes are pairs; brow
   ridge, goat beard and ruff are single, centred kinds. A pair is symmetric by default; an asymmetry knob is
   the antlers' ASYMMETRY value if wanted later. Recommended: start symmetric and omit the knob.
 
@@ -81,18 +82,7 @@ Geometry below is a starting proposal in simple tapered boxes, not a drawing; th
 yard decide the final numbers, and every proportion is a pose-stack transform so tuning is cheap. All use
 boxes only. All are static, parented to a bone that already animates.
 
-1. Dragon horns (PartKind DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT)
-   - Inheritance: decided RARE RECESSIVE, two copies needed, like the unicorn horn.
-   - New anchors NAPE_RIGHT, NAPE_LEFT: the back of the skull just behind the base of each ear, so they sit
-     away from the antlers' CROWN anchors (forward of the ears) and the horn's FOREHEAD anchor.
-   - Shape: a chain of 4 to 6 tapering boxes that sweeps BACK over the neck and tips slightly down or up.
-     Styles (topology, baked): swept (a smooth backward curve), straight (an angled spike) and curled (a
-     ram-style curl outward). Size buckets as the horn has.
-   - Epigenome on the granting allele copy: length, girth, sweep (how far it curves) and splay (how far it
-     angles outward). Recommended: also a category for style, like the horn's TWIST.
-   - Sheet: HORN and HORN_TIP (existing). Colour: its own colour gene (above). Not on foals.
-
-2. Ear fins / frills (EAR_FIN_RIGHT, EAR_FIN_LEFT)
+1. Ear fins / frills (EAR_FIN_RIGHT, EAR_FIN_LEFT)
    - Inheritance: decided RARE RECESSIVE.
    - New anchors EAR_RIGHT, EAR_LEFT: on the HEAD bone at the outer base of each ear, NOT on the ear bone.
      UNVERIFIED: whether the vanilla ears animate on their own (a flick or a lay-back). If they do, anchoring
@@ -106,14 +96,14 @@ boxes only. All are static, parented to a bone that already animates.
    - Out of scope for now: a see-through MEMBRANE between the rays. The crystal antlers already draw some
      regions translucent by region through the same layer, so it is possible later; do not build it now.
 
-3. Cheek spikes (CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT)
+2. Cheek spikes (CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT)
    - Inheritance: decided DOMINANT, one copy shows.
    - New anchors CHEEK_RIGHT, CHEEK_LEFT: the side of the head about midway between the eye and the mouth.
    - Shape: two to four short cones pointing outward and a little back. One style, count shown out of
      the most baked (like tines).
    - Epigenome: length, girth, count. Sheet: BONE. Colour: its own colour gene. Not on foals.
 
-4. Brow ridge (BROW, single, centred)
+3. Brow ridge (BROW, single, centred)
    - Inheritance: decided DOMINANT.
    - New anchor BROW: across the front of the skull above and in front of the eyes, LOWER than the unicorn
      horn's FOREHEAD anchor so a horn can still stand on top of it.
@@ -121,7 +111,7 @@ boxes only. All are static, parented to a bone that already animates.
      short cones). Epigenome: width, height, bump size.
    - Sheet: BONE. Colour: its own colour gene. Not on foals.
 
-5. Goat beard (BEARD, single, centred)
+4. Goat beard (BEARD, single, centred)
    - Inheritance: decided DOMINANT.
    - New anchor CHIN: under the tip of the lower jaw.
    - Shape: three to five boxes hanging down and slightly forward, tapering, like a goatee. Static: it does
@@ -129,10 +119,10 @@ boxes only. All are static, parented to a bone that already animates.
    - UNVERIFIED which bone: the vanilla horse's lower jaw may animate (mouth open when grazing). Anchoring
      to the head bone keeps the beard on the skull while the jaw moves; anchoring to the jaw would move
      it with the mouth. Recommended: the head bone. Read HorseModel and say which was used.
-   - Sheet: the HAIR region, from the foundation unit "Part colour base and hair region". Colour: its own
+   - Sheet: the HAIR region (PartSheet.HAIR). Colour: its own
      colour gene. On foals: yes (soft part).
 
-6. Ruff (RUFF, single, a ring)
+5. Ruff (RUFF, single, a ring)
    - Inheritance: decided RARE RECESSIVE.
    - New anchor NECK: the ring sits around the base of the neck. This is the one part not on the head
      bone: it hangs off head_parts, the bone that carries the neck angle (AttachedPartLayer's own comment:
@@ -144,10 +134,10 @@ boxes only. All are static, parented to a bone that already animates.
      neck, so a ruff can clip through both. Check in the dev yard with a maned horse and a barded one.
    - Sheet: HAIR (shared with the beard). Colour: its own colour gene. On foals: yes (soft part).
 
-Genes this adds (twelve)
-========================
-Six granting genes and six colour genes.
-  granting: dragon_horns (recessive), ear_fins (recessive), cheek_spikes (dominant),
+Genes this adds (ten more)
+==========================
+Five granting genes and five colour genes.
+  granting: ear_fins (recessive), cheek_spikes (dominant),
             brow_ridge (dominant), goat_beard (dominant), ruff (recessive)
   colour:   one per granting gene, horn-style, as above
 - Keys follow the house form horsegenetics.<name>. Each granting gene exposes a method that returns its
@@ -155,14 +145,14 @@ Six granting genes and six colour genes.
   each is one line in GrownParts.of, dressed by its colour gene the way dressHorn does.
 - Priorities: magical-band code-order slots only (a part gene paints nothing, so a priority has no coat
   effect, exactly as UnicornHornGene says). The horn's genes occupy 227-229 and the antlers' from 230.
-  UNVERIFIED which slots are free; read the Genes registry for the highest magical priority and take
-  the next free run, keeping each colour gene beside its granting gene as the horn's are.
+  241-247 were free on 2026-10-02 (re-check: read the Genes registry for the highest magical priority and take
+  the next free run), keeping each colour gene beside its granting gene as the horn's are.
 - Founder frequency: numbers to tune when built, in the same spirit as the horn and antlers. Recommended
   starting points: the recessive three at an allele frequency near the unicorn's (about 0.05, which is a
   quarter of a percent of wild horses showing it); the dominant three at a share near the antlers'
   (a small fraction of a percent of horses). The owner tunes them in a dev yard, not here.
 - Copy the horn's isNatural() and rarity settings (UnicornHornGene is the template; check them, they
-  decide whether the gene needs a Science tab per check-gene-tabs.mjs). UNVERIFIED which GeneFamily the six belong to
+  decide whether the gene needs a Science tab per check-gene-tabs.mjs). GeneFamily: MAGIC_PARTS by a MAGICAL_OVERRIDES line each, as the dragon horns did; formerly unverified which family the six belong to
   (it groups them in both gene editors and on the wiki landing page); reuse the horn's family unless the
   owner says otherwise.
 - No breed is changed by this. Breeds can pin any of these genes later through the ordinary "genes" block;
@@ -171,14 +161,12 @@ Six granting genes and six colour genes.
 Slices and order
 ================
 One bullet per session is the rule, so three slices, each shippable alone:
-  Slice A: ONE part, end to end, as the proof - the dragon horns (closest to the horn and antlers; the new
-           NAPE anchors). It waits for the foundation unit "Part colour base and hair region", which builds
-           the shared colour base and HAIR. It settles the pattern, and anything that goes wrong goes
-           wrong once.
+  The worked example for B and C is the dragon horns: wiki/gene-dragon-horns.html, DragonHornsGeneTest,
+           priorities 239-240 (241-247 are the next free run; JSON genes start at 248).
   Slice B: the hard-edged remaining parts that need no new sheet region: ear fins, cheek spikes, brow ridge
            (new anchors EAR_*, CHEEK_*, BROW; the count-shown machinery is already there).
   Slice C: the soft parts that need HAIR and the neck anchor: goat beard and ruff.
-Do not reorder C before A: C introduces the only new sheet region and the only non-head-bone anchor.
+C uses the HAIR region (shipped) and introduces the only non-head-bone anchor.
 
 Tests and checks (CLAUDE.md rules apply: no full suite; run by name)
 =====================================================================
@@ -202,11 +190,12 @@ After each slice ships (procedures/rebake.txt)
   unverified-genes.txt and the generated spans of wiki/pages.js and index.html.
 - Anything in common/: :web:bakeDesignerAssets, then node wiki/tools/check-designer-boots.mjs; and the
   designer / CustomHorseSpawnScreen twin (hard rule 5): the new alleles appear in both editors because the
-  gene list is the same, but UNVERIFIED that the editors need no layout change for twelve more genes.
+  gene list is the same, but UNVERIFIED that the editors need no layout change for ten more genes (two more needed none: the designer booted and both
+  editors list them from the registry).
 - A new sheet region: node neoforge-26.1.2/tools/bake-part-sheet.mjs, which writes part_sheet.png.
-- Wiki pages: a gene page is registered by existing (hard rule 7), so each of the twelve genes that
+- Wiki pages: a gene page is registered by existing (hard rule 7), so each of the ten genes that
   should be listed needs its page with Gameplay, Coding and Science tabs (check-gene-tabs.mjs). Recommended:
-  write the six granting pages in full and the six colour pages short, like the horn colour page. Then
+  write the five granting pages in full and the five colour pages short, like the horn colour page. Then
   build-search-index.mjs, check-links.mjs, bake-agent-text.mjs, and sync-page-views.mjs if a tab moved.
 - model-parts.html: the plan comes off its Roadmap tab and onto Gameplay and Coding as each part ships;
   re-run bake-roadmap-index.mjs and bake-verification-index.mjs after.

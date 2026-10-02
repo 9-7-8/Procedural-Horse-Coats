@@ -1,0 +1,120 @@
+2026-10-02 08:40 (end) - Dragon horns, on a new shared part-colour base
+
+ASKED
+-----
+- "/process-intake the dragon horns" - build Slice A of intake/Head parts - implementation
+  treatment.txt. It depended on the foundation unit "Part colour base and hair region",
+  which had not shipped (AbstractPartColourGene did not exist). Asked with the question
+  tool; the owner chose "Both, this run" (foundation first as its own commit, then the
+  dragon horns). Both shipped.
+
+DONE
+----
+1. 90dc1015 - Part colour base and the HAIR sheet region (the foundation unit, complete).
+   - common/.../genetics/genes/AbstractPartColourGene.java: HornColourGene's allele set
+     (Wht, the rainbow, Pnk Blk Gry, Cha), codominant two-tone rule, per-copy hue/tone/chaos
+     numbers and Hardy-Weinberg founders, parameterised by key, name, priority and a Words
+     record (how its outcomes are worded). HornColourGene is now a subclass.
+   - Proof the move changed nothing: PartColourGeneTest pins a CRC of horn_colour's whole
+     observable state (tokens and order, outcome ids/names/descriptions, founder share of
+     every pair, epigenome schema) and of its resolved tints over every pair and four
+     seeds, both taken on the pre-refactor class. Green after the move; a one-word change
+     to the horn's wording turns it red.
+   - PartSheet.HAIR = 7, a fine lengthwise fibre grain painted by bake-part-sheet.mjs;
+     part_sheet.png rebaked (8 regions painted). No part samples it yet.
+   - New PartGeneratorTest.theSheetBakerAgreesWithPartSheet reads the baker and holds
+     every region id, paint() call and PAINTED entry to PartSheet (it was "checked" only
+     by a comment). A mutated HAIR id in the baker turns it red.
+2. c1b38159 - Grow dragon horns (head parts Slice A).
+   - DragonHornsGene (horsegenetics.dragon_horns, priority 239): Drg/n recessive, HW at
+     0.05 per allele (the unicorn's), either sex, never on a foal. Epigenome: length,
+     girth, form (category of 3), sweep, splay. DragonHornColourGene (240) is a
+     three-line AbstractPartColourGene subclass.
+   - parts/: PartAnchor NAPE_RIGHT/LEFT; PartKind DRAGON_HORN_RIGHT/LEFT (HORN region,
+     not on foals, SOLID glow); DragonHornGenerator (swept / straight / curled, 4 sweep x
+     3 splay buckets, all baked: 36 styles) and DragonHornSize (5 classes, 3 to 22 units);
+     AttachedPart.dragonHorn; cases in PartShape and PartGenerators.
+   - GrownParts.of composes the pair and dresses both sides from the colour locus;
+     dragon horns joined the every-part baseline in GrownParts.shapes so the editors see
+     the colour locus. GeneFamily MAGIC_PARTS overrides, GeneDescriptions, Genes + BUILTINS.
+   - neoforge: AttachedPartLayer.anchor gains NAPE_* with adult {+-2.6, -9.5, 4.5} and a
+     never-drawn foal offset.
+   - Tests green by name: DragonHornsGeneTest (new; mutating the recessive gate to
+     count >= 1 turns it red), PartGeneratorTest, PartColourGeneTest, HornGenesTest,
+     RamHornsGeneTest, AntlersGeneTest, UnicornHornGeneTest, and the 41 test classes that
+     walk Genes.all()/codeOrder()/magicalOrder() plus GeneFamilyTest, EditorRulesTest,
+     CommonPortabilityTest.
+   - Goldens: coat-bake-golden gained 14 rows, all at the baseline hash; coat-golden's
+     hash column is byte-identical, only its genotype-code keys grew (so every line shows
+     in the diff). Both re-run green after copying.
+   - ./gradlew :neoforge-26.1.2:build green (AttachedPartLayer recompiled).
+3. a14b83eb - the gene bake row (bakeGeneBundle .. bakeUnverifiedGenes, gene timeline),
+   both gene pages (wiki/gene-dragon-horns.html, wiki/gene-dragon-horn-colour.html), the
+   designer wasm rebuilt (reachable registry changed); check-designer-boots 4 checks OK,
+   check-parity OK (7163 checks), check-gene-tabs OK.
+4. Docs commit (this log's commit): model-parts.html (gameplay paragraph, adding-a-part
+   now names AbstractPartColourGene and HAIR, sheet count 8, a Roadmap bullet for the five
+   remaining head parts, two stale lines fixed), gene-horn-colour.html (#base section,
+   class line, the HUES pointer), decisions.html pointers, indexes and text rebaked.
+   Intake retired: "Part colour base and hair region - implementation treatment.txt"
+   deleted (both pieces shipped); the dragon horns section and Slice A removed from the
+   head parts treatment (it now lists five parts, ten genes, and points at the dragon
+   horns as the worked example); the "foundation unit ... ships first" notes in the Body
+   parts, Feathering and Tusks treatments replaced with pointers to the shipped base.
+
+DECIDED
+-------
+- Build the foundation and the dragon horns in one run (owner, question tool).
+- Calls made without the owner:
+  - HornColourGene moved onto the base (the treatment left it to the building session),
+    proven unchanged by snapshot. Recorded: gene-horn-colour.html#base; pointer on
+    decisions.html.
+  - Splay is baked into the mesh in three buckets rather than a new AttachedPart field,
+    because the layer's only free rotation is the x lean and a pair needs a per-side z
+    rotation. Recorded: gene-dragon-horns.html#numbers; pointer on decisions.html.
+  - Form is an epigenetic category on the copy (the treatment's Recommended line).
+  - Founders are Hardy-Weinberg with invisible carriers, the unicorn horn's model, as the
+    treatment specified - not the "no invisible carriers" rule for particle-style genes.
+  - Curled horns use 6-10 segments, past the treatment's "4 to 6", so a curl stays round.
+  - HAIR region index 7 (the treatment's Recommended line).
+
+FOUND ON THE WAY
+----------------
+- Two Blk copies never give a one-tone part: each copy keeps its own tone nudge, so the
+  base and tip differ slightly and the part is drawn per segment. True of the unicorn
+  horn already; my first test assumed otherwise and was corrected, not the gene. Not
+  filed - it is the documented per-copy-shade design, though it does make nearly every
+  coloured part a per-segment draw (relevant to gene-horn-colour.html#open-colour-cost).
+- model-parts.html still said "One thing, so far" and "five regions painted"; fixed.
+- A long Bash heredoc failed to parse (the known trap); switched to the Write tool.
+- No bugs filed.
+
+PROCEDURES
+----------
+- process-intake.txt: a unit the owner names in the arguments is the pick, and an
+  unshipped foundation is asked about once (both in one run is allowed).
+- add-a-gene.txt: step 5b (a part's colour locus is an AbstractPartColourGene subclass;
+  soft parts use HAIR); step 7 notes that every new gene rewrites every pipeline-golden
+  line and only the hash column should be compared.
+- rebake.txt row x: the baker/PartSheet drift is now caught by a named test.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every test class that
+  neither walks the registry nor touches parts - breeds, items, villagers, spec parity
+  inside common - none of which this change reaches by reading, but unproven.
+- Nothing here has been seen in game. New Verification checks:
+  gene-dragon-horns.html#open-dragon-placement, #open-dragon-stacking,
+  #open-dragon-foal-size; gene-dragon-horn-colour.html#open-dragon-colour-fade.
+- The HAIR grain has not been looked at on a part (none uses it yet).
+- No server boot: no startup, config or registry-object change, only Java gene statics.
+
+RELEASE
+-------
+Not offered: one new part and its foundation is below release step 1's bar, and 0.5.040
+was cut just before this session.
+
+PICK UP FIRST
+-------------
+Head parts Slice B (ear fins, cheek spikes, brow ridge) by procedures/process-intake.txt -
+or hand the dragon horns to the owner first by procedures/hand-over-a-test.txt.

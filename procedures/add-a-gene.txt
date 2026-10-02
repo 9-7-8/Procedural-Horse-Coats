@@ -269,6 +269,9 @@ STEPS
       AttachedPart(s), with epigenome values on the copy: size, a seed, counts, reach,
       girth, asymmetry, tint. Modifier genes (form, colour, glow, crystal, growth, tip)
       are separate Java genes. A form allele's order equals its generator's habit index.
+   5b. A part's own colour locus (one per part, owner 2026-10-01) is a short subclass of
+      C/genetics/genes/AbstractPartColourGene: key, name, priority, Words. DragonHornColourGene
+      is the example. A soft part (beard, ruff, feathering) samples PartSheet.HAIR.
    6. C/genetics/GrownParts.java: add the call in of(...), plus a dress<X> method. ALSO
       add the granting locus to the everyPart baseline in shapes(Gene). Otherwise its
       modifier genes look invisible to EditorRules.changesLooks, and the editors never
@@ -305,7 +308,9 @@ STEPS
    mismatch, each writes its actual to common/build/. Check WHICH rows moved, then copy
    them to common/src/test/resources/. A gene that paints nothing should only ADD bake
    rows at the baseline hash, and change no pipeline hash. Any other movement is a
-   regression until explained.
+   regression until explained. Every new gene rewrites EVERY pipeline-golden line, because
+   each line's key is the whole genotype code: compare only the last (hash) column, e.g.
+   awk '{print $NF}' on both files with CRs stripped, before copying the actual.
 
 8. The gene page.
    - Three tabs inside article.doc: <section class="tab-panel"

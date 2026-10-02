@@ -772,6 +772,23 @@ wiki/gene-dorsal-wing.html#finding	gameplay	Finding one
 wiki/gene-dorsal-wing.html#inheritance	gameplay	Crossing two of them
 wiki/gene-dorsal-wing.html#layers	coding	What it paints
 wiki/gene-dorsal-wing.html#outcomes	gameplay	What it can come out as
+wiki/gene-dragon-horn-colour.html#base	coding	One short subclass
+wiki/gene-dragon-horn-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-dragon-horn-colour.html#colours	gameplay	The colours, and two-tone pairs
+wiki/gene-dragon-horn-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-dragon-horn-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dragon-horn-colour.html#invented	science	Invented
+wiki/gene-dragon-horn-colour.html#separate	gameplay	Its own gene, not the horn’s
+wiki/gene-dragon-horns.html#anchor	coding	The nape anchor
+wiki/gene-dragon-horns.html#carrot	gameplay	Its gene carrot
+wiki/gene-dragon-horns.html#finding	gameplay	Finding them
+wiki/gene-dragon-horns.html#health	gameplay	Is it good for the horse?
+wiki/gene-dragon-horns.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dragon-horns.html#invented	science	Invented
+wiki/gene-dragon-horns.html#numbers	coding	The epigenome, by cost
+wiki/gene-dragon-horns.html#pattern	coding	The ram horn pattern, with the unicorn’s inheritance
+wiki/gene-dragon-horns.html#recessive	gameplay	Two copies, either sex
+wiki/gene-dragon-horns.html#what-varies	gameplay	What varies
 wiki/gene-dragon-shroud.html#about	coding	Why it is built this way
 wiki/gene-dragon-shroud.html#carrot	gameplay	Its gene carrot
 wiki/gene-dragon-shroud.html#file	coding	The file
@@ -1207,6 +1224,7 @@ wiki/gene-hood.html#finding	gameplay	Finding one
 wiki/gene-hood.html#inheritance	gameplay	Crossing two of them
 wiki/gene-hood.html#layers	coding	What it paints
 wiki/gene-hood.html#outcomes	gameplay	What it can come out as
+wiki/gene-horn-colour.html#base	coding	The shared base
 wiki/gene-horn-colour.html#carrot	gameplay	Its gene carrot
 wiki/gene-horn-colour.html#colours	gameplay	The colours
 wiki/gene-horn-colour.html#door	coding	How the colour reaches the horn

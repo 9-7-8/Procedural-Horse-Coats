@@ -74,8 +74,7 @@ in createHdBodyMesh for a part: that moves the mesh the HD coat UVs are baked ag
   count can show k of N and the last grow in, like tines.
 - Epigenome on the allele copy, one setting for all four legs: length, density (boxes shown), droop (how far the hair
   falls outward), and a front-to-hind ratio. A category for style.
-- Sheet: the HAIR region, built by the foundation unit "Part colour base and hair region" (owner, 2026-10-01). It ships
-  first; this treatment only reuses it.
+- Sheet: PartSheet.HAIR (region 7, shipped 2026-10-02 - wiki/model-parts.html#sheet); this treatment only reuses it.
 - It is a part with NO colour gene, no glow and no translucency: one opaque pass per leg.
 - Rigid in v1. Decided by the "no animation" brief and her earlier note, not asked: no counter-swing. The old plan
   suggested a pure formula (feather.xRot = -0.3 * leg.xRot) so the hair trails the hoof instead of swinging like a rigid

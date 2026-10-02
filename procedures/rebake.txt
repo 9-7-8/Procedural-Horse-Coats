@@ -206,8 +206,9 @@ STEPS
       COMMIT the regenerated data/horsegenetics/structure/*.nbt
 
    x. A part-sheet region (PartSheet.java, or a paint() in the tool)
-      RUN    node T/bake-part-sheet.mjs. Its constants repeat PartSheet's by value, and
-             the two drift silently.
+      RUN    node T/bake-part-sheet.mjs. Its constants repeat PartSheet's by value;
+             --tests '*PartGeneratorTest' (theSheetBakerAgreesWithPartSheet) fails if an
+             id, a paint() call or a PAINTED entry disagrees.
       COMMIT N/assets/horsegenetics/textures/entity/horse/part_sheet.png
 
    A row is missing if a derived, checked-in file has no row. Add the row here in the
