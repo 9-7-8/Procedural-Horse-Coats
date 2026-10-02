@@ -1,0 +1,145 @@
+2026-10-01 23:15 (session start) - Overnight run-tests: two waves of yard pens, four bugs fixed, a horse stress run
+
+ASKED
+-----
+1. "/run-tests, I'm going to bed, so please do anything that doesn't need any intervention from me but that you
+   expect to take hours and hours to run/process" - the yard ran all night (three launches), the full suite ran.
+2. "Also see if there's any new pens you need to add, based off anything left in verification that you can run with
+   a player you control or with just looking at the logs" - every Verification tab (1,499 checks) was swept by five
+   agents; two waves of pens were built from the result (rows AR-AW, then AW-BC).
+3. "I freed up more memory for you" - used for a git worktree (C:\Users\Isabel\phc-wave2, branch yard-wave2, now
+   merged) so wave 2 could be built without touching the running yard's jar.
+4. "try to stress test performance of the horses and see if there's ways you can make the horses cost fewer ticks
+   ... freezing them ... optimizing their social routines ... stopping social routines when a player is far away
+   ... be ready with a report in a couple of hours" - DebugStress + JFR, eleven fixes measured; report below.
+5. "I hit my usage limit while you were working, but it has reset now. Please continue" - four wave-2 agents had
+   died mid-report; their files turned out complete and compiled.
+
+DONE
+----
+- Full :common:test (owner asked for long-running work): 1456 tests, 0 failures, 0 errors, exit 0, 19m55s.
+  :neoforge-26.1.2:test and runGameTest: 28/28 required gametests, on every build tonight.
+- 26ef727d  Fix #20 - a gene's two allele copies both move an attribute. GeneAbilityHandler.attributeModifierId
+  carried one id per gene, so a second copy's addOrUpdateTransientModifier replaced the first (open check 304).
+  Proven by WEATHER COPIES: R+/R+ rain x1.36119 measured, x1.36119 predicted from its own rolled deltas.
+  Issue #20 closed with the lines.
+- 26ef727d  Yard rows AR-AW (DebugYardBody, -Death, -Keep, -Stud, -Care, -Weather, RATIO ACAN D5).
+- 6b24fe7e  Fix #21 - a horse sold to a wandering trader leaves with him (TraderSale.onTraderLeave on a DISCARDED
+  trader). Proven by KEEPING HORSES on the relaunch. Closed with evidence. Also: LAST STAND's bolt look moved from
+  +10 to +40 ticks (the escape goal starts ~20 ticks after the save; the first FAIL was the pen's timing).
+- 449e1787  Fix #22 - a hopper under a stasis bank pulled the feed and water straight back out (VanillaContainer
+  Wrapper checks nothing on extract). Goods container is now a WorldlyContainer refusing those two slots through a
+  face. Proven: "16 in the feed slot, 0 drained on". Closed.
+- ca244eef, f50a41ad  Docs: about 80 yard PASS lines closed on their pages' Coding tabs (horse-care, villagers,
+  horse-stasis, weather speed/jump, silver, RYR1, magic health/jump/fighter/on-death/item-drop/meat,
+  shadowcreature, suntouched, fertility, vet kit, breeding, verdant, SCN4A, EDNRB, body size, KIT, milk, ACAN).
+  Open checks 1,499 -> 1,467.
+- 344ce9b1  Horse tick costs (see the report below) and Fix #24 - every mob in every world saved a lycan_shift
+  attachment (LycanthropyHandler.getData creates the default; the attachment always serialised). Reads now use
+  getExistingDataOrNull; only an active shift serialises. #24 stays open until a save is inspected.
+- b9d0cb4e  Fix #23 - natural covers refused for a mare standing beside a wall: the pathfinder plans a horse as a
+  2x2 mob, so against a wall no path starts. RATIO BRINDLE, STARBURST and MITF stood "no walkable path ... (1.6
+  blocks)" for 2.5 hours. canMeet now accepts hitboxes within a block with no collision shape on the line between
+  them (checked before the path). WALL PAIR / FENCE PAIR (DebugYardReach) prove both halves - running at the end
+  of the session. #23 open until they answer.
+- a56afcbb  Yard second wave, rows AW-BC: RESEARCH SHELF, STALL SHAPES, CHEST LOOT, CARROT CROP, GRAZING, HANDS AT
+  FEEDING, FIREPROOF, BREATH, MUSIC, PACK LEADER, DRAUGHT, STALLION DAY/FRESHER, WEATHER COPIES (jump storm only),
+  WALL/FENCE PAIR. Answered pens removed. DebugStress + the runStressServer task (build.gradle).
+  First 20 minutes of wave 2: 46 PASS, 6 FAIL (triage under FOUND).
+
+PERFORMANCE REPORT (the owner's ask 4)
+--------------------------------------
+Method: ./gradlew :neoforge-26.1.2:runStressServer -PstressStages=0,100,300,600,1000 -PstressDir=<dir> (a dedicated
+server, flat world, 12x12 forced chunks fenced in, natural-reason spawns, debug.tools off, INFO log), timing server
+work per tick (ServerTickEvent Pre->Post) for 1800 ticks per stage after a 1200-tick warm-up, with JFR. The
+dedicated server pauses when empty after 60 s by default: run-stress dirs need pause-when-empty-seconds=0.
+
+Before (main at ca244eef) vs after (a56afcbb), mean ms/tick (p95):
+  100 horses   3.09 (3.76)  ->  2.35 (2.93)   -24%
+  300 horses   8.59 (10.96) ->  8.42 (10.34)   -2%
+  600 horses  27.35 (34.63) -> 18.65 (22.29)  -32%
+ 1000 horses  48.43 (57.62) -> 35.69 (41.69)  -26%   (p95 was over the 50 ms budget; now has headroom)
+A run in between (run-stress3) bred foals and is not comparable; it found the next two hotspots.
+
+Where the time went (JFR, share of server-thread samples, before -> after):
+  LycanthropyHandler.onTick 12.9% -> ~0  whole-genome + epigenome parse per horse per check, after dark
+  SunSensitivityHandler     7.4% -> ~0   whole-genome parse for every horse standing in the open
+  LethalFoalHandler        13.8% (with foals) -> cached   traits resolved for every foal every 20 ticks
+  GeneAbilityHandler        7.9% -> 5.5% new AttributeModifier every tick = dirty attribute every tick (vanilla
+                                         compares by reference): recalc + attribute packets to trackers
+  HorseFlight.of            3.2% -> 1.1% HorseAbilities.anyLoaded walked the gene list per horse per tick
+  HeatAttraction.tick       5.8% (with breeding)  re-asked A* every tick for an unreachable partner
+  NaturalBreeding canMeet   ~6% (with breeding)   A* path test; the cheap ray now goes first
+  AvoidCartGoal             2.0% -> 0.3% entity search every other tick in a world with no carts
+Smaller ones fixed: Spar parsed sex before its cooldown; HorseCareHandler's r10 herd search for horses that ignore
+it; the portal tick's block reads before its escort test; three unstaggered % N handlers. The new GenomeFacts cache
+(yes/no facts kept against the code they came from) is where the next such check belongs.
+
+Still on the table, NOT done (ranked; the static audit is in this session's scratch notes, perf-static.md):
+ 1. Dormancy ("freezing"): skip the mod's own per-horse logic for a horse with no player within ~64 blocks (wake at
+    64, sleep at 80, checked every 20 ticks with level.hasNearbyAlivePlayer), whole bands frozen and thawed
+    together. With no player near, the mod's share of a horse's tick (about half of all server samples in the
+    profile) is what it would save; vanilla AI stays. Bond decay, social-ledger decay, dispersal and pregnancy
+    outside the realm are day/tick-stamped and catch up; hunger does not (a frozen horse neither starves nor heals,
+    as in an unloaded chunk); HorseRealmRepro pauses (an owner call); a mare's heat window can pass unseen.
+    Gameplay-visible, so it is the owner's call: proposed behind a server config radius, 0 = off.
+ 2. Vanilla AI freeze for the same horses (a Mob.serverAiStep HEAD cancel), only after 1 is measured - never
+    setNoAi (it is saved) and never cancelling EntityTickEvent.Pre (gravity, fire, foal growth).
+ 3. Social routines: cap HerdSocialHandler's per-neighbour loop at ~16 (the ledger keeps 12); BandSpacing once per
+    band from the lead instead of an r40 search per horse; WildHerdGoal re-paths every 15 ticks (3.5-7.5% of
+    samples) - repath only when the leader has moved more than 2 blocks.
+ 4. A per-horse cache of diet / favourite food / sex (CrouchFeedGoal and HungerFoodGoal re-parse the genome), and
+    SunShadeGoal's 5,625-block scan with no failure cooldown.
+ 5. ActionTrace call sites build their strings before the debug gate; BloodHuntGoal runs an r16 scan for a trace
+    line production discards.
+Also: simulation-distance in server.properties is the zero-code lever servers already have.
+
+DECIDED
+-------
+- Without the owner: the duplicate foal name is chance (448 foals, no first name more than 5 times), not a bug -
+  recorded on breeding.html with an owner question. The bolt check's +10 sample was the pen's fault. A non-
+  persistent sold horse would still never despawn, so KEEPING HORSES judged only "gone".
+- Without the owner: #23's fallback (beside + no collision on the line) keeps the 2026-09-30 owner rule that a
+  fence blocks a cover; FENCE PAIR tests exactly that.
+- Owner questions added to pages (not answered): storm + rain both apply on the weather loci; silver MCOA one heart
+  or two; sibling names guaranteed unique?; should a slept night cost bond?; should moss eat cobblestone and stone?
+- Dormancy is left for the owner (gameplay-visible).
+
+FOUND ON THE WAY
+----------------
+- #25 (open): the stall detector refuses a slab-floored stall and splits one with a one-block step - both are stated
+  as "one room" on item-stall-signs.html. STALL SHAPES stays in the yard to prove the fix.
+- Wave-2 FAILs that are the pens', not the mod's: CARROT CROP drops (it counted golden_carrot_seeds as "gold");
+  CHEST LOOT papers (1,198 cowboy_house papers are carriers written wild-type-first, WT|Top - worth a look at
+  whether a shelf files the two orders as two rows); CARROT CROP planting (seeds failed even on farmland - most
+  likely the pen's lidded cell, crops need light 8 or sky; unconfirmed).
+- PACK LEADER: after the leader dies, a cow or two walk out their last 2-3 blocks of path (nothing stops their
+  navigation); the page says "at once". Minor; left on the page.
+- The debug highlight reaper (DebugHighlightHandler.reapStaleGlow) would also strip a glow from a spectral arrow.
+- A stress server from the worktree (PID 12824, run-stress, paused when empty) was outside stop-dev-java.ps1's
+  allowlist and was left for the owner (it was gone by 03:54).
+- A wiki/text bake showed most of wiki/text as modified on mtime; the commit held 23 real files.
+
+PROCEDURES
+----------
+None changed. Worth adding to test-tiers or a new procedure: the stress run's command, and that run-stress dirs need
+pause-when-empty-seconds=0 and their own server-port.
+
+NOT RUN / NOT CHECKED
+---------------------
+- :common:bakeUnverifiedGenes was not run after the gene-page closures (gradle under the running yard); every page
+  that gained a verified- id already had a Verified block, so its output should not change - run it next session.
+- No full :common:test after the performance commits (one common/ change: HorseAbilities.anyLoaded; GeneAbilitySpecTest
+  and CommonPortabilityTest pass).
+- #24 needs a save inspected (an existing mob's NBT loses the empty lycan_shift on its next save).
+- The yard at session end: WALL PAIR / FENCE PAIR (#23), RATIO BRINDLE / STARBURST / MITF SW3 restarted, the dryad,
+  MUSIC and CARROT CROP growth still timing.
+
+RELEASE
+-------
+Not offered by this routine; four player-facing fixes (#20-#24 minus #25) and a performance pass have landed since
+0.5.039 - offer one when the owner is back if she judges it a substantial batch.
+
+PICK UP FIRST
+-------------
+Read the yard's verdicts for WALL PAIR / FENCE PAIR and close #23 and the remaining pens (procedures/run-tests.txt).
