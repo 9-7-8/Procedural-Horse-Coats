@@ -126,9 +126,8 @@ STEPS
 7. End the session with end-session. The session log names the issue, the cause, the
    fix commit, the proof (and whether the issue is closed or waiting), and any new
    issues filed along the way.
-   Release by the release procedure, step 1. A fix, even a crash fix, rides along until
-   a bunch of fixes or a new feature is ready; then the patch release is cut without
-   asking (owner's rule: crash fixes batch too).
+   A fix, even a crash fix, rides the next release. Never offer a release for one fix or
+   a handful: release step 1 sets the bar, and the owner decides.
 
 DONE WHEN
 ---------

@@ -101,8 +101,8 @@ STEPS
    wiki/config.html has no key table today; do not start one in passing. Its Roadmap
    tab plans the sweep.
 
-10. Finish with the build and end-session. A new option is a feature: a patch release
-    (release). Under hard rule 10, its default must keep existing worlds behaving as
+10. Finish with the build and end-session. A new option rides the next release
+    (release, step 1). Under hard rule 10, its default must keep existing worlds behaving as
     they did.
 
 DONE WHEN

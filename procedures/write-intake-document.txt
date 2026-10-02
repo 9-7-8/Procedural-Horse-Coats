@@ -278,10 +278,10 @@ L. Testing
    - What can only be judged by eye in a running game?
 
 M. Release - always asked
-   The version is 0.<compat>.<patch>. A finished feature gets a patch release by
-   default, and the building session cuts it without asking (release procedure). So
-   ask the two things that default does not settle:
-   - "Should each piece get its own patch release, or only the last one?" Options:
+   The version is 0.<compat>.<patch>. Releases are the owner's call: a session
+   offers one only once a substantial batch has piled up (release, step 1), and a
+   finished feature counts toward it. So ask the two things that does not settle:
+   - "Should each piece count toward the next release, or only the last one?" Options:
      each piece (Recommended when each is something a player notices) / only the last
      piece / rides with another treatment's release.
    - "Can this keep every existing save loading?" Almost always yes, with a migration

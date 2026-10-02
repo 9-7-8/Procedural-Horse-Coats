@@ -26,8 +26,8 @@ BEFORE YOU START
 STEPS
 -----
 1. Read every queue, cheaply. Take one line per item:
-   a. UNRELEASED WORK on main: `git log --oneline v<last tag>..origin/main`. Is a patch
-      release due (release, step 1: a bunch of fixes, or a new feature)?
+   a. UNRELEASED WORK on main: `git log --oneline v<last tag>..origin/main`. Is a release
+      worth offering (release, step 1: a substantial batch, never a handful of fixes)?
    b. OPEN BUGS and TUNING:
       `gh issue list --state open --search "label:bug,tuning -label:needs-owner"`, plus
       the needs-owner ones, which are waiting on her answers. Note the urgency line of
@@ -44,7 +44,7 @@ STEPS
 
 2. Rank, highest first. The order follows the owner's own priorities:
    a. A released jar that is broken for players (the DAMAGE urgency) -> fix-bug.
-   b. A patch release that is due -> release.
+   b. A release worth offering by release step 1 -> offer it; cut only on her yes.
    c. Anything the owner named last session as "pick up first".
    d. Cheap, high-value work that needs nothing from her:
       - small bugs (fix-bug);
@@ -82,7 +82,7 @@ NEVER
   In that case take the recommendation, and say so.
 - Never read whole pages or every issue body to build the list.
 - Never recommend a visual check above work that can be wrong without anyone seeing it.
-- Never offer a release that is not due, or hold back one that is.
+- Never offer a release below release step 1's bar.
 
 SEE ALSO
 --------

@@ -164,8 +164,8 @@ STEPS
     drift is a purple cube, or an item that will not craft, logging nothing. Family
     members are exempt from the wiki art bake (NOT_ON_A_PAGE).
 
-16. Finish with `./gradlew :neoforge-26.1.2:build` and end-session. A new item is a new
-    feature, so cut a patch release by the release procedure.
+16. Finish with `./gradlew :neoforge-26.1.2:build` and end-session. A new item rides the
+    next release; release step 1 decides whether one is worth offering.
 
 DONE WHEN
 ---------

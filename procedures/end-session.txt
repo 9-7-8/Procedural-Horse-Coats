@@ -85,9 +85,9 @@ STEPS
 9. Stop, with a short summary. Say what shipped, what is newly waiting in
    wiki/verification.html, which procedures step 4a changed or added, and the one thing
    the next session should pick up first.
-   Say too whether a release is due, by release step 1: a bunch of bug fixes (crash
-   fixes included) or a new feature. If one is, cut the patch release by that procedure, unless the owner has
-   said to hold it.
+   If main now holds enough to OFFER a release by release step 1 (a substantial batch,
+   never a handful of fixes), ask the owner with the question tool and cut it only on a
+   yes. Below the bar, say nothing about a release.
    Then stop: no new work, no "while I'm here" refactors.
 
 DONE WHEN

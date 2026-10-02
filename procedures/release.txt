@@ -3,23 +3,25 @@ COMMAND    : /release
 SAY        : "ship a release", "cut a release", "push a release", "release it",
              "new version", "tag it", "is it worth a release"
 RUNS       : local only (the jar cannot build in the cloud sandbox)
-TAKES      : main with bug fixes or a new feature since the last tag
+TAKES      : a substantial batch of unreleased work on main, and the owner's yes
 LEAVES     : every code test green, a tag, a GitHub release with the jar, and the same
              note on wiki/releases.html
 ==============================================================================
 
 WHEN TO USE
 -----------
-Use this in three cases:
-- when the owner asks for a release;
-- when another procedure reaches its release step: process-intake, fix-bug, or
-  end-session's summary;
-- whenever main holds a bunch of bug fixes or a new feature that are not released yet.
+Use this in two cases:
+- when the owner asks for a release - cut it, whatever the size;
+- when another procedure reaches its release step (process-intake, fix-bug, whats-next,
+  end-session's summary). There it only decides whether to OFFER one (step 1).
+A session never cuts a release on its own. Owner, 2026-10-01: "a single fixed bug, or
+even two or three or five, is not enough for a release". The one exception is a
+replacement for a release that is itself broken (step 10).
 Real players install these jars: testers, and the owner's server. They cannot rebuild
 from source or read the session log, so "builds green here" is not "playable there".
 THE VERSION IS 0.<COMPAT>.<PATCH> (owner, 2026-10-01):
-- PATCH, the third number: a session may ALWAYS bump it, without asking. Do it whenever
-  main holds a bunch of bug fixes or a new feature.
+- PATCH, the third number: every ordinary release moves it, without asking WHICH number.
+  WHETHER to release at all is the owner's call (step 1).
 - COMPAT, the second number: a compatibility indicator. It moves only for a substantial
   new feature that cannot be made back-compatible with saves (CLAUDE.md hard rule 10).
   A release that moves it is the only kind that may break saves.
@@ -38,17 +40,22 @@ BEFORE YOU START
 
 STEPS
 -----
-1. Decide whether a release is due. Cut one, without asking, when main holds:
-   - A NEW FEATURE, finished, that a player will notice. One is enough; size is no bar.
-   - A BUNCH OF BUG FIXES. Crash and stuck-player fixes batch like the rest (owner's
-     rule, 2026-10-01): they wait for a bunch or a feature. The one exception is a
-     replacement for a release that is itself broken. It goes at once, and its note says
-     "replaces <version>".
+1. If the owner did not ask for this release, decide whether to OFFER one. Never cut
+   one unasked. Offer only when main holds a SUBSTANTIAL batch of player-facing work
+   since the last tag:
+   - roughly ten or more player-facing bug fixes; or
+   - a substantial finished feature that changes how the game plays - not one small
+     item, config option or tweak; or
+   - a mix of the two that a player would call worth updating for.
+   Five fixes is below the bar. Below it, say nothing about a release: the work waits.
+   Crash and stuck-player fixes batch like the rest. The one exception is a replacement
+   for a release that is itself broken: it goes at once, without asking, and its note
+   says "replaces <version>".
    Docs, intake planning, test-yard or debug-only work (debug tools are off in a real
-   jar) and unfinished features are NOT a reason on their own. They ride along with the
-   next release.
-   If the owner has said to hold a release ("before you cut, implement X too"), hold it.
-   She often batches one more thing in.
+   jar) and unfinished features do not count toward the bar.
+   To offer: one AskUserQuestion naming what has piled up since the last tag, with
+   "not yet" as an option. Cut only on a yes. On "not yet" or "hold" ("before you cut,
+   implement X too"), hold, and do not offer again until substantially more has landed.
 
 2. Decide which number moves.
    a. The patch number, in almost every case.
@@ -61,7 +68,7 @@ STEPS
    c. Any change to a world players already have, in a patch release, must be a built and
       tested migration, never "the note will warn them".
    Ask the owner only what the history and this procedure do not answer, such as a
-   title she may want to lead with. Say in the summary what was cut, and why it was due.
+   title she may want to lead with. Say in the summary what was cut.
 
 3. Run the RELEASE SET from test-tiers: every code test, cheapest first, and stop at the
    first red. After the full :common:test run, record its slowest classes in test-tiers'
@@ -126,7 +133,8 @@ STEPS
 
 DONE WHEN
 ---------
-Either the release was not due (or the owner held it), and the summary says why; or:
+Either no release was offered (below the step 1 bar) or the owner declined or held it,
+and the summary says which; or:
 - the release set is green;
 - `gh release view` lists the jar;
 - the wiki note matches the GitHub note;
@@ -134,6 +142,9 @@ Either the release was not due (or the owner held it), and the summary says why;
 
 NEVER
 -----
+- Never cut a release the owner did not ask for or say yes to, except a replacement for
+  a broken one.
+- Never offer a release below the step 1 bar: a handful of fixes is not one.
 - Never cut a release the owner has said to hold.
 - Never move the compat number for anything but a substantial feature that cannot keep
   saves loading, and never without confirming with the owner.

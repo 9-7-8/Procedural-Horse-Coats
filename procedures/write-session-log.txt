@@ -64,7 +64,7 @@ STEPS
       procedure review produces this list).
    g. NOT RUN / NOT CHECKED: what a full :common:test run would still check, what
       nobody has seen in game, and the Verification-tab anchors added.
-   h. RELEASE: due or not, by release step 1, and what is holding it if it is due.
+   h. RELEASE: whether one was offered by release step 1, and the owner's answer.
    i. PICK UP FIRST: one line naming the next session's first piece of work, and the
       procedure that runs it. whats-next reads this line, so it must be there.
    Write it for a reader who has none of this conversation. Name files, classes,

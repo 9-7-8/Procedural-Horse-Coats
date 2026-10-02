@@ -142,13 +142,13 @@ STEPS
      to it, leave a one-line pointer to where it now lives on the wiki.
    - A To do.txt bullet -> delete it, and its heading if the heading is now empty.
 
-9. End the session with end-session. Then release by the release procedure. A finished
-   feature is a patch release, cut without asking. The treatment's Release: line refines
-   it:
-   - "patch on the last piece", and this is not the last piece -> no release yet;
-   - "rides with <other>" -> no release; it goes out with that one;
+9. End the session with end-session. A finished feature counts toward release step 1's
+   bar; it does not cut a release by itself, and the owner decides. The treatment's
+   Release: line refines what counts:
+   - "patch on the last piece", and this is not the last piece -> does not count yet;
+   - "rides with <other>" -> does not count; it goes out with that one;
    - "compat bump" -> the release procedure confirms it with the owner before cutting;
-   - no Release: line (an older treatment) -> a patch release.
+   - no Release: line (an older treatment) -> counts as one feature.
 
 10. Write the session log by procedures/write-session-log.txt (a new timestamped file;
     end-session step 4b runs it). Under its sections, make sure it has:
