@@ -1,0 +1,96 @@
+2026-10-02 13:00 (start, local time) - Realm breeding: normal speed, paused while nobody is near
+
+ASKED
+-----
+- "/process-intake" - take one unit from intake/ and build it. Picked "Realm breeding
+  pause - implementation treatment.txt" (Tier 1: S-M, impact a, owner-free on paper).
+  Runner-up: Mythical antlered beasts piece 2 (S, b), which only adds Roadmap lines.
+- Owner answers, one question round (step 5), after step 2 found the unit half-built:
+  - Realm speed: "Default to 100 (Recommended)".
+  - Off switch: "Add the switch (Recommended)".
+
+DONE
+----
+- a6b5432a  Realm breeding runs at normal speed, and only while somebody is near.
+  What was missing: the treatment (written 2026-10-01) assumed an unloaded realm mare's
+  due tick simply passes. In fact server/HorseRealmRepro (2026-09-25) already kept a
+  per-horse repro offset and deferred every gap longer than three scans, so the whole
+  cycle (pregnancy, early loss, heat, retry, stallion's day, weaning) already froze for
+  an unloaded realm horse. What it lacked against the treatment: it ran at 25% while
+  loaded (the treatment says normal speed), the freeze could not be turned off, and the
+  breeding line never said anything.
+  The change:
+  - common/realm/RealmClock: the deferral rule (deferred, dormant, note, withNote) and
+    both defaults, with Pace(ratePercent, pauseWhenUnloaded). HorseRealmRepro now only
+    measures the gap and stores RealmClock.deferred(..).
+  - ServerConfig: realm.breeding_rate_percent default 25 -> 100 (from the RealmClock
+    constant); new realm.pause_when_unloaded (default true) with a safe accessor;
+    realmPace() builds the Pace.
+  - ReproHandler.breedingLine -> HorseRealmRepro.withRealmNote: a realm mare's line ends
+    "(stops while nobody is near)", or "(paused in the realm)" at rate 0.
+  Proof: RealmClockTest green (7 tests), and red with the dormant branch mutated to
+  credit the gap (1 failed), then reverted. CommonPortabilityTest green.
+  :neoforge-26.1.2:build green; check-parity OK; check-designer-boots OK. A dev
+  runServer reached Done( with the new key written into the existing server.toml (the
+  only config WARN is NeoForge correcting the file for the new key); the owner's
+  run/phc, run/config and logs were copied aside before and restored after.
+- Docs commit (this one): horse-realm.html Gameplay (#realm-pause), Coding (#repro-clock)
+  and Verification (#verify-breeding rewritten); fertility.html #realm-rate and new
+  #realm-pause; config.html rebaked (bake-config-keys HOME for the new key); verification
+  index, search index and wiki/text rebaked. Retired: intake/Realm breeding pause -
+  implementation treatment.txt deleted, and its block in intake/Sizing.txt.
+
+DECIDED
+-------
+- (owner) realm.breeding_rate_percent defaults to 100. Recorded in ServerConfig's
+  comments and horse-realm.html / fertility.html.
+- (owner) realm.pause_when_unloaded exists, default on.
+- Without the owner: the key lives in realm.* beside the rate, not behaviour.* as the
+  treatment suggested (add-a-config-option: beside its relatives).
+- Without the owner: the mechanism stays HorseRealmRepro's offset clock, not the
+  treatment's recommended "shift every absolute tick by the gap". The offset already does
+  exactly that for every reader at once, and needed no migration.
+- Without the owner: the "paused" wording. The breeding line is only ever built from a
+  loaded horse (info screen, Jade, herd screen all call ReproHandler.breedingLine), so it
+  can never say "paused right now because nobody is near". It says the clock "stops while
+  nobody is near" instead, and "paused in the realm" at rate 0. Recorded on
+  horse-realm.html#repro-clock.
+- Without the owner: no gametest. GameTestServer has no realm dimension (documented on
+  ModGameTests.horse_realm_is_built), so the unload/reload check is the manual one on
+  horse-realm.html#verify-breeding.
+- Off-switch semantics: off credits an unloaded gap at the rate, so off at 100 is plain
+  game time, as the treatment asked.
+
+FOUND ON THE WAY
+----------------
+- A server whose config file already exists keeps realm.breeding_rate_percent = 25: a
+  NeoForge config default only reaches fresh files. That includes the owner's dev
+  run/phc/server.toml and the live server. Edit the key by hand to get normal speed there.
+- The boot logged "Recipe horsegenetics:stasis_chamber can't be placed due to empty
+  ingredients and will be ignored" (WARN). Not touched by this change; not investigated.
+- The first wiki patch was a long Bash heredoc and was cut off (nothing written); redone
+  from a scratchpad script, per the known heredoc limit.
+
+PROCEDURES
+----------
+- process-intake.txt step 2: grep for the mechanism, not only the treatment's words; a
+  unit can be half-built under another name, and then only the remainder is the unit
+  and any clash with what was built is an owner question.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite: it would still check every other common class, though
+  only RealmClock was added in common/.
+- Gametests: none cover the realm's clock (no realm in the harness).
+- Nothing seen in game. Look first at wiki/horse-realm.html#verify-breeding: the breeding
+  line's note, a pregnant mare not moving while you are 200+ blocks away, pause off
+  letting her progress, and rate 0 showing "(paused in the realm)".
+
+RELEASE
+-------
+Not offered: one feature since 0.5.041 is below the bar.
+
+PICK UP FIRST
+-------------
+/process-intake: next by ranking is Mythical antlered beasts piece 2 (plan lines on
+model-parts.html's Roadmap tab; Tier 1, S, b, no owner question).

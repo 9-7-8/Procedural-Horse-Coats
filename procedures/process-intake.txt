@@ -63,6 +63,10 @@ STEPS
    Get the date it was written (`git log --date=short -S 'phrase' -- intake/`) and the
    date the matching work landed. A unit written after that work asks for more than was
    built, so it is still open.
+   Also grep for the MECHANISM, not only the treatment's own words: a treatment can
+   miss code already doing half of it under another name (the realm breeding pause was
+   already HorseRealmRepro's offset clock, 2026-10-02). Then the unit is only the
+   remainder, and any clash with what was built is an owner question for step 5.
    If a unit is already done, delete its text (step 8) and say so in the session log.
    That deletion is not this run's unit: carry on and pick one.
 

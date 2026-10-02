@@ -78,12 +78,6 @@ Horse shoes.txt                                                   sized 2026-10-
 Built? No.
 
 ------------------------------------------------------------------------------
-Realm breeding pause - implementation treatment.txt               sized 2026-10-02
-- One unit: shift pregnancy by unloaded time (pure common/),
-  server config, gametest                                        S-M a  owner-free; one UNVERIFIED: the realm scales no time
-Built? No.
-
-------------------------------------------------------------------------------
 Troughs and salt licks - implementation treatment.txt             sized 2026-10-02
 Gate: after the feeding rules are fixed (check-roadmap-execution).
 - Piece 1: wooden trough, the first block entity, every wood     L  b  No: Open lines (rung, foreign troughs, ...)

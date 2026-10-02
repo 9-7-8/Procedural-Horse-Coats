@@ -75,6 +75,7 @@ const HOME = {
     'ride.jump_forward_boost': 'horse-body.html#jumps-0920-meter',
     'fertility.gestation_days': 'fertility.html#setting',
     'realm.breeding_rate_percent': 'fertility.html#realm-rate',
+    'realm.pause_when_unloaded': 'fertility.html#realm-pause',
     'realm.release_emeralds': 'horse-realm.html#releasing',
     'ops.resurrect_grace_minutes': 'horse-afterlife.html#window',
     'ops.resurrect_budget_mb': 'horse-afterlife.html#window',

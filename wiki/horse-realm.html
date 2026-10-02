@@ -278,16 +278,22 @@
     the arrival block and the whole field was a single ball of horses.
 </p>
 <p>
-    It runs at <strong>a quarter speed</strong> by default. Heat, the wait between covers and
-    the length of a pregnancy are all four times what they are at home. A server owner can
-    change that with <code>realm.breeding_rate_percent</code>, anywhere from 0 to 100; zero
+    It runs at <strong>normal speed</strong> while you are near: heat, the wait between covers
+    and the length of a pregnancy are what they are at home. (Until 2026-10-02 it was a
+    quarter speed; a server whose config file already says 25 keeps that.) A server owner can
+    change it with <code>realm.breeding_rate_percent</code>, anywhere from 0 to 100; zero
     stops it entirely, pregnancies included.
 </p>
-<p>
-    <strong>Nothing at all happens while nobody is there.</strong> A mare left pregnant in an
-    empty realm is exactly as pregnant when somebody next walks in, however long that took.
-    The field does not run in the background, and a server pays nothing for one nobody is
-    visiting.
+<p id="realm-pause">
+    <strong>A horse nobody is near does not move on.</strong> Breeding only advances while the
+    horse is loaded &mdash; while a player is near enough to have her chunk in view. A mare left
+    pregnant on the far side of the field is exactly as pregnant when somebody next walks up to
+    her, however long that took, and she does not catch up when they arrive. It is per horse:
+    a player on the other side of the realm does not count. Her breeding line on the info
+    screen says so, <em>&ldquo;Pregnant &hellip; (stops while nobody is near)&rdquo;</em>, or
+    <em>&ldquo;(paused in the realm)&rdquo;</em> when the rate is 0. A server can turn the pause
+    off with <code>realm.pause_when_unloaded</code>; then unloaded time counts like any other
+    and foals are born off-screen, as in the Overworld.
 </p>
 
 </section>
@@ -681,21 +687,43 @@
     it. One number, in one place. A horse that has never been in the realm has an offset of
     zero and behaves precisely as it did before the class existed.
 </p>
+<p>
+    How much of each gap since a horse&rsquo;s last scan goes onto its offset is a pure rule in
+    <code>common/realm/RealmClock</code> (<code>deferred(gap, scan, Pace)</code>, pinned by
+    <code>RealmClockTest</code>); <code>HorseRealmRepro</code> only measures the gap and
+    stores the answer. <code>Pace</code> carries the two server options and is built only by
+    <code>ServerConfig.realmPace()</code>; both defaults live once, in <code>RealmClock</code>.
+</p>
 <p>That framing is what buys all four requirements at once:</p>
 <ul>
-    <li><strong>The rate.</strong> At 25, a quarter of each elapsed tick is credited and
+    <li><strong>The rate.</strong> <code>realm.breeding_rate_percent</code>, 100 by default
+        since 2026-10-02 (it was 25). At 25, a quarter of each elapsed tick is credited and
         three quarters deferred, so every stage takes four times as long. A rate, not a
         conception chance.</li>
     <li><strong>Zero pauses it</strong>, existing pregnancies included &mdash; which a
         conception-chance reading of the same config could not have done.</li>
-    <li><strong>A dormant realm advances nothing.</strong> If nobody is there the horse is not
-        ticking, so no time is credited <em>and</em> all of it is deferred. The test is the
-        size of the gap since that horse was last scanned: late by more than three of its own
-        periods means it was not being simulated, not that it was being simulated slowly.</li>
+    <li><strong>An unloaded horse advances nothing</strong>
+        (<code>realm.pause_when_unloaded</code>, default on). If nobody is near, the horse is
+        not ticking, so none of the gap is credited. The test is the size of the gap since that
+        horse was last scanned (<code>RealmClock.dormant</code>): late by more than three of its
+        own periods means it was not being simulated, not that it was being simulated slowly.
+        Because the first scan after a load measures the gap and defers it whole, a chunk
+        loaded for a moment leaks nothing. Off, the gap is credited at the rate; at 100 that is
+        plain game time. The timer inventory (2026-10-02): every mod repro stage reads
+        <code>reproTime</code>; the only other breeding wait, the vanilla love cooldown in
+        <code>AgeableMob.age</code>, already only counts while loaded.</li>
     <li><strong>It survives the trip home.</strong> The offset belongs to the horse, not to
         where it is standing, so it stops growing on the way out and is never taken away.
         Clearing it on exit would make a mare instantly, retroactively overdue.</li>
 </ul>
+<p>
+    <code>ReproHandler.breedingLine</code> &mdash; the info screen, Jade and the herd screen
+    all read it &mdash; passes through <code>HorseRealmRepro.withRealmNote</code>, which adds
+    <code>RealmClock.note</code> in brackets for a horse standing in the realm. The line is
+    only ever built from a loaded horse, so it cannot say &ldquo;paused right now because
+    nobody is near&rdquo;; it says instead that the clock <em>stops</em> while nobody is near,
+    which is the thing a player standing there needs to know before walking away.
+</p>
 <p>
     The one place both clocks appear is <code>NaturalBreedingHandler</code>. Her cycle and her
     one try use her repro clock; the three-second courtship, the chat throttles and the log
@@ -1232,15 +1260,27 @@
         you as the owner.</li>
 </ul>
 
-<h3 id="verify-breeding">Breeding and the clock (built 2026-09-25, NOT played)</h3>
+<h3 id="verify-breeding">Breeding and the clock (built 2026-09-25; normal speed and the pause switch 2026-10-02; NOT played)</h3>
+<p>
+    The rule is unit-tested; none of it can run in a gametest, because the harness has no
+    realm dimension (see <code>horse_realm_is_built</code>). Check on a fresh config file, or
+    with <code>realm.breeding_rate_percent = 100</code> set by hand.
+</p>
 <ul>
     <li>Release a mare and a stallion together and leave them. They should band up within ten
-        seconds or so, and cover in about four times the usual time.</li>
-    <li>Leave a pregnant mare in the realm, go away for a long while in the Overworld, and
-        come back. <strong>Her pregnancy should not have moved.</strong> This is the one that
-        cannot be checked any other way, and the one most likely to be wrong.</li>
+        seconds or so, and cover in about the usual time.</li>
+    <li>Read a realm mare&rsquo;s breeding line on the info screen: it should end
+        <em>(stops while nobody is near)</em>.</li>
+    <li>Note a pregnant realm mare&rsquo;s days to go, walk 200+ blocks away inside the realm
+        (or go home) for a game day or more, and come back. <strong>Her days to go should not
+        have moved.</strong> This is the one that cannot be checked any other way, and the
+        one most likely to be wrong. Standing beside her, it should then count down at the
+        normal rate.</li>
+    <li>Set <code>realm.pause_when_unloaded = false</code> and repeat: this time she should
+        have progressed while you were away.</li>
     <li>Set <code>realm.breeding_rate_percent</code> to 0 with a pregnant mare standing
-        there. Nothing should progress. Set it back to 25 and it should resume.</li>
+        there. Nothing should progress and the line should end <em>(paused in the realm)</em>.
+        Set it back to 100 and it should resume.</li>
     <li>Bring a mare who conceived in the realm back to the Overworld. Her pregnancy should
         continue from where it was at ordinary speed, not jump.</li>
 </ul>
