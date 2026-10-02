@@ -85,6 +85,135 @@
     </p>
 </div>
 
+<h2 id="v0-5-038">0.5.038 &mdash; Chaos, realm backups, and server fixes</h2>
+
+<p>
+    A patch release. It adds a new allele on all three mob loci (Chaos), a climate rule for
+    breeds, and backups for the horse realm. It also fixes three bugs found on a live
+    server: mislabelled stable horses, horse AI and the realm forcing chunk loads, and horse
+    armour for mods that aren&rsquo;t installed.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners: read &ldquo;What this does to a world you already have&rdquo; before updating</p>
+    <p>
+        The first start of this version takes a backup of the horse realm, which is a
+        one-off save and a short hitch. Two armours, if your pack ever had them, turn into
+        iron horse armour.
+    </p>
+</div>
+
+<h3 id="v0-5-038-chaos">Chaos: one allele for every modded mob</h3>
+<p>
+    <a href="gene-lycan.html">Lycanthropy</a>, <a href="gene-pack-leader.html">Leader of the
+    pack</a> and <a href="gene-spawner.html">Spawner</a> each gain one new allele,
+    <code>Cha</code> (Chaos). It stands for whatever mobs your other mods add. Each copy of
+    the allele carries a seed, and the server resolves that seed against the mobs actually
+    installed:
+</p>
+<ul>
+    <li><strong>Lycanthropy:</strong> the horse can shift into a modded mob it can wear.</li>
+    <li><strong>Leader of the pack:</strong> the horse leads a peaceful modded mob.</li>
+    <li><strong>Spawner:</strong> the horse can spawn any modded mob.</li>
+</ul>
+<p>
+    Two Chaos copies act only when their seeds agree. A newly made horse carries the same
+    seed on both copies; breeding two Chaos lines keeps them as two lines. Server owners can
+    rule mobs out in the server config: <code>chaos.exclude_mods</code> (by mod id) and
+    <code>chaos.exclude_ids</code> (single mobs, as <code>modid:mob</code>). Both are empty
+    by default. The existing alleles of all three loci are unchanged, and no existing
+    genotype reorders.
+</p>
+
+<h3 id="v0-5-038-climate">Breeds: Nether breeds take heat, cold breeds take cold</h3>
+<ul>
+    <li>Every Nether breed (Netherhorse, Nightmare, Mirrorgazer) now always carries
+        <a href="gene-magic-heat.html">heat tolerance</a> (<code>Htol/Htol</code>).</li>
+    <li>Every breed that spawns in a cold biome carries cold tolerance, more of it the more of
+        its biomes are cold. Bashkir Curly and Percheron now have partial tolerance; Enderpony
+        and Yugoslavian Trotter light; Clydesdale is raised to near-fixed and Yili to partial.
+        The other cold-spawning breeds already met the rule.</li>
+</ul>
+<p>This changes newly spawned horses only.</p>
+
+<h3 id="v0-5-038-realm-backups">Horse realm backups</h3>
+<p>
+    The <a href="horse-realm.html">horse realm</a> is now backed up before anything changes
+    it in a way that could lose horses, and an operator can put its horses back afterwards.
+</p>
+<ul>
+    <li><strong>Automatic:</strong> any realm change that could lose horses (today, the realm
+        floor lift) is backed up once per world, at server start, before any realm chunk
+        ticks. The change does not run until its backup exists; if the backup fails, the
+        change stays off and the log says so.</li>
+    <li><strong>By hand:</strong> <code>/horserealm backup</code>, and
+        <code>/horserealm backups</code> to list them. The newest ten are kept, under
+        <code>&lt;world&gt;/horsegenetics/realm-backups/</code>.</li>
+    <li><strong>Restore:</strong> <code>/horserealm restore [name]</code> shows what restoring
+        would do; <code>/horserealm restore &lt;name&gt; confirm</code> does it. A horse that
+        died or was lost since the backup is brought back, with the same identity, at its old
+        spot on the surface. A living horse stuck inside a block is moved up to the surface:
+        at once if loaded, otherwise when it next loads. A horse that left the realm or is in
+        a stasis chamber is left alone.</li>
+</ul>
+<p>A backup copies the realm&rsquo;s horses only, not its terrain. Operators only (permission level 2).</p>
+
+<h3 id="v0-5-038-fixes">Fixes</h3>
+<ul>
+    <li><strong>#11: a stable horse&rsquo;s breed label is the breed its genes came
+        from.</strong> Stables listing several breeds labelled most of their horses with a breed
+        drawn separately from their genes, so a &ldquo;Falabella&rdquo; could carry a
+        Paint&rsquo;s frame overo, and size, stats and lineage followed the wrong label. Horses
+        already spawned keep the label they were given.</li>
+    <li><strong>#13: less server lag from horses and the horse realm.</strong> The realm floor
+        lift and the realm&rsquo;s water pools loaded the neighbouring chunk on every edge block
+        they wrote. The hunger goal, the hay-portal check and the glow light could also load a
+        chunk just to look at it. None of these load chunks now. Loading a chunk on purpose,
+        where a horse or player is about to arrive, is unchanged.</li>
+    <li><strong>#14: no horse armour for a mod that isn&rsquo;t installed.</strong> A
+        <code>c:</code> tag can name another mod&rsquo;s item as an optional entry, and the mod
+        made a horse armour from it anyway. On a server without Actually Additions or Mana and
+        Artifice, that meant a Black Quartz and a Chimerite Horse Armor, sold by the
+        metalsmith and impossible to forge. A metal now
+        <a href="compatibility.html#generated-installed">counts only if its own mod is
+        loaded</a>. The metalsmith also no longer sells any generated armour that nothing in
+        the pack can forge.</li>
+</ul>
+
+<h3 id="v0-5-038-worlds">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading from here on.</strong> A world made under 0.5.037 or later
+        will load in every later 0.5.x release; only a change of the middle number may break
+        saves, and its note will say so first. See <a href="#saves">the saves promise</a>.</li>
+    <li><strong>A realm backup on first start.</strong> The first start of 0.5.038 saves the
+        world and copies the horse realm&rsquo;s entity files: a one-off hitch, and a few
+        megabytes on disk.</li>
+    <li><strong>Phantom armours become iron horse armour.</strong> If your pack once had a horse
+        armour for a mod that isn&rsquo;t installed (Black Quartz and Chimerite on the server
+        that reported #14), any you own, and any villager trade selling one, now load as iron
+        horse armour. This has not been checked against a real save yet.</li>
+    <li><strong>The generated compatibility pack rebuilds</strong> on first start if your pack
+        lost a phantom armour. That&rsquo;s automatic.</li>
+    <li>Breeds&rsquo; climate changes affect new horses only. Existing horses keep their genes
+        and labels.</li>
+</ul>
+
+<h3 id="v0-5-038-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a>
+        stays open until the live server&rsquo;s logs confirm the chunk loads are gone;
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/12">#12</a> (founder log
+        flags a stable&rsquo;s magic as &ldquo;not on its sheet&rdquo;);
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (stasis bank
+        arrow on the wrong tab). Tuning request
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/15">#15</a> (keep dead
+        horses longer) is not in this release.</li>
+    <li>None of this release has been played in game. The realm backup and restore, the Chaos
+        allele and the armour alias are covered by automated tests only. The list of what is
+        waiting on someone&rsquo;s eyes is on <a href="verification.html">the verification
+        page</a>.</li>
+</ul>
+
 <h2 id="v0-5-037">0.5.037 &mdash; antlers, ram horns, and four new breeds</h2>
 
 <div class="note warn">
