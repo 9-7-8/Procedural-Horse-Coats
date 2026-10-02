@@ -66,7 +66,8 @@ STEPS
    - why now.
    Put the recommendation first, marked "(Recommended)". Put any pending owner
    questions (step 1, items b and f) in the SAME round, so she can answer them while
-   picking.
+   picking. Then record each answer where its work will look for it: a fix pick on its
+   issue as a comment, with needs-owner removed; a design call on decisions.html.
 
 4. Run the chosen option's procedure, from its first step. Do not carry this survey's
    reading into it beyond what that procedure needs.
