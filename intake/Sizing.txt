@@ -102,8 +102,9 @@ Built? No.
 
 ------------------------------------------------------------------------------
 Mythic breeds - biome assignments.txt   (A PROPOSAL)                  sized 2026-10-02
-- One unit: biome/spawn_time/commonness for 59 entries          S  a  No: owner questions (spawn kinds;
-  plain horses one breed or many); rides with each breed as it ships
+- One unit: biome/spawn_time/commonness for 59 entries          S  a  owner answered 2026-10-02 (wild+egg;
+  plain horses one breed, sun teams one breed); rides with each breed as it ships
+- NEW: a breed "names" list field (format change; the two merged breeds need it)   S-M b  owner-free
 Built? No.
 
 ------------------------------------------------------------------------------

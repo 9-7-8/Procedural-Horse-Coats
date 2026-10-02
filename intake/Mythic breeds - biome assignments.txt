@@ -290,8 +290,21 @@ Breeds that are blocked still get biomes
 Several entries cannot ship yet (Sleipnir, Kelpie, Each-uisge, Hippocampus, Hippalektryon, Uchchaihshravas, Nuckelavee, Pegasus and Longma wait on parts or abilities). Their biomes are
 decided now so the file is ready when they are built; until then they should not spawn (a breed file with no genes beyond what exists would spawn a plain horse with a myth's name).
 
-Open questions for the owner
-============================
+Answered by the owner, 2026-10-02 (recorded on wiki/breed-book.html#plan-mythic-breeds)
+=====================================================================================
+- Spawn kinds: wild + spawn_egg only, like the Nether trio.
+- The plain horses (eight Aesir steeds, Freyfaxi, the Irish trio): ONE breed with all twelve names,
+  biomes the union of theirs, uncommon.
+- The sun teams (Helios, Arvakr and Alsvidr, Lampos and Phaethon): ONE sun breed with all the names,
+  spawn_time day, biomes the union of theirs. Its commonness is for design-a-breed to ask.
+- Coasts: as proposed; the blocked sea breeds stay unspawned until built, then recheck the shares.
+- NEW PREREQUISITE: the breed format has no names list (HorseNameGenerator reads none), so those two
+  merged breeds wait on a "names" field, a format change.
+- Still open: named lineages (below). The per-entry blocks above for the merged horses are now
+  superseded by the two merged breeds.
+
+Original open questions (kept for the record)
+=============================================
 - Spawn kinds: wild, spawn_egg, cowboy and stable. Recommended wild + spawn_egg only, like the Nether trio.
 - Whether the plain horses (the eight Aesir horses, Freyfaxi, the Irish trio) should be separate breeds at all. They have no coat, power or look to tell them apart; they could be ONE
   breed or two with many name options, which would avoid a dozen near-identical entries in a spawn pool.

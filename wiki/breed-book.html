@@ -1232,8 +1232,9 @@
     <p>
         The catalogue&rsquo;s backlog is a shopping list, not a commitment: a <strong>continental
         draft cluster</strong> from the Ardennais to the Schleswig Coldblood, the sport-horse
-        books waiting on studbook kinds, and the reindeer mod&rsquo;s breeds, whose wings
-        and horns mean learning to 3D model.
+        books waiting on studbook kinds, the reindeer mod&rsquo;s breeds, whose wings
+        and horns mean learning to 3D model, and the mythic breeds, whose spawning is now
+        decided.
     </p>
 </div>
 
@@ -1333,6 +1334,37 @@
         <a href="compatibility.html#mod-survey">the Bedrock cluster</a> &mdash; ideas and shapes,
         nothing installable.</li>
 </ul>
+
+<h3 id="plan-mythic-breeds">Mythic breeds: how they spawn and which are one breed (owner&rsquo;s call, 2026-10-02)</h3>
+<p>
+    The mythic breeds of <code>intake/Mythic breeds - gene audit.txt</code> take their biomes,
+    <code>spawn_time</code> and commonness from <code>intake/Mythic breeds - biome
+    assignments.txt</code>, with these four answers from the owner:
+</p>
+<ul>
+    <li><strong>Spawn kinds: <code>["wild", "spawn_egg"]</code></strong>, the same as the
+        Nether trio. The cowboy does not sell them and the stable does not hold them.</li>
+    <li><strong>The plain horses are one breed with all their names.</strong> These are the eight
+        Aesir steeds, Freyfaxi, and the Irish trio Attach, Gaoth and Sidhe. Nothing sets them
+        apart, so they become one entry in the spawn pool instead of twelve. Its biomes are the
+        union of theirs, at <code>uncommon</code>.</li>
+    <li><strong>The sun teams are one breed with all their names.</strong> These are the Horses
+        of Helios, Arvakr and Alsvidr, and Lampos and Phaethon. The breed spawns by day, and its
+        biomes are the union of the teams&rsquo; biomes. Whether three <code>very_rare</code>
+        pools merged into one stay <code>very_rare</code> is for design-a-breed to ask.</li>
+    <li><strong>Coast crowding stays as proposed.</strong> The blocked sea breeds (Hippocampus,
+        Kelpie, Each-uisge, Nuckelavee) do not spawn until they are built, so most of that
+        crowding never happens yet. Recheck the beach and stony-shore shares when they ship.</li>
+</ul>
+<p>
+    <strong>Prerequisite:</strong> &ldquo;one breed, many names&rdquo; needs something the
+    format does not have. A breed file cannot list the names its horses draw from, because
+    <a href="breed-format.html">the format</a> has no such field and the
+    <code>HorseNameGenerator</code> reads none. The plain-horse and sun breeds wait on that
+    field. It is a format change, so it lands in every place the format page lists. These two
+    answers settle &ldquo;named individuals versus breeds&rdquo; only for the twelve plain
+    horses and the sun teams. The other named individuals are still open in the audit.
+</p>
 
 </section>
 
