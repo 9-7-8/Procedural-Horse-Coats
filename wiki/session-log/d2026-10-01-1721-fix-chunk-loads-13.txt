@@ -83,7 +83,8 @@ NOT RUN / NOT CHECKED
 RELEASE
 
     Due: the Chaos allele, the breed climate rule, the #11 fix, and now #13. It was held
-    only for #13, which is now in, so nothing is holding it.
+    for #13, which is now in. The owner then chose to fix #14 first and ship both together.
 
-PICK UP FIRST: /release for the next patch (it carries #13's fix to the live server),
-then /review-server-logs on the 2026-10-01 export.
+PICK UP FIRST: /fix-bug #14 (owner, at the end of this session: fix it before the
+release), then /release for the next patch, then /review-server-logs on the 2026-10-01
+export.
