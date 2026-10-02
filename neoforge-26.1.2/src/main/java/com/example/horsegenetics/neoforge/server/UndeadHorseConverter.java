@@ -4,7 +4,6 @@ import com.example.horsegenetics.common.SeededRng;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.BreedLineage;
-import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.horse.HorseRecord;
@@ -79,7 +78,8 @@ import java.util.UUID;
  * has crashed the chunk system before (3.2). And not while a player is riding it
  * (D8), not while it is an unsprung skeleton trap (D5), never a dead or dying one,
  * never a modded subclass (exact types only, D7), never one a debug pen marked
- * {@link #KEEP_VANILLA}, and never at all with {@code undead.convert} off.
+ * {@link #KEEP_VANILLA}, and never at all with {@code undead.convert} off. Which breed
+ * of the pool it becomes is {@code UndeadPools.pick}: one living in its biome first.
  */
 @EventBusSubscriber
 public final class UndeadHorseConverter {
@@ -186,7 +186,9 @@ public final class UndeadHorseConverter {
         UUID uuid = undead.getUUID();
         SeededRng rng = new SeededRng(uuid.getMostSignificantBits() ^ uuid.getLeastSignificantBits(),
                 "undead-conversion");
-        Breed breed = pickBreed(pool, rng);
+        String biome = level.getBiome(undead.blockPosition()).unwrapKey()
+                .map(k -> k.identifier().toString()).orElse(null);
+        Breed breed = com.example.horsegenetics.common.breed.UndeadPools.pick(pool, biome, rng);
         if (breed == null) {
             if (EMPTY_POOLS_REPORTED.add(pool)) {
                 HorseGenetics.LOGGER.warn("[undead] no breed is in the '{}' pool (\"undead_of\") - vanilla {} horses "
@@ -240,20 +242,6 @@ public final class UndeadHorseConverter {
         DebugAnnounce.log("Undead", "a vanilla " + pool + " horse at " + horse.blockPosition().toShortString()
                 + " became " + HorseRecords.of(horse).displayName() + ", a " + breed.name());
         return horse;
-    }
-
-    /** One breed of the pool, uniform and seeded, so a replay picks the same one. */
-    static Breed pickBreed(String pool, SeededRng rng) {
-        List<Breed> members = new ArrayList<>();
-        for (Breed b : Breeds.all()) {
-            if (pool.equals(b.undeadOf())) {
-                members.add(b);
-            }
-        }
-        if (members.isEmpty()) {
-            return null;
-        }
-        return members.get(Math.min(members.size() - 1, (int) (rng.nextFloat() * members.size())));
     }
 
     /**

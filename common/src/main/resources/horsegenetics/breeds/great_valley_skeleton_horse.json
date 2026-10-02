@@ -168,7 +168,7 @@
       "tint": [0, 0.06]
     },
     "horsegenetics.ram_horns": {
-      "shade": [0, 0.05]
+      "shade": [-1, -0.95]
     }
   },
   "notes": [
@@ -177,7 +177,7 @@
     "Passification is Prm/Prm: permanent, one minecraft:bone (offering 14). The offering is an index into PassificationGene.OFFERINGS; check it if that list is ever edited. Diet is Dbone/Dbone, the same item on purpose: hostile until given what it is made of, and kept alive by it after.",
     "Drops Bne/Bne: one to three bones instead of leather. It never drowns - the skeleton locus itself grants the horse underwater breathing - and does not burn in daylight.",
     "Soul fire trails from all four hooves: Bflm/Bflm on the particle locus, site 2 (hooves).",
-    "Every horn-like part is in its pool, all bone and none of them glowing or shedding: the count group draws how many kinds a founder wears - none for about 84 in 100, one kind for 10, two for 5, three for 1.25, all four for about 1 in 640 - and then which. Horn and dragon-horn colour are pinned Bon (bone); antler tint and ram-horn shade are banded to their pale-bone ends; glow, crystal, bloom, dust and coloured tips are pinned off.",
+    "Every horn-like part is in its pool, all bone and none of them glowing or shedding: the count group draws how many kinds a founder wears - none for about 84 in 100, one kind for 10, two for 5, three for 1.25, all four for about 1 in 640 - and then which. Horn and dragon-horn colour are pinned Bon (bone); antler tint is banded to its pale-bone end and ram-horn shade to its bone end (below the wild range); glow, crystal, bloom, dust and coloured tips are pinned off.",
     "Size [0.86, 0.95] matches vanilla's undead horses, which vanilla draws at 1/1.1 of a horse.",
     "Strains. Bleached 65: Wm/Wm white under EWD/EWD, so the bones are locked clean white; a few natural white genes ride along heterozygous as hidden carriers for later generations, never homozygous (several are lethal or nonviable that way). Weathered 35: a dunalino - a red dun (e/e, D/D) with one cream (Cr/N, owner 2026-10-02: it takes the pink out and leaves yellowed bone; double cream washed out and champagne went grey in the preview) - worked over with cracked porcelain and dust, yellowed old bone; Wm and EWD pinned off so neither can land on it.",
     "The look: the skeleton locus lays vanilla's skeleton horse sheet over the finished coat - its alpha cuts away all but the bones, its colour shows through the coat, and its shading is laid back over the top. Both numbers are on the skeleton allele copy and may be banded here once they have been looked at in a game."

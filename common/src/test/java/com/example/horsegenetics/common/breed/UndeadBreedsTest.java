@@ -133,6 +133,76 @@ class UndeadBreedsTest {
         assertEquals("Bon/Bon", g.genotype().pair(Genes.DRAGON_HORN_COLOUR).toTokens());
     }
 
+    private static final Breed BLACKENED = Breeds.get("blackened_skeleton_horse");
+
+    /** A skeleton horse converting in the Nether is Blackened; anywhere else, Great Valley. */
+    @Test
+    void theConversionPoolPrefersABreedThatLivesThere() {
+        for (long seed = 0; seed < 40; seed++) {
+            assertEquals(BLACKENED, UndeadPools.pick("skeleton", "minecraft:soul_sand_valley",
+                    new SeededRng(seed, "pool")));
+            assertEquals(SKELETON, UndeadPools.pick("skeleton", "minecraft:plains", new SeededRng(seed, "pool")));
+            assertEquals(ZOMBIE, UndeadPools.pick("zombie", "minecraft:crimson_forest", new SeededRng(seed, "pool")));
+        }
+        assertEquals(null, UndeadPools.pick("ghost", "minecraft:plains", new SeededRng(1, "pool")));
+    }
+
+    /** Rare overall, and the commonest horse in the Nether (owner, 2026-10-02). */
+    @Test
+    void blackenedIsTheCommonestNetherHorse() {
+        assertTrue(BLACKENED.spawnWeight() < Commonness.UNCOMMON.weight);
+        for (Breed b : Breeds.all()) {
+            if (b != BLACKENED && BreedClimate.isNether(b.biomes())) {
+                assertTrue(BLACKENED.spawnWeight() > b.spawnWeight(), b.id() + " out-spawns Blackened");
+            }
+        }
+        assertTrue(BreedClimate.isNether(BLACKENED.biomes()));
+        assertTrue(BLACKENED.allows(BreedSource.WILD));
+    }
+
+    @Test
+    void blackenedIsAFireproofBlackSkeleton() {
+        for (long seed = 0; seed < 40; seed++) {
+            Genome g = roll(BLACKENED, seed);
+            assertEquals(Undeath.Kind.SKELETON, Undeath.kindOf(g.genotype()));
+            assertEquals("Frp/Frp", g.genotype().pair(Genes.byKey("horsegenetics.fireproof")).toTokens());
+            assertEquals("a/a", g.genotype().pair(Genes.byKey("horsegenetics.agouti")).toTokens());
+            assertEquals("n/n", g.genotype().pair(Genes.MAGIC_WHITE).toTokens());
+            double coat = com.example.horsegenetics.common.genetics.GeneEpigenetics.forGene(Genes.SKELETON,
+                    g.genotype(), g.epigenome()).expressed()
+                    .get(com.example.horsegenetics.common.genetics.genes.SkeletonGene.COAT);
+            assertTrue(coat >= 0.84, "coat_opacity " + coat);
+        }
+    }
+
+    /** Every horn on a skeleton is bone - the ram's horns too, from the shade's bone end. */
+    @Test
+    void aSkeletonsRamHornsAreBone() {
+        for (long seed = 0; seed < 300; seed++) {
+            Genome g = roll(SKELETON, seed);
+            for (AttachedPart p : GrownParts.of(g.genotype(), g.epigenome())) {
+                if (p.kind().ramHorn()) {
+                    int c = p.baseTint();
+                    int r = (c >> 16) & 0xFF, gr = (c >> 8) & 0xFF, b = c & 0xFF;
+                    assertTrue(r >= 0xEA && gr >= 0xE0 && b >= 0xC8,
+                            "a skeleton's ram horn should be pale bone, got " + Integer.toHexString(c));
+                }
+            }
+        }
+    }
+
+    /** No wild founder reaches the bone end: the wild roll is 0..1, as before. */
+    @Test
+    void wildRamHornsNeverRollBone() {
+        for (long seed = 0; seed < 400; seed++) {
+            Genome g = BreedFounder.roll(Breeds.FERAL_MIXED, new SeededRng(seed, "wild-ram"));
+            double shade = com.example.horsegenetics.common.genetics.GeneEpigenetics.forGene(
+                    Genes.RAM_HORNS, g.genotype(), g.epigenome()).expressed()
+                    .get(com.example.horsegenetics.common.genetics.genes.RamHornsGene.SHADE);
+            assertTrue(shade >= 0.0, "a wild ram horn rolled shade " + shade);
+        }
+    }
+
     @Test
     void aCountGroupRoundTripsThroughTheWriter() {
         String written = BreedSpecWriter.write(SKELETON);

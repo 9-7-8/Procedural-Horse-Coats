@@ -86,13 +86,21 @@ public final class RamHornsGene implements Gene {
     public static final String CURL = "curl";
     /** Thickness on top of the size. */
     public static final String GIRTH = "girth";
-    /** Pale horn at 0 to black at 1. */
+    /**
+     * Pale horn at 0 to black at 1 - and, below 0, from pale horn to bare <b>bone</b>
+     * at -1. No wild horse rolls below 0 (the founder roll is 0..1, as it always was), so
+     * the bone end is reached only by a breed that bands it: the skeleton horse, whose
+     * ram's horns are bone like everything else on it (owner, 2026-10-02 - every part that
+     * has bone has a bone version; wiki/model-parts.html#bone-versions).
+     */
     public static final String SHADE = "shade";
 
-    /** The two ends of {@link #SHADE}. */
+    /** The two ends of {@link #SHADE}'s wild range. */
     static final int PALE_HORN = 0xFFDCCDA8;
     /** @see #PALE_HORN */
     static final int BLACK_HORN = 0xFF141110;
+    /** {@link #SHADE} at -1: the antler's pale bone ({@code AntlersGene.PALE_BONE}), so every bone part matches. */
+    static final int BONE = AntlersGene.PALE_BONE;
 
     @Override public String key() { return KEY; }
     @Override public String name() { return "Ram horns"; }
@@ -128,7 +136,7 @@ public final class RamHornsGene implements Gene {
                 EpiValue.uniform(SIZE, 0.0, 0.6).clampedTo(0.0, 1.0),
                 EpiValue.uniform(CURL, 0.0, 1.0).clampedTo(0.0, 1.0),
                 EpiValue.uniform(GIRTH, 0.85, 1.15).clampedTo(0.6, 1.5),
-                EpiValue.uniform(SHADE, 0.0, 1.0).clampedTo(0.0, 1.0));
+                EpiValue.uniform(SHADE, 0.0, 1.0).clampedTo(-1.0, 1.0));
     }
 
     /**
@@ -162,7 +170,12 @@ public final class RamHornsGene implements Gene {
     }
 
     static int shadeOf(double t) {
-        double c = t < 0.0 ? 0.0 : (t > 1.0 ? 1.0 : t);
+        if (t < 0.0) {
+            double b = t < -1.0 ? 1.0 : -t;
+            return 0xFF000000 | lerp(PALE_HORN >> 16, BONE >> 16, b) << 16
+                    | lerp(PALE_HORN >> 8, BONE >> 8, b) << 8 | lerp(PALE_HORN, BONE, b);
+        }
+        double c = t > 1.0 ? 1.0 : t;
         int r = lerp(PALE_HORN >> 16, BLACK_HORN >> 16, c);
         int g = lerp(PALE_HORN >> 8, BLACK_HORN >> 8, c);
         int b = lerp(PALE_HORN, BLACK_HORN, c);
