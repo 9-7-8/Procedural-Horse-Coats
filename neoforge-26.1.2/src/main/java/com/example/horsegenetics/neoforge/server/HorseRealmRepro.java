@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.realm.RealmClock;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -31,21 +32,24 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  *
  * <h2>What the offset buys, in order</h2>
  * <ul>
- *   <li><b>The rate.</b> At {@code realm.breeding_rate_percent} = 25, a quarter
- *       of each elapsed tick is credited and three quarters are deferred, so
- *       heat, the retry window, the stallion's day and gestation all take four
- *       times as long. The treatment's wording exactly: a rate, not a chance.</li>
+ *   <li><b>The rate.</b> {@code realm.breeding_rate_percent}, 100 by default
+ *       (normal speed; 25 until 2026-10-02). At 25 a quarter of each elapsed
+ *       tick is credited and three quarters are deferred, so heat, the retry
+ *       window, the stallion's day and gestation all take four times as long.
+ *       A rate, not a chance.</li>
  *   <li><b>Zero pauses it.</b> Nothing is credited, the horse's clock stands
  *       still, and an existing pregnancy stands still with it - which a
  *       conception-chance reading of the same config could not have done.</li>
- *   <li><b>A dormant realm advances nothing.</b> This is the part an absolute
- *       deadline cannot express on its own. If the realm is empty the horse is
- *       not ticking, so no time is credited <i>and</i> all of it is deferred:
- *       a mare left pregnant in an empty realm is exactly as pregnant when
- *       somebody comes back, however many days later. The test is the size of
- *       the gap since this horse was last seen - a scan that is late by more
- *       than a few of its own periods means the horse was not being simulated,
- *       not that it was being simulated slowly.</li>
+ *   <li><b>An unloaded horse advances nothing</b> ({@code realm.pause_when_unloaded},
+ *       on by default). This is the part an absolute deadline cannot express on
+ *       its own. A horse nobody is near is not ticking, so none of that time is
+ *       credited: a mare left pregnant where nobody goes is exactly as pregnant
+ *       when somebody comes back, however many days later - per horse, so a
+ *       player across the realm does not count. The test is the size of the gap
+ *       since this horse was last seen ({@code RealmClock.dormant}). A momentary
+ *       load does not leak the gap in either: the first scan after loading is
+ *       the one that measures it, and defers it whole. Off, the gap is credited
+ *       at the rate, as if she had been watched.</li>
  *   <li><b>It survives the trip home.</b> The offset is a property of the horse,
  *       not of where it is standing, so it stops growing when the horse leaves
  *       and is never taken away. A mare who spent a month of game time in a
@@ -72,14 +76,6 @@ public final class HorseRealmRepro {
      */
     private static final int SCAN = 40;
 
-    /**
-     * How many of this horse's own scan periods may pass before a gap is read as
-     * "it was not being simulated" rather than "it was simulated slowly". Three,
-     * because one missed scan is ordinary lag and a dormant realm is measured in
-     * minutes or days, never in six seconds.
-     */
-    private static final int DORMANT_AFTER_SCANS = 3;
-
     private static final String OFFSET_KEY = "horsegenetics:repro_offset";
     private static final String SEEN_KEY = "horsegenetics:repro_seen";
 
@@ -103,7 +99,16 @@ public final class HorseRealmRepro {
      * the natural-cover scan asks this directly.
      */
     static boolean reproductionPaused(AbstractHorse horse) {
-        return HorseRealm.isInRealm(horse) && ServerConfig.realmBreedingRatePercent() == 0;
+        return HorseRealm.isInRealm(horse) && ServerConfig.realmPace().stopped();
+    }
+
+    /**
+     * {@code line} as a realm horse's breeding line reads: with a bracketed note
+     * that its clock is paused, or stops while nobody is near, so a still
+     * pregnancy never looks stuck (owner, 2026-10-02). Unchanged elsewhere.
+     */
+    static String withRealmNote(AbstractHorse horse, String line) {
+        return HorseRealm.isInRealm(horse) ? RealmClock.withNote(line, ServerConfig.realmPace()) : line;
     }
 
     @SubscribeEvent
@@ -128,14 +133,7 @@ public final class HorseRealmRepro {
         if (!HorseRealm.isRealm(level)) {
             return;
         }
-        long gap = now - seen;
-        if (gap <= 0L) {
-            return;
-        }
-        int rate = ServerConfig.realmBreedingRatePercent();
-        boolean dormant = gap > (long) SCAN * DORMANT_AFTER_SCANS;
-        long credit = dormant ? 0L : Math.round(gap * (rate / 100.0));
-        long defer = gap - credit;
+        long defer = RealmClock.deferred(now - seen, SCAN, ServerConfig.realmPace());
         if (defer > 0L) {
             data.putLong(OFFSET_KEY, offset(horse) + defer);
         }

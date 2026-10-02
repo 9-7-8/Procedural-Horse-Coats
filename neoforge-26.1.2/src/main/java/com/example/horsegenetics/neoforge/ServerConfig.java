@@ -81,18 +81,24 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  *
  * <h2>realm.breeding_rate_percent</h2>
  * <b>How fast reproduction runs in the horse realm, as a whole percent of
- * normal.</b> 25 by default, meaning every reproductive timer takes four times
- * as long there: heat, the once-a-heat retry, the stallion's day, and
- * gestation. It is a <i>rate</i>, not a chance - 25 does not mean a quarter of
- * covers take, it means the calendar runs at quarter speed, which is the
- * difference between a realm that fills up slowly and one that fills up just as
- * fast with three quarters of the horses disappointed.
+ * normal, while the horse is loaded.</b> 100 by default (owner, 2026-10-02; it
+ * was 25 until then, and a server whose file already says 25 keeps it). At 25
+ * every reproductive timer takes four times as long there: heat, the
+ * once-a-heat retry, the stallion's day, and gestation. It is a <i>rate</i>, not
+ * a chance - 25 does not mean a quarter of covers take, it means the calendar
+ * runs at quarter speed.
  *
  * <p>0 stops it outright, existing pregnancies included. That is only possible
  * because the pacing is a clock rather than a scale factor - see
- * {@code server/HorseRealmRepro}, which also explains why an empty realm
- * advances nothing at all whatever this is set to. Scoped to that one
- * dimension; the Overworld and the debug corridor never read it.
+ * {@code server/HorseRealmRepro}. Scoped to that one dimension; the Overworld
+ * and the debug corridor never read it.
+ *
+ * <h2>realm.pause_when_unloaded</h2>
+ * <b>Whether a realm horse's breeding stands still while nobody is near enough
+ * to keep it loaded.</b> On by default: it does not progress, and does not catch
+ * up when somebody arrives. Off, unloaded time counts at the rate above, so at
+ * 100 a realm foal can be born off-screen exactly as in the Overworld. The rule
+ * is {@code common/realm/RealmClock}.
  *
  * <h2>What none of them can change</h2>
  * <b>All the health genetics are built and inherited regardless.</b> The genes
@@ -260,6 +266,12 @@ public final class ServerConfig {
      * {@code server/HorseRealmRepro}, never here.
      */
     public static final ModConfigSpec.IntValue REALM_BREEDING_RATE;
+
+    /**
+     * <b>{@code realm.pause_when_unloaded}</b> - an unloaded realm horse's
+     * breeding stands still. Read through {@link #realmPace()}.
+     */
+    public static final ModConfigSpec.BooleanValue REALM_PAUSE_WHEN_UNLOADED;
 
     /**
      * <b>{@code realm.release_emeralds}</b> - what turning a horse out into the
@@ -481,15 +493,25 @@ public final class ServerConfig {
                 .defineInRange("fertility.gestation_days",
                         com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS, 1.0, 340.0);
         REALM_BREEDING_RATE = builder
-                .comment("How fast reproduction runs in the horse realm, as a whole percent. (default: 25)",
+                .comment("How fast reproduction runs in the horse realm while a horse is loaded,",
+                        "as a whole percent of normal. (default: 100)",
                         "A rate, not a chance: 25 runs every reproduction timer at a quarter speed,",
                         "so heat, the once-a-heat retry, a stallion's day and gestation all take four",
                         "times as long. It does not mean one cover in four takes.",
                         "0 pauses reproduction there completely, existing pregnancies included.",
-                        "Nothing advances at all while no player is in the realm, whatever this says -",
-                        "an empty field is a still one.",
                         "The horse realm only. The Overworld, and the F6 debug dimension, ignore it.")
-                .defineInRange("realm.breeding_rate_percent", 25, 0, 100);
+                .defineInRange("realm.breeding_rate_percent",
+                        com.example.horsegenetics.common.realm.RealmClock.DEFAULT_RATE_PERCENT, 0, 100);
+        REALM_PAUSE_WHEN_UNLOADED = builder
+                .comment("Whether a horse's breeding in the horse realm stands still while nobody is near",
+                        "enough to keep it loaded. (default: true)",
+                        "On: a mare nobody is near does not progress - pregnancy, heat and the waits",
+                        "between covers - and does not catch up when somebody arrives.",
+                        "Off: unloaded time counts at realm.breeding_rate_percent, as if she had been",
+                        "watched; at 100 that is plain game time, and realm foals are born off-screen.",
+                        "Changing it changes when realm foals are born. Server-side.")
+                .define("realm.pause_when_unloaded",
+                        com.example.horsegenetics.common.realm.RealmClock.DEFAULT_PAUSE_WHEN_UNLOADED);
         REALM_RELEASE_EMERALDS = builder
                 .comment("Emeralds paid for turning one horse out into the horse realm. (default: 2)",
                         "Flat, per horse, whatever the horse is - the realm takes anybody's surplus",
@@ -937,8 +959,23 @@ public final class ServerConfig {
         try {
             return REALM_BREEDING_RATE.get();
         } catch (IllegalStateException notLoaded) {
-            return 25;
+            return com.example.horsegenetics.common.realm.RealmClock.DEFAULT_RATE_PERCENT;
         }
+    }
+
+    /** {@code realm.pause_when_unloaded}, safely. */
+    public static boolean realmPauseWhenUnloaded() {
+        try {
+            return REALM_PAUSE_WHEN_UNLOADED.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.realm.RealmClock.DEFAULT_PAUSE_WHEN_UNLOADED;
+        }
+    }
+
+    /** Both realm breeding settings, as the value {@code common/realm/RealmClock} takes. */
+    public static com.example.horsegenetics.common.realm.RealmClock.Pace realmPace() {
+        return new com.example.horsegenetics.common.realm.RealmClock.Pace(
+                realmBreedingRatePercent(), realmPauseWhenUnloaded());
     }
 
     /** {@code realm.release_emeralds}, safely. */

@@ -293,7 +293,8 @@ public final class ReproHandler {
         if (horse.isBaby() || !HorseRecords.hasRealRecord(horse) || HorseRecords.of(horse).sex() != Sex.FEMALE) {
             return "";
         }
-        return ReproText.breedingLine(of(horse), HorseRealmRepro.reproTime(horse), ServerConfig.reproTiming());
+        return HorseRealmRepro.withRealmNote(horse,
+                ReproText.breedingLine(of(horse), HorseRealmRepro.reproTime(horse), ServerConfig.reproTiming()));
     }
 
     /**
