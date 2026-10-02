@@ -36,8 +36,20 @@ import java.util.Set;
  */
 public final class DebugPhotoShoot {
 
-    /** One picture: a file name, a sex, a genetic code, and a dragon horn form or -1 for any. */
-    public record Shot(String name, Sex sex, String code, int dragonForm) {}
+    /**
+     * One picture: a file name, a sex, a genetic code, a dragon horn form or -1 for any,
+     * and the framing. A code of {@code breed:<id>} rolls a founder of that breed instead,
+     * re-rolled until every {@code <key>=<pair>} after a {@code |} is on it - how a shot asks
+     * for one strain, or one of a count group's horns.
+     */
+    public record Shot(String name, Sex sex, String code, int dragonForm, Framing framing) {
+        public Shot(String name, Sex sex, String code, int dragonForm) {
+            this(name, sex, code, dragonForm, Framing.HEAD);
+        }
+    }
+
+    /** Head and shoulders (the default), the whole horse side-on, or a whole foal. */
+    public enum Framing { HEAD, WIDE, FOAL }
 
     private static final String BAY = "horsegenetics.extension=E/E-horsegenetics.agouti=A/A";
     private static final String BLACK = "horsegenetics.extension=E/E-horsegenetics.agouti=a/a";
@@ -122,6 +134,9 @@ public final class DebugPhotoShoot {
         horse.setYRot(90f);
         horse.setYBodyRot(90f);
         horse.setYHeadRot(90f);
+        if (shot.framing() == Framing.FOAL) {
+            horse.setAge(-24000);
+        }
         HorseRecords.apply(horse, record(horse, shot));
         level.addFreshEntity(horse);
         current = horse;
@@ -138,6 +153,17 @@ public final class DebugPhotoShoot {
         double ex = tx - 1.5;
         double ey = ty + 0.5;
         double ez = tz + 2.0;
+        if (shot.framing() != Framing.HEAD) {
+            // The whole horse from a little forward of side-on, for a look that is the
+            // whole body (the skeleton's cut-outs). A foal is half the size, so half the way.
+            double k = shot.framing() == Framing.FOAL ? 0.6 : 1.0;
+            tx = hx - 0.3 * k;
+            ty = origin.getY() + 1.05 * k;
+            tz = hz;
+            ex = tx - 1.2 * k;
+            ey = ty + 0.45 * k;
+            ez = tz + 2.9 * k;
+        }
         double dx = tx - ex;
         double dy = ty - ey;
         double dz = tz - ez;
@@ -151,6 +177,9 @@ public final class DebugPhotoShoot {
 
     /** A founder for this shot - re-rolled until a dragon horn form, if one is asked for, is expressed. */
     private static HorseRecord record(Horse horse, Shot shot) {
+        if (shot.code().startsWith("breed:")) {
+            return breedRecord(horse, shot);
+        }
         Genotype genotype = Genotype.parse(shot.code());
         HorseRecord rec = null;
         for (int attempt = 0; attempt < 200; attempt++) {
@@ -165,6 +194,48 @@ public final class DebugPhotoShoot {
                 return rec;
             }
         }
+        return rec;
+    }
+
+    /** A founder of the shot's breed carrying every pair the shot asks for, or the last try. */
+    private static HorseRecord breedRecord(Horse horse, Shot shot) {
+        String[] parts = shot.code().substring("breed:".length()).split(java.util.regex.Pattern.quote("|"));
+        com.example.horsegenetics.common.breed.Breed breed =
+                com.example.horsegenetics.common.breed.Breeds.get(parts[0]);
+        // "+key=pair" is stamped onto the roll (BreedFounder's forced pairs, so the breed's
+        // other pins and bands still apply); "key=pair" is waited for by re-rolling.
+        List<com.example.horsegenetics.common.genetics.AllelePair> forced = new java.util.ArrayList<>();
+        for (int i = 1; i < parts.length; i++) {
+            if (parts[i].startsWith("+")) {
+                String[] kv = parts[i].substring(1).split("=");
+                com.example.horsegenetics.common.genetics.Gene gene = Genes.byKey(kv[0]);
+                String[] ab = kv[1].split("/");
+                forced.add(new com.example.horsegenetics.common.genetics.AllelePair(
+                        gene.fromToken(ab[0]), gene.fromToken(ab[1])));
+            }
+        }
+        HorseRecord rec = null;
+        for (int attempt = 0; attempt < 400; attempt++) {
+            NeoRng rng = new NeoRng(horse.getRandom());
+            com.example.horsegenetics.common.genetics.Genome genome =
+                    com.example.horsegenetics.common.breed.BreedFounder.roll(breed, rng, shot.sex(), forced);
+            com.example.horsegenetics.common.name.HorseNameGenerator.NameParts name = HorseRecords.newNameParts(rng);
+            rec = HorseRecord.founder(horse.getUUID(), name.first(), name.last(), genome,
+                    com.example.horsegenetics.common.breed.BreedLineage.pure(breed.id()).toToken());
+            Genotype g = rec.genome().genotype();
+            boolean all = true;
+            for (int i = 1; i < parts.length && all; i++) {
+                if (parts[i].startsWith("+")) {
+                    continue;
+                }
+                String[] kv = parts[i].split("=");
+                all = g.pair(Genes.byKey(kv[0])).toTokens().equals(kv[1]);
+            }
+            if (all) {
+                return rec;
+            }
+        }
+        com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.warn("[photo] {}: no founder matched", shot.name());
         return rec;
     }
 
