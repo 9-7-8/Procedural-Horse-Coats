@@ -105,6 +105,9 @@ STEPS
       form with -FilePath gradlew.bat (a cmd.exe /c wrapper launches nothing), after checking that
       no client holds the run directory. A DirectoryLock IOException means the owner's
       game is open; it does not mean a bad registration.
+      The boot overwrites run/logs/latest.log and debug.log, which hold the owner's last
+      play session. Copy them aside first, with run/phc/ and run/config/, and put all of
+      them back after step d.
    b. Poll the log for "Done (" or "BUILD FAILED", then stop it with `pwsh -File tools/stop-dev-java.ps1`
       (-WhatIf first). NEVER by matching "nogui": the live server's command line ends in
       "nogui" too, and that match is what killed it on 2026-10-01.

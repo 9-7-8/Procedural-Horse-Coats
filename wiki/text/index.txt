@@ -2896,6 +2896,8 @@ wiki/horse-browser.html#log-reason	coding	A refusal is a constant, not a string
 wiki/horse-browser.html#log-refresh	gameplay	Refresh
 wiki/horse-browser.html#log-strip	coding	It needed no new tab-strip work
 wiki/horse-browser.html#refresh-built	coding	The roster refreshes on every open (2026-09-24)
+wiki/horse-browser.html#send-home	gameplay	Send home — free, from anywhere
+wiki/horse-browser.html#send-home-free-built	coding	Send home is free, and can be priced (2026-10-02)
 wiki/horse-care.html#band-code	coding	Band life
 wiki/horse-care.html#bands	gameplay	3. Wild bands
 wiki/horse-care.html#bareback-steering	gameplay	Bareback steering — what the top tier is for

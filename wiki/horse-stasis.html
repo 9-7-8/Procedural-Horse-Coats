@@ -344,7 +344,8 @@
 <h2 id="send-home-gameplay">Sending a horse home without going to fetch the bottle</h2>
 <p>
     The Horse Browser's <em>My horses</em> table has a <strong>Send home</strong> button on every
-    row, which spends a ticket and puts that horse in its stall. <strong>It now works on a horse
+    row, which puts that horse in its stall &mdash; free unless the server has set a price (see
+    <a href="horse-browser.html#send-home">the browser</a>). <strong>It now works on a horse
     that is in a stasis chamber</strong>: the horse comes out of the chamber straight into its
     stall, and <strong>the empty jar is left exactly where the full one was</strong> &mdash; in
     the bank slot it was filed in, or in your pack if you were carrying it.
@@ -356,13 +357,13 @@
     nothing.
 </p>
 <div class="note">
-    <span class="label">It still costs a ticket, and it still refuses safely</span>
+    <span class="label">It refuses safely</span>
     <p>
-        The same ticket as any other <em>Send home</em> &mdash; the cheapest one in your pack that
-        reaches &mdash; and the same destination rule: the horse's own stall, or your holding pen
+        The same price as any other <em>Send home</em> &mdash; nothing, unless the server set
+        one &mdash; and the same destination rule: the horse's own stall, or your holding pen
         if it has none. <strong>Every refusal leaves the horse in the chamber.</strong> No stall,
-        no room in the stall, no ticket that reaches, the sign taken down: you get the line saying
-        which, the ticket is unspent, and the bottle is as full as it was. A release that is
+        no room in the stall, a price you cannot pay, the sign taken down: you get the line saying
+        which, nothing is taken, and the bottle is as full as it was. A release that is
         followed by a refusal would be a horse standing in somebody's cellar with the chamber
         spent, which is worse than not pressing the button.
     </p>
@@ -1397,6 +1398,12 @@
     in, so the ticket tier has to reach from the bank's world &mdash; which is the honest
     question, since that is where the animal actually re-appears from.
 </p>
+<p>
+    <strong>Since 2026-10-02 no ticket is chosen at all</strong>: Send home is free, or costs
+    the server's configured item, and the price check sits where <code>chooseTicket</code>
+    was, so every refusal before <code>place</code> still leaves the chamber full. See
+    <a href="horse-browser.html#send-home-free-built">the browser's coding tab</a>.
+</p>
 
 <h2 id="jars-coding">Drawing the horse in the jar</h2>
 <p>
@@ -1945,8 +1952,9 @@
 
 <h3 id="verify-send-home-chamber">Send home takes a horse out of a chamber (2026-09-25, NOT played)</h3>
 <p>
-    The whole path is new and it spends a ticket, so the failure that matters is
-    <strong>a ticket spent with the horse still in the bottle</strong>, or the reverse.
+    The whole path is new, so the failure that matters is <strong>a price taken with the horse
+    still in the bottle</strong>, or the reverse. It is free by default since 2026-10-02; set a
+    price in <code>phc/server.toml</code> to test the refusals.
 </p>
 <ul>
     <li><strong>Out of your pack.</strong> Bind a stall, put the horse in a chamber, carry it,
@@ -1955,8 +1963,8 @@
     <li><strong>Out of a bank, in another world.</strong> The case the index exists for. File the
         chamber in a bank, walk away far enough that its chunk is unloaded, and press the button.
         A bank the player does not own must not be reachable at all.</li>
-    <li><strong>Every refusal leaves it full.</strong> Wall the stall up, or hold no ticket, or
-        take the sign down, and check the chamber is unchanged and the ticket unspent each
+    <li><strong>Every refusal leaves it full.</strong> Wall the stall up, or set a price you
+        cannot pay, or take the sign down, and check the chamber is unchanged and nothing taken each
         time.</li>
     <li><strong>The at-stud mark goes with the horse</strong>, so a mare turned out at stud and
         then sent home leaves a chamber that is empty <em>and</em> unmarked.</li>

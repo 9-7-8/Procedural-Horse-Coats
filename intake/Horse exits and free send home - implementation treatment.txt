@@ -2,11 +2,11 @@ Horse exits and free send home - implementation treatment
 
 Scoped with the owner. Every "Decided" line below is her call; "UNVERIFIED" lines
 are facts this file has not proved and the building session must check first.
-Two pieces, shippable separately: (1) a new Exits tab on the H menu, (2) Send
-home becomes free by default and configurable. Source of truth for what exists is
-wiki/horse-browser.html (the H menu) and wiki/horse-care.html / wiki/item-tickets.html
-(Send home and tickets). This file is retired (deleted, per /process-intake step 8) as
-each piece ships and moves onto those pages' Gameplay and Coding tabs.
+One piece left: (1) a new Exits tab on the H menu. Piece 2, Send home free by
+default and configurable, shipped 2026-10-02 and lives on
+wiki/horse-browser.html#send-home (Gameplay) and #send-home-free-built (Coding).
+Source of truth for what exists is wiki/horse-browser.html (the H menu). This file
+is deleted, per /process-intake step 8, when piece 1 ships.
 
 What already exists, so the building session does not redo it
 ==============================================================
@@ -27,13 +27,8 @@ What already exists, so the building session does not redo it
 - The pedigree is the permanent record and survives death and sale. There is a
   family-tree request/response (FamilyTreeRequestPayload / FamilyTreeDataPayload)
   keyed by horse UUID.
-- Send home: network/HorseRecallPayload (client to server, carries the horse's
-  RECORD UUID, "not trusted") -> server/StallRecall.request. It re-checks
-  ownership, death, stall, pen and TICKETS. chooseTicket picks the cheapest ticket
-  that reaches (tier limits which worlds a ticket crosses) and ticket.shrink(1)
-  spends it. The same path serves a horse inside a stasis chamber/bank
-  (StallRecall.fromChamber), which is what "out of the gene bank" means: the
-  Stasis Bank (wiki/horse-stasis.html).
+- Send home (StallRecall) is free since 2026-10-02 - see the pointer above. It is
+  not an exit and writes nothing to the Log.
 
 Piece 1 - the Exits tab
 =======================
@@ -90,60 +85,13 @@ is gone, newest first, with filter chips.
 - Play checks (Verification tab): sell a horse to a player, to a trader, kill one,
   portal one and freedom-stick one, and see all five on Exits; open each row.
 
-Piece 2 - Send home is free, and can be made to cost
-====================================================
-What changes for the player: the Send home button in the H menu's My horses tab
-works with no ticket, including for a horse sitting in a stasis chamber / bank.
-- Decided: FREE BY DEFAULT. Today it spends a ticket; the default becomes no cost.
-  This includes the stasis-chamber path (StallRecall.fromChamber).
-- Decided: free means ANYWHERE. It no longer depends on a ticket's tier or on which
-  dimension the horse is in, because the destination is the horse's own stall (or
-  the holding pen, as it falls back today). The stall is still re-measured live at
-  send time (the horse must not be teleported into a wall) and a refusal still
-  leaves nothing spent. Reuse TicketHandler's landing rules; do not write a second
-  copy (StallRecall's own class comment says why).
-- Decided: PAYMENT IS CONFIGURABLE, as ONE ITEM + A COUNT. A server option names a
-  registry item id (vanilla or modded, any item) and a count per trip. No item or a
-  count of 0 means free, which is the default.
-- Decided: the payment item is CONSUMED per successful trip. If the player does not
-  have it, nothing happens and nothing is spent, the same rule tickets follow now.
-  The refusal line names the item and the count.
-- Decided: when payment is configured, it REPLACES ticket spending for the button.
-  Tickets and whistles are not also charged. They remain the way to send or call a
-  horse from the world with no menu.
-- Decided: the button's tooltip and the refusal line SUGGEST the alternatives, in
-  text, so a server owner who sets a price still points players at them: "Tickets
-  and whistles can also bring a horse home." Keep it to one short sentence, and read
-  the item names from the live roster rather than hard-coding them.
-- Decided: a COOLDOWN of 5 seconds between sends, per player, default 5, and
-  configurable (0 turns it off). It is per player, not per horse, and the refusal
-  line says how long is left. Start the cooldown only on a successful send.
-- Config home: ServerConfig, behaviour.*, with the usual safe accessor beside it
-  (copy the pattern of leadsReturn()). Three new options: the payment item id, the
-  payment count, the cooldown in seconds. UNVERIFIED how ServerConfig declares a
-  string option holding a registry item id and how the existing items there
-  are validated; read it first. An id that is not a registered item must be
-  refused or logged and treated as free, never crash on a world load.
-- Sync: the button needs to know whether it is free, to draw "Send home" vs "Send
-  home (costs 1 x <item>)". The config is server-side. UNVERIFIED whether the
-  client can read server config values; if it cannot, send the two values in the
-  existing roster payload rather than adding a payload.
-- Docs that must change with it: wiki/item-tickets.html and wiki/horse-browser.html
-  currently describe the button as spending a ticket. Say what is true after.
-- Tests: a gametest for free (no ticket, horse lands in its stall), for a refusal
-  with payment configured and none held (nothing spent), for payment taken on
-  success, and for the cooldown. The unloaded-horse path (chunk ticket, wait, then
-  act) is unchanged and must keep working; check it once by hand.
-
 Order and size
 ==============
-Piece 2 first: it is mostly deleting a ticket requirement plus a config. Piece 1 is
-a new tab, a new ledger and two new log call sites. One bullet per session.
+Piece 1 is a new tab, a new ledger and two new log call sites: one session.
 
 After each piece ships
 ======================
 Per CLAUDE.md's table: wiki prose (build-search-index.mjs, check-links.mjs,
 bake-agent-text.mjs); anything in common/ means :web:bakeDesignerAssets then
-check-designer-boots.mjs; a new ServerConfig option touches the config page's
-Roadmap/Gameplay text. Move each shipped piece onto the owning pages' Gameplay and
-Coding tabs and delete its section here.
+check-designer-boots.mjs. Move it onto the owning page's Gameplay and Coding tabs and
+delete this file.

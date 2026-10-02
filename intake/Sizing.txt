@@ -67,9 +67,8 @@ Built? No.
 
 ------------------------------------------------------------------------------
 Horse exits and free send home - implementation treatment.txt     sized 2026-10-02
-- Piece 2: Send home free by default + config option             S  a  owner-free; the file says do it first
 - Piece 1: Exits tab on the H menu, ledger, log call sites       M  c  owner-free
-Built? No (StallRecall still spends tickets).
+Piece 2 (Send home free) shipped 2026-10-02. Built? Piece 1 no.
 
 ------------------------------------------------------------------------------
 Horse shoes.txt                                                   sized 2026-10-02

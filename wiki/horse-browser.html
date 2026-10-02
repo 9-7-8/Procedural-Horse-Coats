@@ -138,9 +138,82 @@
     whenever something is added to it, so a tab left open fills in as the day goes on.
 </p>
 
+<h2 id="send-home">Send home &mdash; free, from anywhere</h2>
+
+<p>
+    Every row of <strong>My horses</strong> has a <strong>Send home</strong> button. Press it and
+    that horse goes to its own stall, or to your
+    <a href="item-tickets.html#holding-pen">holding pen</a> if it has no stall. It works on a horse
+    in another world, on one in a chunk nobody has loaded, and on one sitting in a
+    <a href="horse-stasis.html#send-home-gameplay">stasis chamber</a>. <strong>It costs nothing</strong>
+    unless the server has set a price.
+</p>
+<ul>
+    <li>The stall is checked at the moment you press it. If the horse no longer fits &mdash; the
+        sign is down, the stall is walled up or full &mdash; you are told why and nothing
+        happens.</li>
+    <li>There is a short wait between sends, five seconds by default, so a mashed button sends
+        one horse. Only a trip that actually happened starts it.</li>
+    <li><strong>A server may put a price on it</strong>: one item and a count per trip, named in
+        <code>behaviour.send_home_payment_item</code> and
+        <code>behaviour.send_home_payment_count</code>. The button then reads, for example,
+        <em>Send home (2 x Emerald)</em>, greys out when you cannot pay, and takes the items only
+        when the horse arrives. A price replaces tickets for the button; it never charges both.
+        <a href="item-tickets.html">Tickets</a> and <a href="item-whistles.html">whistles</a> still
+        move a horse with no menu, and the tooltip says so.</li>
+    <li>The <strong>Realm</strong> tab's <em>Bring home</em> button is different and still spends a
+        holding pen ticket: it tames a wild horse, which has no stall of its own yet.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
+
+<h2 id="send-home-free-built">Send home is free, and can be priced (2026-10-02)</h2>
+
+<p>
+    The owner's call (2026-10-01): the button stops spending tickets. Before, it spent the
+    cheapest ticket in the pack whose tier reached the horse's world
+    (<code>StallRecall.chooseTicket</code>, now deleted), so a horse in the Nether needed an
+    interdimensional ticket. Now the destination is the horse's own stall wherever it is, and the
+    only questions are the ones <code>TicketHandler.landingSpot</code> already asked: does the
+    stall still exist, and does this horse fit in it. A refusal still spends nothing.
+</p>
+<ul>
+    <li><strong>The rules are <code>common/care/SendHome</code></strong>: the <code>Price</code>
+        record (an item id and a count; blank or 0 is free, so a half-set price is free), the
+        cooldown arithmetic, and every line the player reads (button label, tooltip, refusal,
+        cooldown line, the alternatives sentence). Pinned by <code>SendHomeTest</code>.</li>
+    <li><strong>The inventory side is <code>server/SendHomePayment</code></strong>: it resolves
+        the id against the item registry, counts the pack across stacks, and takes the price only
+        after the move. An id that names no item is <strong>free with one warning in the
+        log</strong>, so a typo never locks every player out. A creative player
+        (<code>abilities.instabuild</code>) is never charged. The alternatives sentence reads the
+        basic ticket's, holding pen ticket's and ender whistle's names off the live items. A
+        dedicated server resolves those names: NeoForge's <code>LanguageHook</code> loads every
+        mod's <code>en_us</code> there.</li>
+    <li><strong>Three server keys</strong>, in <code>behaviour.*</code>:
+        <code>send_home_payment_item</code> (default empty: free; the validator accepts blank or
+        any parseable id), <code>send_home_payment_count</code> (default 1, 0&ndash;64; 0 is free),
+        and <code>send_home_cooldown_seconds</code> (default 5, 0&ndash;3600; 0 is off).
+        Accessors <code>ServerConfig.sendHomePrice()</code> and
+        <code>sendHomeCooldownSeconds()</code>.</li>
+    <li><strong>The client reads the price straight from the synced server config</strong>, so
+        the label and the greying need no payload. Before the sync lands, the accessor's catch
+        answers free. The button now greys out only when a price is set and the pack is short; the
+        realm tab's <em>Bring home</em> still greys out without a holding pen ticket
+        (<code>holdsPenTicket</code>).</li>
+    <li><strong>The cooldown</strong> is per player, in server ticks, in an unsaved map in
+        <code>StallRecall</code>. Only a completed trip writes it, so a refusal never costs the
+        wait. A restart forgets it, which is not worth a save migration.</li>
+    <li>Using the button no longer ticks off the ticket checklist tasks, because no ticket is
+        spent. Those tasks are still earned by using a ticket by hand.</li>
+    <li>Gametest <code>send_home_payment</code> checks: the default config is free, a short pack
+        is refused with nothing taken, the exact price is taken across two stacks, a creative
+        player pays nothing, and a typo is free. It does not reach the landing itself, because
+        <code>StallRecall</code> needs a real <code>ServerPlayer</code>, and a gametest cannot
+        make one without joining the player list.</li>
+</ul>
 
 <h2 id="refresh-built">The roster refreshes on every open (2026-09-24)</h2>
 
@@ -576,7 +649,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty; and the <em>My horses</em> table has changed shape three times over, losing its dead, trading its coat column for a button that spends a ticket, and gaining a sortable <em>Pull</em> column.</p>
+    <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty; and the <em>My horses</em> table has changed shape three times over, losing its dead, trading its coat column for a Send home button (free since 2026-10-02, with an optional price and a cooldown), and gaining a sortable <em>Pull</em> column.</p>
 </div>
 
 <h3 id="dead-leave-roster-0925">Dead horses leave the roster (2026-09-25, NOT played)</h3>
@@ -606,12 +679,13 @@
         deliberately not touched, so a hole here would be a surprise.</li>
 </ul>
 
-<h3 id="send-home-0925">The Send home column (2026-09-25, NOT played)</h3>
+<h3 id="send-home-0925">The Send home column (2026-09-25; free since 2026-10-02; NOT played)</h3>
 
 <p>
-    The coat column is now a per-row button that spends a ticket and sends the horse to
-    its own stall, or to the holding pen when it has none. None of it has been pressed in
-    game. The layout half is the cheap thing to get wrong: <code>TOTAL_WEIGHT</code> is
+    The coat column is now a per-row button that sends the horse to its own stall, or to the
+    holding pen when it has none. It used to spend a ticket; since 2026-10-02 it is free unless
+    the server sets a price (<a href="#send-home-free-built">as built</a>). None of it has been
+    pressed in game. The layout half is the cheap thing to get wrong: <code>TOTAL_WEIGHT</code> is
     hand-summed from the <code>COLUMNS</code> weights rather than derived from them, so it
     has to be edited by hand every time a column moves &mdash; 658 to 626 alongside the
     column swap, and 626 to 656 when <em>Pull</em> was added on 2026-09-26. Forgetting it
@@ -621,29 +695,34 @@
 <ul>
     <li><strong>The table still lines up.</strong> Open <kbd>H</kbd> &rarr; My horses at a
         narrow window width and at full screen. <strong>Pass:</strong> headings sit over
-        their columns and the button clears the scrollbar. <strong>Fail:</strong> a drift
-        between heading and cell, which would mean the weight sum is wrong.</li>
-    <li><strong>It greys out with no tickets.</strong> Empty your inventory of tickets.
-        <strong>Pass:</strong> every button is dim and the tooltip says which ticket does
-        what; clicking does nothing at all &mdash; in particular it must not fall through
-        and select the row.</li>
-    <li><strong>A stall trip.</strong> With a horse that has a bound stall sign up, press
-        it. <strong>Pass:</strong> the horse arrives in the stall, one ticket is gone, and
-        the cheapest sufficient one was the one spent &mdash; hold a basic and an
-        interdimensional in the overworld and the basic should go.</li>
+        their columns and the button clears the scrollbar.</li>
+    <li><strong>Free, with an empty pack.</strong> Hold no tickets at all, on a horse with a
+        bound stall sign up. <strong>Pass:</strong> the button reads <em>Send home</em>, is
+        live, and the horse arrives in the stall with nothing taken.</li>
+    <li><strong>From another world.</strong> The same, with the horse in the Nether or the horse
+        realm and its stall in the overworld. <strong>Pass:</strong> it arrives. Before
+        2026-10-02 this needed an interdimensional ticket.</li>
+    <li><strong>The cooldown.</strong> Press two rows within five seconds. <strong>Pass:</strong>
+        the second says &ldquo;Wait N more seconds before sending another horse home.&rdquo; and
+        nothing moves. A refused press (sign taken down) followed straight away by a good one
+        should not be made to wait.</li>
+    <li><strong>A price.</strong> Set <code>behaviour.send_home_payment_item = "minecraft:emerald"</code>
+        and <code>_count = 2</code> in <code>phc/server.toml</code>. <strong>Pass:</strong> the
+        button reads <em>Send home (2 x Emerald)</em>; with one emerald it is grey and its
+        tooltip names the price and the tickets and whistles; with three, one is left after the
+        horse arrives. In creative, nothing is taken.</li>
     <li><strong>The pen fallback.</strong> Same, on a horse with no stall and a holding
-        pen hung. <strong>Pass:</strong> it lands in the pen. This is the one genuinely new
-        behaviour &mdash; right-clicking a written ticket on a stall-less horse still
-        refuses, and that difference is deliberate.</li>
+        pen hung. <strong>Pass:</strong> it lands in the pen. Right-clicking a written ticket on
+        a stall-less horse still refuses, and that difference is deliberate.</li>
     <li><strong>An unloaded horse.</strong> The reason the button exists, and the least
         proven path: it borrows the ender whistle's chunk ticket and wait, which is itself
         unverified. <strong>Pass:</strong> &ldquo;Reaching for that horse&hellip;&rdquo;
         and then an arrival within five seconds. <strong>Fail:</strong> &ldquo;not where it
         was last seen&rdquo;, which means the chunk ticket did not land the entity in
         time.</li>
-    <li><strong>Nothing is spent on a refusal.</strong> Try it on a horse whose stall sign
-        has been broken. <strong>Pass:</strong> a sentence saying so, and the ticket count
-        unchanged.</li>
+    <li><strong>Nothing is spent on a refusal.</strong> With a price set, try it on a horse whose
+        stall sign has been broken. <strong>Pass:</strong> a sentence saying so, and the item
+        count unchanged.</li>
 </ul>
 
 <h3 id="refresh-verify-0924">The roster re-asks on open (2026-09-24, NOT played)</h3>

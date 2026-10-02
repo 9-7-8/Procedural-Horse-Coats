@@ -222,8 +222,13 @@
         sources jar and the NeoForge sources jar. Every tutorial written about GameTest describes a version this is
         not. A test here is an object in the <code>minecraft:test_instance</code> <em>datapack</em> registry whose
         body is a <code>Consumer&lt;GameTestHelper&gt;</code> in <code>minecraft:test_function</code>, so it is
-        registered in two halves - see <code>ModGameTests</code>. Four things that cost time:
+        registered in two halves - see <code>ModGameTests</code>. Five things that cost time:
         <ul>
+            <li><code>GameTestHelper.makeMockPlayer(GameType.CREATIVE)</code> overrides
+                <code>isCreative()</code> and nothing else: its <code>getAbilities()</code> are a
+                fresh survival set, so <code>abilities.instabuild</code> is false. Every spend in this
+                mod checks <code>instabuild</code>, so a test of the creative branch must set it on the mock
+                by hand (<code>send_home_payment</code>, 2026-10-02).</li>
             <li><code>neoforge.enabledGameTestNamespaces</code> <strong>does not exist</strong> in this version -
                 nothing reads it. This build set it on all three runs for months. The live property is
                 <code>neoforge.enableGameTest</code>, which the <code>client</code> and <code>gameTestServer</code>

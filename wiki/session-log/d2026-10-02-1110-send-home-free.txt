@@ -1,0 +1,110 @@
+2026-10-02 11:10 (end) - Send home is free, with an optional price and a cooldown
+
+ASKED
+-----
+- "/process-intake" - take one unit out of intake/ and build it. Picked Horse exits
+  Piece 2, "Send home is free, and can be made to cost": Tier 1 (size S, impact a,
+  owner-free; its treatment says to build it first). Runner-up: the config key table
+  (S, b). It lost on impact, and it is better built once these three keys exist. Built,
+  documented, retired.
+
+DONE
+----
+- 93788e12 Send home is free by default, with an optional item price and a cooldown.
+  Before: the horse browser's Send home button spent the cheapest ticket in the pack
+  whose tier reached the horse's world (StallRecall.chooseTicket). That meant an
+  interdimensional ticket for any horse outside the overworld. The owner decided
+  (2026-10-01, in the treatment) that it should be free from anywhere by default.
+  Now:
+  - common/care/SendHome holds the Price record (item id + count; blank or 0 is
+    free), the cooldown arithmetic and every player-facing line.
+  - neoforge server/SendHomePayment resolves the id against the item registry (an
+    unknown id is free, with one log warning), counts and takes from the pack across
+    stacks, never charges creative, and names the alternatives from live item names.
+  - StallRecall: the ticket choice, the holdsAnyTicket pre-check, noTicketReason and
+    creditTicket are deleted. A price check sits in their place on both paths, the
+    loaded/unloaded horse and fromChamber. The price is taken and the per-player
+    cooldown started only after the move.
+  - ServerConfig: behaviour.send_home_payment_item (default ""),
+    behaviour.send_home_payment_count (1, 0-64) and
+    behaviour.send_home_cooldown_seconds (5, 0-3600), with safe accessors
+    sendHomePrice() and sendHomeCooldownSeconds().
+  - HorseBrowserScreen labels the button ("Send home (2 x Emerald)"), greys it and
+    writes its tooltip from the synced server config. The realm tab's Bring home
+    still needs a holding pen ticket (holdsTicket narrowed to holdsPenTicket).
+  Proof:
+  - :common:test --tests '*SendHomeTest' green; mutated (a half-set price counted as
+    a price), red, reverted.
+  - :neoforge-26.1.2:runGameTest: all 29 pass, including the new send_home_payment.
+    Mutated (accept one short of the price), red on exactly that test, reverted.
+  - runServer to "Done (": the new keys were written into server.toml. The only
+    warnings were vanilla command ambiguities, offline mode, version differences and
+    the stasis_chamber empty-ingredients recipe line, all already in the owner's
+    earlier log.
+  - :neoforge-26.1.2:build green, check-parity OK, check-designer-boots OK.
+- Docs (the second commit):
+  - wiki/horse-browser.html: Gameplay #send-home, Coding #send-home-free-built, and
+    Verification #send-home-0925 rewritten for the free button.
+  - wiki/item-tickets.html: the Verification section send-home-spend-0925 (the old
+    ticket-choice checks) retired unplayed; Coding #browser-stops-spending records why.
+  - wiki/horse-stasis.html: the Gameplay note, a Coding paragraph and the
+    #verify-send-home-chamber checks updated.
+  - wiki/api-notes.html#gametest: the makeMockPlayer creative quirk.
+  - Intake: Piece 2 deleted from "intake/Horse exits and free send home -
+    implementation treatment.txt", leaving a pointer to the wiki. Its row is gone from
+    intake/Sizing.txt.
+
+DECIDED
+-------
+Calls made without the owner (none is a design call; all sit inside the treatment's
+decided lines):
+- The cooldown is kept in memory and not saved, so a restart forgets it. Recorded on
+  horse-browser.html#send-home-free-built.
+- The config validator accepts blank or any parseable id. Whether the id is a real item
+  is checked at use time, so an unknown id is free with one warning (the treatment said
+  "refused or logged and treated as free").
+- The alternatives sentence names the Basic Ticket, Holding Pen Ticket and Ender
+  Whistle, read from the live items.
+- The button greys out on the client when a price is set and the pack is short. The
+  client reads the price from the synced SERVER config rather than a payload (api-notes
+  already records that SERVER config syncs to clients).
+- The button no longer ticks off the USE_*_TICKET checklist tasks, since it spends no
+  ticket. Using a ticket by hand still does.
+
+FOUND ON THE WAY
+----------------
+- GameTestHelper.makeMockPlayer(GameType.CREATIVE) leaves abilities.instabuild false.
+  The first gametest run went red on that ("a creative player was asked to pay"). Fixed
+  in the test, and written into api-notes.
+- A dedicated server does resolve mod item names: NeoForge's LanguageHook loads every
+  mod's en_us there, so getHoverName().getString() is safe in server chat.
+
+PROCEDURES
+----------
+- launch-game.txt step 8a: a server boot overwrites run/logs/latest.log and debug.log,
+  which hold the owner's last play session. The step now says to copy them aside with
+  run/phc and run/config and put them back. This session did that by hand because the
+  step did not say so.
+- No new procedure needed. No other procedure is made untrue by this change: the config
+  key table bullet in intake/To do.txt still stands.
+
+NOT RUN / NOT CHECKED
+---------------------
+- A full :common:test run was not made. It would still check every other common class
+  against this change; only care/SendHome was added, and nothing else in common/
+  changed.
+- Not seen in game: the button sending a horse with an empty pack, from another world,
+  out of a chamber, the cooldown line, a configured price, and the unloaded-horse wait.
+  Anchors: wiki/horse-browser.html#send-home-0925 and
+  wiki/horse-stasis.html#verify-send-home-chamber.
+
+RELEASE
+-------
+Offered at the end of this session, since main now holds a batch since v0.5.040 (dragon
+horns, horn glow following the light locus, papers discovering genes, free Send home).
+The owner's answer is recorded in the summary of this session.
+
+PICK UP FIRST
+-------------
+The generated config key table on wiki/config.html (intake/To do.txt bullet; Tier 1,
+S, owner-free), by procedures/process-intake.txt.
