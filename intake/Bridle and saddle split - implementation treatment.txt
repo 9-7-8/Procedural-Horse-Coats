@@ -6,11 +6,8 @@ answer, by whom is on the line; "UNVERIFIED" lines are facts this file has not p
 truth for what exists: wiki/horse-gear.html (Gameplay and Coding tabs, read as wiki/text/
 horse-gear.*.txt) and wiki/philosophy.html ("utility, not decoration"). This file is retired
 (deleted, per /process-intake step 8) when it ships and moves onto horse-gear's Gameplay and
-Coding tabs. It was written AFTER the answers were given, from the owner's choices; the question
-text itself is not preserved, so where an answer left a gap it is marked Open.
-Release: not asked in this session. Recommended: patch, and because the split changes what an
-existing saved item MEANS, say so in the release note. Open (owner): confirm with
-/probe-a-scope or release step 1.
+Coding tabs. Second round of questions answered 2026-10-02; the Open list is now short.
+Release: patch (Decided), and the note says saddles are now bridles.
 
 1. The ask, in one paragraph
 ============================
@@ -36,96 +33,79 @@ passenger but not steered.
 - Bond tiers live on wiki/horse-care.html; the bond tier that counts as "tier 3" is read from
   there, not from this file (UNVERIFIED which constant names it).
 
-3. Decided (owner)
-==================
-- A horse below bond tier 3 wearing a saddle and NO bridle: you may mount it, as a PASSENGER ONLY.
-  You cannot steer it. (Same as vanilla bareback riding is today.)
-- The saddle's job is STATS: it carries real stats the way the planned tack stats do (speed,
-  jump, stamina and the like). It is not just a gate for the pad and saddlebags.
-- Existing saves: EVERY VANILLA SADDLE BECOMES A BRIDLE, renamed and retextured. THEN this mod
-  adds its own saddles as new items. So a world's existing saddles and saddled horses carry on
-  steering (they are now bridles).
-- The bridle is crafted from leather plus iron or string, and is dyed at the Tack Bench. The
-  saddle's current "Bridle" dye zone moves to the bridle item, so the bench dyes bridle and saddle
-  separately.
+3. Decided (owner, all asked)
+=============================
+Rules
+- Bridle worn in HEADSTALL (shares it with the halter). The SADDLE slot is for the mod's own new
+  saddle item, a second piece beside the bridle.
+- The bridle IS the vanilla saddle item: it KEEPS the id minecraft:saddle, renamed and retextured.
+  Every saddle in old worlds, loot, trades and other mods therefore reads as a bridle.
+- Bridle alone: you can mount and steer (no saddle needed).
+- Saddle alone, below bond tier 3: passenger only, cannot steer.
+- Nothing worn, below tier 3: you can mount as a passenger (no steering).
+- Bond tier 3 and up: the horse steers freely with or without a bridle (existing bareback rule).
+- A passenger-only horse walks on its own, herd-like (reuse existing herd AI), carrying you.
+- Horses only: donkeys, mules and llamas keep vanilla saddle behaviour.
+Saddle
+- Stats: SPEED and JUMP, plus CARRY CAPACITY / saddlebags.
+- Stats apply ONLY WHILE RIDDEN and are not shown on the horse's own genes/stat screen.
+- Source: crafted, with material tiers (stats scale by tier).
+Bridle
+- Crafted from leather plus iron or string; dyed at the Tack Bench; the saddle's old "Bridle" dye
+  zone moves to the bridle item, so bench dyes bridle and saddle separately.
+Config
+- One SERVER boolean, default ON, to turn the passenger-only rule off and restore "a saddle
+  steers" (add-a-config-option).
+Release
+- Patch release, noted. Ships per piece. No compat bump: the id is kept, so no saved stack is
+  rewritten (see 5, one exception).
 
-4. What the answers leave unsaid (Open, each needs the owner unless marked)
-===========================================================================
-These are the gaps a building session would otherwise guess at. None is decided.
-A. Which slot does the bridle go in? Today a bridle belongs in Headstall, the vanilla saddle item
-   goes in the vanilla SADDLE slot, and vanilla's own steering reads that SADDLE slot. If the
-   vanilla saddle ITEM becomes the bridle, it still needs to live in a slot vanilla treats as
-   "saddled" for steering to keep working, but the owner's gear model puts bridles in Headstall.
-   Open (owner): is the bridle worn in Headstall (and the SADDLE slot is repurposed for our new
-   saddle), or does the renamed item stay in the SADDLE slot until the saddle ships?
-B. "Renamed and retextured" a vanilla item: does the item KEEP the id minecraft:saddle (only its
-   name and texture change, by a resource override and a lang change) or become a new item of our
-   own with a one-time conversion of every saved stack and worn piece? The first is invisible in
-   saves; the second needs a migration (CLAUDE.md hard rule 10). Recommended: keep the id and
-   relabel, because it needs no migration and the owner's wording ("renamed and retextured") says
-   so. UNVERIFIED: that a client resource pack and our lang can rename and retexture an item
-   that other mods, loot tables, villagers and the cowboy also produce. Cost to note: every
-   vanilla-source saddle (loot, trades, other mods) is now a bridle; a pack with no recipe for
-   "our saddle" has no saddle until the new item exists.
-C. The craft recipe. Her answer: leather plus iron or string. Open (owner, small): exact counts
-   and shape, and whether the recipe produces the old minecraft:saddle id (a bridle by B) so the
-   old item is craftable for the first time. Recommended: yes, same id; shaped, leather x? with a
-   string or iron nugget as the buckle. The building session picks counts, tuned by feel.
-D. Which saddle stats, and how many. "Stats on the saddle" is the call; the numbers are not.
-   Open (owner): which of speed, jump, stamina, comfort, carrying capacity; whether stats vary by
-   a saddle's material tier; whether a saddle's stats stack with a pad's. This overlaps the
-   tack-stats call on horse-gear's Roadmap tab; read it first and answer both together.
-E. Where does our saddle come from? Crafting, loot, a cowboy trade? Not asked. Open (owner).
-F. Tier 3 and above: is a saddle or a bridle needed to STEER at all, or does a fully bonded horse
-   steer unbridled? The answer covers only "below tier 3". Recommended: a bonded horse (tier 3
-   and up) steers with or without a bridle, as the wording "below tier 3" implies; a bridle then
-   adds a smaller bonus (Open: what). Confirm with the owner.
-G. A horse with a bridle and NO saddle: can you ride it, and does it steer? Not asked. Open
-   (owner). Recommended: you cannot mount at all without a saddle (nothing to sit on), the
-   same as today.
-H. Passenger-only riding, mechanically. Vanilla steers a saddled horse with the rider's input;
-   a passenger-only ride needs the horse to ignore rider input (like a vanilla unsaddled-but-
-   tamed horse does not, which is not the same: UNVERIFIED how vanilla lets you sit on a tamed
-   unsaddled horse in 26.1.2 and what controls steering). Read the vanilla horse sources before
-   building; do not assume.
-I. What a passenger-only horse does while ridden: stands still, wanders, follows the herd,
-   panics? Not asked. Open (owner).
-J. Carts, second seats and other mods. A cart or a second rider on the horse may need the
-   bridle rule too. UNVERIFIED which of our carts mount through the saddle slot.
-K. Donkeys and mules and other equids share the vanilla saddle path (AbstractMountInventoryMenu
-   is shared). A rename of the vanilla item reaches them too. Open (owner): do the same rules
-   apply to them, or horses only?
-L. The bridle-and-halter rule: "a bridle or a halter, never both". The halter is still the other
-   Headstall piece. If the bridle is the vanilla saddle item, the halter is unaffected. No
-   change, said here so nobody assumes one.
+4. Contradictions to settle in the build (not owner questions)
+=============================================================
+- "Bridle alone mounts and steers" together with "nothing worn mounts as a passenger" means vanilla's
+  requirement of a saddle to ride is gone for horses. UNVERIFIED how vanilla 26.1.2 lets a
+  tamed unsaddled horse be mounted and who controls it (AbstractHorse.getControllingPassenger
+  hands control only if isSaddled()). Read the sources first.
+- Vanilla steering reads the vanilla SADDLE slot, but the bridle now lives in Headstall. The
+  existing BarebackSteeringHandler already lends a hidden "phantom saddle" (PHANTOM_SADDLE data
+  component, never drawn, taken back each tick) so vanilla's steering path runs. Recommended:
+  extend that handler so a bridle in Headstall (or tier 3) is also a reason to lend it, and so
+  the real saddle's presence no longer implies steering. One mechanism, not a second path.
+- The vanilla saddle item is equip-on-interact into the SADDLE slot (Equippable.saddle). A
+  bridle-in-Headstall needs that click redirected to Headstall for horses, while donkeys keep the
+  vanilla slot. UNVERIFIED how to intercept; TackEquipHandler skips vanilla slots on purpose.
+- Existing saddled horses: their old saddle sits in the SADDLE slot and must be moved into
+  Headstall once on load (flagged), otherwise it would become a "saddle" that no longer steers.
+  This is a data move, so hard rule 10 asks for a migration even though the item id is kept.
+- Our new saddle needs its own item id (the vanilla id is the bridle).
+- Rider-only stats must be read where the rider is known, not from the horse's attributes; the
+  genes screen must not show them. Pad and saddlebag slots interact (bags: capacity from the
+  saddle).
 
-5. Where it touches (implications, one line each)
-=================================================
-- Genetics, coat, breeds, pedigree: untouched.
-- Gear: touches - HorseTackSlot accepts tags, slot meaning, the Gear tab hint text, the tag files.
-- Items and crafting: touches - one new craft recipe (bridle), a new saddle item and its recipe
-  or loot, lang keys, textures, the Tack Dyeing Bench zones.
-- Riding, steering, bond: touches - the mount and steering rules, bond tier 3 as a threshold.
-- Saves: touches - the rename is not a data change if the id is kept (B); if it is a new id, a
-  migration is required. A saddled horse in an old world must still be ridable.
-- Multiplayer: server decides steering; the client only draws the new texture.
-- Config: Recommended one server switch to turn the passenger-only rule off, for servers that
-  want the old behaviour. Open (owner).
-- Other mods: touches - any mod that adds or reads saddles (see B).
-- Wiki: wiki/horse-gear.html (both tabs), the Tack Dyeing Bench page, rider-comfort, the item
-  page for each new item; a new saddle item gets its own page (add-an-item).
+5. Saves
+========
+Item id kept, so inventories and loot are unchanged. One migration: a horse that wears an
+old-style saddle in the SADDLE slot moves it to Headstall once. A horse that has that gear while
+the mod is removed is vanilla-saddled again. Defect to test: a world saved before the update,
+loaded after, with a ridden saddled horse.
 
-6. Order and size
+6. Where it touches
+===================
+Genetics, coat, breeds, pedigree: untouched. Gear (HorseTackSlot, tags, Gear tab hints):
+touches. Items and crafting: touches (bridle recipe, new saddle item and tiers, lang,
+textures, dye zones). Riding/steering/bond: touches. Multiplayer: server decides steering.
+Config: one server key. Other mods: touches (their saddles read as bridles; carts and second
+seats UNVERIFIED). Wiki: horse-gear both tabs, Tack Dyeing Bench, rider-comfort, a page per new
+item. Tests: a common/ rule class for "who steers" pinned by unit tests; gametests for bridle-only,
+saddle-only, nothing-worn below tier 3 and tier 3 bare, plus the migration.
+
+7. Order and size
 =================
-Do NOT build in one go. Recommended pieces:
-  1. Rename and retexture the vanilla saddle as the bridle, and the dye zone move (small, no new
-     logic, needs A and B answered).
-  2. The passenger-only rule below tier 3, with the bridle as the steering item (the riding
-     change; needs F, G, H, I answered).
-  3. The new saddle item with stats (needs D and E answered, and the tack-stats call).
-Size: piece 1 S, piece 2 M, piece 3 M-L. Each shippable alone, in that order.
+1. Bridle: relabel and retexture the vanilla saddle, move it to Headstall, migrate old worlds,
+   dye zone (M; the click redirect and migration are the work).
+2. Passenger-only rule below tier 3, the server switch, herd-like carrying (M).
+3. The mod's saddle: tiers, rider-only speed/jump, bags (M-L). Each ships alone, in this order.
 
-7. Next step
+8. Next step
 ============
-Run /probe-a-scope on this file first: sections 4A, 4B, 4D, 4F, 4G, 4H and 4I are the questions
-a building session cannot guess. Then /process-intake.
+Run /probe-a-scope (section 4 is the build-session risk list), then /process-intake.
