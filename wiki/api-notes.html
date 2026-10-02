@@ -743,6 +743,17 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     <code>@EventBusSubscriber(value = Dist.CLIENT)</code>.
 </p>
 
+<p id="mixin-no-refmap">
+    <strong>The mixin config names no <code>refmap</code>, on purpose.</strong> NeoForge 26.1.2
+    runs on Mojang names in dev and in production alike, and ModDevGradle has no remap step,
+    so there is nothing for a refmap to translate and the build never writes one. Naming one
+    anyway only made every start warn that <code>horsegenetics.refmap.json</code> could not
+    be read (issue #16, 2026-10-01). Removing the entry was proven by a server boot: no
+    warning, every mixin still logged <em>Mixing &hellip; from horsegenetics.mixins.json</em>,
+    and <code>defaultRequire: 1</code> would have failed the boot on any injection that
+    missed. A 1.12.2 backport does remap, and will need the refmap back.
+</p>
+
 <h2 id="interface-private-static">An interface&rsquo;s <code>private static</code> method is unreachable, and vanilla hides real behaviour in them</h2>
 
 <p>
