@@ -129,4 +129,18 @@ public enum PartKind {
     public boolean antler() {
         return this == ANTLER_RIGHT || this == ANTLER_LEFT;
     }
+
+    /**
+     * What a person calls the part, both sides of a pair named once - "Antlers", not
+     * two antlers. The browser designer lists a horse's parts by it, because it
+     * cannot draw them ({@link com.example.horsegenetics.common.genetics.GrownParts#listed}).
+     */
+    public String label() {
+        return switch (this) {
+            case HORN -> "Unicorn horn";
+            case ANTLER_RIGHT, ANTLER_LEFT -> "Antlers";
+            case RAM_HORN_RIGHT, RAM_HORN_LEFT -> "Ram's horns";
+            case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> "Dragon horns";
+        };
+    }
 }

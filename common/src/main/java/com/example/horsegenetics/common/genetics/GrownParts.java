@@ -3,6 +3,7 @@ package com.example.horsegenetics.common.genetics;
 import com.example.horsegenetics.common.genetics.genes.AbstractPartColourGene;
 import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.parts.AttachedPart;
+import com.example.horsegenetics.common.parts.PartKind;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,6 +89,36 @@ public final class GrownParts {
                 out.add(side.dressed(tints.base(), tints.tip(), false));
             }
         });
+        return List.copyOf(out);
+    }
+
+    /**
+     * One part, as a list of a horse's traits names it: a pair once, and whether a
+     * foal goes without it ({@link PartKind#showsOnFoal}).
+     */
+    public record Listed(String name, boolean adultOnly) {
+    }
+
+    /**
+     * The parts {@link #of} grows, named for a person - in the order {@code of}
+     * returns them, each pair once. The browser designer prints this because it
+     * previews a coat texture and cannot draw geometry (owner's call, 2026-10-01:
+     * say so in words rather than build a 3D preview). The sex gate is already in
+     * {@code of}, so an {@code Antm} mare lists no antlers, as the game draws none.
+     */
+    public static List<Listed> listed(Genotype genotype, Epigenome epigenome) {
+        List<AttachedPart> parts = of(genotype, epigenome);
+        if (parts.isEmpty()) {
+            return List.of();
+        }
+        List<Listed> out = new ArrayList<>(parts.size());
+        for (AttachedPart part : parts) {
+            PartKind kind = part.kind();
+            Listed named = new Listed(kind.label(), !kind.showsOnFoal());
+            if (!out.contains(named)) {
+                out.add(named);
+            }
+        }
         return List.copyOf(out);
     }
 

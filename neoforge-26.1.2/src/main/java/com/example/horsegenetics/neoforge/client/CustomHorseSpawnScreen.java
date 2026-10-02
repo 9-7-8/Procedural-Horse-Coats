@@ -149,9 +149,10 @@ import java.util.List;
  * hands every screen's model horse its parts along with its coat, sex gate
  * included, so an {@code Antm} mare shows no antlers here - but the browser twin
  * previews a coat texture and cannot draw geometry, so there a {@code Horn/Horn}
- * or {@code Ant/n} horse shows its gene rows and epigenome and no part. Closing
- * that is a design call, not an omission: see
- * {@code wiki/model-parts.html#open-designer}.
+ * or {@code Ant/n} horse names its parts in a panel over the preview ("not drawn
+ * here, see them in game", {@code gui.js drawParts}) instead of drawing them. That
+ * panel has no twin here, deliberately: this preview shows the part itself. Owner's
+ * call, 2026-10-01: {@code wiki/model-parts.html#open-designer}.
  *
  * <p>The deliberate divergences. The browser has nothing to spawn and no
  * inventory to put an egg in, so this screen's two output buttons have no twin
@@ -1749,7 +1750,7 @@ public final class CustomHorseSpawnScreen extends Screen {
             }
             // on the horse: name, what it expresses, and its two allele buttons
             Expression e = genotype.expressionOf(row.gene);
-            boolean expressing = !e.wildType();
+            boolean expressing = EditorRules.expressing(row.gene, e);
             g.fill(nx - 2, ry, nx + nameWidth(true) + 2, ry + ROW_H - 2, 0x33202838);
             drawFitted(g, row.gene.name(), nx, ry + 1, nameWidth(true),
                     expressing ? 0xFF9BE08A : 0xFFC8C8C8);
