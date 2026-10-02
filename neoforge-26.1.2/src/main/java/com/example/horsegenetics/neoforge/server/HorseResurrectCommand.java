@@ -174,9 +174,14 @@ public final class HorseResurrectCommand {
                                     + ", " + left(wake, grace))
                             .withStyle(ChatFormatting.GRAY)), false);
         }
-        if (grace == 0) {
-            say(source, "ops.resurrect_grace_minutes is 0, so none of these will ever "
-                    + "be thrown away. That is disk, per horse, for ever.");
+        long budget = ServerConfig.resurrectBudgetBytes();
+        if (budget > 0) {
+            say(source, "The store holds " + megabytes(afterlife.totalBytes()) + " of "
+                    + megabytes(budget) + " (ops.resurrect_budget_mb); past that the "
+                    + "oldest deaths are let go first.");
+        } else if (grace == 0) {
+            say(source, "ops.resurrect_grace_minutes and ops.resurrect_budget_mb are both 0, "
+                    + "so none of these will ever be thrown away. That is disk, per horse, for ever.");
         }
         say(source, "/horseresurrect <name> at <player> hands one back.");
         return wakes.size();
@@ -205,11 +210,17 @@ public final class HorseResurrectCommand {
         return hours + (hours == 1 ? " hour ago" : " hours ago");
     }
 
+    /** Bytes as megabytes to one decimal place, the unit the setting is in. */
+    private static String megabytes(long bytes) {
+        return String.format(java.util.Locale.ROOT, "%.1f MB",
+                bytes / (double) com.example.horsegenetics.common.horse.AfterlifeBudget.BYTES_PER_MB);
+    }
+
     /** How much of the owner's window is left, said in the terms the window is measured in. */
     private static String left(HorseAfterlife.Wake wake, int grace) {
         int remaining = wake.remaining(grace);
         if (remaining < 0) {
-            return "kept indefinitely";
+            return "no time limit";
         }
         int minutes = remaining / (20 * 60);
         return minutes < 1

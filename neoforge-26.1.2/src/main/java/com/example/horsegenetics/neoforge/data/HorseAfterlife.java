@@ -1,11 +1,13 @@
 package com.example.horsegenetics.neoforge.data;
 
+import com.example.horsegenetics.common.horse.AfterlifeBudget;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -13,6 +15,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -45,15 +49,21 @@ import java.util.UUID;
  * entity - its age, its gear, its bond, its hunger, its pregnancy, its name tag
  * - as it stood at the moment it died.
  *
- * <h2>Why it expires, and on whose clock</h2>
+ * <h2>Why it expires: a size budget</h2>
  * An entity tag is real bytes, per horse, and a world that never throws one
- * away accumulates every horse that ever died in it. So a {@link Wake} has a
- * budget: {@code ops.resurrect_grace_minutes} of its owner's <b>own time
- * online</b>, counted by {@link #spend} from a slow sweep, after which it is
- * dropped. Owner-online time rather than wall clock because the window exists
+ * away accumulates every horse that ever died in it. So the store as a whole
+ * has a budget in bytes, {@code ops.resurrect_budget_mb}: a dead horse is kept
+ * until the store would be over it, and then {@link #trimTo} lets the oldest
+ * deaths go first, only as many as it takes ({@link AfterlifeBudget}; owner,
+ * issue #15). Each wake carries its own cost, {@link Wake#bytes}, measured
+ * once when it is kept.
+ *
+ * <p>The older limit is still here as an optional extra:
+ * {@code ops.resurrect_grace_minutes} of the owner's <b>own time online</b>,
+ * counted by {@link #spend} from a slow sweep. It is {@code 0} - off - by
+ * default. Owner-online time rather than wall clock because that window exists
  * to give the owner a chance to notice and ask, and somebody who was logged off
- * when their mare met a creeper has had no such chance. See that setting for
- * the argument in full; {@code 0} keeps everything for ever.
+ * when their mare met a creeper has had no such chance.
  *
  * <p>The elapsed count is kept even while the limit is {@code 0}, so an
  * operator who turns a limit back on starts expiring the backlog rather than
@@ -83,14 +93,18 @@ public final class HorseAfterlife extends SavedData {
      *                      against the setting when it is read, so changing the
      *                      setting - in either direction, including to "for
      *                      ever" - applies to horses that are already dead.
-     * @param deathGameTime the world's game time at the moment of death, kept
-     *                      only so the listing can say "twenty minutes ago" in
-     *                      terms a person standing in that world recognises. It
-     *                      is <b>not</b> the expiry clock.
+     * @param deathGameTime the world's game time at the moment of death. The
+     *                      listing says "twenty minutes ago" from it, and the
+     *                      size budget lets the oldest of these go first. It is
+     *                      <b>not</b> the owner-online clock.
+     * @param bytes         what keeping this horse costs, as the gzipped size of
+     *                      its entity tag - see {@link #measure}. {@code 0} on a
+     *                      wake saved before the budget existed, which the store
+     *                      measures as it loads.
      */
     public record Wake(StasisSnapshot snapshot, UUID owner, String ownerName,
                        ResourceKey<Level> dimension, BlockPos pos,
-                       long deathGameTime, int ownerTicks) {
+                       long deathGameTime, int ownerTicks, long bytes) {
 
         public static final Codec<Wake> CODEC = RecordCodecBuilder.create(i -> i.group(
                 StasisSnapshot.CODEC.fieldOf("horse").forGetter(Wake::snapshot),
@@ -99,8 +113,16 @@ public final class HorseAfterlife extends SavedData {
                 ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(Wake::dimension),
                 BlockPos.CODEC.fieldOf("pos").forGetter(Wake::pos),
                 Codec.LONG.optionalFieldOf("died_at", 0L).forGetter(Wake::deathGameTime),
-                Codec.INT.optionalFieldOf("owner_ticks", 0).forGetter(Wake::ownerTicks)
+                Codec.INT.optionalFieldOf("owner_ticks", 0).forGetter(Wake::ownerTicks),
+                Codec.LONG.optionalFieldOf("bytes", 0L).forGetter(Wake::bytes)
         ).apply(i, Wake::new));
+
+        /** A horse that has just died: no owner time spent yet, and its cost measured. */
+        public static Wake of(StasisSnapshot snapshot, UUID owner, String ownerName,
+                              ResourceKey<Level> dimension, BlockPos pos, long deathGameTime) {
+            return new Wake(snapshot, owner, ownerName, dimension, pos, deathGameTime, 0,
+                    measure(snapshot));
+        }
 
         /** Which horse this is - the snapshot's id, which is the entity's real UUID. */
         public UUID horse() {
@@ -113,7 +135,16 @@ public final class HorseAfterlife extends SavedData {
 
         Wake plusTicks(int ticks) {
             return new Wake(snapshot, owner, ownerName, dimension, pos, deathGameTime,
-                    ownerTicks + ticks);
+                    ownerTicks + ticks, bytes);
+        }
+
+        Wake measured() {
+            return bytes > 0 ? this : new Wake(snapshot, owner, ownerName, dimension, pos,
+                    deathGameTime, ownerTicks, measure(snapshot));
+        }
+
+        AfterlifeBudget.Entry<UUID> budgetEntry() {
+            return new AfterlifeBudget.Entry<>(horse(), deathGameTime, bytes);
         }
 
         /**
@@ -147,7 +178,47 @@ public final class HorseAfterlife extends SavedData {
 
     private HorseAfterlife(List<Wake> wakes) {
         for (Wake wake : wakes) {
-            byHorse.put(wake.horse(), wake);
+            // A wake saved before the size budget existed has no cost on it
+            // yet; measure it here so the budget sees the whole store.
+            byHorse.put(wake.horse(), wake.measured());
+        }
+    }
+
+    /**
+     * <b>What one horse costs to keep</b>: the length of its entity tag
+     * written the way a {@code .dat} file is written, gzipped.
+     *
+     * <p>The store's file is one gzip stream over every wake, which compresses
+     * across horses a little better than each does alone, so the sum of these
+     * slightly <b>over</b>states the file - the budget errs towards letting go
+     * a little early, never towards growing past it. Measured once, when the
+     * horse is kept, rather than by statting the file, because the file only
+     * exists after a save and the sweep runs between saves. UNVERIFIED against
+     * a real file of any size.
+     */
+    static long measure(StasisSnapshot snapshot) {
+        CountingStream count = new CountingStream();
+        try {
+            NbtIo.writeCompressed(snapshot.horse(), count);
+        } catch (IOException cannot) {
+            // A counting stream cannot fail; if writing the tag itself did,
+            // count what got written, and never call a horse free.
+        }
+        return Math.max(1, count.bytes);
+    }
+
+    /** An output stream that keeps nothing but a count. */
+    private static final class CountingStream extends OutputStream {
+        long bytes;
+
+        @Override
+        public void write(int b) {
+            bytes++;
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            bytes += len;
         }
     }
 
@@ -254,6 +325,44 @@ public final class HorseAfterlife extends SavedData {
             setDirty();
         }
         return before - byHorse.size();
+    }
+
+    /**
+     * <b>Let the oldest deaths go until the store fits in {@code budgetBytes}</b>
+     * - only as many as it takes, and nothing at all for a budget of {@code 0},
+     * which is "no cap". Run from the same slow sweep as {@link #spend}, never
+     * on a death.
+     *
+     * @return the horses dropped, so the sweep can log them
+     */
+    public List<Wake> trimTo(long budgetBytes) {
+        List<Wake> dropped = new ArrayList<>();
+        if (budgetBytes <= 0) {
+            return dropped;
+        }
+        List<AfterlifeBudget.Entry<UUID>> entries = new ArrayList<>();
+        for (Wake wake : byHorse.values()) {
+            entries.add(wake.budgetEntry());
+        }
+        for (UUID horse : AfterlifeBudget.overflow(entries, budgetBytes)) {
+            Wake gone = byHorse.remove(horse);
+            if (gone != null) {
+                dropped.add(gone);
+            }
+        }
+        if (!dropped.isEmpty()) {
+            setDirty();
+        }
+        return dropped;
+    }
+
+    /** What everything kept costs, by {@link Wake#bytes}. */
+    public long totalBytes() {
+        long sum = 0;
+        for (Wake wake : byHorse.values()) {
+            sum += wake.bytes();
+        }
+        return sum;
     }
 
     public int size() {

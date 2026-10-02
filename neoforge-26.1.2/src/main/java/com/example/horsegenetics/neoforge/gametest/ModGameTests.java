@@ -1389,6 +1389,49 @@ public final class ModGameTests {
         helper.runAfterDelay(10L, () -> killAndRaise(helper, horse));
     }
 
+    /**
+     * <b>The afterlife store's size budget, on a real horse's tag</b> (issue
+     * #15). A kept horse has a cost; a wake saved before the budget existed -
+     * no {@code bytes} field - is measured as it loads, so an old save is
+     * budgeted too (rule 10); and {@code trimTo} lets it go over budget and
+     * keeps it under "no cap". Run on a decoded copy, so the server's own store
+     * still holds the wake for the resurrection that follows.
+     */
+    private static void afterlifeBudgetHolds(com.example.horsegenetics.neoforge.data.HorseAfterlife.Wake wake) {
+        if (wake.bytes() <= 0) {
+            throw new GameTestAssertException(Component.literal(
+                    "a freshly kept horse has no cost (" + wake.bytes() + " bytes), so the size"
+                            + " budget can never let it go. Check HorseAfterlife.Wake.of / measure."), 0);
+        }
+        net.minecraft.nbt.Tag encoded = com.example.horsegenetics.neoforge.data.HorseAfterlife.Wake.CODEC
+                .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, wake).getOrThrow();
+        net.minecraft.nbt.CompoundTag old = ((net.minecraft.nbt.CompoundTag) encoded).copy();
+        old.remove("bytes");
+        net.minecraft.nbt.ListTag wakes = new net.minecraft.nbt.ListTag();
+        wakes.add(old);
+        net.minecraft.nbt.CompoundTag file = new net.minecraft.nbt.CompoundTag();
+        file.put("wakes", wakes);
+        com.example.horsegenetics.neoforge.data.HorseAfterlife loaded =
+                com.example.horsegenetics.neoforge.data.HorseAfterlife.CODEC
+                        .parse(net.minecraft.nbt.NbtOps.INSTANCE, file).getOrThrow();
+        long measured = loaded.lookup(wake.horse()).map(w -> w.bytes()).orElse(-1L);
+        if (measured != wake.bytes()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a wake saved before the size budget loaded with a cost of " + measured
+                            + " bytes, not the " + wake.bytes() + " it measures at death - an old"
+                            + " save's dead horses would sit outside the budget."), 0);
+        }
+        if (!loaded.trimTo(0).isEmpty() || loaded.size() != 1) {
+            throw new GameTestAssertException(Component.literal(
+                    "ops.resurrect_budget_mb = 0 is meant to be no cap, and trimTo(0) dropped a horse"), 0);
+        }
+        if (loaded.trimTo(wake.bytes() - 1).size() != 1 || loaded.size() != 0) {
+            throw new GameTestAssertException(Component.literal(
+                    "a store one byte over its budget kept its only horse - trimTo is not enforcing"
+                            + " ops.resurrect_budget_mb"), 0);
+        }
+    }
+
     private static void killAndRaise(GameTestHelper helper,
                                      net.minecraft.world.entity.animal.equine.Horse horse) {
         if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
@@ -1420,6 +1463,7 @@ public final class ModGameTests {
                             + " anything to offer. Check HorseAfterlifeHandler.onHorseDeath and"
                             + " whether the record still carries an ownerId at death."), 0);
         }
+        afterlifeBudgetHolds(wake);
 
         // The entity is discarded by now, so the id is free for it to take back.
         net.minecraft.world.entity.animal.equine.Horse raised =

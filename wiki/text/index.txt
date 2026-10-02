@@ -2822,6 +2822,7 @@ wiki/genetics-model.html#noncoat	all	Genes that never paint
 wiki/genetics-model.html#registry	all	The forty-eight registered genes
 wiki/genetics-model.html#sex-linked	all	Sex-linked inheritance
 wiki/genetics-model.html#verified	all	Verified
+wiki/horse-afterlife.html#budget	coding	The size budget (2026-10-01, issue #15)
 wiki/horse-afterlife.html#clock	coding	The clock is the owner, and it counts up
 wiki/horse-afterlife.html#command	gameplay	The command
 wiki/horse-afterlife.html#corpse	coding	The corpse has to go first (2026-09-26)

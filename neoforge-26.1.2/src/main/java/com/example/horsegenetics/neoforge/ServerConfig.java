@@ -275,10 +275,10 @@ public final class ServerConfig {
      * <p>It is a number of minutes rather than a flag because of what is being
      * kept. A resurrectable horse is a whole entity tag - every attachment, the
      * gear, the pedigree, the bond - and that is real bytes in the world save,
-     * per dead horse, for ever, if nothing ever throws it away. The window is
-     * therefore a <b>storage budget first</b> and a gameplay rule second: it is
-     * the answer to "how long should the server carry a corpse around on the
-     * chance somebody asks for it back".
+     * per dead horse, for ever, if nothing ever throws it away. That storage
+     * question is now answered by size, {@link #RESURRECT_BUDGET_MB}; this
+     * window is left as an operator's extra rule for a server that also wants
+     * a time limit.
      *
      * <p><b>Why owner-online time and not wall clock.</b> The grace exists so a
      * player who loses a horse has a chance to notice and ask. Somebody who
@@ -288,12 +288,29 @@ public final class ServerConfig {
      * only clock that measures the thing the window is for. It also means the
      * store cannot be aged out by a server simply being left running.
      *
-     * <p><b>0 keeps every dead horse for ever</b> - an operator who would rather
-     * spend the disk than ever say no. The count is still kept, so turning the
-     * limit back on later starts expiring the backlog rather than
-     * grandfathering it.
+     * <p><b>0 - the default since issue #15 - puts no time limit on it</b>, and
+     * the store is held to {@link #RESURRECT_BUDGET_MB} instead. The count is
+     * still kept, so turning a limit on later starts expiring the backlog
+     * rather than grandfathering it.
      */
     public static final ModConfigSpec.IntValue RESURRECT_GRACE_MINUTES;
+
+    /**
+     * <b>{@code ops.resurrect_budget_mb}</b> - how big the afterlife store may
+     * grow before it lets dead horses go, oldest death first and only as many
+     * as it takes (owner, issue #15). Read through
+     * {@link #resurrectBudgetBytes()}, enforced by
+     * {@code server/HorseAfterlifeHandler}'s sweep through
+     * {@code common/horse/AfterlifeBudget}.
+     *
+     * <p>A size rather than a clock because the cost of keeping a dead horse
+     * is bytes, and a clock spends a horse long before the bytes add up to
+     * anything. Measured as each horse's gzipped entity tag, which slightly
+     * overstates the real file. Only the resurrectable snapshot is let go; the
+     * pedigree's record of the horse stays for ever as it always has.
+     * <b>0 is no cap.</b>
+     */
+    public static final ModConfigSpec.IntValue RESURRECT_BUDGET_MB;
 
     /**
      * <b>{@code behaviour.owner_only_riding}</b> - may a stranger get on your
@@ -459,16 +476,23 @@ public final class ServerConfig {
                         "0 turns the payment off.")
                 .defineInRange("realm.release_emeralds", 2, 0, 64);
         RESURRECT_GRACE_MINUTES = builder
-                .comment("How long a dead horse can still be brought back by /horseresurrect. (default: 60)",
+                .comment("An optional time limit on bringing a dead horse back with /horseresurrect. (default: 0)",
                         "Counted in minutes of the OWNER'S OWN TIME ONLINE since the horse died, not",
                         "wall clock: a player who was logged off when it happened has not spent any",
                         "of their window, because the window is their chance to notice and ask.",
-                        "While it lasts, the whole horse is kept in the world save - every attachment,",
-                        "its gear, its pedigree, its bond - so this is a disk budget as much as a rule.",
-                        "Only owned horses are kept at all; a wild one has nobody to ask for it.",
-                        "0 keeps every dead horse for ever. The elapsed count is still kept while it",
-                        "is 0, so turning a limit back on expires the backlog rather than sparing it.")
-                .defineInRange("ops.resurrect_grace_minutes", 60, 0, 10_080);
+                        "0 is no time limit: a dead horse is then kept until ops.resurrect_budget_mb",
+                        "is reached. Only owned horses are kept at all; a wild one has nobody to ask",
+                        "for it. The elapsed count is still kept while this is 0, so turning a limit",
+                        "on expires the backlog rather than sparing it.")
+                .defineInRange("ops.resurrect_grace_minutes", 0, 0, 10_080);
+        RESURRECT_BUDGET_MB = builder
+                .comment("How big the store of dead horses /horseresurrect can bring back may grow, in",
+                        "megabytes. (default: 100)",
+                        "Each one is the whole horse - every attachment, its gear, its bond - kept in",
+                        "the world save. Past this size the OLDEST deaths are let go first, only as",
+                        "many as it takes to fit. A horse let go can no longer be resurrected; its",
+                        "pedigree record is kept for ever regardless. 0 is no cap.")
+                .defineInRange("ops.resurrect_budget_mb", 100, 0, 100_000);
         NEARBY_HORSE_CAP = builder
                 .comment("How many other horses may be within 16 blocks of a mare and still let a",
                         "stallion cover her. (default: 50)",
@@ -856,9 +880,20 @@ public final class ServerConfig {
         try {
             minutes = RESURRECT_GRACE_MINUTES.get();
         } catch (IllegalStateException notLoaded) {
-            minutes = 60;
+            minutes = 0;
         }
         return minutes * 60 * 20;
+    }
+
+    /** {@code ops.resurrect_budget_mb} as <b>bytes</b>, safely - {@code 0} meaning "no cap". */
+    public static long resurrectBudgetBytes() {
+        int mb;
+        try {
+            mb = RESURRECT_BUDGET_MB.get();
+        } catch (IllegalStateException notLoaded) {
+            mb = 100;
+        }
+        return mb * com.example.horsegenetics.common.horse.AfterlifeBudget.BYTES_PER_MB;
     }
 
     /**
