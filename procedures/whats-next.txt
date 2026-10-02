@@ -33,7 +33,8 @@ STEPS
       the needs-owner ones, which are waiting on her answers. Note the urgency line of
       each.
    c. INTAKE: the units in intake/, scored as process-intake steps 1-4 score them
-      (size, impact, owner, dependencies). Count intake/To do.txt bullets too.
+      (size, impact, owner, dependencies) - read intake/Sizing.txt rather than every
+      treatment, re-sizing only what changed since its date. Count intake/To do.txt bullets too.
    d. WAITING ON HER EYES: wiki/verification.html, the newest entries and the oldest
       ones. Also anything a yard pen could answer without her (run-tests).
    e. THE SERVER: unreviewed PCH log export folders (review-server-logs; the local

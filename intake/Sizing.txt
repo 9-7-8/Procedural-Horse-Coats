@@ -14,7 +14,6 @@ or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on
 
 ------------------------------------------------------------------------------
 To do.txt                                                         sized 2026-10-02
-- Designer lists each grown part as a trait                      S  a  owner-free (decided 2026-10-01)
 - Config key table on wiki/config.html (new bake row)            S  b  owner-free
 - Champagne foal eye blue-green until adult                      S-M a  owner-free (coat cache key)
 - body.size off compresses scale; designer "genotype preview"    S  a  owner-free; measure a stall band in game first
@@ -26,7 +25,7 @@ To do.txt                                                         sized 2026-10-
 Attached model parts.txt   (PLAN ONLY)                            sized 2026-10-02
 STALE for stages 0-3: the spike, the registry/layer, the first gene and the head batch have
 shipped (AttachedPartLayer, PartAnchor, PartKind, GrownParts; horn, antlers, ram's and dragon
-horns). P6 (what the designer shows) was decided in To do.txt. Trim those stages next time.
+horns). P6 (what the designer shows) shipped 2026-10-02. Trim those stages next time.
 - Stage 4, breed hook (breed format, BreedSpecWriter, bakes)     L  b  No: touches breeds; unblocks reindeer breeds
 - Stage 5, worn side (HorseShoeLayer -> AttachedPartLayer)       M  a  owner-free; needs Horse shoes
 - Stage 6, wings                                                 L  c  No: "what drives them; one texture or many"

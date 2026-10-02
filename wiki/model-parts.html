@@ -378,14 +378,42 @@
 </p>
 
 
-<h3 id="open-designer">Settled 2026-10-01: the designer says plainly that a part is not drawn</h3>
+<h3 id="open-designer">Shipped 2026-10-02: the designer names the parts it cannot draw</h3>
 <p>
     The browser designer previews a flat coat texture and cannot draw geometry, while the game's
-    spawn screen draws every part. The owner's call is the cheap one: the designer
-    <em>lists</em> each grown part as a trait, with a line saying it is not drawn there and can
-    be seen in game. It does not attempt a 3D preview. The divergence stays written in a comment
-    on both editor files (hard rule 5). <strong>Not built yet</strong>: it is queued in
-    <code>intake/To do.txt</code>.
+    spawn screen draws every part. The owner's call (2026-10-01) was the cheap one: say so in
+    words, and no 3D preview. A horse with a part now gets a panel at the top left of the preview
+    reading <em>Not drawn here &mdash; see in game</em>, with one line per part. A foal's antlers,
+    ram's horns and dragon horns add <em>(grows in with age)</em>, because a foal wears only the
+    horn (<code>PartKind.showsOnFoal</code>). A plain horse shows no panel.
+</p>
+<ul>
+    <li><strong>The words come from <code>common/</code>.</strong>
+        <code>GrownParts.listed</code> is <code>GrownParts.of</code> named for a person: a pair
+        once, by <code>PartKind.label()</code>, with an adult-only flag. It is the same door the
+        renderer uses, so the antler sex gate holds here too, and an <code>Antm</code> mare lists
+        nothing. <code>DesignerApi.stateJson</code> sends it as <code>"parts"</code>, and
+        <code>gui.js drawParts</code> draws it. The panel is the one widget with no twin on the
+        spawn screen, which draws the part itself; the comment on both editor files says so
+        (hard rule 5).</li>
+    <li><strong>Part rows are no longer struck through.</strong> <code>genesJson</code> sends a
+        <code>grows</code> flag (<code>EditorRules.grows</code>, a memoised
+        <code>GrownParts.shapes</code>) beside <code>shows</code>, and <code>viewable()</code>
+        honours it. It is a flag rather than a sixth <code>shows</code> category because
+        <code>viewable()</code> lists the categories it cannot draw, and a new category would read
+        there as drawable (<a href="architecture.html#gap-254">open check 254</a>).</li>
+    <li><strong>Both editors' rows were wrong, and are fixed in one place.</strong> A part gene's
+        outcomes are all wild types, because they paint nothing. Both editors' "is it expressing"
+        rule was <em>not a wild type</em>, so an <code>Ant/Ant</code> horse's antlers row said
+        <em>no effect</em>. <code>EditorRules.expressing</code> is now the rule for both
+        editors: a part gene expresses when its outcome is not the one its default alleles give.
+        <code>GrownPartsListedTest</code> holds the listing, the sex gate, the foal flag and the
+        row rule.</li>
+</ul>
+<p>
+    Seen working in headless Chrome on 2026-10-02: an adult Horn/Horn Ant/Ant stallion, and the
+    same horse as a foal. Neither the game screen's row change nor the panel has been seen by
+    a person yet. See <a href="#open-editor-part-rows">the check</a>.
 </p>
 </section>
 
@@ -475,13 +503,6 @@
         <code>AttachedPart</code> list. Saddle pads follow. Not settled: whether a worn item may
         ever replace a grown part &mdash; a helmet over a horn.</li>
 </ul>
-
-<h2 id="designer-pointer">The designer cannot draw a part</h2>
-<p>
-    Whatever is built for the two editors is a plan, but <em>which</em> of the three answers to
-    build is an unresolved design call, so it lives on
-    <a href="#open-designer">the Verification tab</a> rather than here.
-</p>
 
 <h2 id="elytra-wings">Wings off the elytra &mdash; what transfers and what does not</h2>
 <p>
@@ -621,7 +642,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, the antlers on screen, and any cost against a herd.</p>
+    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, the antlers on screen, any cost against a herd, and the editors' new part rows and the designer's parts panel.</p>
 </div>
 
 <h3 id="open-parts-draw-order">Draw order has been argued, not observed</h3>
@@ -641,6 +662,17 @@
     different tine counts in one frame, which is the first time <code>setupAnim</code> carries
     something per horse that a wrong order would visibly swap. The detail is on
     <a href="gene-antlers.html#open-antler-tines">the antlers&rsquo; tab</a>.
+</p>
+
+<h3 id="open-editor-part-rows">The editors' part rows and the designer's parts panel, unseen by a person</h3>
+<p>
+    Built 2026-10-02 (<a href="#open-designer">what shipped</a>). In game, open the custom horse
+    spawn egg, add <code>Antlers</code> at <code>Ant/Ant</code> and <code>Unicorn horn</code> at
+    <code>Horn/Horn</code>: both rows should be green and say <em>Antlers</em> and
+    <em>Unicorn</em>, where they used to say <em>no effect</em>. Do the same in the
+    browser designer: the panel at the top left of the preview should list both parts, and
+    switching to a foal should add <em>(grows in with age)</em> to the antlers only. Also check
+    on a narrow window that the panel does not cover the horse.
 </p>
 
 <h3 id="open-parts-herd">Nothing has been measured</h3>

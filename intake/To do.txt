@@ -1,7 +1,6 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
 
 Decided by the owner on 2026-10-01; each is small, and needs only building:
-- The horse designer lists each grown part as a trait, with "not drawn here; see it in game" (wiki/model-parts.html#open-designer). Hard rule 5: it is a designer-only change, so keep the divergence comment on both editor files.
 - A champagne foal's eye is blue-green, turning to its rolled adult colour on growing up: an adult signal on EyeColorContribution, and the age flag in the coat cache key (wiki/gene-champagne.html#plan-foal-eyes).
 - With body.size off, compress scale toward 1.0 instead of flattening it, and label the designer a genotype preview (wiki/gene-body-size.html#plan-compress). Measure the band against a stable stall first.
 - Decided 2026-10-01 but each needs a few more owner answers before building: cutie marks get a gene/breed-biased item pool (wiki/gene-cutie-mark.html#plan-pool-bias), and the breed format gets all four studbook kinds before any sport horse (wiki/breed-book.html#plan-studbooks).

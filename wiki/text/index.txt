@@ -2694,6 +2694,7 @@ wiki/gene-unicorn-horn.html#deferred	coding	The deferred-submit trap, and why th
 wiki/gene-unicorn-horn.html#family	coding	Why it is not filed with the coat genes
 wiki/gene-unicorn-horn.html#finding	gameplay	Finding one
 wiki/gene-unicorn-horn.html#health	gameplay	Is it good for the horse?
+wiki/gene-unicorn-horn.html#horn-designer	coding	The designer names the horn rather than drawing it
 wiki/gene-unicorn-horn.html#inheritance	gameplay	Crossing two of them
 wiki/gene-unicorn-horn.html#numbers	coding	The epigenome, sorted by what it costs to change
 wiki/gene-unicorn-horn.html#pipeline	coding	It paints nothing, and that is the novelty
@@ -3273,7 +3274,7 @@ wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
-wiki/model-parts.html#open-designer	coding	Settled 2026-10-01: the designer says plainly that a part is not drawn
+wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
 wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time
 wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
 wiki/model-parts.html#settings	gameplay	If they cost you frames
