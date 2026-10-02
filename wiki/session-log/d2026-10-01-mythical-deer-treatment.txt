@@ -1,0 +1,19 @@
+2026-10-01 - the mythical deer, scoped as one treatment
+
+    An intake session. No code, wiki prose or assets touched; nothing built or played. The
+    owner pasted a table of seven mythical deer (Ceryneian Hind, white stag, Saint Eustace's
+    stag, Ruru, the Nine-Colored Deer, Marica, Takemikazuchi's deer), then added an eighth,
+    Artemis's chariot deer, and asked which new genes they need.
+
+    Output: intake/Mythical deer - implementation treatment.txt. New things needed: a mane-and-tail
+    shape gene (no mane, flag tail), a hoof colour gene (bronze, brass, gem), a nine-colour coat
+    gene, and a crown cross part for Eustace's stag. Plus a Roadmap-only page for a deer build gene
+    (it does nothing yet, like the Curly coat page).
+
+    Owner's calls: one White Stag breed (Takemikazuchi's deer folded in, Eustace's cross a gene the
+    breed can carry); lore only for speech; Marica carries Lycan; Hind speed 10; very_rare, wild and
+    spawn egg only; rides the next release. Biome lists, the Artemis's-deer-as-its-own-breed split
+    and the stat numbers are recommendations, not asked.
+
+    What the building session picks up first: the mane-and-tail gene, after checking that the
+    braid layer survives a hidden mane (the treatment's first UNVERIFIED line).

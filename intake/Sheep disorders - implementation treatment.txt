@@ -1,0 +1,192 @@
+Sheep disorders - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "Open" lines are still to be settled, by whom is said on the line; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first. Source of truth for what
+exists is wiki/gene-ednrb.html, wiki/horse-body.html (disorders, the two lethal paths), wiki/genetics-model.html, wiki/eye-colour.html,
+wiki/making-a-gene.html and wiki/gene-census.html. This file is retired (deleted, per START HERE step 3) as each
+piece ships and moves onto those pages' Gameplay and Coding tabs.
+Release: rides the next release after the kind ships (see section 8).
+LOWEST POSSIBLE PRIORITY (owner). WAITS ON "Natural-sheep gene kind - implementation treatment.txt". Siblings:
+"Sheep coat genes - implementation treatment.txt" (the EDNRB white here is a separate locus from ASIP white there)
+and "Sheep horns and body genes - implementation treatment.txt" (polyceraty, spider-lamb frame).
+
+
+1. The request, as given
+========================
+The owner's research, congenital section: "Keep a distinct disease record for each particular variant: gene,
+allele, genotype, penetrance, age_of_onset, severity, and any parent-of-origin requirement." Four rows: spider lamb
+syndrome (FGFR3, recessive, severe bone growth, carriers with a small additive long-bone effect); the EDNRB
+deletion hypopigmentation syndrome (recessive, ~110-kb, homozygous lambs white, blue-eyed, dying soon after birth;
+carriers unaffected); polyceraty-associated eyelid defects (sometimes with HOXD1 multiple horns, not obligatory);
+other inherited dwarfism/chondrodysplasia ("add only when you can identify a defined breed, syndrome, or variant").
+"Do not make ordinary ASIP-white or ordinary spotted sheep sick by association." "do not invent a general rule that
+white spotting causes deafness or that an MSTN muscular sheep has a congenital illness."
+Reading, confirmed: reuse the horse disorder machinery (Decided); EDNRB is its own locus, never tied to any other
+white.
+
+
+2. In scope, and what is not
+============================
+In scope
+ - Piece 1: the EDNRB white (recessive, lethal in the homozygote).
+ - Piece 2: spider lamb (FGFR3 analogue: recessive severe, carrier frame effect).
+ - Piece 3: the polyceraty eyelid risk and the dwarfism rule, as a plan or a conditional.
+Not in scope (all re-askable)
+ - A deafness rule for white sheep. Decided by the research and owner: none.
+ - A congenital illness for muscular (MSTN) sheep. None.
+ - A parent-of-origin disease. Callipyge is in the horns and body treatment and is not a disease.
+ - Sheep breeds that carry these (later, with the owner). No invisible carriers in the wild: a founder table only
+   contains genotypes that show.
+ - A new health system; a death that is not one of the two existing lethal paths.
+
+
+3. What already exists, so the building session does not redo it
+=================================================================
+3a. Disorder genes: RecessiveDisorderGene and DominantDisorderGene (common/genetics/genes), SkittishGene, MagicHealthGene.
+    NATURAL_HEALTH family lede (GeneFamily): "Almost every one is recessive and absent from its own founder table
+    as a homozygote - a wild horse can carry a disorder but never have one."
+3b. Lethals: wiki/horse-body.html owns "disorders, the two lethal paths". Read it for what a lethal does to a foal
+    and how the two paths differ before choosing one. UNVERIFIED here which of the two fits "dies soon after birth".
+3c. Eye colour: wiki/eye-colour.html owns thirteen loci and "the genes that request one"; a blue-eyed result is
+    requested through that system, not painted by the disorder. UNVERIFIED how a gene requests an eye colour -
+    read it before wiring the blue eyes.
+3d. THE HORSE ALREADY HAS AN EDNRB GENE. EdnrbGene.java (wiki/gene-ednrb.html) is frame overo, "the model's first
+    genuine lethal": two carriers give an all-white, blue-eyed foal that does not survive its first days, and it
+    claims blue eyes through the shared eye-colour channel. It was renamed to its locus alongside KIT, MITF and
+    PAX3. The sheep EDNRB deletion is the SAME real locus with the SAME outcome (white, blue-eyed, dies soon
+    after birth), so Piece 1 must not simply add a second gene that does the same thing. Read EdnrbGene and the
+    page first.
+Looks built but is not
+  - Any sheep disease allele; "spider lamb", "EDNRB" and "polyceraty" are in no code or wiki page.
+  - Penetrance, age_of_onset, or severity as stored fields. The research wants them; the mod's disorders may not
+    have them (UNVERIFIED). The mod's convention may be "a sentence on Gameplay" (CLAUDE.md: health goes as a
+    sentence), so the record may be a table on the Science tab rather than fields in code.
+
+
+4. The pieces
+=============
+Piece 1 - The EDNRB white
+-------------------------
+ Open (owner, ASK FIRST - decides the whole piece): the horse's EdnrbGene already is a recessive-lethal white with
+   blue eyes. Options: (a) a sheep EDNRB allele APPENDED to the existing gene (one locus, no duplicate, but a
+   natural gene would gain a natural-sheep allele, which the kind treatment does not allow - a gene is one kind);
+   (b) a separate natural-sheep gene with its own key that gives the same outcome through the same eye-colour
+   channel (two EDNRB loci, a duplicate but clean kinds); (c) no new gene - document that frame overo's lethal
+   white already is the model's EDNRB white and do nothing. Recommended: (b), named for its variant, with the page
+   linking to gene-ednrb.html. Never reuse the horse key.
+What the player sees: a very rare sheep-lineage white horse with blue eyes whose foal does not survive; carrier
+ parents look ordinary. Breeding two carriers is the only way to get one.
+ Decided: a recessive natural-sheep disorder gene reusing RecessiveDisorderGene's pattern: homozygous = white coat,
+   blue eyes, dies shortly after birth. Heterozygotes are unaffected carriers. It is its OWN locus; ordinary
+   ASIP white and ordinary spotted sheep carry no risk.
+ Decided: absent from founder tables as a homozygote; a carrier may appear only where a breed pins it.
+ Open (building session): the coat the homozygote paints (a white overlay that wins over sheep ASIP/MC1R/TYRP1) and
+   its priority inside the natural-sheep sub-band; Recommended: after the pigment genes, so white wins.
+ Open (owner): how severe in the mod - the research says "died soon after birth", with intestinal-obstruction signs
+   in some lambs but the investigators "did not establish" lethal-white-horse aganglionosis. Recommended: the
+   gentlest existing lethal path, with page text saying exactly that and not claiming the horse syndrome.
+ Where: common/ - one gene, a gene page with a Science tab carrying the evidence level and the research's caveat.
+ Data and saves: key and allele order permanent. A world that has a carrier keeps it.
+ Sync/config: none. Tests: GeneFilesTest/RecessiveDisorder test (homozygote shows, carrier does not); a founder-table
+   test that no ordinary founder is homozygous; the lethal path test the horse disorders use; both goldens by KEY;
+   a test that no other white gene triggers this death.
+ Play checks: two carriers bred in a yard; the foal's coat, eyes and fate; an ASIP-white sheep stays healthy.
+ Docs: the gene page, horse-body.html (Coding: a new disorder), gene-census.html, eye-colour.html if the eyes are
+   requested through a locus there.
+
+Piece 2 - Spider lamb (FGFR3 analogue)
+--------------------------------------
+What the player sees: a recessive condition that gives a foal long, bent legs and a poor outcome, with carriers a
+ touch leggier. Carrier x carrier gives 25% affected, before any survival modelling.
+ Decided: recessive severe disease; carriers get a small additive frame effect (the research: "an additive effect on
+   long-bone length in carriers", with "genetic background" modifying manifestation).
+ Recommended: do not model the background modification as a gene; leave it as the existing epigenome/size spread.
+ Open (owner): what "severe" costs in the mod: stats only (health and jump down), or a lethal path? Recommended:
+   stats only, a disorder not a lethal, because the research describes malformation, not certain death.
+ Open (building session): whether the carrier frame effect is a size nudge through the size gene's range or the
+   frame effect of the horns-and-body treatment; Recommended: ONE mechanism, not two.
+ Where/data/tests/play/docs as Piece 1. Extra test: carrier x carrier distribution over a fixed seed set is near
+   25% affected; carrier stats within the small band.
+
+Piece 3 - Conditional risks: polyceraty eyelids and the dwarfism rule
+---------------------------------------------------------------------
+What the player sees: nothing certain. Four-horned (polycerate) sheep-lineage horses may rarely have a defect; there
+ is no generic "small sheep is diseased" rule.
+ Decided: incompletely penetrant, conditional, NOT "every four-horned lamb has defective eyelids". Dwarfism and
+   chondrodysplasia are added only for a defined breed, syndrome or variant.
+ Recommended: a plan only (Roadmap tab on the disorder/horn page) until polyceraty exists as a gene (horns and body
+   treatment, Piece 1, Open). The mod's horses already carry a four-horned shape (Fhn) which must NOT gain this
+   risk - that is a magical shape, not HOXD1.
+ Open (owner): whether penetrance (a percentage that a polycerate horse is affected) is stored on the allele
+   epigenome or fixed in code. Recommended: a fixed, small number per genotype.
+ Where: plan page text only until a gene exists. No tests until built.
+ Docs: a Roadmap tab on the page that will own the disorder (a plan with no page means writing the page - rule 9).
+
+
+5. Decisions (anything not inside a piece)
+===========================================
+A. The ask: sheep disorders with the specific variant recorded, no association-by-colour. Smallest worthwhile
+   version: Piece 1.
+B. Fit: bends horses-only (owner, kind treatment). Is it a carrot not a stick? A genuine tension: a lethal is a
+   stick. Mitigated: homozygous only, absent from the wild as a homozygote, never an ordinary white. Recommended:
+   ask again at the building session if the owner wants it ON by default in any breed.
+C. Meeting it: breeding two carriers from a breed that pins the allele (later), or the editors.
+D. Genetics: natural-sheep kind (health family). Alleles recessive; sex linkage none; both editors (rule 5). Lethal:
+   Piece 1 only. Health: written as a sentence on Gameplay (CLAUDE.md).
+E. Breeds: none here. F. Items: none. G. Config: none - Open (owner): a server option to disable sheep lethals?
+   Recommended: only if the horse lethals already have one (UNVERIFIED).
+H. Saves: keys permanent; a disorder gene removed later would leave unknown keys in saved horses (UNVERIFIED how the
+   registry handles an unknown key - read the gene registry before shipping a lethal).
+I. Multiplayer: none. J. Compatibility: none. K. Performance: none per tick.
+L. Tests: see pieces. M. Release: section 8.
+
+Implications sweep
+  Genetics ... genes. Pipeline/goldens ... the white overlay; goldens by key and new rows. Eye colour ... touches
+  (blue eyes). Body space ... untouched. Breeding ... carriers inherit like any gene. Breeds ... none. Horse body ...
+  touches (disorders, a lethal). Care ... untouched; a foal that does not survive is the existing lethal path.
+  AI ... untouched. Items/carrots ... a gene-database/carrot interaction is UNVERIFIED. Tack ... untouched. Villagers ...
+  untouched. Realm ... bakeUnverifiedGenes. H menu ... disorder info text must name the carrier. Stasis ... a
+  stasis-banked carrier must survive. Designers ... rule 5. Gene creator ... not extended. Config ... maybe. Mods ...
+  none. Advancements ... none. Backport ... in common/. Wiki ... gene pages, horse-body.
+Three likeliest ways it goes wrong for a real player
+  0. Two EDNRB loci with the same name confuse players and the census. Handled: the Open above; a distinct name.
+  1. A player breeds a "white sheep" and loses foals, thinking ordinary white is the cause. Handled: the lethal is
+     a separate locus; the pages and the H-menu text say the carriers look normal and name the locus.
+  2. A founder table gives a homozygote in the wild. Handled: the founder-table test.
+  3. A four-horned (Fhn) horse is read as sick. Handled: no coupling to Fhn at all.
+
+
+6. UNVERIFIED (riskiest first)
+===============================
+ 1. Which of the two lethal paths fits, and what a lethal does to a foal and to stasis (read horse-body.html).
+ 2. How a gene requests an eye colour (read eye-colour.html), and whether blue eyes need a new locus entry.
+ 3. How the registry treats an unknown gene key in an old save if a lethal is ever removed.
+ 4. Whether penetrance/onset/severity can be fields or are prose (the mod's convention).
+ 5. Whether a server option already exists for horse lethals.
+ 6. That the horse disorder base classes fit a natural-sheep gene without the kind change leaking.
+
+
+7. Order and size
+=================
+ Piece 1 EDNRB white ............. M. After the kind; the lethal and the eye request are the risk.
+ Piece 2 spider lamb ............. S to M. After Piece 1 (same pattern, no lethal).
+ Piece 3 conditional risks ....... S, a plan page entry; do with Piece 1 or 2.
+ Waits on: the kind. Unblocks: sheep breeds; the polyceraty gene in the horns treatment.
+ Do not do in one session: Piece 1 and Piece 2 (two disorders, one debug); either piece and a breed pin.
+
+
+8. Release
+==========
+The kind carries the owner's "bigger bump when the kind ships". For this file: Recommended "rides the next release",
+applying when each piece ships; NOT asked for this file separately. Open (owner), at scoping of the build session.
+
+
+9. After each piece ships
+=========================
+ Regenerate-table rows touched: the gene-file long row (bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages,
+ bakeMarkingFacts, bakeGeneCensus, bakeUnverifiedGenes, bake-gene-timeline.mjs), both goldens, anything in common/
+ (:web:bakeDesignerAssets, check-designer-boots.mjs), dead-layers if the white paints nothing, the wiki-prose row,
+ and bake-roadmap-index.mjs / bake-verification-index.mjs for the plan and check tabs.
+ Wiki: horse-body.html (Coding), a three-tab page per gene, eye-colour.html, gene-census.html. Open checks go on
+ each page's Verification tab (rule 9), never on wiki/verification.html.

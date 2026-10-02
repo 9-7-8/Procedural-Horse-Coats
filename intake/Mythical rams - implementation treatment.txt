@@ -1,0 +1,206 @@
+Mythical rams - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "Open" lines are still to be settled, by whom is said on the line; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first. Source of truth for what
+exists is wiki/gene-ram-horns.html, wiki/gene-ram-horn-form.html, wiki/gene-flying.html, wiki/model-parts.html,
+wiki/breeds.html, wiki/breed-format.html and wiki/curly-coat.html. This file is retired (deleted, per START HERE
+step 3) as each piece ships and moves onto those pages' Gameplay and Coding tabs.
+Release: rides the next release (Decided). Applies when each piece ships; none cuts its own.
+It sits beside "Mythical goats - implementation treatment.txt" (which appends the scimitar shape to the same gene
+and builds goat-build.html), "Mythical equids - implementation treatment.txt" and "Mythical antlered beasts -
+implementation treatment.txt". Rules carried from the audit: public domain only, no talking.
+
+
+1. The request, as given
+========================
+"Now create a set of sheep/ram:" and a table of five rows. Reading: five horse breeds that are rams, in the way the
+goats were built, plus a sheep build plan page (asked and confirmed).
+  Chrysomallos          Greek     golden fleece; powerful ram; flies, carries Phrixus and Helle away; speed 10+; wings in accounts
+                                  that call him winged; ram horns. Aries and the Golden Fleece ram are this one entry.
+  Vegetable Lamb        medieval  white wool in one version; lamb-sized; grows on a stem at its navel, grazes only as far as the
+                                  stalk reaches. An animal-plant hybrid; some accounts show several lambs as fruit.
+  Criosphinx            Egyptian  no fixed colour (takes its material's); lion mane may be present, lion tail, lion paws not hooves;
+                                  heavy, lion-bodied; ram head and curved horns on a lion's body; no human parts.
+  Banebdjedet (ram form) Egyptian not specified; fleece; ram-bodied; four ram heads; only the animal-bodied form (the ram-headed man
+                                  is excluded). Divine form of several ba-souls.
+  Khnum (ram form)      Egyptian  not specified; fleece; ram; horizontally projecting, twisting horns in early depictions; only
+                                  depictions as a complete ram (the ram-headed man is excluded).
+
+
+2. In scope, and what is not
+============================
+In scope
+ - Piece 1: a "horizontal twist" shape appended to Ram horn form (Khnum's horns). Decided.
+ - Piece 2: five breeds, "all five, noting what each lacks". Decided. Banebdjedet, the Criosphinx and the Vegetable
+   Lamb ship as their sheep or lamb half only.
+ - Piece 3: sheep-build.html, a Roadmap-only plan page, separate from the deer and goat build pages. Decided.
+Not in scope (all re-askable)
+ - Flight on Chrysomallos. Decided: "No flight until wings ship"; the breed ships on the ground with a golden fleece
+   and the page says flight and wings are one later pass (audit gap 1, wings).
+ - A woolly look. Decided: gold and white coats now; the fleece is a plan (the Curly coat page), not built here.
+ - Extra heads (Banebdjedet's four), the lion body (Criosphinx), the plant stem (Vegetable Lamb). Decided: noted as
+   not drawn. Banebdjedet pins curled horns (Decided), and keeps four-horned for Jacob-type sheep.
+ - The Vegetable Lamb's tether and stem. Decided: lore only, no AI goal and no part.
+ - Any new ability. Recommended: none (the deer's rule); not asked.
+ - Speech, none. Divine powers (Khnum's creation, Banebdjedet's souls): lore only.
+
+
+3. What already exists, so the building session does not redo it
+=================================================================
+3a. Horns: RamHornsGene (Rh any sex, Rhm stallion only), RamHornFormGene "horsegenetics.ram_horn_form", PRIORITY 237,
+    allele order Crl, Crk, Fhn, Scr (permanent, append only), dominance Fhn > Crl > Crk > Scr; RamHornGenerator shape
+    constants CURL 0, CORKSCREW 1, FOUR 2, SCURS 3 with FORMS 4, CURLS 4, MAX_NODES 24; PartKind's baked count for RAM_HORN_RIGHT
+    and RAM_HORN_LEFT is FORMS * CURLS (re-bake neoforge-26.1.2/tools/bake-part-sheet.mjs). Corkscrew is "long, straight and twisted,
+    rising up and out" - up and out, not horizontal, so it is NOT Khnum's horn.
+    The goats treatment appends a scimitar shape to this same list first. THE ORDER OF APPENDING MATTERS: allele order is permanent
+    the moment a world uses it. Whichever of the two ships first takes the next slot; the other appends after it. Dominance is
+    independent of order, so the two sessions do not conflict, but they must not run in one session.
+3b. Flight: the data gene "flying" (wiki/gene-flying.html): glide dominant, true flight recessive (two copies). Paints nothing.
+    Cloudtouched pins it. Wings are unbuilt (audit gap 1). Chrysomallos does NOT pin it (Decided).
+3c. Breeds: breeds/not_a_sheep.json is the nearest precedent (magical, "pair" weights, ram horns pinned with Rhm, Rh, n). Not A Sheep
+    exists and is NOT one of these rams: it is a very small ordinary-looking sheep, uncommon, sold. Do not touch its pool.
+3d. Wool: the coat pipeline has no hair axis (wiki/curly-coat.html). Gold is the champagne, palomino and dunalino looks; white is the
+    dominant whites and Grey.
+Looks built but is not
+  - Wings, extra heads, a lion body, a plant stem, a horizontal twist horn, a woolly coat, a "sheep build": none exists.
+  - Four-horned (Fhn) is four horns, not four heads; it is a Jacob sheep's, not Banebdjedet's.
+  - HornGenerator mentions a scimitar curve for the unicorn horn; irrelevant here.
+
+
+4. The pieces
+=============
+Piece 1 - Khnum's horns: the horizontal twist
+---------------------------------------------
+What the player sees: a ram's horns that project sideways, flat and wide, twisting - Khnum's old horns - on either sex
+ (Rh) or a stallion only (Rhm).
+ Decided: append one shape to Ram horn form, not a new gene. Recommended name "Horizontal twist", token "Hzt" (a PROPOSAL; grep
+   every existing allele token).
+ Recommended: dominance below Crk and above Scr (Fhn > Crl > Crk > Hzt > Scr, adjusted if the goats' scimitar already sits in the
+   series: Open, building session). Founder frequency about 0.04, taken from Crl's remainder.
+ Recommended: shape is two roots leaving the skull sideways in a shallow twist, with the CURLS knob as the twist count.
+   UNVERIFIED that MAX_NODES 24 allows it at every size.
+ Where: common/ - RamHornFormGene (allele, expression text, founder table), RamHornGenerator (the shape, FORMS +1); NeoForge -
+   part sheet re-bake.
+ Data and saves: allele order permanent; append only; see 3a for the ordering with the goat scimitar.
+ Sync: none new. Config: none.
+ Tests: RamHornFormGene (the allele in the series and a pair), RamHornGenerator (nodes inside the budget at every curl and size),
+   PartGeneratorTest, EditorRules parity; the two goldens move by KEY ONLY (horns paint nothing).
+ Play checks: the horns on both sexes, a foal, both sizes, a halter and a saddle on, against the other shapes; the horns clear the
+   ears; the horns are not hidden inside a halter.
+ Docs: gene-ram-horn-form.html (Gameplay shapes table, Coding allele order, Science), gene-ram-horns.html, model-parts.html if
+   the sheet changes.
+
+Piece 2 - The five breeds
+-------------------------
+What the player sees: five sheep-like horses in the wild and as spawn eggs, each with a breed-book entry that tells the myth in
+ fresh words; three say plainly what is not drawn.
+ Decided: all five are breeds, kind magical, "wild" and "spawn_egg" only (as the deer and goats). Commonness very_rare for
+   Chrysomallos, the Vegetable Lamb, Khnum and Banebdjedet; rare for the Criosphinx (a type). Rides the next release.
+ Every row is a PROPOSAL for review; biome lists, stats and sizes were NOT asked. Every founder carries the expressing allele;
+ every pool pins ram_horns and ram_horn_form. Weights come from the breed designer's output, not by hand.
+ Chrysomallos (very_rare)
+   biomes: minecraft:plains, minecraft:sunflower_plains, minecraft:meadow, minecraft:savanna
+   stats: speed 10, jump 6, health 7; size standard. Coat: gold (champagne, palomino, dunalino, full golds), no spots. Horns: Rh,
+   Crl (a powerful ram's, ordinary shape), gold-leaning tint. No flight, no wings (Decided). UNVERIFIED that speed 10 is
+   reachable in BreedStatCurve. Page: Aries and the Golden Fleece ram are one animal; the wings and flight are not built.
+ Vegetable Lamb (very_rare)
+   biomes: minecraft:plains, minecraft:meadow, minecraft:sunflower_plains, minecraft:windswept_hills
+   stats: speed 2, jump 2, health 3; size very small (the low end of the shipped range, below Not A Sheep). Coat: white (the dominant
+   whites), some creamy. Horns: none (a lamb); no ram_horns pinned beyond the polled pair. Page: lore only for the stem and the
+   tether; not rooted, not tethered, no stem drawn (Decided).
+ Criosphinx (rare; SHEEP HEAD OF A SPHINX, NOT DRAWN)
+   biomes: minecraft:desert, minecraft:badlands, minecraft:savanna
+   stats: speed 6, jump 4, health 9; size large. Coat: sandstone tones (the whole pool, with tans, golds and dun weighted). Horns: Rh,
+   Crl. Notes: the lion body, lion tail and paws are not drawn (audit gaps 2, 7); it reads as a heavy ram-horned horse until they
+   are. Open (building session): a mane (a lion's) once the mane-and-tail shape gene ships.
+ Banebdjedet (very_rare; ONE HEAD ONLY)
+   biomes: minecraft:river, minecraft:swamp, minecraft:beach
+   stats: speed 4, jump 3, health 7; size standard. Coat: not specified; Recommended whole pool with whites and browns weighted.
+   Horns: Rh, Crl pinned (Decided: curled; four-horned is for Jacob-type sheep). The four heads are not drawn (audit gap 6).
+ Khnum (very_rare)
+   biomes: minecraft:desert, minecraft:river, minecraft:savanna, minecraft:badlands
+   stats: speed 4, jump 3, health 7; size standard. Coat: not specified; Recommended whole pool. Horns: Rh with the Hzt allele pinned
+   (Piece 1) - the horn design is the reason the row qualifies. Waits on Piece 1.
+ Common checks: cold share of each biome list against the climate spec (none of these is cold, so none gains cold tolerance);
+   every biome on data/horsegenetics/neoforge/biome_modifier/add_horse_herds.json (UNVERIFIED for swamp, river and beach: all
+   are listed in the biome-assignments file but confirm).
+ Where: breed JSON under common/src/main/resources/horsegenetics/breeds/; breeds.html and breed-book.html (a Rams section).
+ Data and saves: breed ids are permanent once a world has horses of them.
+ Tests: *BreedsTest per breed; BreedFilesTest; BreedBandsReachTest for a band on a knob no pinned pair reads.
+ Play checks: each breed in a yard pen; a cross of two (a cross label per breeds.html); a wild herd in each biome; the three
+   half-drawn breeds read as sheep and not as unfinished horses.
+ Docs: breeds.html, breed-book.html, the breed census; check-breed-heights.mjs for hand-typed heights.
+
+Piece 3 - The sheep build plan
+------------------------------
+What the player sees: nothing. A plan page, sheep-build.html (Roadmap tab only, one sentence in a note roadmap-summary box,
+ per CLAUDE.md rule 9). Decided: separate page; currently does nothing.
+ Recommended text: a thick, woolly body, short legs, short neck. It shares body-space groundwork with the deer and goat builds and
+   records the open question of one build gene with several alleles (Open, owner). The fleece plan points at curly-coat.html.
+ Where: wiki only. Docs: the page; SECTIONS in wiki/pages.js only (rule 7), with its views ("coding"); sync-page-views.mjs, then
+   bake-roadmap-index.mjs and bake-verification-index.mjs. Say on each breed's Verification tab that the rams are lean horses
+   until the build ships.
+
+
+5. Decisions (anything not inside a piece)
+===========================================
+A. The ask: five breeds and a plan page. Smallest worthwhile version: Chrysomallos and the Vegetable Lamb (no new gene).
+B. Fit: horses-only, vanilla intact, carrot not stick; horns are grown parts that do nothing. A concept is a breed; the
+   horizontal shape is an allele because any horned horse may wear it. Does not bend a settled decision.
+C. Meeting it: wild herds and spawn egg. Tutorial text none; refusal text none.
+D. Genetics: one appended allele (Piece 1). No new epigenome ranges. No sex linkage change. Not a lethal, no health effect. Both
+   editors (rule 5): rebake the wasm and run check-designer-boots.mjs; check the editor's shape list.
+E. Breeds: five new; Not A Sheep is untouched.
+F. Items: none. Carrot: Open (building session) whether the new allele needs a gene-carrot row (read making-a-gene.html#contracts).
+G. Config: none. H. Saves: tokens and allele order permanent. I. Multiplayer: nothing to authorise.
+J. Compatibility: the biome analogues carry these herds to modded biomes automatically.
+K. Performance: one shape in a baked sheet; no tick work.
+L. Tests: see the pieces. M. Release: rides the next release (Decided).
+
+Implications sweep
+  Genetics ... touches: an allele. Pipeline/goldens ... key-only moves. Eye colour ... untouched. Body space/parts ... the sheet and a
+  baked count; the plan page. Breeding ... untouched. Breeds ... five new. Horse body ... untouched. Care ... untouched. AI goals ...
+  untouched (the Vegetable Lamb's tether is lore). Items/carrots ... maybe a row. Tack ... untouched. Villagers/stables ...
+  untouched. Realm ... re-bake unverified-genes.txt only if a gene is flagged. H menu ... info text for the allele. Stasis ...
+  untouched. Designers ... both editors, rule 5. Gene creator ... untouched. Config ... untouched. Mods ... untouched. Advancements
+  ... untouched. Backport ... logic is in common/. Wiki ... ram horn pages, breeds, breed book, census, sheep-build.html.
+Three likeliest ways it goes wrong for a real player
+  1. A half-drawn breed reads as an unfinished horse. Handled by the page and the play check.
+  2. The two appended horn shapes (this and the goats') land in a different order than a world expects. Handled by the ordering rule
+     in 3a: the second to ship appends, never reorders.
+  3. Chrysomallos is expected to fly. Decided; the page and the Verification tab say wings and flight are one later pass.
+
+
+6. UNVERIFIED (riskiest first)
+===============================
+ 1. That a fifth (or sixth) shape fits PartKind's baked count and the part-sheet bake without moving the existing shapes' UVs.
+ 2. That MAX_NODES 24 allows the horizontal twist at every size and curl.
+ 3. That speed 10 is reachable in BreedStatCurve (Chrysomallos).
+ 4. The state of the goat scimitar when this builds (its allele slot decides this one's dominance slot).
+ 5. That river, swamp and beach are on the herd list.
+ 6. That no test enumerates ram horn shapes by a hard-coded count.
+
+
+7. Order and size
+=================
+ Piece 1 horizontal twist ........ S to M. Before Khnum; not needed for the other four breeds.
+ Piece 2 breeds .................. S each. Chrysomallos, Vegetable Lamb, Criosphinx, Banebdjedet need no new gene and may ship
+                                   first (even before Piece 1); Khnum after Piece 1.
+ Piece 3 sheep-build plan page ... S, may ride with any piece.
+ Waits on: nothing. Unblocks: wings and flight for Chrysomallos later; a sheep build; a fleece coat; extra heads and a lion body.
+ Do not do in one session: Piece 1 and the goats' scimitar (both append to one list); Piece 1 and the breed pools that pin it.
+
+
+8. Release
+==========
+Rides the next release (Decided); applies when each piece ships.
+
+
+9. After each piece ships
+=========================
+ Regenerate-table rows touched: Piece 1: the long gene row, the two goldens (key only), anything in common/ (wasm rebake and boot
+ check), the part sheet, wiki prose. Piece 2: the breed row (bakeBreedFiles then bakeGeneCensus; check-breed-heights.mjs); an egg
+ texture only if one is added. Piece 3: sync-page-views.mjs, the roadmap and verification bakes, the prose row. ProgressTask untouched.
+ Wiki: gene-ram-horn-form.html and gene-ram-horns.html (Gameplay and Coding); breeds.html and breed-book.html (a Rams section);
+ sheep-build.html as a new Roadmap-only page (rule 9), added to SECTIONS in wiki/pages.js only.

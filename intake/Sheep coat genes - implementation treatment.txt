@@ -1,0 +1,219 @@
+Sheep coat genes - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "Open" lines are still to be settled, by whom is said on the line; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first. Source of truth for what
+exists is wiki/pipeline.html, wiki/making-a-gene.html, wiki/genetics-model.html, wiki/gene-agouti.html,
+wiki/gene-extension.html, wiki/gene-kit.html, wiki/gene-mitf.html (UNVERIFIED that each page exists under
+that name - read wiki/text/index.txt), wiki/curly-coat.html and wiki/eye-colour.html. This file is retired
+(deleted, per START HERE step 3) as each piece ships and moves onto those pages' Gameplay and Coding tabs.
+Release: rides the next release after the kind ships (see section 8).
+LOWEST POSSIBLE PRIORITY (owner). WAITS ON "Natural-sheep gene kind - implementation treatment.txt" (Pieces 1-2).
+Siblings: "Sheep horns and body genes - implementation treatment.txt", "Sheep disorders - implementation
+treatment.txt". The coat genes come first of the three: they are what "widen the marking pool" means.
+
+
+1. The request, as given
+========================
+"We're going to add a bunch of sheep genes into this, to widen the marking pool." Plus the owner's research,
+whose coat section says: pigment and pattern are different things; ASIP (the A locus), MC1R (E), TYRP1 (B), a
+classical white-spotting (S) locus, MITF and KIT as associations only, and fading/dilution as modifiers. "Do not
+assign every visible marking a single dominant or recessive gene." "A sensible rendering order is: determine an
+ASIP pattern; apply any dominant-black MC1R override; use TYRP1 to recolor dark areas; overlay genuine white
+spotting; then apply age-related fleece changes. That is a simulation design, not a claim that all those classical
+labels have been mapped to independent causal genes."
+Reading, confirmed: natural-sheep loci that paint on a horse, honest-hybrid (real alleles where established, a
+labelled analogue where not), shipped as hand- or data-authored genes after the kind exists.
+
+
+2. In scope, and what is not
+============================
+In scope
+ - Piece 1: three pigment loci - sheep ASIP, sheep MC1R, sheep TYRP1 - and the rule that they paint over the horse
+   base coat in that order.
+ - Piece 2: one genuine white-spotting locus (the "S" locus), as a breed-model-dependent analogue.
+ - Piece 3: age/fade modifiers - only if the horse pipeline can already do age (UNVERIFIED), otherwise a plan.
+Not in scope (all re-askable)
+ - Wool and fleece look. The coat pipeline has no hair axis (wiki/curly-coat.html); the fleece is a plan there. Do
+   not build a woolly texture here.
+ - MITF and KIT sheep genes. The research says no sheep-wide dominance rule, and "avoid importing named dog or horse
+   spotting alleles into sheep". Decided by scope: they appear as a note on the S gene's Science tab, no loci.
+   Re-askable.
+ - Horns, body, disease: the sibling treatments.
+ - Sheep breeds that pin these genes. Decided: later, with the owner.
+ - Any change to the horse's own Extension, Agouti, Brown, Kit or Mitf genes. They are not touched or renamed.
+
+
+3. What already exists, so the building session does not redo it
+=================================================================
+3a. Horse loci that read like these ones, which must NOT be reused or have their alleles borrowed:
+    ExtensionGene (KEY "horsegenetics.extension", alleles E/e), AgoutiGene (KEY "horsegenetics.agouti", A/a,
+    calls BayCoat.apply; dependsOn ShadeGene), ShadeGene, KitGene, MitfGene, TobianoGene, BrindleGene.
+    Sheep ASIP/MC1R/TYRP1 are NEW genes under new keys, in the new kind, so a horse with E/e and a sheep E^D carries
+    both and neither reads the other's alleles.
+3b. Pipeline facts (read wiki/pipeline.html before relying on this): three phases; the natural phase restricts red
+    and black per pixel and the survivors are looked up in a gradient and multiplied onto the white template; a
+    natural layer "reads the coat as the layer above it left it" (GeneSpecParser error text, line ~926). 'over' and
+    'emissive' are magical-phase only and a natural gene may not use them.
+3c. Data-driven genes are JSON under common/src/main/resources/horsegenetics/genes/, with masks, ops and an
+    "effects" block; making-a-gene.html owns the format and #contracts lists the four or five files each new
+    mask/op/verb touches. Prefer data genes; a Java gene only if no op can do it.
+3d. Gene census / unverified-genes: gene-census.html lists every registered gene; bakeUnverifiedGenes writes
+    unverified-genes.txt, the horse dimension's coat column - a new gene is unverified until played.
+3e. Marking facts for the breed designer: MarkingFactsTool writes wiki/breed-designer/assets/marking-facts.json.
+3f. Never regenerate genes/index.json from the folder (hard rule 6): an absence is a killswitch. Add the new
+    genes to it by hand.
+Looks built but is not
+  - Any sheep gene or pattern; "badgerface", "mouflon", "moorit" are not names in the mod. No age-fade mechanism is
+    confirmed for naturals (Grey changes with age on horses - UNVERIFIED how, read the Grey gene page).
+  - The natural-sheep kind and its sub-band: built by the kind treatment, not here.
+
+
+4. The pieces
+=============
+Piece 1 - Sheep pigment: ASIP, MC1R, TYRP1
+------------------------------------------
+What the player sees: horses can carry sheep-style colour: a dominant white/tan, a badger-faced or mouflon-like
+ light-and-dark pattern, a dominant-black override, and a brown shift of the dark areas - on top of a normal horse
+ coat. A horse with no sheep genes looks exactly as it does now.
+ Decided: sheep genes paint AFTER the horse base coat, as extra per-pixel red/black restrictions; an inert
+   genotype changes nothing, so existing horses keep their coats.
+ Decided: honest hybrid. Established loci are real alleles; traditional pattern names are labelled "analogous, not
+   measured" on the Science tab (precedent gene-ram-horns.html#real-sheep). Each gene's page states the evidence
+   level: classical phenotype allele, associated marker, or validated causal variant.
+ Decided: ASIP's intermediate patterns are NOT ranked. Wt (dominant white/tan) is dominant to the rest, self-colour
+   is the recessive end, and each heterozygous pair among the intermediates gets an explicit pair outcome (labelled).
+ Genes and rules (PROPOSALS for review; tokens must be grepped against every existing allele token first):
+   Sheep ASIP (key like "horsegenetics.sheep_asip"; alleles Wt dominant white/tan, Mf wild/mouflon-like, Bf
+     badgerface, Gr a gray/blue pattern, Sc self-colour, the recessive end. Allele order permanent, append only.
+     Founder frequencies: each in a breed pool only; none in ordinary founders (the kind is opt-in).
+     UNVERIFIED that the data format's "combinations" can state every intermediate pair without a dominance order -
+     if not, a Java gene (like TobianoGene) is the fallback; say so on the page.
+   Sheep MC1R (E^D dominant black over E+; the building session picks ASCII tokens). Dominant: one copy darkens an
+     otherwise patterned or ASIP-white/tan animal; true white spotting (Piece 2) still shows. Note on the page:
+     "particular MC1R effects are breed-specific; not a universal rule".
+   Sheep TYRP1 (black dominant, brown recessive; "moorit" as the name of the brown). Moves the colour of the dark
+     areas, not where they occur. Note the Soay variant (dark dominant to light) as a Science-tab sentence, NOT a
+     second allele set - "do not equate every use of light or brown across populations". Open (owner): a second
+     TYRP1-style allele for Soay? Recommended: no.
+ Recommended: paint order inside the sub-band is ASIP, then MC1R, then TYRP1, then (Piece 2) spotting. The
+   priority numbers come from the kind treatment's sub-band; the order is what this treatment fixes.
+ Open (building session): which horse red/black the sheep layers act on. Recommended: both pigments, through the
+   existing red/black restriction ops, so a bay with sheep Wt shows tan where bay was dark.
+ Where: common/ - three gene files (data first), horsegenetics/genes/index.json entries by hand, a gene page per gene
+   with three tabs (Gameplay, Coding, Science; check-gene-tabs.mjs requires Science on a natural page). NeoForge:
+   nothing but what the bakes write.
+ Data and saves: gene keys and allele order permanent. A world with these genes keeps its genotype codes if the
+   painters change later; a RENAMED key is a loss of genes, never rename.
+ Sync: none. Config: none.
+ Tests: a *CoatBakeGoldenTest row per gene (every gene, seconds); *CoatPipelineGoldenTest unchanged unless a pinned
+   horse gains sheep genes (it should not - then both goldens move by the new keys only, check which rows moved);
+   *DeadLayerTest (a layer that paints nothing fails; fix the gene, then delete its dead-layers.txt line);
+   a diagnostic-cross test: E^D/E+ x E+/E+ transmits E^D to half the offspring on average, over a fixed seed set;
+   a test that a horse with no sheep genes is pixel-identical to before; GeneFilesTest; EditorRules parity.
+ Play checks: each gene alone on a bay, a chestnut, a black and a grey; the three together; dominance (Wt over Sc,
+   E^D over E+); a foal; both editors show them under the natural-sheep group; none in a wild horse.
+ Docs: three gene pages, gene-census.html, timeline-of-genes.html, the generated spans of wiki/pages.js and
+   index.html (bakeGeneWikiPages, never by hand), pipeline.html (one line: the sheep sub-band).
+
+Piece 2 - Genuine white spotting (the S locus)
+----------------------------------------------
+What the player sees: unpigmented patches that stay white whatever the pigment genes say - cap, blaze, socks,
+ tail-tip, or larger piebald patches - more extensive with two copies.
+ Decided: it is a separate mask from pigment: a sheep with E^D can still show spotting.
+ Decided: honest hybrid. The research says the S locus is breed-model dependent and not a universal molecular locus.
+   Model the Romney-style breeder convention (a visible effect in heterozygotes, more extensive with two copies),
+   name it as that, and say on the page "a breeder's S symbol is not a KIT or MITF mutation".
+ Recommended: patch extent and placement come from a stochastic mask seeded by the horse (the mod is deterministic
+   throughout - philosophy.html - so seed from the genotype/horse seed, not a fresh roll), conditioned on the
+   genotype and on modifiers; patch shape reuses an existing noise or mask op if one fits. UNVERIFIED which.
+ Recommended: alleles S+ (none) and S (spotting), incompletely dominant; epigenome knobs for patch size and edge
+   (the epigenome is "literal named numbers on each allele copy, inherited and slightly drifted", genetics-model).
+ Open (owner): does S spot the face and legs only, the whole body, or by knob? Recommended: knob-driven, defaulting
+   to face and legs.
+ Where, data/saves/sync/config/tests/docs: as Piece 1. Extra test: homozygous covers strictly more pixels than
+   heterozygous across a fixed seed set; spotting never paints red or black.
+ Play checks: spotting on each of the three Piece-1 backgrounds; across foal and adult; no overlap with the horse's
+   own white genes beyond what the layers imply.
+
+Piece 3 - Fading and dilution of the fleece colour
+--------------------------------------------------
+What the player sees: a sheep-style coat that lightens with age or at shearing time, separate from the horse's Grey.
+ The research keeps gradual fading and faster dilution as SEPARATE modifiers and warns that a gray-looking fleece is
+ not the same as a gray-patterned lamb or a white-spotted one.
+ Recommended: do NOT build until the coat pipeline can do an age-dependent natural layer and a fleece axis
+   exists (curly-coat.html). Until then this piece is a Roadmap tab entry on the coat pages, nothing more.
+ Open (building session): whether any age-dependent natural layer exists today (read Grey's gene and the epigenome
+   age handling). If one does, build fading as a modifier on TYRP1's dark areas; if not, defer.
+ Everything else: "None - a plan only" unless the above resolves.
+
+
+5. Decisions (anything not inside a piece)
+===========================================
+A. The ask: sheep coat loci that widen the marking pool; smallest worthwhile version: Piece 1 with ASIP alone.
+B. Fit: bends horses-only (owner, Decided in the kind treatment). Carrot not stick (opt-in). Utility: marking pool.
+   A concept is a breed, a mechanism is a gene: these are mechanisms.
+C. Meeting it: editors, breeds (later), gene carrots (Open: the carrot/splice rows - read making-a-gene#contracts).
+D. Genetics: natural-sheep kind, natural phase, sub-band from the kind treatment. Epigenome: spotting knobs only.
+   Sex linkage: none. Lethal/health: none (the EDNRB white is in the disorders treatment and must not be tied to
+   ASIP white - the research is explicit). Both editors: rule 5.
+E. Breeds: none here (Decided).
+F. Items: none; a gene-carrot row per gene is Open (building session).
+G. Config: none. H. Saves: see Piece 1. I. Multiplayer: none. J. Compatibility: none.
+K. Performance: painters run at coat-bake time only; the epigenome is already stored.
+L. Tests: see the pieces. M. Release: section 8.
+
+Implications sweep
+  Genetics ... three or four genes. Pipeline/goldens ... a sheep sub-band, the bake golden gains rows, the whole-horse
+  golden should not move. Eye colour ... untouched here (the research has blue eyes only with the EDNRB deletion,
+  which is the disorders treatment). Body space ... untouched. Breeding ... untouched; the genes inherit like any
+  gene. Breeds ... none. Horse body ... untouched. Care ... untouched. AI ... untouched. Items/carrots ... maybe
+  rows. Tack ... untouched. Villagers ... untouched. Realm ... unverified-genes bake. H menu ... gene info text.
+  Stasis ... untouched. Designers ... both editors list them. Gene creator ... not extended (rule 3). Config ...
+  none. Mods ... none. Advancements ... none. Backport ... all in common/. Wiki ... a page per gene.
+Three likeliest ways it goes wrong for a real player
+  1. A sheep gene changes an existing horse's coat. Handled: inert genotype is identical; pixel test.
+  2. ASIP white reads as the lethal EDNRB white, or spotting reads as deafness. Handled: no health coupling anywhere
+     in this treatment; pages say so (the research warns against it).
+  3. The painters imply knowledge the science does not have. Handled: every gene page's Science tab labels the
+     evidence level and "analogous, not measured".
+
+
+6. UNVERIFIED (riskiest first)
+===============================
+ 1. That a data-driven gene can express ASIP's unranked pair table, or a Java gene is needed.
+ 2. A free sub-band that paints after the horse base coat and before dilution (see the kind treatment).
+ 3. That the red/black restriction ops let a sheep layer act on both pigments after the horse base without a new op
+    (a new op or mask touches four or five files, #contracts).
+ 4. That the wiki page names in the header exist; read wiki/text/index.txt.
+ 5. Whether any age-dependent natural layer exists (Piece 3).
+ 6. That the allele tokens chosen clash with none of the existing ones.
+
+
+7. Order and size
+=================
+ Piece 1 pigment loci ............ L (three genes, three pages, goldens). Ship ASIP alone first if it grows (M).
+ Piece 2 spotting ................ M. After Piece 1; a stochastic mask, the riskiest visual.
+ Piece 3 fading .................. S as a plan; unbuildable until the fleece axis exists.
+ Waits on: the natural-sheep kind. Unblocks: sheep breeds; the horns/body treatment shares only the kind.
+ Do not do in one session: Piece 1 and Piece 2; any coat piece and a breed; any gene and a hand re-bake of
+ genes/index.json (rule 6).
+
+
+8. Release
+==========
+The kind's treatment carries the owner's "bigger bump when the kind ships" (the middle number). This treatment
+itself: Recommended "rides the next release", applying when each piece ships; NOT asked for this file separately.
+Open (owner), at scoping of the build session.
+
+
+9. After each piece ships
+=========================
+ Regenerate-table rows touched: "any file in horsegenetics/genes/" (the long row: bakeGeneBundle, bakeGeneIcons,
+ bakeGeneWikiPages, bakeMarkingFacts, bakeGeneCensus, bakeUnverifiedGenes, then bake-gene-timeline.mjs), "any
+ gene" (both goldens: run each class, check which rows moved), "anything in common/" (:web:bakeDesignerAssets and
+ check-designer-boots.mjs), the dead-layers row, the wiki-prose row (build-search-index, check-links,
+ bake-agent-text), and sync-page-views.mjs for the new pages' tabs.
+ Wiki: one three-tab page per gene (Gameplay, Coding, Science), pipeline.html, gene-census.html. Any open check goes
+ on the page's Verification tab with a note verify-summary sentence (rule 9) and bake-verification-index.mjs;
+ never on wiki/verification.html. Piece 3's plan goes on a Roadmap tab, never on roadmap.html.

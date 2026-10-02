@@ -1,0 +1,22 @@
+2026-10-01 - the rams, equids, antlered beasts and reindeer, scoped as four treatments
+
+    An intake session. No code, wiki prose or assets touched; nothing built or played. The owner
+    pasted a table of five rams, then three more tables during the session.
+
+    Output, four files in intake/:
+      Mythical rams: Chrysomallos, Vegetable Lamb, Criosphinx, Banebdjedet, Khnum. A "horizontal
+        twist" shape appended to the ram horn form (for Khnum), five breeds, a sheep-build.html plan page.
+      Mythical equids: the one-horned Indian wild ass and the San zebra. A head-colour coat gene
+        (red and black alleles, widened for Meandash) and a three-band horn colour allele.
+        The Allocamelus was left out (camel body).
+      Mythical antlered beasts: Shadawar, Yale, Calopus (heraldic antelope merged in), Tarandrus,
+        Leucrocotta, each as its horse half, plus Roadmap lines for the unbuilt horn parts.
+      Mythical reindeer: Meandash, the white reindeer, Saint Nicholas's eight reindeer.
+
+    Owner's calls: all breeds shipped as their horse half with the missing parts noted; no flight for
+    Chrysomallos until wings ship, true flight pinned on Meandash and the eight; curled horns for
+    Banebdjedet; gold and white coats now, fleece a plan; abilities lore only; separate sheep-build.html.
+    Biomes, stats, sizes, tokens and the reindeer rarity and release were recommendations, not asked.
+
+    What the building session picks up first: the goat scimitar horn shape, then the ram horn twist
+    (two appends to one allele list, never in one session), then the equids' head-colour gene.

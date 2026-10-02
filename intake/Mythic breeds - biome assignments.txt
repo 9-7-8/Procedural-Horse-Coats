@@ -1,0 +1,299 @@
+Mythic breeds - biome assignments
+
+A PROPOSAL, NOT A SPEC. Nothing in the repo has changed. It assigns vanilla Minecraft biomes to every breed in "Mythic breeds - gene audit.txt", following the
+biome structure the shipped breeds already use. Read from the breed files, wiki/breed-format.html, wiki/breeds.html and common/breed/BiomeAnalogues. UNVERIFIED
+lines are things I could not confirm. The owner's two rules still apply: public domain only and no talking.
+
+How the existing biome structure works
+======================================
+- A breed names the biomes it lives in, in VANILLA's vocabulary ("biomes": ["minecraft:plains", ...]). A modded biome that stands in for a vanilla one gets that
+  vanilla biome's whole pool automatically (common/breed/BiomeAnalogues: terralith:steppe is plains and windswept hills, regions_unexplored:bayou is swamp, oceans map to
+  beach). So nothing here names a modded biome; every assignment below reaches modded packs by analogue. Dimensions a mod adds never have horses.
+- Herds only form in the biomes on the biome modifier's list (data/horsegenetics/neoforge/biome_modifier/add_horse_herds.json): the plains, savannas, deserts, badlands,
+  forests, taigas, snow biomes, peaks, rivers, beaches, stony shore, swamps, jungles, cherry grove, mushroom fields and the windswept hills. Every biome below is on that list
+  (checked by a script). UNVERIFIED observation: several shipped breeds also name biomes that are NOT on it (stony_peaks, dark_forest, old_growth_spruce_taiga,
+  snowy_beach, and the End biomes), for example Cloudtouched's stony_peaks. Whether a breed's herds can form there is worth confirming; I avoided off-list biomes.
+- The Nether and the End work differently: a breed must name its floor blocks in "spawn_ground", and the herd then counts only in those dimensions. None of the breeds
+  below is placed there. Fire-themed breeds (Aithon, Konabos, Phobos) went to hot overworld biomes instead, so the existing Nether trio (Netherhorse, Nightmare, Mirrorgazer)
+  is not crowded and the heat-tolerance rule for Nether breeds (the climate spec) is not triggered.
+- "commonness" is a weight ladder: extremely_common 48, very_common 24, common 12, moderate 6, uncommon 3, rare 1.5, very_rare 0.75. Every shipped magical breed is rare or
+  very_rare except Not A Sheep (uncommon). I used very_rare for named individuals and rare for types, and uncommon only for the plain horses that have no powers (the eight
+  Aesir horses, Freyfaxi and the Irish trio Attach, Gaoth and Sidhe).
+- "spawn_time" is day, night or any. A day or night breed is the "light" rule the Unicorn (day) and Dhampir (night) already use.
+- "spawn" (wild, cowboy, spawn_egg, stable): not assigned here. Shipped Nether breeds use ["wild","spawn_egg"] and keep out of the cowboy and the stable; recommended the same
+  for these mythic ones, but it is the owner's call (see the open questions).
+
+The climate rule from the breed climate spec applies
+=====================================================
+The spec ("Breed climate tolerance - spec.txt") raises a breed's cold tolerance by the share of its biomes that are cold (snowy plains, ice spikes, snowy taiga, snowy slopes,
+grove, frozen and jagged peaks, frozen river and snowy beach). Applied to the assignments below, it gives: Pegasus, Sleipnir, Hrimfaxi and Silfrintoppr near-fixed cold tolerance;
+Gullfaxi, Svadilfari, Longma and Tulpar partial. This is a consequence to review, not an extra decision: if any of these should NOT carry cold tolerance, drop its cold biome
+(or one of them) rather than the rule. Pegasus is the surprising one: it picks up near-fixed cold tolerance only because grove and jagged_peaks are two of its four biomes.
+
+Where they live
+===============
+59 entries (a team or a trio that shares a pool counts as one entry; the plain Aesir horses are individual entries). Cold share and tier are what the climate spec defines.
+ Pegasus [Greek]
+     biomes: minecraft:jagged_peaks, minecraft:windswept_gravelly_hills, minecraft:grove, minecraft:meadow
+     spawn_time: day   commonness: rare   cold share: 0.50 -> cold tolerance 'near-fixed'
+     High country; Cloudtouched uses the windswept hills, so Pegasus takes the peaks
+ Sleipnir [Norse]
+     biomes: minecraft:snowy_taiga, minecraft:old_growth_pine_taiga, minecraft:snowy_plains, minecraft:frozen_peaks
+     spawn_time: any   commonness: very_rare   cold share: 0.75 -> cold tolerance 'near-fixed'
+     Northern; blocked on eight legs
+ Grani [Norse]
+     biomes: minecraft:taiga, minecraft:old_growth_pine_taiga, minecraft:forest, minecraft:plains
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Sigurd's forest country
+ Skinfaxi [Norse]
+     biomes: minecraft:sunflower_plains, minecraft:meadow, minecraft:plains
+     spawn_time: day   commonness: very_rare   cold share: 0.00
+     A day horse
+ Hrimfaxi [Norse]
+     biomes: minecraft:snowy_plains, minecraft:snowy_taiga, minecraft:ice_spikes, minecraft:grove
+     spawn_time: night   commonness: very_rare   cold share: 1.00 -> cold tolerance 'near-fixed'
+     A night horse of frost
+ Arvakr [Norse]
+     biomes: minecraft:sunflower_plains, minecraft:plains, minecraft:savanna_plateau
+     spawn_time: day   commonness: very_rare   cold share: 0.00
+     Sun-team pool (with Alsvidr)
+ Alsvidr [Norse]
+     biomes: minecraft:sunflower_plains, minecraft:plains, minecraft:savanna_plateau
+     spawn_time: day   commonness: very_rare   cold share: 0.00
+     Sun-team pool (with Arvakr)
+ Gullfaxi [Norse]
+     biomes: minecraft:windswept_hills, minecraft:grove, minecraft:taiga
+     spawn_time: any   commonness: very_rare   cold share: 0.33 -> cold tolerance 'partial'
+     A giant's horse: the hills
+ Svadilfari [Norse]
+     biomes: minecraft:windswept_gravelly_hills, minecraft:windswept_hills, minecraft:snowy_slopes
+     spawn_time: any   commonness: very_rare   cold share: 0.33 -> cold tolerance 'partial'
+     Hauls stone: gravel hills
+ Hofvarpnir [Norse]
+     biomes: minecraft:beach, minecraft:stony_shore, minecraft:windswept_hills
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Air and sea
+ Bloudughofi [Norse]
+     biomes: minecraft:flower_forest, minecraft:forest, minecraft:birch_forest
+     spawn_time: any   commonness: rare   cold share: 0.00
+     Freyr's horse
+ Sinir [Norse]
+     biomes: minecraft:plains, minecraft:forest
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed
+ Skeidbrimir [Norse]
+     biomes: minecraft:windswept_hills, minecraft:plains
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed
+ Gisl [Norse]
+     biomes: minecraft:meadow, minecraft:sunflower_plains
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed
+ Falhofnir [Norse]
+     biomes: minecraft:taiga, minecraft:forest
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed; feathered if the Feathering gene is pinned
+ Gladr [Norse]
+     biomes: minecraft:meadow, minecraft:plains
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed
+ Gyllir [Norse]
+     biomes: minecraft:sunflower_plains, minecraft:meadow
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed
+ Glenr [Norse]
+     biomes: minecraft:forest, minecraft:birch_forest
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed
+ Lettfeti [Norse]
+     biomes: minecraft:plains, minecraft:savanna
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Aesir steed; light and fast
+ Gulltoppr [Norse]
+     biomes: minecraft:sunflower_plains, minecraft:meadow
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Gold mane
+ Silfrintoppr [Norse]
+     biomes: minecraft:windswept_hills, minecraft:snowy_plains
+     spawn_time: any   commonness: uncommon   cold share: 0.50 -> cold tolerance 'near-fixed'
+     Silver mane
+ Arion [Greek]
+     biomes: minecraft:plains, minecraft:forest, minecraft:windswept_forest
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Arcadian
+ Balius [Greek]
+     biomes: minecraft:plains, minecraft:windswept_hills
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Child of the West Wind
+ Xanthus [Greek]
+     biomes: minecraft:sunflower_plains, minecraft:savanna, minecraft:plains
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Child of the West Wind
+ Pedasus [Greek]
+     biomes: minecraft:plains, minecraft:savanna, minecraft:windswept_hills
+     spawn_time: any   commonness: rare   cold share: 0.00
+     Troy and the plains
+ Kyllaros [Greek]
+     biomes: minecraft:windswept_hills, minecraft:windswept_forest, minecraft:plains
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Dioscuri (Sparta)
+ Phlogeus [Greek]
+     biomes: minecraft:windswept_hills, minecraft:windswept_forest, minecraft:plains
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Dioscuri (Sparta)
+ Harpagos [Greek]
+     biomes: minecraft:windswept_hills, minecraft:windswept_forest, minecraft:plains
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Dioscuri (Sparta)
+ Askhetos [Greek]
+     biomes: minecraft:plains, minecraft:sunflower_plains, minecraft:meadow
+     spawn_time: any   commonness: rare   cold share: 0.00
+     Racing horse
+ Kygnos [Greek]
+     biomes: minecraft:plains, minecraft:sunflower_plains, minecraft:meadow
+     spawn_time: any   commonness: rare   cold share: 0.00
+     Racing horse, white
+ Podarkes [Greek]
+     biomes: minecraft:plains, minecraft:savanna, minecraft:forest
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Erechtheus of Athens
+ Horses of Helios (Aethon Eous Phlegon Pyrois Bronte Sterope Aithops) [Greek]
+     biomes: minecraft:desert, minecraft:badlands, minecraft:savanna, minecraft:savanna_plateau
+     spawn_time: day   commonness: very_rare   cold share: 0.00
+     Sun team pool
+ Lampos / Phaethon (Dawn) [Greek]
+     biomes: minecraft:plains, minecraft:sunflower_plains, minecraft:savanna
+     spawn_time: day   commonness: very_rare   cold share: 0.00
+     Dawn team
+ Aithon / Konabos / Phobos (Ares) [Greek]
+     biomes: minecraft:badlands, minecraft:eroded_badlands, minecraft:wooded_badlands, minecraft:savanna_plateau
+     spawn_time: any   commonness: rare   cold share: 0.00
+     War and fire; blocked on fire breath
+ Mares of Diomedes [Greek]
+     biomes: minecraft:plains, minecraft:forest, minecraft:taiga, minecraft:windswept_hills
+     spawn_time: night   commonness: rare   cold share: 0.00
+     Thracian man-eaters
+ Skylla / Sthenios (Poseidon) [Greek]
+     biomes: minecraft:beach, minecraft:river
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Sea-chariot team
+ Hippocampus [Greek]
+     biomes: minecraft:beach, minecraft:mangrove_swamp, minecraft:river
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Blocked on hide-a-bone and fish tail
+ Hippalektryon [Greek]
+     biomes: minecraft:plains, minecraft:forest, minecraft:birch_forest
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Blocked on rooster foreparts
+ Longma [Chinese]
+     biomes: minecraft:river, minecraft:bamboo_jungle, minecraft:cherry_grove, minecraft:grove
+     spawn_time: any   commonness: very_rare   cold share: 0.25 -> cold tolerance 'partial'
+     The dragon-horse of the river
+ Qilin (horse-bodied) [Chinese]
+     biomes: minecraft:cherry_grove, minecraft:flower_forest, minecraft:bamboo_jungle
+     spawn_time: day   commonness: very_rare   cold share: 0.00
+     Auspicious
+ Chollima / Qianlima [East Asian]
+     biomes: minecraft:plains, minecraft:sunflower_plains, minecraft:windswept_hills, minecraft:taiga
+     spawn_time: any   commonness: rare   cold share: 0.00
+     Steppe runner
+ Tulpar [Turkic]
+     biomes: minecraft:plains, minecraft:windswept_hills, minecraft:grove
+     spawn_time: any   commonness: rare   cold share: 0.33 -> cold tolerance 'partial'
+     Steppe
+ Buraq [Islamic tradition]
+     biomes: minecraft:desert, minecraft:badlands, minecraft:savanna_plateau
+     spawn_time: night   commonness: very_rare   cold share: 0.00
+     A night journey; sensitive
+ Uchchaihshravas [Hindu]
+     biomes: minecraft:beach, minecraft:jungle, minecraft:sparse_jungle, minecraft:bamboo_jungle
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Born of the ocean; blocked on seven heads
+ Devadatta [Hindu]
+     biomes: minecraft:savanna, minecraft:savanna_plateau, minecraft:sparse_jungle
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Kalki's horse; sensitive
+ Kelpie [Scottish]
+     biomes: minecraft:river, minecraft:swamp, minecraft:stony_shore, minecraft:mangrove_swamp
+     spawn_time: night   commonness: rare   cold share: 0.00
+     Blocked on forced riding
+ Each-uisge [Scottish]
+     biomes: minecraft:stony_shore, minecraft:river
+     spawn_time: night   commonness: very_rare   cold share: 0.00
+     Blocked on forced riding
+ Puca [Irish]
+     biomes: minecraft:plains, minecraft:swamp, minecraft:windswept_hills, minecraft:forest
+     spawn_time: night   commonness: rare   cold share: 0.00
+     Bogs and hills
+ Nuckelavee [Orcadian]
+     biomes: minecraft:stony_shore
+     spawn_time: night   commonness: very_rare   cold share: 0.00
+     Blocked; consider non-rideable
+ Enbarr / Aonbharr [Irish]
+     biomes: minecraft:plains, minecraft:beach, minecraft:windswept_hills
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Land and sea; white is a retelling choice
+ Liath Macha [Irish]
+     biomes: minecraft:plains, minecraft:river, minecraft:windswept_hills
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Cu Chulainn's grey, from a pool; with Dub Sainglend
+ Dub Sainglend [Irish]
+     biomes: minecraft:plains, minecraft:river, minecraft:swamp
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Cu Chulainn's black, from a pool; with Liath Macha
+ Freyfaxi [Icelandic saga]
+     biomes: minecraft:plains, minecraft:taiga, minecraft:windswept_hills
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Hrafnkell's dedicated horse; a plain horse
+ Rhesus's horses [Greek]
+     biomes: minecraft:plains, minecraft:sunflower_plains, minecraft:birch_forest
+     spawn_time: night   commonness: rare   cold share: 0.00
+     A white team stolen in a night raid
+ Attach [Irish]
+     biomes: minecraft:plains, minecraft:windswept_hills
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Tuatha De Danann trio
+ Gaoth [Irish]
+     biomes: minecraft:windswept_forest, minecraft:windswept_hills
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Tuatha De Danann trio
+ Sidhe [Irish]
+     biomes: minecraft:flower_forest, minecraft:forest, minecraft:swamp
+     spawn_time: any   commonness: uncommon   cold share: 0.00
+     Tuatha De Danann trio
+ Podargos (Hector's) [Greek]
+     biomes: minecraft:plains, minecraft:sunflower_plains, minecraft:savanna
+     spawn_time: any   commonness: rare   cold share: 0.00
+     Battle-trained; not Podargos of Diomedes, not Podarkes
+ Niamh's white horse [Irish]
+     biomes: minecraft:beach, minecraft:meadow, minecraft:cherry_grove
+     spawn_time: any   commonness: very_rare   cold share: 0.00
+     Between Ireland and Tir na nOg
+
+Crowding check
+==============
+Meadow, plains, forest and windswept hills already carry a lot of breeds (the shipped files list meadow 94 times, plains 82, forest 66, windswept_hills 62). The mythic entries
+are rare or very rare (weights 0.75 to 3 against commons of 12 to 48), so by weight they stay a modest fraction of the big biomes: windswept_hills about 12%, sunflower_plains about 9%, plains about 8%, forest about 7%, meadow about 4%. The biomes that tip are the coasts
+and a few small ones, where few breeds live. After thinning the sea breeds (Hippocampus, Each-uisge, Nuckelavee and the Poseidon team each lost a shore biome, and two moved to
+very_rare) the most affected biomes by weight are:
+  beach: existing weight 15.0, added 4.5, mythic share 23%
+  stony_shore: existing weight 15.8, added 3.8, mythic share 19%
+  windswept_forest: existing weight 33.0, added 6.0, mythic share 15%
+  bamboo_jungle: existing weight 14.2, added 2.2, mythic share 14%
+  eroded_badlands: existing weight 9.8, added 1.5, mythic share 13%
+  mangrove_swamp: existing weight 15.8, added 2.2, mythic share 12%
+That is still a lot for a coast or a small biome. The easy dials are to drop a biome from a breed, leave the blocked ones (Nuckelavee, the Hippocampus and the rest) unspawned until
+they are built, or move the water breeds to spawn_egg only.
+
+Breeds that are blocked still get biomes
+========================================
+Several entries cannot ship yet (Sleipnir, Kelpie, Each-uisge, Hippocampus, Hippalektryon, Uchchaihshravas, Nuckelavee, Pegasus and Longma wait on parts or abilities). Their biomes are
+decided now so the file is ready when they are built; until then they should not spawn (a breed file with no genes beyond what exists would spawn a plain horse with a myth's name).
+
+Open questions for the owner
+============================
+- Spawn kinds: wild, spawn_egg, cowboy and stable. Recommended wild + spawn_egg only, like the Nether trio.
+- Whether the plain horses (the eight Aesir horses, Freyfaxi, the Irish trio) should be separate breeds at all. They have no coat, power or look to tell them apart; they could be ONE
+  breed or two with many name options, which would avoid a dozen near-identical entries in a spawn pool.
+- Whether the sun-team horses (Horses of Helios, Arvakr and Alsvidr, Lampos and Phaethon) are one breed with several names or separate ones. The table gives names, not differences.
+- Named lineages (Hofvarpnir's parents, the sire of Askhetos and Kygnos) have no entries here; add them if wanted.

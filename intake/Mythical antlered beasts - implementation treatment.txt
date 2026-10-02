@@ -1,0 +1,164 @@
+Mythical antlered beasts - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "Open" lines are still to be settled, by whom is said on the line; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first. Source of truth for what
+exists is wiki/gene-antlers.html, wiki/gene-unicorn-horn.html, wiki/gene-ram-horns.html, wiki/model-parts.html,
+wiki/breeds.html and wiki/breed-format.html. This file is retired (deleted, per START HERE step 3) as each piece ships
+and moves onto those pages' Gameplay and Coding tabs.
+Release: rides the next release (Decided). Applies when each piece ships; none cuts its own.
+It sits beside "Mythical deer", "Mythical goats", "Mythical rams" and "Mythical equids". Rules: public domain only, no talking.
+Named "antlered beasts" because most of them wear a horn or rack; the zebra is in the equids file, and the Allocamelus is out.
+
+
+1. The request, as given
+========================
+A table queued mid-session; "zebra" went to the equids file, the other seven rows are here, and the owner chose "Three files" and
+"All as breeds, noting what each lacks; merge the heraldic antelope into the calopus", and "All lore only, no abilities".
+  Shadawar / Aras        Arabic bestiary: antelope-like, one-horned, light; the wind through its hollow-branched horn (42 in a well-
+                         known account) makes music that draws animals. The branching, musical horn is the whole point.
+  Yale / Eale            ancient and heraldic: goat- or antelope-like, large, powerful; two independently swivelling horns, boar-
+                         like tusks, sometimes a tail tuft; no fixed colour.
+  Calopus (with the heraldic antelope)
+                         bestiary: roe-deer-like, light, swift (speed 10); two large saw-edged horns that cut trees but snag in
+                         bushes. Heraldic antelope (merged): deer-antelope composite, serrated horns, a small nose tusk, a tufted
+                         neck and a lion-like tail.
+  Tarandrus / Parandrus  reindeer- or moose-like, about ox-sized, deer outline; bear-coloured, changing colour with surroundings;
+                         long shaggy hair; branching antlers; cloven hooves.
+  Leucrocotta            Pliny: donkey-sized; stag hindquarters, lion neck and chest, a badger-like head (a horse or camel head in
+                         some texts), mouth reaching to its ears; lion tail; cloven; extremely fast (speed 10+); imitates human
+                         voices (lore only, no talking rule).
+Reading: five breeds (the heraldic antelope folds into the Calopus), each a horse breed with the nearest shipped horn.
+
+
+2. In scope, and what is not
+============================
+In scope
+ - Piece 1: the five breeds, each as its horse half. Decided.
+ - Piece 2: Roadmap lines on model-parts.html for the unbuilt parts these need (see 3c). Decided as "noting what each lacks";
+   Recommended placement as lines, not pages.
+Not in scope (all re-askable)
+ - Any new ability. Decided: all lore only (the Tarandrus's colour change, the Calopus's snagging, the Leucrocotta's voice,
+   the Shadawar's music).
+ - A new horn part for any of them. Not built here; see 3c.
+ - Cloven hooves and tail shapes (the audit's gaps 8 and 2); tusks (the Tusks treatment); a mane shape (the deer treatment).
+ - The Allocamelus (camel body), left out by the owner.
+
+
+3. What already exists, so the building session does not redo it
+=================================================================
+3a. Antlers: AntlerGenerator (common/.../parts/AntlerGenerator.java), FORMS 5, MAX_NODES 44; the gene pair Ant (either sex) and
+    Antm (stallion only); size, tines, reach, thickness and bone tone are on the allele copy. UNVERIFIED which of the five forms
+    reads as a branching rack, and which reads saw-like.
+3b. Horns: the unicorn horn (a single horn, colour, glow, dust), and ram horns (Rh, Rhm; curl, corkscrew, four-horned, scurs; the
+    goats and rams treatments append more shapes). The Yale pins ram horns (two horns); the Shadawar the unicorn horn.
+3c. What these need that does not exist (written on each page as "not drawn"; each a separate, unscoped piece of work):
+    - A branching hollow horn with many branches (Shadawar). New part kind.
+    - A saw-edged horn (Calopus). New part kind or a serrated antler form.
+    - Swivelling horns (Yale): animation; two horns that move on their own. UNVERIFIED that the part layer can animate a part.
+    - Boar tusks and a nose tusk (Yale, heraldic antelope): the Tusks treatment (intake/Tusks gene - implementation treatment.txt).
+    - A lion neck and chest, a stag's hindquarters, a mouth to the ears (Leucrocotta): hiding a vanilla bone (audit gap 7) plus
+      parts; and a lion or tufted tail (audit gap 2).
+    - Cloven hooves (audit gap 8), a shaggy coat, a colour that changes with the surroundings (Tarandrus: no such gene).
+    - A mane SHAPE: the deer treatment's mane-and-tail gene.
+Looks built but is not
+  - "Molten Hooves" is not hoof colour; hoof colour is in the deer treatment.
+  - Antlers are tines and a rack; none is a branching hollow horn or a saw edge.
+  - Goat beard (Head parts) is scoped, not built.
+
+
+4. The pieces
+=============
+Piece 1 - The five breeds
+-------------------------
+What the player sees: five horse breeds that wear horns or antlers, each with a breed-book entry that says what is not drawn.
+ Decided: all as breeds, kind magical, "wild" and "spawn_egg" only; very_rare for named individuals (Shadawar, Tarandrus,
+   Leucrocotta), rare for types (Yale, Calopus). Rides the next release. Open (owner): none; the rarity ladder is the deer's.
+ Rows are PROPOSALS; biomes, stats and sizes not asked. Weights from the breed designer's output.
+ Shadawar (very_rare)
+   biomes: minecraft:desert, minecraft:badlands, minecraft:savanna
+   stats: speed 6, jump 4, health 5; size small. Coat: dun and sandy tones, pale underbelly (the whole pool with those weighted).
+   Horn: unicorn_horn pinned, horn colour pale (Wht), glow and dust off. NOT DRAWN: the branches and the music.
+ Yale (rare)
+   biomes: minecraft:jungle, minecraft:sparse_jungle, minecraft:savanna, minecraft:plains
+   stats: speed 5, jump 4, health 8; size large. Coat: the whole pool (no fixed colour). Horns: ram_horns Rh, Crl pinned (two
+   horns). NOT DRAWN: the swivel and the tusks.
+ Calopus (rare; the heraldic antelope folded in)
+   biomes: minecraft:forest, minecraft:birch_forest, minecraft:flower_forest, minecraft:taiga
+   stats: speed 10, jump 5, health 5; size small. Coat: roe-deer tones (bays, browns, red dun). Horns: Antlers, the nearest
+   serrated-looking form (UNVERIFIED which AntlerGenerator form), large. NOT DRAWN: the saw edge, the nose tusk, the tufted tail.
+   The page tells both the bestiary and the heraldic design.
+ Tarandrus (very_rare; closest to ready)
+   biomes: minecraft:taiga, minecraft:snowy_taiga, minecraft:snowy_plains, minecraft:grove
+   (cold: the climate rule gives it near-fixed cold tolerance, right for a northern beast)
+   stats: speed 6, jump 4, health 8; size large (ox-sized). Coat: bear-brown (bays, browns, dark browns). Antlers: Ant, large, branching.
+   NOT DRAWN: the colour change, the long shaggy hair (Curly coat plan), cloven hooves.
+ Leucrocotta (very_rare)
+   biomes: minecraft:savanna, minecraft:desert, minecraft:badlands, minecraft:plains
+   stats: speed 10, jump 5, health 6; size small (donkey-sized). Coat: the whole pool, tawny weighted. No horns. NOT DRAWN: the lion
+   chest, the stag hindquarters, the wide mouth, the cloven feet, the lion tail. Voice: lore only.
+ Common checks: cold share against the climate spec (Tarandrus near-fixed, right; no other breed is cold); every biome on the herd
+   list in add_horse_herds.json (UNVERIFIED for savanna, jungle, sparse_jungle and flower_forest: confirm).
+ Where: breed JSON under common/src/main/resources/horsegenetics/breeds/; breeds.html and breed-book.html.
+ Data and saves: breed ids are permanent once a world has horses of them.
+ Tests: *BreedsTest per breed; BreedFilesTest; BreedBandsReachTest.
+ Play checks: each breed in a yard pen; the Calopus's rack against the Tarandrus's; each half-drawn breed reads as itself;
+   a cross of two with a cross label; a wild herd in each biome.
+ Docs: breeds.html, breed-book.html (an Antlered and horned beasts section), the breed census; check-breed-heights.mjs.
+
+Piece 2 - The plan lines
+------------------------
+What the player sees: nothing. One-line Roadmap entries on model-parts.html's Roadmap tab: branching hollow horn, saw-edged horn,
+ swivelling horns, nose tusk and boar tusks (point at the Tusks treatment), a lion neck and chest and stag hindquarters (point at
+ the audit's gap 7). Decided as "noting what each lacks"; Recommended as lines, not new pages (none has a page of its own to grow).
+ Where: wiki only. Docs: model-parts.html Roadmap tab; the roadmap bake; the prose row.
+
+
+5. Decisions (anything not inside a piece)
+===========================================
+A. The ask: five breeds. Smallest worthwhile version: the Tarandrus and the Leucrocotta (shipped genes only).
+B. Fit: horses-only, vanilla intact; a carrot not a stick; grown parts do nothing. A concept is a breed; no gene is added.
+C. Meeting it: wild herds and spawn eggs. D. Genetics: none new. E. Breeds: five new, no existing pool moves.
+F. Items: none. G. Config: none. H. Saves: breed ids permanent. I. Multiplayer: nothing. J. Compatibility: biome analogues only.
+K. Performance: none. L. Tests: see Piece 1. M. Release: rides the next release (Decided).
+
+Implications sweep
+  Genetics ... untouched (pinned existing alleles). Pipeline/goldens ... untouched. Eye colour ... untouched. Body space/parts ...
+  untouched; plan lines only. Breeding ... untouched. Breeds ... five new. Horse body ... untouched. Care/AI ... untouched. Items ...
+  untouched. Tack ... untouched. Villagers/stables ... untouched. Realm ... untouched. H menu ... untouched. Stasis ... untouched.
+  Designers ... untouched (no gene change). Gene creator ... untouched. Config/mods/advancements ... untouched. Backport ... logic
+  in common/. Wiki ... breeds, breed book, census, model-parts Roadmap.
+Three likeliest ways it goes wrong for a real player
+  1. A half-drawn breed (Shadawar, Calopus, Leucrocotta) reads as a plain horse or as a wrong-horned one. Handled by the pages and the
+     yard play check.
+  2. The Calopus's nearest antler form does not read as saw-edged. Open, building session; a play check.
+  3. The Tarandrus's colour change is expected. Decided: lore only; the page says so.
+
+
+6. UNVERIFIED (riskiest first)
+===============================
+ 1. Which AntlerGenerator form reads as a rack, and which as serrated (generate and look).
+ 2. That speed 10 is reachable in BreedStatCurve (Calopus, Leucrocotta).
+ 3. That savanna, jungle, sparse_jungle and flower_forest are on the herd list in add_horse_herds.json.
+ 4. That the part layer cannot animate a part (the Yale's swivel), so it stays a plan line.
+
+
+7. Order and size
+=================
+ Piece 1 breeds ..... S each. Tarandrus, Leucrocotta (no horns) first; Yale (needs the ram horn pin; the goat and ram treatments' shape
+                      work is not required), Shadawar and Calopus after checking the nearest horn reads.
+ Piece 2 plan lines . S, may ride with any breed.
+ Waits on: nothing. Unblocks: the later horn parts, the tusks gene, a hide-a-bone capability.
+ Do not do in one session: more than a few breeds with a new yard bake; the plan lines and a gene change.
+
+
+8. Release
+==========
+Rides the next release (Decided); applies when each piece ships.
+
+
+9. After each piece ships
+=========================
+ Regenerate-table rows touched: Piece 1: the breed row (bakeBreedFiles then bakeGeneCensus; check-breed-heights.mjs); anything in
+ common/ would add the wasm rebake (none expected). Piece 2: the prose row, the roadmap and verification bakes. ProgressTask untouched.
+ Wiki: breeds.html and breed-book.html (a section); model-parts.html Roadmap tab. No new page.

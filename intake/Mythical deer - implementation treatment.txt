@@ -1,0 +1,281 @@
+Mythical deer - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "Open" lines are still to be settled, by whom is said on the line; "UNVERIFIED" lines
+are facts this file has not proved and the building session must check first. Source of truth for what
+exists is wiki/model-parts.html, wiki/gene-antlers.html, wiki/gene-mane-color.html, wiki/gene-prismtail.html,
+wiki/gene-lycan.html, wiki/breeds.html and wiki/breed-format.html. This file is retired (deleted, per START
+HERE step 3) as each piece ships and moves onto those pages' Gameplay and Coding tabs.
+Release: rides the next release (Decided). Applies when each piece ships; none cuts its own.
+It sits beside "Mythic breeds - gene audit.txt" and "Mythic breeds - biome assignments.txt" and follows their
+two rules: public domain only, no talking.
+
+
+1. The request, as given
+========================
+"In the same way you made the mythic breeds from the previous session, help me create treatments for each of
+these mythical deer. We're going to implement these deer as horses. Let me know if we need to add new marking
+genes for any of these, or any other new kinds of genes we need to create to support them."
+Then, mid-session: "add this to the deer pool as well" - Artemis's chariot deer.
+
+Reading: eight table rows, so eight entries (one of them a group). Each is a horse breed that wears antlers.
+The answer to "what new genes" is below in section 3a: four new things, one stub.
+
+The eight, with the table's facts kept and nothing invented:
+  Ceryneian Hind        Greek      coat not fixed; no mane; bronze/brass hooves; golden antlers; speed 10+; large for a deer
+  Artemis's chariot deer Greek     coat not specified; no mane; bronze hooves; golden antlers on hinds; speed 10+;
+                                   four enormous hinds "larger than bulls"; draw a goddess's chariot. One group entry.
+  White stag            European   white; no mane, white tail; ordinary stag antlers; a recurring type
+  Saint Eustace's stag  Christian  white; no mane; a radiant cross between the antlers
+  Ruru                  Buddhist   golden; no mane; graceful deer. (Speaks in the tale: lore only, no-talking rule.)
+  Nine-Colored Deer     Buddhist   nine-coloured multicoloured coat; no mane; slender; antlers. (Speaks: lore only.)
+  Marica                Ramayana   gold with silver spots and jewel colours; no mane; rainbow-variegated tail;
+                                   gem-like hooves; gem-like antler tips; slender. Shapeshifter.
+  Takemikazuchi's deer  Japanese   white; no mane; large enough to carry a rider; antlers unspecified
+
+
+2. In scope, and what is not
+============================
+In scope
+ - Piece 1: a mane-and-tail shape gene (full / cropped / none; flag tail). Decided.
+ - Piece 2: a hoof colour gene. Decided.
+ - Piece 3: a nine-colour coat gene, and a crown part for Eustace's cross (with the gene that grants it). Decided.
+ - Piece 4: the breeds.
+ - A Roadmap-only page for a deer BUILD gene (see Piece 5). Decided: pin it now, build nothing.
+Not in scope
+ - A deer body shape (thin legs, long neck, smaller head). Decided: breed stats and the existing size genes only;
+   the build gene is a plan page, "currently does nothing" (the Curly coat page is the precedent). Re-askable.
+ - Speech, in any form (Ruru, Nine-Colored Deer). Decided: lore only.
+ - Marica's disguise as a deer. Decided: she carries Lycan (see Piece 4) - the nearest shipped thing; it turns a
+   horse into a peaceful land animal at night, which is NOT the poem's shapeshift. Say so on her page.
+ - A new ability per deer (dazzle, vision, rescue). Decided: none.
+ - Cloven hooves, tails of other shapes, wings, extra heads or legs: untouched, see the audit.
+
+
+3. What already exists, so the building session does not redo it
+=================================================================
+3a. The answer to "what new genes": FOUR new things plus one stub
+  1. MANE AND TAIL SHAPE (new, natural, any breed can carry it). The model always draws a mane and a tail:
+     HdHorseModel has the named children mane and tail, and nothing in common/ or the client can hide one.
+     This is gap 7 of the audit ("nothing HIDES a vanilla bone") in its smallest form.
+  2. HOOF COLOUR (new, magical, codominant like HornColourGene). Hooves come only from the dark template
+     multiplied by the coat (wiki/pipeline: "the template's dark detail - hooves, nostrils - survives on every
+     coat"), so there is no hoof colour control at all. The audit said "nothing needs one"; the Hind, the chariot
+     deer and Marica now do.
+  3. NINE-COLOUR COAT (new, a data gene under horsegenetics/genes/, see wiki/making-a-gene.html). Nearest
+     shipped looks: stained_glass, harlequin_shield, iridescent_jewel, kintsugi. None lays out nine distinct hues.
+  4. CROWN CROSS (new part kind plus its gene). Eustace's cross, glowing, between the antlers.
+  5. DEER BUILD (stub only, Piece 5).
+  NOT new, used as they are: Antlers (Ant, both sexes, so hinds have them), antler_glow, antler_crystal (gem
+  tips for Marica), Prismtail (rainbow mane-and-tail banding; Marica's tail), mane_color and tail_color, Lycan,
+  the white and gold coats (Grey, Champagne, Matp cream, Silver, Rosette and Leopard for silver spots),
+  Waterborn is NOT used.
+3b. The files (read before building)
+  - Parts: common/src/main/java/.../common/parts/ (PartKind, PartAnchor, PartNode, PartShape, PartGenerators,
+    HornGenerator, AntlerGenerator, PartSheet, AttachedPart); genetics/GrownParts.of is the one door;
+    neoforge-26.1.2/.../client/AttachedPartLayer.java places a part by anchor with one offset per horse model;
+    neoforge-26.1.2/tools/bake-part-sheet.mjs paints the sheet. The "adding a part" list is on
+    wiki/model-parts.html's Coding tab; the Head parts treatment restates it. A new anchor (CROWN_CENTRE) goes
+    on PartAnchor and in AttachedPartLayer.anchor with a foal offset.
+  - Light/hoof mask: LightGene already knows a per-texel hoof mask ("four hooves and two eyes - neither is a part,
+    the bake already knows exactly" - wiki/pipeline). The hoof colour gene reads that mask; it does not invent one.
+  - Colour-gene precedent: genes/HornColourGene.java (codominant, a hue and tone number on each allele copy, a chaos
+    allele). Hoof colour copies the shape, with a metal-and-gem palette, not the rainbow one.
+  - Breed precedent: breeds/rimehart.json (antlered, magical, "pair" weights, biomes, stats, size, pull).
+    Biome vocabulary and herd list: "Mythic breeds - biome assignments.txt".
+  - Rule 5: any gene here goes in BOTH editors (CustomHorseSpawnScreen and wiki/horse-designer, EditorRules).
+Looks built but is not
+  - Mane colour is not mane SHAPE (wiki/gene-mane-color). A maneless horse is not reachable by colour.
+  - There is no hoof gene; "Molten Hooves" is a glowing hoofprint trail, nothing to do with hoof colour.
+  - Curly coat is a plan page, not a gene. The deer build page copies that, not a shipped gene.
+  - Antlers' tint is on the allele copy, so a gold rack is a tint value; UNVERIFIED that the range reaches a
+    convincing metallic gold. Check against gene-antlers.coding first.
+
+
+4. The pieces
+=============
+Piece 1 - A horse with no mane and a short tail
+------------------------------------------------
+What the player sees: a mane-less horse, or a cropped mane, and a short flag tail - on any breed.
+ Decided: new natural gene. Recommended key horsegenetics.mane_tail_shape; priority and family are the building
+   session's call (a natural gene that paints nothing files under NATURAL_HEALTH per the antlers' note - check, it
+   may be magical grown-parts-adjacent instead).
+ Recommended: alleles Fu (full, wild), Cr (cropped), Ns (none), Fl (flag tail). Tokens are PROPOSALS; grep every
+   existing token. Dominance: Ns > Cr > Fu for the mane; the tail axis is its own locus if one gene cannot hold both
+   (Open, building session; two loci is fine and probably cleaner).
+ Recommended: the effect is a render-state flag (mane scale 0..1, tail scale 0..1), not a mesh; the client hides or
+   scales the existing mane and tail bones. Same shape as CutieMarkContribution: a record in common/, folded over
+   the expressing genes, copied through GeneticHorseRenderState; its javadoc says record and layer change together.
+ Where: common/ the gene, the record, the founder tables; neoforge client the model change.
+ Data and saves: allele order is permanent once a world uses it; append only.
+ Sync: through the existing render-state extract; no new payload.
+ Config: none (it follows the existing parts switches if any; UNVERIFIED whether parts.enabled should gate it).
+ Tests: a gene test per wild/expressing combination, EditorRules parity, the two goldens (it paints nothing, so
+   expect key-only moves, like the antlers).
+ Play checks: a horse with Ns/Ns has no mane in the yard; a foal; the saddle and braids do not float over a hole
+   (BraidLayer reads the mane: UNVERIFIED how it behaves with no mane).
+ Docs: a new gene page with three tabs, genetics-model priorities, breeds.html/breed-format.html mention.
+
+Piece 2 - Metal and gem hooves
+------------------------------
+What the player sees: bronze, brass, silver, gold or gem-coloured hooves, with a gleam.
+ Decided: new hoof colour gene, codominant like horn colour.
+ Recommended: alleles Dk (dark, wild), Brz, Brs, Sil, Gld, plus a gem allele (hue number on the copy) and Cha
+   (chaos hue). Two different copies: front legs one, hind legs the other (Open, building session - horn colour
+   splits base and tip; hooves have no tip).
+ Recommended: a gleam on the metal ones through the existing emissive coat layer path; no glow unless a gene says so.
+ Where: common/ the gene and palette; the painter reads LightGene's hoof mask.
+ Tests: a coat-bake golden row per allele; the pipeline golden stays at the baseline for a Dk horse.
+ Play checks: every allele on all four hooves, white socks versus the hoof colour (a leopard draws striped hooves -
+   wiki/pipeline - check they coexist).
+ Docs: a new gene page; pipeline.html.
+
+Piece 3 - The nine colours, and the cross between the antlers
+--------------------------------------------------------------
+What the player sees: a multicoloured Nine-Colored Deer; a stag with a glowing cross hanging between its antlers.
+ Decided: nine-colour coat is a data gene (a file under horsegenetics/genes/); the cross is a part.
+ Recommended: nine hue bands in patches, one allele pair, any breed; the order of the hues is the gene's
+   (the table says "not standardized", so a palette is the breed's, not canon).
+ Recommended: the cross is its own part kind with its own anchor CROWN_CENTRE, glowing (PartKind.glowRegions),
+   foal: no (like antlers). The gene that grants it is separate from Antlers and does not require them.
+   Open (building session): its colour (white gold) is a fixed tint or an allele value.
+ Tests: PartGeneratorTest walks the new mesh; AntlersGeneTest as a model; goldens move by key only for the part,
+   by rows for the coat gene.
+ Play checks: the cross clears a massive rack at both rack sizes; it does not clip into the forehead.
+ Docs: model-parts.html, the new gene pages; making-a-gene.html if a contract list changes.
+
+Piece 4 - The breeds
+--------------------
+All kind magical, spawn wild and spawn_egg only (Decided, as the Nether breeds): not the cowboy, not stables.
+Commonness very_rare for named individuals; rare for types (Decided; matches the earlier audit).
+Rows are PROPOSALS for the owner's review - the biome lists were NOT asked.
+Every founder carries the expressing allele (no invisible carriers). Every pool pins the maneless and flag-tail
+alleles. Antlers: Ant (any sex) for hinds and stags alike unless noted.
+
+ Ceryneian Hind (very_rare, unique-flavour)
+   biomes: minecraft:forest, minecraft:flower_forest, minecraft:birch_forest, minecraft:meadow
+   stats: speed 10, jump 6, health 6; size: large (the top of the deer range). Coat: pale gold ("not securely
+   fixed" -> a deliberately weighted coat of fawn and palomino, so it stays unfixed). Hooves: Brz/Brs.
+   Antlers: Ant, gold tint, standard to large rack, both sexes. This breed is the only one that is female-leaning
+   in lore; no sex rule (Open: the owner may want a breed that only females carry - not supported today).
+ Artemis's chariot deer (rare, a type, ONE group entry)
+   biomes: minecraft:forest, minecraft:taiga, minecraft:meadow, minecraft:savanna
+   stats: speed 10, jump 4, health 8, pull 8; size: the largest of the deer (larger than a bull). Coat: not specified
+   -> the whole pool is allowed; Recommended a mild spread of golds, tans and reds. Hooves: bronze (Brz). Antlers:
+   gold, both sexes (Ant). Recommended: a separate breed from the Hind, since the table says only that she is the
+   fifth deer of the herd, and a breed can carry a pull stat ("draw a chariot") the single Hind need not. Re-askable.
+ White Stag (rare)
+   biomes: minecraft:snowy_plains, minecraft:snowy_taiga, minecraft:taiga, minecraft:grove
+   stats: speed 6, jump 5, health 7; size standard. Coat: white (the dominant white genes, plus Grey for the aged
+   look). Mane: none; tail: flag, white. Antlers: Ant/Antm, ordinary stag rack, Open (the building session): stallion
+   only via Antm, or both sexes.
+   - Takemikazuchi's deer folds into this breed (Decided: one White Stag breed). Its larger rider-carrying frame is a
+     size band, lore on the page; it is not a separate breed.
+   - Saint Eustace's cross: a rare allele of the cross gene in this breed's pool (Decided: the cross is a gene a
+     White Stag line can carry, so players can breed toward it). The breed description says so.
+ Ruru (very_rare)
+   biomes: minecraft:savanna, minecraft:savanna_plateau, minecraft:meadow, minecraft:sunflower_plains
+   stats: speed 6, jump 5, health 7; size standard. Coat: golden (palomino and champagne, full golds, no spots). Mane:
+   none. Antlers: Ant, stag rack ("not firmly specified" - modest). Description: lore only for the speech.
+ Nine-Colored Deer (very_rare)
+   biomes: minecraft:badlands, minecraft:eroded_badlands, minecraft:desert, minecraft:savanna
+   (the Dunhuang cave tradition: dry country). stats: speed 6, jump 5, health 7; size small. Coat: the nine-colour
+   gene, pinned. Mane: none. Antlers: Ant. Lore only for speech and the rescue.
+ Marica (very_rare)
+   biomes: minecraft:jungle, minecraft:sparse_jungle, minecraft:bamboo_jungle, minecraft:swamp
+   stats: speed 6, jump 8, health 5 ("modest and equal" except a leaning toward jump, as discussed); size small. Coat:
+   gold with silver spots (palomino or champagne plus Rosette/Leopard-silver-white; UNVERIFIED which spots gene paints
+   them silver on gold - check by baking a sample). Mane: none; tail: Prismtail pinned (the rainbow tail).
+   Hooves: the gem allele. Antlers: Ant, antler_crystal pinned (gem-like tips). Carries Lycan (Decided).
+   Biomes and the cold-tolerance rule: none of the above are cold, so the climate rule changes nothing for Marica.
+ Common checks: cold share of each biome list against the climate spec (White Stag picks up cold tolerance: that is
+   right for it; Hind, Artemis's deer, Ruru, Nine-Colored Deer, Marica should not). Breed colour weights go through
+   the breed designer's output, not by hand, per wiki/breed-format.html.
+Tests: *BreedsTest per breed; BreedFilesTest; BreedBandsReachTest for any band on a knob no pinned pair reads.
+Play checks: each breed in a yard pen; a cross of two (a cross label per breeds.html); a wild herd in each biome.
+Docs: breeds.html, breed-book.html (a new section of Deer, in lore written fresh from the myth), breed census.
+
+Piece 5 - Deer build (Roadmap only)
+-----------------------------------
+A plan page, deer-build.html (Roadmap tab only, one sentence in a note roadmap-summary box), per CLAUDE.md rule 9.
+Decided: it currently does nothing. What it would be: thin legs, a long neck, a small head. Why it waits: it touches
+HdHorseModel, the foal model and body-space.html's tables; a bigger feature than any of the four above.
+Until it ships the breeds above are lean horses with antlers - say so on the White Stag and the Hind pages' Verification
+tabs. Re-bake wiki/pages.js with sync-page-views.mjs and the roadmap index.
+
+
+5. Decisions (anything not inside a piece)
+===========================================
+A. The ask: confirmed - eight rows, four new things. Smallest worthwhile version: Piece 1 plus the breeds that need no
+   new genes (White Stag without the cross, Ruru, Hind with dark hooves). Recommended order below.
+B. Fit: horses-only, vanilla intact; carrot not stick (no penalty anywhere); the antlers and cross are grown parts, which
+   do nothing (Decided for the head parts, applied here). A concept is a breed, not a gene - that is why the White Stag
+   is a breed; the cross is a gene because it can sit on any breed. No settled decision bent.
+C. Meeting it: wild herds, spawn egg, stable-and-cowboy not used. Tutorial text: none, a note in the H menu's breed list.
+   Refusal text: none (no new action).
+F. Items and blocks: none. Carrots: the hoof colour, mane-and-tail and cross genes each get a gene carrot recipe (four
+   or five files each; read wiki/making-a-gene.html#contracts) - Recommended.
+G. Config: none.
+H. Saves: tokens and allele order permanent; adding an allele later is append-only.
+I. Multiplayer: nothing to authorise; the client reads the render state only.
+J. Compatibility: none beyond the breed biome analogues (a modded biome standing in for forest or jungle reaches these
+   herds automatically, as the audit says).
+K. Performance: one extra part and a hoof-mask paint; no tick work.
+L. Tests: see the pieces.
+M. Release: rides the next release (Decided).
+
+Implications sweep
+  Genetics model / registry ........ touches: three genes and one part gene. Pipeline/goldens ........ touches: hoof colour and the nine-colour gene
+  paint; the mane-and-tail and cross genes paint nothing. Eye colour .......... untouched. Body space/model parts ........ touches: a new
+  anchor and a hidden bone. Breeding/pedigree ........ untouched (stat inheritance unchanged). Breeds ........ touches: eight new, none
+  change existing pools. Horse body ........ untouched. Care/herds ........ untouched. AI goals ........ untouched. Items/carrots ........
+  touches: gene carrots. Tack/gear ........ touches: a maneless horse and the braid layer; saddle pads and horse shoes should draw
+  over metal hooves (shoes cover hooves - UNVERIFIED which wins). Villagers/stables ........ untouched (these breeds are not sold).
+  Realm/dimension ........ touches: the realm's pens list breeds - a new genes' unconfirmed state hides them there (unverified-genes.txt,
+  re-bake). The H menu ........ touches: info text for the new genes. Stasis ........ untouched. Designers ........ touches: both editors, rule 5.
+  Gene creator ........ untouched (a data gene shows up on its own). Config ........ untouched. Other mods ........ untouched. Advancements ........
+  untouched. Backport ........ the logic is in common/. Wiki ........ four new gene pages, the deer build plan page, the breed book.
+Three likeliest ways it goes wrong for a player
+  1. A maneless horse leaves the braid or saddle-pad draw floating. (Play check, Piece 1.)
+  2. A rack of antlers plus the cross plus a unicorn horn clip into each other. (Accepted per the head parts decision; Verification tab.)
+  3. The deer read as horses with antlers until the build gene ships. (Decided; named on Verification and in the breed descriptions.)
+
+
+6. UNVERIFIED (riskiest first)
+===============================
+ 1. Whether the client can hide the mane and tail bones without breaking the braid layer or the saddle: read HdHorseModel,
+    BraidLayer, GeneticHorseRenderer; prove in the dev yard before writing the gene.
+ 2. Whether the hoof mask LightGene uses is reachable from a colour painter in phase 3 (pipeline.html) or is only in the emissive step.
+ 3. Whether antler tint reaches a metallic gold (gene-antlers.coding).
+ 4. Whether speed 10 is reachable in BreedStatCurve (the audit's own caveat).
+ 5. Which existing spots gene paints silver spots on gold (bake and look).
+ 6. Whether the breed designer's output accepts the new gene keys without a registry change (breed-format.html).
+ 7. Whether herds can form in minecraft:flower_forest, savanna_plateau, eroded_badlands, bamboo_jungle (the biome assignments file
+    notes only the list's members were checked; these four are on the vanilla list but check against the biome modifier JSON).
+
+
+7. Order and size
+=================
+ Piece 1 mane-and-tail shape ......... M. Groundwork for every deer; ships first even though it is not the smallest.
+ Piece 4a first six breeds (no new gene) ... S each; may ship with only Piece 1 (White Stag, Ruru; Hind without hooves).
+ Piece 2 hoof colour ................. M. Unblocks the Hind, Artemis's deer, Marica.
+ Piece 3 nine-colour coat and the cross .. M (coat, data gene: S; the cross part: M). Ship as two sessions.
+ Piece 4b the remaining breeds ........ S each, after Pieces 2 and 3.
+ Piece 5 deer build plan page ........ S (a page only), may go with Piece 1.
+ Waits on: nothing. Unblocks: a later maneless unicorn or a mythic horse with no mane; hoof colour unblocks shoes (Horse shoes.txt).
+ Do not do in one session: Piece 1 and Piece 3's cross (both touch AttachedPartLayer's anchors and the model).
+
+
+8. Release
+==========
+Rides the next release; applies when each piece ships (no release is cut by this feature alone).
+
+
+9. After each piece ships
+=========================
+ Regenerate-table rows touched: any file in genes/ (the long gene row); the coat goldens (hoof colour, nine-colour coat); a new
+ anchor needs bake-part-sheet.mjs and the neoforge model; any breed (the breed row, bakeBreedFiles then bakeGeneCensus); web/
+ designer rebake and the designer boot check (anything in common/); wiki prose (search index, links, agent text); the roadmap and
+ verification indexes; ProgressTask is untouched.
+ Wiki: gene pages (three tabs each) for the four new genes; model-parts.html Gameplay and Coding tabs for the cross; breed-book.html
+ for the deer; deer-build.html as a new Roadmap-only page (rule 9), added to the SECTIONS array in wiki/pages.js only.

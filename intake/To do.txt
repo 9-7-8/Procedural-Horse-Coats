@@ -10,3 +10,6 @@ Routines to write up as procedures (procedures/FORMAT.txt; then a row in procedu
 - measure-worldgen: run Structure.generate headlessly with a control, before claiming a worldgen change helped.
 - add-a-wood-family: a per-wood block or item (gates, jumps, carts), written twice (author-time bake and run-time compat). Rare and easy to get wrong: a drift shows as a purple cube and logs nothing. add-an-item step 15 covers the outline today.
 - answer-a-tester: reply on a tester's issue with the release that carries the fix, ask for a retest, and close the issue on their word. Today fix-bug step 2 covers it.
+
+Genes:
+- Make a natural dapple gene. (No explicit dapple gene exists today: Shade is the bay-shade locus, and the nearest are Grey, Sooty and the data gene Scarab Dapple. Balius, in intake/Mythic breeds - gene audit.txt, is a dappled horse and wants one.)
