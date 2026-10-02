@@ -71,6 +71,15 @@ public final class PartSheet {
 
     /** The smoothed, polished last two boxes of a ram's horn. */
     public static final int RAM_TIP = 6;
+
+    /**
+     * Hair - fine fibres running along the box's length, in loose locks, softer and
+     * finer than any keratin grain so a soft part (a goat beard, a ruff, feathering)
+     * reads as hair rather than horn. Opaque. No part samples it yet: it was laid
+     * down by the foundation unit ahead of the soft parts that will.
+     */
+    public static final int HAIR = 7;
+
     /** Every region, as a mask for {@link #bit} tests. */
     public static final int ALL = -1;
 

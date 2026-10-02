@@ -50,6 +50,7 @@ const BONE_TIP = 3;
 const BLOOM = 4;
 const RAM_HORN = 5;
 const RAM_TIP = 6;
+const HAIR = 7;
 
 /** Deterministic integer hash to [0,1). Nothing here may use Math.random. */
 function hash(x, y, salt) {
@@ -133,6 +134,19 @@ function ram(u, v, tip) {
   return (tip ? 0.74 : 0.62) + ridge + 0.25 * (wobble + fine);
 }
 
+/**
+ * Hair. Fine fibres along v - the length of a box, so a beard's strands hang down
+ * it - at a one-to-two-texel period across u, grouped into loose locks by a slow
+ * noise so it reads as hair and not as a ribbed horn. Paler and lower in contrast
+ * than keratin: a dyed beard should take its tint, not fight it.
+ */
+function hair(u, v) {
+  const strand = noise(u * 1.0, v / 6.0, 9, REGION) * 0.30;
+  const lock = noise(u / 4.0, v / 8.0, 10, REGION) * 0.22;
+  const fibre = 0.06 * Math.sin((u * Math.PI) / 1.0 + 2.0 * noise(u, v / 3.0, 11, REGION));
+  return 0.62 + strand + lock + fibre;
+}
+
 const px = Buffer.alloc(SIZE * SIZE * 4);          // zeroed: an unused region is blank
 function paint(region, fn) {
   const ox = (region % ACROSS) * REGION;
@@ -157,12 +171,13 @@ paint(BONE_TIP, (u, v) => bone(u, v, true));
 paint(BLOOM, (u, v) => bloom(u, v));
 paint(RAM_HORN, (u, v) => ram(u, v, false));
 paint(RAM_TIP, (u, v) => ram(u, v, true));
+paint(HAIR, (u, v) => hair(u, v));
 
 // The one thing worth asserting: every texel a box can reach is opaque. A part is
 // drawn through a cutout pipeline, which DISCARDS a fragment under an alpha of
 // 0.1 - so a region with a transparent corner is a horn with holes in it, and the
 // hole would appear only on the segment sizes that happen to reach that corner.
-const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM, RAM_HORN, RAM_TIP];
+const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM, RAM_HORN, RAM_TIP, HAIR];
 for (const region of PAINTED) {
   const ox = (region % ACROSS) * REGION;
   const oy = Math.floor(region / ACROSS) * REGION;
