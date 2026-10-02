@@ -38,6 +38,8 @@ public final class PartGenerators {
                     shape.style() % RamHornGenerator.CURLS,
                     shape.size(),
                     shape.kind() == PartKind.RAM_HORN_LEFT);
+            case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornGenerator.generate(
+                    shape.style(), shape.size(), shape.kind() == PartKind.DRAGON_HORN_LEFT);
         };
     }
 

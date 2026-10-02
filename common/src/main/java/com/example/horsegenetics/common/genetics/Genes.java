@@ -134,6 +134,8 @@ import com.example.horsegenetics.common.genetics.genes.AntlerGlowGene;
 import com.example.horsegenetics.common.genetics.genes.AntlersGene;
 import com.example.horsegenetics.common.genetics.genes.RamHornFormGene;
 import com.example.horsegenetics.common.genetics.genes.RamHornTipGene;
+import com.example.horsegenetics.common.genetics.genes.DragonHornsGene;
+import com.example.horsegenetics.common.genetics.genes.DragonHornColourGene;
 import com.example.horsegenetics.common.genetics.genes.RamHornsGene;
 import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.genetics.genes.HornDustGene;
@@ -594,6 +596,10 @@ public final class Genes {
     public static final RamHornFormGene RAM_HORN_FORM = new RamHornFormGene();
     /** Ram horn tip - recessive; a coloured point the MltH hoofprints match. Silent on a polled horse. */
     public static final RamHornTipGene RAM_HORN_TIP = new RamHornTipGene();
+    /** Dragon horns - recessive; a pair behind the ears, swept back. Length, girth, form, sweep, splay on the copy. */
+    public static final DragonHornsGene DRAGON_HORNS = new DragonHornsGene();
+    /** Dragon horn colour - codominant, the horn colour rule; silent without dragon horns. */
+    public static final DragonHornColourGene DRAGON_HORN_COLOUR = new DragonHornColourGene();
     public static final HealerGene HEALER = new HealerGene();
     /**
      * Magic sectoral heterochromia - two different colour alleles and the horse
@@ -721,6 +727,7 @@ public final class Genes {
             HORN_COLOUR, HORN_GLOW, HORN_DUST,
             ANTLERS, ANTLER_FORM, ANTLER_GLOW, ANTLER_CRYSTAL, ANTLER_BLOOM,
             RAM_HORNS, RAM_HORN_FORM, RAM_HORN_TIP,
+            DRAGON_HORNS, DRAGON_HORN_COLOUR,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,
