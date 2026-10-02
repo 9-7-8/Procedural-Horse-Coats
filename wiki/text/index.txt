@@ -61,6 +61,7 @@ wiki/breed-format.html#herd-shape	all	The shape of a founded herd
 wiki/breed-format.html#pull	all	Pull
 wiki/breed-format.html#size	all	Size
 wiki/breed-format.html#strain-stats	all	A strain that scores its own stats
+wiki/breed-format.html#studbook-kinds	all	Studbook kinds: decided, not yet in the format
 wiki/breed-format.html#where	all	Where a breed may come from
 wiki/breeding.html#H	coding	H. Client sync, the information screen, family tree
 wiki/breeding.html#breeding-debug	coding	Every draw, written down (dev builds)
@@ -138,6 +139,7 @@ wiki/carts.html#textures	coding	23. No cart texture is shipped
 wiki/carts.html#two-riders	gameplay	14. Two riders
 wiki/carts.html#two-sources	coding	22. The contract that lives twice
 wiki/carts.html#vehicles	gameplay	1. The six vehicles
+wiki/carts.html#verified-draught	coding	Verified in the test yard: the draught goes on, grows with the load, and comes off clean
 wiki/carts.html#wagon	gameplay	5. The wagon
 wiki/carts.html#weight	gameplay	4. Weight: what a full cart costs
 wiki/carts.html#woods	gameplay	15. Every wood, including modded ones
@@ -401,6 +403,7 @@ wiki/gene-antlers.html#finding	gameplay	Finding one
 wiki/gene-antlers.html#health	gameplay	Is it good for the horse?
 wiki/gene-antlers.html#inheritance	gameplay	Crossing two of them
 wiki/gene-antlers.html#numbers	coding	The epigenome, sorted by what it costs to change
+wiki/gene-antlers.html#open-antler-family	coding	Settled 2026-10-01: magical, not natural
 wiki/gene-antlers.html#polygenic	gameplay	Five genes make a rack
 wiki/gene-antlers.html#real-deer	science	Analogous, not measured
 wiki/gene-antlers.html#rendering	coding	How a rack reaches the screen
@@ -516,6 +519,7 @@ wiki/gene-body-size.html#distribution	coding	A normal distribution, centred on a
 wiki/gene-body-size.html#gait	coding	It needed a rendering fix
 wiki/gene-body-size.html#inheritance	gameplay	Crossing two of them
 wiki/gene-body-size.html#only-size	coding	Deliberately size only
+wiki/gene-body-size.html#size-setting-decided	coding	The size setting compresses; the preview says what it is (owner, 2026-10-01)
 wiki/gene-body-size.html#table	coding	The combination table
 wiki/gene-body-size.html#wild	gameplay	Only heterozygotes are born wild
 wiki/gene-bracket.html#carrot	gameplay	Its gene carrot
@@ -577,6 +581,7 @@ wiki/gene-champagne.html#both-pigments	science	It dilutes both pigments, which i
 wiki/gene-champagne.html#breeds	science	Breeds and frequency
 wiki/gene-champagne.html#carrot	gameplay	Its gene carrot
 wiki/gene-champagne.html#eye	coding	The eye is the one thing about it that varies
+wiki/gene-champagne.html#foal-eyes-decided	coding	A champagne foal’s eye is blue-green (owner, 2026-10-01)
 wiki/gene-champagne.html#health	science	Health, build, performance
 wiki/gene-champagne.html#identity	science	Genetic identity
 wiki/gene-champagne.html#inheritance	gameplay	Crossing two of them
@@ -712,6 +717,7 @@ wiki/gene-crescents.html#inheritance	gameplay	Crossing two of them
 wiki/gene-crescents.html#layers	coding	What it paints
 wiki/gene-crescents.html#outcomes	gameplay	What it can come out as
 wiki/gene-cutie-mark.html#carrot	gameplay	Its gene carrot
+wiki/gene-cutie-mark.html#cutie-mark-policy	coding	The pool may be biased; the colour stays (owner, 2026-10-01)
 wiki/gene-cutie-mark.html#epigenetics	coding	Everything about the emblem is epigenetic
 wiki/gene-cutie-mark.html#inheritance	gameplay	Crossing two of them
 wiki/gene-cutie-mark.html#items	coding	The item pool
@@ -766,6 +772,23 @@ wiki/gene-dorsal-wing.html#finding	gameplay	Finding one
 wiki/gene-dorsal-wing.html#inheritance	gameplay	Crossing two of them
 wiki/gene-dorsal-wing.html#layers	coding	What it paints
 wiki/gene-dorsal-wing.html#outcomes	gameplay	What it can come out as
+wiki/gene-dragon-horn-colour.html#base	coding	One short subclass
+wiki/gene-dragon-horn-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-dragon-horn-colour.html#colours	gameplay	The colours, and two-tone pairs
+wiki/gene-dragon-horn-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-dragon-horn-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dragon-horn-colour.html#invented	science	Invented
+wiki/gene-dragon-horn-colour.html#separate	gameplay	Its own gene, not the horn’s
+wiki/gene-dragon-horns.html#anchor	coding	The nape anchor
+wiki/gene-dragon-horns.html#carrot	gameplay	Its gene carrot
+wiki/gene-dragon-horns.html#finding	gameplay	Finding them
+wiki/gene-dragon-horns.html#health	gameplay	Is it good for the horse?
+wiki/gene-dragon-horns.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dragon-horns.html#invented	science	Invented
+wiki/gene-dragon-horns.html#numbers	coding	The epigenome, by cost
+wiki/gene-dragon-horns.html#pattern	coding	The ram horn pattern, with the unicorn’s inheritance
+wiki/gene-dragon-horns.html#recessive	gameplay	Two copies, either sex
+wiki/gene-dragon-horns.html#what-varies	gameplay	What varies
 wiki/gene-dragon-shroud.html#about	coding	Why it is built this way
 wiki/gene-dragon-shroud.html#carrot	gameplay	Its gene carrot
 wiki/gene-dragon-shroud.html#file	coding	The file
@@ -1029,6 +1052,7 @@ wiki/gene-food-preference.html#breed	science	The most breed-defining invisible g
 wiki/gene-food-preference.html#contradiction	gameplay	A carnivore that loves carrots
 wiki/gene-food-preference.html#health	gameplay	Health
 wiki/gene-food-preference.html#order	coding	Which locus is asked first
+wiki/gene-food-preference.html#verified	coding	Verified
 wiki/gene-food-preference.html#what	gameplay	What it does
 wiki/gene-foxglove.html#about	coding	Why it is built this way
 wiki/gene-foxglove.html#carrot	gameplay	Its gene carrot
@@ -1200,6 +1224,7 @@ wiki/gene-hood.html#finding	gameplay	Finding one
 wiki/gene-hood.html#inheritance	gameplay	Crossing two of them
 wiki/gene-hood.html#layers	coding	What it paints
 wiki/gene-hood.html#outcomes	gameplay	What it can come out as
+wiki/gene-horn-colour.html#base	coding	The shared base
 wiki/gene-horn-colour.html#carrot	gameplay	Its gene carrot
 wiki/gene-horn-colour.html#colours	gameplay	The colours
 wiki/gene-horn-colour.html#door	coding	How the colour reaches the horn
@@ -1225,6 +1250,7 @@ wiki/gene-horn-glow.html#door	coding	How it reaches the horn
 wiki/gene-horn-glow.html#finding	gameplay	Finding one
 wiki/gene-horn-glow.html#health	gameplay	Is it good for the horse?
 wiki/gene-horn-glow.html#inheritance	gameplay	Crossing two of them
+wiki/gene-horn-glow.html#open-glow-light-locus	coding	Settled 2026-10-02: only horn glow lights the horn
 wiki/gene-horn-glow.html#real-horses	science	There is no real locus here
 wiki/gene-horn-glow.html#what-it-does	gameplay	What it looks like
 wiki/gene-hot-blooded.html#health	gameplay	Health
@@ -1466,7 +1492,7 @@ wiki/gene-magic-day-watch.html#founders	gameplay	Rare in the wild
 wiki/gene-magic-day-watch.html#inheritance	gameplay	Crossing two of them
 wiki/gene-magic-day-watch.html#what	gameplay	The five
 wiki/gene-magic-fighter.html#baseline	coding	Where the baseline lives
-wiki/gene-magic-fighter.html#cancel	gameplay	A wimp copy cancels a gladiator copy
+wiki/gene-magic-fighter.html#cancel	gameplay	A wimp copy works against a gladiator copy
 wiki/gene-magic-fighter.html#carrot	gameplay	Its gene carrot
 wiki/gene-magic-fighter.html#ceiling	gameplay	No ceiling, but nothing to catch
 wiki/gene-magic-fighter.html#codominant	science	Why codominance is the whole design
@@ -1523,6 +1549,7 @@ wiki/gene-magic-meat.html#inheritance	gameplay	Crossing two of them
 wiki/gene-magic-meat.html#recessive	science	Why the carrier is silent
 wiki/gene-magic-meat.html#stacking	gameplay	It stacks with the other drop locus
 wiki/gene-magic-meat.html#verb	coding	It shares a verb with the treasure locus
+wiki/gene-magic-meat.html#verified	coding	Verified
 wiki/gene-magic-meat.html#what	gameplay	What it does
 wiki/gene-magic-milk-volume.html#carrot	gameplay	Its gene carrot
 wiki/gene-magic-milk-volume.html#codominant	science	Codominant, because a dairy trait is
@@ -1786,6 +1813,7 @@ wiki/gene-music-enjoyer.html#cap	gameplay	It still respects the daily limit
 wiki/gene-music-enjoyer.html#care	science	Bond as something a gene can touch
 wiki/gene-music-enjoyer.html#health	gameplay	Health
 wiki/gene-music-enjoyer.html#verb	coding	A small verb with more users than it looks
+wiki/gene-music-enjoyer.html#verified	coding	Verified
 wiki/gene-music-enjoyer.html#what	gameplay	What it does
 wiki/gene-myo5a.html#at-a-glance	science	At a glance
 wiki/gene-myo5a.html#breeds	science	Breeds and frequency
@@ -2333,6 +2361,7 @@ wiki/gene-shadowcreature.html#phases	coding	Three things, three phases
 wiki/gene-shadowcreature.html#sclera	coding	shadeEyes, not tintIris
 wiki/gene-shadowcreature.html#strokes	coding	The tentacles are the STROKES shape
 wiki/gene-shadowcreature.html#tentacles	gameplay	The join
+wiki/gene-shadowcreature.html#verified	coding	Verified
 wiki/gene-shadowcreature.html#what	gameplay	What it looks like
 wiki/gene-shadowcreature.html#wild	gameplay	What you can catch
 wiki/gene-shallows.html#about	coding	Why it is built this way
@@ -2665,6 +2694,7 @@ wiki/gene-unicorn-horn.html#deferred	coding	The deferred-submit trap, and why th
 wiki/gene-unicorn-horn.html#family	coding	Why it is not filed with the coat genes
 wiki/gene-unicorn-horn.html#finding	gameplay	Finding one
 wiki/gene-unicorn-horn.html#health	gameplay	Is it good for the horse?
+wiki/gene-unicorn-horn.html#horn-designer	coding	The designer names the horn rather than drawing it
 wiki/gene-unicorn-horn.html#inheritance	gameplay	Crossing two of them
 wiki/gene-unicorn-horn.html#numbers	coding	The epigenome, sorted by what it costs to change
 wiki/gene-unicorn-horn.html#pipeline	coding	It paints nothing, and that is the novelty
@@ -2820,6 +2850,7 @@ wiki/genetics-model.html#noncoat	all	Genes that never paint
 wiki/genetics-model.html#registry	all	The forty-eight registered genes
 wiki/genetics-model.html#sex-linked	all	Sex-linked inheritance
 wiki/genetics-model.html#verified	all	Verified
+wiki/horse-afterlife.html#budget	coding	The size budget (2026-10-01, issue #15)
 wiki/horse-afterlife.html#clock	coding	The clock is the owner, and it counts up
 wiki/horse-afterlife.html#command	gameplay	The command
 wiki/horse-afterlife.html#corpse	coding	The corpse has to go first (2026-09-26)
@@ -2848,6 +2879,7 @@ wiki/horse-body.html#notbuilt	all	What this is not
 wiki/horse-body.html#pull	all	Pulling ability, the one that is a score
 wiki/horse-body.html#reference-numbers	all	Why the reference’s percentages are not the numbers
 wiki/horse-body.html#resolve	all	One walk, one record
+wiki/horse-body.html#severity-stays-flat	all	Severity stays flat (owner, 2026-10-01)
 wiki/horse-body.html#units	all	What those numbers are in metres
 wiki/horse-body.html#verified	all	Verified
 wiki/horse-browser.html#log	gameplay	The Log tab — what has been happening to your horses
@@ -2864,6 +2896,8 @@ wiki/horse-browser.html#log-reason	coding	A refusal is a constant, not a string
 wiki/horse-browser.html#log-refresh	gameplay	Refresh
 wiki/horse-browser.html#log-strip	coding	It needed no new tab-strip work
 wiki/horse-browser.html#refresh-built	coding	The roster refreshes on every open (2026-09-24)
+wiki/horse-browser.html#send-home	gameplay	Send home — free, from anywhere
+wiki/horse-browser.html#send-home-free-built	coding	Send home is free, and can be priced (2026-10-02)
 wiki/horse-care.html#band-code	coding	Band life
 wiki/horse-care.html#bands	gameplay	3. Wild bands
 wiki/horse-care.html#bareback-steering	gameplay	Bareback steering — what the top tier is for
@@ -2939,6 +2973,7 @@ wiki/horse-gear.html#using	gameplay	Putting something on
 wiki/horse-gear.html#verify	coding	The roster checks itself at boot
 wiki/horse-gear.html#where	gameplay	Where it is
 wiki/horse-realm.html#arrival	coding	One exit, at the origin
+wiki/horse-realm.html#backup	coding	Back the realm up before changing it
 wiki/horse-realm.html#breeding	gameplay	They breed, slowly
 wiki/horse-realm.html#census	coding	Counting horses that are not there
 wiki/horse-realm.html#circle	coding	The field is a circle, and it grows
@@ -3144,6 +3179,7 @@ wiki/item-research-papers.html#topic	coding	Why it is strings, and where it norm
 wiki/item-research-papers.html#use	gameplay	What it does
 wiki/item-research-papers.html#verified	coding	Verified
 wiki/item-research-shelf.html#art-0929	coding	The block finally looks like itself
+wiki/item-research-shelf.html#filing-discovers	coding	Filing a paper discovers its gene (owner, 2026-10-01; built 2026-10-02)
 wiki/item-research-shelf.html#furnace	coding	The copy runs on the block, like a furnace
 wiki/item-research-shelf.html#loop	gameplay	Where the papers come from
 wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each
@@ -3169,6 +3205,7 @@ wiki/item-splice-carrots.html#known	gameplay	Known Gene Splice — the targeted 
 wiki/item-splice-carrots.html#mark	gameplay	A splice that lands marks the foal
 wiki/item-splice-carrots.html#random	gameplay	Unknown Gene Splice — the random one
 wiki/item-splice-carrots.html#recipe-type	coding	The Known Gene Splice is a custom recipe type
+wiki/item-splice-carrots.html#splice-policy	coding	What a splice does to the next foal (owner, 2026-10-01)
 wiki/item-splice-carrots.html#themed	gameplay	The five themed splices
 wiki/item-splice-carrots.html#verified	coding	Verified
 wiki/item-stall-signs.html#art-0929	coding	Three signs that are three different drawings
@@ -3196,6 +3233,7 @@ wiki/item-vet-kit.html#code	coding	Where it lives
 wiki/item-vet-kit.html#fertility-gelding	coding	Gelding reaches the record (shown 2026-09-30)
 wiki/item-vet-kit.html#gaps	coding	Known gaps
 wiki/item-vet-kit.html#gelding	gameplay	What gelding does
+wiki/item-vet-kit.html#gelding-never-covers	coding	A gelding never covers (shown 2026-10-01)
 wiki/item-vet-kit.html#use	gameplay	How to use it
 wiki/item-whistles.html#blow-key	gameplay	One key blows every whistle you carry
 wiki/item-whistles.html#blow-key-code	coding	One key, every whistle (2026-09-29)
@@ -3231,11 +3269,14 @@ wiki/items.html#tack-derived	gameplay	The textures are derived, not drawn
 wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
 wiki/items.html#tack-found	gameplay	Somebody else’s tack, in a chest
 wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
+wiki/items.html#verified-carrot-growth	coding	Verified: the crop grows
+wiki/items.html#verified-chest-loot	coding	Verified: the rates are the configured ones
 wiki/known-gaps.html#migrated	all	Migrated open checks
 wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
+wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
 wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time
 wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
 wiki/model-parts.html#settings	gameplay	If they cost you frames
@@ -3338,6 +3379,7 @@ wiki/roadmap-execution.html#symptom-map	all	Symptom-to-anchor map
 wiki/roadmap-execution.html#ui-and-gear-fixes	all	6. UI and equipment actions - partly built
 wiki/stables.html#adding	all	Adding one: two files and no Java
 wiki/stables.html#debug-announce	all	Turning the commentary on
+wiki/stables.html#level-ground	all	Level ground: horsegenetics:level_jigsaw
 wiki/stables.html#rarity	all	How often they generate
 wiki/stables.html#safety	all	What a stable may never do
 wiki/stables.html#stalls	all	How it finds the stalls
@@ -3357,6 +3399,7 @@ wiki/texture-resolution.html#scales	all	Scale by scale
 wiki/texture-resolution.html#today	all	What 128 actually is
 wiki/texture-resolution.html#unverified	all	Unverified
 wiki/villagers.html#arcane	all	The arcane dealer
+wiki/villagers.html#arcane-no-horse-hunters	all	He does not stock a horse that hunts horses
 wiki/villagers.html#arcane-pools	all	The pools are generated, never listed
 wiki/villagers.html#arcane-quiet	all	He does not stock the genes that make a noise
 wiki/villagers.html#arcane-wandering	all	He is also out on the road

@@ -136,7 +136,7 @@ plains.
   Mixed? ("Regardless of biome" is about where the villagers APPEAR, not about
   what they trade; do not flatten the breed system by accident.)
 - Ships with: the pool entries (code, in the injector), any new .nbt through
-  bake-barn.py (CLAUDE.md table: regenerate, commit the nbt), the config list if
+  bake-barn.py (procedures/rebake.txt row v: regenerate, commit the nbt), the config list if
   option (a) of the modded half is taken, a gametest that generates a village of
   each style at a fixed seed and asserts the barn is there (ModGameTests already
   does this for plains via the census; extend it), and a wiki update.

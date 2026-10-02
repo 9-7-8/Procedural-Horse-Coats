@@ -11,8 +11,12 @@ Do not work from memory of what the routine says: the file is the only copy.
 
 Command                  Runs    Say (any of)                         What it leaves
 -----------------------  ------  -----------------------------------  ---------------------------------
+/whats-next              either  "what's next", "what should we do    2-4 options with a recommendation,
+                                 next", "where are we"                 then the picked work started
 /end-session             local   "end the session", "wrap up",        code + docs pushed as two commits,
                                  "we're done for today"               nothing left running
+/write-session-log       either  "write the session log", "log this   one NEW timestamped log file, every
+                                 session" (end-session runs it)       section filled, top of the index
 /process-intake          local   "process intake", "pick something    ONE intake feature built and
                                  from intake", "next intake item"     retired, session ended
 /write-intake-document   either  "scope a feature", "write an intake  one treatment in intake/, every
@@ -23,11 +27,15 @@ Command                  Runs    Say (any of)                         What it le
                                  "this is broken"                     bug; no code changed
 /run-tests               local   "run tests", "run the yard"          passes closed, pens built, bugs
                                                                       filed, a report
+/stress-test             local   "stress test", "how much do horses   ms/tick per horse count, a ranked
+                                 cost", "profile the horses"          JFR profile, fixes before/after
 /hand-over-a-test        local   "what should I test", "update the    a re-aimed kit and a numbered
                                  test kit"                            list in chat
 /launch-game             local   "launch the game", "restart",        exactly one game running,
                                  "launch into the yard",              confirmed from a fresh log
                                  "boot a server"
+/photograph-horses       local   "show me pictures", "photograph      photo-*.png per shot, described
+                                 the horses"                          and shown to the owner
 /release                 local   "ship a release", "new version",     owner's decision; if yes, every
                                  "is it worth a release"              code test green, jar + wiki note
 /rebake                  local   "rebake", "run the bakes",           every derived artefact current,
@@ -36,36 +44,37 @@ Command                  Runs    Say (any of)                         What it le
                                  "run the full suite"                 the full suite only for releases
 /add-a-gene              local   "add a gene", "new gene",            one gene (coat / ability / add-on)
                                  "a gene that ..."                    asked, built, baked, pushed
+/add-an-item             local   "add an item", "new item",           one item: model, art, recipe,
+                                 "an item that ..."                    behaviour, tests, page, booted
+/add-a-config-option     local   "add a config option", "make it      a key with a safe accessor, passed
+                                 configurable"                        into common/, booted, documented
 /design-a-breed          either  "make a breed", "new breed"          a breed designed WITH the owner,
                                                                       baked and tested
 /survey-a-mod            local   "survey this mod", "compat with"     the jar's real contents, and
                                                                       options
 /review-server-logs      local   "check the server logs", "review     new export folders reviewed once;
                                  the PCH logs"                        bugs -> issues, wants -> To do
+/add-a-wiki-page         either  "add a wiki page", "new page"        one page in pages.js, true tabs
+                                                                      and footer, indexes rebaked
+/use-an-art-pack         local   "use the art packs", "find art for"  art copied and transformed, with
+                                                                      USAGE.txt + notices written
+/close-a-check           either  "that works", "confirmed",           the item gone from its tab, written
+                                 "that shipped"                       up on Coding/Gameplay, rebaked
+/audit-claude-md         either  "audit CLAUDE.md", "is CLAUDE.md     CLAUDE.md at most 300 lines of
+                                 over budget"                         standing rules and pointers
 (no command) look-it-up  either  "where is", "which class handles"    an answer that saves context
 (no command) FORMAT      either  "write a procedure"                  the template every file follows
 
 How they fit together
 ---------------------
   feature wanted -> write-intake-document -> intake/ treatment -> process-intake -> end-session
-  bug noticed    -> report-bug (cloud), run-tests (yard) or review-server-logs (server)
-                    -> GitHub issue -> fix-bug -> end-session
+  bug or tuning  -> report-bug (cloud), run-tests (yard) or review-server-logs (server)
+                    -> GitHub issue (bug | tuning) -> fix-bug -> end-session
   needs her eyes -> hand-over-a-test -> launch-game
   any change     -> rebake -> test-tiers (lowest tier that proves it)
   shipping       -> release: offer -> owner decides -> the release set -> tag + jar + note
 
 Routines that might become procedures next
 ------------------------------------------
-These are done often enough to repeat the same way, but nobody has written them up
-yet. Each is a candidate, not a procedure: write it by FORMAT.txt when it next comes up.
-- add-a-wiki-page: hard rule 7 (pages.js), the three tabs, the footer, and the bakes.
-- close-a-check: move a Verification item to Coding with its evidence, delete its pen,
-  and re-bake the indexes. It is step 2 of run-tests, often done alone.
-- whats-next: read the verification index, the open issues and intake/, and offer the
-  owner 2-4 next pieces of work with a recommendation.
-- use-an-art-pack: copy from intake/potential-assets/ with the USAGE.txt and
-  THIRD_PARTY_NOTICES.md paper trail.
-- compat-test: build the synthetic mod and boot with it, to prove the modded-material
-  layer.
-- measure-worldgen: run Structure.generate headlessly with a control, before claiming a
-  worldgen change helped.
+They are queued in intake/To do.txt, under "Routines to write up as procedures". When one
+is written, by FORMAT.txt, its bullet is deleted there and its row added above.

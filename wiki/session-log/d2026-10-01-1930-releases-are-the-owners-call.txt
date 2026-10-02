@@ -1,0 +1,66 @@
+2026-10-01 19:30 (end time) - Releases are the owner's call
+
+ASKED
+-----
+- "You're pushing releases too frequently-- a single fixed bug, or even two or three or
+  five-- is not enough for a release"
+  -> Asked the bar with the question tool; the owner picked "Offer, you decide". Every
+     procedure that could cut a release was rewritten to match (d35c758d).
+- "End session" -> this log, by procedures/end-session.txt.
+
+DONE
+----
+- d35c758d - release cadence. Before this, procedures/release.txt step 1 (and the
+  release steps of nine other procedures) told a session to cut a patch release without
+  asking whenever "a bunch of" fixes or a single feature was on main. That put out
+  0.5.038 and 0.5.039 on the same day. Now:
+  - procedures/release.txt step 1: a session never cuts a release unasked. It OFFERS one
+    (one AskUserQuestion with "not yet" as an option) only once main holds a substantial
+    batch of player-facing work: roughly ten-plus fixes, or a substantial feature (not
+    one small item, option or tweak). Five fixes is below the bar, and below it the
+    session says nothing about a release. After "not yet", it does not offer again until
+    substantially more has landed. When the owner asks for a release, it is cut whatever
+    the size. A replacement for a broken release still goes at once. NEVER and DONE WHEN
+    changed to match.
+  - The release steps in end-session, fix-bug, process-intake, add-a-gene, add-an-item,
+    add-a-config-option, whats-next, write-intake-document (section M) and
+    write-session-log (section h) now point at that bar instead of "cut without asking".
+  - The /release skill description, CLAUDE.md hard rule 10 and the numbering note on
+    wiki/releases.html say the same.
+  Proof: the release wording was grepped across procedures/ and .claude/skills/, and the
+  only "without asking" left is about WHICH number moves and the broken-release
+  replacement. build-search-index and check-links OK. :neoforge-26.1.2:build green (no
+  code changed, so it was all up to date). check-parity OK.
+
+DECIDED
+-------
+- Releases are offered, not cut: the session offers one at a substantial batch, and the
+  owner decides (owner). Recorded in procedures/release.txt step 1.
+- "Roughly ten player-facing fixes" as the bar is this session's reading of "not two or
+  three or five", made without the owner. She was told she can change the number.
+
+FOUND ON THE WAY
+----------------
+None.
+
+PROCEDURES
+----------
+release (step 1 rewritten: offer at a substantial batch, never cut unasked), and the
+release steps of end-session, fix-bug, process-intake, add-a-gene, add-an-item,
+add-a-config-option, whats-next, write-intake-document and write-session-log, all to
+match.
+
+NOT RUN / NOT CHECKED
+---------------------
+No code changed, so no tests were run. A full :common:test run would check nothing this
+session touched. No Verification-tab anchors were added.
+
+RELEASE
+-------
+Not offered. Since v0.5.039 main holds only this docs/procedure change, which is nowhere
+near the new bar.
+
+PICK UP FIRST
+-------------
+/fix-bug for #18 (dealer horses in powder snow), then #12. #17 waits on the owner's pick
+of a fix option. This is carried over unchanged from d2026-10-01-1858-free-covers-config.

@@ -1062,7 +1062,9 @@
         <code>resolveMobResponsibleForDamage</code> runs after <code>actuallyHurt</code>, so a
         saved horse still gets its <code>lastHurtByMob</code> and its <code>hurtTime</code> &mdash;
         which is exactly what <a href="#escape-code"><code>HorseEscapeGoal.inDanger</code></a>
-        reads. A horse on half a heart therefore bolts on the same tick it is saved, and
+        reads. A horse on half a heart therefore bolts within two seconds of the save &mdash; not
+        on the same tick: the goal starts when the selector next picks it up, and the yard&rsquo;s
+        first look, ten ticks in, found it not yet running (<a href="#verified-last-stand">2026-10-01</a>) &mdash; and
         <code>Escape.THREAT_LINGERS_TICKS</code> (200) outlasts
         <code>LastStand.DEFAULT_IMMUNITY_TICKS</code> (120) on purpose: the running does not stop
         before the immunity does.</li>
@@ -1401,11 +1403,78 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
         watched doing it for the first time since the last stand shipped.</li>
     <li><strong><code>/kill</code>&rsquo;s generic kill still kills.</strong> The same run&rsquo;s DEATH DIAMONDS horse
         took <code>3.4E38</code> from <code>genericKill</code>, logged the same exemption line and died. The void, the
-        other member of <code>bypasses_invulnerability</code>, is still
-        <a href="?view=verification#last-stand-0924">open</a>.</li>
+        other member of <code>bypasses_invulnerability</code>, was watched killing on 2026-10-01
+        (<a href="#verified-last-stand">below</a>).</li>
 </ul>
 <p>
     All three pens were taken out of the yard after this run.
+</p>
+
+<p id="verified-last-stand">
+    <strong>No horse dies to one blow, and the save is spent, re-arms and bolts</strong> (2026-10-01, the test yard's
+    LAST STAND pen, row AR east, unattended, the run of 23:53 on commit <code>449e1787</code>). Four tamed, ownerless
+    horses in lidded cells, every blow a direct <code>hurtServer</code> credited to a caged zombie, so it is the
+    <code>LivingDamageEvent.Pre</code> pairing this feature rests on that was exercised, not the arithmetic. Each line
+    below is a <code>CLOCKWORK PASS</code>:
+</p>
+<ul>
+    <li><strong>The save.</strong> A full-health horse took 1000 from the zombie and was left alive:
+        <code>horse A at full 22.0 took 1000 from mob at tick 101: hurtServer returned true, alive on 1.0 (expects 1.0
+        = healthLeft(last_stand_health 1.0)), stamp 101</code> (23:53:45).</li>
+    <li><strong>The window is real immunity, not the hurt cooldown.</strong> Thirty ticks in, past vanilla's ten, a
+        hit of 5 that would kill on one health point did nothing: <code>health 1.0 -&gt; 1.0, hurtServer returned
+        false, alive true</code> (23:53:46).</li>
+    <li><strong>It is spent.</strong> After the 120-tick window, unhealed, a second 1000 killed it: <code>at +160
+        (window 120), health 1.0/22.0, stamp 101: 1000 hit -&gt; dead</code> (23:53:53).</li>
+    <li><strong>It comes back.</strong> Healed to full, the same horse was saved again and the stamp rewritten:
+        <code>healed to 22.0/22.0 (stamp still 101), then 1000 at tick 301 -&gt; alive on 1.0, stamp now 301</code>
+        (23:53:55). The pen sets the health rather than feeding the horse, which is honest: the re-arm reads the
+        health and nothing else.</li>
+    <li><strong>The void still kills.</strong> <code>full health 22.0, save armed, fellOutOfWorld 1000: hurtServer
+        returned true -&gt; dead</code> (23:53:45).</li>
+    <li><strong>The save and the bolt are one behaviour.</strong> A saved horse is bolting, with both escape
+        modifiers on, within two seconds of the save, and still bolting as the window ends: <code>boosts on before
+        the blow: false; at +40: bolting true, escape/speed true, escape/jump true; at +118 (window 120): bolting
+        true, speed value/base x1.3000 (SPEED_BOOST 0.3)</code> (23:53:51). The first run looked at +10 ticks and
+        failed on the pen's own timing, since <code>HorseEscapeGoal</code> starts about twenty ticks after the save;
+        the look moved to +40 in <code>6b24fe7e</code>.</li>
+    <li><strong>The boosts come off when it calms.</strong> Healed to full at +140, read at +180: <code>bolting
+        false, escape/speed false, escape/jump false</code> (23:53:54), so <code>stop</code> runs and nothing is
+        left permanently buffed.</li>
+</ul>
+<p>
+    What the pen cannot see is what a player sees &mdash; the totem particles, the chat line, the information
+    screen &mdash; and a charged creeper's explosion is a different damage path from a mob's blow; those stay on
+    <a href="?view=verification#last-stand-0924">the Verification tab</a>.
+</p>
+
+<p id="verified-despawn">
+    <strong>No horse, owned or wild, is ever removed for distance</strong> (2026-10-01; formerly open check 300).
+    This was raised as a possible defect: <code>setPersistenceRequired</code> is never called on taming or
+    ownership. It does not need to be. 26.1.2's <code>Mob.checkDespawn</code> (the patched sources jar) runs
+    NeoForge's <code>MobDespawnEvent</code>, then the peaceful rule, then &mdash; only if neither
+    <code>isPersistenceRequired()</code> nor <code>requiresCustomPersistence()</code> (a passenger or a leashed
+    mob) holds &mdash; two distance removals, <em>each ANDed with</em> <code>removeWhenFarAway(distSqr)</code>.
+    <code>Animal.removeWhenFarAway</code> returns <code>false</code> unconditionally and neither
+    <code>AbstractHorse</code> nor <code>Horse</code> overrides it. The yard's KEEPING HORSES pen (row AT west) read
+    those predicates off a live tamed, owned horse, with an untamed COMMAND-spawned horse beside it for contrast:
+    <code>persistenceRequired false, requiresCustomPersistence false, removeWhenFarAway(1e6) false,
+    allowedInPeaceful true, tamed true</code>, the untamed one reading the same, and <code>this mod has no
+    MobDespawnEvent subscriber</code> &mdash; <code>CLOCKWORK PASS</code>, 23:54:10. So the fix that check feared
+    it would need is not needed. It does not cover another mod's <code>MobDespawnEvent</code> answering ALLOW.
+</p>
+
+<p id="verified-bond-decay">
+    <strong>Bond fades a point a game day, down to the floor and no further</strong> (2026-10-01, the 23:53
+    yard run on 449e1787, row AV west, the BOND DECAY pen: five unowned, never-fed mares with bond written
+    straight onto the attachment, <code>bond_decay_per_day 1</code>, <code>bond_floor 31</code>). A day is
+    <code>getGameTime() / 24000</code>, so it is twenty minutes of ticks and sleep does not shorten it. All five
+    checks logged <code>CLOCKWORK PASS</code>: H1 &ldquo;from 100 at day 6: 97 after 3 day(s) ... history
+    d0=100 d1=99 d2=98 d3=97&rdquo; (03:03); H2, written at 90 with <code>dayStamp 0</code> on day 6, read
+    &ldquo;bond 90, dayStamp 6&rdquo; a hundred ticks later, so an unstamped horse is stamped and not charged
+    the world's age (01:57); H3, stamped five days back, &ldquo;bond 95&rdquo; on its first tick (01:57); H4
+    &ldquo;from 33 ... 31 after 3 day(s), lowest seen 31&rdquo;; and the foal H5 &ldquo;from 10 ... 10 after 3
+    day(s)&rdquo;, never topped up to the floor (03:03).
 </p>
 
 <p id="verified-taming">
@@ -1413,6 +1482,17 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     unwatched:</em> horses peeling off a wild herd for a player walking past crouched with food, a
     carnivore ignoring a carrot, and a dhampir not coming at all
     (<a href="item-stall-signs.html#verification">the stall-sign rewrite&rsquo;s verification tab</a>).
+</p>
+
+<p id="verified-ground-food">
+    <strong>Dropped food is judged by what a horse grazes</strong> (pen GRAZING, the run of 2026-10-02 03:52 on
+    <code>a56afcbb</code>, two clockwork PASS lines). In a stone-floored glass cell with nothing else to eat, a hungry
+    ordinary mare (hunger 20) ate a dropped beetroot, melon slice and potato &mdash; none of them in vanilla&rsquo;s
+    horse-food tag &mdash; within 300 ticks, her hunger rising 74.4 in all (03:53:01). Beside her a hungry
+    <code>Dwht/Dwht</code> wheat-eater with the same three and a wheat ate the wheat at +200 and left all three for
+    the full ten minutes while her hunger drained back to 20 (04:02:46), so the widening stops at
+    <code>NORMAL</code>/<code>ANYTHING</code>. The modded-grain, peckish-horse and hand-feeding halves are still open on
+    <a href="#ground-food-0924">the Verification tab</a>.
 </p>
 
 </section>
@@ -2011,8 +2091,8 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
         new item, no leash, and a low-bond horse still drifts, which is the thing bond is
         <em>for</em>. <strong>Note this is adjacent to a separate problem, not the same
         one</strong> &mdash; <code>setPersistenceRequired</code> is never called on taming or
-        ownership, so whether an owned horse can despawn at all is
-        <a href="known-gaps.html#gap-300">an open question</a>. Keep them apart: a horse that
+        ownership &mdash; which turned out not to matter, since
+        <a href="?view=coding#verified-despawn">no horse is ever removed for distance</a>. Keep them apart: a horse that
         vanishes is a defect and its fix belongs to everybody, while waiting where you left it is
         a reward and belongs to bond. Fixing the first as a tier of the second would mean a
         low-bond horse is <em>allowed</em> to disappear.</li>
@@ -2130,7 +2210,7 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>No horse can be killed by a single blow any more, and that rests entirely on one unverified assumption &mdash; that zeroing the damage and setting the health inside <code>LivingDamageEvent.Pre</code> behaves the way the 26.1.2 sources read &mdash; so the first check is a charged creeper against a full-health horse (the exemptions for lethal foals, <code>/kill</code> and a were-animal's death are already seen working); a horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; a horse can no longer eat a crop through the fence either, and the check that matters more than the fix is the one that catches it overshooting &mdash; if an ordinary pen has stopped grazing its own grass, the sight line is being aimed at block centres and every tuft five paces off reads as barred; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, so the check that is left is the plain one &mdash; find a wild band on real ground and watch a grown filly leave it, for a neighbouring band or for a bachelor who founds one with her, since <strong>nothing refuses a suitor any more</strong> and the yard has only ever shown this in pens ten blocks wide; and bond now <strong>fades</strong> by a point a Minecraft day down to 31, which wants a stabled horse left alone for a week and, more importantly, a check that the everyday horse never notices it and that nothing was quietly slammed to the floor the first time an old world loaded; and food is no longer the only thing a horse will run at &mdash; an item that would <a href="gene-passification.html">passify</a> it is a gallop-tier lure whatever its diet says, so somebody has to hold a cake out to an untamed nightmare and then check the running stops once the offer is spent; and a tamed horse now <strong>refuses to be ridden by anybody but its owner and their team</strong>, which is the largest behaviour change here in a while and needs a second player before any of it can be believed &mdash; the check to run first is not the refusal but its opposite, that an <em>untamed</em> horse still lets you on, because if it does not then horses cannot be tamed at all.</p>
+    <p>No horse can be killed by a single blow any more, and the yard has now watched the save, its window, its re-arming, the void and the bolt work, so what is left of it is what a player sees &mdash; the particles and the chat line against a charged creeper &mdash; plus a relog, a wild horse and the switches; a horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; a horse can no longer eat a crop through the fence either, and the check that matters more than the fix is the one that catches it overshooting &mdash; if an ordinary pen has stopped grazing its own grass, the sight line is being aimed at block centres and every tuft five paces off reads as barred; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, so the check that is left is the plain one &mdash; find a wild band on real ground and watch a grown filly leave it, for a neighbouring band or for a bachelor who founds one with her, since <strong>nothing refuses a suitor any more</strong> and the yard has only ever shown this in pens ten blocks wide; and bond now <strong>fades</strong> by a point a game day down to 31, which the yard has watched fall, stop at the floor and spare an unstamped horse, so what is left is a horse surviving a real unload, the everyday horse never noticing it, the off switch, and whether a slept night should cost bond; and food is no longer the only thing a horse will run at &mdash; an item that would <a href="gene-passification.html">passify</a> it is a gallop-tier lure whatever its diet says, so somebody has to hold a cake out to an untamed nightmare and then check the running stops once the offer is spent; and a tamed horse now <strong>refuses to be ridden by anybody but its owner and their team</strong>, which is the largest behaviour change here in a while and needs a second player before any of it can be believed &mdash; the check to run first is not the refusal but its opposite, that an <em>untamed</em> horse still lets you on, because if it does not then horses cannot be tamed at all.</p>
 </div>
 
 <h3 id="riding-0929">A horse refuses a stranger (2026-09-29, NOT played)</h3>
@@ -2227,39 +2307,33 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <a href="?view=coding#bond-decay-code">the daily decay</a>.
     <code>BondTest</code> covers the arithmetic: the floor, that a horse below it is never
     topped up to it, a stamp from the future, <code>behaviour.bond_decay_per_day = 0</code>, and
-    a stamp old enough to overflow the subtraction. <strong>Nothing about the behaviour in a
-    world is tested</strong>, because the tick, the stamp and the config are all NeoForge.
+    a stamp old enough to overflow the subtraction. The yard has since watched the daily fall,
+    the unstamped guard, a multi-day charge and the floor in a world
+    (<a href="#verified-bond-decay">verified 2026-10-01</a>); what is left below is a player's.
 </p>
 
 <h4>In the game, with your hands</h4>
 
 <ul>
-    <li><strong>The one that decides whether it works at all.</strong> <code>/bond 100</code> a
-        horse, note the number on its information screen, leave it in a loaded pen and sleep
-        through several nights. <strong>Pass:</strong> the number is down by one per night.
-        <strong>Fail:</strong> it has not moved, which means the tick's rollover is not firing
-        &mdash; check that <code>dayStamp</code> is not being kept current by the gain path
-        (standing near the horse is enough to call <code>awardBond</code>).</li>
-    <li><strong>The one that would be a disaster.</strong> Load an existing world with horses
-        you bonded before this build and read their numbers <em>immediately</em>.
-        <strong>Pass:</strong> unchanged. <strong>Fail:</strong> they are all at exactly 31,
-        which is the unstamped-horse guard not working and every horse being charged for the
-        whole age of the world on its first tick.</li>
-    <li><strong>Unloaded time is charged.</strong> <code>/bond 100</code> a horse, leave the
-        area (or the dimension) for several Minecraft days, come back. <strong>Pass:</strong>
-        the number dropped by the days you were away, all at once on the first tick.
-        <strong>Fail:</strong> unchanged, meaning it is behaving as a rate on attention after
-        all.</li>
-    <li><strong>The floor holds, and nothing is topped up.</strong> Leave a <code>/bond 35</code>
-        horse alone for a fortnight, and a <code>/bond 10</code> foal beside it.
-        <strong>Pass:</strong> 31 and 10. <strong>Fail:</strong> the foal is at 31, which is the
-        floor being treated as a level rather than a stopping point.</li>
+    <li><strong>Owner's call: should a slept night cost bond?</strong> It does not. The tick
+        counts days as <code>level.getGameTime() / 24000</code>, the game time that sleeping
+        and <code>/time</code> do not move (vanilla's long-standing behaviour, not read out of
+        the 26.1.2 jar), so a night slept through costs nothing and only a
+        night waited out costs a point. This check used to read &ldquo;sleep through several
+        nights. <strong>Pass:</strong> the number is down by one per night&rdquo;, which the code
+        never did. Keep it as elapsed game time, or charge day time too?</li>
+    <li><strong>Unloaded time survives an unload.</strong> The yard showed a horse stamped five
+        days back charged all five on its next tick; it did not unload one. <code>/bond 100</code>
+        a horse, leave the area (or the dimension) for several Minecraft days, come back.
+        <strong>Pass:</strong> the number dropped by the days you were away, all at once on the
+        first tick. <strong>Fail:</strong> unchanged, meaning the stamp is not being saved.</li>
     <li><strong>The horse you actually ride never notices.</strong> Ride a bonded horse for a
         few minutes a day across several days. <strong>Pass:</strong> the number climbs; the
         point a day is invisible against the cap of fifteen. <strong>Fail:</strong> it slides
         anyway, which would mean the decay is running more than once a day.</li>
     <li><strong>The off switch.</strong> Set <code>behaviour.bond_decay_per_day = 0</code> and
-        repeat the first check. <strong>Pass:</strong> nothing moves, ever.</li>
+        leave a <code>/bond 100</code> horse in a loaded pen for a few game days.
+        <strong>Pass:</strong> nothing moves, ever.</li>
 </ul>
 
 <h3 id="last-stand-0924">No horse dies to one blow (2026-09-24, NOT played)</h3>
@@ -2273,45 +2347,26 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <code>LastStandTest</code> covers the arithmetic and the wording &mdash; that damage exactly
     equal to the remaining health still counts as fatal, the window, the "never" value the cooldown
     store answers with, the two ways a setting could hand back immortality, and the clamps that stop
-    a configured health of 0 killing what it rescues. <strong>Nothing about the behaviour is
-    tested</strong>, because all of it is NeoForge.
+    a configured health of 0 killing what it rescues. The behaviour itself &mdash; the save, the
+    window, spent, re-armed, the void, and the bolt &mdash; was
+    <a href="?view=coding#verified-last-stand">watched in the yard on 2026-10-01</a>; what is left
+    is what a player sees, and the paths the yard did not take.
 </p>
 
 <h4>In the game, with your hands</h4>
 
 <ul>
-    <li><strong>The one that decides whether any of it works.</strong> Stand a full-health horse
-        next to a charged creeper, or hit one with a sharpness-V sword it could not survive.
-        <strong>Pass:</strong> totem particles, one red line in chat, and the horse alive on half
-        a heart. <strong>Fail:</strong> it dies &mdash; which most likely means
-        <code>LivingDamageEvent.Pre</code>'s <code>setNewDamage</code>/<code>setHealth</code>
-        pairing does not behave the way the 26.1.2 sources read, and that is the single assumption
-        this whole feature rests on.</li>
-    <li><strong>The window is real immunity, not a hurt cooldown.</strong> Save a horse standing in
-        fire or lava. <strong>Pass:</strong> its health does not move for six seconds, then it
-        starts burning down again. <strong>Fail:</strong> it keeps losing health through the
-        window, meaning the incoming-damage cancel is not landing (another handler may be
-        cancelling or consuming the event first).</li>
-    <li><strong>It is spent.</strong> Save a horse, wait out the window, hit it again hard without
-        healing it. <strong>Pass:</strong> it dies. <strong>Fail:</strong> it is saved a second
-        time, which is the stamp not being written or not surviving &mdash; check
-        <code>[trace] last-stand</code>.</li>
-    <li><strong>It comes back.</strong> Heal the same horse to full at food and water, then hit it
-        hard. <strong>Pass:</strong> saved again, with the line. <strong>Fail:</strong> it dies at
-        full health, which means the re-arm read never fires.</li>
+    <li><strong>What a player sees, against a charged creeper.</strong> The save itself is
+        <a href="?view=coding#verified-last-stand">proven</a> against a mob's blow; stand a
+        full-health horse next to a charged creeper, or hit one with a sharpness-V sword it could
+        not survive. <strong>Pass:</strong> totem particles, one red line in chat, and the horse
+        alive on half a heart. <strong>Fail:</strong> no particles or no line, or &mdash; for the
+        explosion only &mdash; it dies, which would mean that damage path reaches the horse some
+        other way.</li>
     <li><strong>It survives a relog.</strong> Save a horse, log out inside the six seconds, log
         back in. <strong>Pass:</strong> it is still not saveable until healed. The stamp is on
         <code>HorseCooldownsAttachment</code>, which is serialized, but nothing has watched it hold
         a value written mid-damage.</li>
-    <li><strong>The void still kills.</strong> Push a horse into it. <strong>Fail:</strong> an
-        unkillable horse, which is the <code>bypasses_invulnerability</code> check. The generic kill
-        that <code>/kill</code> uses is <a href="?view=coding#verified-last-stand-exempt">verified</a>;
-        the void is the other source in that tag and has not been watched.</li>
-    <li><strong>The save and the bolt are one behaviour.</strong> <strong>Pass:</strong> a saved
-        horse is already running when the particles clear, and is still running when the immunity
-        ends. <strong>Fail:</strong> it stands on half a heart for six seconds and then gets hit,
-        which would mean a cancelled hit does not leave the <code>hurtTime</code> and
-        <code>lastHurtByMob</code> that <code>HorseEscapeGoal.inDanger</code> reads.</li>
     <li><strong>A wild horse gets it too.</strong> And a donkey &mdash; and, by the same class
         test, a llama and a camel. Worth looking at once and deciding whether that is wanted.</li>
     <li><strong>The switches.</strong> <code>behaviour.last_stand = false</code> &mdash;
@@ -2330,8 +2385,9 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <code>EscapeTest</code> covers the arithmetic and the wording &mdash; the threshold, that a
     configured 0 turns it off, that stopping takes more health than starting, the window that
     outlasts the blow, the three saddle sentences, and that a boosted weakest-jump horse still
-    clears a fence. <strong>Nothing about the behaviour is tested</strong>, because all of it is
-    NeoForge.
+    clears a fence. Of the behaviour, only the bolt after a last-stand save and the boosts coming
+    off again have been <a href="?view=coding#verified-last-stand">watched</a> (the yard,
+    2026-10-01); everything with a rider, a saddle or a fence below is unplayed.
 </p>
 
 <h4>In the game, with your hands</h4>
@@ -2362,11 +2418,11 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
         <strong>Pass:</strong> it comes straight back off into your pack and you get
         <em>no</em> second line of chat. <strong>Fail:</strong> a line a tick, or you get the
         reins back.</li>
-    <li><strong>The boost is visible.</strong> Watch its information screen while it bolts.
-        <strong>Pass:</strong> speed and jump read about a third and two fifths higher, and drop
-        back when it calms. <strong>Fail:</strong> they stay put (the modifiers are not landing),
-        or they stay high after it calms &mdash; which means <code>stop</code> never ran, and the
-        horse is permanently buffed.</li>
+    <li><strong>The boost is visible.</strong> The modifiers going on and coming back off are
+        <a href="?view=coding#verified-last-stand">proven in the yard</a>; what is left is the
+        screen. Watch its information screen while it bolts. <strong>Pass:</strong> speed and jump
+        read about a third and two fifths higher, and drop back when it calms.
+        <strong>Fail:</strong> the screen does not show what the attributes hold.</li>
     <li><strong>The fence, which the boost is supposed to have settled.</strong> Pen a
         <em>poor</em> jumper and hurt it to the threshold from outside the pen.
         <strong>Pass:</strong> it clears the rail, because the jump boost is sized for exactly
@@ -2601,17 +2657,13 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     modded server is in. It now asks <code>DietFoods.acceptsFromGround</code>: crops, fruit,
     vegetables, berries, mushrooms, small flowers and cake, vanilla&rsquo;s and any mod&rsquo;s, by
     the common tags. A grazing horse also takes a dropped mouthful within 2 blocks before it takes
-    the grass.
+    the grass. The yard has seen a hungry horse eat dropped vanilla crops and a wheat-eater refuse them
+    (&sect;<a href="#verified-ground-food">Verified</a>); what is below is the rest.
 </p>
 
 <h4>In the game, with your hands</h4>
 
 <ul>
-    <li><strong>A dropped potato is eaten.</strong> Drop a potato, a beetroot or a melon slice
-        &mdash; none of them in vanilla&rsquo;s horse-food tag &mdash; beside a hungry ordinary
-        horse. <strong>Pass:</strong> it walks over and eats it, and <code>hunger</code> logs
-        <code>ate minecraft:potato (dropped)</code>. <strong>Fail:</strong> it walks past to the
-        grass, which means the tag lookup is not matching.</li>
     <li><strong>A modded grain is eaten</strong> &mdash; the case that prompted this. On the modded
         server, drop another mod&rsquo;s crop or fruit by a hungry horse. <strong>Pass:</strong> the
         same log line with that mod&rsquo;s item id. <strong>Fail:</strong> it is ignored, which
@@ -2620,10 +2672,6 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <li><strong>A horse that is only peckish still takes what is at its feet.</strong> Drop food
         beside a horse that is below three quarters full but not yet hungry. <strong>Pass:</strong>
         within a couple of minutes it eats it without walking anywhere.</li>
-    <li><strong>A narrow diet still refuses.</strong> Drop a potato by a hungry
-        <a href="gene-diet.html">wheat-eater</a>. <strong>Pass:</strong> ignored; hay and wheat only.
-        <strong>Fail:</strong> it eats it, which means the widening leaked past
-        <code>NORMAL</code>/<code>ANYTHING</code>.</li>
     <li><strong>Hand-feeding is unchanged.</strong> Hold a plain potato out to an ordinary horse.
         <strong>Pass:</strong> nothing happens, exactly as before &mdash; this change is about the
         floor, not the hand.</li>
@@ -2758,28 +2806,6 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     - the same generous box that <a href="gene-spawner.html#verified-ground">the spawner pens</a> found searching 34
     blocks. It is a reporting fault, not a gameplay one, but it makes a pen's roster untrustworthy exactly where the
     yard is packed tightest, and a reader counting foals off a watch line will double-count.
-</div>
-
-<h3 id="gap-300" data-check-kind="open-gap">Open check 300</h3>
-<div class="open-check">
-<strong>Open, found 2026-09-21 while surveying other mods: nothing in this mod stops an owned horse despawning, and whether vanilla does is unproven.</strong>
-    <code>setPersistenceRequired()</code> is called on cowboy stock
-    (<code>CowboyHandler</code>, <code>Cowboy</code>), egg-spawned horses
-    (<code>HorseEggSpawner</code>), stable stock (<code>StablePopulator</code>), lycanthropy
-    victims and the debug pens &mdash; and <strong>never on taming, on binding, or on
-    ownership</strong>. <code>HorseOwnership</code> is the mod&rsquo;s single answer to whose
-    horse it is, and it does not touch persistence.
-    <strong>What is not established is whether that matters.</strong> Vanilla may already protect
-    a tamed horse through <code>AbstractHorse</code>&rsquo;s own despawn rules; this was looked
-    for on 2026-09-21 and the joined Minecraft sources were not to hand, so it is recorded as a
-    question rather than a defect. <strong>The test is cheap:</strong> tame a horse, leave it
-    unleashed and unridden well outside the simulation distance, travel far enough that its
-    chunks unload, and come back &mdash; ideally with one leashed control horse beside it. If it
-    survives, this closes with a note on <a href="horse-care.html">horse care</a>; if it does not,
-    it is the worst failure a horse mod can have and the fix is one call.
-    Relevant because <a href="horse-care.html#bond-behaviours">a bonded horse waiting where you left
-    it</a> is planned and sits right next to this &mdash; but the two are different problems, and
-    a despawn fix should not be smuggled in as a bond reward.
 </div>
 </section>
 

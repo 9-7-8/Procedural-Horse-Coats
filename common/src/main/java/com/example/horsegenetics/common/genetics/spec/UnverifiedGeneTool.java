@@ -60,7 +60,7 @@ import java.util.stream.Stream;
  * without this resource going stale every time the index changes.
  *
  * <p>Re-run whenever a {@code Verified} block is added or a gene page appears -
- * see the regenerate table in {@code CLAUDE.md}.
+ * see the regenerate table in {@code procedures/rebake.txt}.
  */
 public final class UnverifiedGeneTool {
 

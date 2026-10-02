@@ -28,8 +28,10 @@ STEPS
 -----
 1. Survey.
    a. Read wiki/verification.html (generated) and the Verification tabs it points to.
-   b. Read every open issue from anyone, testers included, except those waiting on the
-      owner: `gh issue list --state open --search "-label:needs-owner" --limit 200`.
+   b. Read every open bug and tuning issue from anyone, testers included, except those
+      waiting on the owner:
+      `gh issue list --state open --search "label:bug,tuning -label:needs-owner" --limit 200`.
+      Also scan unlabelled issues, and label any bug or tuning request you find.
    c. For each issue and check, decide whether a pen, a test or a small fix can settle
       it in this run, and fold those into steps 3, 4 and 7.
    d. Rank what can be wrong without anyone seeing it first, and visual checks last.

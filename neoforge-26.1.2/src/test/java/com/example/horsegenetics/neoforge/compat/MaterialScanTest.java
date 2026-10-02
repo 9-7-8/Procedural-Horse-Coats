@@ -552,6 +552,33 @@ class MaterialScanTest {
     }
 
     @Test
+    void aMetalWhoseModIsNotInstalledIsDropped() {
+        // Issue #14: a c: tag naming another mod's item as an optional entry.
+        // The live server logged Black Quartz and Chimerite horse armour with
+        // neither Actually Additions nor Mana and Artifice installed.
+        FakeJar tagger = new FakeJar()
+                .put("data/c/tags/item/gems/black_quartz.json",
+                        "{\"values\":[{\"id\":\"actuallyadditions:black_quartz\",\"required\":false}]}")
+                .put("data/c/tags/item/ingots/tin.json", "{\"values\":[\"othermod:tin_ingot\"]}");
+
+        MaterialScan.Result everything = MaterialScan.of(List.of(tagger), "horsegenetics");
+        MaterialScan.Result installedOnly = MaterialScan.of(List.of(tagger), "horsegenetics",
+                namespace -> namespace.equals("othermod"));
+
+        assertEquals(List.of("actuallyadditions:black_quartz", "othermod:tin_ingot"),
+                everything.metals().stream().map(ModdedMaterials.Metal::itemId).toList(),
+                "the premise: the tag really does yield both");
+        assertEquals(List.of("othermod:tin_ingot"),
+                installedOnly.metals().stream().map(ModdedMaterials.Metal::itemId).toList(),
+                "a metal from a mod that is not installed makes no armour, recipe or trade");
+        org.junit.jupiter.api.Assertions.assertNotEquals(everything.fingerprint(), installedOnly.fingerprint(),
+                "and the fingerprint moves, so a pack built with the phantom armour is rebuilt");
+        assertEquals(List.of("black_quartz_horse_armor"), installedOnly.droppedArmours(),
+                "and the dropped armour is named, so a save holding one can be aliased");
+        assertEquals(List.of(), everything.droppedArmours());
+    }
+
+    @Test
     void metalColourLooksUpOnlyWhatWasFound() {
         assertNull(ModdedMaterials.metalColour("testmod:never_scanned"),
                 "an id we never saw has no colour, and must not be given one");

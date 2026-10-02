@@ -152,6 +152,19 @@ class HornGenesTest {
         assertTrue(r(blackGlow.baseTint()) < 60);
     }
 
+    /**
+     * Only horn glow makes the horn emissive. A light horse still emits light, but
+     * that is a separate thing and does not reach the horn (owner, 2026-10-02).
+     */
+    @Test
+    void theLightLocusDoesNotLightTheHorn() {
+        for (String light : List.of("Lthf/n", "Ltmn/Ltmn", "Lteye/n", "Lthf/Ltmn")) {
+            assertFalse(horn(unicorn("light", light), 5).emissive(), light + " must not light the horn");
+            assertTrue(horn(unicorn("light", light, "horn_glow", "Glw/Glw"), 5).emissive(),
+                    "horn glow still lights it on a light horse");
+        }
+    }
+
     /** The dust asks the horn for its colours, so it can never disagree with what is drawn. */
     @Test
     void dustFallsFromTheHornInTheHornsColours() {

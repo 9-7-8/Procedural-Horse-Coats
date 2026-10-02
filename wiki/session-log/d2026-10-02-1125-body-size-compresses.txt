@@ -1,0 +1,100 @@
+2026-10-02 11:25 (end time) - body.size off compresses scale instead of flattening it
+
+ASKED
+-----
+- "/process-intake": take one unit from intake/, build it, retire it, end the session.
+  Picked "With body.size off, compress scale toward 1.0 instead of flattening it, and
+  label the designer a genotype preview" (intake/To do.txt). Tier 1: size S, impact a
+  (it finishes the shipped body.size setting), owner-free. Runner-up: the generated
+  config key table (S, impact b), which lost on impact.
+- Mid-run: "I do still want it to be possible for horses to be absurdly huge, even if
+  that makes them much less practical as mounts, that's another 'the customer is always
+  right in matters of taste'". Answered: the compression applies only when a server
+  sets body.size=false. The default (true) is untouched, so magical giants still reach
+  about 2x. Asked with the question tool what an opted-out server does with a magical
+  giant; the owner chose "Compress all".
+
+DONE
+----
+- f8bb8745 "body.size off compresses scale into 0.85-1.15 instead of flattening it".
+  Before: HorseRecords.applyTraitsToEntity wrote a flat 1.0 to Attributes.SCALE when
+  body.size was false, so a Shire and a Falabella stood the same height. Now it writes
+  HorseTraits.compressScale(traits.scale()) = 1 + 0.15*tanh((s-1)/0.15). That always
+  stays inside 0.85-1.15, keeps every horse in the same order, and leaves a near-1.0
+  horse almost unmoved. HorseTraits.COMPRESSED_SCALE_BAND = 0.15 was measured from the
+  26.1.2 sources rather than chosen:
+    - EntityType.HORSE is sized 1.3964844 x 1.6 with eyeHeight 1.52;
+    - Entity.isInWall tests the eye position;
+    - a stall is a floor with two blocks of air (StablePopulator).
+  So the hitbox meets the roof at 1.25x and the eye suffocates past 1.316x. At 1.15x
+  the top is at 1.84 and the eye at 1.75.
+  The ServerConfig key comment and class javadoc were rewritten to match.
+  CustomHorseSpawnScreen.drawSizeReadout adds "(n.nnx in this world)" when the setting
+  is off. ServerConfig is ModConfig.Type.SERVER, which is synced to clients, the same
+  thing MountedMiningHandler relies on. The designer (wiki/horse-designer/js/gui.js)
+  cannot know the setting, so its readout says "(genotype; servers may differ)", and
+  shrinks to fit when the panel is narrow. That is a deliberate divergence, commented in
+  both files (hard rule 5). The effects-verb scale modifiers are still switched off
+  outright when body.size is false; a modifier is not compressed.
+  Proof:
+    - --tests '*HorseTraitsTest' green. The new test is
+      compressedScaleStaysInTheBandAndKeepsTheOrder: it walks 0.1-10x in 0.01 steps,
+      and checks the stall arithmetic and the near-1.0 identity.
+    - Broken on purpose (tanh replaced by the identity): the test failed. Restored.
+    - :neoforge-26.1.2:build green.
+    - check-parity OK, 7163 checks.
+    - check-designer-boots OK.
+- Docs commit: gene-body-size.html. The plan moved from the Roadmap tab to the Coding
+  tab (#size-compressed) and the now-empty Roadmap tab was removed, with its coverage row
+  in roadmap-execution.html. The Verification check was rewritten for the band.
+  horse-body.html#body-size now carries the mechanism and the arithmetic. The six
+  size-gene notes (acan, b4galt7, body-size, hmga2, lcorl, shox) and the
+  for-testers.html#t-server-settings pass/fail lines were updated. The decisions.html
+  entry is marked built.
+- Retired: the intake/To do.txt bullet and its row in intake/Sizing.txt.
+
+DECIDED
+-------
+- (owner) An opted-out server compresses magical giants too; the default keeps them
+  absurd. Recorded on gene-body-size.html#size-compressed and horse-body.html#body-size.
+- Without the owner: the band is 0.15, measured as above; a tanh rather than a linear
+  factor plus clamp, so order survives everywhere; and the spawn screen shows the
+  world's compressed number, since it can read the synced setting, rather than only a
+  label. All recorded on gene-body-size.html#size-compressed.
+
+FOUND ON THE WAY
+----------------
+- web.wasm changed on :web:bakeDesignerAssets although nothing in web/ reaches
+  compressScale. That is the known non-reproducible noise, so it was reverted (rebake
+  step 5).
+- `git log --since=2026-10-02 -- intake/` printed nothing even though intake/ commits
+  exist that day. Git reads a bare date as that date at the current time of day, so
+  same-day edits are missed (with T00:00 it lists 7 commits). Sizing.txt was rewritten in
+  the latest commits anyway, so its blocks stood this run; the test is fixed below.
+
+PROCEDURES
+----------
+- process-intake.txt step 1 and the header of intake/Sizing.txt: the freshness test is
+  now `git log --since=<date>T00:00`. The bare-date form missed same-day edits, which
+  would have let a stale Sizing row stand.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other trait test
+  and the portability guard. Math.tanh is plain JDK, and compressScale is unreachable
+  from :web.
+- Not seen in game: the band itself, the readout suffix, and a doubled horse in a
+  two-high stall with the setting off. All are in the rewritten check on
+  wiki/gene-body-size.html#open-gene-body-size.
+- The designer's readout is only drawn for a scaled horse, and the headless boot check
+  does not draw one.
+
+RELEASE
+-------
+Not offered: one feature is below the bar, and the previous session already had the
+owner's "not yet".
+
+PICK UP FIRST
+-------------
+/process-intake: the generated config key table on wiki/config.html (Tier 1, S/b,
+owner-free).

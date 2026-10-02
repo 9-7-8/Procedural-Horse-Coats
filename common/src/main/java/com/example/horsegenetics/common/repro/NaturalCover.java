@@ -14,7 +14,7 @@ import java.util.List;
  *
  * <p><b>A stallion's day is not capped</b> (owner, 2026-09-24): he attempts
  * every mare in heat he is left with, and past
- * {@link ReproRules#FREE_COVERS_PER_DAY} his <i>odds</i> halve, exactly as they
+ * his free covers ({@link StallionDay}) his <i>odds</i> halve, exactly as they
  * already did on the carrot and seed-jar paths. It used to be a hard stop here
  * and nowhere else, so the fourth mare in a paddock saw no stallion at all -
  * and {@link Verdict#NO_STALLION} is the one refusal her owner is never told
@@ -88,8 +88,8 @@ public final class NaturalCover {
         }
     }
 
-    /** A stallion near the mare. */
-    public record Stallion(Party party, double distanceSq, int coversToday) {
+    /** A stallion near the mare, and his day's covers against this world's allowance. */
+    public record Stallion(Party party, double distanceSq, StallionDay day) {
     }
 
     /**
@@ -187,15 +187,15 @@ public final class NaturalCover {
      * her shoulder. It never refuses anybody - a paddock of tired stallions
      * still covers, which is the point of the cap going away.
      *
-     * <p><b>The split is where the odds change</b>, {@code >= }
-     * {@link ReproRules#FREE_COVERS_PER_DAY}, not above it. A stallion who has
-     * made his third cover is already on {@link ReproRules#TIRED_STALLION_FACTOR}
-     * for his fourth, so counting him as fresh would have her prefer the halved
-     * one - which is the opposite of what the preference is for.
+     * <p><b>The split is where the odds change</b>, {@link StallionDay#tired()},
+     * not above it. A stallion who has made his third cover is already on
+     * {@link ReproRules#TIRED_STALLION_FACTOR} for his fourth, so counting him as
+     * fresh would have her prefer the halved one - which is the opposite of what
+     * the preference is for.
      */
     private static boolean better(Stallion candidate, Stallion best) {
-        boolean tired = candidate.coversToday() >= ReproRules.FREE_COVERS_PER_DAY;
-        boolean bestTired = best.coversToday() >= ReproRules.FREE_COVERS_PER_DAY;
+        boolean tired = candidate.day().tired();
+        boolean bestTired = best.day().tired();
         if (tired != bestTired) {
             return bestTired;
         }

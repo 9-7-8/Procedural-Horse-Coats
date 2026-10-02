@@ -50,6 +50,12 @@
     <code>parts.glow</code> in the client config turns the glow off and keeps the horn.
 </p>
 
+<p>
+    This gene is the only thing that makes a horn glow. A unicorn that carries
+    <a href="gene-light.html">light</a> still gives off light from its hooves, mane or eyes,
+    but its horn stays unlit unless it also has two copies here.
+</p>
+
 <h2 id="health">Is it good for the horse?</h2>
 
 <p>
@@ -92,6 +98,17 @@
     bred for.
 </p>
 
+
+<h3 id="open-glow-light-locus">Settled 2026-10-02: only horn glow lights the horn</h3>
+<p>
+    The owner's call, reversing the one of 2026-10-01 that the horn should follow the
+    <a href="gene-light.html">light</a> locus as the <a href="gene-cutie-mark.html">cutie mark</a>
+    does. The unicorn locus only grows a horn; this locus alone makes it emissive. Emitting
+    light is a separate thing: a light horse still lights the world, but not its horn. The
+    2026-10-01 rule was built and pushed as <code>f6143d97</code>, then reversed the same
+    day. <code>GrownParts.dressHorn</code> asks only <code>HornGlowGene.glows</code>, and
+    <code>HornGenesTest.theLightLocusDoesNotLightTheHorn</code> pins it.
+</p>
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -114,7 +131,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A glowing horn has not been seen since glow became its own gene, and whether it should instead follow the light locus is an open design question.</p>
+    <p>A glowing horn has not been seen since glow became its own gene.</p>
 </div>
 
 <h3 id="open-glow-look">A glowing horn of each kind, at night</h3>
@@ -123,15 +140,6 @@
     night: each should glow in its own colours, the black one as a visible dark shape.
     Then <code>parts.glow</code> off, and the horn should still draw, lit like the rest
     of the horse.
-</p>
-
-<h3 id="open-glow-light-locus">Should a glow come from the light locus too?</h3>
-<p>
-    What <a href="gene-cutie-mark.html">cutie mark</a> does is take a contribution from
-    the <a href="gene-light.html">light</a> locus, so a horse whose mane and hooves already
-    glow gets a glowing emblem as a matter of course. The horn could do the same &mdash;
-    a light horse's horn glowing whatever this locus says &mdash; or the two could stay
-    independent, as they are now. Unresolved, and the owner's call.
 </p>
 
 </section>

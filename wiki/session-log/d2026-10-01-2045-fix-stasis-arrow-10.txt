@@ -1,0 +1,68 @@
+2026-10-01 20:45 (start, approximate) - Fix #10: the stasis bank's saved-searches arrow
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Took #2 first by rank, found it large and put it to the
+  owner (needs-owner); then took #10 and fixed it.
+
+DONE
+----
+- 5d0f1837 "#10: the stasis bank's saved-searches arrow showed on the Chambers tab".
+  HorseStasisBankScreen.applyTab() set the filter box's visible/active from
+  tab == BROWSE but never touched savedSearchButton, which init() adds once, so the
+  arrow drew on every tab. A SavedSearchPicker left open when leaving Browse also stayed
+  over the Chambers slots and took their clicks first (mouseClicked checks the picker
+  before anything else). applyTab() now gives the button the box's visible/active (with
+  a null guard, because init() calls applyTab() once before the button exists) and closes
+  the picker when leaving Browse. This is the fix the issue prescribed, and it matches
+  HorseBrowserScreen's own handling of its button.
+  Proof: :neoforge-26.1.2:compileJava and :neoforge-26.1.2:build green; check-parity OK.
+  No automated test reaches a client screen, so nothing was mutated to go red.
+  Issue #10: OPEN, waiting on an in-game check. The comment on the issue says what to
+  look for (no arrow on Chambers; arrow on Browse; an open menu closes when you leave
+  Browse).
+- Issue #2 ("Structure Spawns", a tester's screenshot from 2026-09-10): no code. The
+  screenshot shows a large stable (from its roofline, probably tm_u_stable) floating as a
+  thin slab over a valley. Cause, read from the config but not reproduced: all three
+  stable structures are jigsaw with project_start_to_heightmap WORLD_SURFACE_WG, so the
+  whole piece takes the start corner's height and nothing checks how even the footprint
+  is. beard_box (since 9798f1a3, 0.3.4, the day before the report) fills only a limited
+  depth. Nothing has changed since, so the bug is live on main. Commented four options
+  (recommended: a custom structure type that rejects uneven sites by sampling corner
+  heights and places at the lowest corner, then measure it headlessly) and labelled it
+  needs-owner.
+
+DECIDED
+-------
+- #2 is large: there is more than one reasonable fix, and one of them changes how rare
+  stables are (a balance call). Made without the owner, under fix-bug step 4; the
+  options are on the issue.
+- #10 is ranked above #16: #10 includes a menu that catches clicks, while #16 is a log
+  warning only. Made without the owner.
+
+FOUND ON THE WAY
+----------------
+- None filed. The only java process running was the live server (nogui), not ours, and
+  it was left alone.
+
+PROCEDURES
+----------
+- None needed. fix-bug's steps fitted, including step 4c's "go back to step 1" after #2
+  turned out large, and step 6's "#N:" form for a fix that only the game can prove.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The #10 fix has not been seen in game.
+- No :common:test run; nothing in common/ changed, so a full run would check nothing
+  this session touched.
+- No Verification-tab anchors added: the open check is on issue #10 (bugs are issues).
+
+RELEASE
+-------
+Not offered. One fix is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/fix-bug: #16 (the mixin refmap warning on every start, cosmetic) is the only bug not
+waiting on something. #13 waits on the live server's logs, #10 on an in-game check, and
+#2 on the owner's pick of the options.

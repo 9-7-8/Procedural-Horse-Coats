@@ -4,8 +4,10 @@ import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.horse.Sex;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * The genetics behind the two <b>gene editors</b> - the custom horse spawn egg
@@ -69,8 +71,49 @@ public final class EditorRules {
      * visible side of the line.
      */
     public static boolean changesLooks(Gene gene) {
-        return Genes.influencesCoat(gene) || GrownParts.shapes(gene);
+        return Genes.influencesCoat(gene) || grows(gene);
     }
+
+    /**
+     * <b>Does a row say what its gene does, or "no effect"?</b> - for {@code x},
+     * the gene's expression on this horse.
+     *
+     * <p>Not-a-wild-type was the whole rule, and it is wrong for a part gene: its
+     * outcomes are all wild types, because they paint nothing, so an {@code Ant/Ant}
+     * horse's antlers row said "no effect" over a horse wearing antlers. A gene that
+     * grows or dresses a part is expressing when its outcome is not the one its
+     * default alleles give.
+     */
+    public static boolean expressing(Gene gene, Expression x) {
+        if (x == null) {
+            return false;
+        }
+        if (!x.wildType()) {
+            return true;
+        }
+        if (!grows(gene)) {
+            return false;
+        }
+        Expression plain = gene.expressionOf(new AllelePair(gene.defaultAllele(), gene.defaultAllele()));
+        return plain == null || !x.id().equals(plain.id());
+    }
+
+    /**
+     * {@link GrownParts#shapes}, remembered per gene. It walks every allele pair of
+     * the gene through {@link GrownParts#of} twice, and the editors ask it of every
+     * row on every frame; the answer is fixed for a gene object, so it is asked once.
+     * Keyed on identity: a gene registered afresh is a new object and asks again.
+     */
+    public static synchronized boolean grows(Gene gene) {
+        Boolean known = GROWS.get(gene);
+        if (known == null) {
+            known = GrownParts.shapes(gene);
+            GROWS.put(gene, known);
+        }
+        return known;
+    }
+
+    private static final Map<Gene, Boolean> GROWS = new IdentityHashMap<>();
 
     /**
      * The three loci an editor always shows as carried, however plain the

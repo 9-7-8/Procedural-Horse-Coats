@@ -189,9 +189,8 @@ Slices and order (one bullet per session, each shippable alone)
   Slice C: the shoulder/hip plates (BODY_RIGHT / BODY_LEFT anchors, no new render path).
   Slice D: the crystal growths (cluster generator, seed, the CRYSTAL region), reusing Slice B's path.
 Do not start B before A (it needs the mask) or D before B (it needs the translucent path generalised).
-If the head parts' slices have shipped first, reuse AbstractPartColourGene instead of writing it again; if
-not, this treatment's Slice A writes it and the head parts reuse it. Either order works, but settle which
-session owns it before either starts, or two copies appear.
+The colour genes subclass AbstractPartColourGene (shipped 2026-10-02; how to subclass it: wiki/model-parts.html#adding).
+Reuse it; never write a second copy.
 
 Tests and checks (CLAUDE.md: no full suite; run by name)
 =========================================================
@@ -211,7 +210,7 @@ Tests and checks (CLAUDE.md: no full suite; run by name)
   as a rider looks down; the parts stacked together; and the horse in the realm and in the browser portrait if
   parts draw there.
 
-After each slice ships (CLAUDE.md table)
+After each slice ships (procedures/rebake.txt)
 ========================================
 - Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
   bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs, and commit genes.json, the

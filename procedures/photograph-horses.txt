@@ -1,0 +1,73 @@
+PROCEDURE  : Photograph horses in game
+COMMAND    : /photograph-horses
+SAY        : "show me pictures", "photograph the horses", "screenshot the parts",
+             "show me examples in game"
+RUNS       : local only (it launches the dev client)
+TAKES      : a built tree; no client running, or one the owner says may close
+LEAVES     : run/screenshots/photo-*.png, one per shot, looked at, and shown to the owner
+==============================================================================
+
+WHEN TO USE
+-----------
+When the owner wants to see horses with given genes in the real game, without spawning
+them herself: a new grown part, a colour, a stacking case. It photographs a fixed list
+of genotypes on a stage in the sky. It does not test behaviour, animation or anything
+that needs time; for those, build a yard pen (run-tests) or hand her a test
+(hand-over-a-test).
+
+BEFORE YOU START
+----------------
+1. Read launch-game. Its rules about her world, the log and closing a client all apply.
+2. The tool: N/server/DebugPhotoShoot.java (the stage and the SHOTS list) and
+   N/client/DebugPhotoShootClient.java (camera timing and the screenshot), where
+   N = neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge. It runs only
+   when the client starts with -PphotoShoot, in singleplayer.
+
+STEPS
+-----
+1. Write the shots. Edit DebugPhotoShoot.SHOTS: a file name, a sex, a genetic code
+   (full keys, horsegenetics.<gene>=<a>/<b>, joined with "-"), and a dragon horn form or
+   -1. Genes left out are wild type. Epigenetic numbers (length, girth, shade) are rolled
+   per horse and differ every run; to pin one, extend record() to re-roll until it is met,
+   as the dragon horn form already does. The camera frames head and shoulders; a long
+   unicorn horn still leaves the top of the frame. Grep every allele token before using it.
+2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
+3. Launch by launch-game step 5, with the task :neoforge-26.1.2:runClientTestWorld and
+   the extra argument -PphotoShoot. Use -WindowStyle Normal: a minimized window renders
+   nothing worth saving.
+4. Watch run/logs/latest.log for "[photo] staged", "[photo] saved", "[photo] done",
+   /ERROR] and Exception. The shoot starts 400 ticks after login and takes about four
+   seconds a shot.
+5. Look at every picture with Read before showing it. Say what each one actually shows,
+   including what is too small or hidden to judge. A picture is not a pass.
+6. Show them. If a file cannot be attached in this session, publish one private gallery
+   artifact with the shots embedded as data URIs (artifact-design first), and give the
+   link. The owner often reads it on a phone:
+   - Show the whole frame. Do not crop or zoom in CSS; move the camera instead (stage()).
+   - Give every grid that holds a picture grid-template-columns: minmax(0, 1fr), or the
+     picture's natural 854px width forces the column wider than the screen.
+   - After any scripted edit to the page's CSS, count its { and } before publishing. An
+     unclosed @media block silently drops every rule after it.
+   - To check phone width, wrap a copy in the publish skeleton's viewport meta and
+     screenshot it in headless Chrome. On Windows it lays out at no less than 500px
+     whatever --window-size says, so print innerWidth and scrollWidth into the page:
+     equal means no sideways overflow.
+7. Close the client by launch-game steps 2 and 4: read the log, then
+   tools/stop-dev-java.ps1 (-WhatIf first).
+8. Revert any SHOTS edit that only served this run, unless the owner wants it kept.
+
+DONE WHEN
+---------
+Every shot is saved and described, the owner has the pictures, and no client this
+procedure launched is still running.
+
+NEVER
+-----
+- Never close a client the owner is playing in to take pictures.
+- Never call a part verified because it looks right in a screenshot: placement in motion,
+  foals and other gear are Verification-tab checks of their own.
+- Never commit the screenshots: run/ is not tracked.
+
+SEE ALSO
+--------
+launch-game; hand-over-a-test; run-tests; artifact-design.

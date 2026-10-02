@@ -1,0 +1,87 @@
+2026-10-01 21:51 (end time) - Fix #2: stables no longer float over valleys
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Open bug/tuning issues without needs-owner: #13 and #10
+  were both already fixed and waiting on a check; #2 (Structure Spawns) had the owner's
+  pick written on it (option 1, reject uneven sites, ~6 blocks), so #2 was taken.
+- Mid-fix, the owner was asked how the fix should land once the 6-block limit measured
+  at 34% of stables kept. Answer: "Loosen to ~10". Done at 10.
+
+DONE
+----
+- bd2df7df "Fix #2: stables floated over valleys because the jigsaw sat them at their
+  centre's height".
+  Wrong: a minecraft:jigsaw structure gives a rigid building one height, the surface
+  under its centre (project_start_to_heightmap), and never looks at the rest of the
+  footprint. A stable started on a hilltop ran on over the valley, and beard_box filled
+  only part of the drop, leaving the hollow slab in the report's screenshot.
+  Change: the three stables (horse_stable, stables, tm_u_stable) are now
+  "type": "horsegenetics:level_jigsaw" with "max_ground_spread": 10.
+  - neoforge worldgen/LevelJigsawStructure wraps a JigsawStructure (vanilla's is final).
+    Its codec is JigsawStructure.CODEC plus max_ground_spread. It builds the pieces in
+    findGenerationPoint, samples first-free WORLD_SURFACE_WG height at the footprint's
+    four corners and the start piece's centre, and either returns empty or moves the
+    builder down to the lowest sample. Its own StructureSettings come from the same JSON,
+    so structure modifiers and the beardifier see it.
+  - worldgen/ModStructureTypes registers the type (wired in HorseGenetics).
+  - common/stable/StableSite.fit is the rule (typed Fit: accepted, spread, drop; it
+    never raises a stable).
+  - worldgen/StableSiteCensus + the gametest stables_stand_on_level_ground generate every
+    stable chunk near spawn twice on the same seeds: the wrapped vanilla jigsaw (control)
+    and the real structure, re-measuring the ground under each kept stable.
+  Proof:
+  - Reproduced red first: with max_ground_spread at 64, the gametest failed with "a
+    stable stands on ground spreading 62 blocks (limit 6)".
+  - 12 seeds, 216 sites: control 95 over 10 blocks (worst 116); median spread
+    horse_stable 7, stables 10, tm_u_stable 12. At limit 6: 73 kept (33.8%). At limit
+    10: 121 kept (56.0%), worst kept spread 10.
+  - :neoforge-26.1.2:runGameTest, all 27 required tests passed (twice, at 6 and at 10).
+    :common:test --tests '*StableSiteTest' green. :neoforge-26.1.2:build green.
+    check-parity OK.
+  Issue #2: CLOSED by the commit, with a proof comment (issuecomment-5945802289).
+  Wiki: stables.html gained "Level ground" (#level-ground, #level-ground-measured); the
+  stale "minecraft:jigsaw ... beard_thin" sentence now says level_jigsaw / beard_box; the
+  spacing section says about half of sites are skipped.
+
+DECIDED
+-------
+- Limit 10 rather than 6 (owner, via the question tool). Recorded in the #2 comment and
+  on stables.html#level-ground-measured.
+- Without the owner: sampling uses first-free height on WORLD_SURFACE_WG (what the JSON
+  already projected onto); the centre sampled is the start piece's, as the jigsaw does;
+  the build is never raised, only dropped. Recorded in StableSite / LevelJigsawStructure.
+
+FOUND ON THE WAY
+----------------
+- #19 filed (bug): node wiki/tools/check-roadmap-execution.mjs fails on main -
+  roadmap-execution.html's coverage table lacks rows for gene-champagne,
+  gene-cutie-mark, item-research-shelf and gene-body-size. Pre-existing, not fixed here.
+- Mistake: the Fix commit was pushed before end-session's :build step ran. The build
+  was green afterwards, and fix-bug now says to build first (see PROCEDURES).
+- The issue's own prediction ("stables get a bit rarer") was off by a lot: a 6-block
+  limit removes two-thirds. Caught by measuring before committing.
+
+PROCEDURES
+----------
+- procedures/fix-bug.txt step 5: an owner-picked fix is measured before it is
+  committed, and a cost bigger than the issue predicted goes back to her first.
+- procedures/fix-bug.txt step 6: run end-session step 2's build before the Fix commit,
+  since that commit is end-session's code commit and reaches main first.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run; it would re-check every other common/ class
+  against the new StableSite (which nothing else uses).
+- Nobody has seen a level_jigsaw stable in a world. Added to stables.html#verification:
+  "A stable on a slope looks built in, not dropped in".
+- Stable rarity (now about half of the spacing table's rate) is unplayed.
+
+RELEASE
+-------
+Not offered: one fix is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/fix-bug on #19 (four missing coverage rows on roadmap-execution.html), the one open
+bug not waiting on a check.

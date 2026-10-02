@@ -200,7 +200,9 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<LycanShift>> LYCAN_SHIFT =
             ATTACHMENT_TYPES.register("lycan_shift", () -> AttachmentType
                     .builder(() -> LycanShift.NONE)
-                    .serialize(LycanShift.MAP_CODEC)
+                    // Only a live shift is written (2026-10-02): NONE is what a missing attachment reads as anyway,
+                    // and every mob that ever met LycanthropyHandler.getData had been saving one.
+                    .serialize(LycanShift.MAP_CODEC, LycanShift::active)
                     .build());
 
     // Where a PLAYER came into the horse realm from - the Overworld hay portal

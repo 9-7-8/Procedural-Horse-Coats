@@ -25,7 +25,7 @@ class NaturalCoverTest {
     private static final NaturalCover.Party STALLION = new NaturalCover.Party(true, false, false, true, false, false, false);
 
     private static NaturalCover.Stallion near(NaturalCover.Party p) {
-        return new NaturalCover.Stallion(p, 4.0, 0);
+        return new NaturalCover.Stallion(p, 4.0, StallionDay.of(0));
     }
 
     private static NaturalCover.Decision decide(NaturalCover.Party mare, List<NaturalCover.Stallion> s, int crowd) {
@@ -42,9 +42,9 @@ class NaturalCoverTest {
     @Test
     void theNearestAbleStallionIsTheOne() {
         NaturalCover.Decision d = decide(MARE, List.of(
-                new NaturalCover.Stallion(STALLION, 8.0, 0),
-                new NaturalCover.Stallion(STALLION, 2.0, 0),
-                new NaturalCover.Stallion(STALLION, 5.0, 0)), 3);
+                new NaturalCover.Stallion(STALLION, 8.0, StallionDay.of(0)),
+                new NaturalCover.Stallion(STALLION, 2.0, StallionDay.of(0)),
+                new NaturalCover.Stallion(STALLION, 5.0, StallionDay.of(0))), 3);
         assertEquals(1, d.stallion());
     }
 
@@ -78,44 +78,44 @@ class NaturalCoverTest {
     @Test
     void aStallionsDayIsNotCapped() {
         assertEquals(NaturalCover.Verdict.COVER,
-                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, ReproRules.FREE_COVERS_PER_DAY)), 1)
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, StallionDay.of(ReproRules.DEFAULT_FREE_COVERS_PER_DAY))), 1)
                         .verdict());
         assertEquals(NaturalCover.Verdict.COVER,
-                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, 40)), 1).verdict(),
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, 4.0, StallionDay.of(40))), 1).verdict(),
                 "a stallion who has covered all day still covers");
     }
 
     /**
      * Between two in reach she takes the one whose odds are still whole, near or
-     * not (owner, 2026-09-24). The split is at {@link ReproRules#FREE_COVERS_PER_DAY}
-     * itself, because that is where {@link ReproRules#stallionFactor} halves.
+     * not (owner, 2026-09-24). The split is at {@link ReproRules#DEFAULT_FREE_COVERS_PER_DAY}
+     * itself, because that is where {@link StallionDay#factor} halves.
      */
     @Test
     void aRestedStallionIsPreferredToANearerTiredOne() {
         NaturalCover.Decision d = decide(MARE, List.of(
-                new NaturalCover.Stallion(STALLION, 1.0, ReproRules.FREE_COVERS_PER_DAY),
-                new NaturalCover.Stallion(STALLION, 8.0, 0)), 2);
+                new NaturalCover.Stallion(STALLION, 1.0, StallionDay.of(ReproRules.DEFAULT_FREE_COVERS_PER_DAY)),
+                new NaturalCover.Stallion(STALLION, 8.0, StallionDay.of(0))), 2);
         assertEquals(1, d.stallion());
 
         NaturalCover.Decision tiredOnly = decide(MARE, List.of(
-                new NaturalCover.Stallion(STALLION, 8.0, 5),
-                new NaturalCover.Stallion(STALLION, 1.0, 5)), 2);
+                new NaturalCover.Stallion(STALLION, 8.0, StallionDay.of(5)),
+                new NaturalCover.Stallion(STALLION, 1.0, StallionDay.of(5))), 2);
         assertEquals(1, tiredOnly.stallion(), "all tired, so the nearest again");
 
         NaturalCover.Decision onHisThird = decide(MARE, List.of(
-                new NaturalCover.Stallion(STALLION, 1.0, ReproRules.FREE_COVERS_PER_DAY),
-                new NaturalCover.Stallion(STALLION, 8.0, ReproRules.FREE_COVERS_PER_DAY - 1)), 2);
+                new NaturalCover.Stallion(STALLION, 1.0, StallionDay.of(ReproRules.DEFAULT_FREE_COVERS_PER_DAY)),
+                new NaturalCover.Stallion(STALLION, 8.0, StallionDay.of(ReproRules.DEFAULT_FREE_COVERS_PER_DAY - 1))), 2);
         assertEquals(1, onHisThird.stallion(),
-                "his free covers are spent at FREE_COVERS_PER_DAY, so he is the tired one");
+                "his free covers are spent at the allowance itself, so he is the tired one");
     }
 
     @Test
     void exactlyThreeBlocksIsOutOfReachAsInVanilla() {
         double three = ReproRules.NATURAL_REACH * ReproRules.NATURAL_REACH;
         assertEquals(NaturalCover.Verdict.NO_STALLION,
-                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, three, 0)), 1).verdict());
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, three, StallionDay.of(0))), 1).verdict());
         assertEquals(NaturalCover.Verdict.COVER,
-                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, three - 0.01, 0)), 1).verdict());
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, three - 0.01, StallionDay.of(0))), 1).verdict());
     }
 
     /** Gap 230, settled the vanilla way: three seconds in reach of the same stallion, then a cover. */
@@ -153,7 +153,7 @@ class NaturalCoverTest {
     void outOfReachDoesNotCount() {
         double justOut = (ReproRules.NATURAL_REACH + 0.1) * (ReproRules.NATURAL_REACH + 0.1);
         assertEquals(NaturalCover.Verdict.NO_STALLION,
-                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, justOut, 0)), 1).verdict());
+                decide(MARE, List.of(new NaturalCover.Stallion(STALLION, justOut, StallionDay.of(0))), 1).verdict());
     }
 
     @Test
@@ -207,5 +207,32 @@ class NaturalCoverTest {
         assertEquals(NaturalCover.Verdict.COVER,
                 NaturalCover.decide(MARE, IN_HEAT, NOW, T, List.of(near(STALLION)),
                         new NaturalCover.Crowd(12, ReproRules.MAX_NATURAL_CAP)).verdict());
+    }
+
+    /**
+     * <b>The free covers are the world's too</b> ({@code fertility.free_covers_per_day},
+     * owner 2026-10-01). The same five-cover stallion is tired on one allowance and
+     * rested on another, and all three readers - her preference, his odds and the
+     * vet's sentence - follow the allowance rather than the default.
+     */
+    @Test
+    void aWorldMaySetTheFreeCovers() {
+        StallionDay strict = new StallionDay(5, 2);
+        StallionDay generous = new StallionDay(5, 10);
+        assertEquals(true, strict.tired());
+        assertEquals(false, generous.tired());
+        assertEquals(ReproRules.TIRED_STALLION_FACTOR, strict.factor());
+        assertEquals(1.0, generous.factor());
+
+        NaturalCover.Decision d = decide(MARE, List.of(
+                new NaturalCover.Stallion(STALLION, 1.0, strict),
+                new NaturalCover.Stallion(STALLION, 8.0, generous)), 2);
+        assertEquals(1, d.stallion(), "the nearer one is past a strict world's allowance");
+
+        assertEquals(1, ReproText.vetMale("Rook", true, false, generous).size(),
+                "five covers is not tired on a generous world");
+        List<String> tired = ReproText.vetMale("Rook", true, false, strict);
+        assertEquals(2, tired.size());
+        assertEquals(true, tired.get(1).contains("past 2 a day"), tired.get(1));
     }
 }

@@ -144,10 +144,13 @@ final class GeneratedArmour {
                 forgeable = true;
             }
             if (!forgeable) {
-                // The armour is still sold by the metalsmith; it just cannot be
-                // forged by anybody.
+                // Its mod is loaded (MaterialScan already dropped the ones that
+                // are not) but registered none of the items - a config flag,
+                // most likely. Owner, issue #14: the metalsmith never sells an
+                // armour the pack cannot forge, so no trade either.
                 HorseGenetics.LOGGER.warn("compat: no registered item is in the c: tag that named {} - "
-                        + "{} is uncraftable", metal.itemId(), id);
+                        + "{} is uncraftable and not sold", metal.itemId(), id);
+                continue;
             }
 
             // ---- and the metalsmith stocks it -------------------------------

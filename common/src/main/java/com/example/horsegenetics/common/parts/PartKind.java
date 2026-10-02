@@ -31,7 +31,16 @@ public enum PartKind {
     RAM_HORN_RIGHT(PartAnchor.CROWN_RIGHT, PartSheet.RAM_HORN),
 
     /** The left-hand ram's horn. */
-    RAM_HORN_LEFT(PartAnchor.CROWN_LEFT, PartSheet.RAM_HORN);
+    RAM_HORN_LEFT(PartAnchor.CROWN_LEFT, PartSheet.RAM_HORN),
+
+    /**
+     * The right-hand dragon horn - the dragon horns locus. Rooted behind the ear and
+     * swept back over the neck; keratin like the unicorn's, tip and all.
+     */
+    DRAGON_HORN_RIGHT(PartAnchor.NAPE_RIGHT, PartSheet.HORN),
+
+    /** The left-hand dragon horn. A pair is symmetric: both sides ask for the same style. */
+    DRAGON_HORN_LEFT(PartAnchor.NAPE_LEFT, PartSheet.HORN);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -59,6 +68,8 @@ public enum PartKind {
             case ANTLER_RIGHT, ANTLER_LEFT -> AntlerGenerator.FORMS * AntlerGenerator.VARIANTS;
             // Shape x how far it curls (how tight a corkscrew twists).
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornGenerator.FORMS * RamHornGenerator.CURLS;
+            // Form x sweep x splay - every way a dragon horn points is baked.
+            case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornGenerator.styles();
         };
     }
 
@@ -72,6 +83,7 @@ public enum PartKind {
             case HORN -> PartShape.SIZE_BUCKETS;
             case ANTLER_RIGHT, ANTLER_LEFT -> AntlerSize.classes();
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornSize.classes();
+            case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornSize.classes();
         };
     }
 
@@ -80,6 +92,8 @@ public enum PartKind {
      * 2026-09-30); it wears <b>no antlers</b> - the treatment's default (P5), and
      * the biology: antlers grow from pedicles that do not exist at birth - and no ram's
      * horns either, which come in with the rack's rule rather than the unicorn's.
+     * Dragon horns are a hard part and come with maturity too (owner, 2026-10-01:
+     * foals wear the soft parts only).
      */
     public boolean showsOnFoal() {
         return this == HORN;
@@ -96,7 +110,14 @@ public enum PartKind {
             case ANTLER_RIGHT, ANTLER_LEFT -> PartSheet.bit(PartSheet.BONE_TIP);
             // Nothing makes a ram's horn glow yet; if something does, the whole horn.
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> PartSheet.SOLID;
+            // Nor a dragon horn; the same answer.
+            case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> PartSheet.SOLID;
         };
+    }
+
+    /** Is this a dragon horn, of either side? */
+    public boolean dragonHorn() {
+        return this == DRAGON_HORN_RIGHT || this == DRAGON_HORN_LEFT;
     }
 
     /** Is this a ram's horn, of either side? */
@@ -107,5 +128,19 @@ public enum PartKind {
     /** Is this an antler, of either side? */
     public boolean antler() {
         return this == ANTLER_RIGHT || this == ANTLER_LEFT;
+    }
+
+    /**
+     * What a person calls the part, both sides of a pair named once - "Antlers", not
+     * two antlers. The browser designer lists a horse's parts by it, because it
+     * cannot draw them ({@link com.example.horsegenetics.common.genetics.GrownParts#listed}).
+     */
+    public String label() {
+        return switch (this) {
+            case HORN -> "Unicorn horn";
+            case ANTLER_RIGHT, ANTLER_LEFT -> "Antlers";
+            case RAM_HORN_RIGHT, RAM_HORN_LEFT -> "Ram's horns";
+            case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> "Dragon horns";
+        };
     }
 }

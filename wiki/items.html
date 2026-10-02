@@ -466,6 +466,34 @@
     only the blanket, and does <em>nothing at all</em> to a saddle.
 </p>
 
+<h3 id="verified-chest-loot">Verified: the rates are the configured ones</h3>
+
+<p>
+    <strong>Every modifier adds at its configured rate, to the tables it should and no others</strong>
+    (2026-10-02, test yard row AY, pen CHEST LOOT, run launched 03:52 on <code>a56afcbb</code>,
+    <code>CLOCKWORK PASS</code> lines at 03:52:55). Every loot table in the live registry whose path
+    starts <code>chests/</code> &mdash; 57 of them, this mod's own <code>horsegenetics:chests/cowboy_house</code>
+    included as the one non-vanilla namespace &mdash; was rolled 2,000 times through the GLM path and
+    again raw on the same seed, so the modifiers' additions are told apart from vanilla's own saddles.
+    Seeds 22799/114000 = 0.2000 (one to three, evenly: 7588/7583/7628); tack 0.2213 against 0.22;
+    research papers 0.3008 against 0.30; breed eggs 0.0696 against 0.07 in the ten named chests and
+    none in any other. No table was outside its band. The tack came in its weights (leather 0.3406,
+    saddle 0.2802, iron 0.2082, gold 0.1369, diamond 0.0341 of 25,231 pieces), and all 15,663 leather
+    armours and saddles were dyed with a cheap fitting: 0 undyed, 0 gem fittings. Fishing, a zombie
+    and a stone block got nothing from this mod in 2,000 rolls each. What a player <em>feels</em> the
+    rates to be is still open.
+</p>
+
+<h3 id="verified-carrot-growth">Verified: the crop grows</h3>
+
+<p>
+    <strong>Golden carrots grow to maturity under the world's random tick</strong> (2026-10-02, test
+    yard row AY, pen CARROT CROP, <code>CLOCKWORK PASS</code> at 04:02:49). Twelve crops planted at age 0
+    on wet farmland, lit, at <code>randomTickSpeed</code> 3: at 10 minutes one was at age 7 and none
+    still at 0, with <code>isRandomlyTicking(age 0)</code> true &mdash; so the <code>randomTicks</code>
+    property took.
+</p>
+
 <h2 id="art">No two items look alike</h2>
 
 <p>
@@ -643,7 +671,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The quiet failures are here: golden carrot seeds carry this mod's <strong>first block tint</strong> and fail invisibly &mdash; a crop frozen at age 0, a gold item dropping where nothing gold should, a tint that misses the model &mdash; and <strong>chest loot now rides on a regex</strong> that has never had anything taken out of a chest to prove it; and <strong>twenty-four item sprites were recoloured at once</strong>, fourteen of them by repointing a model at art that did not exist until that moment, which is exactly how a purple cube happens.</p>
+    <p>The quiet failures are here: golden carrot seeds carry this mod's <strong>first block tint</strong> and fail invisibly &mdash; a gold item dropping where nothing gold should, a seed planting off farmland, a tint that misses the model &mdash; while chest loot's rates are <a href="items.html?view=coding#verified-chest-loot">proven</a> and only how they feel is open; and <strong>twenty-four item sprites were recoloured at once</strong>, fourteen of them by repointing a model at art that did not exist until that moment, which is exactly how a purple cube happens.</p>
 </div>
 
 <h3 id="item-art-0929">Twenty-four recoloured item sprites (2026-09-29, NOT played)</h3>
@@ -684,52 +712,47 @@
 
 <h3 id="goldencarrot-0918">Golden carrot seeds (2026-09-18, NOT played)</h3>
 
+<p>It <a href="#verified-carrot-growth">grows</a> and turns up in chests at the
+<a href="#verified-chest-loot">configured 20%</a> (both 2026-10-02). The drops and the planting
+were read by the yard the same night but its own checks were wrong, so they stay open.</p>
+
 <ul>
     <li><strong>The crop is gold, not orange.</strong> It is vanilla's carrot sheets under a
         block tint, and this mod's first block tint - if the tint does not reach it, it grows
         as plain carrots and looks like a bug in the loot table rather than in the model. The
         seed icon should be gold too, by a different mechanism.</li>
-    <li><strong>It grows at all.</strong> Plant on farmland, wait, or bone-meal it. A crop
-        that sits at age 0 forever means the <code>randomTicks</code> property did not take.</li>
     <li><strong>Breaking it early returns the seed</strong>, and a mature one gives one golden
         carrot and two seeds. <strong>Nothing gold ever drops.</strong></li>
     <li><strong>The seed will not plant on anything but farmland</strong>, and a golden carrot
         still will not plant at all.</li>
     <li><strong>The supplier sells them at rank 5</strong>, 38 emeralds, twice. Level him up
         and look. He has four other rank-5 trades and rolls three of the five.</li>
-    <li><strong>They turn up in chests</strong> - now 20% in <em>any</em> chest rather than 7%
-        across eight named ones, so a handful of chests should do it where it used to need a
-        creative check of the loot modifier.</li>
     <li><strong>The two checklist boxes tick</strong> - plant one, harvest one.</li>
 </ul>
 
 <h3 id="chest-tack-0924">Tack in chest loot (2026-09-24, NOT played)</h3>
 
-<p>Proven only to the depth a server boot can prove it: a clean <code>runServer</code> logs
-nothing, and the same boot with a deliberately invalid regex logs the decode error from our own
-codec - which shows the folder is scanned, <code>add_horse_tack</code> resolves and
-<code>horsegenetics:loot_table_matches</code> is registered. <em>Nothing has been taken out of a
-chest.</em></p>
+<p>The rates, the weights, the fittings and the chests-only reach are
+<a href="#verified-chest-loot">verified</a> (2026-10-02). What is left needs a player or another
+mod.</p>
 
 <ul>
-    <li><strong>The regex reaches modded chests, and only chests.</strong> Open another
-        mod&rsquo;s structure chest and tack should turn up at about one in five; open a
-        <em>block</em> drop, a fishing catch or a mob drop and it must not. The pattern matches
-        the path, so a mod that files its chest tables somewhere other than
-        <code>chests/</code> is invisible to it and would be worth knowing about.</li>
-    <li><strong>A found saddle and leather armour are visibly dyed</strong>, in two unrelated
-        leather colours with cheap fittings - and never a gem fitting, which would undercut the
-        leatherworker&rsquo;s top tier.</li>
-    <li><strong>No gem fitting, and no diamond flood.</strong> Diamond horse armour is weight 1
-        of 29; several chests in a row producing one means the weighted chain is wrong.</li>
+    <li><strong>A found saddle and leather armour are <em>visibly</em> dyed</strong>, in two
+        unrelated leather colours. That every one carries a dye and a cheap fitting is
+        <a href="#verified-chest-loot">verified</a>; whether the two colours read as two in a
+        player's hand is not.</li>
+    <li><strong>Another mod's structure chests.</strong> The regex reached this mod's own
+        <code>horsegenetics:chests/cowboy_house</code>; a mod that files its chest tables somewhere
+        other than <code>chests/</code> would be invisible to it and would be worth knowing about.</li>
     <li><strong>With another mod&rsquo;s metals installed, its armours appear</strong> - and do
         not swamp vanilla&rsquo;s four. This is the one branch that cannot be checked in a
         vanilla dev world at all; it needs the
         <a href="compatibility.html">synthetic compat mod</a>, and nothing generated for another
         mod&rsquo;s materials has ever been drawn.</li>
     <li><strong>Rates feel right rather than merely different.</strong> 20% seeds, 30% research
-        papers and 22% tack per chest were picked against &ldquo;much more common&rdquo; and
-        nothing else; a stronghold is a lot of chests.</li>
+        papers and 22% tack per chest are what the game rolls
+        (<a href="#verified-chest-loot">verified</a>), but they were picked against &ldquo;much more
+        common&rdquo; and nothing else; a stronghold is a lot of chests.</li>
     <li><strong>Dyed leather horse armour specifically is &ldquo;very common&rdquo;.</strong>
         The owner asked for that word for this one piece, separately from the rest of the tack.
         It is the heaviest entry in the pool, which puts it at 10 of 29 of a 22% chest &mdash;

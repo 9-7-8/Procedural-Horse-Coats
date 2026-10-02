@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * <b>The whole of "what did the other mods bring", with no Minecraft in it.</b>
@@ -59,15 +60,30 @@ public final class MaterialScan {
         void list(String folder, Consumer<String> paths);
     }
 
-    /** What a scan found. Every list is sorted; see {@link #of}. */
+    /**
+     * What a scan found. Every list is sorted; see {@link #of}.
+     *
+     * @param droppedArmours armour ids that only a not-installed mod's metal would
+     *                       have made (issue #14). A world from an older jar may
+     *                       hold one - in a chest, or in a villager's offers - so
+     *                       {@link ModdedArmour} aliases each to iron horse armour
+     *                       rather than leave a save naming an id that is gone.
+     */
     public record Result(List<ModdedMaterials.Wood> woods,
                          List<ModdedMaterials.Metal> metals,
                          Map<String, Integer> dyes,
-                         String fingerprint) {
+                         String fingerprint,
+                         List<String> droppedArmours) {
     }
 
     /** Namespaces that are never a source of modded material. */
     private static final String MINECRAFT = "minecraft";
+
+    /** {@code mymod} from {@code mymod:tin_ingot}; {@code minecraft} when there is no colon. */
+    static String namespaceOf(String itemId) {
+        int colon = itemId.indexOf(':');
+        return colon < 0 ? MINECRAFT : itemId.substring(0, colon);
+    }
 
     private MaterialScan() {
     }
@@ -85,6 +101,31 @@ public final class MaterialScan {
      *             thing anybody wants
      */
     public static Result of(List<Source> sources, String ours) {
+        return of(sources, ours, namespace -> true);
+    }
+
+    /**
+     * {@link #of(List, String)}, keeping only the metals whose <b>own mod is
+     * installed</b> (issue #14).
+     *
+     * <p>A {@code c:} tag may name another mod's item as an optional entry -
+     * {@code actuallyadditions:black_quartz} in somebody's {@code c:gems} - and
+     * the tag file is read whether or not that mod is there. Taken at face value
+     * it made a Black Quartz Horse Armor on a server with no Actually Additions:
+     * registered, sold by the metalsmith, and forgeable from nothing. A metal
+     * from a namespace nobody loaded is an item that cannot exist, so it is
+     * dropped here, before anything is built from it - the armour, its recipe,
+     * its trade and the bench colour alike. It also moves the fingerprint, so a
+     * pack generated with the phantom armour in it is rebuilt.
+     *
+     * <p>The test is the namespace, not the item, because items are registered
+     * after this runs (the armour items are registered from it, in the mod
+     * constructor). A mod that registers items under a namespace other than its
+     * own id would lose its armours to this; none is known.
+     *
+     * @param installed whether a mod with this id is loaded
+     */
+    public static Result of(List<Source> sources, String ours, Predicate<String> installed) {
         Map<String, ModdedMaterials.Wood> woods = new TreeMap<>();
         Map<String, Boolean> metalIds = new TreeMap<>();
         Map<String, Boolean> dyeIds = new TreeMap<>();
@@ -103,7 +144,13 @@ public final class MaterialScan {
         // Colours in a second pass, once every tag file has been read: a metal
         // declared in one jar may perfectly well be drawn in another.
         List<ModdedMaterials.Metal> metals = new ArrayList<>();
+        java.util.Set<String> dropped = new java.util.TreeSet<>();
         for (Map.Entry<String, Boolean> metal : metalIds.entrySet()) {
+            if (!installed.test(namespaceOf(metal.getKey()))) {
+                // Named by a tag, owned by a mod that is not here - see of().
+                dropped.add(new ModdedMaterials.Metal(metal.getKey(), 0, metal.getValue()).armourId());
+                continue;
+            }
             metals.add(new ModdedMaterials.Metal(
                     metal.getKey(), colourOf(sources, metal.getKey()), metal.getValue()));
         }
@@ -120,8 +167,12 @@ public final class MaterialScan {
         List<ModdedMaterials.Wood> sortedWoods = List.copyOf(confirmWoods(sources, woods.values()));
         List<ModdedMaterials.Metal> sortedMetals = List.copyOf(metals);
         Map<String, Integer> sortedDyes = Map.copyOf(dyes);
+        // An armour another, installed, metal still makes is not dropped at all.
+        for (ModdedMaterials.Metal kept : metals) {
+            dropped.remove(kept.armourId());
+        }
         return new Result(sortedWoods, sortedMetals, sortedDyes,
-                fingerprint(sortedWoods, metals, dyes));
+                fingerprint(sortedWoods, metals, dyes), List.copyOf(dropped));
     }
 
     // ------------------------------------------------------------------

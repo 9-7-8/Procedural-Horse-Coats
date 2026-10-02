@@ -136,7 +136,7 @@ public final class ModdedMaterials {
     }
 
     private static MaterialScan.Result result =
-            new MaterialScan.Result(List.of(), List.of(), Map.of(), "");
+            new MaterialScan.Result(List.of(), List.of(), Map.of(), "", List.of());
     private static boolean scanned;
 
     private ModdedMaterials() {
@@ -176,6 +176,11 @@ public final class ModdedMaterials {
      * bench colours a fitting from whichever ingot the player actually put in it
      * and must still know all 167.
      */
+    /** Armour ids no installed metal makes any more - see {@link MaterialScan.Result#droppedArmours}. */
+    public static List<String> droppedArmours() {
+        return result.droppedArmours();
+    }
+
     public static List<Metal> armourMetals() {
         return MaterialScan.armourMetals(metals());
     }
@@ -232,7 +237,9 @@ public final class ModdedMaterials {
                 // A mod file we cannot open is a mod file we cannot read.
             }
         }
-        result = MaterialScan.of(sources, HorseGenetics.MOD_ID);
+        // Only metals whose own mod is loaded - issue #14, see MaterialScan.of.
+        result = MaterialScan.of(sources, HorseGenetics.MOD_ID,
+                namespace -> "minecraft".equals(namespace) || ModList.get().isLoaded(namespace));
 
         HorseGenetics.LOGGER.info("compat: {} modded woods, {} modded metals, {} modded dyes, fingerprint {}",
                 woods().size(), metals().size(), dyes().size(), fingerprint());

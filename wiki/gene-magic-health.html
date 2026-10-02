@@ -269,6 +269,16 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     inheritance (<a href="horse-body.html#verification">the body stats verification tab</a>).
 </p>
 
+<p id="verified-stat-doses">
+    <strong><code>Vmp</code> is fixed, and <code>Frail</code> takes hearts off by its own copies</strong>
+    (2026-10-01, the yard&rsquo;s STAT DOSES pen, row AR west, log 23:54:40.264&ndash;.266). Against a plain black
+    control at 22.0: <code>Vmp/n</code> read 44.0 (&times;2) and two <code>Vmp/Vmp</code> horses read 66.0 and
+    66.0 (&times;3), <code>vampiricPerCopy()</code> 1.0. <code>Frail/Frail</code> read 18.8646 (&times;0.8575),
+    exactly what its two copies&rsquo; deltas (0.1325 + 0.0100) predict &mdash; &ldquo;about four fifths&rdquo; is
+    the mean, and each horse sits where its own copies put it. That horse was nowhere near
+    <code>MIN_HEALTH</code>, so the floor was not exercised.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -276,7 +286,7 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Magic health&rsquo;s upward multiplier has been read off the attribute in the yard, but the <code>Frail</code> mirror, the <code>Vmp</code> allele&rsquo;s fixed doubling and tripling, and the claim that <code>health.mode&nbsp;=&nbsp;off</code> leaves magical vigour alone have all never been in a world.</p>
+    <p>Magic health&rsquo;s multiplier, its <code>Frail</code> mirror and the <code>Vmp</code> allele&rsquo;s fixed doubling and tripling have been read off the attribute in the yard, but the <code>MIN_HEALTH</code> floor, the claim that <code>health.mode&nbsp;=&nbsp;off</code> leaves magical vigour alone, and inheritance have never been in a world.</p>
 </div>
 
 <h3 id="open-magic-health">Still open (NOT played)</h3>
@@ -293,16 +303,10 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The mirror allele takes hearts off.</strong> A <code>Frail/Frail</code> horse.
-        <strong>Pass:</strong> clearly below the plain control &mdash; about four fifths of it
-        &mdash; and never below half a heart, which is <code>MIN_HEALTH</code>&rsquo;s job. A
-        <code>Frail</code> horse reading the same as the control means only the positive direction
-        is wired.</li>
-    <li><strong><code>Vmp</code> is fixed, and the same on every horse.</strong>
-        <code>Vmp/n</code> should be exactly twice the control and <code>Vmp/Vmp</code> exactly
-        three times it. <strong>Pass:</strong> both numbers land on the multiple, and two
-        <code>Vmp/Vmp</code> horses read <em>identically</em> &mdash; unlike two
-        <code>Hardy/Hardy</code> horses, which must not.</li>
+    <li><strong>A <code>Frail/Frail</code> horse never reads below half a heart.</strong> The
+        mirror allele is <a href="#verified-stat-doses">measured</a>, but only on a horse far above
+        the floor. <strong>Pass:</strong> a <code>Frail/Frail</code> horse whose two deltas sum past
+        1.0 (drifted, or set through the designer) reads <code>MIN_HEALTH</code>, not less.</li>
     <li><strong><code>health.mode = off</code> does not strip it.</strong> Set the server config to
         <code>off</code>, reload the world &mdash; each horse re-resolves its body once per level
         load &mdash; and read a <code>Hardy/Hardy</code> horse again.

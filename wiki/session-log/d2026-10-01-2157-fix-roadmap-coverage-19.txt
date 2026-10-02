@@ -1,0 +1,55 @@
+2026-10-01 21:57 (end time) - #19: the roadmap coverage check is green again
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Took #19. The other two open bugs, #13 (synchronous chunk
+  loads) and #10 (stasis-bank saved-searches arrow), are already fixed and waiting on
+  checks, so #19 was the only open bug with work left. Its cause was written in the issue.
+
+DONE
+----
+- 66060528 "Fix #19: the roadmap coverage check failed because four pages had no lane".
+  What was wrong: the owner's 2026-10-01 design calls gave Champagne, Cutie mark, the
+  Equine Research Shelf and Magic body size their first Roadmap entries. The coverage table
+  on wiki/roadmap-execution.html#coverage was not updated to match, so
+  wiki/tools/check-roadmap-execution.mjs, which fix-bug and process-intake run before they
+  start, threw "pages=52, rows=48" on every run.
+  Fix: four coverage rows, one per page. Each row's lane and order come from that page's
+  own Roadmap entry: champagne's adult eye signal, the cutie-mark bias that waits on the
+  owner, filing discovers on the shelf, and body.size compression measured against a stall.
+  Proof: the check failed on aaceaf63 and reports "roadmap execution checks OK" (52/52) on
+  66060528. check-links.mjs is OK, the search index and wiki/text/ are rebaked, the
+  :neoforge-26.1.2:build is green (up to date, docs only), and check-parity.mjs is OK.
+  Issue #19: CLOSED by the commit, with a proof comment.
+
+DECIDED
+-------
+- The lane and order wording in the four new rows was written without the owner. Each
+  row paraphrases its page's own Roadmap entry and makes no new call. Recorded in
+  wiki/roadmap-execution.html#coverage.
+
+FOUND ON THE WAY
+----------------
+- No new bugs. The cause of the drift went into a procedure; see PROCEDURES.
+
+PROCEDURES
+----------
+- rebake.txt row k (a Verification or Roadmap tab changed) now runs
+  check-roadmap-execution.mjs after the two index bakes, and commits
+  roadmap-execution.html. The table drifted because a page that gains its first Roadmap
+  entry goes through row k, and only add-a-wiki-page (new pages) mentioned the coverage
+  row.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No :common:test, which nothing here could move. The change was docs only.
+- Nothing to see in game. No Verification-tab anchors were added.
+
+RELEASE
+-------
+- Not offered. One docs fix is far below release step 1's bar.
+
+PICK UP FIRST
+-------------
+- /whats-next. No open bug has work left: #13 waits on the live server's logs after the
+  next release, and #10 waits on the in-game check that /run-tests can close.

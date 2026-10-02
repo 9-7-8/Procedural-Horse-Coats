@@ -3,24 +3,30 @@ COMMAND    : /release
 SAY        : "ship a release", "cut a release", "push a release", "release it",
              "new version", "tag it", "is it worth a release"
 RUNS       : local only (the jar cannot build in the cloud sandbox)
-TAKES      : main with player-facing work since the last tag
-LEAVES     : the owner's decision recorded; if yes, every code test green, a tag, a
-             GitHub release with the jar, and the same note on wiki/releases.html
+TAKES      : a substantial batch of unreleased work on main, and the owner's yes
+LEAVES     : every code test green, a tag, a GitHub release with the jar, and the same
+             note on wiki/releases.html
 ==============================================================================
 
 WHEN TO USE
 -----------
-Use this in three cases:
-- when the owner asks for a release;
-- when another procedure reaches its release step: process-intake with a Release: line,
-  fix-bug after a crash fix, or end-session's summary;
-- when a session ends with work on main that the history says is worth one.
+Use this in two cases:
+- when the owner asks for a release - cut it, whatever the size;
+- when another procedure reaches its release step (process-intake, fix-bug, whats-next,
+  end-session's summary). There it only decides whether to OFFER one (step 1).
+A session never cuts a release on its own. Owner, 2026-10-01: "a single fixed bug, or
+even two or three or five, is not enough for a release". The one exception is a
+replacement for a release that is itself broken (step 10).
 Real players install these jars: testers, and the owner's server. They cannot rebuild
 from source or read the session log, so "builds green here" is not "playable there".
-CLAUDE OFFERS, THE OWNER DECIDES. The only release that is not offered first is one
-the owner has already asked for. A scheduled self-releasing job was tried once and
-retired by the owner: releases are cut by hand, with a jar and a server boot behind
-them.
+THE VERSION IS 0.<COMPAT>.<PATCH> (owner, 2026-10-01):
+- PATCH, the third number: every ordinary release moves it, without asking WHICH number.
+  WHETHER to release at all is the owner's call (step 1).
+- COMPAT, the second number: a compatibility indicator. It moves only for a substantial
+  new feature that cannot be made back-compatible with saves (CLAUDE.md hard rule 10).
+  A release that moves it is the only kind that may break saves.
+Releases are cut by hand, in a local session, with a jar and a server boot behind them.
+A scheduled self-releasing job was tried once and retired by the owner.
 
 BEFORE YOU START
 ----------------
@@ -34,42 +40,40 @@ BEFORE YOU START
 
 STEPS
 -----
-1. Decide whether a release is due. The owner's record from 0.5.000 on, as a guide:
-   - SHIP NOW, and offer it the moment it is fixed: a crash, a join-blocker, lost data,
-     or a stuck player on a RELEASED jar, from a tester or the owner's server. Fixes like
-     these have gone out within 20 to 80 minutes of the report, one after another,
-     because players are waiting. A replacement for a broken release also goes now, and
-     its note says "replaces <version>".
-   - OFFER AT THE END OF THE SESSION: a finished feature a player will notice. One
-     feature is enough for its own number; size is no bar (one release was a folder
-     move). The same goes for a batch of fixes from play.
-   - OFFER AFTER A QUIET STRETCH: when several sessions or days of player-facing work
-     sit on main untagged. Those stretches have ended in one large catch-up release.
-   - DO NOT OFFER for these alone: docs, intake planning, test-yard or debug-only work
-     (debug tools are off in a real jar), or an unfinished feature. They ride along with
-     the next release.
-   - EXPECT TO BATCH. The owner often holds a cut to add one more thing ("before you cut
-     a new version, can you implement X too?"). A declined offer is normal; it is not a
-     failure.
-   Releases have run at about two a day, in bursts around play and tester activity. Do
-   not cut one just because time has passed.
+1. If the owner did not ask for this release, decide whether to OFFER one. Never cut
+   one unasked. Offer only when main holds a SUBSTANTIAL batch of player-facing work
+   since the last tag:
+   - roughly ten or more player-facing bug fixes; or
+   - a substantial finished feature that changes how the game plays - not one small
+     item, config option or tweak; or
+   - a mix of the two that a player would call worth updating for.
+   Five fixes is below the bar. Below it, say nothing about a release: the work waits.
+   Crash and stuck-player fixes batch like the rest. The one exception is a replacement
+   for a release that is itself broken: it goes at once, without asking, and its note
+   says "replaces <version>".
+   Docs, intake planning, test-yard or debug-only work (debug tools are off in a real
+   jar) and unfinished features do not count toward the bar.
+   To offer: one AskUserQuestion naming what has piled up since the last tag, with
+   "not yet" as an option. Cut only on a yes. On "not yet" or "hold" ("before you cut,
+   implement X too"), hold, and do not offer again until substantially more has landed.
 
-2. Ask the owner, in one question-tool round, with options and a recommendation:
-   a. Cut now, or hold it to batch more? (Offer the queue in intake/ or the open issues
-      that could ride along.)
-   b. Anything on main to hold back or call out?
-   c. Does anything change a world players already have? Under hard rule 10, a patch
-      release must load every world saved since the baseline on
-      wiki/releases.html#saves. A migration has to have been built and tested, never
-      "the note will warn them".
-   d. The middle number: only if she raises it. It moves only on her explicit word. It
-      is also the only kind of release that may break saves, and then its note says "no
-      longer back compatible with saves created under 0.X".
-   e. What the title should lead with, if it is not obvious.
-   If she asked for the release outright, ask only what the history does not answer.
+2. Decide which number moves.
+   a. The patch number, in almost every case.
+   b. The compat number ONLY when a substantial new feature truly cannot keep saves
+      loading. Rule 10 asks for a migration first, so a compat bump means the migration
+      was tried and cannot be written. Confirm with the owner in one question before
+      cutting: it breaks every existing world on every server. Then the note leads with
+      "no longer back compatible with saves created under 0.<old>", and the new series
+      starts its own promise on wiki/releases.html#saves.
+   c. Any change to a world players already have, in a patch release, must be a built and
+      tested migration, never "the note will warn them".
+   Ask the owner only what the history and this procedure do not answer, such as a
+   title she may want to lead with. Say in the summary what was cut.
 
 3. Run the RELEASE SET from test-tiers: every code test, cheapest first, and stop at the
-   first red. That means every tier-0 node check, the full :common:test suite,
+   first red. After the full :common:test run, record its slowest classes in test-tiers'
+   tier 3 (read common/build/test-results/test/*.xml), so tiers rest on measured times.
+   This needs updating only when the list changes. That means every tier-0 node check, the full :common:test suite,
    :neoforge-26.1.2:test, :neoforge-26.1.2:runGameTest, every headless browser check,
    and a server boot to "Done (" with the log grepped for
    'ERROR|Couldn.t parse|Invalid|missing'. A red result blocks the release until it is
@@ -77,8 +81,9 @@ STEPS
    Ask what a PLAYER hits that this machine does not: a brand-new world, a survival
    inventory, a horse in view, a client that never saw the previous format.
 
-4. Choose the number. Only the LAST number moves (0.5.037 -> 0.5.038). A number is never
-   reused, and never reissued with different bytes. Bump mod_version in
+4. Set the number: 0.5.037 -> 0.5.038 for a patch, or 0.5.0xx -> 0.6.000 for a compat
+   bump (the third field restarts at 000). A number is never reused, and never reissued
+   with different bytes. Bump mod_version in
    gradle.properties only: neoforge.mods.toml interpolates it.
 
 5. Write the release note by auditing the WHOLE range from the previous tag, never from
@@ -128,7 +133,8 @@ STEPS
 
 DONE WHEN
 ---------
-Either the owner has declined or held the release, and that is said in the summary; or:
+Either no release was offered (below the step 1 bar) or the owner declined or held it,
+and the summary says which; or:
 - the release set is green;
 - `gh release view` lists the jar;
 - the wiki note matches the GitHub note;
@@ -136,8 +142,12 @@ Either the owner has declined or held the release, and that is said in the summa
 
 NEVER
 -----
-- Never cut a release the owner did not ask for or accept.
-- Never move the middle number without her explicit word.
+- Never cut a release the owner did not ask for or say yes to, except a replacement for
+  a broken one.
+- Never offer a release below the step 1 bar: a handful of fixes is not one.
+- Never cut a release the owner has said to hold.
+- Never move the compat number for anything but a substantial feature that cannot keep
+  saves loading, and never without confirming with the owner.
 - Never reuse a version number, or reissue one with different bytes.
 - Never skip the release set: the full suite runs before every release.
 - Never stop at a pushed tag.

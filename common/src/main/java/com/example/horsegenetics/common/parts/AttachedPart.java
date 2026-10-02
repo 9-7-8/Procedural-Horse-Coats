@@ -168,6 +168,35 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
         return new AttachedPart(shape, grow, (float) (grow * girth), 0f, tint, tint, false);
     }
 
+    /**
+     * One dragon horn, from the numbers the dragon horns locus carries - white and
+     * dark until its colour locus dresses it.
+     *
+     * @param left   the left side rather than the right
+     * @param form   a {@link DragonHornGenerator} form
+     * @param sweep  {@code [0,1]}: how far a swept horn bends, a spike leans, a curl goes round
+     * @param splay  {@code [0,1]}: how far the pair angle outward
+     * @param length position on the {@link DragonHornSize} ladder - class is the mesh, the rest a stretch
+     * @param girth  extra scale across the horn
+     */
+    public static AttachedPart dragonHorn(boolean left, int form, double sweep, double splay,
+                                          double length, double girth) {
+        PartKind kind = left ? PartKind.DRAGON_HORN_LEFT : PartKind.DRAGON_HORN_RIGHT;
+        int style = DragonHornGenerator.style(form,
+                bucket(sweep, DragonHornGenerator.SWEEPS), bucket(splay, DragonHornGenerator.SPLAYS));
+        PartShape shape = PartShape.of(kind, style, length);
+        // Length is a uniform scale within a class, as a ram's horn's is - a longer
+        // horn is a bigger one, not a thinner one - and girth the nudge on top.
+        float grow = shape.stretchTo(length);
+        return new AttachedPart(shape, grow, (float) (grow * girth), 0f, UNDYED, UNDYED, false);
+    }
+
+    /** {@code x} in {@code [0,1]}, clamped, to one of {@code n} equal buckets. */
+    private static int bucket(double x, int n) {
+        double c = x < 0.0 ? 0.0 : (x > 1.0 ? 1.0 : x);
+        return Math.min(n - 1, (int) (c * n));
+    }
+
     /** This part in other colours and light, its shape untouched. */
     public AttachedPart dressed(int base, int tip, boolean glows) {
         return new AttachedPart(shape, stretch, girth, tilt, base, tip, glows, shown, translucent, bloomTint);

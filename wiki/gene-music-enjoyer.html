@@ -106,6 +106,19 @@
     check is what makes the next one free.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-bond">
+    <strong>Bond rises beside a jukebox, stops at the daily cap, and only for a tamed expressing horse in
+    range</strong> (test yard, pen MUSIC, the run of 2026-10-02 03:52 on <code>a56afcbb</code>, five clockwork PASS
+    lines at 04:12:26). A tamed <code>Msc/Msc</code> mare 2&ndash;4 blocks from a jukebox with a record went
+    40 &rarr; 55, one point every 200 ticks from +200, until <code>bondToday</code> reached 15 at +3000; it never read
+    above 15 and the bond did not move again for the rest of the care day. Over the same 118 readings an untamed
+    <code>Msc/Msc</code> mare beside it, a tamed <code>Msc/n</code> carrier 6&ndash;7 blocks off, and a tamed
+    <code>Msc/Msc</code> mare 13 blocks off each held bond 40, <code>bondToday</code> 0. No owner was near any of them
+    and their hunger was held full, so the gene was the only thing that could move a number.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -126,48 +139,41 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Music enjoyer has never been watched earning a point of bond: it needs a tamed horse, a sampled
-    <code>near_jukebox</code> block search and the shared daily cap all to work at once, and none of
-    the three has been read on this locus.</p>
+    <p>Music enjoyer&rsquo;s bond, its cap and its controls are confirmed; what is left is whether a
+    finished record left in the jukebox still pays out, and the hearts a player should see.</p>
 </div>
 
 <h3 id="open-gene-music-enjoyer">Still open (NOT played)</h3>
 
 <p>
-    The gene is one <code>Bond</code> ability on an interval, gated on the
-    <code>near_jukebox</code> world flag. Two things in the translator are worth knowing before
-    testing it: <code>maybeBond</code> <strong>returns early on an untamed horse</strong>, and the
-    flag is a sampled block search over roughly eight blocks horizontally and three vertically, which
-    has been permanently stuck off for every gene in the mod once before.
+    The gene is one <code>Bond</code> ability on an interval, gated on the <code>near_jukebox</code>
+    world flag, and the yard has watched it earn bond and stop at the cap (&sect;<a href="#verified">Verified</a>).
+    The flag reads the jukebox&rsquo;s <code>HAS_RECORD</code> state, not whether it is playing.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>Bond actually rises.</strong> Tame an <code>Msc/Msc</code> horse, stand it beside a
-        jukebox with a record in it, and read its bond before and after ten minutes.
-        <strong>Pass:</strong> hearts every <code>MusicEnjoyerGene.INTERVAL_TICKS</code> and a bond
-        number that has climbed. Nothing else below is worth checking until this moves.</li>
-    <li><strong>An untamed horse gains nothing.</strong> The same jukebox, an untamed expressing
-        horse. <strong>Pass:</strong> no hearts at all. This is the translator&rsquo;s rule rather
-        than a defect &mdash; bond is a relationship &mdash; but it is not written anywhere a player
-        can see, so confirm it before anybody reports the gene as broken.</li>
-    <li><strong>A carrier gains nothing.</strong> An <code>Msc/n</code> horse beside the same
-        jukebox. <strong>Pass:</strong> no hearts, no bond. The control that separates a working
-        recessive from a bond source every tamed horse in the world has.</li>
-    <li><strong>The daily cap holds.</strong> Leave a tamed expressing horse at a playing jukebox
-        overnight. <strong>Pass:</strong> its bond stops at the day&rsquo;s ceiling rather than
-        arriving at the top tier by morning. An AFK bond source that ignored
-        <code>bondToday</code> would devalue every other way of earning bond, and it fails by
-        <em>working too well</em>, which nobody reports as a bug.</li>
-    <li><strong>Distance matters.</strong> The same horse twelve blocks from the jukebox.
-        <strong>Pass:</strong> nothing. A flag stuck true reads exactly like a gene that
-        works.</li>
     <li><strong>Does a finished record still count?</strong> The flag tests whether the jukebox
         <em>holds</em> a record, not whether it is audible, so a single disc left in one may go on
         paying out for ever. <strong>Pass:</strong> record which it is. If bond keeps rising after the
         track ends, one disc is an unattended bond source bounded only by the daily cap, and that is a
-        decision for the owner rather than a bug to fix quietly.</li>
+        decision for the owner rather than a bug to fix quietly.
+        <em>Read once, not answered (yard, 2026-10-02 04:17):</em> over the first 6,000 ticks of the
+        next care day the box held a finished disc at all 30 readings and the tamed <code>Msc/Msc</code>
+        mare gained nothing (bond 55). But she still read <code>bondToday</code> 15 and no day&rsquo;s
+        decay had landed, so the day had not rolled over on her and the cap alone would have blocked any
+        gain &mdash; the reading cannot tell a dead flag from a full cap. Re-run it with the day&rsquo;s
+        rollover confirmed first (<code>bondToday</code> back at 0).</li>
+</ul>
+
+<h4>In the game, with your hands</h4>
+
+<ul>
+    <li><strong>The hearts show.</strong> The yard read the bond number, not the particles. Stand a
+        tamed <code>Msc/Msc</code> horse by a playing jukebox. <strong>Pass:</strong> hearts every
+        <code>MusicEnjoyerGene.INTERVAL_TICKS</code> until the day&rsquo;s cap, and none on an untamed
+        or carrier horse beside it.</li>
 </ul>
 </section>
 

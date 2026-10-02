@@ -148,6 +148,13 @@ public final class StallDetector {
      * The stall a sign on {@code wall}'s {@code face} names, or {@code null} if
      * neither side of the wall is an enclosed room.
      *
+     * <p><b>Loads what it reads, on purpose</b> (issue #13). It runs when a sign
+     * is put up, where the player is standing, and when a ticket sends a horse
+     * to the stall, which is where the horse is about to be. Treating an
+     * unloaded column as wall instead would measure a different room at ticket
+     * time than at bind time - the mismatch {@link #standable} describes, which
+     * put a horse in a wall.
+     *
      * @param wall the block the sign is hung on
      * @param face the face it is hung on - so the sign itself is at
      *             {@code wall.relative(face)} and the two candidate rooms are

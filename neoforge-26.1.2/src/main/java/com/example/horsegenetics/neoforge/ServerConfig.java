@@ -35,8 +35,11 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * scales the model <i>and</i> the hitbox from it. That second half is the catch:
  * a saddle, a lead, an arrow and a fence gap all meet a Falabella somewhere
  * other than where they meet a Percheron, and a player who would rather have
- * every horse fit the way vanilla horses fit can turn the size write off here.
- * Every horse then renders and collides at scale 1.0 while still carrying,
+ * every horse fit near the way vanilla horses fit can turn the size write off
+ * here. Every horse's scale is then compressed into 0.85-1.15
+ * ({@code HorseTraits.compressScale}) rather than flattened to 1.0 (owner,
+ * 2026-10-01), so a Shire still stands over a Falabella and every horse still
+ * fits a two-block stall, while still carrying,
  * showing and inheriting exactly the size alleles it always did - the info
  * panel and the paper both keep reporting what the genotype says, because that
  * has not changed.
@@ -99,7 +102,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * settings would be breeding different animals, and a horse traded between them
  * would change genotype on the way. All they govern is whether what a horse
  * <i>carries</i> is allowed to affect the horse standing in front of you. The
- * same is true of {@code body.size}: it gates one attribute write, not a gene.
+ * same is true of {@code body.size}: it shapes one attribute write, not a gene.
  */
 public final class ServerConfig {
 
@@ -155,6 +158,13 @@ public final class ServerConfig {
      * See {@code common/repro/NaturalCover.Crowd}, which carries it to the rule.
      */
     public static final ModConfigSpec.IntValue NEARBY_HORSE_CAP;
+
+    /**
+     * <b>How many covers a stallion makes in a day before his odds halve.</b>
+     * Server-side for the same reason as {@link #NEARBY_HORSE_CAP}. See
+     * {@code common/repro/StallionDay}, which carries it to every rule that asks.
+     */
+    public static final ModConfigSpec.IntValue FREE_COVERS_PER_DAY;
 
     /**
      * <b>Does an owner hear about their horse being hurt?</b> See
@@ -275,10 +285,10 @@ public final class ServerConfig {
      * <p>It is a number of minutes rather than a flag because of what is being
      * kept. A resurrectable horse is a whole entity tag - every attachment, the
      * gear, the pedigree, the bond - and that is real bytes in the world save,
-     * per dead horse, for ever, if nothing ever throws it away. The window is
-     * therefore a <b>storage budget first</b> and a gameplay rule second: it is
-     * the answer to "how long should the server carry a corpse around on the
-     * chance somebody asks for it back".
+     * per dead horse, for ever, if nothing ever throws it away. That storage
+     * question is now answered by size, {@link #RESURRECT_BUDGET_MB}; this
+     * window is left as an operator's extra rule for a server that also wants
+     * a time limit.
      *
      * <p><b>Why owner-online time and not wall clock.</b> The grace exists so a
      * player who loses a horse has a chance to notice and ask. Somebody who
@@ -288,12 +298,29 @@ public final class ServerConfig {
      * only clock that measures the thing the window is for. It also means the
      * store cannot be aged out by a server simply being left running.
      *
-     * <p><b>0 keeps every dead horse for ever</b> - an operator who would rather
-     * spend the disk than ever say no. The count is still kept, so turning the
-     * limit back on later starts expiring the backlog rather than
-     * grandfathering it.
+     * <p><b>0 - the default since issue #15 - puts no time limit on it</b>, and
+     * the store is held to {@link #RESURRECT_BUDGET_MB} instead. The count is
+     * still kept, so turning a limit on later starts expiring the backlog
+     * rather than grandfathering it.
      */
     public static final ModConfigSpec.IntValue RESURRECT_GRACE_MINUTES;
+
+    /**
+     * <b>{@code ops.resurrect_budget_mb}</b> - how big the afterlife store may
+     * grow before it lets dead horses go, oldest death first and only as many
+     * as it takes (owner, issue #15). Read through
+     * {@link #resurrectBudgetBytes()}, enforced by
+     * {@code server/HorseAfterlifeHandler}'s sweep through
+     * {@code common/horse/AfterlifeBudget}.
+     *
+     * <p>A size rather than a clock because the cost of keeping a dead horse
+     * is bytes, and a clock spends a horse long before the bytes add up to
+     * anything. Measured as each horse's gzipped entity tag, which slightly
+     * overstates the real file. Only the resurrectable snapshot is let go; the
+     * pedigree's record of the horse stays for ever as it always has.
+     * <b>0 is no cap.</b>
+     */
+    public static final ModConfigSpec.IntValue RESURRECT_BUDGET_MB;
 
     /**
      * <b>{@code behaviour.owner_only_riding}</b> - may a stranger get on your
@@ -360,6 +387,20 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue JOCKEY_PASS_DAYS;
 
     /**
+     * <b>What the horse browser's Send home button costs.</b> An item id and a
+     * count per trip; blank, or a count of 0, is free - the default. A price
+     * replaces tickets for the button. See {@code common/care/SendHome} and
+     * {@code server/StallRecall}.
+     */
+    public static final ModConfigSpec.ConfigValue<String> SEND_HOME_PAYMENT_ITEM;
+
+    /** How many of {@link #SEND_HOME_PAYMENT_ITEM} one trip takes. */
+    public static final ModConfigSpec.IntValue SEND_HOME_PAYMENT_COUNT;
+
+    /** Seconds between two Send home trips by one player; 0 is off. */
+    public static final ModConfigSpec.IntValue SEND_HOME_COOLDOWN_SECONDS;
+
+    /**
      * <b>What a Chaos allele may never name.</b> The three mob loci each have one
      * {@code Cha} allele standing in for every modded mob ({@code server/ChaosRoster});
      * these take a whole mod, or one mob, off all three lists. Default is
@@ -391,8 +432,9 @@ public final class ServerConfig {
                 .comment("Whether the size loci actually resize the horse. (default: true)",
                         "  true  - a Falabella is genuinely small and a Percheron genuinely",
                         "          large: vanilla scales the model AND the hitbox from it.",
-                        "  false - every horse is rendered and collides at scale 1.0, so tack",
-                        "          and hitboxes sit exactly where vanilla puts them.",
+                        "  false - every horse's scale is compressed into 0.85-1.15: big",
+                        "          horses are still bigger, but every one fits a two-block",
+                        "          stall and tack and hitboxes sit near where vanilla puts them.",
                         "The size genes are registered, inherited and reported either way -",
                         "this only governs whether the resolved scale reaches the entity.",
                         "SERVER-SIDE: it moves hitboxes, so the server's answer is the one",
@@ -459,16 +501,24 @@ public final class ServerConfig {
                         "0 turns the payment off.")
                 .defineInRange("realm.release_emeralds", 2, 0, 64);
         RESURRECT_GRACE_MINUTES = builder
-                .comment("How long a dead horse can still be brought back by /horseresurrect. (default: 60)",
+                .comment("An optional time limit on bringing a dead horse back with /horseresurrect. (default: 0)",
                         "Counted in minutes of the OWNER'S OWN TIME ONLINE since the horse died, not",
                         "wall clock: a player who was logged off when it happened has not spent any",
                         "of their window, because the window is their chance to notice and ask.",
-                        "While it lasts, the whole horse is kept in the world save - every attachment,",
-                        "its gear, its pedigree, its bond - so this is a disk budget as much as a rule.",
-                        "Only owned horses are kept at all; a wild one has nobody to ask for it.",
-                        "0 keeps every dead horse for ever. The elapsed count is still kept while it",
-                        "is 0, so turning a limit back on expires the backlog rather than sparing it.")
-                .defineInRange("ops.resurrect_grace_minutes", 60, 0, 10_080);
+                        "0 is no time limit: a dead horse is then kept until ops.resurrect_budget_mb",
+                        "is reached. Only owned horses are kept at all; a wild one has nobody to ask",
+                        "for it. The elapsed count is still kept while this is 0, so turning a limit",
+                        "on expires the backlog rather than sparing it.")
+                .defineInRange("ops.resurrect_grace_minutes", 0, 0, 10_080);
+        RESURRECT_BUDGET_MB = builder
+                .comment("How big the store of dead horses /horseresurrect can bring back may grow, in",
+                        "megabytes. (default: 100)",
+                        "Each one is the whole horse - every attachment, its gear, its bond - kept in",
+                        "the world save. Past this size the OLDEST deaths are let go first, only as",
+                        "many as it takes to fit. A horse let go can no longer be resurrected; its",
+                        "pedigree record is kept for ever regardless. 0 is no cap. Server-side.")
+                .defineInRange("ops.resurrect_budget_mb",
+                        com.example.horsegenetics.common.horse.AfterlifeBudget.DEFAULT_BUDGET_MB, 0, 100_000);
         NEARBY_HORSE_CAP = builder
                 .comment("How many other horses may be within 16 blocks of a mare and still let a",
                         "stallion cover her. (default: 50)",
@@ -481,6 +531,16 @@ public final class ServerConfig {
                 .defineInRange("fertility.nearby_horse_cap",
                         com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_CAP, 1,
                         com.example.horsegenetics.common.repro.ReproRules.MAX_NATURAL_CAP);
+        FREE_COVERS_PER_DAY = builder
+                .comment("How many covers a stallion makes in one day before his chance of getting",
+                        "a mare in foal is halved until tomorrow. (default: 3, range 0 to 1000)",
+                        "Natural covers, breeding carrots and seed-jar fills all count against it,",
+                        "and a mare prefers a stallion still under it. It is a taper, never a stop:",
+                        "a tired stallion still covers. 0 is always tired; 1000 is never.",
+                        "Server-side: a client cannot raise its own.")
+                .defineInRange("fertility.free_covers_per_day",
+                        com.example.horsegenetics.common.repro.ReproRules.DEFAULT_FREE_COVERS_PER_DAY, 0,
+                        com.example.horsegenetics.common.repro.ReproRules.MAX_FREE_COVERS_PER_DAY);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -695,6 +755,32 @@ public final class ServerConfig {
                         "Feeding a second pass ADDS another of these rather than replacing",
                         "what is left, so a three-day meeting is three passes.")
                 .defineInRange("behaviour.jockey_pass_days", 1, 1, 365);
+        SEND_HOME_PAYMENT_ITEM = builder
+                .comment("What the horse menu's Send home button costs per trip, as an item id. (default: \"\")",
+                        "Empty - the default - makes the button free: it sends a horse to its stall,",
+                        "or your holding pen if it has none, from any world and out of a stasis",
+                        "chamber, with nothing spent. Name any item, vanilla or modded, such as",
+                        "\"minecraft:emerald\", and each trip takes behaviour.send_home_payment_count",
+                        "of it. A trip that is refused takes nothing.",
+                        "A price REPLACES tickets for the button; it never charges both. Tickets and",
+                        "whistles still move a horse from the world with no menu, and the button's",
+                        "tooltip and refusal say so.",
+                        "An id that is not a registered item is logged once and treated as free.",
+                        "Server-side; clients read the synced value only to label the button.")
+                .define("behaviour.send_home_payment_item", "",
+                        o -> o instanceof String s && (s.isBlank()
+                                || net.minecraft.resources.Identifier.tryParse(s.trim()) != null));
+        SEND_HOME_PAYMENT_COUNT = builder
+                .comment("How many of behaviour.send_home_payment_item one Send home trip takes. (default: 1)",
+                        "0 makes the button free whatever item is named.")
+                .defineInRange("behaviour.send_home_payment_count", 1, 0, 64);
+        SEND_HOME_COOLDOWN_SECONDS = builder
+                .comment("Seconds a player waits between two Send home trips. (default: "
+                                + com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS + ")",
+                        "Per player, not per horse, and started only by a trip that happened - a",
+                        "refusal never starts it. 0 turns it off.")
+                .defineInRange("behaviour.send_home_cooldown_seconds",
+                        com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS, 0, 3600);
         CHAOS_EXCLUDE_MODS = builder
                 .comment("Mods whose mobs a Chaos allele may never name, by mod id. (default: [])",
                         "Lycanthropy, Leader of the pack and Spawner each have one Chaos allele that",
@@ -769,7 +855,7 @@ public final class ServerConfig {
 
     /**
      * <b>May the resolved body scale reach {@code Attributes.SCALE}?</b> False
-     * means every horse is the vanilla size - see the {@code body.size} section
+     * means every horse is compressed to near the vanilla size - see the {@code body.size} section
      * above for why a world would want that.
      */
     /** Safe read - falls back to the default if the config isn't loaded yet. */
@@ -828,6 +914,24 @@ public final class ServerConfig {
         }
     }
 
+    /** {@code fertility.free_covers_per_day}, safely. */
+    public static int freeCoversPerDay() {
+        try {
+            return FREE_COVERS_PER_DAY.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.repro.ReproRules.DEFAULT_FREE_COVERS_PER_DAY;
+        }
+    }
+
+    /**
+     * <b>A stallion's day, on this world's allowance</b> - the only way the game
+     * module hands a cover count to {@code common/}, so no caller can fall back
+     * to the default by forgetting the config.
+     */
+    public static com.example.horsegenetics.common.repro.StallionDay stallionDay(int coversToday) {
+        return new com.example.horsegenetics.common.repro.StallionDay(coversToday, freeCoversPerDay());
+    }
+
     /** {@code realm.breeding_rate_percent}, safely. */
     public static int realmBreedingRatePercent() {
         try {
@@ -856,9 +960,20 @@ public final class ServerConfig {
         try {
             minutes = RESURRECT_GRACE_MINUTES.get();
         } catch (IllegalStateException notLoaded) {
-            minutes = 60;
+            minutes = 0;
         }
         return minutes * 60 * 20;
+    }
+
+    /** {@code ops.resurrect_budget_mb} as <b>bytes</b>, safely - {@code 0} meaning "no cap". */
+    public static long resurrectBudgetBytes() {
+        int mb;
+        try {
+            mb = RESURRECT_BUDGET_MB.get();
+        } catch (IllegalStateException notLoaded) {
+            mb = com.example.horsegenetics.common.horse.AfterlifeBudget.DEFAULT_BUDGET_MB;
+        }
+        return mb * com.example.horsegenetics.common.horse.AfterlifeBudget.BYTES_PER_MB;
     }
 
     /**
@@ -985,6 +1100,29 @@ public final class ServerConfig {
             return JOCKEY_PASS_DAYS.get() * 24_000L;
         } catch (IllegalStateException notLoaded) {
             return 24_000L;
+        }
+    }
+
+    /**
+     * {@code behaviour.send_home_payment_item} and {@code _count}, safely, as
+     * one price. Read on the client too, for the button's label: a SERVER
+     * config is synced on connection, and before that lands this is free.
+     */
+    public static com.example.horsegenetics.common.care.SendHome.Price sendHomePrice() {
+        try {
+            return com.example.horsegenetics.common.care.SendHome.Price.of(
+                    SEND_HOME_PAYMENT_ITEM.get(), SEND_HOME_PAYMENT_COUNT.get());
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.SendHome.Price.FREE;
+        }
+    }
+
+    /** {@code behaviour.send_home_cooldown_seconds}, safely. */
+    public static int sendHomeCooldownSeconds() {
+        try {
+            return SEND_HOME_COOLDOWN_SECONDS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS;
         }
     }
 

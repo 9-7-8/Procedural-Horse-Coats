@@ -241,8 +241,8 @@
 <p id="verified-glow">
     <strong>The <code>glow</code> verb, seen in game 2026-09-02:</strong> the emissive gold mane and tail
     render and look good, the gold-dust <code>emitter</code> shows, and the horse lights the area around
-    it with a trailing <code>minecraft:light</code> block. Still unchecked: the light cleaning up on death
-    or unload, a foal, and hard base coats (<a href="gene-suntouched.html#effects">verification item 13</a>).
+    it with a trailing <code>minecraft:light</code> block. Still unchecked: the light cleaning up on unload
+    (death is <a href="#verified-light-death">verified</a>), a foal, and hard base coats (<a href="gene-suntouched.html#effects">verification item 13</a>).
 </p>
 
 <p id="verified-no-light-in-dimension">
@@ -263,6 +263,18 @@
     history of this mod, had an issue with them leaving behind light blocks.&rdquo;</em> The outdoor checks on
     the Verification tab are about the light <em>reaching</em> the ground and about singleplayer unloads, which
     no pen ever held.
+</p>
+
+<p id="verified-light-death">
+    <strong>One light, at level 12, following it step by step, and gone at death</strong> (2026-10-01). The
+    yard&rsquo;s SHADOW LIGHT pen (row AS east) put a <code>Sntch/Sntch</code> horse in a sealed glass corridor
+    cleared of every other light block, moved it one block east every 15 ticks by teleport for sixteen steps, then
+    killed it: <em>&ldquo;16 steps observed, 16 with exactly one light at level 12 within 2 blocks, at most 1 light(s)
+    at once&rdquo;</em>, and <em>&ldquo;40 ticks after the kill (died true, body removed true): 0 light(s) in the
+    corridor&rdquo;</em>. A torch it was stepped into, a chest and a glass block it was stood on were <em>&ldquo;all
+    intact through 16 steps and the death&rdquo;</em>. All <code>CLOCKWORK PASS</code>, 23:53:55. Not covered: a horse
+    walking under its own AI or ridden for a long time, and a chunk unload or server restart with a light standing
+    (the <code>GLOW_LIGHT</code> map is held in memory).
 </p>
 
 </section>
@@ -343,7 +355,7 @@
 <h3 id="open-older-gene-suntouched">Still open from before 2026-09-13 (NOT played)</h3>
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
-    <li><strong>Suntouched's light is cleaned up.</strong> Kill the horse, or ride far enough to unload it: the <code>minecraft:light</code> block goes with it. Gallop and check the light never fills a spot that has a block in it. <a href="gene-suntouched.html">Suntouched</a>.</li>
+    <li><strong>Suntouched's light is cleaned up on unload.</strong> Death is <a href="#verified-light-death">verified</a>; ride far enough to unload it, and restart the server with it standing lit: the <code>minecraft:light</code> block goes with it. Gallop and check the light never fills a spot that has a block in it. <a href="gene-suntouched.html">Suntouched</a>.</li>
 </ul>
 
 <h3 id="gap-284" data-check-kind="open-gap">Open check 284</h3>

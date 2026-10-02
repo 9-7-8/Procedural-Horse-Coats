@@ -14,6 +14,7 @@ owner. Every bug is a GitHub issue (CLAUDE.md hard rule 9). Bugs never go in int
 which holds new features only, and never on a Verification tab, which holds checks on
 things nobody has seen yet. The labels:
   bug            - every defect;
+  tuning         - a balance or tuning request; this procedure takes those too;
   found-in-yard  - found by a test-yard run;
   needs-owner    - waits on the owner's answer; every routine skips it until she
                    removes the label.
@@ -21,11 +22,16 @@ run-tests finds bugs in the yard and fixes the small ones in passing. report-bug
 a player's report into an issue. This procedure fixes one issue.
 
 One run fixes ONE issue. The owner clears context and runs this again for the next.
+Asked to run several at once (parallel agents, one bug each): count the issues with work
+left first. An issue whose fix is in and only waits on a check is not one. Then say that
+parallel runs collide on one checkout, one Gradle and end-session's commits, and offer
+them in sequence, or one per worktree with the commits made one at a time.
 
 BEFORE YOU START
 ----------------
 1. `git pull --ff-only origin main`.
-2. `gh issue list --state open --label bug --search "-label:needs-owner" --limit 200`.
+2. `gh issue list --state open --search "label:bug,tuning -label:needs-owner" --limit 200`
+   (a comma in label: means either label).
    Testers do not always label their issues, so also scan the open issues with no
    label, and label any that are bugs.
 3. Run `node wiki/tools/check-roadmap-execution.mjs`.
@@ -96,16 +102,27 @@ STEPS
      - Extend the existing path; never add a second, screen-only copy of a rule.
      - If the spawn-egg screen or the designer is involved, change both (rule 5).
      - Flag any unverified API (rule 8).
+     - A fix that adds or changes a config key owes add-a-config-option steps 3, 4, 8
+       and 9 too: the default once as a common/ constant, the safe accessor, a server
+       boot, and the key on the feature's page.
    - Break the fix on purpose once, and watch the test go red.
    - Run tests by name only. If a gametest goes red, run HEAD without your diff
      (`git stash`) before blaming the diff: gametests are sensitive to tick phase.
-   - Run every regenerate-table row the change touched.
+   - Run every rebake row the change touched.
    - If the fix turns out larger than step 4 judged, stop and treat the bug as large.
+   - When the owner already picked the fix, measure its cost before committing. If it
+     costs more than the issue predicted (a rate, a balance number, something players
+     will notice), take the numbers back to her with the question tool first. Example:
+     #2's "a bit rarer" measured as two-thirds of the stables gone.
 
 6. Close it on evidence.
-   - Commit as "Fix #N: <what was wrong>", saying why, not which files changed. Do not
-     write "Fixes #N" unless the proof is already in hand: a push to main
-     auto-closes the issue.
+   - Run end-session step 2's build first. This commit is end-session's code commit,
+     and it reaches main before end-session runs, so a red build here goes out with it.
+   - Commit as "Fix #N: <what was wrong>", saying why, not which files changed. That
+     form closes the issue when it reaches main ("fix", "fixes", "closes", "resolves"
+     are all GitHub closing keywords), so use it only when the proof is already in hand,
+     and post the proof comment right after the push. Without the proof, write
+     "#N: <what was wrong>" instead.
    - A test proves it and no runtime question remains -> close the issue, with a
      comment naming the commit and the test.
    - Only the game can prove it -> leave the issue open, and comment "fixed in
@@ -119,8 +136,8 @@ STEPS
 7. End the session with end-session. The session log names the issue, the cause, the
    fix commit, the proof (and whether the issue is closed or waiting), and any new
    issues filed along the way.
-   Release only if the owner asks. When the fix is to a crash or data loss on a
-   released jar, OFFER a release in the report, because testers are on that jar.
+   A fix, even a crash fix, rides the next release. Never offer a release for one fix or
+   a handful: release step 1 sets the bar, and the owner decides.
 
 DONE WHEN
 ---------

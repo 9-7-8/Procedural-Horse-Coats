@@ -87,6 +87,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -198,9 +199,19 @@ public final class GeneAbilityHandler {
 
         boolean moving = isMoving(horse);
         List<GeneAbility.Emitter> prints = null; // hoofprint emitters - laid by stride, after the loop
+        Map<String, Integer> modCopies = null; // check 304: which copy of its gene's attribute each modifier is
 
         for (HorseAbilities.Active active : abilities) {
             GeneAbility ability = active.ability();
+            // Counted before the condition is read, so a copy keeps its id whether or not it holds this tick -
+            // clearAttributes counts the same list the same way and so names the same ids.
+            int copy = 0;
+            if (ability instanceof GeneAbility.AttributeMod am) {
+                if (modCopies == null) {
+                    modCopies = new HashMap<>();
+                }
+                copy = copyIndex(modCopies, active.geneKey(), am.attribute());
+            }
             if (!conditionHolds(ability.when(), horse, record)) {
                 continue;
             }
@@ -219,7 +230,7 @@ public final class GeneAbilityHandler {
                         maybeEmit(e, horse, (ServerLevel) level, moving);
                     }
                 }
-                case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey());
+                case GeneAbility.AttributeMod am -> applyAttribute(am, horse, active.geneKey(), copy);
                 case GeneAbility.Breath b -> breathe(b, horse);
                 case GeneAbility.Swim ignored -> { /* read inside travelInWater by HorseSwimMixin, via SwimScaling */ }
                 case GeneAbility.MobAura ma -> mobAura(ma, horse, (ServerLevel) level);
@@ -321,7 +332,7 @@ public final class GeneAbilityHandler {
      * before it ever reaches here, so nothing would take the modifier off again.
      * {@link #clearAttributes} therefore runs unconditionally afterwards.
      */
-    private static void applyAttribute(GeneAbility.AttributeMod mod, Horse horse, String geneKey) {
+    private static void applyAttribute(GeneAbility.AttributeMod mod, Horse horse, String geneKey, int copy) {
         Holder<Attribute> attribute = ATTRIBUTES.get(mod.attribute());
         if (attribute == null) {
             warnUntranslated("attribute:" + mod.attribute(), geneKey);
@@ -339,8 +350,17 @@ public final class GeneAbilityHandler {
             case "multiply_total" -> AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL;
             default -> AttributeModifier.Operation.ADD_VALUE;
         };
-        instance.addOrUpdateTransientModifier(
-                new AttributeModifier(attributeModifierId(geneKey, mod.attribute()), mod.amount(), op));
+        Identifier id = attributeModifierId(geneKey, mod.attribute(), copy);
+        // NOT EVERY TICK (2026-10-02, the stress run). addOrUpdateTransientModifier compares the old modifier with
+        // the new one by REFERENCE and marks the attribute dirty when they differ - and a modifier built here is
+        // always a new object. So every horse with a held attribute ability (weather, climate, eyesight, fireproof)
+        // was dirty every tick: a recalculation, an attribute packet to every player tracking it every few ticks,
+        // and for scale a refreshDimensions. An identical modifier already on is left alone.
+        AttributeModifier on = instance.getModifier(id);
+        if (on != null && on.amount() == mod.amount() && on.operation() == op) {
+            return;
+        }
+        instance.addOrUpdateTransientModifier(new AttributeModifier(id, mod.amount(), op));
     }
 
     /**
@@ -363,10 +383,26 @@ public final class GeneAbilityHandler {
         return horse.isInLava() && horse.getFluidHeight(FluidTags.LAVA) > horse.getFluidJumpThreshold();
     }
 
-    /** A stable, gene-scoped id, so two genes may move one attribute without fighting. */
-    private static Identifier attributeModifierId(String geneKey, String attribute) {
+    /**
+     * A stable, gene-scoped id, so two genes may move one attribute without fighting - and, since
+     * 2026-10-01, copy-scoped too, so one gene's two copies may move it without fighting either (check 304).
+     *
+     * <p>{@code AbstractWeatherGene.abilitiesFor} emits one conditioned modifier per allele copy, because each
+     * copy carries its own weather. With one id per gene and attribute, {@code addOrUpdateTransientModifier}
+     * let the second copy overwrite the first: an {@code R+/R+} horse moved by one percentage instead of two,
+     * and an {@code R+/Tv} horse in a storm (raining <i>and</i> thundering) carried whichever copy came last.
+     * The first copy keeps the old id, so a gene with one modifier per attribute - nearly all of them - names
+     * exactly what it named before, and a modifier still standing from an older build is swept by
+     * {@link #clearAttributes} like any other.
+     */
+    private static Identifier attributeModifierId(String geneKey, String attribute, int copy) {
         return Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
-                "gene/" + geneKey.replace('.', '_') + "/" + attribute);
+                "gene/" + geneKey.replace('.', '_') + "/" + attribute + (copy == 0 ? "" : "/" + (copy + 1)));
+    }
+
+    /** The next copy number for {@code geneKey}'s modifier on {@code attribute}, counting from 0, in list order. */
+    private static int copyIndex(Map<String, Integer> seen, String geneKey, String attribute) {
+        return seen.merge(geneKey + "|" + attribute, 1, Integer::sum) - 1;
     }
 
     /**
@@ -380,11 +416,14 @@ public final class GeneAbilityHandler {
     private static void clearAttributes(Horse horse, List<HorseAbilities.Active> wanted,
                                         HorseRecord record) {
         Set<Identifier> keep = new HashSet<>();
+        Map<String, Integer> modCopies = new HashMap<>();
         for (HorseAbilities.Active active : wanted) {
-            if (active.ability() instanceof GeneAbility.AttributeMod mod
-                    && attributeAllowed(mod.attribute())
-                    && conditionHolds(mod.when(), horse, record)) {
-                keep.add(attributeModifierId(active.geneKey(), mod.attribute()));
+            if (active.ability() instanceof GeneAbility.AttributeMod mod) {
+                // Counted for every modifier, held or not, exactly as the apply loop counts them.
+                int copy = copyIndex(modCopies, active.geneKey(), mod.attribute());
+                if (attributeAllowed(mod.attribute()) && conditionHolds(mod.when(), horse, record)) {
+                    keep.add(attributeModifierId(active.geneKey(), mod.attribute(), copy));
+                }
             }
             if (active.ability() instanceof GeneAbility.Traversal t
                     && "lava_swim".equals(t.flag())
@@ -398,7 +437,8 @@ public final class GeneAbilityHandler {
             if (instance == null) {
                 continue;
             }
-            for (AttributeModifier existing : List.copyOf(instance.getModifiers())) {
+            // getModifiers() already hands back a copy, so it is safe to remove while walking it - no second copy.
+            for (AttributeModifier existing : instance.getModifiers()) {
                 // ONLY THE MODIFIERS THIS SWEEP OWNS (2026-09-15). It used to take off every modifier in the mod's
                 // namespace that no gene asked for - including ReproHandler's repro/late_pregnancy, which it put on
                 // every 40 ticks and this took off on the next gene tick. A heavily pregnant mare in the yard's
@@ -1143,7 +1183,11 @@ public final class GeneAbilityHandler {
             // Nowhere within reach will take it this tick. Keep what we have if
             // it is still really there; forget it if it is not, so that the
             // next tick tries afresh rather than trusting a block that is gone.
-            if (current != null && !level.getBlockState(current).is(Blocks.LIGHT)) {
+            // Not read while its chunk is unloaded (issue #13: this branch can run
+            // every tick). The entry is kept, so the light is still cleared once
+            // the horse has somewhere new to put it.
+            if (current != null && level.hasChunkAt(current)
+                    && !level.getBlockState(current).is(Blocks.LIGHT)) {
                 GLOW_LIGHT.remove(id);
             }
             return;
@@ -1201,6 +1245,10 @@ public final class GeneAbilityHandler {
     }
 
     private static void clearLight(Level level, BlockPos pos) {
+        // MAY LOAD the light's chunk, on purpose (issue #13). Only when the horse
+        // has moved off a light whose chunk has since unloaded - a teleport, not a
+        // walk - so once, not per tick; and skipping it would leave the light
+        // behind in the world with nothing left that remembers it.
         BlockState state = level.getBlockState(pos);
         if (state.is(Blocks.LIGHT)) {
             level.removeBlock(pos, false);

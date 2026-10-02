@@ -1,0 +1,69 @@
+2026-10-01 19:40 (start time) - Fix #18: no horse stands in powder snow
+
+ASKED
+-----
+- "/whats-next" -> the queues were surveyed (procedures/whats-next.txt). Nothing to
+  release: only docs had landed since v0.5.039. All four 2026-10-01 PCH export folders
+  were already reviewed. Four options were offered (fix #18, fix #17, fix #12, the
+  horn-glow To do item), together with the pending #17 fix question. The owner picked
+  "Fix #18" and, for #17, fix option 1.
+- (picked) /fix-bug for #18 -> fixed and closed (9d5efba0).
+
+DONE
+----
+- 9d5efba0 - Fix #18: dealer horses placed in powder snow froze to death.
+  Cause: CowboyHandler.roomForAHorse asked ServerLevel.noCollision about the horse's
+  spawn box. Powder snow has no collision shape for that test, so a spot full of it
+  passed. On the live server a dealer at (44, 66, -1327) lost his string of 6, plus two
+  restocks, on 25 Sep.
+  Fix: the spot is refused when any block the horse's box overlaps is powder snow
+  (level.getBlockStates(box)), or when the block it would stand on is powder snow. Every
+  placement goes through this method: findPlacement (the dealer's and cowboy's string,
+  founding and restocks) and findPaddock. The method is now public, for the test.
+  Proof: a new gametest, no_horse_stands_in_powder_snow (ModGameTests), in a scratch box
+  40 blocks up. It checks a plain spot on stone first (so a check that refuses everything
+  cannot pass), then powder snow at the feet, under the feet, and one block east inside
+  the horse's width. runGameTest: red on the old code ("powder snow at its feet"), green
+  with the fix (all 26 required tests passed), and red again with the box check mutated
+  to `state -> false`. :neoforge-26.1.2:build green, check-parity OK.
+  wiki/villagers.html: one added passage on placement (the gameplay prose beside the
+  horse-sized-box paragraph). search index, check-links and agent text were rebaked.
+  Issue #18: CLOSED by the commit, with a proof comment.
+- Issue #17 (an arcane dealer's horses kill each other): the owner's pick of fix option 1
+  is recorded as a comment on the issue, and needs-owner was removed. That option leaves
+  Aggression's horse-targeting pairs out of ArcaneStock.eligible. No code was written.
+
+DECIDED
+-------
+- #17 gets fix option 1, leaving Aggression's horse-targeting pairs out of
+  ArcaneStock.eligible (owner). Recorded on issue #17.
+- Powder snow is refused anywhere in the horse's box, not only at the feet column. Made
+  without the owner: a horse freezes once it overlaps the block, and it is about a block
+  and a half wide. Recorded on wiki/villagers.html and in the code comment.
+
+FOUND ON THE WAY
+----------------
+None. Unknown, and left alone: whether vanilla powder snow is isSolidRender. The
+explicit ground check covers it either way.
+
+PROCEDURES
+----------
+whats-next step 3: after the question round, record each answer where its work will look
+for it (a fix pick on its issue, with needs-owner removed; a design call on
+decisions.html). This session did it for #17, and the procedure did not say to.
+
+NOT RUN / NOT CHECKED
+---------------------
+No common/ code changed, so a full :common:test run would check nothing this session
+touched. Nobody has seen the fix in game. The gametest calls the method directly, and a
+dealer setting up in snow has not been watched. No Verification-tab anchors were added.
+
+RELEASE
+-------
+Not offered. Since v0.5.039 main holds this one fix and docs, well below release step 1's
+bar.
+
+PICK UP FIRST
+-------------
+/fix-bug for #17 (dealer stock kills itself; the fix is chosen, option 1 on the issue),
+then #12.

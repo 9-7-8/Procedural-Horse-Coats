@@ -216,11 +216,22 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
     </p>
     <p>
         A real champagne <em>foal</em> is born blue-green and matures to amber or hazel.
-        Here it is the adult colour from birth: the eye-colour hook is not told which skin
-        it is baking, and with <a href="philosophy.html">aging out of scope</a> there is
-        nothing to mature through. <a href="decisions.html#open-eyes">Roadmap</a>.
+        Here it is still the adult colour from birth, because the eye-colour hook is not told
+        which skin it is baking. The owner has decided that should change:
+        <a href="#foal-eyes-decided">below</a>.
     </p>
 </div>
+
+<h3 id="foal-eyes-decided">A champagne foal&rsquo;s eye is blue-green (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled:</strong> a champagne foal wears a blue-green eye, and the eye turns to the
+    rolled adult colour when the horse grows up. This does not reopen
+    <a href="philosophy.html">aging</a>. The game already draws a foal and an adult
+    differently, so all the hook needs is to be told which one it is baking: an
+    <code>adult</code> signal on <code>EyeColorContribution</code>. That hook is reusable
+    by any other gene with a foal eye. Not built yet: <a href="#roadmap">Roadmap</a>.
+</p>
 
 <h2>What makes it nearly the simplest gene</h2>
 
@@ -241,20 +252,22 @@ field.restrictBlack(px, py, 0.82f);          // black *= 0.18</code></pre>
 
 </section>
 
-<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Open checks">
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
 
-<div class="note verify-summary">
-    <span class="label">What needs verifying here</span>
-    <p>The remaining design check is whether champagne foals should have a distinct blue-green eye before an age transition, or keep the adult colour from birth.</p>
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>A champagne <strong>foal gets a blue-green eye</strong> that turns to its rolled adult colour when it grows up. This needs an adult signal on the eye-colour hook.</p>
 </div>
 
-<h3 id="open-champagne-foal-eyes">Should a champagne foal be born blue-green?</h3>
+<h3 id="plan-foal-eyes">Blue-green foal eyes (owner&rsquo;s call, 2026-10-01)</h3>
 <p>
-    A real champagne foal is born blue-green and matures to amber or hazel. Decide whether to
-    add an <code>adult</code> signal to <code>EyeColorContribution</code> and represent that
-    transition, or keep the current adult colour from birth because aging is out of scope. The
-    current result is intentional until this question is answered.
+    Add an <code>adult</code> signal to <code>EyeColorContribution</code>. Champagne requests a
+    blue-green iris when it is false and the rolled adult allele when it is true. The
+    foal and adult textures then differ, so the coat cache key must include the age
+    flag. Otherwise a foal and its grown self would share one baked texture. The horse
+    designer (hard rule 5) previews an adult unless it gains a foal toggle. Why:
+    <a href="#foal-eyes-decided">the decision</a>.
 </p>
 
 </section>

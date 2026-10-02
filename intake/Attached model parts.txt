@@ -301,7 +301,7 @@ this treatment's registry is a third list that will otherwise drift silently).
 - wiki/api-notes.html: whatever stage 0 learns about LayerDefinition registration in
   26.1.2.
 - Then run node wiki/tools/check-roadmap-execution.mjs, the search/agent-text bakes,
-  and check-links.mjs, per CLAUDE.md's regenerate table.
+  and check-links.mjs, per the regenerate table in procedures/rebake.txt.
 - Delete this file. It leaves intake/ the moment stage 0 is routed.
 
 

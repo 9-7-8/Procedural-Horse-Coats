@@ -16,7 +16,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.Containers;
+import net.minecraft.core.Direction;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
@@ -168,7 +170,42 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
     public static final int DATA_FOALING = 1;
     public static final int DATA_COUNT = 2;
 
-    private final SimpleContainer supplies = new SimpleContainer(SUPPLY_SLOTS) {
+    private final Supplies supplies = new Supplies();
+
+    /**
+     * <b>The goods container, worldly</b> (2026-10-01, #22): a pipe may take out only what the bank puts out.
+     * As a plain container every slot was extractable, so a hopper under the bank pulled the hay and the water
+     * buckets straight back out of the supply row as fast as one above put them in - the yard's STASIS BANK pen read
+     * "16 drained on into the low hopper + chest, 0 in the feed slot". {@link StasisBankCapability} promised feed and
+     * water in, empties and the drop buffer out; through a face that is now what {@link #canTakeItemThroughFace} says.
+     * The menu is not a face, so a player still takes anything back by hand.
+     */
+    private final class Supplies extends SimpleContainer implements WorldlyContainer {
+        private final int[] all;
+
+        Supplies() {
+            super(SUPPLY_SLOTS);
+            all = new int[SUPPLY_SLOTS];
+            for (int i = 0; i < SUPPLY_SLOTS; i++) {
+                all[i] = i;
+            }
+        }
+
+        @Override
+        public int[] getSlotsForFace(Direction side) {
+            return all;
+        }
+
+        @Override
+        public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
+            return canPlaceItem(slot, stack);
+        }
+
+        @Override
+        public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+            return slot != FEED_SLOT && slot != WATER_SLOT;
+        }
+
         @Override
         public void setChanged() {
             super.setChanged();
@@ -195,7 +232,7 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
                     return false;
             }
         }
-    };
+    }
 
     /**
      * <b>Water the bank has left</b>, in health points it can pay for - see
@@ -374,6 +411,11 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
     }
 
     public SimpleContainer supplies() {
+        return supplies;
+    }
+
+    /** The same container, as pipes see it: what a face may put in and take out ({@link Supplies}). */
+    public WorldlyContainer suppliesForPipes() {
         return supplies;
     }
 

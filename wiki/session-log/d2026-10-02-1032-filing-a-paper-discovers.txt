@@ -1,0 +1,81 @@
+2026-10-02 10:32 (time the log was written, near the session's end) - Filing a paper discovers its gene
+
+ASKED
+-----
+- "/process-intake" - take one unit out of intake/, build it, retire it, end the
+  session. Came to: the To do.txt bullet "Filing a paper on the research shelf discovers
+  its gene for the player who filed it", built and pushed.
+
+DONE
+----
+- 77ab3d97 Filing a paper on the research shelf discovers its gene.
+  Missing: the owner settled on 2026-10-01 that filing a paper counts as discovering its
+  gene (wiki/item-research-shelf.html#filing-discovers), but the shelf never consulted
+  discovery - it filed anything and discovered nothing.
+  Change: ResearchShelfMenu.PaperSlot.setByPlayer now calls
+  GeneDiscoveryHandler.discoverFromPaper(player, topic), which goes through
+  GeneDatabaseData.discover (the call taming and breeding make, so the carrot recipe
+  unlocks and the database syncs) and ticks DISCOVER_GENE / MAGICAL_GENE_DISCOVERED.
+  What a paper teaches is common/: ResearchTopic.discoveryTokens() - its two alleles, or
+  nothing for the wild pair and for an unreadable paper. Stale javadoc on
+  GeneDatabaseData.discover ("owning a horse is the only way in") and on
+  GeneDiscoveryHandler ("reading a paper ... lives on ResearchPaperItem") rewritten.
+  Proof: :common:test --tests '*ResearchTopicTest' green (18 tests, three new); with the
+  wild-pair guard removed on purpose, exactly one failed, then restored.
+  :neoforge-26.1.2:build green; check-parity OK; :web:bakeDesignerAssets +
+  check-designer-boots OK (wasm reverted: the new method is unreachable from DesignerApi,
+  so the rebuild was noise). Nothing seen in game.
+  Retired: the To do.txt bullet; the page's Roadmap tab and its coverage row in
+  wiki/roadmap-execution.html.
+
+DECIDED
+-------
+- Filing counts as discovering (owner, 2026-10-01; already on the page).
+- Calls made without the owner (both left open by the decision as "settle while
+  building"; recorded on wiki/item-research-shelf.html#filing-discovers and its entry on
+  wiki/decisions.html):
+  - Automation discovers nothing. The hook is Slot.setByPlayer, which every hand
+    placement reaches in the 26.1.2 sources (Slot.safeInsert, AbstractContainerMenu
+    swap / moveItemStackTo / quick-craft / number key). A FakePlayer is refused, so
+    another mod's automation and the yard's own shelf pens never write database entries
+    for a non-player. The shelf registers no item capability, so hoppers cannot reach
+    it at all today.
+  - The player is told the way taming and breeding tell: database, recipe, progress
+    tasks. No chat line of its own.
+  - The wild pair teaches nothing, mirroring discoverFrom's homozygous-default skip.
+
+FOUND ON THE WAY
+----------------
+- check-roadmap-execution.mjs fails ("coverage rows are incomplete") after a page's
+  Roadmap tab goes, until its row in roadmap-execution.html is deleted AND
+  bake-roadmap-index has run. close-a-check did not say so; fixed (see PROCEDURES).
+- First draft of the wiki/javadoc said a hopper-filed paper discovers nothing; the shelf
+  has no hopper capability at all, so that was reworded before commit.
+- Verification tabs are not baked into wiki/text/ (item-research-shelf.all.txt carries
+  none of it). Left alone; not this unit's.
+
+PROCEDURES
+----------
+- procedures/close-a-check.txt: step 4 now says a removed Roadmap tab loses its
+  roadmap-execution.html coverage row by hand, and step 7 runs
+  check-roadmap-execution.mjs. Why: the check failed this session for exactly that.
+- process-intake, rebake, write-session-log: followed as written; none needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- A full :common:test run would still check everything outside ResearchTopicTest; only
+  that class ran. The change touches no coat, gene or breed data, so the goldens and
+  parity snapshots cannot move.
+- No gametest or yard pen: the yard's shelf pens use a FakePlayer, which is refused on
+  purpose. Nobody has filed a paper in a game.
+- New Verification check: wiki/item-research-shelf.html#check-filing-discovers (the
+  by-hand reproduction is written there).
+
+RELEASE
+-------
+Not offered: one small feature is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/process-intake: the next Tier 1 unit is the To do.txt bullet "the horse designer lists
+each grown part as a trait" (S, finishes shipped work, no owner question).

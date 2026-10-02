@@ -1,0 +1,97 @@
+2026-10-01 22:00 (start, approximate) - Stasis bank: a Basic horse found by name, and Eject empties
+
+ASKED
+-----
+- "Can you create three agents, who should all tackle different bugs from /fix-bug?"
+  Not done. Only two issues were open (#13, #10), and both are already fixed and only
+  waiting on a check: #13 on the live server's logs after the next release, #10 on an
+  in-game look. There was nothing for any agent to fix. Also explained that parallel
+  fix-bug runs would collide on one checkout, one Gradle and end-session's commits.
+  Offered /run-tests, /whats-next, or parallel /process-intake in worktrees.
+- "Let's do /whats-next, I'll do the tests right before I go to bed tonight"
+  Surveyed every queue. No bug has work left, no design calls are open, and all four PCH
+  export folders are reviewed. Six fixes since v0.5.039 is below the release bar. Offered
+  four intake units, and the owner picked the stasis bank.
+- Owner's answer when asked about scope: "Both pieces" (pieces 2 and 3 of the stasis bank
+  treatment in one session).
+
+DONE
+----
+- d8c35af6 Stasis bank: find a Basic horse by name; eject every empty chamber in one press
+  * Piece 2: a Basic chamber is now found by a query that is nothing but its name.
+    Before, a Basic chamber was unreachable by every query, though its name was already
+    on the row and on the item. common/horse/StasisBrowseRow gained plainNameQuery(),
+    built on QueryExpr.tokenize and HorseQuery.flags(). A query is plain only if every
+    token is a bare word (optionally led by "-") with no operator, bracket, comma, quote,
+    keyword (AND/OR/NOT/IN/LIKE) or flag. A plain query matches a Basic row when each
+    word is a substring of displayName() and no negated word is. There is a new
+    locked(rows, query), and the screen's "cannot reach" line now uses it.
+    Proof: StasisBrowseTest, 12 tests, all green. Four are new (found by name and only
+    name; a negated name; searchable rows unchanged; no-papers rows unaffected). Mutating
+    out the flag check turns two of them red.
+  * Piece 3: "Eject empties (N)" on the Chambers tab, right of the Inventory caption.
+    HorseStasisBankMenu.EJECT_EMPTIES_BUTTON = 2 * SLOTS is a third clickMenuButton verb.
+    The server re-checks stillValid and walks only the chamber container. Each chamber
+    with no snapshot goes through setItem into the pack, and the overflow goes through
+    Containers.dropItemStack at the bank. One setChanged at the end. menu.empties() =
+    filed() - occupied(); it is cheap because snapshotOf is one component read, which
+    answered the treatment's UNVERIFIED line. The button is greyed at zero and hidden on
+    the other tabs. Three lang keys in en_us.json.
+    Proof: the new gametest stasis_bank_ejects_empties. It checks that both empties come
+    out, that the occupied chamber and a chamber in a drop-buffer slot stay put, that one
+    empty goes into the single free pack slot and one onto the ground, and that a second
+    press is refused. runGameTest: all 28 required tests passed. With the snapshot guard
+    removed, it fails with "took a chamber WITH A HORSE IN IT".
+  * intake/Stasis bank - implementation treatment.txt deleted. All three pieces are done
+    (piece 1 was issue #10).
+  * Docs commit: wiki/horse-stasis.html Gameplay (tier table, Browse note, #eject-empties),
+    Coding (#basic-by-name, #eject-empties-coding), Verification
+    (#verify-eject-and-name-search, plus the summary sentence).
+- Builds: :neoforge-26.1.2:build green, check-parity OK, check-designer-boots OK, rebake
+  rows b, k and i run, check-links OK.
+
+DECIDED
+-------
+- Build pieces 2 and 3 in one session (owner).
+- Calls made without the owner, recorded on horse-stasis.html#basic-by-name:
+  * The treatment assumed the old term language. The box is now QueryExpr's SQL-style
+    clause, so "plain" also excludes AND/OR/NOT/IN/LIKE, brackets, commas and quotes.
+    "cinder OR amber" does not reach a Basic horse.
+  * The name rule belongs to the chamber's tier only. A no-papers horse in a searchable
+    chamber stays unreachable by every query. The existing test for that case was kept.
+  * Matching reads displayName() (what the row shows), not only the chamber's cached name.
+  * Overflow drops at the bank (Containers.dropItemStack, the break path), as the
+    treatment said. Withdraw-by-row still drops at the player's feet; left alone.
+
+FOUND ON THE WAY
+----------------
+- Issue #10's check (the saved-searches arrow) lives on the issue, not on the page. That
+  is right for a bug; nothing to change.
+- No bugs filed.
+
+PROCEDURES
+----------
+- process-intake.txt: the owner may make pieces of ONE treatment that share a screen and a
+  test class into one run. The treatment invited this, but the procedure's "never two
+  units" had no way to say yes.
+- fix-bug.txt: what to do when asked for several runs in parallel. Count the issues with
+  work left (fixed-and-waiting does not count), explain the collisions, and offer them in
+  sequence or one worktree each.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other HorseQuery /
+  QueryExpr consumer (browser, breeding pickers), which this change does not touch.
+- Nobody has seen any of this in game. The anchor is
+  wiki/horse-stasis.html#verify-eject-and-name-search: button placement, the greyed state
+  and its tooltip (unverified on 26.1.2 whether an inactive widget shows one), the
+  overflow drop, and Browse finding a Basic horse by name.
+
+RELEASE
+-------
+Not offered: six fixes and one small feature since v0.5.039 is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+- /run-tests (the owner is running it tonight). It can close #10 and look at
+  #verify-eject-and-name-search on the same screen. After that, /whats-next.

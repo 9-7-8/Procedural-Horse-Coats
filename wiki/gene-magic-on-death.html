@@ -123,6 +123,15 @@
     allele, which is written up below.
 </p>
 
+<p id="verified-mixed-pair">
+    <strong>A mixed pair does nothing</strong> (2026-10-01). The yard&rsquo;s DEATH DROPS II pen (row AS) killed three
+    <code>Lav/Wat</code> horses on stone and scanned a box round each death 40 ticks later, with a <code>Wat/Wat</code>
+    control in the same pen: <em>&ldquo;Lav/Wat 1 &hellip; no fluid, dropped 2x minecraft:leather; Lav/Wat 2 &hellip; no
+    fluid, dropped nothing; Lav/Wat 3 &hellip; no fluid, dropped nothing | control Wat/Wat: 4 fluid block(s), water
+    present&rdquo;</em> (<code>CLOCKWORK PASS</code>, 23:53:47). Two contradictory answers stay silent; the leather is
+    vanilla&rsquo;s ordinary 0&ndash;2.
+</p>
+
 <h3 id="retired">The volatile allele, and what a horse still carrying it does now</h3>
 
 <p>
@@ -269,15 +278,15 @@ if (existing.isAir() || existing.canBeReplaced()
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Both of magic on death&rsquo;s deaths are confirmed on a built floor, which leaves the mixed pair &mdash; a <code>Lav/Wat</code> horse must do <strong>nothing at all</strong> &mdash; the founder rule that no feral horse can ever leave a lava spring, and, since 2026-09-24, that a saved horse carrying the retired <code>Xpl</code> loads at <code>n/n</code> instead of taking the world down.</p>
+    <p>Both of magic on death&rsquo;s deaths are confirmed on a built floor, as is the mixed pair doing nothing, which leaves the founder rule that no feral horse can ever leave a lava spring, and, since 2026-09-24, that a saved horse carrying the retired <code>Xpl</code> loads at <code>n/n</code> instead of taking the world down.</p>
 </div>
 
 <h3 id="open-magic-on-death">Still open (NOT played)</h3>
 
 <p>
-    The yard&rsquo;s row AD kills one horse of each expressing kind and logs what it left, so the
-    remaining questions are the row that is supposed to do nothing, the founder rule, and the one
-    thing the retirement introduced.
+    The yard&rsquo;s row AD kills one horse of each expressing kind and logs what it left, and DEATH DROPS II
+    confirmed the mixed pair, so the remaining questions are the founder rule and the one thing the
+    retirement introduced.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
@@ -292,10 +301,6 @@ if (existing.isAir() || existing.canBeReplaced()
         <strong>Fail</strong> is an <code>IllegalArgumentException</code> from inside an entity tick,
         which is a crash every time that chunk loads &mdash; the exact failure
         <code>readableStored</code> was written for.</li>
-    <li><strong>A mixed pair does nothing.</strong> Kill a <code>Lav/Wat</code> horse on the same stone
-        floor. <strong>Pass:</strong> no fluid, and the ordinary leather &mdash; the locus states
-        that two contradictory answers are silent rather than picking a winner, and picking a winner
-        anyway would read as correct behaviour to anyone who had not read the page.</li>
     <li><strong>No feral horse carries two copies.</strong> This is the one locus whose founder table
         is carriers only. <strong>Pass:</strong> across a large wild sample every on-death allele you
         find sits opposite an <code>n</code> &mdash; a single wild <code>Lav/Lav</code> horse is a

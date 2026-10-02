@@ -219,6 +219,41 @@ class ResearchTopicTest {
     }
 
     // ------------------------------------------------------------------
+    // Filing discovers (owner, 2026-10-01)
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>Every paper a chest or a villager hands out discovers its gene when
+     * filed</b>, and teaches the two alleles it names - the shelf never takes a
+     * paper that turns out to teach nothing.
+     */
+    @Test
+    void everyLootPaperTeachesItsPairWhenFiled() {
+        for (Gene gene : Genes.all()) {
+            for (ResearchTopic topic : ResearchTopic.lootPool(gene)) {
+                assertEquals(List.of(topic.alleleA(), topic.alleleB()), topic.discoveryTokens(),
+                        gene.key() + ": filing " + topic.token() + " should teach its pair");
+            }
+        }
+    }
+
+    /** The wild pair teaches nothing, by the rule taming uses. */
+    @Test
+    void filingTheWildPairTeachesNothing() {
+        Gene gene = wideLocus();
+        ResearchTopic wild = ResearchTopic.of(gene,
+                new AllelePair(gene.defaultAllele(), gene.defaultAllele()));
+        assertEquals(List.of(), wild.discoveryTokens());
+    }
+
+    /** A paper this build cannot read teaches nothing and throws nothing. */
+    @Test
+    void filingAnUnreadablePaperTeachesNothing() {
+        assertEquals(List.of(), new ResearchTopic("somebodyelse.nosuchgene", "X", "x").discoveryTokens());
+        assertEquals(List.of(), new ResearchTopic(wideLocus().key(), "NotAnAllele", "AlsoNot").discoveryTokens());
+    }
+
+    // ------------------------------------------------------------------
     // Nothing throws on a paper this build cannot read
     // ------------------------------------------------------------------
 

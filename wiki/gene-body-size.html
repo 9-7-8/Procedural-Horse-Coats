@@ -79,10 +79,11 @@
     <p>
         This locus is one of the ones that moves a horse&rsquo;s <em>size</em>, and
         vanilla scales the hitbox from the model &mdash; so a world that would rather
-        have tack and hitboxes sit exactly where vanilla puts them can set
+        have tack and hitboxes sit near where vanilla puts them can set
         <a href="horse-body.html#body-size"><code>body.size</code></a> false. The gene
         is still inherited, still reported and still worth breeding for; only the
-        entity is held at 1.0&times;.
+        entity is compressed into 0.85&ndash;1.15&times;, so a big horse is still the
+        bigger one.
     </p>
 </div>
 
@@ -312,6 +313,40 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
     <code>Attributes.SCALE</code> scales the model <em>and</em> the hitbox.
 </p>
 
+<h3 id="size-setting-decided">The size setting compresses; the preview says what it is (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled:</strong> turning the size setting off <em>compresses</em> body scale
+    toward 1.0 instead of flattening it. A Shire still stands visibly taller than a
+    Falabella, just less so. The horse designer cannot know a server&rsquo;s settings, so it
+    labels itself a <strong>genotype preview</strong> (&ldquo;server settings may
+    differ&rdquo;) and does not pretend to show the server&rsquo;s result.
+</p>
+
+<p id="size-compressed">
+    <strong>Built 2026-10-02.</strong> With <code>body.size=false</code>,
+    <code>HorseRecords.applyTraitsToEntity</code> writes
+    <code>HorseTraits.compressScale(traits.scale())</code>:
+    <code>1 + 0.15&middot;tanh((s&nbsp;&minus;&nbsp;1)/0.15)</code>, which never leaves
+    0.85&ndash;1.15 and keeps every horse in order. The 0.15 is measured against a stall, not
+    picked: a vanilla horse is 1.6 tall with its eye at 1.52
+    (<code>EntityType.HORSE</code>), a stall is two blocks of air, so the roof is met at
+    1.25&times; and the eye suffocates past 1.316&times;
+    (<a href="horse-body.html#body-size">the arithmetic</a>). The spawn egg&rsquo;s readout
+    adds &ldquo;(<i>n</i>x in this world)&rdquo; when the setting is off; the designer
+    says &ldquo;genotype; servers may differ&rdquo;. <code>HorseTraitsTest</code> walks
+    0.1&ndash;10&times; for the band and the order. <strong>Giants stay possible</strong>
+    (owner, 2026-10-02): with the setting on &mdash; the default &mdash; nothing changed,
+    and an opted-out server compresses magical giants along with everyone else.
+</p>
+
+<p id="yard-ratio">
+    <strong>Two <code>Big/n</code> parents throw 1&nbsp;:&nbsp;2&nbsp;:&nbsp;1</strong> (2026-10-01, the 23:53 yard
+    run on 449e1787, RATIO SIZE judging itself at 40 born foals by chi-square at p&nbsp;&lt;&nbsp;0.01):
+    &ldquo;Big/Big 8, Big/n 17, n/n 15 against 1:2:1, chi-square 3.35 (2 df, p 0.187 ...) - PASS&rdquo;
+    (02:31:45 on 2026-10-02). The count is of foals born, so every <code>Big/Big</code> in it was born alive.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -319,20 +354,12 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>No scaled horse has ever been in a world, so magic body size is unproven on all four
-    of the things that can be wrong without anybody noticing: the 1:2:1 ratio, that no wild
-    horse is ever born doubled, that <code>body.size</code> false holds the entity at
-    1.0&times; <em>without</em> switching the gene off, and that a 2&times; horse does not
+    <p>Only the yard has bred a scaled horse (the 1:2:1 ratio holds), so magic body size is
+    unproven on three of the things that can be wrong without anybody noticing: that no wild
+    horse is ever born doubled, that <code>body.size</code> false compresses the entity into
+    0.85&ndash;1.15&times; <em>without</em> switching the gene off, and that a 2&times; horse does not
     suffocate in an ordinary stable.</p>
 </div>
-
-<h3 id="open-body-size-setting">Body-size setting and preview truth</h3>
-<p>
-    Decide whether the breed-height setting flattens the scale range to 1.0 or compresses it
-    toward 1.0 while preserving a recognisable Falabella/Shire contrast. The designer preview
-    must either receive the server&rsquo;s body-size flag before drawing or identify itself as a
-    genotype-only model preview; it must not silently imply a different server result.
-</p>
 
 <h3 id="open-gene-body-size">Still open (NOT played)</h3>
 
@@ -346,10 +373,6 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The ratio pen agrees.</strong> The yard&rsquo;s <em>RATIO SIZE</em> pen runs
-        <code>Big/n</code> over <code>Big/n</code> all day. <strong>Pass:</strong> about
-        1&nbsp;<code>Big/Big</code> to 2&nbsp;<code>Big/n</code> to 1&nbsp;<code>n/n</code>
-        among the foals, and every <code>Big/Big</code> born alive.</li>
     <li><strong>No wild horse is ever born doubled.</strong> The founder table lists
         <code>Big/n</code>, <code>Small/n</code> and <code>n/n</code> and nothing else, so
         <code>double-giant</code>, <code>double-tiny</code> and <code>balanced</code> are
@@ -367,9 +390,12 @@ public void contribute(AllelePair pair, Genotype genotype, GeneEpigenetics epige
         which no stack of natural loci can reach &mdash; and no horse anywhere reads anything
         near <code>MAGICAL_MAX_SCALE</code>. If nothing ever gets past 1.75, the unclamped
         path is not being taken and the whole point of making the gene codominant is lost.</li>
-    <li><strong><code>body.size</code> false stops the entity, not the gene.</strong> Set it
-        false and rejoin. <strong>Pass:</strong> every horse&rsquo;s scale reads exactly 1.0,
-        <em>and</em> a doubled horse&rsquo;s gene row still reads <code>double-giant</code> and
+    <li><strong><code>body.size</code> false compresses the entity, not the gene.</strong> Set it
+        false and rejoin. <strong>Pass:</strong> every horse&rsquo;s scale reads between 0.85 and
+        1.15, a big horse still reads larger than a small one, a doubled horse stands in a
+        two-high stall with no <code>inWall</code> damage line in the log, the spawn egg&rsquo;s
+        readout shows &ldquo;(<i>n</i>x in this world)&rdquo; (that proves the client sees the
+        synced setting), <em>and</em> a doubled horse&rsquo;s gene row still reads <code>double-giant</code> and
         still passes its copies to its foals. A switch that silently takes the gene away
         along with the scale is the failure mode. Then set it back true and note <em>when</em>
         the sizes come back &mdash; immediately, or only once the horses reload.

@@ -38,24 +38,6 @@
 
 <p>
     The <em>shipped</em> files are inside the jar, so a world changes them another way:
-<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Open checks">
-
-<div class="note verify-summary">
-    <span class="label">What needs verifying here</span>
-    <p>The meaning of a breed&rsquo;s <code>country</code> token is unresolved because no mechanic currently reads it.</p>
-</div>
-
-<h3 id="open-country">What is a breed&rsquo;s <code>country</code> for?</h3>
-<p>
-    Nearly every breed carries a country and the parser preserves it, but no gameplay mechanic
-    reads it. Decide whether it should key a mechanic before the catalogue grows, or whether it
-    is only descriptive metadata. Until then, the token remains a nation identifier rather than
-    a region, as documented by the format.
-</p>
-
-</section>
-
     <code>.minecraft/phc/breed-spawning.toml</code> overrides each one&rsquo;s biomes,
     weight and hours, or switches it off (<a href="breeds.html#world-settings">breeds</a>).
     It never touches a drop-in breed &mdash; that is already a file you can edit.
@@ -129,7 +111,11 @@
         pinned to the one it is most associated with &mdash; the Barb to
         <code>morocco</code>, the Arabian to <code>saudi_arabia</code> &mdash; because
         the mechanic this feeds keys on a country and a region token would simply
-        never match.</td>
+        never match. <span id="country-read">That mechanic is <strong>the cowboy</strong>
+        (owner, confirmed 2026-10-01): each cowboy comes from one region, a grouping of
+        countries in <code>common/breed/Region</code>, and deals only in breeds whose
+        country is in it (<code>CowboyHandler</code>, <code>BreedPool</code>). A breed with no
+        country belongs to no region, and no cowboy sells it.</span></td>
 </tr>
 <tr>
     <td><code>description</code></td>
@@ -425,6 +411,17 @@
     about scores, sizes and which allele is the pushing one, so a band naming one of them
     is refused. And <strong>a value the gene does not declare</strong> is dropped the same
     way an unknown gene is.
+</p>
+
+<h2 id="studbook-kinds">Studbook kinds: decided, not yet in the format</h2>
+
+<p>
+    <strong>Settled (owner, 2026-10-01):</strong> the format will carry a studbook kind, and
+    all four will be modelled before the sport-horse books ship: <strong>closed</strong>,
+    <strong>graded</strong> (approved outside blood), <strong>appendix / upgrade</strong>
+    and <strong>open performance</strong>. Strains cannot express any of these. No field
+    exists yet. The plan is on
+    <a href="breed-book.html#plan-studbooks">the breed book&rsquo;s Roadmap tab</a>.
 </p>
 
 <h2 id="where">Where a breed may come from</h2>

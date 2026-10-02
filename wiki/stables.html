@@ -164,9 +164,39 @@
     <code>worldgen/structure/&lt;id&gt;.json</code>,
     <code>worldgen/structure_set/&lt;id&gt;.json</code> and
     <code>worldgen/template_pool/&lt;id&gt;.json</code>. Copy this mod&rsquo;s and
-    change the ids; the structures here are <code>minecraft:jigsaw</code> with a
-    single-element start pool, <code>terrain_adaptation: beard_thin</code>, and a
-    <code>random_spread</code> placement.
+    change the ids; the structures here are <code>horsegenetics:level_jigsaw</code>
+    (below) with a single-element start pool, <code>terrain_adaptation: beard_box</code>,
+    and a <code>random_spread</code> placement. Plain <code>minecraft:jigsaw</code> works
+    too, but it builds on any slope.
+</p>
+
+<h3 id="level-ground">Level ground: <code>horsegenetics:level_jigsaw</code></h3>
+<p>
+    A vanilla jigsaw gives a rigid building <b>one</b> height, the surface under its
+    centre, and never looks at the rest of the footprint. A big stable started on a
+    hilltop ran on over the valley beside it, and the beard under it (which fills only
+    a limited depth) left a thin hollow slab with open air and mobs below. That was
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/2">issue #2</a>.
+</p>
+<p>
+    <code>level_jigsaw</code> takes a <code>minecraft:jigsaw</code> structure&rsquo;s JSON
+    unchanged, plus one field, <code>max_ground_spread</code> (blocks, default 10). Once
+    the pieces are placed, it samples the ground under the footprint&rsquo;s four corners
+    and the centre. If the highest and lowest samples differ by more than the limit, that
+    chunk gets no stable. Otherwise the whole building drops to the <b>lowest</b> sample:
+    the high side is cut into the slope, and the beard has at most the limit to fill. The
+    rule is <code>common/stable/StableSite</code>; the type is
+    <code>worldgen/LevelJigsawStructure</code>.
+</p>
+<p id="level-ground-measured">
+    <b>Measured 2026-10-01</b> by <code>worldgen/StableSiteCensus</code> (the
+    <code>stables_stand_on_level_ground</code> gametest), 12 seeds and 216 stable sites,
+    the same sites with and without the check. Before it, 95 of the 216 stood on ground
+    spreading more than 10 blocks, and the worst was 116. The median spread was 7 under
+    Horse Stable, 10 under Stables and 12 under TM U Stable. With the check, 121 are kept
+    (<b>56%</b>), and none spreads more than 10. A limit of 6 kept only 34%, and the owner
+    chose 10. So stables are now about half as common as the spacing table below
+    suggests, and the big TM U Stable loses the most.
 </p>
 
 <div class="note warn">
@@ -364,7 +394,9 @@
     horses a player could not have bred yet, and the smallest, plainest building is
     the most common of the three. All three share one biome tag, which is open,
     grassy, buildable ground &mdash; a stable on a mountainside is a stable
-    half-buried in a mountainside.
+    half-buried in a mountainside. On top of the spacing, a site whose ground is too
+    uneven is skipped (<a href="#level-ground">level ground</a>), which drops a little
+    under half of them.
 </p>
 
 <p class="muted">
@@ -453,6 +485,7 @@
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
     <li><strong>Stables sit on the ground in a new world</strong> (<a href="known-gaps.html#gap-147">gap 147</a>). Needs a fresh world. If one is still buried, try dropping <code>meadow</code> and <code>savanna_plateau</code> from the biome tag.</li>
+    <li><strong>A stable on a slope looks built in, not dropped in</strong> (<a href="#level-ground">level ground</a>, 2026-10-01). The census proves no kept stable spreads more than 10 blocks; what it cannot see is the result. <strong>Pass:</strong> on sloping ground the low side has a filled skirt of at most about ten blocks, never a hollow slab, and the high side is cut cleanly into the hill, with no terrain left inside the stalls.</li>
     <li><strong>A stable gets its horses</strong> (<a href="known-gaps.html#gap-136">gap 136</a>; the rotation fix is <a href="stables.html#verified-rotated-starts">recorded</a>, not seen). Find a generated stable, reload its chunk if empty, walk back. The log's <code>[Stables] queued</code> and <code>[Stables] filled … with N horse(s)</code> lines say which half broke.</li>
     <li><strong>Where a stable's horses stand</strong> (<a href="known-gaps.html#gap-82">gap 82</a>): not in a corridor, a tack room or a wall.</li>
     <li><strong>Each stable's horses carry what it promises.</strong> Open <kbd>i</kbd> on every horse in each of the three (<a href="stables.html">stables</a>). <strong>Pass:</strong> Horse Stable has seven (four outside, three in stalls), each with two rare-or-better natural genes and nothing magical; Stables is all Friesian, each with at least one homozygous magical trait (most exactly one); TM U Stable is all white-marking breeds with no painting magical gene.</li>

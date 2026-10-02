@@ -146,14 +146,25 @@ public final class HorseRealmLift {
      * queue, and directly by {@link HorseRealmTerrain} before it decorates -
      * because a decorated chunk that has not been lifted yet would get a new
      * portal at the new surface and then have the old one dropped on top of it.
+     *
+     * <p><b>Not before the realm is backed up</b> ({@link RealmBackup#ready}). The
+     * lift rewrites terrain horses are standing on, so a world it has not been
+     * backed up for is left exactly as it is, and the chunk waits for its next
+     * load.
+     *
+     * @return {@code false} only when this chunk still needs lifting and could
+     *         not be - the caller must not build on it then
      */
-    public static void liftNow(ServerLevel realm, ChunkPos at) {
+    public static boolean liftNow(ServerLevel realm, ChunkPos at) {
         if (OFFSET == 0 || !realm.hasChunk(at.x(), at.z())) {
-            return;
+            return true;
         }
         LevelChunk chunk = realm.getChunk(at.x(), at.z());
         if (!builtOnTheOldFloor(realm, at)) {
-            return;
+            return true;
+        }
+        if (!RealmBackup.ready(realm.getServer(), RealmBackup.LIFT)) {
+            return false;
         }
         if (!announced) {
             announced = true;
@@ -163,6 +174,7 @@ public final class HorseRealmLift {
                     BUILT_AT_Y, HorseRealm.GROUND_Y);
         }
         lift(realm, chunk, at);
+        return true;
     }
 
     /**
@@ -206,8 +218,17 @@ public final class HorseRealmLift {
                             continue;
                         }
                         dst.set(src.getX(), fromY + OFFSET, src.getZ());
-                        realm.setBlock(dst, resurface(was, fromY), 2);
-                        realm.setBlock(src, air, 2);
+                        // 2 | 16: no neighbour shape updates. Without the 16,
+                        // setBlock asks every neighbour to re-shape, and a
+                        // neighbour across the chunk edge is a block in a chunk
+                        // that may not be loaded - a synchronous load per edge
+                        // block, issue #13 (the live server logged this site
+                        // 101 times). Nothing here needs re-shaping anyway: the
+                        // whole column moves together, states and all, and a
+                        // shape update half way through a memmove could only
+                        // re-shape a block against a neighbour not moved yet.
+                        realm.setBlock(dst, resurface(was, fromY), 2 | 16);
+                        realm.setBlock(src, air, 2 | 16);
                     }
                 }
             }

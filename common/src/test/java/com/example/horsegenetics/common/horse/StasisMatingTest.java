@@ -8,6 +8,7 @@ import com.example.horsegenetics.common.repro.Conception;
 import com.example.horsegenetics.common.repro.ReproRules;
 import com.example.horsegenetics.common.repro.ReproTiming;
 import com.example.horsegenetics.common.repro.Reproduction;
+import com.example.horsegenetics.common.repro.StallionDay;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -118,7 +119,7 @@ class StasisMatingTest {
         Conception.Result took = null;
         for (int seed = 1; seed < 50 && took == null; seed++) {
             Conception.Result result = Conception.attempt(
-                    StasisMating.mating(mare(), sire(), ""), inHeat(now), now, T, 0,
+                    StasisMating.mating(mare(), sire(), ""), inHeat(now), now, T, StallionDay.of(0),
                     true, true, new SeededRng(seed));
             if (result.outcome() == Conception.Outcome.CONCEIVED) {
                 took = result;

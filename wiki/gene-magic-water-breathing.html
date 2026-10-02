@@ -99,6 +99,16 @@
     drowning.
 </p>
 
+<p id="verified-compose">
+    <strong>The absolute flag wins, the debt is dropped on surfacing, and <code>Gil/Shal</code> breathes like a plain
+    horse</strong> (test yard, pen BREATH, the run of 2026-10-02 03:52 on <code>a56afcbb</code>, three clockwork PASS
+    lines at 03:53:46). An <code>Ocn/Ocn Shal/Shal</code> horse held under for 1200 ticks never fell below 300 air and
+    lost no health (22.000 &rarr; 22.000). A <code>Gil/Gil</code> horse (factor &times;1.80) ran out of air at +536 ticks
+    on both of two dives with a refill between, the same air trace tick for tick, so no stale credit crossed over. A
+    <code>Gil/Shal</code> horse (factor &times;1.02, its copies&rsquo; deltas re-rolled to within 0.08) ran out at 303
+    ticks against a plain <code>n/n</code> horse&rsquo;s 298.
+</p>
+
 <h2 id="graded">Graded, beside an absolute flag</h2>
 
 <p>
@@ -192,39 +202,24 @@ BREATH_DEBT.put(id, owed);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Magic water breathing&rsquo;s accumulator is confirmed in both directions and every horse still drowns; what is unconfirmed is how it composes with the absolute <code>underwater_breathing</code> flag, whether the per-horse debt is really dropped when a horse surfaces, and that the server&rsquo;s health switch does not govern a short breath.</p>
+    <p>Magic water breathing is confirmed in both directions, beside the absolute flag and across repeated dives; what is unconfirmed is that the server&rsquo;s health switch does not govern a short breath.</p>
 </div>
 
 <h3 id="open-magic-water-breathing">Still open (NOT played)</h3>
 
 <p>
-    The BREATH pen settled the hard part: a <code>Shal/Shal</code> horse drowned at tick 40, a plain
-    one at 340 and a <code>Gil/Gil</code> one at 500, and none of the three stepped past the value
-    vanilla drowns at. What it did not exercise is the fractional debt across more than one dive, or
-    this locus standing beside a gene that says the horse cannot drown at all.
+    The BREATH pen settled the accumulator, its composition with <a href="gene-ocean-born.html">ocean-born</a>,
+    the debt across dives and the signed <code>Gil/Shal</code> pair (&sect;<a href="#verified">Verified</a>).
+    One config switch is left.
 </p>
 
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The absolute flag wins.</strong> A horse that is both <code>Ocn/Ocn</code>
-        (<a href="gene-ocean-born.html">ocean-born</a>, which refills its air every tick) and
-        <code>Shal/Shal</code>. <strong>Pass:</strong> it never takes drowning damage however long it
-        is held under. The composition is meant to need no special case &mdash; the flag simply
-        refills faster than the extra drain &mdash; and two handlers fighting over one
-        <code>int</code> would show up as a horse that drowns <em>sometimes</em>.</li>
-    <li><strong>The debt does not survive surfacing.</strong> Hold a <code>Gil/Gil</code> horse under,
-        let it up until its air is full, and hold it under again.
-        <strong>Pass:</strong> the second dive lasts as long as the first. <code>BREATH_DEBT</code> is
-        cleared when the horse surfaces and when it leaves the level, and a part-point of stale credit
-        carried across dives is invisible until somebody times two of them.</li>
     <li><strong><code>health.mode = off</code> does not save a short-breathed horse.</strong> Set the
         config, reload the world, and re-run the BREATH pen. <strong>Pass:</strong> <code>Shal/Shal</code> still drowns
         first. A short breath is the rule of this gene rather than a disorder, so the switch that
         turns the dwarfisms off must not touch it.</li>
-    <li><strong><code>Gil/Shal</code> breathes like a plain horse.</strong> Add one to the pen.
-        <strong>Pass:</strong> it drowns with the plain horse rather than at either extreme &mdash;
-        the sum is signed, and nothing checks for the pair.</li>
 </ul>
 </section>
 

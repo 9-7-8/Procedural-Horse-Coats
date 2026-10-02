@@ -1,0 +1,95 @@
+2026-10-01 16:50 (start, approximate; ended about 17:10) - fix #11, and a session-log procedure
+
+ASKED
+
+    1. /whats-next. Offered four options. Picked "fix #11 + #13, then release", and
+       answered the pending #14 question in the same round (see DECIDED). The option was
+       wrong as offered: fix-bug takes ONE issue per conversation. This session therefore
+       fixed #11 only; #13 and the release follow in their own sessions.
+    2. "End session. Make sure the end session procedure creates a new session log for this
+       session, that includes the time and doesn't collide with other session logs from
+       today and that session logs include everything important and make sure making a new
+       session log is a procedure, and also add that during end session you should see if
+       there's any procedure you should update or a new one to create." Done: see
+       PROCEDURES. This file is the first log written under the new scheme. It was first
+       written as d2026-10-01-fix-stable-breed-label.txt, then renamed to the timed name in
+       the same session.
+
+    The survey behind option 1: 44 commits since v0.5.037, about 900 lines of them shipped
+    code (the Chaos allele at the three mob loci, the breed climate rule). Open: bugs #10,
+    #11, #12, #13, #14; tuning #15; unlabelled #2. One PCH export folder (2026-10-01) is
+    unreviewed. intake/To do.txt holds four small builds the owner has already decided.
+
+DONE
+
+    #11, commit 26d8b9cf. A generated stable drew the breed twice. StableSpawn.roll drew
+    one and rolled the genome from it; StablePopulator.spawnHorse then drew another for the
+    record, the founder log and withBreed. In a stable listing several breeds (TM U Stable
+    lists thirteen), most horses were labelled with a breed their genes did not come from,
+    and size, the stat curve and lineage followed the wrong label. roll now returns
+    StableSpawn.Rolled(breed, genome), and the populator uses that single draw.
+    Proof: StableSpawnTest.theBreedReturnedIsTheBreedTheGenesCameFrom rolls 400 horses from
+    a nine-breed stable and checks, as BreedFounderLog does, that every disorder gene a
+    horse carries is on its labelled breed's sheet. Red with the label drawn separately,
+    green with the fix. :neoforge-26.1.2:build green, check-parity OK, designer boot OK
+    (web.wasm unchanged; StableSpawn is not reachable from web/).
+    The commit message's "Fix #11" closed the issue on push; the proof comment followed.
+    Issue closed. Horses already spawned keep their label.
+
+    Procedures (second commit of the session, docs): see PROCEDURES.
+
+DECIDED
+
+    - #14, phantom Black Quartz / Chimerite horse armour (owner): option 1. A material's
+      armour is generated only when at least one source item is registered. Recorded on
+      the issue; needs-owner removed. It is an ordinary bug now, not yet fixed.
+    - Session-log file names carry the start time, d<date>-<HHMM>-<slug>.txt, and each
+      session writes its own file (owner's request; the exact scheme was chosen without
+      her). Older files keep their names, because pages link to them.
+    - whats-next reads the TOP entry of wiki/session-log.html, not the newest filename:
+      timed and untimed names from one day do not sort in time order (without the owner).
+
+FOUND ON THE WAY
+
+    - My whats-next option bundled two fix-bug issues, which fix-bug forbids. Corrected
+      in chat before any code; whats-next now says not to do this.
+    - fix-bug step 6 warned against "Fixes #N", but its own "Fix #N:" format also closes the
+      issue on push. Rewritten.
+    - Issue #2 ("Structure Spawns", a tester's screenshot from 2026-09-10) has no label.
+      Its image was not looked at, so it is not labelled yet.
+    - No bugs filed.
+
+PROCEDURES
+
+    - NEW procedures/write-session-log.txt (/write-session-log), plus its INDEX row, its
+      .claude/skills wrapper and the keyword memory. It covers: one new timestamped file
+      per session, a collision check, required sections (asked, done with proof, decided,
+      found, procedures, not run, release, pick up first), and the entry at the top of
+      session-log.html.
+    - end-session: new step 4a, a procedure review with three questions (did a procedure
+      fail or get corrected; was something repeatable done with no procedure; did a change
+      make another procedure untrue). Step 4b now runs write-session-log. The summary
+      names the procedures that changed.
+    - process-intake step 10 and write-intake-document step 7 now point at
+      write-session-log, replacing their own d<date>-<slug> naming.
+    - whats-next: step 1g reads the top index entry; new rule against bundling
+      one-per-conversation work.
+    - fix-bug step 6: the closing-keyword correction above.
+    - CLAUDE.md: the one-line end-session summary names the two new steps.
+
+NOT RUN / NOT CHECKED
+
+    - The full :common:test suite. It would also cover the breed and stat tests that read
+      founder genomes; none of them call StableSpawn.
+    - Nobody has looked in game at a freshly generated multi-breed stable. That is not
+      needed for the fix, but it is the place to see it: every [breed-health] stable line
+      in the log should name the breed the genes came from.
+    - No Verification-tab entries added.
+
+RELEASE
+
+    Due (the Chaos allele, the breed climate rule, the #11 fix). Held until #13 is fixed,
+    per the owner's pick.
+
+PICK UP FIRST: /fix-bug #13 (horse AI forcing synchronous chunk loads on the live server),
+then /release for the next patch.

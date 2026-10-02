@@ -91,14 +91,13 @@ public final class HorseAfterlifeHandler {
 
         MinecraftServer server = level.getServer();
         String name = record.displayName();
-        HorseAfterlife.get(server).died(new HorseAfterlife.Wake(
+        HorseAfterlife.get(server).died(HorseAfterlife.Wake.of(
                 HorseStasisHandler.snapshot(horse, name),
                 owner,
                 ownerName(server, owner),
                 level.dimension(),
                 horse.blockPosition(),
-                level.getGameTime(),
-                0));
+                level.getGameTime()));
 
         ActionTrace.log("afterlife", ActionTrace.describeShort(horse)
                 + " kept for resurrection (owner " + owner + ")");
@@ -126,11 +125,14 @@ public final class HorseAfterlifeHandler {
      * tells a player that asking an operator is a thing that would work, and a
      * rescue nobody knows to ask for is not a rescue.
      *
-     * <p>Silent when the window is off, because then there is nothing true to
-     * say, and silent for an offline owner, whose window has not started.
+     * <p>Silent when both limits are off, because then there is nothing true to
+     * say, and silent for an offline owner. With only the size budget on - the
+     * default - the line says the chance lasts while there is room, which is
+     * what the budget means to a player.
      */
     private static void tellOwner(MinecraftServer server, UUID owner, String horseName) {
-        if (ServerConfig.resurrectGraceTicks() == 0) {
+        boolean window = ServerConfig.resurrectGraceTicks() > 0;
+        if (!window && ServerConfig.resurrectBudgetBytes() == 0) {
             // "For ever" - true, but not something to promise in chat on every
             // death. The operator knows; the player is told the ordinary notice.
             return;
@@ -140,8 +142,10 @@ public final class HorseAfterlifeHandler {
             return;
         }
         player.sendSystemMessage(Component.literal(
-                        horseName + " can still be brought back. Ask an operator soon - "
-                                + "the chance runs out after a while of you being online.")
+                        horseName + " can still be brought back. Ask an operator - "
+                                + (window
+                                ? "the chance runs out after a while of you being online."
+                                : "the oldest losses are let go once the server runs out of room for them."))
                 .withStyle(ChatFormatting.GRAY));
     }
 
@@ -157,6 +161,11 @@ public final class HorseAfterlifeHandler {
      * who is logged in, so lowering the setting would otherwise leave a horse
      * belonging to somebody who never comes back sitting in the save for ever
      * under a window it is already past.
+     *
+     * <p>Then the size budget, {@link HorseAfterlife#trimTo}: the store's
+     * real limit since issue #15. Here and not on a death, so a burst of
+     * deaths costs one trim, and a budget an operator lowers takes effect
+     * within ten seconds whether anybody dies or not.
      */
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
@@ -173,5 +182,9 @@ public final class HorseAfterlifeHandler {
             afterlife.spend(player.getUUID(), SWEEP_INTERVAL, grace);
         }
         afterlife.dropExpired(grace);
+        for (HorseAfterlife.Wake gone : afterlife.trimTo(ServerConfig.resurrectBudgetBytes())) {
+            ActionTrace.log("afterlife", gone.horseName() + " (" + gone.horse()
+                    + ") let go: the store was over ops.resurrect_budget_mb");
+        }
     }
 }

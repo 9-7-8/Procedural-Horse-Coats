@@ -71,9 +71,12 @@ import java.util.List;
  * so a {@code Horn/Horn} or {@code Ant/n} horse shows its gene rows and its
  * epigenome values here and <b>no horn or antlers in the picture</b>. (The game's
  * preview also obeys the antler sex gate: an {@code Antm} mare shows none there
- * either, correctly.) The cheap fix is to say in words that the part
- * is not drawn, the expensive one a preview that can draw geometry, and it is a
- * design call either way. See {@code wiki/model-parts.html#open-designer}.
+ * either, correctly.) The owner took the cheap fix (2026-10-01): the page says it
+ * in words. {@code DesignerApi.stateJson} sends {@code GrownParts.listed} as
+ * {@code "parts"}, and {@code gui.js}'s {@code drawParts} names each one over the
+ * preview, "not drawn here, see them in game" - a panel the screen has no twin of,
+ * because the screen draws the part instead. A part gene's row is no longer struck
+ * through. See {@code wiki/model-parts.html#open-designer}.
  *
  * <p><b>And one in how a horse leaves the screen.</b> Both carry the same
  * payload - {@code HorseFile}, the whole horse rather than its alleles - but the

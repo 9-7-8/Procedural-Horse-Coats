@@ -183,7 +183,7 @@ Next blocked gate:</code></pre>
     saddle opens this mod's menu, and ALT+E opens the rider's own inventory (2026-09-24, 09-29).
     <strong>Not built:</strong> a My horses row still only selects the row. It does not fetch
     the record and open the info screen, and it has no fallback when the record is unavailable.
-    That waits on stage 1. None of the test classes this stage once named exist yet.
+    That waits on stage 1.
 </p>
 
 <h3 id="ai-arbitration-first">3. Navigation failure and AI arbitration - built, tests owed</h3>
@@ -385,11 +385,13 @@ Next blocked gate:</code></pre>
 <tr><td><a href="breeds.html#roadmap">Breeds</a></td><td>New content</td><td>After spawn validation and render behaviour are stable; add breed batches.</td><td><code>wiki/breeds.html</code></td></tr>
 <tr><td><a href="cart-bench.html#roadmap">The cart and jump bench</a></td><td>Foundation</td><td>Before multi-horse draught; migrate materials to components once.</td><td><code>wiki/cart-bench.html</code></td></tr>
 <tr><td><a href="carts.html#roadmap">Carts: wagons, plows and draught</a></td><td>Vehicles</td><td>After the bench/component migration; teams and the vardo are separate slices.</td><td><code>wiki/carts.html</code></td></tr>
+<tr><td><a href="gene-champagne.html#roadmap">Champagne</a></td><td>Gear and rendering</td><td>Blue-green foal eyes need an adult signal on <code>EyeColorContribution</code> first, and the age flag in the coat cache key with it; the designer follows (hard rule 5).</td><td><code>wiki/gene-champagne.html</code></td></tr>
 <tr><td><a href="chase-gene.html#roadmap">The chase gene</a></td><td>Traits and behaviour</td><td>After goal arbitration and flag ownership are documented.</td><td><code>wiki/chase-gene.html</code></td></tr>
 <tr><td><a href="coding-notes.html#roadmap">Coding notes</a></td><td>Process</td><td>Continuous maintenance; sources and reusable checklist idioms unblock other pages.</td><td><code>wiki/coding-notes.html</code></td></tr>
 <tr><td><a href="compatibility.html#roadmap">Compatibility</a></td><td>Foundation</td><td>Run as small compatibility patches and surveys alongside, never inside, feature work.</td><td><code>wiki/compatibility.html</code></td></tr>
 <tr><td><a href="config.html#roadmap">Config</a></td><td>Process</td><td>The capacity control is exposed server-side already; what is left is a server/client convention pass.</td><td><code>wiki/config.html</code></td></tr>
 <tr><td><a href="curly-coat.html#roadmap">Curly coat</a></td><td>New content</td><td>After a coat-structure extension is proven independently of recolouring.</td><td><code>wiki/curly-coat.html</code></td></tr>
+<tr><td><a href="gene-cutie-mark.html#roadmap">Cutie mark</a></td><td>New content</td><td>The biased item pool waits on the owner naming which genes and breeds carry a bias and where it is declared; colour stays out.</td><td><code>wiki/gene-cutie-mark.html</code></td></tr>
 <tr><td><a href="gene-dmrt3.html#roadmap">DMRT3 - gait</a></td><td>Animation</td><td>After horse animation ownership is established; keep genome resolution in common.</td><td><code>wiki/gene-dmrt3.html</code></td></tr>
 <tr><td><a href="gene-flying.html#roadmap">Flying</a></td><td>Gear and rendering</td><td>The part layer is proven; wings need a body-anchored part kind, and cloud-treading remains a separate design slice.</td><td><code>wiki/gene-flying.html</code></td></tr>
 <tr><td><a href="forced-riding.html#roadmap">Forced riding - the kelpie</a></td><td>Behaviour</td><td>After ride-lock and warning feedback are specified and tested.</td><td><code>wiki/forced-riding.html</code></td></tr>
@@ -420,7 +422,7 @@ Next blocked gate:</code></pre>
 <tr><td><a href="storm-fed.html#roadmap">Storm fed</a></td><td>Traits and behaviour</td><td>After per-horse resource attachments and a consuming gene exist.</td><td><code>wiki/storm-fed.html</code></td></tr>
 <tr><td><a href="horse-traits.html#roadmap">The trait &amp; effect architecture</a></td><td>Foundation</td><td>Decision gate for selectors, resources, goals, auras and scalar conditions.</td><td><code>wiki/horse-traits.html</code></td></tr>
 <tr><td><a href="troughs.html#roadmap">Troughs and salt licks</a></td><td>Horse care</td><td>The feeding fixes have shipped; build the trough as the first world feeding block (treatment in intake/).</td><td><code>wiki/troughs.html</code></td></tr>
-<tr><td><a href="undead-horses.html#roadmap">Undead horses</a></td><td>Decision gate</td><td>The bundle call is settled in the intake treatment (the breed sets the bundle); write it onto the decisions page first, then build conversion before spawning.</td><td><code>wiki/undead-horses.html</code></td></tr>
+<tr><td><a href="undead-horses.html#roadmap">Undead horses</a></td><td>Decision gate</td><td>The bundle call is settled (the breed sets the bundle); build conversion before spawning.</td><td><code>wiki/undead-horses.html</code></td></tr>
 <tr><td><a href="villagers.html#roadmap">Villagers &amp; transfer papers</a></td><td>Ownership and acquisition</td><td>Ownership transitions are explicit now; barn placement per village style and the honest cowboy route are the gates.</td><td><code>wiki/villagers.html</code></td></tr>
 <tr><td><a href="virtual-stables.html#roadmap">Virtual stables</a></td><td>Ownership and records</td><td>After the registry and cross-dimension identity rules; item versus stall is the gate.</td><td><code>wiki/virtual-stables.html</code></td></tr>
 </tbody>
@@ -437,7 +439,7 @@ Next blocked gate:</code></pre>
     <li><strong>Gear attachment and render contract</strong> - <em>partly settled.</em> The worn-gear attachment, the Dress window and the gene part layer (horn, ram horns, antlers) are proven. The worn-side hook, which lets a gear item draw through the part layer, is still needed before shoes, wings or pads.</li>
     <li><strong>Trait/effect shape</strong> before storm-fed, magic-grab and other long-lived per-horse abilities.</li>
     <li><strong>Cart bench components</strong> before multi-horse draught, because the latter changes the vehicle shape rather than adding a new vehicle.</li>
-    <li><strong>Undead gene decision</strong> - <em>settled by the owner in the intake treatment</em> (undeath is the visible locus; the breed pins diet, temper and stats). <a href="decisions.html#open-undead-locus">The decisions page</a>, the undead page and the philosophy page still call it open. Moving the answer onto those pages is the treatment's first step.</li>
+    <li><strong>Undead gene decision</strong> - <em>settled</em> (<a href="undead-horses.html#open-undead-locus">the breed sets the bundle</a>): undeath is the visible locus, and the breed pins diet, temper and stats.</li>
 </ol>
 <p>
     A gate is finished only when its answer is written on the decision page or the owning page,

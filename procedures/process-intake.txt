@@ -16,7 +16,9 @@ and go through fix-bug instead.
 
 One run builds ONE unit. Never start a second one in the same conversation. The owner
 clears context and runs this again for the next one, because the next unit's classes,
-pages and tests have nothing to do with this one's.
+pages and tests have nothing to do with this one's. The one exception is hers to make:
+pieces of ONE treatment that share a screen and a test class may be one run if she says
+so when asked (step 5). Then they are one commit and one session log.
 
 This file is the routine, not the queue. Read what is in intake/ fresh every run.
 
@@ -40,15 +42,20 @@ STEPS
    - a treatment marked PLAN ONLY with stages unchecked is a unit only at its first
      stage.
    These are not units, so leave them alone:
-   - intake/README.txt;
+   - intake/README.txt and intake/Sizing.txt;
    - potential-assets/. Use anything in it freely for the unit you are building:
      copy, crop, recolour or transform it, without asking. Log each use in that pack's
      USAGE.txt, add THIRD_PARTY_NOTICES.md on a pack's first use, and never put a
      whole pack in git or a release;
    - *-draft/ and tools/ folders. They retire with the treatment that uses them.
-   To list a treatment's units, read its header, its "What already exists" section and
-   any "Order and size" section, not the whole file. If more than a handful of
-   treatments need sizing, hand the sizing to an Explore agent.
+   Start from intake/Sizing.txt: it holds every unit's size, impact, owner calls and
+   dependencies, dated per treatment. A block stands while
+   `git log --since=<its date>T00:00 -- "intake/<file>"` is empty (a bare date counts
+   from the current time of day and misses same-day edits); re-size only the
+   treatments changed since, and new ones, and rewrite their blocks. To size a
+   treatment, read its header, its "What already exists" section and any "Order and
+   size" section, not the whole file. If more than a handful need sizing, hand it to
+   an Explore agent. Commit Sizing.txt with the run's docs, never as an untracked file.
 
 2. Throw out what is already done.
    For each unit you might pick, grep wiki/session-log/ and wiki/text/ for its
@@ -71,7 +78,9 @@ STEPS
        b. unblocks other units;
        c. new content.
        A unit the owner flagged in her own words ("most important", "next") goes to
-       the top of its tier.
+       the top of its tier. A unit she NAMES in the command's arguments is the pick; if a
+       foundation it depends on has not shipped, ask once (question tool) whether to
+       build the foundation first in this same run - two commits, one session log.
    - OWNER: can it be built without her? The answer is No if any of these is true:
        - it has an Open: line that is a design call;
        - it says "confirm with the owner";
@@ -122,7 +131,7 @@ STEPS
      change both (rule 5).
    - Run tests by name only (--tests '*XTest'), never the full suite. Break the new
      test on purpose once, to prove it can fail.
-   - Run every regenerate-table row the change touched.
+   - Run every rebake row the change touched.
    - If the unit turns out bigger than its score, ship the part that stands alone and
      put the rest back in the treatment as its next piece. Do not widen the run.
 
@@ -141,17 +150,19 @@ STEPS
    - Not the last piece -> delete that piece's section. If the remaining pieces refer
      to it, leave a one-line pointer to where it now lives on the wiki.
    - A To do.txt bullet -> delete it, and its heading if the heading is now empty.
+   - Every case -> delete the unit's row in intake/Sizing.txt (its block, for a whole
+     treatment). An already-done unit found in step 2 goes the same way.
 
-9. End the session with end-session. Then release, as the treatment's Release: line says:
-   - own version -> run the release procedure. If the line says "when the last piece
-     ships" and this is not the last piece, do not release.
-   - rides the next release -> no release.
-   - bigger bump -> ask the owner first. The middle number never moves without her
-     word.
-   - no Release: line (an older treatment) -> no release; raise it as a question in the
-     report.
+9. End the session with end-session. A finished feature counts toward release step 1's
+   bar; it does not cut a release by itself, and the owner decides. The treatment's
+   Release: line refines what counts:
+   - "patch on the last piece", and this is not the last piece -> does not count yet;
+   - "rides with <other>" -> does not count; it goes out with that one;
+   - "compat bump" -> the release procedure confirms it with the owner before cutting;
+   - no Release: line (an older treatment) -> counts as one feature.
 
-10. Write the session log as wiki/session-log/d<date>-<slug>.txt, with:
+10. Write the session log by procedures/write-session-log.txt (a new timestamped file;
+    end-session step 4b runs it). Under its sections, make sure it has:
     - the owner's request, quoted;
     - Done: the unit, the commit, what is green, and which treatment text was retired;
     - Calls made without the owner;
@@ -171,7 +182,8 @@ Then stop. Do not start that next unit.
 
 NEVER
 -----
-- Never build two units in one conversation.
+- Never build two units in one conversation, unless the owner said so for pieces of one
+  treatment (WHEN TO USE).
 - Never pick anything that needs the owner's live server.
 - Never design a breed without her (design-a-breed).
 - Never treat an UNVERIFIED line as true because the treatment sounds confident.

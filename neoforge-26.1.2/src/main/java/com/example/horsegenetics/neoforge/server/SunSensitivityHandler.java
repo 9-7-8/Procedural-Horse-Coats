@@ -80,7 +80,9 @@ public final class SunSensitivityHandler {
         }
         // Sunlight first: it is a few block reads, and the genome parse only
         // happens for a horse actually standing in the open by day.
-        if (!inSunlight(horse) || !isSensitive(horse)) {
+        // GenomeFacts, not isSensitive (2026-10-02): the parse below ran for every horse standing in the open by day,
+        // which is most horses most of the day - 7.4% of a thousand-horse server, for a gene almost none carry.
+        if (!GenomeFacts.sunSensitive(horse) || !inSunlight(horse)) {
             return;
         }
         // Vanilla's on-fire damage on purpose, so fire resistance and fire

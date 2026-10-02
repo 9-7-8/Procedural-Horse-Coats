@@ -59,8 +59,10 @@ STEPS
    j. Interactions: what other genes change it, or hide it? Does it stack with similar
       genes?
    k. Breeding items: should a carrot or splice exist for it?
-   l. Release: once built, is it its own version, does it ride the next release, or
-      is it a bigger bump? (Only the owner moves the middle number.)
+   l. Saves: can every existing world keep loading? (Almost always, with a migration.
+      A gene that cannot is a compat - second-number - release, and that is only for
+      a substantial feature.) A finished gene otherwise rides the next patch release,
+      which the owner calls (release, step 1).
    Ask too, for a COAT gene:
    m. Where on the body, and on which bases (black, bay, chestnut, grey, dilutes)?
    n. Shape and edge: spots, lines, patches, gradients; hard or soft edges; size and
@@ -217,7 +219,7 @@ STEPS
       - a case in the handler;
       - a section on making-a-gene's Effects tab;
       - a client RenderLayer, if it draws.
-      AbilityType is on the spec/ row of the regenerate table, so run bakeSpecFixtures,
+      AbilityType is on the spec/ row of rebake's table (row d), so run bakeSpecFixtures,
       then check-parity.mjs.
    6. Config: server keys in N/ServerConfig.java, each with a safe accessor and a
       default. A bad value must never crash a world load. Document each key on
@@ -267,6 +269,9 @@ STEPS
       AttachedPart(s), with epigenome values on the copy: size, a seed, counts, reach,
       girth, asymmetry, tint. Modifier genes (form, colour, glow, crystal, growth, tip)
       are separate Java genes. A form allele's order equals its generator's habit index.
+   5b. A part's own colour locus (one per part, owner 2026-10-01) is a short subclass of
+      C/genetics/genes/AbstractPartColourGene: key, name, priority, Words. DragonHornColourGene
+      is the example. A soft part (beard, ruff, feathering) samples PartSheet.HAIR.
    6. C/genetics/GrownParts.java: add the call in of(...), plus a dress<X> method. ALSO
       add the granting locus to the everyPart baseline in shapes(Gene). Otherwise its
       modifier genes look invisible to EditorRules.changesLooks, and the editors never
@@ -303,7 +308,9 @@ STEPS
    mismatch, each writes its actual to common/build/. Check WHICH rows moved, then copy
    them to common/src/test/resources/. A gene that paints nothing should only ADD bake
    rows at the baseline hash, and change no pipeline hash. Any other movement is a
-   regression until explained.
+   regression until explained. Every new gene rewrites EVERY pipeline-golden line, because
+   each line's key is the whole genotype code: compare only the last (hash) column, e.g.
+   awk '{print $NF}' on both files with CRs stripped, before copying the actual.
 
 8. The gene page.
    - Three tabs inside article.doc: <section class="tab-panel"
@@ -319,17 +326,18 @@ STEPS
 9. The bake list, in this order. The timeline dates a gene by the first commit that
    names its key, so commit the code before baking the timeline.
      :common:bakeGeneBundle   :common:bakeGeneIcons   :common:bakeGeneWikiPages
-     :common:bakeMarkingFacts :common:bakeGeneCensus  :common:bakeUnverifiedGenes
+     :common:bakeMarkingFacts :common:bakeGeneCensus
      node wiki/tools/bake-gene-timeline.mjs
+     :common:bakeUnverifiedGenes  (after the timeline: it sorts by it)
      :web:bakeDesignerAssets  then  node wiki/tools/check-designer-boots.mjs
      node wiki/tools/bake-verification-index.mjs  (and bake-roadmap-index.mjs)
      node wiki/tools/build-search-index.mjs, check-links.mjs, bake-agent-text.mjs
-   Commit everything those wrote (CLAUDE.md's gene row lists them). A wasm rebuild
+   Commit everything those wrote (rebake's gene row, g, lists them). A wasm rebuild
    after a data-only bake may be byte-noise: compare the two, and revert the wasm if
    nothing reachable changed.
 
-10. Finish with `./gradlew :neoforge-26.1.2:build`, then end-session. Release as step
-    1's answer (l) says.
+10. Finish with `./gradlew :neoforge-26.1.2:build`, then end-session. The gene rides the
+    next release; release step 1 decides whether one is worth offering.
 
 DONE WHEN
 ---------
@@ -355,4 +363,4 @@ SEE ALSO
 --------
 wiki/making-a-gene.html (the full reference); wiki/model-parts.html; design-a-breed;
 process-intake; hand-over-a-test; end-session; release; CLAUDE.md (hard rules 3, 5, 6,
-7, 10 and the gene rows of the regenerate table).
+7, 10 and the gene rows of rebake's table).

@@ -57,8 +57,7 @@ Carried over from the head parts, NOT re-asked (Recommended, change if she says 
   type, the rainbow, pink, black, grey, and chaos), two different copies giving a two-tone part from base to tip,
   hue and tone on each copy. ONE colour gene for the whole tusks gene, so every form on a horse is tinted by the same
   gene (a horse with fangs and a horn has both ivory, or both red). White is the wild type, which reads as ivory.
-  Reuse the shared AbstractPartColourGene if the head or body parts have shipped it; if not, settle which session
-  owns it before this one starts, so two copies do not appear.
+  It subclasses the shared AbstractPartColourGene (shipped 2026-10-02; how to subclass it: wiki/model-parts.html#adding).
 - Everything can stack with every other grown part (horn, antlers, the head and body parts).
 
 How each form is built
@@ -115,7 +114,7 @@ Slices (one bullet per session, each shippable alone)
            the colour gene once.
   Slice B: the boar tusks and the sabre fangs together (the two new generators, the four new anchors JAW_* and LIP_*,
            the mixed-pair behaviour made visible: fangs plus a horn on one horse).
-If the head parts' Slice A has shipped, this reuses the colour-gene base class; if not, see the ownership note above.
+The colour gene subclasses AbstractPartColourGene (shipped 2026-10-02; how to subclass it: wiki/model-parts.html#adding).
 
 Tests and checks (CLAUDE.md: no full suite; run by name)
 =========================================================
@@ -133,7 +132,7 @@ Tests and checks (CLAUDE.md: no full suite; run by name)
   (UNVERIFIED: whether it does; anchor to the head bone and say which was used, so the tusks do not follow a jaw that
   is not the one they grew from); a horn plus a narwhal horn on one head; and the tusks with a bridle or head armour.
 
-After each slice ships (CLAUDE.md table)
+After each slice ships (procedures/rebake.txt)
 ========================================
 - Any file in horsegenetics/genes/: :common:bakeGeneBundle, bakeGeneIcons, bakeGeneWikiPages, bakeMarkingFacts,
   bakeGeneCensus, bakeUnverifiedGenes, then node wiki/tools/bake-gene-timeline.mjs, and commit genes.json, the icons,

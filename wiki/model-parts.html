@@ -50,7 +50,7 @@
 <h2 id="what-you-see">What a player sees</h2>
 
 <p>
-    One thing, so far: a <a href="gene-unicorn-horn.html">unicorn</a> &mdash; a horse with two
+    First, a <a href="gene-unicorn-horn.html">unicorn</a> &mdash; a horse with two
     copies of a rare recessive grows a tapering horn on its forehead, and about one of those in
     eight has a horn that shines in the dark. How long it is, how thick, how tightly it spirals,
     how far it leans and what colour it is are inherited with the allele and drift over
@@ -74,6 +74,16 @@
     makes them curled, corkscrew, four-horned or scurs, and a tip gene fades the points into a
     colour of their own. The <a href="breed-book.html#mirrorgazer">Mirrorgazer</a> and the
     <a href="breed-book.html#not_a_sheep">Not A Sheep</a> carry them.
+</p>
+
+<p>
+    And <a href="gene-dragon-horns.html">dragon horns</a>, the first of the head parts: two copies
+    of a rare recessive grow a pair behind the ears, swept back over the neck &mdash; swept,
+    straight or curled, and as long, thick, swept back and splayed as the allele says &mdash; on
+    mares and stallions alike, never on a foal. Their colour is
+    <a href="gene-dragon-horn-colour.html">a gene of its own</a> with the horn colour&rsquo;s
+    rules, so a horse&rsquo;s dragon horns and unicorn horn are bred for colour separately. Every
+    part stacks: one horse can wear all four.
 </p>
 
 <p>
@@ -142,8 +152,8 @@
                 region. A tree of these is a part.</td></tr>
         <tr><td><code>PartKind</code></td><td>common</td>
             <td>What a gene asks for. Carries the anchor and the default sheet region. One value
-                today (<code>HORN</code>); a kind arrives <em>with</em> its geometry, never
-                ahead of it.</td></tr>
+                per part, and one per side for a pair (the antlers, ram&rsquo;s horns and dragon
+                horns); a kind arrives <em>with</em> its geometry, never ahead of it.</td></tr>
         <tr><td><code>PartAnchor</code></td><td>common</td>
             <td>Where it roots, as an enum and <strong>never a bone name</strong> &mdash; so
                 <code>common/</code> imports nothing from Minecraft and retargeting an anchor is
@@ -192,7 +202,19 @@
         &mdash; the adult and the foal share bone names and nothing else.</li>
     <li>A region in <code>PartSheet</code> and a <code>paint()</code> call in
         <code>bake-part-sheet.mjs</code>. Keep it a uniform grain; see below.</li>
-    <li>A gene that returns one, and a line in <code>GrownParts.of</code>.</li>
+    <li>A gene that returns one, and a line in <code>GrownParts.of</code> &mdash; and the
+        granting locus added to the every-part baseline in <code>GrownParts.shapes</code>, or its
+        modifier loci look invisible to the editors.</li>
+    <li>Its colour, if it has one of its own (owner, 2026-10-01: colour is its own gene per
+        part): a short subclass of <code>AbstractPartColourGene</code> &mdash; a key, a name, a
+        priority and the <code>Words</code> its outcomes are written in. The alleles, the two-tone
+        rule, the per-copy <code>hue</code>/<code>tone</code>/<code>chaos</code> numbers and the
+        founders come with it. <code>GrownParts.of</code> asks its <code>tintsFor</code> and
+        <code>dressed</code> puts the base and tip on. <a href="gene-dragon-horn-colour.html">Dragon
+        horn colour</a> is the worked example.</li>
+    <li>A soft part (a beard, a ruff, feathering) samples <code>PartSheet.HAIR</code>, a fine
+        lengthwise fibre grain laid down ahead of them; a hard one <code>HORN</code> or
+        <code>BONE</code>.</li>
 </ol>
 
 <p>
@@ -211,6 +233,13 @@
     <code>Slice.regions</code>). Plus a foal gate, as data on the kind. The antlers are also two
     kinds, one per side, rather than one mirrored mesh: a negative scale would turn a culled
     box inside out, and an asymmetric rack wants the sides to differ anyway.
+</p>
+
+<p>
+    <strong>The dragon horns were the head-parts proof</strong> (2026-10-02): a new pair of
+    anchors (<code>NAPE_RIGHT</code>/<code>LEFT</code>, behind the ears), a generator and size
+    ladder beside the ram horn&rsquo;s, and the first part to take its colour from a subclass of
+    the shared colour base. Nothing else moved.
 </p>
 
 <h2 id="three-tiers">The rule that keeps a herd cheap</h2>
@@ -318,9 +347,12 @@
 
 <p>
     <code>part_sheet.png</code> is 64&times;64, cut into a 4&times;4 grid of 16&times;16 regions,
-    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Five regions are
-    painted &mdash; horn and horn tip, antler bone and antler point, and the bloom clumps &mdash; and
-    the rest are room for the parts that have not been written.
+    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Eight regions are
+    painted &mdash; horn and horn tip, antler bone and antler point, the bloom clumps, ram horn and
+    ram tip, and hair &mdash; and the rest are room for the parts that have not been written.
+    The baker repeats every region id by value; <code>PartGeneratorTest.theSheetBakerAgreesWithPartSheet</code>
+    reads it and fails if an id, a <code>paint()</code> call or a <code>PAINTED</code> entry
+    disagrees with <code>PartSheet</code>.
 </p>
 
 <p>
@@ -345,6 +377,44 @@
     horse are on the checks.
 </p>
 
+
+<h3 id="open-designer">Shipped 2026-10-02: the designer names the parts it cannot draw</h3>
+<p>
+    The browser designer previews a flat coat texture and cannot draw geometry, while the game's
+    spawn screen draws every part. The owner's call (2026-10-01) was the cheap one: say so in
+    words, and no 3D preview. A horse with a part now gets a panel at the top left of the preview
+    reading <em>Not drawn here &mdash; see in game</em>, with one line per part. A foal's antlers,
+    ram's horns and dragon horns add <em>(grows in with age)</em>, because a foal wears only the
+    horn (<code>PartKind.showsOnFoal</code>). A plain horse shows no panel.
+</p>
+<ul>
+    <li><strong>The words come from <code>common/</code>.</strong>
+        <code>GrownParts.listed</code> is <code>GrownParts.of</code> named for a person: a pair
+        once, by <code>PartKind.label()</code>, with an adult-only flag. It is the same door the
+        renderer uses, so the antler sex gate holds here too, and an <code>Antm</code> mare lists
+        nothing. <code>DesignerApi.stateJson</code> sends it as <code>"parts"</code>, and
+        <code>gui.js drawParts</code> draws it. The panel is the one widget with no twin on the
+        spawn screen, which draws the part itself; the comment on both editor files says so
+        (hard rule 5).</li>
+    <li><strong>Part rows are no longer struck through.</strong> <code>genesJson</code> sends a
+        <code>grows</code> flag (<code>EditorRules.grows</code>, a memoised
+        <code>GrownParts.shapes</code>) beside <code>shows</code>, and <code>viewable()</code>
+        honours it. It is a flag rather than a sixth <code>shows</code> category because
+        <code>viewable()</code> lists the categories it cannot draw, and a new category would read
+        there as drawable (<a href="architecture.html#gap-254">open check 254</a>).</li>
+    <li><strong>Both editors' rows were wrong, and are fixed in one place.</strong> A part gene's
+        outcomes are all wild types, because they paint nothing. Both editors' "is it expressing"
+        rule was <em>not a wild type</em>, so an <code>Ant/Ant</code> horse's antlers row said
+        <em>no effect</em>. <code>EditorRules.expressing</code> is now the rule for both
+        editors: a part gene expresses when its outcome is not the one its default alleles give.
+        <code>GrownPartsListedTest</code> holds the listing, the sex gate, the foal flag and the
+        row rule.</li>
+</ul>
+<p>
+    Seen working in headless Chrome on 2026-10-02: an adult Horn/Horn Ant/Ant stallion, and the
+    same horse as a foal. Neither the game screen's row change nor the panel has been seen by
+    a person yet. See <a href="#open-editor-part-rows">the check</a>.
+</p>
 </section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
@@ -353,8 +423,8 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        The parts the built machinery has no generator for yet &mdash; dorsal spines and
-        crystalline growths first, then hoof feathering, tufted tails and wings &mdash; plus the
+        The parts the built machinery has no generator for yet &mdash; the five head parts
+        after the dragon horns, dorsal spines and crystalline growths, then hoof feathering, tufted tails and wings &mdash; plus the
         two hooks that would let something other than one gene ask for a part: a breed file, and
         the worn side, so a horse shoe draws through this layer rather than a bespoke one.
     </p>
@@ -394,6 +464,13 @@
     <a href="#adding">the Coding tab</a> &mdash; and none of them needs a new layer.
 </p>
 <ul>
+    <li><strong>The rest of the head parts.</strong> Dragon horns shipped as the proof; five more
+        are scoped with the owner&rsquo;s calls: ear fins or frills (recessive), cheek spikes and a
+        brow ridge (dominant) &mdash; hard parts, new anchors on the head, the count-shown
+        machinery &mdash; then a goat beard (dominant) and a ruff round the neck (recessive), the
+        soft parts on <code>HAIR</code> that foals wear too. Each with its own colour locus on
+        <code>AbstractPartColourGene</code>. The treatment is in <code>intake/</code> until each
+        slice ships.</li>
     <li><strong>Dorsal spines.</strong> A row along the back; needs a <code>SPINE</code> anchor,
         which is the first anchor on the body rather than the head and therefore the first one
         that has to be checked against a body-armour layer.</li>
@@ -426,13 +503,6 @@
         <code>AttachedPart</code> list. Saddle pads follow. Not settled: whether a worn item may
         ever replace a grown part &mdash; a helmet over a horn.</li>
 </ul>
-
-<h2 id="designer-pointer">The designer cannot draw a part</h2>
-<p>
-    Whatever is built for the two editors is a plan, but <em>which</em> of the three answers to
-    build is an unresolved design call, so it lives on
-    <a href="#open-designer">the Verification tab</a> rather than here.
-</p>
 
 <h2 id="elytra-wings">Wings off the elytra &mdash; what transfers and what does not</h2>
 <p>
@@ -572,7 +642,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, the antlers on screen, and any cost against a herd.</p>
+    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack, the antlers on screen, any cost against a herd, and the editors' new part rows and the designer's parts panel.</p>
 </div>
 
 <h3 id="open-parts-draw-order">Draw order has been argued, not observed</h3>
@@ -594,17 +664,15 @@
     <a href="gene-antlers.html#open-antler-tines">the antlers&rsquo; tab</a>.
 </p>
 
-<h3 id="open-designer">The browser designer cannot draw a part &mdash; and what to do about it</h3>
+<h3 id="open-editor-part-rows">The editors' part rows and the designer's parts panel, unseen by a person</h3>
 <p>
-    <code>wiki/horse-designer/</code> and <code>CustomHorseSpawnScreen</code> are one screen in
-    two places, and on this they now differ. The game's screen draws the horn on its preview:
-    every screen's model horse gets its parts from <code>GeneticHorseRenderer.applyCoat</code>
-    along with its coat, so a unicorn in the spawn egg, the family tree or the horse browser is
-    drawn wearing its horn. The browser designer previews a flat coat texture and cannot draw
-    geometry, so there a <code>Horn/Horn</code> horse shows its gene row and its epigenome and
-    no horn, and an antlered one no antlers. The cheap answer is for the designer to <em>list</em> the part as a trait and say
-    plainly that it is not drawn; anything better is its own plan. The divergence is written in
-    a comment on both files, per hard rule 5.
+    Built 2026-10-02 (<a href="#open-designer">what shipped</a>). In game, open the custom horse
+    spawn egg, add <code>Antlers</code> at <code>Ant/Ant</code> and <code>Unicorn horn</code> at
+    <code>Horn/Horn</code>: both rows should be green and say <em>Antlers</em> and
+    <em>Unicorn</em>, where they used to say <em>no effect</em>. Do the same in the
+    browser designer: the panel at the top left of the preview should list both parts, and
+    switching to a foal should add <em>(grows in with age)</em> to the antlers only. Also check
+    on a narrow window that the panel does not cover the horse.
 </p>
 
 <h3 id="open-parts-herd">Nothing has been measured</h3>

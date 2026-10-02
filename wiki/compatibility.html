@@ -405,6 +405,25 @@
     actually put in it and has to know every one.
 </p>
 
+<p id="generated-installed">
+    <strong>A metal counts only if its own mod is installed</strong> (owner, issue #14). A
+    <code>c:</code> tag can name another mod&rsquo;s item as an optional entry &mdash;
+    <code>actuallyadditions:black_quartz</code> in somebody else&rsquo;s <code>c:gems</code>
+    &mdash; and the tag file is read whether or not that mod is there. Taken at face value it
+    gave a server with neither Actually Additions nor Mana and Artifice a Black Quartz and a
+    Chimerite Horse Armor that the metalsmith sold and nothing could forge. So
+    <code>MaterialScan.of</code> drops a metal whose namespace is not a loaded mod before
+    anything is built from it, which also moves the fingerprint and rebuilds an old pack. The
+    test is the namespace and not the item because the armour items are registered in the mod
+    constructor, before anybody else&rsquo;s items exist. A loaded mod that still registers
+    none of a material&rsquo;s items (a config flag) keeps its armour item, but gets no recipe
+    and no trade. A world from an older jar may still hold a dropped armour, in a chest or
+    in a villager&rsquo;s offers, so each dropped id is registered as an <strong>alias of
+    iron horse armour</strong> (<code>ModdedArmour</code>): it loads as iron, the tier it
+    was modelled on, rather than naming an item that is gone. Not yet seen against a real
+    save.
+</p>
+
 <div class="note">
     <span class="label">Collapsing is the honest answer, not only the safe one</span>
     <p>
@@ -2095,6 +2114,22 @@
     <p>Predicted from other mods&rsquo; jars, never observed: a wood scan falling from 287 to 39, one steel armour where a tester&rsquo;s 319-jar pack found six, a hay-bale tag lookup that would silently stop every horse in the world eating hay, and two whole integrations written entirely by reading a jar &mdash; the <a href="compatibility.html#verify-waystones">Waystones hook</a> and the <a href="compatibility.html#verify-ftbteams">FTB Teams one</a> &mdash; and <strong>no generated recipe has ever once been parsed by the game</strong>.</p>
 </div>
 
+<h3 id="verify-armour-alias">A dropped armour loads as iron in an old world (2026-10-01, NOT played)</h3>
+<p>
+    0.5.038 drops a horse armour whose metal&rsquo;s mod is not installed and
+    <a href="#generated-installed">aliases its id to iron horse armour</a>
+    (<code>ModdedArmour</code>), so a world from an older jar that holds one still loads. The
+    scan side is unit-tested; the alias has never met a real save.
+</p>
+<ul>
+    <li><strong>Pass:</strong> on the server that reported #14, after updating, a Black Quartz
+        or Chimerite Horse Armor that was in a chest is iron horse armour, and a metalsmith
+        that offered one offers iron in its place. No error naming
+        <code>horsegenetics:black_quartz_horse_armor</code> in the log.</li>
+    <li><strong>Fail:</strong> the stack has vanished, or a villager lost its whole offer list
+        &mdash; the alias did not apply where NeoForge reads saved items.</li>
+</ul>
+
 <h3 id="verify-ftbteams">Teams and allies riding each other&rsquo;s horses (NOT played, needs a second player)</h3>
 
 <p>
@@ -2233,7 +2268,9 @@
         grazing hay stopped being a hardcoded block and became a tag lookup, so if the tag
         is wrong every horse silently stops eating hay everywhere. The gametest
         <code>hay_is_still_a_bale</code> covers the tag itself; this covers the goal that
-        reads it.</li>
+        reads it. <em>Failed in the yard (2026-10-02):</em> a hungry mare spent ten minutes beside
+        a plain <code>minecraft:hay_block</code>, starved to 0, and never ate it &mdash;
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">issue #26</a>.</li>
     <li><strong>Hand a hay bale to a hurt tamed horse.</strong> It should heal, consume the
         bale and give bond exactly as before &mdash; vanilla's own bale is deliberately
         excluded from the new handler, so any change here is a bug.</li>

@@ -7,10 +7,12 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import java.util.List;
@@ -164,5 +166,30 @@ public final class TraderSale {
         horse.setData(ModAttachments.HORSE_CARE.get(), care.withHerd(Optional.empty()));
         horse.setLeashedTo(trader, true);
         HorseLog.soldToDealer(horse, seller.getUUID(), "a wandering trader");
+    }
+
+    /**
+     * <b>When he goes, it goes with him</b> (#21, 2026-10-01). The class javadoc promised this from the start and
+     * nothing did it: vanilla's {@code TraderLlama} removes itself by copying its trader's despawn delay while it is on
+     * his rope, and a horse has no such logic - so on his despawn the rope simply dropped and the horse stayed,
+     * persistent, unowned and untamed, for ever (the yard's KEEPING HORSES pen, the same day).
+     *
+     * <p>Only a {@code DISCARDED} trader, which is how {@code WanderingTrader.maybeDespawn} removes him. One who is
+     * killed, or whose chunk unloads, leaves his horse where it is, as vanilla leaves his llamas. And only a horse
+     * still on <i>his</i> rope at that moment: one a player has since tied to themselves, or is riding, is theirs.
+     * The leash is still attached when this fires - the horse finds its holder gone only on its own next tick.
+     */
+    @SubscribeEvent
+    public static void onTraderLeave(EntityLeaveLevelEvent event) {
+        if (!(event.getEntity() instanceof WanderingTrader trader)
+                || trader.getRemovalReason() != Entity.RemovalReason.DISCARDED
+                || !(event.getLevel() instanceof ServerLevel level)) {
+            return;
+        }
+        for (Horse horse : level.getEntitiesOfClass(Horse.class, trader.getBoundingBox().inflate(16.0),
+                h -> h.isAlive() && h.isLeashed() && h.getLeashHolder() == trader && !h.isVehicle())) {
+            ActionTrace.log("trader", ActionTrace.describeShort(horse) + " leaves with the wandering trader");
+            horse.discard();
+        }
     }
 }

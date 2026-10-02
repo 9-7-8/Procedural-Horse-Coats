@@ -21,6 +21,84 @@
     making a reader load the whole project chronicle. <strong>Newest first.</strong>
 </p>
 <ul>
+    <li><a href="session-log/d2026-10-02-1125-body-size-compresses.txt">2026-10-02 11:25 &mdash; <strong>body.size off compresses instead of flattening</strong>: with the size setting off, every horse is squashed into 0.85&ndash;1.15&times; (a tanh, order kept, the band measured against a two-block stall) rather than held at 1.0. The default keeps giants absurd. The spawn egg prints the world's number; the designer labels its number a genotype.</a></li>
+    <li><a href="session-log/d2026-10-02-1110-send-home-free.txt">2026-10-02 11:10 &mdash; <strong>Send home is free</strong>: the horse browser's Send home button no longer spends a ticket. It works from any world unless the server sets an item price, and it has a five-second per-player cooldown. Three new <code>behaviour.send_home_*</code> keys.</a></li>
+    <li><a href="session-log/d2026-10-02-1051-designer-names-grown-parts.txt">2026-10-02 10:51 &mdash; <strong>The designer names the grown parts it cannot draw</strong>: the browser designer lists a horse's horn, antlers and other parts in a panel, "not drawn here - see in game", and both editors' part-gene rows stop saying "no effect". Intake gained Sizing.txt, so process-intake re-sizes only what changed.</a></li>
+    <li><a href="session-log/d2026-10-02-1032-filing-a-paper-discovers.txt">2026-10-02 10:32 &mdash; <strong>Filing a paper discovers its gene</strong>: a paper a player puts on the research shelf now discovers its gene and unlocks its carrot, through the same path taming uses. Fake players and automation discover nothing; there is no chat line. Not yet seen in game.</a></li>
+<li><a href="session-log/d2026-10-02-1013-light-horse-horn-glows.txt">2026-10-02 10:13 &mdash; <strong>A light horse's horn glows, then reversed</strong>: the horn briefly followed the light locus, then the owner reversed the call - only horn glow makes a horn emissive. Rebake row g's order fixed so a new gene's unverified-list place is right.</a></li>
+    <li><a href="session-log/d2026-10-02-0840-dragon-horns-and-part-colour-base.txt">2026-10-02 08:40 &mdash; <strong>Dragon horns, on a shared part-colour base</strong>: the foundation unit (AbstractPartColourGene cut out of horn colour, proven unchanged by snapshot, and the HAIR sheet region) and head parts Slice A - a recessive pair of horns behind the ears, swept, straight or curled, with its own colour locus. Nothing seen in game yet.</a></li>
+    <li><a href="session-log/d2026-10-01-2315-overnight-yard-and-stress.txt">2026-10-01 23:15 &mdash; <strong>Overnight yard and a horse stress run</strong>: two waves of self-judging yard pens built from every open Verification check, about eighty checks closed on their pages, and #20-#24 fixed (weather copies, the trader sale, the stasis hopper, covers beside a wall, a lycan attachment on every mob). A dedicated-server stress run with JFR cut 1000 horses from 48 to 36 ms a tick; freezing far-away horses is written up for the owner.</a></li>
+    <li><a href="session-log/d2026-10-01-2200-stasis-name-search-and-eject.txt">2026-10-01 22:00
+        &mdash; <strong>Stasis bank: a Basic horse found by name, and Eject empties</strong>: a
+        query that is only a name now reaches a Basic chamber (nothing else does), and the
+        Chambers tab ejects every empty chamber in one press. The stasis bank treatment is
+        retired from intake.</a></li>
+    <li><a href="session-log/d2026-10-01-2157-fix-roadmap-coverage-19.txt">2026-10-01 21:57
+        &mdash; <strong>#19: the roadmap coverage check is green again</strong>: four pages
+        whose Roadmap tabs gained their first entry today got coverage rows on
+        roadmap-execution.html. Rebake row k now runs the check, so the table cannot drift
+        quietly again.</a></li>
+    <li><a href="session-log/d2026-10-01-2151-fix-stable-ground-2.txt">2026-10-01 21:51
+        &mdash; <strong>#2: stables no longer float over valleys</strong>: they are now
+        <code>horsegenetics:level_jigsaw</code>, which skips a site whose ground spreads more
+        than 10 blocks and drops the rest to the lowest corner. Measured on 216 sites: 56%
+        kept, worst kept spread 10 (was 116). #19 filed for the failing roadmap check.</a></li>
+    <li><a href="session-log/d2026-10-01-2110-fix-mixin-refmap-16.txt">2026-10-01 21:10
+        &mdash; <strong>#16: the mixin config no longer names a refmap</strong>: NeoForge 26
+        never remaps, so none was ever built, and every start warned about it. A server boot
+        proves the mixins still apply. The owner picked "reject uneven sites" for #2.</a></li>
+    <li><a href="session-log/d2026-10-01-2045-fix-stasis-arrow-10.txt">2026-10-01 20:45
+        &mdash; <strong>#10: the stasis bank's saved-searches arrow keeps to Browse</strong>:
+        the arrow now hides with the filter box, and leaving Browse closes its menu so it
+        cannot catch clicks on Chambers. The fix waits on an in-game check. Issue #2 (floating
+        stables) got four fix options and needs-owner.</a></li>
+    <li><a href="session-log/d2026-10-01-2010-fix-founder-log-stables-12.txt">2026-10-01 20:10
+        &mdash; <strong>Fix #12: the founder log stops flagging a stable's own magic</strong>:
+        a Stables horse is now checked against its sheet as BreedFounder rolled it, before
+        the magic the stable adds on purpose. The off-sheet rule moved into common/ as
+        BreedFounder.offSheet, held by a new StableSpawnTest case.</a></li>
+    <li><a href="session-log/d2026-10-01-2000-fix-dealer-horse-hunters-17.txt">2026-10-01 20:00
+        &mdash; <strong>Fix #17: the arcane dealer stocks no horse-hunters</strong>: one
+        aggressive horse in a dealer's pen killed its unsold pen-mates. A pair whose abilities
+        start fights with horses or everything is no longer stocked; the rest of aggression,
+        and guardian, still are. Held by a new ArcaneStockTest case.</a></li>
+    <li><a href="session-log/d2026-10-01-1940-fix-powder-snow-18.txt">2026-10-01 19:40
+        &mdash; <strong>Fix #18: no horse stands in powder snow</strong>: a cowboy's
+        placement check could not see powder snow, so a dealer in a snowy biome froze his
+        string. The spot is now refused when the horse's box touches it, which a new gametest
+        holds. The owner picked option 1 for #17, and that is recorded on the issue.</a></li>
+    <li><a href="session-log/d2026-10-01-1930-releases-are-the-owners-call.txt">2026-10-01 19:30
+        &mdash; <strong>Releases are the owner's call</strong>: a session no longer cuts a
+        release by itself. It offers one only once a substantial batch has piled up (roughly
+        ten-plus player-facing fixes, or a substantial feature) and cuts it on the owner's
+        yes. The release procedure, the nine procedures that reach it, CLAUDE.md rule 10 and
+        releases.html all changed to match.</a></li>
+    <li><a href="session-log/d2026-10-01-1858-free-covers-config.txt">2026-10-01 18:58
+        &mdash; <strong>A stallion's free covers are a server setting</strong>:
+        fertility.free_covers_per_day (default 3) decides when his odds halve, carried into
+        common/ as StallionDay so the odds, a mare's preference and the vet's kit all read the
+        world's number. Then 0.5.039 released (that and #15), and the server's first four log
+        exports reviewed: #16, #17 (dealer stock kills itself) and #18 (dealer horses freeze
+        in powder snow) filed.</a></li>
+    <li><a href="session-log/d2026-10-01-1840-afterlife-size-budget-15.txt">2026-10-01 18:40
+        &mdash; <strong>#15, the afterlife store held to a size</strong>: a dead owned horse is
+        now kept until the store reaches ops.resurrect_budget_mb (100 MB), then the oldest
+        deaths go first; the 60-minute owner-online window is now an optional extra, off by
+        default. Three procedures tightened around config keys and server boots.</a></li>
+    <li><a href="session-log/d2026-10-01-1721-fix-chunk-loads-13.txt">2026-10-01 17:21
+        &mdash; <strong>#13, realm backups, #14, and 0.5.038</strong>: horses and the realm no
+        longer force chunk loads (#13, open until the server's logs confirm); the horse realm is
+        backed up before any change that could lose horses, with <code>/horserealm restore</code>;
+        no armour for a mod that is not installed (#14); 0.5.038 released. A dev-server stop
+        killed the live server by mistake &mdash; process kills are now blocked by a hook and go
+        through <code>tools/stop-dev-java.ps1</code> only.</a></li>
+    <li><a href="session-log/d2026-10-01-1650-fix-stable-breed-label.txt">2026-10-01 16:50
+        &mdash; <strong>Fix #11, and a session-log procedure</strong>: a generated stable
+        drew a horse's breed twice, so multi-breed stables labelled most horses with a breed
+        their genes did not come from; it is now drawn once. Each session now writes its own
+        timestamped log (<code>/write-session-log</code>), and end-session reviews the
+        procedures before it finishes. #14 decided: no armour for a material with no
+        registered source item.</a></li>
     <li><a href="session-log/d2026-10-01-mythic-breeds-audit.txt">2026-10-01
         &mdash; <strong>the mythic-breeds audit, and a biome for every one</strong>.
         An intake session with no code: seven tables of mythical horses mapped onto the gene catalogue
@@ -28,9 +106,12 @@
         public domain only and no talking, then a vanilla biome list, spawn time and rarity for each.
         Nothing built; the audit orders what to scope next, starting with wings.</a></li>
     <li><a href="session-log/d2026-10-01-process-intake-routine.txt">2026-10-01
-        &mdash; <strong>A process-intake routine</strong>: <code>/process-intake</code> ranks every
-        unit in intake/ (small and high impact first, then whatever needs no owner call, then the
-        big ones) and builds exactly one.</a></li>
+        &mdash; <strong>Procedures</strong>: every repeatable routine is now a plain-text file in
+        <code>procedures/</code>, each a slash command. Twenty-two of them, from process-intake
+        and fix-bug to release and add-a-gene. CLAUDE.md fell from 300 lines to 194 as
+        routines moved out. Saves now keep loading within a <code>0.X</code> series, and the
+        version reads <code>0.&lt;compat&gt;.&lt;patch&gt;</code>. A run of open design calls
+        was settled through the question tool, which is now hard rule 11.</a></li>
     <li><a href="session-log/d2026-10-01-breed-climate-rule.txt">2026-10-01
         &mdash; <strong>The breed climate rule</strong>: every Nether breed is heat tolerant, fixed,
         and every breed that spawns in snowy biomes carries cold tolerance at a tier set by their

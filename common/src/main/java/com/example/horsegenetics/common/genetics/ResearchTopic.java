@@ -248,6 +248,26 @@ public record ResearchTopic(String geneKey, String alleleA, String alleleB) {
         return isResolved() ? new CarrotEffect.KnownGeneSplice(geneKey, alleleA, alleleB) : null;
     }
 
+    /**
+     * <b>What filing this paper teaches its filer</b>: the two allele tokens to
+     * mark seen when the shelf discovers {@link #gene()}, or an empty list when
+     * it teaches nothing (owner's call, 2026-10-01: filing counts as
+     * discovering).
+     *
+     * <p>Empty for a paper this build cannot resolve - a retired gene stays
+     * inert - and for the wild pair, by the same rule taming uses: the ordinary
+     * horse tells you nothing new, and a paper about it tells you no more.
+     */
+    public List<String> discoveryTokens() {
+        Gene gene = gene();
+        AllelePair pair = pair();
+        if (gene == null || pair == null || !gene.canOccur(pair)
+                || pair.homozygousFor(gene.defaultAllele())) {
+            return List.of();
+        }
+        return List.of(pair.first().token(), pair.second().token());
+    }
+
     public boolean homozygous() {
         return alleleA.equals(alleleB);
     }

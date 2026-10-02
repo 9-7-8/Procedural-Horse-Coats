@@ -250,6 +250,39 @@ class PartGeneratorTest {
         assertEquals(PartSheet.REGION, PartSheet.v(PartSheet.ACROSS));
     }
 
+    /**
+     * The sheet baker repeats every region id by value, and paints each one. The
+     * two drifting is a horn wearing somebody else's pixels with nothing red, so
+     * read the baker and hold every {@code public static final int} region here to
+     * its constant there, and to a {@code paint()} call and a {@code PAINTED} entry.
+     */
+    @Test
+    void theSheetBakerAgreesWithPartSheet() throws Exception {
+        java.nio.file.Path baker = java.nio.file.Path.of("..", "neoforge-26.1.2", "tools", "bake-part-sheet.mjs");
+        String js = java.nio.file.Files.readString(baker);
+        java.util.regex.Matcher painted = java.util.regex.Pattern
+                .compile("const PAINTED = \\[([^\\]]*)\\]").matcher(js);
+        assertTrue(painted.find(), "no PAINTED list in " + baker);
+        Set<String> paintedNames = new HashSet<>(List.of(painted.group(1).split("\\s*,\\s*")));
+        int regions = 0;
+        for (java.lang.reflect.Field f : PartSheet.class.getFields()) {
+            String name = f.getName();
+            if (f.getType() != int.class || List.of("SIZE", "REGION", "ACROSS", "ALL", "SOLID", "CAPACITY")
+                    .contains(name)) {
+                continue;
+            }
+            regions++;
+            int id = f.getInt(null);
+            java.util.regex.Matcher m = java.util.regex.Pattern
+                    .compile("const " + name + " = (\\d+);").matcher(js);
+            assertTrue(m.find(), name + " is not declared in the baker");
+            assertEquals(id, Integer.parseInt(m.group(1)), name + " has a different id in the baker");
+            assertTrue(js.contains("paint(" + name + ","), name + " is never painted");
+            assertTrue(paintedNames.contains(name), name + " is missing from the baker's PAINTED check");
+        }
+        assertEquals(regions, paintedNames.size(), "the baker paints a region PartSheet does not name");
+    }
+
     // ------------------------------------------------------------------
     // HornSize - the names, which are what the wiki and the horse screen say
     // ------------------------------------------------------------------

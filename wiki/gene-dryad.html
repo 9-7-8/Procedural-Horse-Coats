@@ -253,6 +253,13 @@
         now checks a tick later and logs <code>tree grew</code> only when the sapling has gone, though it still
         under-reports, so read growth off the census's log counts. DRYAD SPRUCE, JUNGLE, ACACIA and OAK were
         deleted from the yard on 2026-09-15.</li>
+    <li id="verified-per-copy-interval"><strong>The interval is on the copy.</strong> (2026-10-02, DRYAD OAK+BIRCH, row T,
+        the run launched 03:52 on <code>a56afcbb</code>; <code>PASS</code> at 06:18:28, 145 minutes in.) The pen
+        read each <code>Oak/Brch</code> mare's two copies directly and timed every planting against its own
+        copy's doubled interval: &ldquo;2 oak and 2 birch plantings, every one on its own copy's beat (mare 1
+        oak every 52426, birch every 26110; mare 2 oak every 44140, birch every 31476 ticks)&rdquo;. So
+        <code>abilitiesFor</code> reads <code>copy(0)</code> and <code>copy(1)</code>, not
+        <code>expressed()</code> twice.</li>
 </ul>
 <p id="verified-no-tree-through-horse">
     <strong>No tree grows through a horse, and the pens still grow trees</strong> (2026-09-15, the 16:11 run,
@@ -379,8 +386,8 @@
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
     <p>Dryad&rsquo;s planting is the best-confirmed magical effect in the mod, so only the
-    parts no pen has ever exercised are still open: the per-copy <code>interval</code> that
-    <strong>breeding is supposed to be able to hurry, and only so far</strong>, and whether a
+    parts no pen has ever exercised are still open: whether breeding can
+    <strong>hurry the per-copy <code>interval</code>, and only so far</strong>, and whether a
     wild dryad exists at all &mdash; every horse that has ever planted anything here came out
     of a spawn egg.</p>
 </div>
@@ -391,7 +398,8 @@
     Read the <a href="#verified">Verified in the test yard</a> block on the Coding tab first
     and do not re-test any of it: the species-per-allele rule, the half-rate mixed pair, dark
     oak clustering, mushrooms on podzol only, the bone-meal allele refusing crops, the carrier
-    planting nothing and no tree growing through a horse are all settled on real runs. What
+    planting nothing, no tree growing through a horse and each copy planting on its own interval
+    are all settled on real runs. What
     remains is the <em>epigenetic</em> half of the locus and the wild population, neither of
     which a test yard full of designed horses can say anything about.
 </p>
@@ -399,13 +407,6 @@
 <h4>Nothing here needs looking at to judge &mdash; do these first</h4>
 
 <ul>
-    <li><strong>The interval is on the copy, and the two halves of a mixed horse differ.</strong>
-        Each copy carries its own <code>interval</code>, and a mixed horse doubles each
-        separately. <strong>Pass:</strong> in an <code>Oak/Brch</code> pen the oak plantings and
-        the birch plantings come at noticeably different spacings in the log &mdash; not
-        alternating on one beat. Identical spacing means <code>expressed()</code> is being read
-        where <code>copy(0)</code> and <code>copy(1)</code> should be, which would count one
-        allele twice and the other never and would still look like a working gene.</li>
     <li><strong>Breeding can hurry a line, and cannot run away with it.</strong>
         <code>MIN_INTERVAL</code> and <code>MAX_INTERVAL</code> bound the drift.
         <strong>Pass:</strong> select the fastest planter over several generations and the line

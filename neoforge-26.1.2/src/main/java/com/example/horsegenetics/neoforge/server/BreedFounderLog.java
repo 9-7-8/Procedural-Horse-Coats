@@ -12,7 +12,6 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * One log line per <b>breed founder</b> the server rolls: which disorders it
@@ -29,19 +28,13 @@ import java.util.Set;
  * <p>Every server-side founder path calls it: breed eggs
  * ({@link HorseRecords#newFounder(net.minecraft.world.entity.animal.equine.Horse,
  * com.example.horsegenetics.common.Rng, Breed)}), wild herds, the cowboy's
- * string and generated stables. The custom spawn egg does not - its genome is
+ * string and generated stables - a stable logs its founder as rolled, before
+ * the magic the stable adds on purpose ({@code StableSpawn.Rolled#founder}).
+ * The custom spawn egg does not - its genome is
  * whatever the player built, so an unlisted gene there is not a bug.
  * Feral Mixed is skipped: it is the one population allowed anything.
  */
 public final class BreedFounderLog {
-
-    /**
-     * Set from the breed's stat scores, not its gene list - see
-     * {@code BreedFounder}, which is also where the list comes from. It used to
-     * be a fifth hand-written copy, and the copy is what made adding pull log
-     * every breed founder in the world as carrying stray magic.
-     */
-    private static final Set<String> BODY_STAT_KEYS = BreedFounder.BODY_STAT_KEYS;
 
     private BreedFounderLog() {
     }
@@ -52,27 +45,20 @@ public final class BreedFounderLog {
         }
         List<String> carried = new ArrayList<>();
         List<String> listed = new ArrayList<>();
-        List<String> stray = new ArrayList<>();
         for (Gene gene : Genes.codeOrder()) {
-            boolean health = gene instanceof HealthContribution;
-            boolean magic = !BODY_STAT_KEYS.contains(gene.key()) && Genes.magicalOrder().contains(gene);
-            if (!health && !magic) {
+            if (!(gene instanceof HealthContribution) || !breed.constrains(gene.key())) {
                 continue;
             }
-            boolean onSheet = breed.constrains(gene.key());
-            if (health && onSheet) {
-                listed.add(gene.name());
-            }
+            listed.add(gene.name());
             AllelePair pair = genotype.pair(gene);
-            if (pair.homozygousFor(gene.defaultAllele())) {
-                continue;
+            if (!pair.homozygousFor(gene.defaultAllele())) {
+                carried.add(shown(gene, genotype));
             }
-            String shown = gene.name() + " " + pair.first().token() + "/" + pair.second().token();
-            if (!onSheet) {
-                stray.add(shown);
-            } else if (health) {
-                carried.add(shown);
-            }
+        }
+        // The stray rule is common/'s, so a test can hold it (issue #12).
+        List<String> stray = new ArrayList<>();
+        for (Gene gene : BreedFounder.offSheet(breed, genotype)) {
+            stray.add(shown(gene, genotype));
         }
         HorseGenetics.LOGGER.info("[breed-health] {} founder ({}): {} | sheet lists: {}",
                 breed.name(), source,
@@ -82,5 +68,10 @@ public final class BreedFounderLog {
             HorseGenetics.LOGGER.warn("[breed-health] {} founder ({}) carries {} - NOT ON ITS SHEET",
                     breed.name(), source, String.join(", ", stray));
         }
+    }
+
+    private static String shown(Gene gene, Genotype genotype) {
+        AllelePair pair = genotype.pair(gene);
+        return gene.name() + " " + pair.first().token() + "/" + pair.second().token();
     }
 }

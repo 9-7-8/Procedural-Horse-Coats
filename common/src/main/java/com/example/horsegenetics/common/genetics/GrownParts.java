@@ -1,7 +1,9 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.genetics.genes.AbstractPartColourGene;
 import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.parts.AttachedPart;
+import com.example.horsegenetics.common.parts.PartKind;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +55,7 @@ public final class GrownParts {
         if (genotype == null) {
             return List.of();
         }
-        // Two granting loci. Each answers empty for nearly every horse, and the
+        // Four granting loci. Each answers empty for nearly every horse, and the
         // list is only built when one of them says otherwise - so the common "no
         // parts" answer still allocates nothing.
         Optional<AttachedPart> horn = Genes.UNICORN_HORN.hornFor(genotype, epigenome);
@@ -61,10 +63,11 @@ public final class GrownParts {
                 Genes.ANTLER_FORM.habitOf(genotype.pair(Genes.ANTLER_FORM)));
         Optional<List<AttachedPart>> rams = Genes.RAM_HORNS.hornsFor(genotype, epigenome,
                 Genes.RAM_HORN_FORM.shapeOf(genotype.pair(Genes.RAM_HORN_FORM)));
-        if (horn.isEmpty() && rack.isEmpty() && rams.isEmpty()) {
+        Optional<List<AttachedPart>> dragon = Genes.DRAGON_HORNS.hornsFor(genotype, epigenome);
+        if (horn.isEmpty() && rack.isEmpty() && rams.isEmpty() && dragon.isEmpty()) {
             return List.of();
         }
-        List<AttachedPart> out = new ArrayList<>(5);
+        List<AttachedPart> out = new ArrayList<>(7);
         horn.ifPresent(h -> out.add(dressHorn(h, genotype, epigenome)));
         rack.ifPresent(antlers -> {
             for (AttachedPart antler : antlers) {
@@ -79,6 +82,43 @@ public final class GrownParts {
                 out.add(tipped ? side.dressed(side.baseTint(), tip, false) : side);
             }
         });
+        dragon.ifPresent(pair -> {
+            // Its own colour locus, the horn's rule: one pair of tints for both sides.
+            AbstractPartColourGene.Tints tints = Genes.DRAGON_HORN_COLOUR.tintsFor(genotype, epigenome);
+            for (AttachedPart side : pair) {
+                out.add(side.dressed(tints.base(), tints.tip(), false));
+            }
+        });
+        return List.copyOf(out);
+    }
+
+    /**
+     * One part, as a list of a horse's traits names it: a pair once, and whether a
+     * foal goes without it ({@link PartKind#showsOnFoal}).
+     */
+    public record Listed(String name, boolean adultOnly) {
+    }
+
+    /**
+     * The parts {@link #of} grows, named for a person - in the order {@code of}
+     * returns them, each pair once. The browser designer prints this because it
+     * previews a coat texture and cannot draw geometry (owner's call, 2026-10-01:
+     * say so in words rather than build a 3D preview). The sex gate is already in
+     * {@code of}, so an {@code Antm} mare lists no antlers, as the game draws none.
+     */
+    public static List<Listed> listed(Genotype genotype, Epigenome epigenome) {
+        List<AttachedPart> parts = of(genotype, epigenome);
+        if (parts.isEmpty()) {
+            return List.of();
+        }
+        List<Listed> out = new ArrayList<>(parts.size());
+        for (AttachedPart part : parts) {
+            PartKind kind = part.kind();
+            Listed named = new Listed(kind.label(), !kind.showsOnFoal());
+            if (!out.contains(named)) {
+                out.add(named);
+            }
+        }
         return List.copyOf(out);
     }
 
@@ -107,6 +147,9 @@ public final class GrownParts {
      * give it its colours and its glow. (A fourth, {@code HornDustGene}, makes it
      * shed, and asks this method's answer for the dust's colours rather than
      * working them out again.)
+     *
+     * <p>Only horn glow makes it emissive - not the light locus, whatever the horse
+     * emits (owner's call, 2026-10-02, reversing the 2026-10-01 one).
      */
     private static AttachedPart dressHorn(AttachedPart horn, Genotype genotype, Epigenome epigenome) {
         HornColourGene.Tints tints = Genes.HORN_COLOUR.tintsFor(genotype, epigenome);
@@ -122,7 +165,8 @@ public final class GrownParts {
      * <p>The second half is what counts the loci that only dress a part: horn
      * colour and horn glow do nothing to a hornless horse, so asked only of a wild
      * one they would look invisible. The baseline with "every part" is a horse
-     * with a horn, a rack of antlers and ram's horns; a further granting locus adds itself to it.
+     * with a horn, a rack of antlers, ram's horns and dragon horns; a further granting
+     * locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way
      * {@code DesignerApi.showsAs} asks the cutie mark. It is the other half of "does
@@ -137,7 +181,8 @@ public final class GrownParts {
         Genotype everyPart = wild
                 .with(new AllelePair(Genes.UNICORN_HORN.Horn, Genes.UNICORN_HORN.Horn))
                 .with(new AllelePair(Genes.ANTLERS.Ant, Genes.ANTLERS.Ant))
-                .with(new AllelePair(Genes.RAM_HORNS.Rh, Genes.RAM_HORNS.Rh));
+                .with(new AllelePair(Genes.RAM_HORNS.Rh, Genes.RAM_HORNS.Rh))
+                .with(new AllelePair(Genes.DRAGON_HORNS.Drg, Genes.DRAGON_HORNS.Drg));
         List<AttachedPart> dressed = of(everyPart, epi);
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
             if (!of(wild.with(pair), epi).isEmpty()

@@ -100,8 +100,8 @@
         <td>Glass bottle + wheat + horse hair + a container of water, in any arrangement. Any
             modded water container matches, by tag. <strong>The container is not
             consumed.</strong></td>
-        <td>Storage only. The horse is listed by name on the Browse tab and nothing else
-            about it can be asked for.</td></tr>
+        <td>Storage only. The horse is listed by name on the Browse tab, and a search for
+            that name finds it; nothing else about it can be asked for.</td></tr>
     <tr><td><strong>Intermediate Horse Stasis Chamber</strong></td>
         <td>A Basic chamber + a book.</td>
         <td>The bank can see inside. All of the horse's information becomes searchable &mdash;
@@ -245,6 +245,14 @@
     what is in there, so a glance tells you <em>nine horses of twelve</em> rather than nothing at
     all.
 </p>
+<p id="eject-empties">
+    <strong>Eject empties (N)</strong>, to the right of the <em>Inventory</em> caption on this
+    tab, takes every empty chamber out of the bank in one press: any tier, never one with a horse
+    in it, and never anything in the supply row or the drop buffer. They go into your inventory,
+    and whatever does not fit drops on the ground at the bank, so nothing gets stuck and nothing
+    is lost. There is no confirmation, because it only moves items. With no empties in the bank
+    the button is greyed out.
+</p>
 
 <h2 id="jars-gameplay">You can see which horse is in which jar</h2>
 <p>
@@ -297,7 +305,11 @@
         chamber's own tooltip already tells you that and a bank that hid it would be arguing
         with the bottle in your hand &mdash; but it says
         <em>&ldquo;a basic chamber cannot be looked into&rdquo;</em> where the details go, and
-        <strong>no search will ever return it</strong>. When a filter hides rows, the list says
+        <strong>the only search that returns it is its name</strong>. Type <code>cinder</code>
+        and Cinder comes up from her Basic bottle; type <code>cinder mare</code>,
+        <code>cinder gen&gt;2</code> or <code>name:cinder</code> and she does not, because every
+        one of those asks something the bank would have to look inside to answer. A
+        <code>-</code> in front of a name works as well. When a filter hides rows, the list says
         how many it could not reach, so a horse never just vanishes from the bank. An eye of
         ender is what fixes that, and it upgrades the chamber with the horse still inside.
     </p>
@@ -332,7 +344,8 @@
 <h2 id="send-home-gameplay">Sending a horse home without going to fetch the bottle</h2>
 <p>
     The Horse Browser's <em>My horses</em> table has a <strong>Send home</strong> button on every
-    row, which spends a ticket and puts that horse in its stall. <strong>It now works on a horse
+    row, which puts that horse in its stall &mdash; free unless the server has set a price (see
+    <a href="horse-browser.html#send-home">the browser</a>). <strong>It now works on a horse
     that is in a stasis chamber</strong>: the horse comes out of the chamber straight into its
     stall, and <strong>the empty jar is left exactly where the full one was</strong> &mdash; in
     the bank slot it was filed in, or in your pack if you were carrying it.
@@ -344,13 +357,13 @@
     nothing.
 </p>
 <div class="note">
-    <span class="label">It still costs a ticket, and it still refuses safely</span>
+    <span class="label">It refuses safely</span>
     <p>
-        The same ticket as any other <em>Send home</em> &mdash; the cheapest one in your pack that
-        reaches &mdash; and the same destination rule: the horse's own stall, or your holding pen
+        The same price as any other <em>Send home</em> &mdash; nothing, unless the server set
+        one &mdash; and the same destination rule: the horse's own stall, or your holding pen
         if it has none. <strong>Every refusal leaves the horse in the chamber.</strong> No stall,
-        no room in the stall, no ticket that reaches, the sign taken down: you get the line saying
-        which, the ticket is unspent, and the bottle is as full as it was. A release that is
+        no room in the stall, a price you cannot pay, the sign taken down: you get the line saying
+        which, nothing is taken, and the bottle is as full as it was. A release that is
         followed by a refusal would be a horse standing in somebody's cellar with the chamber
         spent, which is worse than not pressing the button.
     </p>
@@ -706,6 +719,40 @@
         was asked for by name &mdash; see below.
     </p>
 </div>
+<p id="eject-empties-coding">
+    <strong>Eject empties is a third <code>clickMenuButton</code> verb</strong>,
+    <code>HorseStasisBankMenu.EJECT_EMPTIES_BUTTON</code>, one past the stud and withdraw ranges
+    (<code>2 * SLOTS</code>), so it needs no payload. The server re-checks
+    <code>stillValid</code>, walks only the chamber container, and moves each chamber with no
+    <code>STASIS_SNAPSHOT</code> through <code>setItem</code>, ending in one
+    <code>setChanged</code> so the tick gate is recomputed. Overflow goes through
+    <code>Containers.dropItemStack</code> at the bank's position, which is what
+    <code>dropContents</code> does per stack when the bank is broken. The button's count is
+    <code>menu.empties()</code>, <code>filed() - occupied()</code>: <code>snapshotOf</code> is one
+    component read, so counting every frame costs nothing. The gametest
+    <code>stasis_bank_ejects_empties</code> covers it: two empties out, the occupied chamber and a
+    drop-buffer chamber left alone, one into the pack and one on the ground, and a second press
+    that does nothing.
+</p>
+<p id="verified-bank-breaks">
+    <strong>A broken bank drops every chamber, each still holding its horse</strong> (2026-10-01,
+    the test yard's STASIS BANK pen, row AT east). Three Basic chambers filled by the mod's own
+    capture path sat in slots 0, 30 and 200, and <code>level.destroyBlock(pos, true)</code> took
+    the bank: <code>occupied before 3 (slots 0, 30, 200), destroyBlock returned true, block still a
+    bank false; dropped chamber items 3, carrying 3 of the 3 horses, 0 with an empty entity
+    tag</code> &mdash; <code>CLOCKWORK PASS</code>, 23:53:50. The one
+    <code>preRemoveSideEffects</code> override that guards a bankful of horses works.
+</p>
+<p id="verified-bank-fireproof">
+    <strong>It does not burn, in fire or in lava</strong> (2026-10-01, the same pen, a live
+    test). Two sealed basins, each a bank with a filled chamber in it: one ringed with fire on
+    netherrack, re-lit every ten seconds, the other with eight lava sources. Both stood for three
+    minutes with the horse still in slot 0, and the fire and the lava really were burning: each
+    line reads <code>present in 144 of 144 ring readings ... could tick true
+    (fire_spread_radius_around_player 128)</code>, with <code>max getFlammability over 6 faces 0,
+    ignitedByLava on any face false</code> (<code>CLOCKWORK PASS</code>, both 23:56:43). So the
+    omitted <code>ignitedByLava()</code> is enough; no explicit fire-resistance route is needed.
+</p>
 
 <h2 id="upkeep-coding">The upkeep: four refusals, then one horse</h2>
 <p>
@@ -786,6 +833,19 @@
         argument for having written that test at all.
     </p>
 </div>
+<p id="verified-upkeep">
+    <strong>A bank mends a horse in a world, hands the bucket back, and a Basic bank does
+    nothing</strong> (2026-10-01, the test yard's STASIS BANK pen, row AT east). A horse put in at
+    30% health and hunger 60, in an Intermediate chamber, with a hay bale and a water bucket in the
+    supply row: <code>stored health 6.6/22.0 hunger 60.0 -&gt; health 22.0/22.0 hunger 69.2; feed
+    slot hay 0, water slot buckets 0, empties slot 1 (empty buckets 1), water meter 79</code>
+    &mdash; <code>CLOCKWORK PASS</code>, 23:54:13. The health is read where the bank reads it,
+    <code>StasisCare.health</code> on the chamber's tag; the empty bucket is vanilla's crafting
+    remainder for the water bucket, landing in the empties slot. The same supplies beside a Basic
+    chamber, after five minutes: <code>health 6.6/22.0 hunger 60.0 -&gt; health 6.6/22.0 hunger
+    60.0; feed slot hay 1, water slot buckets 1, empties slot 0, water meter 0</code> &mdash;
+    <code>CLOCKWORK PASS</code>, 23:58:43. The gate in the first refusal above holds.
+</p>
 
 <h2 id="pipes">Why the goods slots are on the wire and the chambers are not</h2>
 <p>
@@ -797,11 +857,36 @@
     call stands untouched: nothing outside the bank can file or fetch a live animal.
 </p>
 <p>
-    <strong>The slot rules are written once.</strong> NeoForge's
-    <code>VanillaContainerWrapper</code> asks <code>Container.canPlaceItem</code> before it
-    inserts, so the per-slot predicates the block entity already writes for the menu are the same
-    rules a pipe obeys &mdash; feed in the feed slot, water in the water slot, nothing at all
-    into the empties or the buffer, which are outputs. There is no second copy to drift.
+    <strong>The slot rules are written once.</strong> The goods container is a
+    <code>WorldlyContainer</code> (<code>HorseStasisBankBlockEntity.Supplies</code>) behind
+    NeoForge's <code>WorldlyContainerWrapper</code>, and its <code>canPlaceItemThroughFace</code>
+    is just <code>canPlaceItem</code>, so the per-slot predicates the block entity already writes
+    for the menu are the same rules a pipe obeys &mdash; feed in the feed slot, water in the water
+    slot, nothing at all into the empties or the buffer, which are outputs. There is no second
+    copy to drift.
+</p>
+<p id="pipes-outputs-only">
+    <strong>A pipe takes out only the outputs</strong> (2026-10-01,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/22">issue #22</a>, fixed in
+    <code>449e1787</code>). The capability used to be a plain <code>VanillaContainerWrapper</code>,
+    which checks nothing on the way out, so a hopper under the bank pulled the hay and the water
+    buckets back out of the supply row as fast as one above put them in: the yard's STASIS BANK
+    pen read <em>16 drained on into the low hopper + chest, 0 in the feed slot</em> &mdash; the
+    bank was a pipe for its own hay. <code>canTakeItemThroughFace</code> now refuses the feed and
+    water slots, so the inputs stay and the empties and the drop buffer leave. The menu is not a
+    face, so a player still takes anything back by hand. The same pen, re-run on the fix (row AT
+    east, 23:55:43): <code>hay: 16/16 left the top hopper, 16 in the feed slot, 0 drained on into
+    the low hopper + chest</code> &mdash; <code>CLOCKWORK PASS</code>.
+</p>
+<p id="verified-pipes">
+    <strong>No hopper reaches a chamber, and a real hopper feeds the bank</strong> (2026-10-01,
+    the same pen and line). Three Basic chambers with horses in slots 0, 54 and 206 and one empty
+    Intermediate chamber sat between a hopper of sixteen hay bales above and a hopper and chest
+    below for two minutes: <code>chambers: filed 4 -&gt; 4, occupied 3 -&gt; 3, 0 in the low
+    hopper + chest; slot 0 same horse, slot 54 same horse, slot 206 same horse</code>, while all
+    sixteen bales went through the capability into the feed slot. So a vanilla hopper does reach
+    the goods container through <code>Capabilities.Item.BLOCK</code>, and the chamber grid is
+    reachable from neither direction.
 </p>
 <div class="note">
     <span class="label">The buffer is in that container on purpose, not for tidiness</span>
@@ -821,7 +906,8 @@
 <div class="note warn">
     <span class="label">26.1.2 has no <code>IItemHandler</code></span>
     <p>
-        <strong>Not verified in a running game.</strong> Written against the 26.1.2 sources: the
+        Written against the 26.1.2 sources, and <a href="#verified-pipes">watched working</a>
+        with a real hopper in the yard on 2026-10-01: the
         item capability is <code>Capabilities.Item.BLOCK</code> and its type is
         <code>ResourceHandler&lt;ItemResource&gt;</code>, NeoForge's newer transfer API, not the
         <code>IItemHandler</code> every tutorial still shows. The patched
@@ -882,8 +968,22 @@
 <p>
     <code>StasisBrowseRow</code> is in <code>common/</code>, and holds the gate: a row is
     searchable only if its own chamber's <code>StasisTier.searchable()</code> says so
-    <em>and</em> there is a listing behind it, and <code>locked()</code> counts the rows that
-    fail that test so the screen can say how many a query could not reach. Both halves are
+    <em>and</em> there is a listing behind it, and <code>locked(rows, query)</code> counts the
+    rows that query could not reach so the screen can say how many.
+</p>
+<p id="basic-by-name">
+    <strong>A Basic chamber answers to its name, and only to a query that is nothing but a
+    name</strong> (owner, 2026-10-01). <code>StasisBrowseRow.plainNameQuery</code> decides
+    that from <code>QueryExpr.tokenize</code> and <code>HorseQuery.flags()</code>, so the
+    language has one parser: plain means every token is a bare word, optionally led by
+    <code>-</code>, with no operator, bracket, comma or quote, no keyword (<code>AND</code>,
+    <code>OR</code>, <code>NOT</code>, <code>IN</code>, <code>LIKE</code>) and no flag. Each word
+    must then be a case-folded substring of the row's name, and each negated word must not be.
+    Reading the flag list rather than copying it means a new flag cannot quietly become part of a
+    name. A mixed query never pulls a Basic horse in on the strength of its name, and leaves it
+    in the locked count exactly as before. The rule is the <em>chamber's</em>: a horse with no
+    papers in a searchable chamber is still out of reach of every query, because its chamber is
+    not the reason it cannot be asked about. The gate and the count are both
     <code>StasisBrowseTest</code>'s subject, because a horse silently disappearing from a
     filtered bank is the one failure this tab must not have: the player's next thought is that
     the bank lost it.
@@ -1298,6 +1398,12 @@
     in, so the ticket tier has to reach from the bank's world &mdash; which is the honest
     question, since that is where the animal actually re-appears from.
 </p>
+<p>
+    <strong>Since 2026-10-02 no ticket is chosen at all</strong>: Send home is free, or costs
+    the server's configured item, and the price check sits where <code>chooseTicket</code>
+    was, so every refusal before <code>place</code> still leaves the chamber full. See
+    <a href="horse-browser.html#send-home-free-built">the browser's coding tab</a>.
+</p>
 
 <h2 id="jars-coding">Drawing the horse in the jar</h2>
 <p>
@@ -1662,20 +1768,41 @@
         leaving a chamber now swaps the item underneath it &mdash; which is unplayed at all four
         swap sites</strong>; beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
-        gametests, but <strong>no horse has yet gone into one in a running game</strong> &mdash;
+        gametests, and the unattended yard has watched a bank mend a horse, refuse every
+        hopper at its chambers, drop them all when broken and stand in fire and lava, but
+        <strong>no player has yet put a horse into one</strong> &mdash;
         so the whole capture/release round trip, the water-container remainder for a modded
-        bucket, the tier upgrade carrying an occupied chamber, every one of the bank's slots,
-        drops and sync costs, every line the Browse tab draws, the healing upkeep and its hopper
-        plumbing, the drop buffer, <strong>every part of in-bank breeding up to a mare
+        bucket, the tier upgrade carrying an occupied chamber, the bank's slots and sync costs,
+        every line the Browse tab draws, the rest of the upkeep, the hoppers taking out the
+        empties and the buffer, the drop buffer, <strong>every part of in-bank breeding up to a mare
         letting herself out to foal</strong>, <strong>the newly deepened grid and the scrolling
         that reaches it</strong>, and <strong>the emergency chamber firing at all</strong> are
         unplayed &mdash; now including <strong>a chamber being spent out of a bank</strong>,
         <strong>the tick a rider is set down for</strong>, <strong>the whereabouts column
         saying a horse is in a chamber</strong>, and newest of all <strong>the horse drawn
         through the jar's new window</strong> and <strong>Send home taking a horse out of a
-        chamber and leaving the empty one behind</strong>.
+        chamber and leaving the empty one behind</strong>, and since 2026-10-01
+        the Eject empties button and finding a Basic horse by its name.
     </p>
 </div>
+
+<h3 id="verify-eject-and-name-search">Eject empties, and finding a Basic horse by name (2026-10-01, NOT played)</h3>
+<p>
+    Both are proven below the screen (<code>StasisBrowseTest</code> and the
+    <code>stasis_bank_ejects_empties</code> gametest); what nobody has seen is the window.
+</p>
+<ul>
+    <li><strong>The button.</strong> On Chambers, <em>Eject empties (N)</em> sits right of the
+        <em>Inventory</em> caption without overlapping the grid's bottom row or the inventory
+        slots. N matches the empties, it greys out at zero, and it is gone on Browse and
+        Supply. Its tooltip may not show while it is greyed out: that is unverified on 26.1.2.</li>
+    <li><strong>A press</strong> with a nearly full inventory fills the free slots and drops the
+        rest at the bank. No horse leaves, and nothing in the supply row or drop buffer moves.</li>
+    <li><strong>Browse.</strong> A horse in a Basic chamber comes up when you type part of its
+        name, and does not when you add <code>mare</code> or <code>gen&gt;2</code>. The
+        &ldquo;cannot reach&rdquo; line counts it for the mixed query and not for the plain
+        one.</li>
+</ul>
 
 <h3 id="verify-bank-insurance">A bank's spare chamber saves a horse (2026-09-25, NOT played)</h3>
 <p>
@@ -1825,8 +1952,9 @@
 
 <h3 id="verify-send-home-chamber">Send home takes a horse out of a chamber (2026-09-25, NOT played)</h3>
 <p>
-    The whole path is new and it spends a ticket, so the failure that matters is
-    <strong>a ticket spent with the horse still in the bottle</strong>, or the reverse.
+    The whole path is new, so the failure that matters is <strong>a price taken with the horse
+    still in the bottle</strong>, or the reverse. It is free by default since 2026-10-02; set a
+    price in <code>phc/server.toml</code> to test the refusals.
 </p>
 <ul>
     <li><strong>Out of your pack.</strong> Bind a stall, put the horse in a chamber, carry it,
@@ -1835,8 +1963,8 @@
     <li><strong>Out of a bank, in another world.</strong> The case the index exists for. File the
         chamber in a bank, walk away far enough that its chunk is unloaded, and press the button.
         A bank the player does not own must not be reachable at all.</li>
-    <li><strong>Every refusal leaves it full.</strong> Wall the stall up, or hold no ticket, or
-        take the sign down, and check the chamber is unchanged and the ticket unspent each
+    <li><strong>Every refusal leaves it full.</strong> Wall the stall up, or set a price you
+        cannot pay, or take the sign down, and check the chamber is unchanged and nothing taken each
         time.</li>
     <li><strong>The at-stud mark goes with the horse</strong>, so a mare turned out at stud and
         then sent home leaves a chamber that is empty <em>and</em> unmarked.</li>
@@ -1894,21 +2022,25 @@
 <h3 id="verify-upkeep">The bank actually mends a horse (NOT played)</h3>
 <p>
     The gametest proves the tag can be read and written and that one turn moves the health
-    inside a chamber. What it does not prove is any of the rest of the loop.
+    inside a chamber, and the yard has since watched a bank mend a horse from hay and water,
+    hand the bucket back, and a Basic bank touch nothing
+    (<a href="?view=coding#verified-upkeep">2026-10-01</a>). The rest of the loop is unwatched.
 </p>
 <ul>
-    <li><strong>It heals at all, in a world.</strong> Hurt a horse, capture it into an
-        Intermediate chamber, file it, put a hay bale and a water bucket in the supply slots and
-        walk away. Come back: is its health up? Release it and check the bar is really higher,
-        not just the number in the tooltip.</li>
+    <li><strong>The mended health survives release.</strong> That the bank heals the stored
+        horse is <a href="?view=coding#verified-upkeep">proven in the yard</a>, read off the
+        chamber's tag. Release a mended horse and check the bar is really higher, not just the
+        number in the tooltip.</li>
     <li><strong>It stops.</strong> A horse healed to full must stop costing supplies. Leave a
         bank with one mended horse and a full feed slot overnight and check the feed is
         untouched.</li>
-    <li><strong>The gate holds.</strong> A bank of nothing but <em>Basic</em> chambers must
-        consume nothing at all and say so on the Supply tab. Upgrade one to Intermediate with
-        the horse inside and check the same bank starts working.</li>
-    <li><strong>The empty bucket comes back</strong>, into the third slot, and a full empties
-        slot stops the bank drinking rather than destroying a bucket.</li>
+    <li><strong>The gate, on screen and on upgrade.</strong> A Basic bank consuming nothing is
+        <a href="?view=coding#verified-upkeep">proven</a>; check the Supply tab says so, then
+        upgrade one chamber to Intermediate with the horse inside and check the same bank starts
+        working.</li>
+    <li><strong>A full empties slot</strong> stops the bank drinking rather than destroying a
+        bucket. (The bucket coming back into that slot is
+        <a href="?view=coding#verified-upkeep">proven</a>.)</li>
     <li><strong>Hunger is really being charged.</strong> Capture a horse, let the bank mend it
         with <em>no</em> feed in the slot, and it should stall part-way rather than heal to full
         for free &mdash; that is the whole economy, and free healing would be the failure that
@@ -1918,22 +2050,19 @@
 </ul>
 <h3 id="verify-pipes">Hoppers and pipes reach the supply slots and nothing else (NOT played)</h3>
 <p>
-    The capability is written against the 26.1.2 sources and <strong>has never been exercised by
-    a real hopper</strong>. In particular <code>Capabilities.Item.BLOCK</code> being
-    <code>ResourceHandler&lt;ItemResource&gt;</code> rather than <code>IItemHandler</code> is a
-    reading of those sources, not a thing anyone has watched work.
+    A real hopper feeding hay into the feed slot, no hopper reaching a chamber in either
+    direction, and a lower hopper leaving the feed alone are
+    <a href="?view=coding#verified-pipes">proven in the yard</a> (2026-10-01); the outputs and
+    the refusals are not.
 </p>
 <ul>
-    <li>A hopper pointing into the bank from above feeds hay into the feed slot.</li>
-    <li>A hopper under the bank pulls empty buckets out &mdash; and, worth knowing either way,
-        whether it also pulls the feed back out. That is allowed today; if it turns out to be
-        annoying in practice it is a per-slot extraction rule, not a bug.</li>
+    <li>A hopper under the bank pulls empty buckets out. Nothing has watched it, and it is the
+        half of <a href="?view=coding#pipes-outputs-only">the output rule</a> that has to work for
+        the bank to keep drinking unattended.</li>
     <li><strong>A hopper under the bank empties the drop buffer.</strong> This is the whole
         reason the buffer lives in the same container as the supply slots, and if it does not
         work then that decision bought nothing. Nine slots of eggs should end up in a chest
         without anyone opening the bank.</li>
-    <li><strong>No hopper can reach a chamber</strong>, in either direction. This is the one
-        that matters: a hopper that can drain a bank of horses is a disaster, not a nuisance.</li>
     <li>A water bucket cannot be pushed into the feed slot, nor anything at all into the
         empties.</li>
 </ul>
@@ -2041,11 +2170,6 @@
         <strong>Fail:</strong> a wrong number means the snapshot component is not reaching the
         client, because the count is a client-side loop over the synced stacks rather than
         anything sent.</li>
-    <li><strong>The one worth being paranoid about: break it with chambers inside.</strong>
-        <strong>Pass:</strong> every chamber drops. <strong>Fail:</strong> they are gone, and a
-        bankful of pedigreed horses went with them. Guarded by one
-        <code>preRemoveSideEffects</code> override, with nothing testing it and nothing logged if
-        it is wrong.</li>
 </ul>
 
 <h3 id="verify-browse">The Browse tab, in one pass (NOT played)</h3>
@@ -2233,20 +2357,6 @@
         yield stamps a cooldown into the horse's tag, and a cover writes a whole reproductive
         record into it. Both re-sync that chamber's entire entity tag, both are far rarer than a
         heal turn, and neither has been measured either.</li>
-</ul>
-
-<h3 id="verify-bank-flammable">That it does not burn (reasoning unverified)</h3>
-<p>
-    The block deliberately omits <code>ignitedByLava()</code>, on the reasoning that mod blocks
-    are absent from <code>FireBlock</code>'s flammability table unless they register themselves.
-    That reasoning has not been checked in a game.
-</p>
-<ul>
-    <li><strong>Set fire to a bank, and drop another in lava</strong>, each with a chamber
-        inside. <strong>Pass:</strong> neither block is destroyed. <strong>Fail:</strong> it
-        needs an explicit fire-resistance route rather than an omission &mdash; and the chambers
-        that dropped into the fire that did it are the reason this is not a cosmetic
-        question.</li>
 </ul>
 
 <h3 id="bank-art-0929-check">Its new art, in a world (2026-09-29, NOT played)</h3>

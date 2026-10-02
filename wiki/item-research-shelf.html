@@ -111,7 +111,18 @@
 
 <p>
     So the loop is: meet horses, take what they will tell you, file it, and copy it from
-    then on. A pair you have filed is a pair you can hand to somebody else as often as
+    then on.
+</p>
+
+<p>
+    <strong>Filing a paper teaches you its gene.</strong> Put a paper for a gene you have
+    never met onto the shelf with your own hands and that gene is discovered for you, as if
+    you had tamed a horse carrying it: it shows in your gene database and its carrot recipe
+    opens up. A paper for the plain, wild pair
+    teaches nothing, because the ordinary horse tells you nothing new.
+</p>
+
+<p> A pair you have filed is a pair you can hand to somebody else as often as
     you like &mdash; which is what makes knowledge shareable rather than hoardable.
 </p>
 
@@ -222,6 +233,30 @@
     <strong>It stores papers</strong> (owner, the third play session of 2026-09-10).
 </p>
 
+<p id="verified-storage-0802">
+    <strong>The storage layer, end to end</strong> (2026-10-02, test yard row AX, pen RESEARCH SHELF, run launched
+    03:52 on <code>a56afcbb</code>; six <code>CLOCKWORK PASS</code> lines, no hands - each shelf placed with
+    <code>setBlock</code> and filled through the block entity's own containers).
+</p>
+<ul>
+    <li><strong>Save and reload</strong> (open check 143's &ldquo;single most valuable thing to try&rdquo;). A shelf
+        holding three papers, two books, one finished copy, a pick and progress 198 was saved with
+        <code>saveWithFullMetadata</code> (770 bytes of NBT) and loaded with <code>loadStatic</code> elsewhere:
+        &ldquo;identical in all 54 slots, book, result, pick and progress&rdquo; (03:53:14).</li>
+    <li><strong>Filing by pair.</strong> Agouti A/a and A/A filed as two rows; a fresh duplicate of either was
+        refused both by the slot predicate and by a real <code>ResearchShelfMenu</code>'s slot, and an a/a control
+        accepted (03:52:48).</li>
+    <li><strong>Taking an original back</strong> takes its row off the list: rows 2 &rarr; 1, <code>stores(A/A)</code>
+        false, A/a still stored (03:52:48).</li>
+    <li><strong>Copying with no screen.</strong> No menu ever built, three books in: at 1300 ticks &ldquo;result 3x
+        Agouti: A/a ... books left 0, ... original still filed true&rdquo; (03:53:49).</li>
+    <li><strong>Pulling the book mid-copy</strong> resets progress: 198 at half the copy time, 0 ten ticks after the
+        book came out, 10 ten ticks after it went back - restarted, not resumed - and no copy made (03:52:55).</li>
+    <li><strong>Breaking drops everything.</strong> <code>destroyBlock</code> on a shelf holding five papers, four
+        books and two finished copies dropped seven papers carrying exactly those pairs, four books, and the shelf
+        itself as an item (03:52:49), through the block entity's <code>preRemoveSideEffects</code>.</li>
+</ul>
+
 <h3 id="art-0929">The block finally looks like itself</h3>
 
 <p>
@@ -238,7 +273,47 @@
     two workstations read as a matched pair of furniture rather than two unrelated blocks.
 </p>
 
+<h3 id="filing-discovers">Filing a paper discovers its gene (owner, 2026-10-01; built 2026-10-02)</h3>
+
+<p>
+    <strong>Settled:</strong> the shelf accepts a paper for a gene the player has not
+    discovered, and filing it <em>counts as</em> discovering that gene. Discovery never
+    refuses a paper. Filing is one more way to learn a gene, alongside taming and breeding.
+</p>
+
+<p>
+    <strong>Built:</strong> the menu&rsquo;s <code>PaperSlot.setByPlayer</code> calls
+    <code>GeneDiscoveryHandler.discoverFromPaper(player, topic)</code>, which marks the gene
+    discovered through <code>GeneDatabaseData.discover</code> &mdash; the same call taming
+    and breeding make, so the carrot recipe unlocks and the database syncs to the client
+    &mdash; and ticks the <code>DISCOVER_GENE</code> (and, for a magical gene,
+    <code>MAGICAL_GENE_DISCOVERED</code>) progress tasks. What a paper teaches is decided in
+    <code>common/</code>: <code>ResearchTopic.discoveryTokens()</code> is the paper&rsquo;s two
+    allele tokens, or nothing for the wild pair (taming&rsquo;s rule: the ordinary horse
+    teaches nothing) and for a paper this build cannot read. <code>ResearchTopicTest</code>
+    pins that every paper a chest or a villager can hand out teaches its pair.
+</p>
+
+<p>
+    The two questions left open by the decision, settled while building (not the
+    owner&rsquo;s calls, so on the session log):
+</p>
+<ul>
+    <li><strong>Automation discovers nothing.</strong> Every way a hand places a paper
+        &mdash; click, swap, shift-click, drag, number key &mdash; goes through
+        <code>Slot.setByPlayer</code> in vanilla&rsquo;s 26.1.2 sources. A hopper cannot
+        reach the shelf today (it registers no item capability), and if one is ever added
+        it will write to the container directly and discover nothing. A <code>FakePlayer</code> (another mod&rsquo;s
+        automation, or the test yard&rsquo;s own) is refused too, so it never fills the
+        saved database with entries for a player who does not exist.</li>
+    <li><strong>The player is told the way the other routes tell them</strong>: the gene
+        database and the recipe update, and the progress tasks tick. There is no chat line
+        of its own, because taming and breeding have none.</li>
+</ul>
+
 </section>
+
+
 
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -246,39 +321,40 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Filing papers is the only part verified, and the rest fails quietly: copying is meant to keep running with the screen shut, pulling the book mid-copy must reset progress to zero, a broken shelf has to drop every paper, book and finished copy rather than eat them, and as of 2026-09-24 the shelf files one paper per <strong>allele pair</strong> rather than per gene, which nobody has watched.</p>
+    <p>The storage layer is proven (<a href="item-research-shelf.html?view=coding#verified-storage-0802">2026-10-02</a>); what is left is the screen &mdash; whether hidden slots really refuse clicks, whether a long Copy list of pairs still reads, the two-player case &mdash; whether filing a paper really discovers its gene, and the new art, none of it yet seen by a player.</p>
 </div>
 
-<h3 id="check-pair-filing" data-check-kind="open-gap">Filing by pair rather than by gene (NOT played)</h3>
+<h3 id="check-filing-discovers" data-check-kind="open-gap">Does filing a paper discover its gene? (built 2026-10-02, NOT played)</h3>
+<div class="open-check">
+<strong>Open, shipped 2026-10-02 with <a href="?view=coding#filing-discovers">filing discovers</a>.</strong>
+The rule is unit-tested; the hook in the menu has never run in a game, and the test yard cannot drive
+it (its shelf pens use a <code>FakePlayer</code>, which is refused on purpose). To check by hand: in a
+fresh world, open the gene database and note a gene you have not discovered; get a research paper for
+it (<code>/give</code>, or the supplier); file it on a shelf by clicking it in, then by shift-clicking a
+second pair of a second undiscovered gene. <strong>PASS:</strong> both genes now show discovered in the
+database and their carrot recipes show, without reopening anything.
+</div>
+
+<h3 id="check-pair-filing" data-check-kind="open-gap">Does a long list of pairs still read? (NOT played)</h3>
 <div class="open-check">
 <strong>Open, shipped 2026-09-24 with <a href="item-research-papers.html#pair">pair papers</a>.</strong>
-Two papers for one locus &mdash; say <em>Agouti: A/n</em> and <em>Agouti: A/A</em> &mdash;
-should both file and show as <b>two rows</b>; a duplicate of either should still refuse the
-slot. Then: does a shelf holding several pairs of several genes still <em>read</em>? The Copy
-list is five rows and is now much longer than it was, and the flat list was chosen over
-grouping under gene headings on the argument that it needed no new UI. If it is unusable,
-grouping is the alternative that was weighed and set aside, not a new idea.
+Filing by pair works (<a href="#verified-storage-0802">verified 2026-10-02</a>). What is left is
+whether a shelf holding several pairs of several genes still <em>reads</em>: the Copy list is five
+rows and is now much longer than it was, and the flat list was chosen over grouping under gene
+headings on the argument that it needed no new UI. If it is unusable, grouping is the alternative
+that was weighed and set aside, not a new idea.
 </div>
 
-<h3 id="open-research-shelf-policy">May an undiscovered gene be filed?</h3>
-<p>
-    Decide whether the shelf may accept and hand off a gene the player has not discovered, or
-    whether discovery must gate filing as well as the recipe display. This is a policy question,
-    not a defect in the shelf&rsquo;s storage logic.
-</p>
-
 <h3 id="open-older-item-research-shelf">Still open from before 2026-09-13 (NOT played)</h3>
-<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
+<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last. Copying with the screen shut, the mid-copy reset, taking an original back, save and reload and the drops on breaking are <a href="#verified-storage-0802">verified</a>.</p>
 <ul>
-    <li><strong>The research shelf copies with its screen closed</strong> (tester guide, <em>Copying genes on the Equine Research Shelf</em>; <a href="item-research-shelf.html">research shelf</a>). Pick a gene, add books, close it and walk away: copies keep arriving, one per book. It opens on the last tab used, and the title and <em>Inventory</em> labels sit inside the window.</li>
-    <li><strong>Breaking a shelf drops everything</strong> (tester guide, <em>The Equine Research Shelf keeps its papers</em>): every paper, book and finished copy.</li>
-    <li><strong>The <a href="item-research-shelf.html">research shelf</a>, what is not yet seen.</strong> Filing works (<a href="item-research-shelf.html#verified-stores-papers">verified</a>). Still: pull the book out mid-copy and progress resets to zero; take a filed original back and the gene leaves the list; save and reload and the filed genes are still there; on the Store tab, click where the book and result slots would be and nothing goes in; two players at one shelf each copy their own gene.</li>
+    <li><strong>The <a href="item-research-shelf.html">research shelf</a>'s screen.</strong> On the Store tab, click where the book and result slots would be and nothing goes in; two players at one shelf each copy their own gene; it opens on the last tab used, and the title and <em>Inventory</em> labels sit inside the window.</li>
 </ul>
 
 
 <h3 id="gap-143" data-check-kind="open-gap">Open check 143</h3>
 <div class="open-check">
-<strong>The Equine Research Shelf has never been placed.</strong> Opened 2026-09-09 with the block. A new block, block entity, container menu, screen and two payloads, all written in one pass and none of it run: the model is a cube of vanilla bookshelf textures nobody has looked at, the two-tab screen's coordinates are arithmetic rather than measurement, and the whole storage layer - file, withdraw, copy, drop-on-break, save and reload - is unexercised. <strong>The parts most likely to be wrong are the ones a compiler cannot see</strong>: whether <code>Slot.isActive()</code> really does gate hit-testing as well as drawing on this version (the tabs depend on it entirely, and a live slot under an invisible one would let a player put a book into the filing slot); whether <code>PlayerContainerEvent.Open</code> fires late enough for <code>ShelfOpenSync</code>'s push to arrive; and whether <code>affectNeighborsAfterRemoval</code> is the right hook for dropping the books, since it is the successor to a method that changed name across recent versions. A save-and-reload is the single most valuable thing to try: the contents are a gene-key set on the block entity, written through <code>ValueOutput.store</code>, and nothing has round-tripped it.
+<strong>The Equine Research Shelf's screen has never been driven by a player.</strong> Opened 2026-09-09 with the block. Its storage layer - file, withdraw, copy, drop-on-break, save and reload - is <a href="#verified-storage-0802">proven</a> (2026-10-02); the screen half needs a client. <strong>The parts most likely to be wrong are the ones a compiler cannot see</strong>: whether <code>Slot.isActive()</code> really does gate hit-testing as well as drawing on this version (the tabs depend on it entirely, and a live slot under an invisible one would let a player put a book into the filing slot); and whether <code>PlayerContainerEvent.Open</code> fires late enough for <code>ShelfOpenSync</code>'s push to arrive.
 </div>
 <h3 id="shelf-art-0929">Its new art, in a world (2026-09-29, NOT played)</h3>
 

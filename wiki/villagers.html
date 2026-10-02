@@ -209,6 +209,11 @@
     now asks the level whether a <em>horse-sized box</em> fits, rather than whether a
     one-block column is clear. A clear column next to a wall still puts a horse's
     shoulders through it, which is exactly how the barn filled up with embedded horses.
+    That box test cannot see <strong>powder snow</strong>, which has no collision, so a
+    spot the box touches, or one standing on it, is refused by name: a horse cannot
+    climb out, and a dealer in a snowy biome once froze his whole string in minutes
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/18">#18</a>; held by
+    the <code>no_horse_stands_in_powder_snow</code> gametest).
 </p>
 
 <h3 id="herd">Their herd</h3>
@@ -545,6 +550,24 @@
     are deliberately still stocked. That is a different complaint, and a different fix if
     it turns out to be one.
 </div>
+
+<h4 id="arcane-no-horse-hunters">He does not stock a horse that hunts horses</h4>
+
+<p>
+    His string stands within a few blocks of itself, so one horse-hunter in it kills its
+    pen-mates. On the live server five dealers lost between six and twelve unsold horses
+    that way, and nobody owned them to be told
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/17">#17</a>; the
+    owner's pick, 2026-10-01). <code>ArcaneStock.huntsHorses</code> refuses any showing
+    pair whose own abilities include an aggressive <code>Temper</code> that starts on its
+    own toward <code>horses</code> or <code>all</code>. For
+    <a href="gene-aggression.html">aggression</a> that is the six <code>?e</code> and
+    <code>?a</code> pairs. The other nine, which hunt herds, monsters or riders, are still
+    sold, and so is <a href="gene-guardian.html">guardian</a>, which answers only whatever
+    hurts its owner. It is read off the abilities rather than listed, so a horse-hunting
+    gene added later is refused too. All of them still breed. Held by
+    <code>ArcaneStockTest.noStockedHorseHuntsHorses</code>.
+</p>
 
 <h4 id="arcane-pools">The pools are generated, never listed</h4>
 
@@ -1933,6 +1956,22 @@
     2026-09-14 and 15, nor the one after that, has a <code>Couldn't load tag</code> line.
 </p>
 
+<p id="verified-trader-leaves">
+    <strong>A horse sold to a wandering trader leaves the world with him</strong> (2026-10-01, the test yard's
+    KEEPING HORSES pen, row AT west). <a href="#trader">&sect;The wandering trader</a> promised it from the start
+    and nothing did it: vanilla's trader llamas remove themselves by copying his despawn delay, a horse has no such
+    logic, so on his despawn the rope dropped and the horse stayed, persistent and unowned, for ever. The yard's
+    first run failed on exactly that &mdash;
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/21">issue #21</a>. The fix
+    (<code>6b24fe7e</code>) is <code>TraderSale.onTraderLeave</code>, on <code>EntityLeaveLevelEvent</code>: a
+    trader removed as <code>DISCARDED</code>, which is how <code>WanderingTrader.maybeDespawn</code> removes him,
+    takes with him every horse still on <em>his</em> rope and not ridden. One killed, or whose chunk unloads, leaves
+    the horse where it is, as vanilla leaves his llamas. The pen sells a horse by the real crouch-click path, then
+    shortens his despawn delay: <code>sold for 4 emeralds, on his rope, tamed false, persistent true; the trader
+    despawned and the horse went with him (no live entity with its UUID)</code> &mdash; <code>CLOCKWORK PASS</code>,
+    23:53:55, on <code>449e1787</code>.
+</p>
+
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
          data-tab-hint="Planned, not built">
 
@@ -2115,11 +2154,11 @@
         the emeralds</strong>: they must arrive as more than one stack and total the
         quoted number. This is the case <code>CowboySale.pay</code> was rewritten for, and
         a short payout is the failure it is guarding against.</li>
-    <li><strong>The horse leaves on a rope.</strong> It should be leashed to him, untamed
-        and unowned, and should follow him as he wanders. Then the part no test can reach:
-        when he despawns, <strong>the horse must go with him and not be left standing
-        there</strong> as an unowned persistent animal accumulating in the world. Watch one
-        out, or chunk-unload and come back.</li>
+    <li><strong>The horse follows him on the rope.</strong> That it goes on his lead, untamed,
+        and leaves the world when he despawns is
+        <a href="#verified-trader-leaves">proven in the yard</a>; what is left is the walk
+        &mdash; it should follow him as he wanders rather than snap the lead, and its owner
+        should read as nobody.</li>
     <li><strong>The three refusals</strong>, each with its own line: no papers, a foal, and
         a horse that is not yours.</li>
     <li><strong>Nothing regressed at the cowboy.</strong> His price must be

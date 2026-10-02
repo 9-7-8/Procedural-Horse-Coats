@@ -1,0 +1,72 @@
+PROCEDURE  : Use art from an art pack
+COMMAND    : /use-an-art-pack
+SAY        : "use the art packs", "find art for", "is there a texture for", "use something
+             from potential-assets"
+RUNS       : local (most pack images are not in git, only on the owner's machine)
+TAKES      : something that needs art (an item sprite, a block texture, a pattern, an icon)
+LEAVES     : the chosen files copied into the module that uses them, transformed as
+             needed, with the paper trail written
+==============================================================================
+
+WHEN TO USE
+-----------
+Whenever the mod needs art. Everything in intake/potential-assets/ is there to be used:
+copy it, crop it, recolour it, or transform it, in any pack, without asking (owner's
+standing permission, 2026-10-01). What is still required is the paper trail, because
+the mod's own licence lets forks redistribute it onward.
+Third-party art from anywhere ELSE is a licence check first (CLAUDE.md, License).
+
+BEFORE YOU START
+----------------
+Read intake/potential-assets/README.txt, and the chosen pack's SOURCE-AND-LICENSE.txt
+for its credit line. The packs differ:
+- one pack is CC0 and committed to git;
+- the others keep their images out of git (a .gitignore rule per pack), and the owner
+  places them on disk by hand.
+A pack whose images are missing is not a bug. Its MANIFEST.txt and
+SOURCE-AND-LICENSE.txt say how to fetch it again.
+
+STEPS
+-----
+1. Find candidates. Browse the packs for the need, and read sizes and file types:
+   - some packs' file extensions lie, so check the real format;
+   - web tiles are not at the mod's pixel scale.
+2. Copy ONLY the specific files you need, into the module that uses them, under this
+   mod's own names. Transform them there as needed (scale to the mod's pixel grid,
+   recolour, crop, combine).
+3. Write the paper trail in the same change:
+   a. the pack's USAGE.txt: each file, where it went, and whether it was modified. An
+      empty USAGE.txt means nothing from that pack is in the game;
+   b. THIRD_PARTY_NOTICES.md, the first time anything from a pack is used, with the
+      credit line from its notes. Some packs need extra wording: one forbids reuse of
+      its icons and needs the CC BY-NC grant carved back for those files, and another
+      must say where a tile came from and that its author is unknown. README.txt has
+      the exact requirements per pack. THIRD_PARTY_NOTICES.md ships inside the jar and
+      stays plain text.
+4. Run the art pipeline for the kind of art:
+   - item sprites -> bake-item-recolours.mjs, then check-duplicate-item-art.mjs, which
+     fails on near-duplicates;
+   - block art -> bake-block-art.mjs, then bake-block-previews.mjs and bake-item-art.mjs.
+     Those refuse unchanged vanilla art on the wiki.
+   See the regenerate table in procedures/rebake.txt (rebake).
+5. Look at it in the game, or in the wiki preview, before calling it done
+   (hand-over-a-test, if it needs the owner's eyes).
+
+DONE WHEN
+---------
+The art is in place, USAGE.txt and THIRD_PARTY_NOTICES.md name it, the art checks are
+green, and it is pushed.
+
+NEVER
+-----
+- Never commit a whole pack, or any image from a pack whose images are kept out of git,
+  except the specific files used. Never `git add -f` around a pack's ignore rule.
+- Never publish a pack whole: not in a release zip, a wiki download or an editor asset
+  bundle.
+- Never re-add the deleted fifth pack (README.txt says why).
+- Never skip USAGE.txt or the notice: the permission to use is not a waiver of credit.
+
+SEE ALSO
+--------
+intake/potential-assets/README.txt; THIRD_PARTY_NOTICES.md; rebake; wiki/stables.html
+(how third-party builds are credited).

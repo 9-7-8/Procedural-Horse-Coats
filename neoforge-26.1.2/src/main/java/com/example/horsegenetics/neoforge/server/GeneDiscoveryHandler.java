@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.ResearchTopic;
 import com.example.horsegenetics.neoforge.data.GeneDatabaseData;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +17,15 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.AnimalTameEvent;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
  * Fills a player's {@link GeneDatabaseData} as they meet genes (roadmap wiki
  * &sect;16.1): <b>taming</b> a horse that carries a non-baseline allele at a
  * gene, and <b>breeding</b> a foal with one (called from
- * {@link HorseBreedingHandler#applyBredFoal}). Reading a paper is the third
- * route and lives on {@link com.example.horsegenetics.neoforge.item.ResearchPaperItem}.
+ * {@link HorseBreedingHandler#applyBredFoal}). Filing a paper on the research
+ * shelf is the third route, {@link #discoverFromPaper}.
  *
  * <p>The database gates nothing but the gene-carrot recipe - every gene a
  * horse carries still shows on the info panel and the genotype code regardless.
@@ -89,6 +91,32 @@ public final class GeneDiscoveryHandler {
             if (!gene.isNatural()) {
                 HorseProgress.complete(serverPlayer, ProgressTask.MAGICAL_GENE_DISCOVERED);
             }
+        }
+    }
+
+    /**
+     * <b>Filing a paper on the research shelf discovers its gene</b> for the
+     * player who filed it (owner, 2026-10-01). Called from the shelf menu's
+     * paper slot, so only a player's hand reaches it: automation writing to the
+     * container never passes here, and a {@link FakePlayer} - another mod's
+     * automation, or the yard's own - is not a player who learnt anything.
+     * Told the way taming and breeding tell: the gene database updates and the
+     * progress tasks tick, with no chat line of its own.
+     */
+    public static void discoverFromPaper(Player player, ResearchTopic topic) {
+        if (!(player instanceof ServerPlayer serverPlayer) || player instanceof FakePlayer || topic == null) {
+            return;
+        }
+        List<String> tokens = topic.discoveryTokens();
+        if (tokens.isEmpty()) {
+            return;
+        }
+        Gene gene = topic.gene();
+        GeneDatabaseData.get(((net.minecraft.server.level.ServerLevel) serverPlayer.level()).getServer())
+                .discover(serverPlayer, gene, tokens);
+        HorseProgress.complete(serverPlayer, ProgressTask.DISCOVER_GENE);
+        if (!gene.isNatural()) {
+            HorseProgress.complete(serverPlayer, ProgressTask.MAGICAL_GENE_DISCOVERED);
         }
     }
 

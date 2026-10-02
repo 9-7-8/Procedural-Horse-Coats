@@ -4,6 +4,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
+import net.neoforged.neoforge.transfer.item.WorldlyContainerWrapper;
 
 /**
  * <b>The one part of the Horse Stasis Bank other machines can reach.</b>
@@ -37,6 +38,13 @@ import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper;
  * empties or the buffer, which are outputs. There is no second copy of that
  * list to drift.
  *
+ * <p><b>And what a pipe may take out</b> (2026-10-01, #22). The plain
+ * {@link VanillaContainerWrapper} checked nothing on the way out, so a hopper
+ * under the bank pulled the hay and water back out as fast as one above put them
+ * in. The goods container is now a {@code WorldlyContainer} whose
+ * {@code canTakeItemThroughFace} refuses the feed and water slots, wrapped in
+ * {@link WorldlyContainerWrapper} - the inputs stay, the outputs leave.
+ *
  * <h2>API note - 26.1.2 has no {@code IItemHandler}</h2>
  * <b>Not verified in a running game.</b> Written against the 26.1.2 sources: the
  * item capability is {@code Capabilities.Item.BLOCK} and its type is
@@ -60,6 +68,6 @@ public final class StasisBankCapability {
         event.registerBlockEntity(
                 Capabilities.Item.BLOCK,
                 ModBlockEntities.HORSE_STASIS_BANK.get(),
-                (bank, side) -> VanillaContainerWrapper.of(bank.supplies()));
+                (bank, side) -> new WorldlyContainerWrapper(bank.suppliesForPipes(), side));
     }
 }

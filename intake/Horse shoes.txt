@@ -131,7 +131,7 @@ data/horsegenetics/enchantment/ folder). A per-shoe enchantment needs, at minimu
   contribution into the same per-tick total the tier bonus already computes, rather than
   writing the enchantment's effect straight onto the horse independently (two code paths
   computing "the horse's effective bonus" is exactly the kind of drift CLAUDE.md's
-  "regenerate what you invalidate" table exists to catch, and there is no bake to catch
+  regenerate table (procedures/rebake.txt) exists to catch, and there is no bake to catch
   this one - it would only show up as a wrong number in play).
 This is the least specified part of the wiki page (it says "define conflicts explicitly"
 without naming which enchantments ship first) - resolve which 1-2 enchantments ship in

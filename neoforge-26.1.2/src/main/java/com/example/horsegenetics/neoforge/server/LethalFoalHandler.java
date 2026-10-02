@@ -101,13 +101,14 @@ public final class LethalFoalHandler {
         // cancels the damage, so this handler would be asking for a death that
         // could not happen anyway. Skipping it here is what stops the attempt.
         if (HorseRealm.isRealm(level)) return;
-        if (horse.tickCount % INTERVAL_TICKS != 0) return;
+        if ((horse.tickCount + horse.getId()) % INTERVAL_TICKS != 0) return;
 
         HorseRecord record = HorseRecords.of(horse);
         if (!record.hasGenome()) return;
 
-        Traits traits = HorseRecords.traitsOf(record);
-        if (traits.viability() != Viability.LETHAL_AT_BIRTH) return;
+        // GenomeFacts (2026-10-02): resolving the traits parses the whole genotype and epigenome, and this asked it of
+        // every foal every INTERVAL_TICKS - 13.8% of a breeding thousand-horse server - for a "no" nearly every time.
+        if (!GenomeFacts.lethalAtBirth(horse, record)) return;
 
         float damage = Math.max(MIN_DAMAGE, horse.getMaxHealth() * DAMAGE_FRACTION);
         horse.hurtServer(level, geneticDefect(level), damage);

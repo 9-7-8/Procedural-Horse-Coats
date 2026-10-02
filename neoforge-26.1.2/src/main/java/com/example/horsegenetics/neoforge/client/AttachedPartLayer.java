@@ -100,6 +100,20 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     private static final float[] FOAL_CROWN = {1.5f, -3.45f, 0.8f};
 
     /**
+     * Where the <b>left</b> dragon horn roots on the adult skull; the right is the
+     * same with {@code x} negated. The head box ends at {@code x 3} and {@code z 5},
+     * and vanilla's {@code left_ear} spans {@code x 0.55..2.55, y -13..-10, z 4..5} -
+     * so {@code x 2.6} is just outside the ear, {@code z 4.5} half a unit inside the
+     * back of the skull, and {@code y -9.5} a unit and a half below its top: the side
+     * of the poll, behind the ear and clear of the {@link #ADULT_CROWN} antler root
+     * two units forward. A first placement from the boxes, not a tuned one.
+     */
+    private static final float[] ADULT_NAPE = {2.6f, -9.5f, 4.5f};
+
+    /** The same on the foal. Never drawn - a foal grows no dragon horns. */
+    private static final float[] FOAL_NAPE = {2.6f, -2.95f, 1.8f};
+
+    /**
      * How large a foal's horn is against the horn it will grow into.
      *
      * <p>A foal wears its own horn rather than nothing (owner's call) because a horn
@@ -132,8 +146,8 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
         }
         float alpha = genetic.fadeAlpha;
         for (AttachedPart part : genetic.parts) {
-            // A foal grows no antlers - they come with maturity (PartKind.showsOnFoal) -
-            // but wears its half-size horn.
+            // A foal grows no antlers, ram's horns or dragon horns - they come with
+            // maturity (PartKind.showsOnFoal) - but wears its half-size horn.
             if (state.isBaby && !part.kind().showsOnFoal()) {
                 continue;
             }
@@ -296,6 +310,14 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
                 headParts.getChild("head").translateAndRotate(poseStack);
                 float[] base = baby ? FOAL_CROWN : ADULT_CROWN;
                 float side = anchor == PartAnchor.CROWN_LEFT ? 1f : -1f;
+                yield new float[] {side * base[0], base[1], base[2]};
+            }
+            case NAPE_RIGHT, NAPE_LEFT -> {
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                float[] base = baby ? FOAL_NAPE : ADULT_NAPE;
+                float side = anchor == PartAnchor.NAPE_LEFT ? 1f : -1f;
                 yield new float[] {side * base[0], base[1], base[2]};
             }
         };

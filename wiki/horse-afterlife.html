@@ -57,17 +57,25 @@
 
 <h2 id="window">How long you have</h2>
 <p>
-    <code>ops.resurrect_grace_minutes</code>, sixty by default &mdash; but counted in
-    <strong>the owner's own time online</strong>, not wall clock. Somebody who logged off ten
-    seconds before a creeper found their mare has not spent a minute of their window, because
-    the window is <em>their chance to notice and ask</em> and they were not in the room. An hour
-    of real time while they are asleep would spend a window they never had.
+    <strong>Until the server runs out of room for it.</strong> A dead horse is kept however long
+    ago it died, until the store of dead horses reaches <code>ops.resurrect_budget_mb</code>
+    (100&nbsp;MB by default). Past that the <strong>oldest deaths are let go first</strong>, and
+    only as many as it takes to fit again. A horse let go can no longer be resurrected; its
+    pedigree record is kept for ever regardless, so no family tree loses it. Set the budget to 0
+    for no cap at all &mdash; a real cost, since a kept horse is a whole entity in the world save.
+    <code>/horseresurrect list</code> says how full the store is.
 </p>
 <p>
-    Set it to <strong>0 to keep every dead horse for ever</strong>. That is a real option and a
-    real cost: a kept horse is a whole entity in the world save, per horse, indefinitely. The
-    elapsed count keeps running while it is 0, so turning a limit back on later starts expiring
+    A server can add a time limit as well: <code>ops.resurrect_grace_minutes</code>, 0 (off) by
+    default. It counts <strong>the owner's own time online</strong>, not wall clock. Somebody who
+    logged off ten seconds before a creeper found their mare has not spent a minute of their
+    window, because the window is <em>their chance to notice and ask</em> and they were not in the
+    room. The elapsed count keeps running while it is 0, so turning it on later starts expiring
     the backlog rather than sparing it.
+</p>
+<p>
+    Until issue #15 (2026-10-01) the only limit was that window, at sixty minutes. A server whose
+    config file was written by an older release keeps its 60 until an operator changes it.
 </p>
 
 <h2 id="command">The command</h2>
@@ -219,12 +227,30 @@
 <div class="note">
     <span class="label">The consequence to know about</span>
     <p>
-        An owner who never logs in again never spends their window, so their horses are kept
-        indefinitely. That is the design working as asked &mdash; the clock is their chance to
-        ask &mdash; but it means the store's floor is set by departed players rather than by the
-        setting. Nothing trims it today.
+        An owner who never logs in again never spends their window, so under the window alone
+        their horses would be kept indefinitely. The size budget is what bounds that now.
     </p>
 </div>
+
+<h2 id="budget">The size budget (2026-10-01, issue #15)</h2>
+<p>
+    The owner's call: the store is held to a <strong>size</strong>, not a clock, and past it the
+    <strong>oldest death</strong> (<code>Wake.deathGameTime</code>) goes first. The rule is
+    <code>common/horse/AfterlifeBudget.overflow</code>, pure and tested by
+    <code>AfterlifeBudgetTest</code>; <code>HorseAfterlife.trimTo</code> applies it from the same
+    200-tick sweep as <code>spend</code>, never on a death, so a burst of deaths costs one trim.
+</p>
+<p>
+    <strong>How a horse is measured.</strong> Each <code>Wake</code> carries <code>bytes</code>:
+    its entity tag written through <code>NbtIo.writeCompressed</code> into a counting stream,
+    once, when it is kept. Not a stat of the <code>.dat</code> file, which exists only after a save
+    while the sweep runs between saves. The real file is one gzip stream across every wake and
+    compresses a little better than the sum, so the budget errs towards letting go slightly early.
+    A wake saved before the budget has no <code>bytes</code> field; the store measures it as it
+    loads, so an old save is budgeted from its first sweep. The gametest
+    <code>a_dead_horse_comes_back_whole</code> checks both, and that <code>trimTo</code> keeps a
+    horse at budget 0 and drops one a byte over.
+</p>
 
 <h2 id="revive">Undoing the death, not just the absence</h2>
 <p>
@@ -292,7 +318,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Nothing on this page has been played: the round trip is proven by a gametest and by nothing else, so the first check is the plain one &mdash; own a horse, name it, get its bond up, let it die, and confirm <code>/horseresurrect list</code> shows it and <code>/horseresurrect &lt;name&gt; at &lt;player&gt;</code> hands back an animal whose bond, name and pedigree are all still there and whose foals still list it as a parent; the saddle is the one that would be a duplication bug rather than a disappointment, so kill a <strong>tacked</strong> horse and check the saddle is on the ground and not also on the horse; the owner-online clock has never been watched over a real hour and the thing to confirm is the half that is easy to get backwards &mdash; that a horse dies, its owner logs off for an hour, and it is <em>still</em> there when they come back; the <code>site</code> placement can put a horse back in the lava that killed it and wants somebody to try exactly that on purpose; and the store has no size ceiling at all, so a busy server is the only thing that can say whether sixty minutes of owner time is the right default or whether the save grows faster than anybody expected.</p>
+    <p>Nothing on this page has been played: the round trip is proven by a gametest and by nothing else, so the first check is the plain one &mdash; own a horse, name it, get its bond up, let it die, and confirm <code>/horseresurrect list</code> shows it and <code>/horseresurrect &lt;name&gt; at &lt;player&gt;</code> hands back an animal whose bond, name and pedigree are all still there and whose foals still list it as a parent; the saddle is the one that would be a duplication bug rather than a disappointment, so kill a <strong>tacked</strong> horse and check the saddle is on the ground and not also on the horse; the owner-online clock has never been watched over a real hour and the thing to confirm is the half that is easy to get backwards &mdash; that a horse dies, its owner logs off for an hour, and it is <em>still</em> there when they come back; the <code>site</code> placement can put a horse back in the lava that killed it and wants somebody to try exactly that on purpose; and the size budget has only been proven on one test horse, so a real server should confirm that the sum of measured wakes tracks the real <code>horse_afterlife.dat</code> and that the oldest deaths go first once it fills.</p>
 </div>
 
 <h3 id="verify-round-trip">The round trip, with a real horse (not played)</h3>
@@ -349,13 +375,20 @@
         <strong>Pass:</strong> the horse is there when somebody walks to it.</li>
 </ul>
 
-<h3 id="verify-scale">Nothing bounds the store (not played)</h3>
+<h3 id="verify-scale">The size budget against a real file (not played)</h3>
 <p>
-    There is no cap on how many horses are kept, and an owner who never returns never spends their
-    window. On a server with turnover, the floor is set by departed players. Nobody has measured
-    what that costs; the honest check is to run it on a real server for a week and look at the
-    size of <code>horse_afterlife.dat</code>.
+    The budget counts each wake's own gzipped tag (<a href="#budget">Coding</a>), which should
+    slightly overstate the file. Only the gametest has exercised it, on one horse.
 </p>
+<ul>
+    <li><strong>Fill a small budget.</strong> Set <code>ops.resurrect_budget_mb</code> to 1, kill
+        owned horses one by one, and compare <code>/horseresurrect list</code>'s &ldquo;the store
+        holds&rdquo; line with the size of <code>data/horsegenetics_horse_afterlife.dat</code>
+        after a save. <strong>Pass:</strong> the listed figure is at or a little above the file,
+        never below it; once it passes 1&nbsp;MB the oldest death leaves the listing and the log
+        says <code>let go</code>. <strong>Fail:</strong> a file bigger than the listed figure means
+        the measure undercounts and the budget will overshoot.</li>
+</ul>
 
 </section>
 

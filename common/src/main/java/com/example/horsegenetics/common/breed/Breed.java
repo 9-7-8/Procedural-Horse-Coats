@@ -222,7 +222,7 @@ public record Breed(
         // unordered, and these are written back out to a checked-in file by
         // BreedSpecWriter. An unordered copy makes that file's diff depend on
         // the JVM's hash seed, which is a regenerated-artefact trap of exactly
-        // the kind CLAUDE.md's "regenerate what you invalidate" table exists for.
+        // the kind the regenerate table in procedures/rebake.txt exists for.
         genePools = ordered(genePools);
         scores = scores == null ? StatScores.NONE : scores;
         bands = bands == null ? BreedBands.NONE : bands;

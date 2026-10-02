@@ -28,15 +28,13 @@
 
 <section class="tab-panel" data-tab="gameplay">
 
-<div class="note warn">
-    <span class="label">Built, and not yet seen in game</span>
+<div class="note">
+    <span class="label">Seen in the test yard</span>
     <p>
-        The gene, its inheritance and its founder table exist and are covered by
-        the test suite; the translator that turns it into behaviour was written
-        against the 26.1.2 sources and is flagged unverified in its own comments.
-        <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on
-        <a href="#verification">the Verification tab</a>.
+        The gene, its inheritance and its founder table are covered by the test
+        suite, and the test yard has watched a horse take a favourite its diet
+        forbids, with the speed buff, while a horse without the favourite refused
+        it (<a href="?view=coding#verified">Verified</a>, 2026-10-02).
     </p>
 </div>
 
@@ -141,6 +139,17 @@
     feeding path, is what keeps the two loci from fighting.
 </p>
 
+<h3 id="verified">Verified</h3>
+
+<p id="verified-favourite-beats-diet">
+    <strong>A favourite the diet forbids is still accepted</strong> (test yard, pen HANDS AT FEEDING, the run of
+    2026-10-02 03:52 on <code>a56afcbb</code>, clockwork PASS at 03:52:54). Two wheat-eaters were each offered an
+    apple: the one whose favourite is apples ate it and gained the speed effect only
+    <code>FoodPreferenceHandler</code> gives &mdash; it took the offer at <code>HIGH</code> priority and
+    <code>HorseDietHandler</code> never saw it &mdash; while the same diet with no favourite kept the apple and said
+    &ldquo;The horse turns its head away. It only eats wheat.&rdquo; The ordering is the right way round.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -157,30 +166,11 @@
 
 </section>
 
-<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Open checks">
-
-<div class="note verify-summary">
-    <span class="label">What needs verifying here</span>
-    <p>Food preference has never been confirmed to fire at all, and the decisive test is an <strong>ordering</strong> bug rather than anything you can see: offer a horse a favourite its own diet forbids, and a refusal means <code>HorseDietHandler</code> won.</p>
-</div>
-
-<h3 id="open-0913-food-preference">Food preference: built, never confirmed (still open after 2026-09-13)</h3>
-
-<p>Nothing here needs looking at to judge.</p>
-<ul>
-    <li><strong>Built, never confirmed:</strong> food preference &mdash; a favourite its diet forbids must still be
-        accepted; a refusal means <code>HorseDietHandler</code> won the ordering.</li>
-</ul>
-
-</section>
-
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-diet.html">Diet</a>
         <a href="horse-care.html">Bond and horse care</a>
         <a href="breeds.html">Breeds</a>
-        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/FoodPreferenceGene.java</code>
 </div>

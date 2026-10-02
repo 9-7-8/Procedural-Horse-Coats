@@ -1,0 +1,94 @@
+2026-10-02 10:51 (time written, at the end) - The designer names the grown parts it cannot draw
+
+ASKED
+-----
+- "/process-intake" - took one unit out of intake/: the To do.txt bullet "The horse
+  designer lists each grown part as a trait, with 'not drawn here; see it in game'". Built,
+  written up, retired.
+- "Once the sizing agent finishes, commit all of its findings into intake so you don't
+  have to run it again, and so that future process-intake calls can run more quickly." -
+  done as intake/Sizing.txt (commit bfa176f8), and process-intake, write-intake-document
+  and whats-next now read or keep it.
+
+DONE
+----
+- bfa176f8 - intake/Sizing.txt: every unit in intake/ sized (size, impact, owner calls,
+  dependencies, built-or-not), dated per treatment. process-intake step 1 starts from it
+  and re-sizes only treatments changed since their block's date (git log --since); step 8
+  deletes a shipped unit's row. intake/README.txt names it. Proof: it is text; the next
+  /process-intake run is its test.
+- 35eda39d - the unit. Tier 1 (size S, impact a: finishes the shipped grown parts; no
+  owner calls - she decided it 2026-10-01). Runner-up: free send home (Exits piece 2), also
+  S/a; it lost because the designer bullet was in her own "decided, needs only building"
+  list and closed a divergence already written on both editors.
+  - Missing: the browser designer cannot draw geometry, so a Horn/Horn or Ant/Ant horse
+    showed nothing of its parts, and the part genes' rows were struck through as invisible.
+  - Built: common/GrownParts.listed (GrownParts.of named for a person, a pair once, by the
+    new PartKind.label(), with an adult-only flag); DesignerApi.stateJson sends it as
+    "parts"; gui.js drawParts draws "Not drawn here - see in game:" plus one line per part
+    at the top left of the preview, "(grows in with age)" on a foal's adult-only parts.
+    genesJson sends a "grows" flag (EditorRules.grows, a memoised GrownParts.shapes) and
+    viewable() honours it - a flag, not a sixth "shows" category, because of open check 254.
+  - Found while looking at the screenshot and fixed in the same unit: BOTH editors' rows
+    said "no effect" under an Ant/Ant horse's antlers, because a part gene's outcomes are
+    all wild types and the row rule was "not a wild type". EditorRules.expressing is now
+    the one rule; CustomHorseSpawnScreen and DesignerApi both call it (hard rule 5).
+  - Proof: GrownPartsListedTest (6 tests) green; the dedupe and the expressing rule were
+    each broken on purpose and failed (2 and 1 failures). CommonPortabilityTest green.
+    :web:bakeDesignerAssets + check-designer-boots OK. :neoforge-26.1.2:build green,
+    check-parity OK. Seen in headless Chrome: an adult Horn/Horn Ant/Ant stallion (panel
+    lists both, antlers row green "Antlers") and the same horse as a foal (antlers say
+    "(grows in with age)", the horn does not).
+- Docs: wiki/model-parts.html#open-designer rewritten as shipped; its stale Roadmap
+  pointer "The designer cannot draw a part" deleted; new check #open-editor-part-rows.
+  wiki/gene-unicorn-horn.html's open check "The designer does not draw the horn" closed
+  and moved to its Coding tab as #horn-designer. decisions.html entry marked shipped.
+- Retired: the To do.txt bullet, and its row in intake/Sizing.txt.
+
+DECIDED
+-------
+- Calls made without the owner:
+  - The panel's place (top left of the preview, only when a part exists) and its words
+    ("Not drawn here - see in game:"; the longer wording shrank to unreadable on a
+    narrow preview). Recorded on model-parts.html#open-designer.
+  - Fixing the "no effect" part row in both editors inside this unit, rather than filing
+    it: it is the row half of "lists each grown part as a trait".
+  - "grows" as a flag rather than a new "shows" category (open check 254's trap).
+  - A Horn/n "Unicorn carrier" row now reads green as "Unicorn carrier" too: any part-gene
+    outcome other than its default alleles' counts as expressing.
+
+FOUND ON THE WAY
+----------------
+- intake/Attached model parts.txt is stale for stages 0-3 (all shipped); noted on its
+  Sizing.txt block for the next run to trim.
+- Mistake: my first screenshot script used gene keys without the "horsegenetics."
+  prefix and threw inside wasm with no message; and its Age click toggled the wrong way,
+  so the first "adult" shot was a foal. Both caught by reading the state back.
+- Driving the designer headlessly to a given genotype took a throwaway script (deleted).
+  check-designer-boots.mjs taking a --horse <file> to load before --shot would make
+  every future designer change visually checkable in one command. Not built.
+
+PROCEDURES
+----------
+- process-intake: step 1 starts from intake/Sizing.txt; step 8 deletes the unit's row;
+  Sizing.txt listed as not-a-unit.
+- write-intake-document: step 7 adds the treatment's Sizing.txt block; section 7's size
+  scale points at Sizing.txt (it pointed at the skill wrapper, which holds no steps).
+- whats-next: step c reads Sizing.txt rather than every treatment.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other test that
+  touches EditorRules (the randomize rules now call EditorRules.grows, memoised, instead
+  of GrownParts.shapes directly) and GrownParts.
+- Nobody has seen in game the spawn egg's part rows, or the designer panel on a narrow
+  window: wiki/model-parts.html#open-editor-part-rows.
+
+RELEASE
+-------
+Not offered: one small feature is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/process-intake (procedures/process-intake.txt) - by Sizing.txt the next Tier 1 unit is
+free send home (Horse exits piece 2), size S, no owner calls.

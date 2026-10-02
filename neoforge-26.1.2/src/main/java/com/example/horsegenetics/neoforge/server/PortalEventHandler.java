@@ -168,6 +168,14 @@ public final class PortalEventHandler {
             return;
         }
 
+        // The cheap half of the horse rule below, asked BEFORE the block reads (2026-10-02, stress audit): every
+        // horse in the world ran portalBlockUnder every tick only to be turned away here for not being escorted.
+        // Same outcome - a horse not already dwelling and not escorted keeps no timer either way.
+        if (!isPlayer && !DWELL.containsKey(id) && !escorted(entity)) {
+            LAST_COUNTDOWN.remove(id);
+            return;
+        }
+
         BlockPos at = portalBlockUnder(level, entity);
         if (at == null) {
             DWELL.remove(id);
@@ -299,6 +307,13 @@ public final class PortalEventHandler {
 
     private static BlockPos portalBlockUnder(ServerLevel level, Entity entity) {
         BlockPos feet = entity.blockPosition();
+        // An entity can tick standing in a chunk that is not loaded - just
+        // teleported, or at the edge of the loaded area - and this runs for every
+        // horse and player every tick, so a read here would load it: issue #13.
+        // The mid block is the same column, so the same chunk.
+        if (!level.hasChunkAt(feet)) {
+            return null;
+        }
         if (level.getBlockState(feet).getBlock() instanceof HayPortalBlock) {
             return feet.immutable();
         }

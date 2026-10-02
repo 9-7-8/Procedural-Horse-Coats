@@ -1,0 +1,106 @@
+intake/Sizing.txt - the sizing of every unit in intake/, so process-intake need not re-read
+every treatment each run. NOT a treatment and NOT a unit: never build from it, never count it.
+
+How to use it (process-intake step 1):
+- Trust a row only while its treatment is unchanged since the date at the top of its block:
+  `git log --since=<date>T00:00 --oneline -- "intake/<file>"` empty -> the row stands.
+  (The T00:00 matters: a bare date counts from the current time of day.)
+- A treatment changed since, or a new one -> re-size that file alone, and rewrite its block.
+- A unit shipped -> delete its row in the same change that retires it from the treatment.
+- A treatment deleted -> delete its block.
+Size: S = one screen or class + one test class; M = one session; L = several sessions, or a
+foundation others wait on. Impact: a finishes shipped work, b unblocks units, c new content.
+"Owner" = No when it has an Open: design call, says "confirm with the owner", designs a breed,
+or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on that date.
+
+------------------------------------------------------------------------------
+To do.txt                                                         sized 2026-10-02
+- Config key table on wiki/config.html (new bake row)            S  b  owner-free
+- Champagne foal eye blue-green until adult                      S-M a  owner-free (coat cache key)
+- Cutie-mark pool bias / four studbook kinds                     -  -  No: "needs a few more owner answers"
+- Procedure write-ups (compat-test, measure-worldgen,
+  add-a-wood-family, answer-a-tester)                            S each, owner-free
+
+------------------------------------------------------------------------------
+Attached model parts.txt   (PLAN ONLY)                            sized 2026-10-02
+STALE for stages 0-3: the spike, the registry/layer, the first gene and the head batch have
+shipped (AttachedPartLayer, PartAnchor, PartKind, GrownParts; horn, antlers, ram's and dragon
+horns). P6 (what the designer shows) shipped 2026-10-02. Trim those stages next time.
+- Stage 4, breed hook (breed format, BreedSpecWriter, bakes)     L  b  No: touches breeds; unblocks reindeer breeds
+- Stage 5, worn side (HorseShoeLayer -> AttachedPartLayer)       M  a  owner-free; needs Horse shoes
+- Stage 6, wings                                                 L  c  No: "what drives them; one texture or many"
+Owner words: grown parts "a HUGE win"; horn, dorsal spines and crystals high priority.
+
+------------------------------------------------------------------------------
+Body parts - implementation treatment.txt                         sized 2026-10-02
+- Slice A: SPINE anchor, saddle-zone mask, dorsal spine row      M  b  owner-free; foundation for B
+- Slice B: back sail + translucent regions                       M  c  owner-free; needs A
+- Slice C: shoulder/hip plates                                   S-M c owner-free
+- Slice D: crystal growths                                       M  c  owner-free; needs B
+Built? No (SPINE is only a comment in PartAnchor).
+
+------------------------------------------------------------------------------
+Head parts - implementation treatment.txt                         sized 2026-10-02
+(Slice A, dragon horns, shipped 2026-10-02.)
+- Slice B: ear fins, cheek spikes, brow ridge; EAR_/CHEEK_/BROW anchors   M  c  owner-free
+- Slice C: goat beard and ruff (HAIR, neck anchor)               M  c  owner-free
+Built? No.
+
+------------------------------------------------------------------------------
+Tusks gene - implementation treatment.txt                         sized 2026-10-02
+- Slice A: TusksGene + colour gene, SNOUT anchor, narwhal horn   M  c  owner-free; no breed changed
+- Slice B: boar tusks, sabre fangs; JAW_/LIP_ anchors            M  c  owner-free; needs A
+Built? No.
+
+------------------------------------------------------------------------------
+Feathering - implementation treatment.txt                         sized 2026-10-02
+- One unit: FeatheringGene + LegPatches (samples leg colour)     M  c  owner-free (HAIR region shipped)
+Follow-on, not in this file: pinning feathering in draught breeds (owner: expect to ask next) - a breed change.
+Built? No.
+
+------------------------------------------------------------------------------
+Daily realm horse - implementation treatment.txt                  sized 2026-10-02
+- One unit                                                       M  c  No: seven Open lines (SLEEP and /time set,
+  ticking with no players, breed weighting - recommends Feral Mixed 1 in 4 -, non-WILD breeds,
+  placement, NBT tag, soft cap)
+Built? No.
+
+------------------------------------------------------------------------------
+Horse exits and free send home - implementation treatment.txt     sized 2026-10-02
+- Piece 1: Exits tab on the H menu, ledger, log call sites       M  c  owner-free
+Piece 2 (Send home free) shipped 2026-10-02. Built? Piece 1 no.
+
+------------------------------------------------------------------------------
+Horse shoes.txt                                                   sized 2026-10-02
+- One unit: shoe items per metal, the four SHOE_* tags,
+  effects/enchantments, HorseShoeLayer (needs hoof anchors)      M-L c  near-owner: which 1-2 enchantments ship first
+Built? No.
+
+------------------------------------------------------------------------------
+Realm breeding pause - implementation treatment.txt               sized 2026-10-02
+- One unit: shift pregnancy by unloaded time (pure common/),
+  server config, gametest                                        S-M a  owner-free; one UNVERIFIED: the realm scales no time
+Built? No.
+
+------------------------------------------------------------------------------
+Troughs and salt licks - implementation treatment.txt             sized 2026-10-02
+Gate: after the feeding rules are fixed (check-roadmap-execution).
+- Piece 1: wooden trough, the first block entity, every wood     L  b  No: Open lines (rung, foreign troughs, ...)
+- Piece 2: connected troughs share an inventory                  M  c  needs 1
+- Piece 3a fill readout S; 3b stall trough M; 3c salt lick M     c     No: "where the salt comes from" etc.
+Built? No.
+
+------------------------------------------------------------------------------
+Undead horse conversion.txt   (PLAN ONLY)                         sized 2026-10-02
+Release: stages 1-4 all finished before any is released; stage 4 may be a later release.
+- Stage 1: sheet converter, alpha op, art, skeleton/zombie genes, two breeds   L  b  No: breeds, philosophy.html, D27/D28
+- Stage 2: wire the reused machinery                             M     needs 1
+- Stage 3: the converter                                         L     needs 1-2 seen in game
+- Stage 4: spawning overhaul                                     M     needs 3
+Built? No.
+
+------------------------------------------------------------------------------
+Villagers in every village - implementation treatment.txt         sized 2026-10-02
+- Piece 1: barns in all five village pools (option a first)      M  c  No: "confirm with the owner", one barn vs per style
+- Piece 2: /horsevillage backfill command                        L  c  No: command name, list command, ...
+Built? No.

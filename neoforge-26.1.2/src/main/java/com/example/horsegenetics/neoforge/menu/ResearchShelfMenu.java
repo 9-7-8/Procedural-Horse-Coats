@@ -2,6 +2,8 @@ package com.example.horsegenetics.neoforge.menu;
 
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.block.EquineResearchShelfBlockEntity;
+import com.example.horsegenetics.neoforge.item.ResearchPaperItem;
+import com.example.horsegenetics.neoforge.server.GeneDiscoveryHandler;
 import com.example.horsegenetics.neoforge.server.HorseProgress;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -172,11 +174,19 @@ public final class ResearchShelfMenu extends AbstractContainerMenu {
             return activeOnTab(true);
         }
 
+        /**
+         * Every way a hand puts a paper here - click, swap, shift-click, drag,
+         * number key - arrives through this in vanilla's {@code Slot} and
+         * {@code AbstractContainerMenu} (26.1.2 sources, read 2026-10-02). The
+         * shelf offers hoppers no capability today; one added later would write to
+         * the container and not pass here, which is the point.
+         */
         @Override
         public void setByPlayer(ItemStack stack, ItemStack previous) {
             super.setByPlayer(stack, previous);
             if (!stack.isEmpty()) {
                 HorseProgress.complete(player, ProgressTask.FILE_PAPER);
+                GeneDiscoveryHandler.discoverFromPaper(player, ResearchPaperItem.topicOf(stack));
             }
         }
     }

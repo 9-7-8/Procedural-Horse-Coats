@@ -1,5 +1,6 @@
 {
-  "type": "minecraft:jigsaw",
+  "type": "horsegenetics:level_jigsaw",
+  "max_ground_spread": 10,
   "biomes": "#horsegenetics:has_stable",
   "step": "surface_structures",
   "spawn_overrides": {},

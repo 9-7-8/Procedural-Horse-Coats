@@ -64,9 +64,14 @@ STEPS
      javac -d <scratchpad> -cp "<that classpath>" path/to/OneFile.java
 
 4. Close every client.
-   Kill every fml.modFolders process, not just the one you think is there. Two clients
-   share run/ and interleave latest.log until it is useless. TaskStop on a runClient task
-   is not enough on its own: re-check the processes afterwards.
+   Stop them with `pwsh -File tools/stop-dev-java.ps1`, and NOTHING else: run it with -WhatIf first and read
+   the list. It stops only Java processes whose command line names this repo, so it
+   gets every dev client (their fml.modFolders carries the repo path) and can never
+   reach the live server. Never Stop-Process, taskkill or kill by hand, by PID or by
+   pattern: a PreToolUse hook refuses them (.claude/hooks/guard-process-kill.mjs). A
+   pattern killed the live server with players on it on 2026-10-01.
+   Two clients share run/ and interleave latest.log until it is useless, so stop all of
+   them. TaskStop on a runClient task is not enough on its own: re-check afterwards.
 
 5. Free memory, then launch DETACHED, never as a harness background task.
    The harness kills background tasks when free memory dips, which happens during world
@@ -96,13 +101,20 @@ STEPS
 
 8. A server boot, for anything that runs at mod load (config specs, registries, the mod
    constructor, drop-in folders):
-   a. Run `./gradlew :neoforge-26.1.2:runServer` in the background, after checking that
+   a. Run `./gradlew :neoforge-26.1.2:runServer` detached, in step 5's Start-Process
+      form with -FilePath gradlew.bat (a cmd.exe /c wrapper launches nothing), after checking that
       no client holds the run directory. A DirectoryLock IOException means the owner's
       game is open; it does not mean a bad registration.
-   b. Poll the log for "Done (" or "BUILD FAILED", then kill the --nogui java process.
+      The boot overwrites run/logs/latest.log and debug.log, which hold the owner's last
+      play session. Copy them aside first, with run/phc/ and run/config/, and put all of
+      them back after step d.
+   b. Poll the log for "Done (" or "BUILD FAILED", then stop it with `pwsh -File tools/stop-dev-java.ps1`
+      (-WhatIf first). NEVER by matching "nogui": the live server's command line ends in
+      "nogui" too, and that match is what killed it on 2026-10-01.
    c. Reaching "Done (" is not a clean boot. Also grep the whole log for
-      'ERROR|Couldn.t parse|Invalid|missing', and triage each hit as ours or another
-      mod's. Datapack failures are logged once and then the game runs without that
+      '/ERROR\]|/WARN\]|Couldn.t parse|Invalid', and triage each hit as ours or another
+      mod's. Match the level marker, not a bare ERROR: the dev log is at DEBUG, and a
+      bare 'ERROR|missing' drowns in lines like "Masking access to .../error.png". Datapack failures are logged once and then the game runs without that
       content.
    d. Delete any config file the boot generated, so the owner's next session starts from
       defaults.
@@ -119,8 +131,11 @@ NEVER
 - Never run runClient as a harness background task.
 - Never claim a launch without seeing the process and a fresh log line.
 - Never touch the owner's live server. It is not a dev run.
+- Never stop a process except through `pwsh -File tools/stop-dev-java.ps1`. Not by PID, not by
+  pattern, not "just this once": the live server restarts under new PIDs, and its
+  command line names no path.
 
 SEE ALSO
 --------
 run-tests; hand-over-a-test; release (the server boot before tagging); end-session
-(step 8, killing what you started).
+(step 8, stopping what you started).

@@ -31,7 +31,18 @@ public enum PartAnchor {
     CROWN_RIGHT,
 
     /** The same on the other side, model {@code +x}. */
-    CROWN_LEFT
+    CROWN_LEFT,
+
+    /**
+     * The back of the skull just behind and outside the base of the <b>right</b>
+     * ear, model {@code -x} - where a dragon horn roots, so it sits clear of the
+     * antlers' {@link #CROWN_RIGHT} (forward of the ears) and the horn's
+     * {@link #FOREHEAD}, and sweeps back over the neck rather than up.
+     */
+    NAPE_RIGHT,
+
+    /** The same on the other side, model {@code +x}. */
+    NAPE_LEFT
 
     // The next anchors, named here only so the shape of the enum is obvious and
     // NOT declared until something draws them: SPINE (along the back, for

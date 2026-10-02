@@ -32,6 +32,7 @@ import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.GrownParts;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
 import com.example.horsegenetics.common.genetics.RandomizeMode;
 import com.example.horsegenetics.common.genetics.ResearchTopic;
@@ -275,6 +276,12 @@ public final class DesignerApi {
                     .kv("sexLinked", g.inheritance().sexLinked())
                     .kv("defaultIndex", HorseEditor.indexOf(g, g.defaultAllele()))
                     .kv("shows", showsAs(g))
+                    // Grows or dresses a part (GrownParts.shapes). A flag beside
+                    // "shows", not a sixth category: gui.js's viewable() lists the
+                    // categories it cannot draw (open check 254), and a new one
+                    // would read there as drawable. A part is not drawn here
+                    // either - it is named, in stateJson's "parts".
+                    .kv("grows", EditorRules.grows(g))
                     .kv("family", GeneFamily.of(g).name())
                     .kv("alwaysCarried", EditorRules.alwaysCarried(g))
                     .kv("influencesCoat", Genes.influencesCoat(g))
@@ -451,10 +458,17 @@ public final class DesignerApi {
                     .kv("description", c.description())
                     .endObj();
         }
+        // The grown parts, in words: this page previews a coat texture and cannot
+        // draw a horn, so it names one instead (owner's call, 2026-10-01 - see the
+        // divergence note on HorseEditor). The sex gate is in GrownParts.of.
+        j.endArr().key("parts").arr();
+        for (GrownParts.Listed part : GrownParts.listed(gt, e.epigenome())) {
+            j.obj().kv("name", part.name()).kv("adultOnly", part.adultOnly()).endObj();
+        }
         j.endArr().key("rows").arr();
         for (HorseEditor.Row row : e.rows()) {
             Expression x = gt.expressionOf(row.gene);
-            boolean expressing = x != null && !x.wildType();
+            boolean expressing = EditorRules.expressing(row.gene, x);
             j.obj()
                     .kv("added", row.added)
                     .kv("locked", row.locked)

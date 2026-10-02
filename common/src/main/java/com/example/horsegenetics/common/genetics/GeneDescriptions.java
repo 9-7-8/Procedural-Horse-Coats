@@ -492,6 +492,18 @@ public final class GeneDescriptions {
                     "A magical dominance series for the shape of ram's horns: four-horned "
                             + "over curled over corkscrew over scurs. Does nothing to a polled "
                             + "horse."),
+            Map.entry("horsegenetics.dragon_horns",
+                    "A magical, recessive gene: Drg/Drg grows a pair of horns behind the ears, "
+                            + "swept back over the neck. Swept, straight or curled, and their "
+                            + "length, thickness, sweep and splay, are epigenetic and inherited "
+                            + "with the allele. Mares and stallions alike; grown at maturity. "
+                            + "Their colour is its own gene. One copy shows nothing."),
+            Map.entry("horsegenetics.dragon_horn_colour",
+                    "A magical, codominant gene that colours dragon horns and does nothing to "
+                            + "a horse without them - the horn colour rule on a locus of its own. "
+                            + "White, the seven rainbow colours, pink, black, grey, and chaos. Two "
+                            + "different copies make a two-tone pair, one colour at the root and "
+                            + "the other at the tips."),
             Map.entry("horsegenetics.ram_horn_tip",
                     "A magical, recessive gene: Tip/Tip fades a ram's horns into a colour "
                             + "of their own toward the points. The colour is inherited. Molten "

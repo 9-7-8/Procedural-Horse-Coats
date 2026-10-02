@@ -1,0 +1,66 @@
+2026-10-01 21:10 (start, approximate) - Fix #16: the mixin config no longer names a refmap
+
+ASKED
+-----
+- "/whats-next". The survey found: 4 fixes since v0.5.039 (below the release bar); open
+  issues #16 (refmap warning, cosmetic), #13 (horse AI forces chunk loads), #10 (fixed,
+  waiting on an in-game check), #2 (floating stables, needs-owner); no unreviewed PCH log
+  export folders; three decided To-do items in intake/To do.txt. The owner was offered
+  #16 (recommended), a To-do item via process-intake, #2, and the AI half of #13.
+  - Picked: "Fix #16 refmap". That ran under /fix-bug.
+  - In the same round, the owner answered #2: "Reject uneven sites".
+
+DONE
+----
+- 032b1388 Fix #16: every start warned that the mixin refmap was missing.
+  What was wrong: neoforge-26.1.2/src/main/resources/horsegenetics.mixins.json named
+  "refmap": "horsegenetics.refmap.json". NeoForge 26.1.2 runs on Mojang names in dev and in
+  production, and ModDevGradle (net.neoforged.moddev 2.0.144) has no remap step, so no
+  refmap was ever built and none is needed. Every start logged "Reference map ... could not
+  be read" (19 times in the server exports; also at line 29 of the dev latest.log).
+  Fix: removed the entry.
+  Proof: a detached :neoforge-26.1.2:runServer boot reached "Done (". It logged no refmap
+  line, still logged "Mixing <X> from horsegenetics.mixins.json" for each mixin, and had
+  0 ERROR-level lines. defaultRequire: 1 would have failed the boot on any injection that
+  missed. Then :neoforge-26.1.2:build was green, and check-parity reported OK.
+  Recorded on wiki/api-notes.html#mixin-no-refmap. It notes that a 1.12.2 backport remaps,
+  and will need the refmap back.
+  Issue #16: CLOSED by the commit, with a proof comment.
+
+DECIDED
+-------
+- #2 (stables floating over valleys): option 1, reject uneven sites (owner). A custom
+  structure type wraps jigsaw. It samples the surface at the footprint's corners and
+  centre, rejects a site whose spread is over ~6 blocks, and places at the lowest corner.
+  Recorded as a comment on #2, and needs-owner was removed.
+- #16: remove the refmap entry rather than generate a refmap (made without the owner; the
+  issue already proposed it).
+
+FOUND ON THE WAY
+----------------
+- None filed. The dev server's DEBUG log makes launch-game 8c's bare 'ERROR|missing' grep
+  useless (see PROCEDURES).
+
+PROCEDURES
+----------
+- procedures/launch-game.txt step 8c: the boot grep now matches the level markers
+  '/ERROR\]|/WARN\]' instead of a bare ERROR/missing. The old pattern matched dozens of
+  harmless DEBUG lines ("Masking access to .../error.png", "0 mod requirements missing").
+
+NOT RUN / NOT CHECKED
+---------------------
+- No full :common:test run (nothing in common/ changed). No gametests: the boot proved the
+  mixins apply, but no gametest exercised one.
+- No client boot. Client-only mixins (the client list) were not applied in a server boot.
+  They load under the same config with the same names, so they are expected to behave the
+  same, but nobody has seen it.
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: 5 fixes since v0.5.039 is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/fix-bug on #2: the stable footprint check the owner picked (reject uneven sites). Measure
+it headlessly against a control before and after.

@@ -497,6 +497,12 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
      * blocks count only with air above, which is where a horse eats them from.
      */
     private static @Nullable Hunger.Food rungOf(ServerLevel level, BlockPos pos, HorseDiet diet) {
+        // An unloaded block is not food. Reading it would load its chunk on the
+        // server thread, and this runs from canContinueToUse - every tick - as well
+        // as from the search: issue #13. The block above is in the same chunk.
+        if (!level.isLoaded(pos)) {
+            return null;
+        }
         BlockState st = level.getBlockState(pos);
         Hunger.Food food;
         Item form = null;

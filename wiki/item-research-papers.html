@@ -326,6 +326,21 @@
     <code>ResearchTopicTest</code>, which asserts every migrated paper still crafts.
 </p>
 
+<p id="verified-chest-rate">
+    <strong>Chests hand out papers at the configured 30%</strong> (2026-10-02, test yard row AY, pen
+    CHEST LOOT, <code>CLOCKWORK PASS</code> at 03:52:55): 34287 of 114000 rolls across all 57 chest
+    tables = 0.3008, every table inside its band (lowest the desert pyramid at 28.2%, highest the
+    stronghold crossing at 32.6%). The full roll is on <a href="items.html#verified-chest-loot">the
+    items page</a>.
+</p>
+
+<p id="verified-shelf-pairs">
+    <strong>A shelf files a carrier and a true-breeding paper of one gene as two rows</strong>
+    (2026-10-02, test yard row AX, pen RESEARCH SHELF, <code>CLOCKWORK PASS</code> at 03:52:48):
+    Agouti A/a and A/A read as two rows, and a duplicate of either was refused the slot. Details on
+    <a href="item-research-shelf.html#verified-storage-0802">the shelf's page</a>.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -333,10 +348,11 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A paper names an <strong>allele pair</strong> as of 2026-09-24 and none of it has been
-    played: the pair a book takes off a horse, the carrot crafted from it granting <em>that</em>
-    pair, the shelf filing two pairs of one gene side by side, and an old whole-gene paper in
-    the owner&rsquo;s existing world still working.</p>
+    <p>A paper names an <strong>allele pair</strong> as of 2026-09-24 and, beyond the shelf filing
+    two pairs side by side, none of it has been played: the pair a book takes off a horse, the
+    carrot crafted from it granting <em>that</em> pair, an old whole-gene paper in the
+    owner&rsquo;s existing world still working &mdash; and the cowboy house's chests write some
+    eye pairs wild-type-first.</p>
 </div>
 
 <h3 id="check-pair-papers" data-check-kind="open-gap">The pair swap, in play (NOT played)</h3>
@@ -359,12 +375,16 @@ can be wrong without saying so:
         (<code>item/BreedingCarrotItem</code>): before today every Known Gene Splice carrot looked
         identical in the inventory. Then feed each and confirm the foals differ the way the pairs
         say they should.</li>
-    <li><strong>File both into an Equine Research Shelf.</strong> Two rows, not one, reading
-        <em>Gene: X/n</em> and <em>Gene: X/X</em>; each copies onto a blank book; a duplicate of
-        either still refuses the slot.</li>
+    <li><strong>Copy both off an Equine Research Shelf.</strong> Filing them as two rows is
+        <a href="#verified-shelf-pairs">verified</a>, and a carrier paper copies with no screen
+        open; that the true-breeding row copies onto a blank book too has not been seen.</li>
     <li><strong>A chest and the supplier.</strong> Found and bought papers should only ever be
         carrier or true-breeding &mdash; a compound pair out of a chest means
-        <code>ResearchTopic.lootPool</code> is not what the draw is reading.</li>
+        <code>ResearchTopic.lootPool</code> is not what the draw is reading. The yard read the chest
+        half on 2026-10-02 and it <strong>failed</strong>: 1198 of 34,287 chest papers, all from
+        <code>horsegenetics:chests/cowboy_house</code>, are eye-locus pairs written wild-type-first
+        (e.g. <em>eye_sector_right WT/Top</em>, <em>eye_colour_left Brn/Cha</em>); every other paper
+        was a carrier or true-breeding pair.</li>
     <li><strong>Does a shelf full of pairs still read?</strong> Lowest priority, and the one the
         flat-list decision was made on: the Copy tab is five rows and the list is now much longer
         than it was. If it is unusable, grouping the rows under a gene heading was the rejected

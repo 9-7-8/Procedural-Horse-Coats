@@ -27,7 +27,11 @@
 // the whole animal - to a file rather than to a clipboard, because a browser tab
 // has no chat to paste into and a Minecraft screen has no file picker; they are
 // NOT in the same slot, though, but one row higher, where the screen has Make
-// egg. Nothing else may differ.
+// egg.
+//
+// And one panel the screen has no twin of: drawParts names the horse's grown
+// parts over the preview, because the screen draws a horn and this page cannot.
+// Nothing else may differ.
 //
 // What this file does NOT contain is any genetics. Every question it asks -
 // what a row expresses, which allele a gene is added at, how a sex-linked row
@@ -233,7 +237,10 @@ window.HG = window.HG || {};
      * - so a gene added later classifies itself.
      */
     function viewable(gene) {
-      return gene.shows !== "ability" && gene.shows !== "stats";
+      // A part gene files as "stats" (it paints nothing and moves no scale), but
+      // it is not invisible: drawParts names what it grows. gene.grows is
+      // GrownParts.shapes, asked of the model like showsAs.
+      return gene.grows || (gene.shows !== "ability" && gene.shows !== "stats");
     }
 
     /** A name with a line through it: real gene, nothing to see. */
@@ -328,6 +335,7 @@ window.HG = window.HG || {};
       drawRows(hovered);
       drawRightColumn();
       drawGenomeLine();
+      drawParts();
       // Last but one, so it sits over the preview and the genome line - but not
       // over an open dropdown, which is the thing you are actually pointing at.
       // (hovered is already -1 while a dropdown is open.)
@@ -660,10 +668,44 @@ window.HG = window.HG || {};
 
       // The size readout, centred under the preview - only when the horse is
       // not ordinary size, so an untouched screen looks exactly as it did.
+      // DELIBERATE DIVERGENCE (hard rule 5): it says "genotype", because this
+      // page cannot know a server's body.size setting, and a server with it off
+      // compresses every horse into 0.85-1.15 (owner, 2026-10-01). The game's
+      // screen can read that setting, so it prints the compressed scale instead -
+      // see drawSizeReadout in CustomHorseSpawnScreen.
       if (Math.abs(state.scale - 1) >= 0.005) {
-        var s = "size " + state.scale.toFixed(2) + "x";
-        centred(s, previewLeft(), previewRight(), vh - 41,
-          state.scale > 1 ? C_BIG : C_SMALL);
+        var s = "size " + state.scale.toFixed(2) + "x (genotype; servers may differ)";
+        var room = previewRight() - previewLeft() - 4;
+        var colour = state.scale > 1 ? C_BIG : C_SMALL;
+        if (widthOf(s) <= room) {
+          centred(s, previewLeft(), previewRight(), vh - 41, colour);
+        } else {
+          fitted(s, previewLeft() + 2, vh - 41, room, colour);
+        }
+      }
+    }
+
+    /**
+     * The grown parts, named - THE ONE PANEL WITH NO TWIN ON THE SCREEN. The game's
+     * preview draws a horn; this page previews a coat texture and cannot draw
+     * geometry, so it says in words what the horse grows and that it is not drawn
+     * (owner's call, 2026-10-01; wiki/model-parts.html#open-designer). Top-left of
+     * the preview, only when there is a part, so a plain horse looks as it did. A
+     * foal wears only the parts PartKind.showsOnFoal allows; the rest say so.
+     */
+    function drawParts() {
+      var parts = state.parts || [];
+      if (!parts.length) return;
+      var x0 = previewLeft() + 2, w = previewRight() - previewLeft() - 4;
+      var lines = [{ s: "Not drawn here - see in game:", c: C_SUB }];
+      parts.forEach(function (p) {
+        lines.push({ s: "- " + p.name + (state.baby && p.adultOnly ? " (grows in with age)" : ""),
+          c: C_EXPRESSING });
+      });
+      var h = lines.length * 10 + 4;
+      fill(x0, LIST_TOP - 2, x0 + w, LIST_TOP - 2 + h, NAME_BG);
+      for (var i = 0; i < lines.length; i++) {
+        fitted(lines[i].s, x0 + 3, LIST_TOP + i * 10, w - 6, lines[i].c);
       }
     }
 

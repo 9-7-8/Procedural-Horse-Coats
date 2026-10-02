@@ -597,6 +597,46 @@
     floor check, so anything through it fell forever. Quietly, since a horse here cannot die.
 </p>
 
+<h2 id="backup">Back the realm up before changing it</h2>
+<p>
+    <strong>The rule</strong> (owner, 2026-10-01): before anything changes the realm in a way
+    that could lose horses on a live server, the realm is backed up, and its horses can be
+    put back once the change is done. <strong>A new realm change of that kind is not finished
+    until it does both of these:</strong>
+</p>
+<ol>
+    <li>its id is added to <code>RealmBackup.CHANGES</code>. That list, not the change&rsquo;s
+        own class, is what the start-up backup reads, because a class that is only an event
+        subscriber may not have run its static initialiser by the time the server starts;</li>
+    <li>it asks <code>RealmBackup.ready(server, id)</code> before touching a block, and does
+        nothing until that is true &mdash; as <code>HorseRealmLift.liftNow</code> does, which
+        also makes the decoration that depends on it wait (<a href="#lift">the lift</a>).</li>
+</ol>
+<p>
+    <strong>What a backup is.</strong> A copy of the realm&rsquo;s entity region files, taken
+    after a flushing save, into <code>&lt;world&gt;/horsegenetics/realm-backups/&lt;name&gt;/</code>:
+    every horse as a whole entity tag, UUID and attachments included, loaded or not, with no
+    chunk loads. Not the terrain &mdash; the change being guarded against is usually a terrain
+    change, and putting the old terrain back would undo it. The newest ten are kept. Backups
+    are taken at server start, before any realm chunk ticks, and never inside a change:
+    the lift and the decoration run in the middle of a teleport, where a flushing save is
+    not safe. <code>/horserealm backup</code> takes one by hand and also covers any change
+    still waiting.
+</p>
+<p>
+    <strong>Restoring.</strong> <code>/horserealm restore &lt;name&gt; confirm</code> judges
+    each backed-up horse by <code>common/realm/RealmRestore</code>: loaded somewhere, in a
+    chamber, last seen outside the realm, dead, still in the realm&rsquo;s files, or none of
+    those. Dead or lost since the backup is raised through
+    <code>HorseResurrection.raise</code> at its old x/z, on the surface; alive and wedged in a
+    block is moved up, now if loaded and on its next load if not (the set waits in
+    <code>data/RealmBackups</code>); everything else is left alone. Raises are spread two a
+    tick, and a restore cut short is finished by running it again. The region files are read
+    with vanilla&rsquo;s <code>RegionFile</code>, only ever on a copy, and without a
+    DataFixer pass, which holds within one Minecraft version. The checks still open are on
+    <a href="#verify-realm-backup">the Verification tab</a>.
+</p>
+
 <h2 id="frame">The frame is cobblestone, because a horse ate a portal</h2>
 <p>
     A hay bale is the largest single meal in the mod and a horse eats it out of the world
@@ -861,6 +901,33 @@
     <span class="label">What needs verifying here</span>
     <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of every horse in the field</strong>, built from the census rather than from what is loaded, that you can buy any horse out of for a holding pen ticket &mdash; it drew nothing at all until 2026-09-26 and has still not been seen with rows in it; a horse now only goes through a portal when a player is <strong>taking it through</strong>; turning one out <strong>pays</strong>, with <code>/horsebounty</code> to settle up for the ones given away before it did; and <strong>the census itself starts empty on an existing world</strong>, which is the thing to read first.</p>
 </div>
+
+<h3 id="verify-realm-backup">Realm backups and <code>/horserealm restore</code> (2026-10-01, NOT played)</h3>
+<p>
+    The realm is backed up before any change that could lose horses, and a restore puts them
+    back (<code>server/RealmBackup</code>, 0.5.038). A gametest proves one lost horse comes
+    back with its own UUID in the harness&rsquo;s overworld, and a dev server takes the
+    start-up backup cleanly &mdash; but that dev realm had no horses in it, and nobody has run
+    a restore in a real realm.
+</p>
+<ul>
+    <li><strong>Start-up backup on a populated realm:</strong> the log line
+        <code>[realm-backup] took ... (N horses)</code> should give an N close to the realm
+        table&rsquo;s count, and the hitch should be short. A much smaller N means the
+        flushing save did not reach the files before the copy.</li>
+    <li><code>/horserealm restore</code> with no <code>confirm</code> must change nothing, and
+        its four counts should add up to the backup&rsquo;s horse count.</li>
+    <li><strong>A real restore, the half a player can reach:</strong> back up, lead one realm
+        horse out through a portal and kill it in the overworld, then restore with
+        <code>confirm</code>. It must be counted &ldquo;left the realm&rdquo; and stay dead
+        &mdash; it died outside, which is not the realm change&rsquo;s doing. The other half,
+        a horse <em>lost inside</em> the realm being raised, cannot be staged in play (the
+        realm cancels every horse death, <code>/kill</code> included); the gametest
+        <code>realm_backup_raises_a_lost_horse</code> is its only proof, and the first real
+        one will be a restore after an actual loss.</li>
+    <li><strong>Rescue on load:</strong> a horse wedged in a block in an unloaded chunk is
+        moved up the first time that chunk loads after a restore, and only then.</li>
+</ul>
 
 <h3 id="verify-release-fee">Turning a horse out pays, and only when somebody is there (2026-09-26, NOT played)</h3>
 <ul>

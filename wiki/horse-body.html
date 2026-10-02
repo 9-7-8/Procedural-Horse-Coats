@@ -625,9 +625,19 @@ public interface GeneEpigenetics {
     So every locus is calibrated against the disorders that already ship &mdash; a
     survivable disorder costs 3 to 8 hearts&rsquo; worth, a lethal 11 to 18 &mdash; and
     the reference is used for the <em>ordering</em> of the disorders against each
-    other. If the severity model on
-    <a href="decisions.html#decisions">roadmap &sect;3</a> ever lands, it does not get to
-    inherit those percentages either.
+    other. If a severity model ever lands, it does not get to inherit those percentages
+    either.
+</p>
+
+<h3 id="severity-stays-flat">Severity stays flat (owner, 2026-10-01)</h3>
+
+<p>
+    <strong>Settled: <code>Condition</code> keeps the flat model.</strong> A locus is lethal at
+    birth, lethal at conception, or a flat heart reduction with stat multipliers. It does not
+    migrate to a magnitude plus an <code>EPISODIC</code>, <code>CHRONIC</code> or
+    <code>PROGRESSIVE</code> kind, and nothing ticks a horse&rsquo;s condition. A richer
+    model is scoped through intake only when a specific disorder needs one, and even then the
+    shipped disorders keep their calibrated values.
 </p>
 
 <h2 id="lethals">The two kinds of lethal</h2>
@@ -731,9 +741,23 @@ public interface GeneEpigenetics {
 <p>
     A boolean, <b>true by default</b>. The size loci resolve a body scale and
     <code>HorseRecords.applyTraitsToEntity</code> writes it to
-    <code>Attributes.SCALE</code>; setting this false writes a flat
-    <code>1.0</code> there instead. That is the whole mechanism &mdash; one
-    expression, in the one place listed in the table below.
+    <code>Attributes.SCALE</code>; setting this false writes the same scale
+    <strong>compressed into 0.85&ndash;1.15</strong> there instead
+    (<code>HorseTraits.compressScale</code>, since 2026-10-02 &mdash; it used to be a
+    flat <code>1.0</code>). That is the whole mechanism &mdash; one expression, in the
+    one place listed in the table below.
+</p>
+
+<p>
+    <strong>Compressed, not flattened</strong> (owner, 2026-10-01). The squash is a
+    <code>tanh</code>, so order survives everywhere: a Shire still stands over a
+    Falabella and a magical giant over a merely large horse, and a horse within a few
+    percent of 1.0 barely moves. The band is measured, not picked: vanilla&rsquo;s horse
+    is 1.6 tall with its eye at 1.52, and a stall is two blocks of air
+    (<a href="stables.html">how stalls are found</a>), so 1.25 is where the hitbox
+    meets the roof and 1.316 where the eye suffocates. At 1.15 the top is at 1.84.
+    <strong>The default is untouched:</strong> with the setting on, absurd giants
+    stay absurd (owner, 2026-10-02 &mdash; an opted-out server compresses giants too).
 </p>
 
 <div class="note">
@@ -754,10 +778,14 @@ public interface GeneEpigenetics {
     Nothing else is gated. The size genes are registered, drawn from the same
     founder tables and inherited identically; <code>Traits.scale()</code> still
     resolves to what the alleles say, so the info screen, the
-    inspect paper and the breeding debug line all keep reporting the real number. Only the entity is held at 1.0. The one other
+    inspect paper and the breeding debug line all keep reporting the real number. Only the entity is compressed. The custom
+    spawn egg&rsquo;s size readout adds &ldquo;(1.12x in this world)&rdquo; when the setting is off &mdash; the
+    setting is a synced SERVER config, so the client can read it &mdash; while the
+    <a href="horse-designer/index.html">horse designer</a>, which cannot, labels its number
+    &ldquo;genotype; servers may differ&rdquo;. The one other
     route to <code>SCALE</code> &mdash; an <a href="making-a-gene.html#block">effects</a>
     <code>attribute</code> verb naming <code>scale</code> &mdash; answers to the
-    same setting, and <code>GeneAbilityHandler.clearAttributes</code> takes a
+    same setting by being switched off outright (a modifier is not compressed), and <code>GeneAbilityHandler.clearAttributes</code> takes a
     standing modifier back off rather than leaving it frozen on the horse.
 </p>
 
@@ -899,18 +927,6 @@ public interface GeneEpigenetics {
     <span class="label">What needs verifying here</span>
     <p>Nobody has ever raced the horse screen&rsquo;s new metre readout &mdash; ride a measured run and build a pillar to the printed jump height, because the <code>&times;43.17</code> constant behind it is unproven and the fit assumes body scale 1.0 &mdash; and a pregnancy lost to a lethal pairing must never name the gene in chat.</p>
 </div>
-
-<h3 id="open-condition-severity">Condition severity and onset remain unresolved</h3>
-<p>
-    The shipped health model is intentionally binary: a locus is lethal at birth, lethal at
-    conception, or a flat heart reduction. The richer disorder reference distinguishes health,
-    speed and jump effects from episodic, chronic and progressive onset. The open question is
-    whether to migrate <code>Condition</code> to a magnitude plus an
-    <code>EPISODIC</code>, <code>CHRONIC</code> or <code>PROGRESSIVE</code> kind, with a
-    future status tick reading it, or keep the current flat heart and stat multipliers. The
-    four disorders already shipped use the current model; their calibrated values must not be
-    replaced by the reference percentages merely because a richer model is considered.
-</p>
 
 <h3 id="stat-units-0918">Speed and jump in metres on the horse screen (2026-09-18, NOT played)</h3>
 

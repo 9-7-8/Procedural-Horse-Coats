@@ -122,11 +122,25 @@ public record StableSpawn(
     }
 
     /**
+     * One horse and the breed it was rolled from. The two travel together
+     * because the caller stamps that breed on the record: drawing the breed a
+     * second time labelled a multi-breed stable's horses with a breed their
+     * genes did not come from (issue #11).
+     */
+    public record Rolled(Breed breed, Genome genome, Genotype founder) {
+    }
+
+    /**
      * One horse. The sex is drawn here rather than forced, so a generated stable
      * is a stable and not a breeding pair - a player who wants to breed from one
      * may have to find a second.
+     *
+     * <p>{@link Rolled#founder} is what {@code BreedFounder} rolled, before this
+     * stable's own passes. That is the genotype the founder log checks against
+     * the breed's sheet: the magic a stable adds is the stable's spec, not a
+     * founder bug, and logging the finished horse called it one (issue #12).
      */
-    public Genome roll(Rng rng) {
+    public Rolled roll(Rng rng) {
         Breed breed = breed(rng);
         Genome genome = BreedFounder.roll(breed, rng, rng.nextBoolean() ? Sex.MALE : Sex.FEMALE);
         Genotype g = genome.genotype();
@@ -138,7 +152,8 @@ public record StableSpawn(
         // Re-rolled rather than carried: the epigenome is aligned to the
         // genotype it was rolled for, and three passes of substitutions is not
         // that genotype any more.
-        return Genome.of(g, rng);
+        Genome finished = Genome.of(g, rng);
+        return new Rolled(breed, finished, genome.genotype());
     }
 
     /**

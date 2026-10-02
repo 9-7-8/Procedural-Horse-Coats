@@ -507,7 +507,8 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
      * stud or brings it back in, and an id {@code SLOTS} higher takes the whole
      * chamber out of the bank and into the player's inventory. Nothing else needs
      * to travel, because both the mark and the horse live on the item and sync
-     * with the slot.
+     * with the slot. A third verb, {@link #EJECT_EMPTIES_BUTTON}, sits one past
+     * both ranges and belongs to the Chambers tab, not to a row.
      *
      * <p>{@code clickMenuButton} rather than a payload of its own, which is the
      * rule {@code BenchNamePayload}'s comment states from the other side: an
@@ -521,6 +522,9 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     public boolean clickMenuButton(Player who, int id) {
         if (who.level().isClientSide()) {
             return true;
+        }
+        if (id == EJECT_EMPTIES_BUTTON) {
+            return ejectEmpties(who);
         }
         if (id >= HorseStasisBankBlockEntity.SLOTS && id < 2 * HorseStasisBankBlockEntity.SLOTS) {
             return withdrawChamber(who, id - HorseStasisBankBlockEntity.SLOTS);
@@ -581,6 +585,58 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         // ticking, and the Browse roster must lose the row.
         chambers.setChanged();
         return true;
+    }
+
+    /**
+     * <b>The Chambers tab's "Eject empties" verb</b> - one past the two ranges
+     * above, so it rides the same int and needs no payload of its own.
+     */
+    public static final int EJECT_EMPTIES_BUTTON = 2 * HorseStasisBankBlockEntity.SLOTS;
+
+    /** How many chambers here have no horse in them - what the eject button counts. */
+    public int empties() {
+        return filed() - occupied();
+    }
+
+    /**
+     * <b>Take every empty chamber out of the bank in one press.</b> Any tier;
+     * never one with a horse in it, and never a supply or drop slot, since only
+     * the chamber container is walked. They go into the player's inventory, and
+     * what does not fit drops at the bank - the bank's own break behaviour, so
+     * nothing is stuck and nothing deleted. No confirmation: ejecting only moves
+     * items. (Owner, 2026-10-01.)
+     *
+     * <p>Re-checks that the player still has this bank open, because a menu
+     * button is a packet. Every move goes through {@code setItem} and ends in
+     * one {@code setChanged}, for {@link #withdrawChamber}'s reason: the tick gate
+     * is recomputed through the container.
+     */
+    private boolean ejectEmpties(Player who) {
+        if (bank == null || !stillValid(who) || bank.getLevel() == null) {
+            return false;
+        }
+        boolean moved = false;
+        for (int i = 0; i < chambers.getContainerSize(); i++) {
+            ItemStack chamber = chambers.getItem(i);
+            if (!HorseStasisBankBlockEntity.isChamber(chamber)
+                    || StasisChamberItem.snapshotOf(chamber) != null) {
+                continue;
+            }
+            chambers.setItem(i, ItemStack.EMPTY);
+            if (!who.getInventory().add(chamber)) {
+                // At the bank, as breaking it would, rather than at the player's
+                // feet: these are spare stationery, not a horse being handed over.
+                // Containers.dropItemStack is what dropContents calls per stack.
+                net.minecraft.core.BlockPos pos = bank.getBlockPos();
+                net.minecraft.world.Containers.dropItemStack(bank.getLevel(),
+                        pos.getX(), pos.getY(), pos.getZ(), chamber);
+            }
+            moved = true;
+        }
+        if (moved) {
+            chambers.setChanged();
+        }
+        return moved;
     }
 
     /** Close if the bank is gone or the player walked off - 8 blocks, the shelf's reach. */

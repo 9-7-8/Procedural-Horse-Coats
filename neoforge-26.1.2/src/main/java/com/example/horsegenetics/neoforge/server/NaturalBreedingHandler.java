@@ -36,7 +36,7 @@ import java.util.List;
  * ({@link ReproRules#COVER_HEALTH}), not ridden or leashed, no geldings, the
  * local cap, cowboy stock exempt - is {@link NaturalCover#decide}, which is
  * unit-tested. A stallion's day is not capped: past
- * {@link ReproRules#FREE_COVERS_PER_DAY} his odds halve and he keeps covering. The cover goes
+ * {@code fertility.free_covers_per_day} his odds halve and he keeps covering. The cover goes
  * through {@link ReproHandler#breed}, so carrot effects armed on either horse act
  * on it, and it is credited to the mare's owner. It runs off the entity tick, so it
  * only ever happens in loaded chunks. The heat-attraction goal
@@ -117,14 +117,44 @@ public final class NaturalBreedingHandler {
         // "standing beside him". It does not open a fence: two horses either side of a one-block fence
         // stand two blocks apart at the closest, and the owner's call the same day is that a fence blocks
         // a cover like a wall (REACH FENCE now expects none). UNVERIFIED beyond the yard's pens.
-        Path path = mare.getNavigation().createPath(stallion, 1);
-        if (path != null && path.canReach()) {
-            return true;
-        }
         // Touching. There is no path to compute between two horses whose
         // hitboxes already overlap, and there is no room for a wall between them
         // either - so the absent path means "no distance", not "no way through".
-        return mare.getBoundingBox().inflate(0.1).intersects(stallion.getBoundingBox());
+        if (mare.getBoundingBox().inflate(0.1).intersects(stallion.getBoundingBox())) {
+            return true;
+        }
+        // The cheap answers first (2026-10-02): one ray is far cheaper than an A* search, and the pathfinder was
+        // ~6% of a breeding thousand-horse server's time. Only a pair further apart, or with something between
+        // them, pays for the path.
+        if (besideWithNothingBetween(mare, stallion)) {
+            return true;
+        }
+        Path path = mare.getNavigation().createPath(stallion, 1);
+        return path != null && path.canReach();
+    }
+
+    /**
+     * <b>Side by side, with nothing solid between them</b> (2026-10-02). The path test fails for a horse standing
+     * against a wall: the pathfinder plans a 1.4-wide horse as a 2x2 mob, so beside a wall its own start node does not
+     * fit and no path is ever found, however near the stallion. The yard's RATIO BRINDLE, STARBURST and MITF pens bred
+     * for an hour and then stood refused - "no walkable path to ... (1.6 blocks)" - for the next two and a half, the
+     * pair grazing against the pen's east wall. Every small stable is that pen.
+     *
+     * <p>So, when the path says no: two horses whose hitboxes are within a block of each other, and a line between their
+     * bodies that crosses no block's collision shape. A fence, a pane, a wall and a closed gate all have one and still
+     * part them - the owner's 2026-09-30 call that a fence blocks a cover stands; an open gate has none.
+     */
+    private static boolean besideWithNothingBetween(Horse mare, Horse stallion) {
+        if (!mare.getBoundingBox().inflate(1.0).intersects(stallion.getBoundingBox())) {
+            return false;
+        }
+        double y = 0.5;
+        net.minecraft.world.phys.Vec3 from = mare.position().add(0.0, y, 0.0);
+        net.minecraft.world.phys.Vec3 to = stallion.position().add(0.0, y, 0.0);
+        net.minecraft.world.phys.BlockHitResult hit = mare.level().clip(new net.minecraft.world.level.ClipContext(
+                from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
+                net.minecraft.world.level.ClipContext.Fluid.NONE, mare));
+        return hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS;
     }
 
     @SubscribeEvent
@@ -208,7 +238,7 @@ public final class NaturalBreedingHandler {
         List<NaturalCover.Stallion> candidates = new ArrayList<>(near.size());
         for (Horse h : near) {
             candidates.add(new NaturalCover.Stallion(party(h), h.distanceToSqr(mare),
-                    ReproHandler.of(h).coversOn(HorseRealmRepro.reproTime(h), t.dayTicks())));
+                    ServerConfig.stallionDay(ReproHandler.of(h).coversOn(HorseRealmRepro.reproTime(h), t.dayTicks()))));
         }
         NaturalCover.Crowd crowd = new NaturalCover.Crowd(level.getEntitiesOfClass(Horse.class,
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_CAP_RADIUS),

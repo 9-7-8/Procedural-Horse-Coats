@@ -18,8 +18,8 @@ Know which files the session touched: `git status --short` and `git diff --stat`
 
 STEPS
 -----
-1. Regenerate what the session invalidated, by the rebake procedure. It walks CLAUDE.md's
-   "Regenerate what you invalidate" table row by row, against the files that changed. If CustomHorseSpawnScreen or the horse designer changed, fix the
+1. Regenerate what the session invalidated, by the rebake procedure. It holds the table
+   of what to re-run for what, and walks it row by row against the files that changed. If CustomHorseSpawnScreen or the horse designer changed, fix the
    other one too (hard rule 5).
 
 2. Build green.
@@ -35,51 +35,71 @@ STEPS
    b. Untracked files in intake/ are the owner queuing material. Commit around them.
    c. Work on main; do not branch. Pull first: cloud routines also push to main.
    d. Write one descriptive commit that says what changed and why, not a file list.
+      In PowerShell, write the message to a scratchpad file and `git commit -F <file>`:
+      piping a here-string into `git commit -F -` is read as a pathspec, commits nothing,
+      and the push after it reports "up to date".
 
 4. Update the docs to what is true now, not to "what I changed today".
    Walk CLAUDE.md's page map and honour the source-of-truth rule. At minimum:
-   a. a new dated file in wiki/session-log/, plus its entry in wiki/session-log.html;
-   b. the Verification tab of each page the session built on: what is newly unplayed,
+   a. Review the procedures against this session. Ask three questions:
+      - Did a procedure followed this session say something wrong, stale or missing?
+        Did a step fail, or get skipped because it did not fit, or did the owner correct
+        how a routine was done? -> fix that procedure file now.
+      - Was something done this session that is likely to be done again the same way,
+        and has no procedure? -> write one by procedures/FORMAT.txt ("ADDING ONE": the
+        file, its INDEX.txt row, the .claude/skills wrapper, the keyword memory). If it
+        is too big to write now, add a bullet under "Routines to write up as
+        procedures" in intake/To do.txt.
+      - Does a change made this session (a new file, a renamed tool, a new rule) make
+        another procedure's steps untrue? -> fix it. Grep procedures/ for the name.
+      List what changed, for the session log. "None needed" is a valid answer, but only
+      after asking all three questions.
+   b. this session's own log, by procedures/write-session-log.txt: a NEW file with the
+      time in its name, never appended to another session's file, plus its entry at the
+      top of wiki/session-log.html;
+   c. the Verification tab of each page the session built on: what is newly unplayed,
       and where to look. Delete only what the owner confirmed in game, or what an
       automated PASS answered. Then run bake-verification-index.mjs;
-   c. any bug discovered goes in a GitHub issue (see report-bug), never on a page;
-   d. any gene or system page the session moved;
-   e. wiki/pages.js, if a page was added (hard rule 7);
-   f. build-search-index.mjs, check-links.mjs and bake-agent-text.mjs, for any prose.
+   d. any bug discovered goes in a GitHub issue (see report-bug), never on a page;
+   e. any gene or system page the session moved;
+   f. wiki/pages.js, if a page was added (hard rule 7);
+   g. build-search-index.mjs, check-links.mjs and bake-agent-text.mjs, for any prose.
 
-5. Audit CLAUDE.md and put it back under budget. Actually run all three:
-       wc -l CLAUDE.md                     (must be at most 300 - wc, not Measure-Object)
-       git diff <session start>..HEAD -- CLAUDE.md
-       grep -nE '20[0-9]{2}-[0-9]{2}-[0-9]{2}|[0-9]{3,}' CLAUDE.md
-   Run every line the session added there through the test at the top of CLAUDE.md:
-   would every task need it, before the task is known? A line that fails moves out. A
-   date means session-log material. A long number is a derived value, which should be
-   named by its accessor instead. Over 300 lines means moving a whole section out,
-   not trimming words to squeeze under.
+5. Audit CLAUDE.md with audit-claude-md: wc -l (at most 300), every line the session
+   added run through the "every task?" test, dates and derived numbers moved out,
+   routines moved to procedures, and every pointer checked.
 
 6. Commit and push the docs as their own commit. Step 4 always leaves the tree dirty.
 
 7. Verify clean: `git status --short` empty, and `git log origin/main..HEAD` empty.
 
-8. Kill every process this session started.
+8. Stop every process this session started - through tools/stop-dev-java.ps1 only.
    This covers Gradle daemons and workers, any runClient or runServer, and every
-   background shell. Kill the game and server processes first, then
+   background shell. Stop the game and server processes first, with
+   `pwsh -File tools/stop-dev-java.ps1` (-WhatIf first; never Stop-Process, taskkill or kill, which
+   a hook refuses - a pattern kill took the live server down on 2026-10-01), then
    `./gradlew --stop`: a daemon still running a build ignores the stop.
    Leave the owner's own terminals alone. If a client is up that you did not launch,
    ask before closing it (see launch-game).
 
 9. Stop, with a short summary. Say what shipped, what is newly waiting in
-   wiki/verification.html, and the one thing the next session should pick up first.
-   Say too whether a release looks due, by release step 1. If one does, offer it; never
-   cut it unasked.
+   wiki/verification.html, which procedures step 4a changed or added, and the one thing
+   the next session should pick up first.
+   If main now holds enough to OFFER a release by release step 1 (a substantial batch,
+   never a handful of fixes), ask the owner with the question tool and cut it only on a
+   yes. Below the bar, say nothing about a release.
    Then stop: no new work, no "while I'm here" refactors.
+   The LAST sentence of the summary is always exactly "Safe to clear." - whether the
+   owner ran /end-session or another procedure (process-intake, fix-bug, release...)
+   reached this step - once steps 7 and 8 hold. If something is left unpushed or running,
+   say what instead and do not write it. (Owner, 2026-10-02.)
 
 DONE WHEN
 ---------
 - Both commits are on origin/main and the tree is clean.
 - CLAUDE.md is 300 lines or fewer.
 - No process this session started is still alive.
-- The summary is given.
+- The summary is given, ending "Safe to clear."
 
 NEVER
 -----
@@ -92,5 +112,5 @@ NEVER
 
 SEE ALSO
 --------
-CLAUDE.md (the regenerate table, the page map, the budget rule); launch-game;
+rebake (the regenerate table); audit-claude-md; CLAUDE.md (the page map); launch-game;
 release; report-bug.

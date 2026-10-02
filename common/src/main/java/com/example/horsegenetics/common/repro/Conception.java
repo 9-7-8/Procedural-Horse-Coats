@@ -78,20 +78,21 @@ public final class Conception {
      * Try once.
      *
      * @param mare          the dam's reproductive record, for her state
-     * @param sireCoversToday covers the sire had already made today, before this one
+     * @param sireDay       the covers the sire had already made today, before this
+     *                      one, and how many this world gives him free
      * @param healthActive  {@code ServerConfig.healthGeneticsActive()}
      * @param lethalsActive {@code ServerConfig.lethalsActive()} - off, and a lethal
      *                      embryo is carried like any other
      */
     public static Result attempt(Mating m, Reproduction mare, long now, ReproTiming t,
-                                 int sireCoversToday, boolean healthActive, boolean lethalsActive, Rng rng) {
+                                 StallionDay sireDay, boolean healthActive, boolean lethalsActive, Rng rng) {
         double base = ReproRules.baseChance(mare, now, t);
         if (base <= 0.0) {
             return new Result(Outcome.NOT_RECEPTIVE, 0.0, Optional.empty());
         }
         double mareFactor = Genes.FERTILITY.mareFactor(m.dam());
         double sireFactor = Genes.FERTILITY.alleleFactor(m.sire().genotype().pair(Genes.FERTILITY))
-                * ReproRules.stallionFactor(sireCoversToday);
+                * sireDay.factor();
         double chance = ReproRules.conceptionChance(base, mareFactor, sireFactor);
         if (rng.nextFloat() >= chance) {
             return new Result(Outcome.DID_NOT_TAKE, chance, Optional.empty());

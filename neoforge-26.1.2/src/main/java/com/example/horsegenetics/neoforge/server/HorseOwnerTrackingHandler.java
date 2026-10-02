@@ -32,7 +32,7 @@ public final class HorseOwnerTrackingHandler {
     static void onEntityTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Horse horse)) return;
         if (horse.level().isClientSide()) return;
-        if (horse.tickCount % 40 != 0) return;                 // ~ every 2s
+        if ((horse.tickCount + horse.getId()) % 40 != 0) return;                 // ~ every 2s
         if (!HorseRecords.hasRealRecord(horse)) return;
 
         // The owner mirror, every pass and regardless of tamed: a horse that has

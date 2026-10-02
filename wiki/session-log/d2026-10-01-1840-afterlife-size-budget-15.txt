@@ -1,0 +1,111 @@
+2026-10-01 18:40 (end time) - #15: the afterlife store held to a size, not a clock
+
+ASKED
+
+    - "/whats-next". Surveyed every queue. No release due: the three commits since
+      v0.5.038 were docs only. Open issues: #15 (tuning, urgency PLAYERS), #13 (waits on
+      the live server running 0.5.038), #12, #10, and #2 (a tester's, no label since
+      2026-09-10). Last session's pick-up-first was /review-server-logs; four export
+      folders are unreviewed now (2026-10-01, -run2, -run3, -run4). 14 intake units and
+      8 To-do bullets. Offered: review the server logs (recommended), fix #15, fix #12,
+      intake "a light horse's horn glows too".
+    - Owner picked "Fix #15 afterlife retention" -> /fix-bug #15, then end-session.
+    - Same round, issue #2 "Structure Spawns": owner chose "Label it a bug". Labelled bug;
+      nothing else done on it.
+
+DONE
+
+    e0367401  Fix #15: dead horses expired on a clock, not when the store was full
+      What was wrong. data/HorseAfterlife let a dead owned horse go after
+      ops.resurrect_grace_minutes (default 60) of its owner's time online, so a horse was
+      unresurrectable long before horse_afterlife.dat was anywhere near big. The owner's
+      call (recorded in the issue): hold the store to about 100 MB, then drop the oldest
+      deaths first, only as many as it takes; never touch HorseAncestryData.
+      The change:
+      - common/horse/AfterlifeBudget.overflow: the pure rule (oldest died_at first, only
+        as many as needed, budget 0 = no cap).
+      - HorseAfterlife.Wake gains `bytes` (optional field, default 0): the snapshot's
+        entity tag through NbtIo.writeCompressed into a counting stream, measured once in
+        Wake.of at death. A wake loaded without it is measured in the constructor, so an
+        old save is budgeted from its first sweep (rule 10's migration).
+      - HorseAfterlife.trimTo + totalBytes; HorseAfterlifeHandler's 200-tick sweep calls
+        trimTo(ServerConfig.resurrectBudgetBytes()) after spend/dropExpired and logs each
+        horse let go through ActionTrace ("afterlife").
+      - ServerConfig: new ops.resurrect_budget_mb (default 100, range 0-100000, 0 = no
+        cap); ops.resurrect_grace_minutes default 60 -> 0 (off), kept as an optional
+        extra limit.
+      - HorseResurrectCommand list prints "The store holds X MB of Y MB"; a wake with no
+        time limit reads "no time limit". The owner's death notice says the oldest losses
+        are let go once the server runs out of room (when only the budget is on).
+      Proof. AfterlifeBudgetTest (7 tests) green; mutated (newest-first sort) -> 2 red.
+      Gametest a_dead_horse_comes_back_whole extended with afterlifeBudgetHolds: a fresh
+      wake has bytes > 0, an old-shape wake (bytes removed) decodes with the same bytes,
+      trimTo(0) keeps it, trimTo(bytes - 1) drops it. All 25 gametests pass; mutated
+      (trimTo always a no-op) -> red with "a store one byte over its budget kept its
+      only horse". :neoforge-26.1.2:build, check-parity, check-designer-boots,
+      check-links green.
+      Issue #15: CLOSED by the commit, proof comment posted.
+
+    8e39f335  #15: the afterlife budget's default lives once, in common/
+      AfterlifeBudget.DEFAULT_BUDGET_MB feeds both the spec and the accessor fallback
+      (add-a-config-option step 3). runServer boot: Done (, no ERROR / Couldn't parse /
+      Invalid / missing lines, and run/phc/server.toml gained resurrect_budget_mb = 100.
+      run/phc/ and run/config/ were snapshotted before the boot and restored exactly
+      after it (the boot had rotated the server-N.toml.bak files).
+
+    Docs: wiki/horse-afterlife.html Gameplay #window rewritten for the budget; Coding
+    gained #budget (how a horse is measured, why not a stat of the file); Verification
+    #verify-scale rewritten as the real-file check; verification.html, search index and
+    wiki/text rebaked.
+
+DECIDED
+
+    - Size budget replaces the clock; oldest death first; pedigree untouched (owner, in
+      issue #15).
+    - "Label it a bug" for #2 (owner, this session).
+    - Calls made without her, recorded on horse-afterlife.html#budget and in ServerConfig:
+      measure each wake's gzipped tag once at death rather than stat the .dat (the file
+      only exists after a save); key name ops.resurrect_budget_mb; MB = 1024*1024 bytes;
+      grace window kept as an optional extra, default 0; the trim runs in the existing
+      sweep, not on death.
+
+FOUND ON THE WAY
+
+    - The owner's own configs keep ops.resurrect_grace_minutes = 60: a NeoForge config
+      file keeps its written value when the default changes. That holds for
+      neoforge-26.1.2/run/phc/server.toml and for the live server's file. Until an operator
+      sets it to 0, the 60-minute window still applies there alongside the budget.
+      Written on horse-afterlife.html#window.
+    - My mistake: first launched runServer as `Start-Process cmd.exe /c gradlew.bat ...`,
+      which launch-game step 5 already forbids ("that launches nothing"). Relaunched the
+      documented way. Step 8a now points at step 5's form.
+    - Issues filed: none.
+
+PROCEDURES
+
+    - fix-bug step 5: a fix that adds or changes a config key owes add-a-config-option
+      steps 3, 4, 8 and 9 (this session missed step 3 and the boot until end-session).
+    - add-a-config-option step 8: a server.toml that existed before the boot holds the
+      owner's settings; snapshot run/phc/ and run/config/ and restore them instead of
+      deleting.
+    - launch-game step 8a: launch runServer in step 5's Start-Process form.
+
+NOT RUN / NOT CHECKED
+
+    - The full :common:test suite was not run. Only AfterlifeBudgetTest and
+      CommonPortabilityTest ran; nothing else in common/ calls the new class, so a full
+      run would check only unrelated suites.
+    - Never seen in game: the budget against a real horse_afterlife.dat, the new list
+      line, the new death notice. Check: horse-afterlife.html#verify-scale.
+    - web.wasm was not committed: the bake produced build noise only, since
+      AfterlifeBudget is not reachable from DesignerApi.
+
+RELEASE
+
+    Not due: since v0.5.038, main holds one tuning fix (#15) and docs. Release step 1
+    wants a bunch of fixes or a new feature. #15 rides the next release.
+
+PICK UP FIRST
+
+    /review-server-logs on the four unreviewed 2026-10-01 PCH export folders (still
+    carried from the last session), then /fix-bug for #12.

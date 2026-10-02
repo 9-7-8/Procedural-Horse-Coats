@@ -150,7 +150,7 @@ What this must not do
   Mixed) is pure and belongs in common/breed/ beside Breeds.wildCandidates, with
   a unit test; the neoforge side is only the transition detector, the placement
   and the entity creation. Touching common/ means :web:bakeDesignerAssets and
-  check-designer-boots.mjs per the CLAUDE.md table.
+  check-designer-boots.mjs per procedures/rebake.txt.
 - No effect on the debug corridor (DebugPenManager.DEBUG_LEVEL): HorseRealm.
   isRealm(level) is false for it, which is exactly the check to use.
 - No server-config surprise: add a ServerConfig toggle (default ON, since it

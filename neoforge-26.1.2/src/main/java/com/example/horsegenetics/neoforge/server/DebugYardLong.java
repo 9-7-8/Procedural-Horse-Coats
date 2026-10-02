@@ -100,45 +100,22 @@ final class DebugYardLong {
         int east = cx + EAST_MIN + 1;
         TALLIES.clear();
         try {
-            // THE DRYAD ROW IS ROW O EAST now (2026-09-30): DRYAD FLOWER passed and went, and its row held
-            // only this. Stone and floor light over the east half only - HURT MARE, west, eats the grass.
-            stoneBand(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
-            dryad(level, gy, east, mouthZ + ROW_O, 6, ROW_O_D, "DRYAD OAK+BIRCH", "Oak/Brch", 2,
-                    List.of("DRYAD OAK+BIRCH", "both, each at half", "rate - and still", "no tree?"),
-                    Blocks.OAK_SAPLING, Blocks.BIRCH_SAPLING, Blocks.OAK_LOG, Blocks.BIRCH_LOG);
-            dryadVerdict(level, gy, east, mouthZ + ROW_O, east + 6, mouthZ + ROW_O + ROW_O_D);
-            lightFromTheFloor(level, gy, cx, cx + 24, mouthZ + ROW_O, ROW_O_D);
+            // DRYAD OAK+BIRCH and RATIO BRINDLE passed on the morning of 2026-10-02 (the dryad at 145 min, brindle at 40
+            // foals) and went; the dryad helpers below stay for the next dryad question.
 
-            ratio(level, gy, west, mouthZ + ROW_U, "RATIO HYPP", "horsegenetics.scn4a", "H/N", "H/N", false,
-                    List.of("RATIO: HYPP", "H/N x H/N all day:", "1 in 4 H/H, and", "every H/H dies"),
-                    "about 1 in 4 H/H, 1 in 2 H/N; every H/H dies at birth");
-            ratio(level, gy, west + 9, mouthZ + ROW_U, "RATIO LETHAL WHITE", "horsegenetics.ednrb", "O/N", "O/N", false,
-                    List.of("RATIO: OVERO", "O/N x O/N all day:", "1 in 4 O/O, and", "every O/O dies"),
-                    "about 1 in 4 O/O, 1 in 2 O/N; every O/O dies at birth");
-            ratio(level, gy, east, mouthZ + ROW_U, "RATIO BRINDLE", "horsegenetics.brindle", "n/n", "Brn/Y", true,
-                    List.of("RATIO: BRINDLE", "Brn/Y carrier x", "n/n mare: every", "filly Brn/n, no Brn colt"),
-                    "every filly Brn/n, every colt n/Y - a brindle colt is a FAIL");
-            ratio(level, gy, east + 9, mouthZ + ROW_U, "RATIO SIZE", "horsegenetics.body_size", "Big/n", "Big/n", false,
-                    List.of("RATIO: SIZE", "Big/n x Big/n all", "day: 1 Big/Big to", "2 Big/n to 1 n/n"),
-                    "about 1 Big/Big : 2 Big/n : 1 n/n");
+            // ANSWERED AND GONE (2026-10-02): RATIO HYPP, LETHAL WHITE, SIZE, KIT W5 and MILK CLASH logged their own
+            // PASS on the night of 2026-10-01 - with RATIO ACAN D5 - and were closed on their pages. What is left is the
+            // three that stalled behind #23 (covers refused against a wall), started over with that fixed.
 
             // ROW W (2026-09-15, owner: every unattended test into the yard). Two genotypes a gene rules
             // out (gap 225): the doubled allele must be lost at conception, never born. A milk clash
             // whose every foal would be Watr/Lava, which MilkGene forbids. And a colour gene with knobs,
             // for inheritance of its epigenetic values. The conception log (gap 245) covers all four.
-            ratio(level, gy, west, mouthZ + ROW_W, "RATIO KIT W5", "horsegenetics.kit", "W5/N", "W5/N", false,
-                    List.of("RATIO: KIT W5", "W5/N x W5/N:", "W5/W5 is impossible", "- lost, never born"),
-                    "no W5/W5 foal ever; about 1 in 4 conceptions lost early as nonviable, 2 W5/N : 1 N/N born");
             ratio(level, gy, west + 9, mouthZ + ROW_W, "RATIO MITF SW3", "horsegenetics.mitf", "SW3/N", "SW3/N", false,
                     List.of("RATIO: MITF SW3", "SW3/N x SW3/N:", "SW3/SW3 impossible", "- lost, never born"),
                     "no SW3/SW3 foal ever; about 1 in 4 conceptions lost early, 2 SW3/N : 1 N/N born");
-            ratio(level, gy, east, mouthZ + ROW_W, "RATIO MILK CLASH", "horsegenetics.milk", "Watr/Watr", "Lava/Lava", false,
-                    List.of("RATIO: MILK CLASH", "Watr x Lava: every", "foal Watr/Lava, and", "that cannot be born"),
-                    "no foal ever: every conception lost early, with a cause that is not MET's");
-            ratio(level, gy, east + 9, mouthZ + ROW_W, "RATIO STARBURST", "horsegenetics.starburst", "W/n", "W/n", false,
-                    List.of("RATIO: STARBURST", "W/n x W/n all day:", "1 W/W : 2 W/n : 1 n/n", "(knob inheritance)"),
-                    "about 1 W/W : 2 W/n : 1 n/n");
-            ActionTrace.log("test yard", "all-day pens built (row O east: the dryad; rows U and W: inheritance ratios)");
+            // RATIO STARBURST passed the same morning (40 foals, 6 : 23 : 11, p 0.341) and went.
+            ActionTrace.log("test yard", "all-day pens built (row W: RATIO MITF SW3)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }
@@ -536,6 +513,8 @@ final class DebugYardLong {
         String mutant = "";
         /** HYPP and LETHAL WHITE: a homozygote alive when FOAL_KEEP ends is a FAIL. */
         boolean homozygoteDies;
+        /** ACAN D5: every foal is an affected dwarf and none may die - a death of any class is a FAIL. */
+        boolean allSurvive;
         long startTick;
         /** Born foals, and distinct conception draws, by copies of {@link #mutant}: [0, 1, 2]. */
         final int[] bornBy = new int[3];
@@ -598,6 +577,10 @@ final class DebugYardLong {
             case "RATIO KIT W5" -> judgeBy(tally, Rule.CONCEIVED_121, "W5", false);
             case "RATIO MITF SW3" -> judgeBy(tally, Rule.CONCEIVED_121, "SW3", false);
             case "RATIO MILK CLASH" -> judgeBy(tally, Rule.NO_FOAL, "", false);
+            case "RATIO ACAN D5" -> {
+                judgeBy(tally, Rule.BORN_121, "D5", false);
+                tally.allSurvive = true;
+            }
             default -> { }
         }
         // A world with lethals off carries a lethal embryo to term and lets a lethal foal live
@@ -753,6 +736,10 @@ final class DebugYardLong {
                     t.counts.computeIfAbsent(cls, k -> new int[2])[1]++;
                     t.died++;
                     ActionTrace.log("test yard", t.name + ": a " + cls + " foal died | " + t.summary());
+                    if (t.allSurvive) {
+                        fail(t, "at " + t.born + " foals", "a " + cls + " foal died inside " + FOAL_KEEP / 20
+                                + " s of birth; only D1/D1 is lethal, so every D5 dwarf must live");
+                    }
                     it.remove();
                     t.done.add(e.getKey());
                 } else if (now - e.getValue() >= FOAL_KEEP) {

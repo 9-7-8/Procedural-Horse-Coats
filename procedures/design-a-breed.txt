@@ -76,7 +76,7 @@ STEPS
 5. Apply the breed climate rule. Nether breeds pin heat tolerance; snow-biome breeds
    carry cold tolerance at their tier. BreedClimateRuleTest holds every file to it.
 
-6. Bake and test, per CLAUDE.md's breed row:
+6. Bake and test, per rebake's breed row (row c):
    - `:common:bakeBreedFiles`, then `:common:bakeGeneCensus`;
    - `node wiki/tools/check-breed-heights.mjs` if the size or a printed height moved;
    - run BreedFilesTest, the breed's own *BreedTest (write one for a breed with a

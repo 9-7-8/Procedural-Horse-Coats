@@ -28,6 +28,7 @@ import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.trait.HorseTraits;
 import com.example.horsegenetics.common.trait.Traits;
 import com.example.horsegenetics.neoforge.NeoRng;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.network.SpawnCustomHorsePayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -149,9 +150,10 @@ import java.util.List;
  * hands every screen's model horse its parts along with its coat, sex gate
  * included, so an {@code Antm} mare shows no antlers here - but the browser twin
  * previews a coat texture and cannot draw geometry, so there a {@code Horn/Horn}
- * or {@code Ant/n} horse shows its gene rows and epigenome and no part. Closing
- * that is a design call, not an omission: see
- * {@code wiki/model-parts.html#open-designer}.
+ * or {@code Ant/n} horse names its parts in a panel over the preview ("not drawn
+ * here, see them in game", {@code gui.js drawParts}) instead of drawing them. That
+ * panel has no twin here, deliberately: this preview shows the part itself. Owner's
+ * call, 2026-10-01: {@code wiki/model-parts.html#open-designer}.
  *
  * <p>The deliberate divergences. The browser has nothing to spawn and no
  * inventory to put an egg in, so this screen's two output buttons have no twin
@@ -1749,7 +1751,7 @@ public final class CustomHorseSpawnScreen extends Screen {
             }
             // on the horse: name, what it expresses, and its two allele buttons
             Expression e = genotype.expressionOf(row.gene);
-            boolean expressing = !e.wildType();
+            boolean expressing = EditorRules.expressing(row.gene, e);
             g.fill(nx - 2, ry, nx + nameWidth(true) + 2, ry + ROW_H - 2, 0x33202838);
             drawFitted(g, row.gene.name(), nx, ry + 1, nameWidth(true),
                     expressing ? 0xFF9BE08A : 0xFFC8C8C8);
@@ -1843,6 +1845,15 @@ public final class CustomHorseSpawnScreen extends Screen {
      *
      * <p>Only drawn when the horse is not ordinary size, so a screen with the
      * size locus untouched looks exactly as it did.
+     *
+     * <p>The number is the genotype's. When this world has {@code body.size}
+     * off it also prints what the horse will really stand at - the compressed
+     * scale - because this screen, unlike the wiki's horse designer, can know:
+     * {@link ServerConfig} is a SERVER config, synced to clients on connection
+     * (see {@code MountedMiningHandler}). The designer cannot, so it labels its
+     * number a genotype preview instead - a deliberate divergence (hard rule 5),
+     * noted on {@code wiki/horse-designer/js/gui.js} too. The preview model keeps
+     * the genotype's size either way: it is the genotype being designed.
      */
     private void drawSizeReadout(GuiGraphicsExtractor g, int x0, int x1, int y1) {
         double scale = previewTraits().scale();
@@ -1850,7 +1861,9 @@ public final class CustomHorseSpawnScreen extends Screen {
             return;
         }
         String text = String.format(java.util.Locale.ROOT, "size %.2fx", scale);
-        if (scale > PREVIEW_SCALE_CAP) {
+        if (!ServerConfig.bodySizeActive()) {
+            text += String.format(java.util.Locale.ROOT, " (%.2fx in this world)", HorseTraits.compressScale(scale));
+        } else if (scale > PREVIEW_SCALE_CAP) {
             text += " (preview capped)";
         }
         int colour = scale > 1.0 ? 0xFFE0C070 : 0xFF80B8D0;

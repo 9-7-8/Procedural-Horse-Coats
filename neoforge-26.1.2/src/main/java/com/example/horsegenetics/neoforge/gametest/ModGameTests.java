@@ -14,6 +14,7 @@ import com.example.horsegenetics.neoforge.data.HorseRealmSize;
 import com.example.horsegenetics.neoforge.server.HorseRealm;
 import com.example.horsegenetics.neoforge.server.StasisCare;
 import com.example.horsegenetics.neoforge.worldgen.HomesteadCensus;
+import com.example.horsegenetics.neoforge.worldgen.StableSiteCensus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -245,6 +246,44 @@ public final class ModGameTests {
             helper.fail(String.format(
                     "the homestead is down to %.1f%% of plains villages (floor %.0f%%): %s",
                     result.rate() * 100.0, CENSUS_FLOOR * 100.0, result.line()));
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>No generated stable stands on ground spreading more than ten blocks</b>
+     * (issue #2). The jigsaw gave a stable one height, the surface under its
+     * centre, so a big one started on a hilltop floated over the valley beside it.
+     * {@link StableSiteCensus} generates every stable chunk near spawn twice on
+     * the same seeds: the wrapped vanilla jigsaw as the control, and the real
+     * structure. It re-measures the ground under each stable that was kept.
+     *
+     * <p>The limit is written here rather than read from the structure, so
+     * loosening {@code max_ground_spread} in the JSON turns this red. The census
+     * size can be raised with {@code PHC_STABLE_SEEDS} / {@code PHC_STABLE_SITES}.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STABLES_STAND_ON_LEVEL_GROUND =
+            TEST_FUNCTIONS.register("stables_stand_on_level_ground", () -> ModGameTests::stablesStandOnLevelGround);
+
+    private static final int STABLE_GROUND_LIMIT = 10;
+
+    private static void stablesStandOnLevelGround(GameTestHelper helper) {
+        int seeds = fromEnv("PHC_STABLE_SEEDS", 4);
+        int sites = fromEnv("PHC_STABLE_SITES", 6);
+        StableSiteCensus.Result result = StableSiteCensus.run(
+                helper.getLevel().getServer(), seeds, sites, STABLE_GROUND_LIMIT);
+        HorseGenetics.LOGGER.info("[census] stable ground: {}", result.line());
+        HorseGenetics.LOGGER.info("[census] stable ground spread before, per stable: {}", result.spreads());
+
+        if (result.sites() == 0) {
+            helper.fail("the census found no stable sites at all - the harness is broken, not the stables");
+        }
+        if (result.accepted() == 0) {
+            helper.fail("no stable was kept anywhere: " + result.line());
+        }
+        if (result.worstAfter() > STABLE_GROUND_LIMIT) {
+            helper.fail("a stable stands on ground spreading " + result.worstAfter()
+                    + " blocks (limit " + STABLE_GROUND_LIMIT + "): " + result.line());
         }
         helper.succeed();
     }
@@ -921,6 +960,135 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>The realm lift loads no chunk but its own.</b> Issue #13: the live
+     * server logged {@code HorseRealmLift.lift} forcing a synchronous chunk load
+     * 101 times. Not by reading - every block it reads is in the chunk it is
+     * lifting - but by writing: {@code setBlock} without flag 16 asks each
+     * neighbour to re-shape, and the neighbour of an edge block is in the next
+     * chunk over, which nothing had loaded.
+     *
+     * <p>So: a chunk nobody has a ticket on, given the old floor's bedrock mark
+     * and a ring of stone round its edge, lifted through the real
+     * {@link com.example.horsegenetics.neoforge.server.HorseRealmLift#liftNow}
+     * in whatever level the harness has (the lift does not ask which). All four
+     * neighbours must still be unloaded afterwards. The setup writes with 16 for
+     * the same reason the fix does, or it would load them itself.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> REALM_LIFT_LOADS_NO_NEIGHBOUR =
+            TEST_FUNCTIONS.register("realm_lift_loads_no_neighbour", () -> ModGameTests::realmLiftLoadsNoNeighbour);
+
+    private static void realmLiftLoadsNoNeighbour(GameTestHelper helper) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        // A long way from the test structures and the spawn chunks.
+        net.minecraft.world.level.ChunkPos at = new net.minecraft.world.level.ChunkPos(-3907, 4111);
+        net.minecraft.world.level.ChunkPos[] around = {
+                new net.minecraft.world.level.ChunkPos(at.x() - 1, at.z()),
+                new net.minecraft.world.level.ChunkPos(at.x() + 1, at.z()),
+                new net.minecraft.world.level.ChunkPos(at.x(), at.z() - 1),
+                new net.minecraft.world.level.ChunkPos(at.x(), at.z() + 1)};
+        level.getChunk(at.x(), at.z());
+        for (net.minecraft.world.level.ChunkPos n : around) {
+            if (level.hasChunk(n.x(), n.z())) {
+                helper.fail("chunk " + n + " was loaded before the lift ran - the test proves "
+                        + "nothing from here; move it somewhere nobody has been");
+                return;
+            }
+        }
+
+        int x0 = at.getMinBlockX();
+        int z0 = at.getMinBlockZ();
+        int y = com.example.horsegenetics.neoforge.server.HorseRealmLift.BUILT_AT_Y;
+        BlockState stone = Blocks.STONE.defaultBlockState();
+        level.setBlock(new BlockPos(x0, y - 1, z0), Blocks.BEDROCK.defaultBlockState(), 2 | 16);
+        for (int i = 0; i < 16; i++) {
+            level.setBlock(new BlockPos(x0, y, z0 + i), stone, 2 | 16);
+            level.setBlock(new BlockPos(x0 + 15, y, z0 + i), stone, 2 | 16);
+            level.setBlock(new BlockPos(x0 + i, y, z0), stone, 2 | 16);
+            level.setBlock(new BlockPos(x0 + i, y, z0 + 15), stone, 2 | 16);
+        }
+
+        com.example.horsegenetics.neoforge.server.HorseRealmLift.liftNow(level, at);
+
+        BlockPos lifted = new BlockPos(x0 + 15, y + com.example.horsegenetics.neoforge.server.HorseRealmLift.OFFSET, z0 + 7);
+        if (!level.getBlockState(lifted).is(Blocks.STONE)) {
+            helper.fail("the lift did not run - no stone at " + lifted.toShortString()
+                    + ", so the neighbour check below would be checking nothing");
+            return;
+        }
+        for (net.minecraft.world.level.ChunkPos n : around) {
+            if (level.hasChunk(n.x(), n.z())) {
+                helper.fail("lifting chunk " + at + " loaded its neighbour " + n
+                        + " - a shape update crossed the edge (issue #13)");
+                return;
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>A horse lost after a realm backup comes back from it, as itself.</b>
+     * The whole of {@code RealmBackup} end to end, in whatever level the harness
+     * has (it has no realm; the backup does not ask which level it is): take a
+     * backup, lose a horse <i>without</i> it dying - discarded, which is what
+     * losing its entity data looks like, and the case nothing else in the mod
+     * can undo - then plan the restore and carry it out.
+     *
+     * <p>The plan must call it RAISE: not loaded, no death mark, no record of
+     * leaving, and gone from the level's files. The raise must give back the
+     * same UUID, alive. The plan is cut down to this one horse with
+     * {@code only}, so the other tests' horses are not raised alongside it.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> REALM_BACKUP_RAISES_A_LOST_HORSE =
+            TEST_FUNCTIONS.register("realm_backup_raises_a_lost_horse", () -> ModGameTests::realmBackupRaisesALostHorse);
+
+    private static void realmBackupRaisesALostHorse(GameTestHelper helper) {
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        // Founded on a later tick - see A_DEAD_HORSE_COMES_BACK_WHOLE.
+        helper.runAfterDelay(10L, () -> backUpLoseAndRestore(helper, horse));
+    }
+
+    private static void backUpLoseAndRestore(GameTestHelper helper,
+                                             net.minecraft.world.entity.animal.equine.Horse horse) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        MinecraftServer server = level.getServer();
+        java.util.UUID id = horse.getUUID();
+        String name = com.example.horsegenetics.neoforge.server.HorseRecords.of(horse).displayName();
+        com.example.horsegenetics.neoforge.server.RealmBackup.Plan plan;
+        try {
+            com.example.horsegenetics.neoforge.data.RealmBackups.Backup backup =
+                    com.example.horsegenetics.neoforge.server.RealmBackup.take(server, level, "gametest");
+            horse.discard();
+            plan = com.example.horsegenetics.neoforge.server.RealmBackup
+                    .plan(server, level, backup.name()).only(id);
+        } catch (java.io.IOException e) {
+            throw new GameTestAssertException(Component.literal("the backup could not be taken or read: " + e), 0);
+        }
+        if (!plan.entries().containsKey(id)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the backup does not hold " + name + " - the region files were copied before the "
+                            + "flush reached them, or the reader is not finding horses in them"), 0);
+        }
+        com.example.horsegenetics.common.realm.RealmRestore.Action action = plan.actions().get(id);
+        if (action != com.example.horsegenetics.common.realm.RealmRestore.Action.RAISE) {
+            throw new GameTestAssertException(Component.literal(
+                    "a discarded horse was planned as " + action + ", not RAISE"), 0);
+        }
+        com.example.horsegenetics.neoforge.server.RealmBackup.execute(server, plan);
+        helper.succeedWhen(() -> {
+            net.minecraft.world.entity.Entity back = level.getEntity(id);
+            if (!(back instanceof net.minecraft.world.entity.animal.equine.Horse h) || !h.isAlive()) {
+                throw new GameTestAssertException(Component.literal(name + " has not been raised yet"), 0);
+            }
+            String raisedName = com.example.horsegenetics.neoforge.server.HorseRecords.of(h).displayName();
+            if (!raisedName.equals(name)) {
+                throw new GameTestAssertException(Component.literal(
+                        "the raised horse is called \"" + raisedName + "\", not \"" + name + "\""), 0);
+            }
+        });
+    }
+
+    /**
      * <b>The freedom stick crafts, and is drawable.</b> A feather, a stick and one
      * horse hair. Same three flags as every other recipe here: an item that is
      * craftable but not <i>findable</i> is an item nobody will ever make, and this
@@ -1150,6 +1318,182 @@ public final class ModGameTests {
         helper.succeed();
     }
 
+    /**
+     * <b>"Eject empties" takes out every empty chamber, and nothing else.</b>
+     * The Chambers tab's one-press button, driven through the real
+     * {@code clickMenuButton} id the screen sends.
+     *
+     * <p>Two empties of different tiers, one occupied chamber, and an empty
+     * chamber sitting in a drop-buffer slot - which is not a chamber slot and
+     * must not be walked. The player's pack has room for exactly one, so the
+     * first empty goes into it and the second drops at the bank. Then a second
+     * press, with nothing left to eject, must do nothing and say so.
+     *
+     * <p>The dropped chamber is cleared up afterwards: a test that leaves items
+     * on the floor is a test that fails its neighbours (see
+     * {@link #VANILLA_LEAD_COMES_BACK}).
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_BANK_EJECTS_EMPTIES =
+            TEST_FUNCTIONS.register("stasis_bank_ejects_empties", () -> ModGameTests::stasisBankEjectsEmpties);
+
+    private static void stasisBankEjectsEmpties(GameTestHelper helper) {
+        BlockPos at = new BlockPos(1, 1, 1);
+        helper.setBlock(at, com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_STASIS_BANK.get());
+        BlockPos abs = helper.absolutePos(at);
+        if (!(helper.getLevel().getBlockEntity(abs)
+                instanceof com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity bank)) {
+            helper.fail("placing a Horse Stasis Bank made no bank block entity - the premise is broken");
+            return;
+        }
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        player.setPos(abs.getCenter().add(0.0, 1.0, 0.0));
+        net.minecraft.world.entity.player.Inventory pack = player.getInventory();
+        for (int i = 1; i < 36; i++) {
+            pack.setItem(i, new ItemStack(Items.DIRT, 64));
+        }
+        pack.setItem(0, ItemStack.EMPTY);
+
+        net.minecraft.world.Container chambers = bank.chambers();
+        chambers.setItem(0, new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get()));
+        chambers.setItem(1, com.example.horsegenetics.neoforge.item.StasisChamberItem.withHorse(
+                new ItemStack(ModItems.INTERMEDIATE_STASIS_CHAMBER.get()),
+                new com.example.horsegenetics.neoforge.data.StasisSnapshot(
+                        "Keeper", UUID.randomUUID(), new net.minecraft.nbt.CompoundTag())));
+        chambers.setItem(2, new ItemStack(ModItems.ADVANCED_STASIS_CHAMBER.get()));
+        int dropSlot = com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity.FIRST_DROP_SLOT;
+        bank.supplies().setItem(dropSlot, new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get()));
+
+        com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu menu =
+                new com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu(0, pack, bank);
+        if (menu.empties() != 2) {
+            helper.fail("the bank counts " + menu.empties() + " empties, not 2 - the button's label "
+                    + "would be wrong before it was ever pressed");
+            return;
+        }
+        int button = com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu.EJECT_EMPTIES_BUTTON;
+        if (!menu.clickMenuButton(player, button)) {
+            helper.fail("pressing Eject empties with two empties in the bank was refused");
+            return;
+        }
+        if (!chambers.getItem(0).isEmpty() || !chambers.getItem(2).isEmpty()) {
+            helper.fail("an empty chamber was left in the bank after Eject empties");
+            return;
+        }
+        if (com.example.horsegenetics.neoforge.item.StasisChamberItem.snapshotOf(chambers.getItem(1)) == null) {
+            helper.fail("Eject empties took a chamber WITH A HORSE IN IT out of the bank");
+            return;
+        }
+        if (!bank.supplies().getItem(dropSlot).is(ModItems.BASIC_STASIS_CHAMBER.get())) {
+            helper.fail("Eject empties reached into the drop buffer - only chamber slots are its business");
+            return;
+        }
+        if (!pack.getItem(0).is(ModItems.BASIC_STASIS_CHAMBER.get())) {
+            helper.fail("the first empty did not reach the player's one free slot");
+            return;
+        }
+        if (menu.empties() != 0) {
+            helper.fail("the bank still counts " + menu.empties() + " empties after ejecting them");
+            return;
+        }
+        if (menu.clickMenuButton(player, button)) {
+            helper.fail("a second press with no empties left claimed to have done something");
+            return;
+        }
+        // The pack was full, so the second empty is on the ground at the bank.
+        helper.runAfterDelay(5L, () -> {
+            helper.assertItemEntityPresent(ModItems.ADVANCED_STASIS_CHAMBER.get(), at, 2.0);
+            helper.killAllEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class);
+            helper.succeed();
+        });
+    }
+
+    /**
+     * <b>Send home is free by default, and a set price is all-or-nothing.</b>
+     *
+     * <p>The browser's button runs through {@code StallRecall}, which needs a
+     * {@code ServerPlayer} - and a gametest cannot make one without joining the
+     * player list (see {@link #VANILLA_LEAD_COMES_BACK}). So this drives the part
+     * that decides money, {@code SendHomePayment}, against a mock player's real
+     * inventory, and leaves the landing in a stall to the in-game check on
+     * wiki/horse-browser.html's Verification tab. The cooldown is pure arithmetic
+     * and pinned by {@code SendHomeTest}.
+     *
+     * <p>Asserted: this run's default config is free and lets an empty pack
+     * through; a price the pack cannot meet is refused <b>and takes nothing</b>;
+     * a price it can meet is taken exactly, across split stacks; a creative
+     * player is never charged; and an id naming no item is free rather than a
+     * lock-out.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SEND_HOME_PAYMENT =
+            TEST_FUNCTIONS.register("send_home_payment", () -> ModGameTests::sendHomePayment);
+
+    private static void sendHomePayment(GameTestHelper helper) {
+        com.example.horsegenetics.neoforge.server.SendHomePayment.Charge configured =
+                com.example.horsegenetics.neoforge.server.SendHomePayment.current();
+        if (!configured.free()) {
+            helper.fail("behaviour.send_home_payment_* sets a price in this run's server config, so the"
+                    + " free default is not what is being run - reset it rather than deleting the test");
+            return;
+        }
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.player.Inventory pack = player.getInventory();
+        pack.clearContent();
+        if (!com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(player, configured)) {
+            helper.fail("the free default refused a player with an empty pack");
+            return;
+        }
+
+        com.example.horsegenetics.neoforge.server.SendHomePayment.Charge emeralds =
+                com.example.horsegenetics.neoforge.server.SendHomePayment.resolve(
+                        com.example.horsegenetics.common.care.SendHome.Price.of("minecraft:emerald", 3));
+        if (emeralds.free() || emeralds.item() != Items.EMERALD) {
+            helper.fail("minecraft:emerald x3 did not resolve to a price in emeralds");
+            return;
+        }
+        pack.setItem(4, new ItemStack(Items.EMERALD, 2));
+        if (com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(player, emeralds)) {
+            helper.fail("two emeralds were accepted for a price of three");
+            return;
+        }
+        if (pack.countItem(Items.EMERALD) != 2) {
+            helper.fail("a refused price took something from the pack");
+            return;
+        }
+        pack.setItem(9, new ItemStack(Items.EMERALD, 5));
+        if (!com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(player, emeralds)) {
+            helper.fail("seven emeralds in two stacks were refused for a price of three");
+            return;
+        }
+        com.example.horsegenetics.neoforge.server.SendHomePayment.take(player, emeralds);
+        if (pack.countItem(Items.EMERALD) != 4) {
+            helper.fail("paying three of seven emeralds left " + pack.countItem(Items.EMERALD) + ", not 4");
+            return;
+        }
+
+        net.minecraft.world.entity.player.Player creative =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.CREATIVE);
+        creative.getInventory().clearContent();
+        // The mock's game type overrides isCreative() and nothing else; its
+        // abilities are a fresh survival set. instabuild is what the real game
+        // sets for creative and what every spend in this mod checks.
+        creative.getAbilities().instabuild = true;
+        if (!com.example.horsegenetics.neoforge.server.SendHomePayment.canPay(creative, emeralds)) {
+            helper.fail("a creative player was asked to pay");
+            return;
+        }
+
+        com.example.horsegenetics.neoforge.server.SendHomePayment.Charge typo =
+                com.example.horsegenetics.neoforge.server.SendHomePayment.resolve(
+                        com.example.horsegenetics.common.care.SendHome.Price.of("minecraft:emerlad", 3));
+        if (!typo.free()) {
+            helper.fail("an id naming no item became a price nobody can pay, not free");
+            return;
+        }
+        helper.succeed();
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -1181,6 +1525,8 @@ public final class ModGameTests {
         // size is. The generous number is for the environment overrides, which
         // are meant to be raised a long way.
         register(event, environment, HOMESTEAD_STILL_GENERATES, 400);
+        // The same kind of census, for the stables' ground.
+        register(event, environment, STABLES_STAND_ON_LEVEL_GROUND, 400);
         // One pass over the recipe list inside a single tick; the budget is slack.
         register(event, environment, EVERY_RECIPE_ENCODES, 100);
         // Five recipe lookups in one tick.
@@ -1200,6 +1546,11 @@ public final class ModGameTests {
         register(event, environment, HORSE_REALM_IS_BUILT, 200);
         // Four thousand hashes; no world touched at all.
         register(event, environment, HORSE_REALM_GRID_IS_STABLE, 100);
+        // One chunk generated, one lifted; all in one tick.
+        register(event, environment, REALM_LIFT_LOADS_NO_NEIGHBOUR, 200);
+        // Ten ticks to be founded, a backup and a plan (two flushing saves), then
+        // a raise on the next server tick.
+        register(event, environment, REALM_BACKUP_RAISES_A_LOST_HORSE, 200);
         // One recipe lookup in a single tick.
         register(event, environment, FREEDOM_STICK_CRAFTS, 100);
         // Spawn, ten ticks to be founded, kill, raise - then read the result.
@@ -1210,12 +1561,19 @@ public final class ModGameTests {
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
         // One horse spawned and three events posted, all inside a single tick.
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
+        // A small scratch box filled and read, all inside one tick.
+        register(event, environment, NO_HORSE_STANDS_IN_POWDER_SNOW, 100);
         // One horse spawned, two attachment writes, two calls; one tick.
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
         // Four horses spawned and seven interact events posted, all in one tick.
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
         // Builds one instance of every mob it classifies, inside one tick.
         register(event, environment, CHAOS_ROSTER, 100);
+        // One bank filled and one button pressed twice, then five ticks for the
+        // dropped chamber to be findable on the ground.
+        register(event, environment, STASIS_BANK_EJECTS_EMPTIES, 100);
+        // Two mock players and a dozen inventory reads, all inside one tick.
+        register(event, environment, SEND_HOME_PAYMENT, 100);
     }
 
     /**
@@ -1255,6 +1613,49 @@ public final class ModGameTests {
         helper.runAfterDelay(10L, () -> killAndRaise(helper, horse));
     }
 
+    /**
+     * <b>The afterlife store's size budget, on a real horse's tag</b> (issue
+     * #15). A kept horse has a cost; a wake saved before the budget existed -
+     * no {@code bytes} field - is measured as it loads, so an old save is
+     * budgeted too (rule 10); and {@code trimTo} lets it go over budget and
+     * keeps it under "no cap". Run on a decoded copy, so the server's own store
+     * still holds the wake for the resurrection that follows.
+     */
+    private static void afterlifeBudgetHolds(com.example.horsegenetics.neoforge.data.HorseAfterlife.Wake wake) {
+        if (wake.bytes() <= 0) {
+            throw new GameTestAssertException(Component.literal(
+                    "a freshly kept horse has no cost (" + wake.bytes() + " bytes), so the size"
+                            + " budget can never let it go. Check HorseAfterlife.Wake.of / measure."), 0);
+        }
+        net.minecraft.nbt.Tag encoded = com.example.horsegenetics.neoforge.data.HorseAfterlife.Wake.CODEC
+                .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, wake).getOrThrow();
+        net.minecraft.nbt.CompoundTag old = ((net.minecraft.nbt.CompoundTag) encoded).copy();
+        old.remove("bytes");
+        net.minecraft.nbt.ListTag wakes = new net.minecraft.nbt.ListTag();
+        wakes.add(old);
+        net.minecraft.nbt.CompoundTag file = new net.minecraft.nbt.CompoundTag();
+        file.put("wakes", wakes);
+        com.example.horsegenetics.neoforge.data.HorseAfterlife loaded =
+                com.example.horsegenetics.neoforge.data.HorseAfterlife.CODEC
+                        .parse(net.minecraft.nbt.NbtOps.INSTANCE, file).getOrThrow();
+        long measured = loaded.lookup(wake.horse()).map(w -> w.bytes()).orElse(-1L);
+        if (measured != wake.bytes()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a wake saved before the size budget loaded with a cost of " + measured
+                            + " bytes, not the " + wake.bytes() + " it measures at death - an old"
+                            + " save's dead horses would sit outside the budget."), 0);
+        }
+        if (!loaded.trimTo(0).isEmpty() || loaded.size() != 1) {
+            throw new GameTestAssertException(Component.literal(
+                    "ops.resurrect_budget_mb = 0 is meant to be no cap, and trimTo(0) dropped a horse"), 0);
+        }
+        if (loaded.trimTo(wake.bytes() - 1).size() != 1 || loaded.size() != 0) {
+            throw new GameTestAssertException(Component.literal(
+                    "a store one byte over its budget kept its only horse - trimTo is not enforcing"
+                            + " ops.resurrect_budget_mb"), 0);
+        }
+    }
+
     private static void killAndRaise(GameTestHelper helper,
                                      net.minecraft.world.entity.animal.equine.Horse horse) {
         if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
@@ -1286,6 +1687,7 @@ public final class ModGameTests {
                             + " anything to offer. Check HorseAfterlifeHandler.onHorseDeath and"
                             + " whether the record still carries an ownerId at death."), 0);
         }
+        afterlifeBudgetHolds(wake);
 
         // The entity is discarded by now, so the id is free for it to take back.
         net.minecraft.world.entity.animal.equine.Horse raised =
@@ -2259,6 +2661,60 @@ public final class ModGameTests {
         var got = com.example.horsegenetics.neoforge.server.ChaosRoster.classify(type, level);
         if (!got.equals(expected)) {
             helper.fail(BuiltInRegistries.ENTITY_TYPE.getKey(type) + " classified as " + got + ", expected " + expected);
+        }
+    }
+
+    /**
+     * <b>A cowboy never stands a horse in powder snow</b> (issue #18).
+     *
+     * <p>Powder snow has no collision shape for a box test, so the old
+     * {@code roomForAHorse} - solid below, no liquid, no collision - passed a
+     * spot full of it, and a dealer in a snowy biome froze his whole string in
+     * minutes. Four spots are asked about: a plain one first, so a check that
+     * refuses everything cannot pass; then powder snow at the feet, under the
+     * feet, and beside them inside the horse's own width, since a horse is
+     * wider than its block and touching the snow is enough to freeze.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> NO_HORSE_STANDS_IN_POWDER_SNOW =
+            TEST_FUNCTIONS.register("no_horse_stands_in_powder_snow",
+                    () -> ModGameTests::noHorseStandsInPowderSnow);
+
+    private static void noHorseStandsInPowderSnow(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos feet = helper.absolutePos(BlockPos.ZERO).above(40);
+        BlockState powder = Blocks.POWDER_SNOW.defaultBlockState();
+        try {
+            reset(level, feet);
+            if (!com.example.horsegenetics.neoforge.server.CowboyHandler.roomForAHorse(level, feet)) {
+                helper.fail("a plain spot on a stone floor was refused, so this test proves nothing.");
+                return;
+            }
+            String[] where = {"at its feet", "under its feet", "beside it, inside its width"};
+            BlockPos[] snow = {feet, feet.below(), feet.east()};
+            for (int i = 0; i < snow.length; i++) {
+                reset(level, feet);
+                level.setBlock(snow[i], powder, 2);
+                if (com.example.horsegenetics.neoforge.server.CowboyHandler.roomForAHorse(level, feet)) {
+                    helper.fail("a horse would be placed with powder snow " + where[i]
+                            + " - it cannot get out and freezes to death (#18).");
+                    return;
+                }
+            }
+        } finally {
+            fill(level, feet, Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
+    }
+
+    /** Air around {@code feet}, on a 7x7 stone floor one block down. */
+    private static void reset(ServerLevel level, BlockPos feet) {
+        for (int x = -3; x <= 3; x++) {
+            for (int y = -1; y <= 3; y++) {
+                for (int z = -3; z <= 3; z++) {
+                    level.setBlock(feet.offset(x, y, z),
+                            (y == -1 ? Blocks.STONE : Blocks.AIR).defaultBlockState(), 2);
+                }
+            }
         }
     }
 

@@ -237,4 +237,29 @@ class HorseTraitsTest {
         assertTrue(unexpected.isEmpty(),
                 "these genes contribute a trait and are not named here: " + unexpected);
     }
+    /**
+     * body.size off compresses rather than flattens (owner, 2026-10-01): every
+     * scale the genetics can reach lands inside the stall-safe band, order is
+     * kept, and an ordinary horse is left where it was.
+     */
+    @Test
+    void compressedScaleStaysInTheBandAndKeepsTheOrder() {
+        double band = HorseTraits.COMPRESSED_SCALE_BAND;
+        assertEquals(1.0, HorseTraits.compressScale(1.0), 1e-12);
+        // A stall's two blocks of headroom: the hitbox (1.6) and the eye (1.52) stay under the roof.
+        assertTrue(1.6 * (1.0 + band) < 2.0 && 1.52 * (1.0 + band) < 2.0,
+                "the band must leave a vanilla-shaped horse inside a two-block stall");
+        double previous = -1;
+        for (double s = HorseTraits.MAGICAL_MIN_SCALE; s <= HorseTraits.MAGICAL_MAX_SCALE; s += 0.01) {
+            double c = HorseTraits.compressScale(s);
+            assertTrue(c >= 1.0 - band && c <= 1.0 + band, "scale " + s + " compressed to " + c);
+            assertTrue(c >= previous, "order lost at " + s + ": " + previous + " then " + c);
+            previous = c;
+        }
+        // Distinct sizes stay distinct across the natural range - a Shire still outgrows a Falabella.
+        assertTrue(HorseTraits.compressScale(1.3) > HorseTraits.compressScale(1.15));
+        assertTrue(HorseTraits.compressScale(0.6) < HorseTraits.compressScale(0.8));
+        // Near 1.0 it barely moves: a 3% horse stays within a fraction of a percent of 3%.
+        assertEquals(1.03, HorseTraits.compressScale(1.03), 0.002);
+    }
 }

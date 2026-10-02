@@ -50,9 +50,9 @@
         named in that release's notes and kept as small as it can be.
     </p>
     <p>
-        <strong>Only a middle-number release breaks saves</strong> (<code>0.X.0</code>,
-        never <code>0.0.X</code>), and only on the owner's word, like every middle-number
-        bump. That release's notes are stamped <em>&ldquo;no longer back compatible with
+        <strong>Only a compat release breaks saves</strong>, one that moves the second
+        number (<code>0.X.0</code>), never the third (<code>0.0.X</code>). That release's
+        notes are stamped <em>&ldquo;no longer back compatible with
         saves created under <code>0.5</code>&rdquo;</em> (naming the series it leaves),
         and the new series starts its own promise from its first release. Worlds from
         before <code>0.5.037</code> were made under the old development-only rule and are
@@ -61,19 +61,23 @@
 </div>
 
 <div class="note warn">
-    <span class="label">The numbering, as of 2026-09-10</span>
+    <span class="label">The numbering: 0.&lt;compat&gt;.&lt;patch&gt;, as of 2026-10-01</span>
     <p>
-        <strong>The next release is <code>0.5.000</code>, and after that only the last
-        number moves</strong> &mdash; <code>0.5.001</code>, <code>0.5.002</code>, and on
-        up. It is a three-digit field on purpose: there is a lot of counting to do before
-        anything else changes.
+        <strong>The third number is the patch number, and every ordinary release moves
+        it</strong> &mdash; <code>0.5.037</code>, <code>0.5.038</code>, and on up.
+        Releasing is the owner's call, offered only once a substantial batch has piled up:
+        a handful of fixes is not one. It is a three-digit field on purpose: there is a
+        lot of counting to do.
     </p>
     <p>
-        <strong>The middle number does not move without the owner saying so, explicitly
-        and out loud.</strong> Not for a big feature, not for a batch of genes, not
-        because the last number is getting long. That is the whole rule and it is the
-        owner's call, not a judgement to make from how much shipped. The versions ran
-        0.2.0 to 0.4.1 in two days, which is what the rule is a reaction to.
+        <strong>The second number is a compatibility indicator.</strong> It moves only for
+        a substantial new feature that cannot keep existing saves loading. Not for a big
+        feature that can, not for a batch of genes, not because the third number is getting
+        long. A world made under one <code>0.X</code> loads in every later release with the
+        same <code>X</code> (see <a href="#saves">Saves</a>), so when the second number
+        changes, that promise starts again. (The rule replaces the 2026-09-10 one, under
+        which the middle number moved only on the owner's say-so. That rule was a reaction
+        to 0.2.0 running to 0.4.1 in two days.)
     </p>
     <p>
         The version itself lives in one place, <code>gradle.properties</code>'
@@ -81,6 +85,340 @@
         so a number is never reused, and never reissued with different bytes.
     </p>
 </div>
+
+<h2 id="v0-5-040">0.5.040 &mdash; level stables, dealer and stasis fixes, and a lighter server</h2>
+
+<p>
+    A patch release of fixes and speed. It fixes ten bugs, most of them reported from the live
+    server: stables that floated over valleys, dealer horses freezing in powder snow or killing
+    each other, a hopper that drained a stasis bank, and a mare beside a wall who could not be
+    covered. A server with many horses now spends about a quarter less time on them each tick.
+    The stasis bank also learns two small tricks.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners: new stables are rarer</p>
+    <p>
+        New stables now only go on fairly level ground, so about half the sites that used to
+        get one are skipped. Stables already built in your world stay where they are.
+    </p>
+</div>
+
+<h3 id="v0-5-040-stables">Stables stand on the ground (#2)</h3>
+<p>
+    A stable used to be set at the height of the ground under its centre, so on a hillside or
+    over a valley it hung in the air on a hollow slab. Each site is now measured at its corners
+    and centre. If the ground varies by more than 10 blocks the site is skipped; otherwise the
+    stable is lowered to the lowest of those points. About 56% of the old sites are kept, so
+    stables are roughly half as common as before.
+    Details: <a href="stables.html">Generated stables</a>.
+</p>
+
+<h3 id="v0-5-040-dealers">Horse dealers</h3>
+<ul>
+    <li><strong>No more horses frozen in powder snow (#18).</strong> The cowboy and the dealers
+        never stand a horse in or over powder snow.</li>
+    <li><strong>The arcane dealer&rsquo;s horses stop killing each other (#17).</strong> He no
+        longer stocks horses whose aggression hunts other horses. Guardians are still stocked.
+        A dealer who already holds a horse-hunter keeps it until it sells, rotates out, or he
+        leaves.</li>
+    <li><strong>A horse sold to a wandering trader leaves with him (#21).</strong> Before, it
+        stayed behind when he despawned.</li>
+</ul>
+
+<h3 id="v0-5-040-breeding">Breeding and genes</h3>
+<ul>
+    <li><strong>A mare beside a wall can be covered (#23).</strong> Natural covers were refused
+        when the mare stood against a wall. A fence between the pair still keeps them
+        apart.</li>
+    <li><strong>Both copies of a gene count (#20).</strong> A horse with two copies of an allele
+        that changes an attribute now gets both effects; before, the second copy replaced the
+        first. The weather genes are the ones a player will notice: a horse with two
+        rain-speed copies now really is faster in the rain than one with a single copy.</li>
+</ul>
+
+<h3 id="v0-5-040-stasis">Stasis bank</h3>
+<ul>
+    <li><strong>A hopper underneath takes only the outputs (#22).</strong> It used to pull the
+        hay and water straight back out of the feed slots.</li>
+    <li><strong>Find a Basic horse by name.</strong> In Browse, typing a horse&rsquo;s name now
+        finds it even in a Basic-tier chamber. A search with operators
+        (<code>cinder OR amber</code>) still does not look inside Basic chambers.</li>
+    <li><strong>Eject empties.</strong> A new &ldquo;Eject empties (N)&rdquo; button on the
+        Chambers tab takes every empty chamber out in one press. They go into your inventory,
+        and any that do not fit drop at the bank.</li>
+    <li>The saved-searches arrow no longer shows on the Chambers tab, and an open saved-search
+        menu closes when you leave Browse. Before, that menu could catch clicks meant for the
+        chamber slots (#10).</li>
+</ul>
+<p>Details: <a href="horse-stasis.html">The horse stasis bank</a>.</p>
+
+<h3 id="v0-5-040-performance">A lighter server with many horses</h3>
+<p>
+    The horse handlers were measured on a server stepped up to 1,000 horses, and the expensive
+    ones were fixed. Mean tick time:
+</p>
+<table class="facts">
+    <tr><th>Horses</th><th>Before</th><th>After</th></tr>
+    <tr><td>100</td><td>3.1 ms</td><td>2.4 ms</td></tr>
+    <tr><td>600</td><td>27.4 ms</td><td>18.7 ms</td></tr>
+    <tr><td>1,000</td><td>48.4 ms (worst 5%: 57.6)</td><td>35.7 ms (worst 5%: 41.7)</td></tr>
+</table>
+<p>
+    At 1,000 horses the slowest ticks used to go over Minecraft&rsquo;s 50 ms budget. They now
+    stay under it. Most of the saving came from not re-reading a horse&rsquo;s genome every
+    tick for night, sunlight and foal checks, and from not rebuilding attribute modifiers that
+    had not changed. Horses behave exactly as before.
+</p>
+<p>
+    Also, mobs no longer save an empty werewolf-shift record (#24), so world saves get a
+    little smaller.
+</p>
+
+<h3 id="v0-5-040-logs">Server logs</h3>
+<ul>
+    <li>Every start no longer warns that a mixin refmap is missing (#16). The warning was
+        harmless.</li>
+    <li>The breed-founder log no longer flags magic that a Stables horse was given on purpose
+        as &ldquo;NOT ON ITS SHEET&rdquo; (#12).</li>
+</ul>
+
+<h3 id="v0-5-040-worlds">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading.</strong> A world from 0.5.037 or later loads in this one.</li>
+    <li><strong>Stables already generated stay as they are.</strong> Only land generated from
+        now on uses the level-ground rule, so an old stable may still float. Newly explored
+        land gets about half as many stables as before.</li>
+    <li><strong>Mobs drop their empty werewolf-shift record</strong> the next time they are
+        saved. Nothing a player can see changes.</li>
+    <li><strong>An arcane dealer already holding a horse-hunter</strong> keeps it until it sells
+        or rotates out.</li>
+    <li>No config keys, defaults, recipes or breed frequencies changed.</li>
+</ul>
+
+<h3 id="v0-5-040-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>
+        (a hungry horse starved beside a plain hay bale in a test pen; the pen itself is not
+        ruled out yet), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a>
+        (the stall detector refuses a slab-floored stall, and splits a stall with a one-block
+        step), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a> (open
+        until the live server&rsquo;s logs show its chunk loads are gone), and
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (fixed in
+        this release, open until someone checks it in game).</li>
+    <li>Not seen in game yet: the level stables and how rare they now are, the powder-snow and
+        arcane-dealer fixes, and the stasis bank&rsquo;s name search and Eject empties. Each is
+        covered by a unit test or gametest. What is waiting on someone&rsquo;s eyes is on
+        <a href="verification.html">the verification page</a>.</li>
+</ul>
+
+<h2 id="v0-5-039">0.5.039 &mdash; dead horses kept by size, and a server setting for stallions</h2>
+
+<p>
+    A patch release with two server-side changes: dead horses that can be resurrected are now
+    kept until a storage budget fills up, not for an hour, and a new server setting controls
+    how many covers a stallion makes in a day before he tires.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners: an existing server.toml keeps the old time limit</p>
+    <p>
+        An existing <code>server.toml</code> keeps <code>ops.resurrect_grace_minutes = 60</code>
+        even though the new default is 0. To get the new behaviour (kept until the store is
+        full, with no time limit), set it to 0 yourself.
+    </p>
+</div>
+
+<h3 id="v0-5-039-afterlife">Dead horses are kept until the store is full (#15)</h3>
+<p>
+    An owned horse that dies can still be brought back with <code>/horseresurrect</code>. It
+    used to be let go after 60 minutes of its owner&rsquo;s time online, long before it took
+    up any real space. Now it is kept however long ago it died, until the store of dead horses
+    reaches <code>ops.resurrect_budget_mb</code> (100 MB by default). After that the
+    <strong>oldest deaths go first</strong>, only as many as it takes to fit. 0 means no cap.
+</p>
+<ul>
+    <li><code>ops.resurrect_grace_minutes</code> is still there as an optional extra time
+        limit. Its default is now 0 (off).</li>
+    <li><code>/horseresurrect list</code> shows how full the store is.</li>
+    <li>A horse that is let go keeps its pedigree record. No family tree loses it.</li>
+</ul>
+<p>Details: <a href="horse-afterlife.html">Bringing a dead horse back</a>.</p>
+
+<h3 id="v0-5-039-free-covers">A stallion&rsquo;s free covers are a server setting</h3>
+<p>
+    <code>fertility.free_covers_per_day</code> (default <strong>3</strong>, from 0 to 1,000)
+    is how many covers a stallion makes in a day before his chance of getting a mare in foal
+    halves until tomorrow. Before, this was fixed at three. Natural covers, breeding carrots
+    and seed-jar fills all count against it. A mare prefers a stallion who is still under it,
+    and the vet&rsquo;s kit quotes it when it calls him tired. It never stops a stallion: a
+    tired stallion still covers. 0 makes every stallion tired all day; 1,000 means none ever
+    tires. Details: <a href="fertility.html#setting-free-covers">the fertility settings</a>.
+</p>
+
+<h3 id="v0-5-039-worlds">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading.</strong> A world from 0.5.037 or later loads in this one.</li>
+    <li><strong>Dead horses already in the store</strong> are measured as the world loads and
+        count toward the budget from the first sweep. Nothing is dropped unless the store is
+        already over 100 MB.</li>
+    <li><strong>Your <code>server.toml</code> keeps its old values.</strong> NeoForge does not
+        rewrite a value already in the file when a default changes, so a server that ran
+        0.5.038 or earlier still has <code>ops.resurrect_grace_minutes = 60</code>. The
+        hour-long limit then applies alongside the budget until you set it to 0.</li>
+    <li><code>fertility.free_covers_per_day</code> is added at 3, which is the old behaviour.
+        Nothing changes until you change it.</li>
+</ul>
+
+<h3 id="v0-5-039-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a>
+        stays open until the live server&rsquo;s logs confirm the chunk loads are gone;
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/12">#12</a> (the founder
+        log flags a stable&rsquo;s magic as &ldquo;not on its sheet&rdquo;);
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (the stasis
+        bank&rsquo;s arrow shows on the wrong tab);
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/2">#2</a> (structure
+        spawns). New from the server&rsquo;s logs:
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/17">#17</a> (an arcane
+        dealer&rsquo;s horses can kill each other in his pen),
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/18">#18</a> (a dealer can
+        stand horses in powder snow, where they freeze) and
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/16">#16</a> (a harmless
+        warning about a mixin refmap on every start).</li>
+    <li>Neither change has been played in game. The budget is covered by unit tests and a
+        gametest, and the free covers by unit tests and a server boot. What is waiting on
+        someone&rsquo;s eyes is on <a href="verification.html">the verification page</a>.</li>
+</ul>
+
+<h2 id="v0-5-038">0.5.038 &mdash; Chaos, realm backups, and server fixes</h2>
+
+<p>
+    A patch release. It adds a new allele on all three mob loci (Chaos), a climate rule for
+    breeds, and backups for the horse realm. It also fixes three bugs found on a live
+    server: mislabelled stable horses, horse AI and the realm forcing chunk loads, and horse
+    armour for mods that aren&rsquo;t installed.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners: read &ldquo;What this does to a world you already have&rdquo; before updating</p>
+    <p>
+        The first start of this version takes a backup of the horse realm, which is a
+        one-off save and a short hitch. Two armours, if your pack ever had them, turn into
+        iron horse armour.
+    </p>
+</div>
+
+<h3 id="v0-5-038-chaos">Chaos: one allele for every modded mob</h3>
+<p>
+    <a href="gene-lycan.html">Lycanthropy</a>, <a href="gene-pack-leader.html">Leader of the
+    pack</a> and <a href="gene-spawner.html">Spawner</a> each gain one new allele,
+    <code>Cha</code> (Chaos). It stands for whatever mobs your other mods add. Each copy of
+    the allele carries a seed, and the server resolves that seed against the mobs actually
+    installed:
+</p>
+<ul>
+    <li><strong>Lycanthropy:</strong> the horse can shift into a modded mob it can wear.</li>
+    <li><strong>Leader of the pack:</strong> the horse leads a peaceful modded mob.</li>
+    <li><strong>Spawner:</strong> the horse can spawn any modded mob.</li>
+</ul>
+<p>
+    Two Chaos copies act only when their seeds agree. A newly made horse carries the same
+    seed on both copies; breeding two Chaos lines keeps them as two lines. Server owners can
+    rule mobs out in the server config: <code>chaos.exclude_mods</code> (by mod id) and
+    <code>chaos.exclude_ids</code> (single mobs, as <code>modid:mob</code>). Both are empty
+    by default. The existing alleles of all three loci are unchanged, and no existing
+    genotype reorders.
+</p>
+
+<h3 id="v0-5-038-climate">Breeds: Nether breeds take heat, cold breeds take cold</h3>
+<ul>
+    <li>Every Nether breed (Netherhorse, Nightmare, Mirrorgazer) now always carries
+        <a href="gene-magic-heat.html">heat tolerance</a> (<code>Htol/Htol</code>).</li>
+    <li>Every breed that spawns in a cold biome carries cold tolerance, more of it the more of
+        its biomes are cold. Bashkir Curly and Percheron now have partial tolerance; Enderpony
+        and Yugoslavian Trotter light; Clydesdale is raised to near-fixed and Yili to partial.
+        The other cold-spawning breeds already met the rule.</li>
+</ul>
+<p>This changes newly spawned horses only.</p>
+
+<h3 id="v0-5-038-realm-backups">Horse realm backups</h3>
+<p>
+    The <a href="horse-realm.html">horse realm</a> is now backed up before anything changes
+    it in a way that could lose horses, and an operator can put its horses back afterwards.
+</p>
+<ul>
+    <li><strong>Automatic:</strong> any realm change that could lose horses (today, the realm
+        floor lift) is backed up once per world, at server start, before any realm chunk
+        ticks. The change does not run until its backup exists; if the backup fails, the
+        change stays off and the log says so.</li>
+    <li><strong>By hand:</strong> <code>/horserealm backup</code>, and
+        <code>/horserealm backups</code> to list them. The newest ten are kept, under
+        <code>&lt;world&gt;/horsegenetics/realm-backups/</code>.</li>
+    <li><strong>Restore:</strong> <code>/horserealm restore [name]</code> shows what restoring
+        would do; <code>/horserealm restore &lt;name&gt; confirm</code> does it. A horse that
+        died or was lost since the backup is brought back, with the same identity, at its old
+        spot on the surface. A living horse stuck inside a block is moved up to the surface:
+        at once if loaded, otherwise when it next loads. A horse that left the realm or is in
+        a stasis chamber is left alone.</li>
+</ul>
+<p>A backup copies the realm&rsquo;s horses only, not its terrain. Operators only (permission level 2).</p>
+
+<h3 id="v0-5-038-fixes">Fixes</h3>
+<ul>
+    <li><strong>#11: a stable horse&rsquo;s breed label is the breed its genes came
+        from.</strong> Stables listing several breeds labelled most of their horses with a breed
+        drawn separately from their genes, so a &ldquo;Falabella&rdquo; could carry a
+        Paint&rsquo;s frame overo, and size, stats and lineage followed the wrong label. Horses
+        already spawned keep the label they were given.</li>
+    <li><strong>#13: less server lag from horses and the horse realm.</strong> The realm floor
+        lift and the realm&rsquo;s water pools loaded the neighbouring chunk on every edge block
+        they wrote. The hunger goal, the hay-portal check and the glow light could also load a
+        chunk just to look at it. None of these load chunks now. Loading a chunk on purpose,
+        where a horse or player is about to arrive, is unchanged.</li>
+    <li><strong>#14: no horse armour for a mod that isn&rsquo;t installed.</strong> A
+        <code>c:</code> tag can name another mod&rsquo;s item as an optional entry, and the mod
+        made a horse armour from it anyway. On a server without Actually Additions or Mana and
+        Artifice, that meant a Black Quartz and a Chimerite Horse Armor, sold by the
+        metalsmith and impossible to forge. A metal now
+        <a href="compatibility.html#generated-installed">counts only if its own mod is
+        loaded</a>. The metalsmith also no longer sells any generated armour that nothing in
+        the pack can forge.</li>
+</ul>
+
+<h3 id="v0-5-038-worlds">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading from here on.</strong> A world made under 0.5.037 or later
+        will load in every later 0.5.x release; only a change of the middle number may break
+        saves, and its note will say so first. See <a href="#saves">the saves promise</a>.</li>
+    <li><strong>A realm backup on first start.</strong> The first start of 0.5.038 saves the
+        world and copies the horse realm&rsquo;s entity files: a one-off hitch, and a few
+        megabytes on disk.</li>
+    <li><strong>Phantom armours become iron horse armour.</strong> If your pack once had a horse
+        armour for a mod that isn&rsquo;t installed (Black Quartz and Chimerite on the server
+        that reported #14), any you own, and any villager trade selling one, now load as iron
+        horse armour. This has not been checked against a real save yet.</li>
+    <li><strong>The generated compatibility pack rebuilds</strong> on first start if your pack
+        lost a phantom armour. That&rsquo;s automatic.</li>
+    <li>Breeds&rsquo; climate changes affect new horses only. Existing horses keep their genes
+        and labels.</li>
+</ul>
+
+<h3 id="v0-5-038-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a>
+        stays open until the live server&rsquo;s logs confirm the chunk loads are gone;
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/12">#12</a> (founder log
+        flags a stable&rsquo;s magic as &ldquo;not on its sheet&rdquo;);
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (stasis bank
+        arrow on the wrong tab). Tuning request
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/15">#15</a> (keep dead
+        horses longer) is not in this release.</li>
+    <li>None of this release has been played in game. The realm backup and restore, the Chaos
+        allele and the armour alias are covered by automated tests only. The list of what is
+        waiting on someone&rsquo;s eyes is on <a href="verification.html">the verification
+        page</a>.</li>
+</ul>
 
 <h2 id="v0-5-037">0.5.037 &mdash; antlers, ram horns, and four new breeds</h2>
 

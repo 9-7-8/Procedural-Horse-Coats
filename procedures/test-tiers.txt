@@ -29,7 +29,9 @@ STEPS
 
    TIER 0 - seconds, every change, no reason needed:
    - `./gradlew :common:classes` (or :neoforge-26.1.2:compileJava): does it compile?
-   - The node checks the change touches (each takes seconds):
+   - The node checks the change touches (each takes seconds). They live in wiki/tools/,
+     except check-recipes, check-block-models, check-duplicate-item-art and
+     check-progress-tasks, which are in neoforge-26.1.2/tools/:
        check-links.mjs                       any wiki prose or anchor
        check-roadmap-execution.mjs           roadmap or gap routing
        check-gene-tabs.mjs                   a natural gene page
@@ -71,6 +73,12 @@ STEPS
    - Never "just to be safe", never to regenerate a golden, never because the change
      "could" move it. Say in the summary which tests a full run would still need to
      check, and why.
+   - The slowest classes, measured on the last full run (the release procedure fills
+     this in). 2026-10-01, for 0.5.039, 21m 1s wall clock: CoatTextureIdTest 314s,
+     RimehartBreedTest 163s, CoatTextureComposerTest 125s, ReproRulesTest 81s,
+     GreenwoodBreedTest 63s, DeadLayerTest 61s, GenotypeCatalogTest 50s,
+     RamHornBreedsTest 45s. Those eight are about two thirds of the run; a change that
+     touches none of them is cheap to prove by name.
    - Its full run has found that checks had drifted from the code, not mod bugs, so
      read a red test as "is the test still describing the code?" before reading it as a
      regression.
@@ -91,8 +99,10 @@ STEPS
    - Run it in the background, logging to a file, and do other work. Never poll it with
      sleep.
    - Read the real exit code from the log. Never trust a piped command's exit code.
-   - Let it finish. If one must be killed, kill the Gradle test JVMs AND delete
-     common/build/test-results/test/ before running anything else. An orphaned worker
+   - Let it finish. If one must be stopped, run `./gradlew --stop` (it takes its test
+     workers with it) AND delete common/build/test-results/test/ before running anything
+     else. Never kill a JVM by hand: a hook refuses it, and a hand-picked kill took the
+     live server down on 2026-10-01. A worker that survives --stop is the owner's call. An orphaned worker
      wedges every later run.
 
 3. Report:

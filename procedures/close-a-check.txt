@@ -1,0 +1,101 @@
+PROCEDURE  : Close a check, or retire a shipped plan
+COMMAND    : /close-a-check
+SAY        : "that works", "confirmed", "close that check", "it's verified", "mark it
+             done", "that shipped", "move it off the roadmap"
+RUNS       : either (cloud can edit and run the node bakes)
+TAKES      : an open Verification-tab check with evidence that answers it, or a
+             Roadmap-tab plan that has shipped
+LEAVES     : the item GONE from its tab, written up on the same page's Coding or
+             Gameplay tab as what became true, and the indexes rebaked
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this when something on a page's Verification tab has been answered:
+- the owner confirmed it in game;
+- a yard pen or clockwork logged its own PASS for that exact question;
+- a unit test or gametest now proves it.
+Use it too when a plan on a Roadmap tab has shipped.
+CLAUDE.md hard rule 9 is the principle (owner, absolute): every open check lives on
+its own page's Verification tab, and every plan on its Roadmap tab. This procedure is
+how an item LEAVES one of those tabs.
+Bugs are not checks. A bug is a GitHub issue, closed on its own proof (fix-bug).
+
+BEFORE YOU START
+----------------
+1. Have the evidence in hand: her words with the date, the PASS log line with its date
+   and run, or the test name.
+2. Make sure the evidence answers THIS item's question, not just a related one. A
+   gene's Verified flag does not answer a pen that tests one question about that gene.
+   Read the pen's own comment block, where the question is written, before deleting it.
+3. INCONCLUSIVE, silent or partial evidence closes nothing. Record it under the item,
+   and leave the item open.
+
+STEPS
+-----
+1. Write what became true on the SAME page's Coding tab, or its Gameplay tab when it is
+   what a player sees:
+   - what is true now;
+   - when, as a date;
+   - on what evidence: her report, the log line, or the test.
+   A gene page's confirmation goes in its Verified block (<h3 id="verified">), which
+   the gene bakes carry over.
+
+2. DELETE the item from the Verification tab. No "Closed" heading, no "Confirmed"
+   note, no strike-through: the tab only ever shrinks. Moved means moved; "marked
+   shipped" is not moved.
+
+3. A plan that shipped: delete it from the Roadmap tab, and write it up on the
+   Gameplay and Coding tabs, growing those tabs if the page lacked them. Never link a
+   plan at roadmap.html#anchor. That page is generated and has no anchors; link the
+   Roadmap tab that holds the plan (page.html#its-anchor).
+
+4. If the tab is now empty, remove the whole tab section, its summary box included.
+   The page leaves verification.html or roadmap.html by itself. If the summary
+   sentence no longer describes what is left, reword it.
+   A removed ROADMAP tab also loses its coverage row in wiki/roadmap-execution.html
+   (the row linking page.html#roadmap): delete it by hand. check-roadmap-execution.mjs
+   compares those rows with the pages roadmap.html lists, so it fails until both the
+   row is gone and bake-roadmap-index has run.
+
+5. Remove what served only this item:
+   - the yard pen that asked this question (DebugTestYard);
+   - the test-kit slot that set it up (hand-over-a-test);
+   - a GitHub issue whose fix this proves: close it with a comment quoting the
+     evidence and naming the fix commit.
+
+6. Fix the links. A deleted item's anchor may be linked from elsewhere: other pages,
+   wiki/known-gaps.html redirects, roadmap-execution.html. Run check-links.mjs and
+   repoint every broken link to where the record now lives.
+
+7. Rebake (rebake, rows i, j and k):
+     node wiki/tools/sync-page-views.mjs           (if a tab was removed)
+     node wiki/tools/bake-verification-index.mjs
+     node wiki/tools/bake-roadmap-index.mjs
+     node wiki/tools/build-search-index.mjs
+     node wiki/tools/check-links.mjs
+     node wiki/tools/bake-agent-text.mjs
+     node wiki/tools/check-roadmap-execution.mjs   (if a Roadmap tab was removed)
+   For a gene page: also :common:bakeUnverifiedGenes, which reads the Verified blocks
+   and feeds the horse dimension's coat column.
+
+8. Commit and push straight away. The owner reads the live wiki.
+
+DONE WHEN
+---------
+The item is gone from its tab, the page's Coding or Gameplay tab says what became true,
+with date and evidence, the indexes are rebaked, check-links is green, and it is pushed.
+
+NEVER
+-----
+- Never leave a "Closed" or "Confirmed" note behind on the Verification tab.
+- Never write anything onto verification.html or roadmap.html; both are generated.
+- Never close a check on evidence that answers a different question.
+- Never close a check on an INCONCLUSIVE or silent pen.
+- Never record a resolved check centrally (known-gaps, the session log, CLAUDE.md)
+  instead of on its own page. The session log may mention it; the page holds it.
+
+SEE ALSO
+--------
+run-tests (closes pens on PASS); fix-bug; rebake; add-a-wiki-page; CLAUDE.md hard
+rule 9.

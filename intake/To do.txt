@@ -1,4 +1,15 @@
 Never delete this file. When everything in it is done or intaken to the road map, just leave this line. 
 
+Decided by the owner on 2026-10-01; each is small, and needs only building:
+- A champagne foal's eye is blue-green, turning to its rolled adult colour on growing up: an adult signal on EyeColorContribution, and the age flag in the coat cache key (wiki/gene-champagne.html#plan-foal-eyes).
+- Decided 2026-10-01 but each needs a few more owner answers before building: cutie marks get a gene/breed-biased item pool (wiki/gene-cutie-mark.html#plan-pool-bias), and the breed format gets all four studbook kinds before any sport horse (wiki/breed-book.html#plan-studbooks).
+- A GENERATED config key table on wiki/config.html (owner, 2026-10-01): a small bake that reads every key from ServerConfig, ClientConfig, BreedSpawningConfig and CartsConfig (key, side, default, range, its comment) and writes the table, each key linked to its feature page. It goes in procedures/rebake.txt as a new row, and add-a-config-option step 9 then says to run it. At least eleven server keys are documented nowhere else today.
+
+Routines to write up as procedures (procedures/FORMAT.txt; then a row in procedures/INDEX.txt, a .claude/skills wrapper and the keyword memory):
+- compat-test: build the synthetic mod and boot with it, to prove the modded-material layer.
+- measure-worldgen: run Structure.generate headlessly with a control, before claiming a worldgen change helped.
+- add-a-wood-family: a per-wood block or item (gates, jumps, carts), written twice (author-time bake and run-time compat). Rare and easy to get wrong: a drift shows as a purple cube and logs nothing. add-an-item step 15 covers the outline today.
+- answer-a-tester: reply on a tester's issue with the release that carries the fix, ask for a retest, and close the issue on their word. Today fix-bug step 2 covers it.
+
 Genes:
 - Make a natural dapple gene. (No explicit dapple gene exists today: Shade is the bay-shade locus, and the nearest are Grey, Sooty and the data gene Scarab Dapple. Balius, in intake/Mythic breeds - gene audit.txt, is a dappled horse and wants one.)
