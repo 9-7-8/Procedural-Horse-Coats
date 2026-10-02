@@ -491,8 +491,9 @@ public final class ServerConfig {
                         "Each one is the whole horse - every attachment, its gear, its bond - kept in",
                         "the world save. Past this size the OLDEST deaths are let go first, only as",
                         "many as it takes to fit. A horse let go can no longer be resurrected; its",
-                        "pedigree record is kept for ever regardless. 0 is no cap.")
-                .defineInRange("ops.resurrect_budget_mb", 100, 0, 100_000);
+                        "pedigree record is kept for ever regardless. 0 is no cap. Server-side.")
+                .defineInRange("ops.resurrect_budget_mb",
+                        com.example.horsegenetics.common.horse.AfterlifeBudget.DEFAULT_BUDGET_MB, 0, 100_000);
         NEARBY_HORSE_CAP = builder
                 .comment("How many other horses may be within 16 blocks of a mare and still let a",
                         "stallion cover her. (default: 50)",
@@ -891,7 +892,7 @@ public final class ServerConfig {
         try {
             mb = RESURRECT_BUDGET_MB.get();
         } catch (IllegalStateException notLoaded) {
-            mb = 100;
+            mb = com.example.horsegenetics.common.horse.AfterlifeBudget.DEFAULT_BUDGET_MB;
         }
         return mb * com.example.horsegenetics.common.horse.AfterlifeBudget.BYTES_PER_MB;
     }

@@ -32,6 +32,9 @@ public final class AfterlifeBudget {
     private AfterlifeBudget() {
     }
 
+    /** {@code ops.resurrect_budget_mb}'s default: about 100 MB, the owner's figure (issue #15). */
+    public static final int DEFAULT_BUDGET_MB = 100;
+
     /** Bytes in one megabyte, as the setting counts them. */
     public static final long BYTES_PER_MB = 1024L * 1024L;
 
