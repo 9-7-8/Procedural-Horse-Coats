@@ -138,11 +138,16 @@ STEPS
    - Run every rebake row the change touched.
    - If the unit turns out bigger than its score, ship the part that stands alone and
      put the rest back in the treatment as its next piece. Do not widen the run.
+   - A plan-only unit (Roadmap lines or a Roadmap-only page) has no test to break. Its
+     hypothesis is that the plan is not written anywhere yet: grep wiki/*.html for its
+     key words (wiki/text/ bakes no Roadmap tab). Grep the code for every fact a plan
+     line states, so the plan does not describe machinery that does not exist.
 
 7. Write it up on the wiki.
    - What shipped goes on the owning page's Gameplay and Coding tabs.
    - What nobody has seen in a game goes on its Verification tab.
-   - What is still planned goes on its Roadmap tab.
+   - What is still planned goes on its Roadmap tab. For a plan-only unit that is the
+     whole write-up: nothing moves to Gameplay or Coding.
    - If the subject has no page, write one.
 
 8. Retire it from intake/.

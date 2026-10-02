@@ -26,6 +26,9 @@ STEPS
    Run `./gradlew :neoforge-26.1.2:build` and `node wiki/gene-creator/tools/check-parity.mjs`.
    If common/ or web/ moved, also run `node wiki/tools/check-designer-boots.mjs`. Do not
    pipe Gradle output to tail: that masks the exit code. Log to a file instead.
+   A session that touched no Java, resource or Gradle file (wiki prose, intake/,
+   procedures/ only) skips the Gradle build, since it cannot move it, and says so in the
+   log. It still runs check-parity.
    Do not push red. If you truly must, say so in the commit message and file a GitHub
    issue for the failure.
 
