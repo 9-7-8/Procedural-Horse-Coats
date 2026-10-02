@@ -1,0 +1,37 @@
+2026-10-01 - fix #11, a stable horse's breed label
+
+    Owner: /whats-next. Picked "fix #11 + #13, then release". fix-bug takes one issue per
+    conversation, so this session fixed #11 alone. #13, then the release, follow in their own
+    sessions.
+
+The survey
+
+    44 commits since v0.5.037, about 900 lines of them shipped code (the Chaos allele at the
+    three mob loci, the breed climate rule). A patch release is due.
+    Open: bugs #10, #11, #12, #13, #14; tuning #15; unlabelled #2 (a tester's screenshot of
+    odd structure generation, 2026-09-10). One PCH export folder, 2026-10-01, not yet
+    reviewed. Four small owner-decided builds in intake/To do.txt.
+
+    #14 (phantom Black Quartz / Chimerite armour): owner chose option 1. A material's
+    armour is generated only when at least one source item is registered. The answer is on
+    the issue and needs-owner is removed. It is now an ordinary bug for fix-bug.
+
+Done
+
+    #11. A generated stable drew the breed twice: StableSpawn.roll drew one and rolled the
+    genome from it, and StablePopulator.spawnHorse drew another for the record, the
+    founder log and withBreed. In a stable listing several breeds (TM U Stable lists
+    thirteen), most horses were labelled with a breed their genes did not come from. Size,
+    the stat curve and lineage followed the wrong label.
+    Fix: roll returns StableSpawn.Rolled(breed, genome), and the populator uses that single
+    draw. Commit 26d8b9cf.
+    Proof: StableSpawnTest.theBreedReturnedIsTheBreedTheGenesCameFrom rolls 400 horses
+    from a nine-breed stable and checks that no disorder gene is missing from the labelled
+    breed's sheet, as BreedFounderLog does. It went red with the label drawn separately,
+    then green. The issue is closed. Horses already spawned keep their label.
+
+    Not run: the full :common:test suite. It would also cover the breed and stat tests that
+    read founder genomes, none of which call StableSpawn.
+
+What the next session picks up first: /fix-bug #13 (horse AI forcing synchronous chunk
+loads on the live server), then /release for 0.5.038.
