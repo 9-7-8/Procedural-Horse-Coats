@@ -133,7 +133,9 @@ public final class HorseRealmTerrain {
         // Always first. A chunk built on the old floor would otherwise get a new
         // portal at the new surface and then have its old one dropped on top of
         // it when the lift caught up - see HorseRealmLift.
-        HorseRealmLift.liftNow(realm, at);
+        if (!HorseRealmLift.liftNow(realm, at)) {
+            return;     // waiting on the realm backup - see HorseRealmLift.liftNow
+        }
 
         MinecraftServer server = realm.getServer();
         if (server == null) {

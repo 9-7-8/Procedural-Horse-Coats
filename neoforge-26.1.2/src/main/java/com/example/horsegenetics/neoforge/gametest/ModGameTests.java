@@ -987,6 +987,69 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>A horse lost after a realm backup comes back from it, as itself.</b>
+     * The whole of {@code RealmBackup} end to end, in whatever level the harness
+     * has (it has no realm; the backup does not ask which level it is): take a
+     * backup, lose a horse <i>without</i> it dying - discarded, which is what
+     * losing its entity data looks like, and the case nothing else in the mod
+     * can undo - then plan the restore and carry it out.
+     *
+     * <p>The plan must call it RAISE: not loaded, no death mark, no record of
+     * leaving, and gone from the level's files. The raise must give back the
+     * same UUID, alive. The plan is cut down to this one horse with
+     * {@code only}, so the other tests' horses are not raised alongside it.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> REALM_BACKUP_RAISES_A_LOST_HORSE =
+            TEST_FUNCTIONS.register("realm_backup_raises_a_lost_horse", () -> ModGameTests::realmBackupRaisesALostHorse);
+
+    private static void realmBackupRaisesALostHorse(GameTestHelper helper) {
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        // Founded on a later tick - see A_DEAD_HORSE_COMES_BACK_WHOLE.
+        helper.runAfterDelay(10L, () -> backUpLoseAndRestore(helper, horse));
+    }
+
+    private static void backUpLoseAndRestore(GameTestHelper helper,
+                                             net.minecraft.world.entity.animal.equine.Horse horse) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        MinecraftServer server = level.getServer();
+        java.util.UUID id = horse.getUUID();
+        String name = com.example.horsegenetics.neoforge.server.HorseRecords.of(horse).displayName();
+        com.example.horsegenetics.neoforge.server.RealmBackup.Plan plan;
+        try {
+            com.example.horsegenetics.neoforge.data.RealmBackups.Backup backup =
+                    com.example.horsegenetics.neoforge.server.RealmBackup.take(server, level, "gametest");
+            horse.discard();
+            plan = com.example.horsegenetics.neoforge.server.RealmBackup
+                    .plan(server, level, backup.name()).only(id);
+        } catch (java.io.IOException e) {
+            throw new GameTestAssertException(Component.literal("the backup could not be taken or read: " + e), 0);
+        }
+        if (!plan.entries().containsKey(id)) {
+            throw new GameTestAssertException(Component.literal(
+                    "the backup does not hold " + name + " - the region files were copied before the "
+                            + "flush reached them, or the reader is not finding horses in them"), 0);
+        }
+        com.example.horsegenetics.common.realm.RealmRestore.Action action = plan.actions().get(id);
+        if (action != com.example.horsegenetics.common.realm.RealmRestore.Action.RAISE) {
+            throw new GameTestAssertException(Component.literal(
+                    "a discarded horse was planned as " + action + ", not RAISE"), 0);
+        }
+        com.example.horsegenetics.neoforge.server.RealmBackup.execute(server, plan);
+        helper.succeedWhen(() -> {
+            net.minecraft.world.entity.Entity back = level.getEntity(id);
+            if (!(back instanceof net.minecraft.world.entity.animal.equine.Horse h) || !h.isAlive()) {
+                throw new GameTestAssertException(Component.literal(name + " has not been raised yet"), 0);
+            }
+            String raisedName = com.example.horsegenetics.neoforge.server.HorseRecords.of(h).displayName();
+            if (!raisedName.equals(name)) {
+                throw new GameTestAssertException(Component.literal(
+                        "the raised horse is called \"" + raisedName + "\", not \"" + name + "\""), 0);
+            }
+        });
+    }
+
+    /**
      * <b>The freedom stick crafts, and is drawable.</b> A feather, a stick and one
      * horse hair. Same three flags as every other recipe here: an item that is
      * craftable but not <i>findable</i> is an item nobody will ever make, and this
@@ -1268,6 +1331,9 @@ public final class ModGameTests {
         register(event, environment, HORSE_REALM_GRID_IS_STABLE, 100);
         // One chunk generated, one lifted; all in one tick.
         register(event, environment, REALM_LIFT_LOADS_NO_NEIGHBOUR, 200);
+        // Ten ticks to be founded, a backup and a plan (two flushing saves), then
+        // a raise on the next server tick.
+        register(event, environment, REALM_BACKUP_RAISES_A_LOST_HORSE, 200);
         // One recipe lookup in a single tick.
         register(event, environment, FREEDOM_STICK_CRAFTS, 100);
         // Spawn, ten ticks to be founded, kill, raise - then read the result.

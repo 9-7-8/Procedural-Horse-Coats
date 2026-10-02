@@ -146,14 +146,25 @@ public final class HorseRealmLift {
      * queue, and directly by {@link HorseRealmTerrain} before it decorates -
      * because a decorated chunk that has not been lifted yet would get a new
      * portal at the new surface and then have the old one dropped on top of it.
+     *
+     * <p><b>Not before the realm is backed up</b> ({@link RealmBackup#ready}). The
+     * lift rewrites terrain horses are standing on, so a world it has not been
+     * backed up for is left exactly as it is, and the chunk waits for its next
+     * load.
+     *
+     * @return {@code false} only when this chunk still needs lifting and could
+     *         not be - the caller must not build on it then
      */
-    public static void liftNow(ServerLevel realm, ChunkPos at) {
+    public static boolean liftNow(ServerLevel realm, ChunkPos at) {
         if (OFFSET == 0 || !realm.hasChunk(at.x(), at.z())) {
-            return;
+            return true;
         }
         LevelChunk chunk = realm.getChunk(at.x(), at.z());
         if (!builtOnTheOldFloor(realm, at)) {
-            return;
+            return true;
+        }
+        if (!RealmBackup.ready(realm.getServer(), RealmBackup.LIFT)) {
+            return false;
         }
         if (!announced) {
             announced = true;
@@ -163,6 +174,7 @@ public final class HorseRealmLift {
                     BUILT_AT_Y, HorseRealm.GROUND_Y);
         }
         lift(realm, chunk, at);
+        return true;
     }
 
     /**
