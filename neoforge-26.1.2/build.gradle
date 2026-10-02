@@ -44,6 +44,11 @@ neoForge {
             if (project.hasProperty('yardSprint')) {
                 systemProperty 'horsegenetics.yardSprint', project.property('yardSprint').toString()
             }
+            // Dev-only photo stage for grown parts (DebugPhotoShootClient): -PphotoShoot saves one
+            // screenshot per DebugPhotoShoot.SHOTS entry to run/screenshots/photo-*.png.
+            if (project.hasProperty('photoShoot')) {
+                systemProperty 'horsegenetics.photoShoot', 'true'
+            }
         }
         server {
             server()
