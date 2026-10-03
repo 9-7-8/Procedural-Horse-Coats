@@ -172,6 +172,9 @@
 <tr><td><strong>Wander</strong></td><td>Roams freely and ignores you: no following, no watching you.</td><td>61</td></tr>
 <tr><td><strong>Hunt monsters</strong></td><td>Holds the spot it was told, and goes for any monster it can see within 16 blocks of it &mdash; never further &mdash; then walks back. <a href="#fighters">Horses bred to fight only.</a></td><td>61</td></tr>
 <tr><td><strong>Defend me</strong></td><td>Follows you, and goes for any monster that comes within 8 blocks of you, then comes back to heel. <a href="#fighters">Horses bred to fight only.</a></td><td>61</td></tr>
+<tr><td><strong>Guard here</strong></td><td>Stands at the spot it was told, like Stay, and kicks any monster that comes within 6 blocks of it, then walks back. <a href="#fighters">Horses bred to fight only.</a></td><td>61</td></tr>
+<tr><td><strong>Graze nearby</strong></td><td>Lives as it likes &mdash; strolls, grazes, eats &mdash; but never further than 12 blocks from where you left it: past that it walks back in, about halfway.</td><td>61</td></tr>
+<tr><td><strong>Go home</strong></td><td>Goes to its stall now, or your <a href="item-tickets.html#holding-pen">holding pen</a> if it has no stall, exactly as <a href="horse-browser.html#send-home">Send home</a> does (and at its price, if the server set one). It leaves no order behind.</td><td>61</td></tr>
 <tr><td><strong>Rejoin herd</strong></td><td>No order: back to its ordinary life.</td><td>none</td></tr>
 </tbody>
 </table>
@@ -185,16 +188,18 @@
         you want it), by Send home, by putting it in a stasis chamber, by selling or giving it away,
         and when it changes dimension.</li>
     <li><strong>Refused</strong> by a horse on a lead, one pulling a cart, or one not bonded enough,
-        and the two combat orders by a horse not bred to fight; the wheel greys an order the aimed
-        horse cannot take and says why.</li>
+        and the three combat orders by a horse not bred to fight; the wheel greys an order the aimed
+        horse cannot take and says why. Go home is also refused, in chat, by a horse with no stall
+        when you have no holding pen, one whose stall has no room, one with a rider, or when you
+        cannot pay the server&rsquo;s price.</li>
     <li><strong>Getting one:</strong> crafted (above), or from an equestrian supplier at level 3 for
         5 emeralds. Giving your first order ticks the &ldquo;Give a horse an order&rdquo; checklist
         task.</li>
 </ul>
 
-<h3 id="fighters">Hunt monsters and Defend me: horses bred to fight</h3>
+<h3 id="fighters">Hunt monsters, Guard here and Defend me: horses bred to fight</h3>
 <p>
-    Only a horse whose genes make it a fighter takes the two combat orders. It has to
+    Only a horse whose genes make it a fighter takes the three combat orders. It has to
     <em>show</em> one of these, not just carry it:
 </p>
 <ul>
@@ -216,13 +221,12 @@
         the radius, or drags the horse that far, is let go.</li>
     <li><strong>Riding pauses it</strong>, like every order: a defender does not leave you mid-ride.</li>
     <li><strong>Server owners</strong> can change the reach and the break-off: <code>orders.hunt_radius</code>
-        (16, from 8 to 32), <code>orders.defend_radius</code> (8, from 4 to 16) and
+        (16, from 8 to 32), <code>orders.guard_radius</code> (6, from 3 to 16),
+        <code>orders.defend_radius</code> (8, from 4 to 16) and
         <code>orders.break_off_health</code> (0.3; 0 means fight to the death), in
-        <code>phc/server.toml</code>.</li>
+        <code>phc/server.toml</code>. Graze nearby&rsquo;s reach is <code>orders.graze_radius</code>
+        (12, from 4 to 32).</li>
 </ul>
-<p>
-    More orders are planned: Graze nearby, Guard here and Go home.
-</p>
 
 <h2 id="ender">The ender whistle</h2>
 
@@ -707,6 +711,60 @@
         because a founding afterwards rolls a new genome.</li>
 </ul>
 
+<h3 id="places-code">Graze nearby, Guard here and Go home (Piece 2, 2026-10-03)</h3>
+<p>
+    The last three orders of the treatment, appended to <code>HorseOrder</code> (so saves keep
+    loading: an order is saved by name, and nothing new is saved). All three are bond tier 2, by the
+    owner&rsquo;s call. Two new questions on the enum say what a goal needs to know:
+    <code>stands()</code> (Stay, Hunt monsters, Guard here &mdash; held still at the anchor) and
+    <code>oneShot()</code> (Go home &mdash; carried out at once, never stored).
+</p>
+<ul>
+    <li><strong>Guard here</strong> is <code>anchored()</code> and <code>combat()</code>: Hunt
+        monsters with a short reach. It needed no goal of its own. <code>OrderStayGoal</code> now
+        runs for any order that <code>stands()</code> (it was any <code>anchored()</code> one, which
+        would have pinned a grazing horse), <code>OrderCombatGoal</code> centres it on its anchor, and
+        <code>ServerConfig.orderLeash</code> gives it <code>orders.guard_radius</code> (6, 3&ndash;16).
+        The fighting gate, the creeper tag and the break-off come free. The treatment recommended
+        &ldquo;never chases beyond 8&rdquo;; the shipped leash lets a fight drift the usual
+        <code>LEASH_SLACK_BLOCKS</code> (4) past the radius, so 10 at the default &mdash; one rule
+        for every combat order rather than a second slack for this one.</li>
+    <li><strong>Graze nearby</strong> is <code>anchored()</code> but does not <code>stands()</code>.
+        <code>server/OrderGrazeGoal</code>, MOVE at priority 4 beside the other order goals, starts
+        only once the horse is past <code>orders.graze_radius</code> (12, 4&ndash;32) of its anchor,
+        and walks it back until it is within half of that (<code>HorseOrders.Tether</code>,
+        <code>TETHER_RETURN_SHARE</code>), so a horse at the edge is not turned back every step.
+        Inside, it holds nothing, so vanilla&rsquo;s stroll and the herd goals run as usual, while
+        <code>BondFollowGoal</code> stands down as under any order. Not vanilla&rsquo;s
+        <code>setHomeTo</code>, for the reason in <a href="#combat-code">Piece 3</a>: a lead sets it.</li>
+    <li><strong>Go home</strong> is <code>StallRecall.goHome</code>: the Send home trip, not a second
+        one. <code>StallRecall.send</code> (the browser button) and <code>goHome</code> now share
+        <code>travel()</code> &mdash; rider, home, its world, price, live landing spot, then
+        <code>TicketHandler.arrive</code>, after clearing the order. So it goes to the stall, or the
+        holding pen without one, as the button does; the treatment&rsquo;s &ldquo;refuses with has no
+        stall&rdquo; became &ldquo;no stall, and you have no holding pen&rdquo; to match. It pays the
+        server&rsquo;s price per horse but skips the button&rsquo;s cooldown, which exists to stop a
+        mashed button pulling far chunks in; the whistle only reaches loaded horses beside you. Its
+        refusals are four new <code>Refusal</code> values only the server gives (the client does not
+        know the stalls, so the wheel never greys Go home for them). <code>HorseOrdering.current</code>
+        drops a stored one-shot, which only a hand-edited save could hold.</li>
+    <li><strong>The wheel</strong> has nine slices, clockwise from the top: Stay, Guard here, Hunt
+        monsters, Defend me, Follow, Wander, Graze nearby, Go home, Rejoin herd &mdash; kin beside
+        kin. Nine 78-wide labels overlap on any circle that fits a GUI-scale-4 1080p screen, so the
+        ring is now an ellipse (118 by 86), and the cursor is squashed by the same ratio before
+        <code>CommandWheel.sliceAt</code>, which puts every label inside its own slice (checked by
+        script for all nine).</li>
+    <li><strong>Tests</strong>: <code>HorseOrdersTest</code> (the tier-2 calls, the one-shot, the
+        anchored and standing sets, the tether&rsquo;s two edges with its clamp, the radii inside
+        their bounds, Go home&rsquo;s summary); moving the tether&rsquo;s return share to 0.6 turns it
+        red. Gametests: <code>order_guard_holds_its_reach</code> &mdash; a guardian on Guard here
+        ignores a husk eight blocks off for three scans, then picks one four off, never the creeper;
+        given the hunt radius by mistake, it went for the far husk.
+        <code>order_graze_tether</code> &mdash; a horse anchored where it stands never runs the
+        graze goal, one whose spot is past the radius does. Go home needs a real
+        <code>ServerPlayer</code> and a stall, so it is a play check.</li>
+</ul>
+
 <h2 id="ender-gaps">Known gaps</h2>
 
 <ul>
@@ -727,7 +785,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ender whistles have never been blown, and the <strong>far call is the one that fails invisibly</strong> &mdash; a wrong portal ticket or entity-section wait simply answers nothing across an unloaded chunk; and the three pieces that shipped on 2026-09-29 are navigation, goal arbitration and a keybind, none of which a test can judge, with the walk-in&rsquo;s worst failure being a horse left standing behind a fence; nor has anyone yet opened the command whistle&rsquo;s wheel or watched an ordered horse fight.</p>
+    <p>Ender whistles have never been blown, and the <strong>far call is the one that fails invisibly</strong> &mdash; a wrong portal ticket or entity-section wait simply answers nothing across an unloaded chunk; and the three pieces that shipped on 2026-09-29 are navigation, goal arbitration and a keybind, none of which a test can judge, with the walk-in&rsquo;s worst failure being a horse left standing behind a fence; nor has anyone yet opened the command whistle&rsquo;s wheel, watched an ordered horse fight or graze on its tether, or sent one home with it.</p>
 </div>
 
 <h3 id="command-verify">The command whistle (2026-10-03, NOT played)</h3>
@@ -756,8 +814,8 @@
 <p>The gate and the pick are gametested; the fight, the leash and the walk home are not. At night,
     with a guardian or an <code>Adh</code>/<code>Adh</code> horse at bond 61 or more:</p>
 <ol>
-    <li>The wheel has six slices that do not overlap, and &ldquo;Hunt monsters&rdquo; fits its
-        box.</li>
+    <li>The wheel has nine slices that do not overlap, every label fits its box, and the slice
+        that lights up is the one under the cursor all the way round.</li>
     <li>On a plain horse at bond 90, Hunt monsters and Defend me are grey and say &ldquo;Needs a horse
         bred to fight&rdquo;; releasing on one does nothing.</li>
     <li>Hunt monsters in a field: it goes for a zombie that comes within 16 blocks of its spot,
@@ -768,6 +826,23 @@
         to heel. Mount it: it stops defending while ridden and carries on when you get off.</li>
     <li>On a server, set <code>orders.hunt_radius</code> to 8 in <code>phc/server.toml</code> while
         it runs: a hunter now ignores a zombie 12 blocks from its spot.</li>
+</ol>
+
+<h3 id="places-verify">Graze nearby, Guard here and Go home (2026-10-03, NOT played)</h3>
+<p>The guard&rsquo;s pick and the graze tether&rsquo;s trigger are gametested; the walking and Go home
+    are not. With a horse at bond 61 or more:</p>
+<ol>
+    <li>Graze nearby in an open field: over a few minutes it strolls and grazes but stays within
+        about 12 blocks of where you told it. Lead it 20 blocks off and let go: it walks back in.</li>
+    <li>Graze nearby, then walk away: it does not follow you.</li>
+    <li>Go home on a horse with a stall: it is in its stall, and its order (H screen) is Rejoin herd.
+        Without a stall but with a holding pen: it is in the pen. With neither: chat says it has no
+        stall and you have no holding pen, and it stays.</li>
+    <li>Sneak and hold, then Go home among three horses with stalls: all three go, and the
+        summary says so. On a server with a Send home price, each horse costs the price.</li>
+    <li>Guard here with a guardian at night: it kicks a zombie that walks within 6 blocks of its
+        spot and walks back; it ignores one passing at 10. A plain horse&rsquo;s Guard here slice is
+        grey.</li>
 </ol>
 
 <h3 id="walking-verify">Walking a near horse in (2026-09-29, NOT played)</h3>
