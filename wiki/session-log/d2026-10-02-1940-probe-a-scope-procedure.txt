@@ -1,0 +1,75 @@
+2026-10-02 19:40 - Mythic to-do list and the probe-a-scope procedure (time is the END of the session)
+
+Cloud session, intake and procedures only: no game code, no wiki page, no asset changed. The
+session's earlier work (rider comfort, runtime registry genes, exits, realm breeding pause, stasis
+bank, climate spec, head/body/tusk/feathering treatments, the mythic breed audit and its biomes) is
+in d2026-10-02-1840-intake-treatments-and-mythic-audit.txt. This file covers what came after it.
+
+ASKED
+-----
+- "What are all the genes for the new supernatural breeds that I still need to scope? Add scoping
+  all of these to the todo list" -> every unscoped feature from intake/Mythic breeds - gene
+  audit.txt was added to intake/To do.txt as one section, priority order, one treatment each.
+- "create a procedure for probing unverified areas of a new scope, register it as a slash command,
+  and then run it. It should look for any potential issues, vague points, or decisions, and should
+  always ask at least 3 questions using the question tool" -> procedures/probe-a-scope.txt, its
+  INDEX row and wrapper written, then run.
+- "This procedure ONLY applies to the treatment we're currently in the process of creating" ->
+  the procedure was rewritten so it covers only the ONE treatment in progress and asks which if
+  unclear.
+- "You're still asking me about stuff outside of the lion tail, which is the treatment we're
+  currently developing" -> the first run had picked the Feathering treatment; that question round
+  was rejected and discarded, and the run was redone on the lion tail treatment.
+- /end-session.
+
+DONE
+----
+- 2aa91f69: the To do section "Mythic breeds - features still to SCOPE" in intake/To do.txt.
+- 0dbf26bd: procedures/probe-a-scope.txt, procedures/INDEX.txt row, .claude/skills/probe-a-scope/
+  SKILL.md; probe results written into intake/Tufted lion tail - implementation treatment.txt.
+  Proof: read-only checks in the code (HdHorseModel does not override setupAnim; no "Lt" allele
+  token found under common/); no tests apply (text only).
+
+DECIDED
+-------
+All on intake/Tufted lion tail - implementation treatment.txt, section "Probe results":
+- Hide the vanilla tail through new setupAnim overrides on HdHorseModel and HdBabyHorseModel (owner).
+- Default tail longer and much thinner than the vanilla one, about 18-20 long and 1-1.5 wide, final
+  numbers by eye in the yard (owner).
+- The lion tail fades with RiderFade like the other parts (owner).
+- Later tail genes are separate genes and ALL DRAW; the vanilla tail hides if any carried tail gene
+  says so, as one OR-ed rule in common/ (owner).
+- probe-a-scope covers one treatment only (owner).
+
+FOUND ON THE WAY
+----------------
+- Mistake: ran the probe on the wrong treatment (Feathering) and asked its questions first.
+  Discarded; no answers were recorded there. The procedure now says to ask which treatment when
+  more than one was edited, and never to sweep others.
+- Feathering's UNVERIFIED "is the coat's NativeImage readable" is partly answered by reading
+  GeneticCoatTextureFactory.registerCoat: it builds the image from an argb[] it holds at bake time,
+  so a four-int leg-colour record can be taken there. Not written into the Feathering file (the
+  owner had asked to stay on the lion tail). Both files share this unknown; settle it once.
+- No bugs filed this part of the session (issue 15 from earlier is still open).
+
+PROCEDURES
+----------
+- Written: probe-a-scope (INDEX row and /probe-a-scope wrapper). No SAY-keyword memory file exists
+  in a cloud session, so the keywords are only in the procedure and INDEX.
+- Others: none needed; the three review questions were asked.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No build, no tests (docs-only; a full :common:test run would still check everything in common/,
+  which nothing touched). Nothing was seen in game.
+- Verification-tab anchors added: none. The new tail hide, offsets and rider fade are still on the
+  treatment as UNVERIFIED until built.
+
+RELEASE
+-------
+Not offered: no code shipped.
+
+PICK UP FIRST
+-------------
+Scope the first mythic feature, Wings, with /write-intake-document (then /probe-a-scope on it);
+the lion tail treatment is ready for /process-intake.

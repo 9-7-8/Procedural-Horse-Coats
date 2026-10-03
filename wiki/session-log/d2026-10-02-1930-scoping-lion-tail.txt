@@ -1,0 +1,46 @@
+2026-10-02 19:30 - Scoped the tufted lion tail (intake only; time is approximate, the session end)
+
+ASKED
+- "Help me scope out a tufted lion tail attachment. Making the pixels on the horse skin where the tail
+  is transparent should hide their original tail". Came of it: intake/Tufted lion tail - implementation
+  treatment.txt, via procedures/write-intake-document.txt. The owner then chose to hide the model
+  part rather than use alpha-0 pixels (see DECIDED).
+
+DONE
+- Read procedures/write-intake-document.txt, wiki/text/philosophy.txt and decisions.txt, the Attached
+  model parts, Body parts and Feathering treatments, and (through an Explore agent) the grown-parts code.
+- Wrote the treatment: three pieces (adult rigid tail, foal tail, optional whipping chain), UNVERIFIED
+  list, implications sweep. Added its block to intake/Sizing.txt.
+- No code, wiki page or asset was touched. No commit hash is quoted here: it is the commit holding this file.
+
+DECIDED
+- Source: a magical gene (owner). Alleles: dominant tuft + wild type (owner).
+- Hide the vanilla tail by hiding the model part in the layer, NOT alpha-0 coat pixels (owner; her
+  first idea was alpha-0, she chose otherwise when shown that nothing in the code does it on purpose).
+- Rigid thin tail + tuft first (owner). Adults and foals (owner). Colour sampled from the tail/mane hair
+  patch (owner). The rescuing braid stays on the hidden vanilla tail and is drawn nowhere (owner).
+- Release: each piece counts, saves keep loading (owner).
+- Recommended, not asked: the hide is gated by the existing parts.* switches and distance; the optional
+  chain is a later piece. Recorded in the treatment only.
+
+FOUND ON THE WAY
+- BraidLayer and EmissiveCoatLayer submit the whole shared model through masks, so hiding the tail part also
+  hides their tail pixels, and the model is shared between horses, so the flag must be set every frame
+  (UNVERIFIED 2 in the treatment).
+- intake/Body parts treatment says tails are "left for later"; this treatment is that later work and shares
+  the first non-head anchor with it.
+- The procedure says push to main; this cloud session was told to use branch claude/beautiful-ptolemy-3a5k63.
+
+PROCEDURES
+- None changed.
+
+NOT RUN / NOT CHECKED
+- Nothing was built or run. Every UNVERIFIED line in the treatment is open. No Verification-tab anchors added.
+  No tests run (an intake-only change); a full :common:test would still check nothing new.
+
+RELEASE
+- Not offered: no player-facing work shipped this session.
+
+PICK UP FIRST
+- Build piece 1 of intake/Tufted lion tail - implementation treatment.txt with procedures/process-intake.txt;
+  start with UNVERIFIED 2 (does ModelPart.visible = false on "tail" hide it in every layer) as a one-horse spike.

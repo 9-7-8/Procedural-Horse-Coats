@@ -1,0 +1,46 @@
+2026-10-02 19:50 - Single tail gene scoped (intake only; time is approximate, the session end)
+
+ASKED
+- "on another one of the tails, but I want to overturn a decision in lion tail: we need to create a
+  single tail gene, which wildtype means a horse tail, and every new tail gene we add comes with its own
+  priority, and each is strictly dominant over the lower prio ones, and it only ever shows one tail".
+  Came of it: intake/Tail gene - implementation treatment.txt (new) and a trimmed
+  intake/Tufted lion tail - implementation treatment.txt, via procedures/write-intake-document.txt.
+
+DONE
+- Read the procedure, the lion tail treatment, the antler form / ram horn form gene pages and their
+  dominance-series code (AntlerFormGene's separate dominance list), intake/Sizing.txt.
+- Asked two rounds of questions (see DECIDED), wrote the Tail gene treatment (one piece: the locus, the
+  hide rule, TAIL_BASE, the lion allele; plus the "Adding a tail" convention), revised the lion tail
+  treatment (it is now the Lt allele's shape, tuft, foal and optional whip; the "separate genes, all
+  draw" call and its OR-ed hide rule are withdrawn), updated intake/Sizing.txt (new block, lion block
+  re-sized).
+- No code, wiki or asset was touched. Proof: greps of the named classes (AntlerFormGene, RamHornFormGene,
+  GrownParts, TailColorGene, the 230-240 priority run) before writing.
+
+DECIDED
+- (owner) A new Tail gene treatment plus a trimmed lion tail file; the Tail gene file builds locus + lion allele.
+- (owner) One locus horsegenetics.tail, wild n = horse tail, Lt = lion; each tail allele has its own rank;
+  any rank by explicit rank in a dominance list kept apart from the append-only declaration order.
+- (owner) Only the dominant copy's epigenome numbers are drawn; one tail ever shown; the vanilla tail is
+  hidden iff the winner is not wild.
+- (owner) Rare, hand-seeded founders; every other lion tail call stands; release: each piece counts, no
+  compat bump.
+- Recorded in the two treatments only (no page exists yet).
+
+FOUND ON THE WAY
+- Nothing was built from the withdrawn OR-ed hide rule, so nothing in code needs undoing. Priority slot 241
+  and the token Lt are still UNVERIFIED.
+
+PROCEDURES
+- None.
+
+NOT RUN / NOT CHECKED
+- No tests: nothing built. All UNVERIFIED lines in both treatments stand.
+
+RELEASE
+- Not offered: nothing shipped.
+
+PICK UP FIRST
+- Build "Tail gene - implementation treatment.txt" piece 1 with procedures/process-intake.txt (check the
+  UNVERIFIED hair sampler and hide semantics first).

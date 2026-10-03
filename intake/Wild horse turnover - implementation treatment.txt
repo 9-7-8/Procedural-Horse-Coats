@@ -1,0 +1,347 @@
+Wild horse turnover - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines
+are the scoping session's, not asked; "Open" lines are still to be settled, by
+whom is said on the line; "UNVERIFIED" lines are facts this file has not proved
+and the building session must check first. Source of truth for what exists is
+wiki/breeds.html (spawning, herds, world settings), wiki/horse-care.html (the slow
+scan), wiki/horse-realm.html (what the realm takes in) and wiki/config.html. This file
+is retired (deleted, per /process-intake step 8) when the piece ships and moves onto
+those pages' Gameplay and Coding tabs.
+Release: patch, one piece (saves keep loading; no compat bump).
+
+1. The request, as given
+========================
+"I want to overhaul how horses spawn: they should spawn like normal, but then once a
+wild, untamed horse has been around for 3 days in game, it despawns. Also, every
+morning, the game rolls to spawn horses in a biome if there are less than 5 horses in
+that biome. The goal here is to have a lot of change between the kind of horses you
+find in the wild, to make it worth exploring or revisiting areas. Additionally, there
+needs to be an idempotent way to spawn horses back in, for when a player adds new
+biomes and then walks them before they add them to the breed spawning list. This
+should run as players move, and might be degenerate to the aforementioned 're roll
+every morning'. It should only roll nearby active players, not the whole world."
+And, mid-scoping: "It can spawn in more than 5 horses at a time, that's just the bare
+minimum per cell."
+
+How it is read (all confirmed by her answers below):
+- Natural spawning stays exactly as it is. This adds a LIFETIME to wild horses and a
+  TOP-UP that refills thin ground.
+- "In that biome" is made concrete as a fixed CELL of 8x8 chunks (128x128 blocks),
+  because a biome is unbounded and only the chunks near players are loaded. A cell is
+  under-populated when it holds fewer than 5 wild, untamed horses. 5 is a trigger, not
+  a ceiling: one roll spawns a whole herd and may leave the cell well above 5.
+- The morning roll and the walking sweep are ONE top-up with two triggers. Each cell
+  stores a stamp (day + ecology signature); the morning is simply "every stamp is now
+  a day old", and a changed breed/biome setting changes the signature so newly listed
+  biomes refill once on the next walk and are then a no-op until the morning.
+- Only cells in loaded chunks near an active player are ever visited.
+
+2. In scope, and what is not
+============================
+In scope:
+- A spawn-time stamp on every wild horse; a 3-day lifetime read off game time.
+- At day 3, an untamed horse a player has TOUCHED is sent to the horse realm and
+  released there; an untouched one is removed. Both wait while a player is within 32
+  blocks. Tamed horses never leave.
+- The top-up (cell ledger, ecology signature, morning and walking triggers, placement).
+- Server config for all of it (section 4, Piece 1).
+Not in scope (re-askable):
+- Any change to breed files, weights, biomes, the spawn_time rule or the founder draw.
+- The realm's own "daily realm horse" (a separate treatment; it shares no code).
+- A per-horse despawn effect (smoke, a message to the player). Silent, unseen removal.
+- Despawning or topping up non-horse mobs. Tamed-horse and Cowboy stock are untouched.
+- A UI for the cell ledger. The debug log (DebugAnnounce) is the only readout.
+
+3. What already exists, so the building session does not redo it
+================================================================
+- BreedSpawnHandler (server/): FinalizeSpawnEvent for NATURAL / CHUNK_GENERATION /
+  SPAWNER; cancels the horse when Breeds.anythingMaySpawn(biome, dark) is false and
+  tags it with WILD_SPAWN_KEY ("horsegenetics:wild_spawn") in its persistent data.
+  Anything the top-up spawns with reason NATURAL goes through this for free
+  (UNVERIFIED: that spawning with NATURAL from server code fires FinalizeSpawnEvent).
+- HorseFoundingTickHandler (server/): founds a wild horse's record, coat, breed and
+  herd from the ENTITY TICK, never from the join event or server.execute (a chunk
+  ticket crash is the reason, see its class note). A top-up spawn must not call
+  HerdManager.assignFounder itself; it spawns horses and lets this run.
+- HerdManager.assignFounder / pickWildBreed(biome, rng, dark) (server/): founds a
+  herd by connected clump, seeded by the lowest-UUID member; breed from
+  Breeds.wildCandidates(biomeId, dark) plus Feral Mixed at its configured weight;
+  discards a pack that has nothing to be. This is "the founder path" the top-up uses.
+  HERD_RADIUS = 32.0, so a top-up pack must spawn within one clump or it founds
+  several herds.
+- BreedHerdsBiomeModifier / ModBiomeModifiers (world/): the natural CREATURE spawn
+  entry (weight + min/max count) added for every listed biome and every biome a WILD
+  breed names; its pack count (min_count..max_count, breed_min/max_count) is the
+  pack size the top-up should mimic. HorseSpawnGround (world/) widens the placement
+  rule (RegisterSpawnPlacementsEvent, Operation.OR) so breeds on sand or Nether floors
+  can spawn; the top-up must use the same placement rule, not a second one.
+- Breeds (common/breed/): spawnSettings(), wildCandidates, anythingMaySpawn,
+  forBiome(id, BreedSource), wildFloors, wildGroundAllows. BreedSpawnSettings (common/)
+  is the world's override of the shipped breeds (phc/breed-spawning.toml via
+  neoforge BreedSpawningConfig); breeds are read at startup (ModBreedSpecs.load) so
+  a biome list only changes across a restart. THAT is why the ecology signature
+  can be computed once per server start.
+- HorseCareAttachment (data/): herd, herdBreed, herdBand, inWildHerd(). The right
+  home for nothing new: the stamp should NOT live here (it is a per-horse spawn
+  record, not care). See Piece 1 for where it goes.
+- HorseCareHandler (server/): the shared slow scan, (tickCount + id) % SCAN_INTERVAL
+  (30). The despawn check belongs on a scan like this, not a new per-tick hook.
+- HorseRelease.makeWild(level, horse, player) (server/): the single "horse stops
+  being owned" routine (untamed, unowned, healed, persistent, WILD_SPAWN_KEY set). The
+  realm hand-off reuses it. TicketHandler.arrive(...) / HorseLeads.untieFor are the
+  precedent for moving a horse between levels with teleportTo(level, ...).
+  HorseRealmRules marks arriving horses persistent and keeps them inside the field.
+- HorseRealmCensus + HorseRealmSize.growToFit(): every horse standing in the realm
+  enlarges the field. Each touched horse sent here grows the realm. It is intended;
+  say it on the page.
+- ServerConfig (neoforge/): the declared-key config with safe try/catch accessors
+  (REALM_BREEDING_RATE, REALM_RELEASE_EMERALDS are the shape to copy). Procedure:
+  procedures/add-a-config-option.txt.
+- StallData (data/) is a SavedData with a SavedDataType: the shape for the cell ledger.
+- Anything that LOOKS built but is not: there is NO despawn of any wild horse today
+  (vanilla Animal does not despawn; every horse path also calls setPersistenceRequired
+  - HorseEggSpawner, CowboySale, HorseRelease, StablePopulator, HorseStasisHandler,
+  ModNetworking). No cell, region or "wild horse count" exists; no per-horse spawn
+  time exists (SocialAttachment.bornTick is BIRTH for the social system, not a wild
+  spawn stamp; do not reuse it). "Idempotent respawn" has no precedent in the code.
+- Day detection: 26.1.2 replaced getDayTime() with ServerClockManager (DebugWorldWatch,
+  DebugTestWorldHandler). Do NOT write `dayTime % 24000`. isBrightOutside() /
+  isDarkOutside() and level.getGameTime() are the safe reads. See Piece 1.
+
+Closest precedent: the "daily realm horse" treatment (a morning TRANSITION and a spawn
+that avoids BreedSpawnHandler's gate). This one is not a transition at all: the stamp
+makes "a day has passed" a comparison, so it needs no persisted bright/dark state.
+
+4. The pieces
+=============
+
+Piece 1 - Wild horses turn over: they leave after 3 days, and thin ground refills
+---------------------------------------------------------------------------------
+What the player sees: a wild horse they leave alone is gone after three days; one they
+leashed, named, fed, saddled or rode but never tamed turns up in the horse realm
+instead. Come back to a place after a few days and the herds in it are different.
+Walk into a biome whose breeds were only just added and herds appear.
+
+Why one piece: removing horses without refilling them thins the wild, and refilling
+without removing grows it. They only make sense together, and the stamp and the cell
+ledger share a config and a tick.
+
+Decided (asked):
+- Exemptions: a TAMED horse never leaves. An untamed horse that is TOUCHED goes to the
+  realm instead of vanishing. "Touched" = ever leashed, wearing any saddle/armour/gear,
+  given a name, fed by a player (food item), or ridden by a player (temper > 0). It is
+  a one-way flag on the horse, so it holds after the player walks away.
+- A horse (touched or not) waits while any player is within 32 blocks; it never goes
+  in front of anyone.
+- Clock: a game-time stamp set at spawn. Day 3 is judged from game time, so it counts
+  while the chunk was unloaded; the horse is removed or moved the first time it is
+  loaded, aged 3+ days and unwatched. A whole herd goes together, keyed to the HERD
+  LEAD's stamp (HorseCareAttachment.herd() names the lead), not each member's.
+- Cells: 8x8 chunks; a cell's biome is read at its centre column. Under 5 wild,
+  untamed horses in the cell triggers a roll.
+- The roll spawns a herd via the founder path (a natural-sized pack, HerdManager does
+  breed, band, sex and magical-herd chance). The cap is a trigger, not a ceiling.
+- One top-up, two triggers. Cell stamp = day + ecology signature. Guaranteed (not
+  chance-based) for a cell that is under 5 and has a valid spot; if no spot is valid
+  the stamp is still written so it is not retried every pass.
+- Placement: near a player, out of sight, using the horse spawn placement rule (so
+  HorseSpawnGround floors work), a few tries, no chunk loads.
+- Dimensions: every dimension that has horse breeds defined as spawning in it (the
+  realm and the debug corridor have none, and are excluded explicitly regardless).
+- Old wild horses: a horse with no stamp is stamped the first time it loads and gets a
+  fresh 3 days. Horses already in the realm are never stamped.
+- Config (server): despawn days (default 3; 0 turns the lifetime AND the realm
+  hand-off off), top-up minimum (default 5; 0 turns the top-up off), cell size and the
+  player radius, and a realm hand-off on/off.
+
+Recommended (not asked, building session may adjust with a reason):
+- Stamp storage: a small attachment or the entity's persistent data beside
+  WILD_SPAWN_KEY, e.g. "horsegenetics:wild_born" (long game time) and
+  "horsegenetics:touched" (boolean). Persistent data survives unloads and needs no new
+  codec or sync. A horse founded later by a path that is not a natural spawn gets no
+  stamp (it is not wild-spawned), so it never turns over.
+- A horse's stamp is cleared when it is tamed or released into the realm (the realm
+  never expires anything), and a horse HorseRelease.makeWild()s elsewhere is NOT
+  stamped (it is meant to stay).
+- Despawn check: on the slow scan, only for horses that carry the stamp, so the cost
+  is a long compare per stamped horse per 30 ticks and nothing for the rest.
+- Realm hand-off: reuse HorseRelease.makeWild(realmLevel, horse, null) and the
+  TicketHandler.arrive-style teleport to HorseRealm.arrivalSpot(); no fee, no stall
+  binding to clear (an untamed horse has none), no message. The horse keeps its
+  record, genome, name and breed (the realm is a commons).
+- Morning trigger: not a transition. Cell stamps hold a game DAY number
+  (level.getGameTime() / 24000L, the shape HorseCareHandler already uses at its day
+  stamp), so "a new day" is stamp != today. The player-walk trigger is the same call
+  from a slow tick over cells in range of each player.
+- Cell ledger: a SavedData per level (like StallData) mapping cell key (a long of cell
+  x/z) to (day, signature). Bound it: drop a cell when no player has been within the
+  radius for N days, or cap entries and evict oldest. Missing = never rolled.
+- Visit budget: a few cells per slow tick (rotating), so a server with many players
+  does a bounded amount of work per tick.
+- Do not count horses that are tamed, owned, in a stall, leashed, or in the realm; the
+  count is "untamed horses with the wild stamp in loaded chunks of the cell".
+- Signature: a hash of what decides where a horse may spawn: each wild breed's id +
+  biomes + spawn weight + spawn_time + spawnGround, plus Feral Mixed's settings,
+  plus the config cell size and minimum. Computed once per server start.
+- Spawn reason: EntitySpawnReason.NATURAL, so BreedSpawnHandler tags and gates it.
+  Pack size: the modifier's min_count..max_count for the biome (the same numbers a
+  natural spawn uses), with the first horse placed and the rest within a few blocks so
+  freshClump sees one clump.
+
+Open (building session settles; none needs the owner):
+- Exact "visible to a player" test and the minimum spawn distance (24 blocks is the
+  starting point). Settle by reading how vanilla NaturalSpawner picks distance.
+- What the realm hand-off does when the realm level is not loaded or its arrival spot
+  is blocked: fall back to leaving the horse for one more scan (never discard a touched
+  horse because the hand-off failed).
+- Whether a horse that is being ridden or leashed by a player 32+ blocks away (but in
+  the loaded area) is counted as "touched" already (yes, by the flag) - confirm the
+  flag is set on the event rather than polled.
+
+Where the code lives:
+- common/: the rules a test can pin: a WildLifetime (is it day 3 yet; given stamp,
+  now, days, return STAY / GO), a TopUpPlan (cell key from x/z, cell size; under-cap
+  test; the signature computed from the breeds + settings; "is this stamp current";
+  pack size pick), and the wording of the debug lines. No Minecraft types.
+- neoforge/: the stamp and touched flags (events: leash, equip, naming, feeding,
+  riding/temper), the slow-scan despawn and realm hand-off, the cell SavedData, the
+  per-player visit tick, spawn placement and the actual EntityType.spawn, ServerConfig
+  keys and the debug readout.
+
+Data and saves:
+- New per-horse persistent data (stamp, touched flag) and one new per-level SavedData
+  (the cell ledger). Nothing existing changes shape. A world without them loads as
+  "no stamps, empty ledger": every existing wild horse is stamped on first load
+  (fresh 3 days) and every cell rolls once on its first visit. Removing the mod
+  leaves harmless NBT. No registry ids, allele order or genotype codes change.
+- The ledger is bounded (see Recommended). Persistent data is on the horse only.
+
+Sync: none. All server side; the client sees ordinary horses spawn and disappear.
+Config (all server):
+- wild.despawn_days: default 3, 0 to 30; 0 = lifetime and realm hand-off both off.
+- wild.topup_minimum: default 5, 0 to 64; 0 = no top-up.
+- wild.topup_cell_chunks: default 8, 2 to 32 (cell edge in chunks).
+- wild.topup_player_radius: default 96 blocks, 32 to 256 (how far from a player a cell
+  counts as nearby).
+- wild.realm_handoff: default true; false = a touched horse just vanishes like the rest.
+A bad value falls back to its default and never crashes a world load (copy the
+accessor shape of REALM_BREEDING_RATE). The config page (wiki/config.html) lists all.
+
+Tests:
+- common: WildLifetimeTest (before/after day 3, days = 0 disables, a stamp in the
+  future from clock rewind stays), TopUpPlanTest (cell key at negative coordinates,
+  under/over the minimum, signature changes when a breed's biomes change and does not
+  change when only an unrelated breed's description does, a stamp from yesterday is
+  stale and today's is not, idempotence: running the plan twice in one day yields one
+  roll), and CommonPortabilityTest stays green.
+- gametest (ModGameTests): an unstamped horse is stamped on load; a stamped horse past
+  day 3 with no player near is removed; with a player within 32 it stays; a touched
+  one ends up in the realm level, persistent and unowned; a tamed one is untouched;
+  a cell under 5 gets a herd, the second pass the same day gets none.
+Play checks (become the Verification tabs):
+- Fresh world: leave a herd alone for three days (sleep or /time add); it is gone and
+  a different herd stands nearby the next morning.
+- Lead a wild horse, feed it, name it, ride it: each makes it "touched"; after day 3
+  it is in the realm, still wild, same name and coat.
+- Add a biome to a breed in phc/breed-spawning.toml, restart, walk into it: a herd
+  appears once; walking out and back the same day adds none.
+- Two players in different places: only the cells near each are rolled; a far cell is
+  untouched.
+- A tame horse left in a field for a week is still there.
+Docs that must change: wiki/breeds.html (a new section on turnover and the cell
+top-up; "no despawn" claims become untrue), wiki/horse-care.html (the scan now carries
+the lifetime check), wiki/horse-realm.html (touched wild horses now arrive here and
+grow the field), wiki/config.html (five keys), wiki/compatibility.html#spawning (a
+stacked-spawns note: other mods' spawns are not stamped and never turn over).
+
+5. Decisions (Part 4, every heading)
+====================================
+A. The ask: wild horses live 3 days, thin ground refills each morning and as players
+   walk, so the wild keeps changing. For a player who explores and a server owner who
+   adds biomes. Smallest worthwhile version: the lifetime alone plus the morning
+   top-up; the walking trigger is the same code, so it is not a separate size.
+B. Fit: horses only; vanilla intact (natural spawning untouched; non-horse mobs
+   untouched). A carrot not a stick: horses a player has worked with are kept (the
+   realm), tamed ones are never touched, and untouched ones only go while unseen.
+   Utility not decoration: serves the exploration loop. No gene or breed. It bends
+   no settled decision (no entry in decisions.html bears on it): it adds a new
+   fate for a wild horse where the realm currently takes only released ones.
+C. How met: pure ecology, nothing to obtain. Explained on wiki/breeds.html and the H
+   menu's Getting started line about wild herds may want one sentence (Open for the
+   building session, the owner has not asked for it). No checklist task. Feedback:
+   silent by design (decided: unseen).
+D. Genetics: does not apply, because no gene, allele or epigenome is touched.
+E. Breeds: does not apply, because no breed changes; breed selection is the existing
+   pickWildBreed. A breed's weights and biomes drive the top-up through the signature.
+F. Items and blocks: does not apply, because there are none.
+G. Config: section 4.
+H. Saves: section 4 (Data and saves). Hard rule 10 satisfied with defaults for the
+   missing stamp and ledger.
+I. Multiplayer: server only; no payloads; no client classes. "Active player" =
+   a non-spectator ServerPlayer in the level. Ownership: tamed horses are never
+   affected, whoever owns them.
+J. Compatibility: other mods' horse spawns (and other mods' horses) never get the
+   stamp (it is set from BreedSpawnHandler's NATURAL path and the top-up's own spawns
+   only) so they never turn over. A modded biome is a normal biome (Breeds.forBiome
+   reads the live id). No synthetic mod needed.
+K. Performance: per slow tick (not per game tick), bounded visit budget, no chunk
+   loads. Cell ledger is bounded. Worst case with a thousand horses: the stamped ones
+   cost one long compare per scan; the top-up is bounded by players x budget, not by
+   horse count. The count per cell is one box query over the loaded cell.
+L. Testing: section 4. Pure rules in common/; gametests for the entity paths; the
+   feel (is a herd's arrival noticeable, is the turnover too fast) only by eye.
+M. Release: patch, one piece; saves keep loading (owner: asked; see section 8).
+
+6. UNVERIFIED (riskiest first)
+==============================
+1. Spawning a pack from server code with EntitySpawnReason.NATURAL fires
+   FinalizeSpawnEvent (so BreedSpawnHandler tags it) AND the entity-tick founder then
+   treats the pack as one clump. Check: spawn two horses 5 blocks apart this way in a
+   gametest and read WILD_SPAWN_KEY and the herd attachment after a few ticks.
+2. Which events reliably say "a player touched this horse" in 26.1.2: leash attach
+   (EntityLeashEvent or Mob.setLeashedTo), equip (the horse inventory slots),
+   naming (nametag on interact / HorseNamingData), feeding (the diet/FoodPreference
+   handler path), riding (temper > 0). Read each handler first; prefer one
+   interaction hook if there is one (HorseInteractionHandler).
+3. teleportTo(level, ...) of a Horse to the realm from a slow scan works without a
+   dimension-change event surprise (the ticket path does it from a player action).
+4. The "no player can see this spot" test and the 24-block floor; how vanilla
+   NaturalSpawner handles it (read NaturalSpawner and EntitySpawnReason).
+5. Whether removing a wild horse with Entity.discard() mid-herd drops anything or
+   leaves a dangling lead reference (HorseCareAttachment.herd() UUID) that
+   HorseRealmHerds or BandLife expects to resolve. Check on a herd of four.
+6. The cell's biome at its centre column is a fair read of "the cell's biome" for
+   biomes narrower than 128 blocks. If not, read the biome at the chosen spawn spot
+   and count by that biome id. (Cheap to change, so check last.)
+7. Game-time day = level.getGameTime()/24000 follows sleeping and /time in a world
+   with the 26.1.2 clock. HorseCareHandler already uses the same expression for its
+   day stamp, so the risk is only that "morning" drifts after /time set; harmless for
+   a stamp comparison.
+
+7. Order and size
+=================
+One piece, size L (several sessions' worth of parts but one shipping unit): the
+common/ rules and tests first (S), then the stamp + slow-scan despawn + realm hand-off
+(M), then the ledger + top-up + placement (M), then config + gametests + docs (S-M).
+These can be separate commits inside one release. It waits on nothing. It unblocks
+nothing, but it touches the same region as the "Daily realm horse" and "Realm breeding
+pause" treatments (the realm census); do the realm treatments in a different session.
+Do NOT do in the same session: a breed change; any change to HerdManager's founding
+logic (the top-up only calls into it).
+
+8. Release
+==========
+Patch. One piece; it counts toward the next release when the owner chooses to cut one.
+Can it keep every existing save loading? Yes (a missing stamp and an empty ledger are
+the default). No compat bump.
+
+9. After each piece ships
+=========================
+- rebake.txt rows: wiki/text agent text + search index (wiki pages changed); the
+  config page baked list if config.html keys are generated (check the row for
+  config); no coat, gene, breed or golden bake is touched.
+- Wiki: breeds.html Gameplay (what a player sees: turnover, the realm for touched
+  horses) and Coding (stamp, ledger, signature, budget); horse-realm.html Gameplay;
+  horse-care.html Coding; config.html keys; Verification tabs for the play checks.
+- New page: none.

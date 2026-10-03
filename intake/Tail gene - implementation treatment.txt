@@ -1,0 +1,199 @@
+Tail gene - implementation treatment
+
+Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines are the scoping
+session's, not asked; "Open" lines are still to be settled, by whom is said on the line; "UNVERIFIED"
+lines are facts this file has not proved and the building session must check first. Source of truth for
+what exists is wiki/model-parts.html (the grown-parts machinery), the antler form and ram horn form gene
+pages (the dominance-series precedent) and wiki/gene-tail-color.html. This file is retired (deleted, per
+/process-intake step 8) as each piece ships and moves onto those pages' Gameplay and Coding tabs.
+Release: patch per piece (each piece is something a player notices); saves keep loading.
+
+1. The request, as given
+========================
+"on another one of the tails, but I want to overturn a decision in lion tail: we need to create a single
+tail gene, which wildtype means a horse tail, and every new tail gene we add comes with its own priority,
+and each is strictly dominant over the lower prio ones, and it only ever shows one tail"
+
+Reading: ONE locus for every tail the mod will ever grow. Its wild type is the ordinary horse tail. Each
+non-wild tail (lion now; fish, blade, club, dragon later) is an allele with its own rank in a dominance
+list; the highest-ranked allele a horse carries is the only tail it shows; the vanilla tail is hidden
+whenever that winner is not wild. This OVERTURNS the lion tail file's probe call "separate genes, ALL
+DRAW" (Decided by her on 2026-10-02, now reversed by her): there are no per-tail genes and no OR-ed hide
+rule, and no horse ever shows two tails.
+Confirmed with her this session: a NEW file builds the locus and the lion allele; the lion tail file is
+trimmed to the lion-specific parts; a new tail may take any rank, by explicit rank; only the dominant copy's
+numbers are used; every other lion tail call stands.
+
+2. In scope, and what is not
+============================
+In scope:
+- One new magical gene "tail" (key horsegenetics.tail): alleles Lt (lion) and n (wild = horse tail), the
+  dominance list Lt > n, the hide rule "the shown allele is not wild", the TAIL_BASE anchor and the adult
+  lion tail part (the lion-specific shape lives in "Tufted lion tail - implementation treatment.txt").
+- The conventions every later tail follows (section 4, "Adding a tail"), written once on the gene's page.
+- Both editors (rule 5), the info screen, the gene's wiki page, the founder entry.
+Not in scope (all re-askable):
+- Any tail other than the lion (fish, blade, club, dragon): each is its own later treatment that appends
+  an allele and names its rank. The fish tail also needs "hide the hind half", a separate capability
+  (intake/Mythic breeds - gene audit.txt gap 7); not built here.
+- A tail colour change: TailColorGene stays a separate locus and keeps painting the hair.
+- Two tails on one horse, by any route (Decided: never).
+- Breeds that carry a tail (design-a-breed, a separate task), and the whipping chain (lion treatment piece 3).
+
+3. What already exists, so the building session does not redo it
+================================================================
+Read from the code on 2026-10-02 (common/src/main/java/com/example/horsegenetics/common/):
+- Closest precedent, the dominance series: genetics/genes/AntlerFormGene (alleles Frk Brw Pal Crn n;
+  "Dominance is not the declaration order; it is a separate list": a private List<Allele> dominance, walked
+  in rank order) and RamHornFormGene (Crl Crk Fhn Scr). Allele storage order is append-only; the rank list
+  is what lets a new tail sit anywhere. The wiki pages: wiki/gene-antler-form.html, gene-ram-horn-form.html.
+- The part machinery, the tail on the vanilla models, TailColorGene, BraidLayer and EmissiveCoatLayer:
+  all described in "Tufted lion tail - implementation treatment.txt" section 3 (same classes; not repeated).
+- Priority slots: the grown-part loci run 230-240 (AntlersGene 230 .. DragonHornColourGene 240). The
+  next free slot is UNVERIFIED (241 is the proposal; see section 6).
+- LOOKS built but is not: no tail gene, tail PartKind, TAIL_BASE anchor or hide flag exists. The lion
+  treatment's earlier "one boolean per tail gene, OR-ed" rule was never built, so nothing has to be undone
+  in code; only that treatment's text changes.
+
+4. The pieces
+=============
+Piece 1 - A rare lion-tailed horse (the locus, the hide, the adult lion tail)
+-----------------------------------------------------------------------------
+What the player sees: unchanged from the lion tail treatment: a horse with a Lt allele has a thin tail
+ending in a brush of hair instead of its own tail. New: the horse info screen and the gene page say
+"tail: horse (wild) or lion", and nothing about a second tail can ever appear on one horse.
+- Decided (owner): ONE locus, key horsegenetics.tail, wild type n = the horse's own tail.
+- Decided (owner): each tail allele has its own priority in a dominance list; strictly dominant over every
+  lower one; the winner is the only tail shown. Dominance is plain, never codominant.
+- Decided (owner): a new tail takes any rank, by explicit rank in the dominance list (declaration order is
+  append-only and separate). The wild n is always the bottom of the list, below every tail.
+- Decided (owner): only the dominant allele's copy supplies the epigenome numbers; the other copy's are
+  carried, inherited and drifted like any recessive's, but never drawn.
+- Decided (owner): the lion allele is Lt (token proposal; building session greps every allele token),
+  wild n; Lt > n.
+- Decided (owner): magical gene; rare and hand-seeded, wild n dominates the founders; each new tail adds
+  its own small founder share, tuned in the yard; no invisible carriers in the wild.
+- Decided (owner): every other lion tail call stands: hide by hiding the model part (set for every horse
+  every frame), rigid thin tail + tuft, hair-patch colour, parts-off or beyond the detail distance shows the
+  vanilla tail, rider fade, adult and foal, braid and tail glow invisible on a tailed horse.
+- Recommended: the hide rule is one method in common/ (for example GrownParts.hidesVanillaTail(genotype)),
+  true when the dominant allele is not n, so HdHorseModel needs no change when a tail allele is appended.
+- Recommended: the part comes from the dominant allele: TailGene.tailFor(genotype, epigenome, ...) returns
+  Optional<List<AttachedPart>> like AntlersGene.racksFor, switching on the winning allele; each tail
+  allele owns one PartKind (the lion treatment's LION_TAIL).
+- Recommended: dominance is one private List<Allele> walked in rank order, exactly as AntlerFormGene does;
+  a test pins the whole list so a later tail cannot reorder an existing one by accident.
+Adding a tail (the convention, written on the gene's Coding tab):
+ 1. Append the allele to the declared order (never reorder, never remove).
+ 2. Insert it into the dominance list at its explicit rank, and say in the commit and the page whether it
+    outranks an existing tail. Placing a new tail BELOW an existing one changes what a heterozygous carrier of
+    the two looks like, so a rank change for an existing pair is a Decided (owner) line in that tail's treatment.
+ 3. Add its PartKind, generator, shape cases, anchor offsets (adult and foal), founder share, and a gene
+    carrier entry if the carrot rules list every magical gene.
+ 4. Extend the dominance-list test and the "exactly one tail" test.
+Where the code lives:
+- common/: TailGene (alleles, dominance list, expressionOf, isNatural() false, label, founder entry), the
+  hide rule, the PartKind LION_TAIL and its switch cases and generator (per the lion treatment), GrownParts.of
+  and shapes, and a test of the winner for every genotype.
+- NeoForge: the TAIL_BASE case in AttachedPartLayer.anchor, the setupAnim hide on HdHorseModel and
+  HdBabyHorseModel (reading the render state's hide flag), the hair-patch tint, the sheet bake: all as in
+  the lion treatment piece 1.
+Data and saves: one new locus appended to the genotype code; existing worlds read n/n everywhere. Allele
+declaration order is permanent once a world has used it; ranks live in code and may change only with a
+Decided line and a note on what changes for existing mixed pairs. Nothing is saved but the allele pair and the
+epigenome numbers on its copies. Parked genes follow genes/index.json (hard rule 6).
+Sync: none new; the part is computed on the client from the already-synced genotype.
+Config: none new; the parts switches and detail distance gate the part and the hide together.
+Tests (common/): TailGeneTest: allele table, the full dominance list, winner for every genotype pair
+(Lt/Lt, Lt/n, n/n, and with a second allele once one exists), "at most one tail part per horse",
+"hides the vanilla tail iff the winner is not n", shape cache key, genotype-code round trip with the locus
+appended; the parity snapshot and CommonPortabilityTest rerun; a web/ designer test that the locus lists.
+Play checks: a Lt/n horse and a Lt/Lt horse show exactly one lion tail; an n/n horse shows its normal tail;
+a pen of mixed horses never shows two tails or none (the shared model's visible flag is set every frame);
+parts switched off shows the vanilla tail on every horse. When a second tail exists: a pair of different
+tails shows only the higher-ranked one.
+Docs: a new gene page wiki/gene-tail.html (add-a-gene; Gameplay, Coding, Science tabs), wiki/model-parts.html,
+wiki/horse-designer.html, a one-line note on wiki/gene-tail-color.html.
+
+5. Decisions
+============
+A. The ask: a single tail locus, wild = horse tail, ranked alleles, one tail shown. Decided (owner).
+B. Fit: unchanged from the lion treatment (horses-only, vanilla intact, a look gene, any breed can carry
+   it). Bends the lion treatment's own "separate genes, all draw" call, which she overturned; no settled
+   wiki decision is bent. A multi-allele dominance series is the existing pattern (antler form).
+C. How met: spawning and breeding; survival-reachable; no new item; explained by the gene page, the info
+   screen and the designer.
+D. Genetics: priority slot UNVERIFIED (proposal 241; read before choosing); family Grown parts; alleles Lt, n
+   appended; epigenome per tail allele, ranges set in its generator; not sex-linked, no lethal, no health effect.
+   Both editors: the locus must list in the designer and CustomHorseSpawnScreen (rule 5, UNVERIFIED how
+   each picks genes; web/HorseEditor.java and common/EditorRules).
+E. Breeds: none changed.
+F. Items and blocks: none. A gene carrot / splice entry only if the carrot rules list every magical gene.
+G. Config: none new.
+H. Saves: one appended locus; old worlds read n/n. Never a compat bump.
+I. Multiplayer: client render of synced data; dedicated-server safe if new client classes stay under client/.
+J. Compatibility: as in the lion treatment (a mod drawing its own tail through the hidden part shows nothing).
+K. Performance: per frame, at most one tail part per horse in view (the single locus bounds it), same detail
+   distance as horns.
+L. Testing: as listed in piece 1; hide and offsets by eye with photograph-horses.
+M. Release (owner, carried over): each piece counts toward the next release; no compat bump. The release
+   procedure still confirms it.
+
+Implications sweep (Part 5)
+- Genetics model, registry, priorities: touches - one new locus, one priority slot, a dominance list.
+- Coat pipeline and the two goldens: untouched - no pixel changes; the parity snapshot reruns for the longer code.
+- Eye colour: untouched.
+- Body space, model, grown parts: touches - TAIL_BASE, a tail kind, hiding "tail".
+- Breeding, pedigree, records, stats: touches - inherits like any locus; no stat.
+- Breeds, spawning, breed files: touches - a breed may later pin Lt; founder entry now.
+- Speed/health/jump/size, disorders, lethals: untouched.
+- Healing, bond, herds, slow tick, hunger: untouched.
+- AI goals and behaviour hierarchy: untouched.
+- Items, carrots, splices: touches only if every magical gene needs a carrot recipe (UNVERIFIED).
+- Tack and gear slots: touches - tail braid invisible on a tailed horse (Decided earlier).
+- Villagers, realm, stables, stasis: untouched.
+- H menu, log, search: touches - the locus's name and lang keys.
+- Horse designer and spawn screen: touches - both.
+- Gene creator, breed designer, web/: touches - web/ rebuilt; breed designer lists it if it reads the registry (UNVERIFIED).
+- Config: untouched. Other mods: see J. Advancements: untouched.
+- 1.12.2 backport: the locus, ranks and hide rule are in common/; the layer and model hide are client work.
+- The wiki: a NEW gene page, wiki/gene-tail.html (hard rule 7; never hand-edit the generated spans).
+Three likeliest failures for a real player:
+1. Two tails or none on a mixed pen: the shared HD model's visible flag left from the previous horse
+   (set it for every horse every frame; play check in a mixed pen).
+2. A later tail added at the wrong rank quietly changes how existing carriers look (the test pins the full
+   rank list; a rank change for an existing pair needs a Decided line).
+3. A hidden Lt carrier looks like a horse with a normal tail once a higher tail exists (accepted; it is how
+   dominance works, and the info screen can show the carried alleles).
+
+6. UNVERIFIED (riskiest first)
+==============================
+1. Everything under "UNVERIFIED" in the lion tail treatment section 6 (hair colour, hide semantics, coat
+   timing, the root-to-tail anchor walk, payloads, foal switch): unchanged, they gate piece 1 here.
+2. The free priority slot after 240 and the free allele token "Lt" (grep common/ and genes/ resources).
+3. How the designer, the spawn screen and the breed designer enumerate genes and alleles (a locus whose
+   non-wild allele has no Java-drawn effect in the browser).
+4. That GrownParts.of can take a single-winner gene beside the existing rack and horn genes without a second path.
+
+7. Order and size
+=================
+Piece 1 only: M-L (the locus, the shared anchor walk and the hair sampler, as the lion treatment sized its
+piece 1). The lion tail's piece 2 (the foal) follows; a later tail is S-M each (a generator, an allele, a
+rank, an offset).
+Waits on: nothing hard; shares machinery with Body parts (the first non-head anchor) and Feathering (hair
+sampling); whichever builds first builds the shared piece.
+Unblocks: every later tail, a lion-tailed breed, the Hippocampus fish tail (with hide-the-rear).
+Do NOT do in the same session: piece 1 and a new breed; any coat pipeline change.
+
+8. Release
+==========
+Decided (owner, carried over): each piece counts toward the next release; saves keep loading; no compat bump.
+
+9. After each piece ships
+=========================
+Rebake rows (procedures/rebake.txt, walk the table): gene census / gene spec, :common:bakeGeneWikiPages, the
+part sheet if a region is touched, the parity snapshot and golden for the longer code, bake-agent-text.mjs,
+verification and roadmap indexes, :web.
+Wiki landing: wiki/gene-tail.html (new; Gameplay, Coding, Science) and wiki/model-parts.html; open checks on the
+gene page's Verification tab. The "lion and tufted tails" line on model-parts.html's Roadmap tab is retired
+when piece 1 ships.

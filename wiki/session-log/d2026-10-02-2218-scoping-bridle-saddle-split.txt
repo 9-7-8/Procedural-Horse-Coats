@@ -1,0 +1,50 @@
+2026-10-02 22:18 - Bridle and saddle split scoped (time is the end of the session)
+
+ASKED
+- /write-intake-document: "this might be pulling from some existing intake documents, but
+  let's scope splitting the saddle+bridle combo (vanilla) into a saddle, and a bridle
+  (separate items) with the bridle being the mandatory piece that controls a horse that
+  isn't bonded enough to be ridden bareback". Came of it: intake/Bridle and saddle split -
+  implementation treatment.txt.
+- "use your questining procedure to ask me questions for everything open". Four rounds
+  settled the open calls (slot, item id, tier-3 steering, bridle-only, nothing-worn, stats,
+  source, passenger ride, equids, switch, release).
+- /probe-a-scope on the saddle transition: eight more questions, recorded in section 4b.
+- /end-session.
+
+DONE
+- Wrote and revised the treatment (three pieces: bridle relabel, passenger-only rule, the
+  mod's tiered saddle; sizes M, M, M-L) and its block in intake/Sizing.txt. Code read:
+  BarebackSteeringHandler, HorseEscapeGoal, HorseTackSlot, TackEquipHandler, SaddleTint,
+  CartHorseMixin (by grep), CowboySale, trades. No code, wiki or asset changed.
+  Proof: grep of each named class; check-links run.
+- Cloud session: build, parity and process steps skipped. Worked on the designated branch
+  claude/beautiful-ptolemy-3a5k63, not main.
+
+DECIDED (all owner; recorded in the treatment sections 3 and 4b)
+- Bridle is the vanilla saddle id relabelled, worn in Headstall; the SADDLE slot takes the
+  mod's saddle. Bridle alone mounts and steers; saddle alone and nothing worn below tier 3
+  are passenger only, the horse walking on its own; tier 3 steers bare.
+- Saddle: speed, jump, carry capacity, only while ridden, small capped bonus, crafted in tiers.
+- Cowboy and stable horses: bridle plus basic saddle. Bolting takes the bridle only.
+- Bridle and halter swap in Headstall (contradicts never-swap; Headstall pair only).
+- Horses only, one server switch (default on), patch release, advancements mean fully bare.
+
+FOUND
+- BarebackSteeringHandler's "no mixins" comment is false (CartHorseMixin and others exist).
+- The leatherworker saddle trades now sell bridles; a trade for the new saddle is Open.
+- Earlier in this session an unrelated session's log was edited by mistake; reverted here.
+
+PROCEDURES CHANGED
+- None needed. write-intake-document step 7 says push to main; this session pushed to the
+  designated branch as instructed.
+
+NOT RUN
+- Build, parity check, tests: nothing but intake text and logs changed.
+
+RELEASE
+- None offered: no code shipped.
+
+PICK UP FIRST
+- /process-intake on the bridle piece 1, after reading CartHorseMixin and the vanilla
+  getControllingPassenger / equip-on-interact sources (UNVERIFIED, none were available here).

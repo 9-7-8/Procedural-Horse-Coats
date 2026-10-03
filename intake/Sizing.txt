@@ -41,10 +41,30 @@ Body parts - implementation treatment.txt                         sized 2026-10-
 Built? No (SPINE is only a comment in PartAnchor).
 
 ------------------------------------------------------------------------------
+Tail gene - implementation treatment.txt                          sized 2026-10-02
+- Piece 1: TailGene locus (Lt, n; ranked dominance), hide rule, TAIL_BASE anchor, lion part   M-L c  owner-free (shares the hair sampler with Feathering and the body anchor with Body parts)
+Built? No (no tail gene, anchor or part exists).
+
+------------------------------------------------------------------------------
+Tufted lion tail - implementation treatment.txt                   sized 2026-10-02
+(Now the Lt allele of the Tail gene; piece 1 here is the lion shape, tuft and hair-patch tint.)
+- Piece 1: LionTailGenerator, LION_TAIL part, hair-patch tint    M  c  owner-free; needs Tail gene piece 1
+- Piece 2: foal tail                                             S  c  owner-free; needs piece 1
+- Piece 3 (optional, not asked): segmented whipping tail         M  c  No: the owner has not said yes
+Built? No (no tail part, anchor or gene exists).
+
+------------------------------------------------------------------------------
 Head parts - implementation treatment.txt                         sized 2026-10-02
 (Slice A, dragon horns, shipped 2026-10-02.)
 - Slice B: ear fins, cheek spikes, brow ridge; EAR_/CHEEK_/BROW anchors   M  c  owner-free
 - Slice C: goat beard and ruff (HAIR, neck anchor)               M  c  owner-free
+Built? No.
+
+------------------------------------------------------------------------------
+Bridle and saddle split - implementation treatment.txt            sized 2026-10-02
+- Piece 1: vanilla saddle relabelled bridle, Headstall, migration  M  b  owner-free; verify vanilla riding first
+- Piece 2: passenger-only below tier 3, server switch, herd walk   M  b  owner-free; needs 1
+- Piece 3: mod saddle, tiers, ridden-only speed/jump, bags         L  c  Open: numbers, trade for it; needs 2
 Built? No.
 
 ------------------------------------------------------------------------------
@@ -174,3 +194,8 @@ Sheep horns and body genes - implementation treatment.txt   (LOWEST PRIORITY)   
 - Piece 2: quantitative layer: frame, muscle, size               M-L c No: which loci Open; the kind
 - Piece 3: callipyge parent-of-origin plan (Roadmap entry)       S  c  owner-free; the kind; with P1
 Built? No.
+
+------------------------------------------------------------------------------
+Wild horse turnover - implementation treatment.txt                sized 2026-10-02
+- One unit: 3-day wild lifetime (touched horses to the realm), cell top-up (<5 per 8x8-chunk cell)   L  c  owner-free; no Open needs the owner
+Built? No (no wild despawn, cell ledger or spawn stamp exists).

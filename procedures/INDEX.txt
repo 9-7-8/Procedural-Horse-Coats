@@ -21,6 +21,8 @@ Command                  Runs    Say (any of)                         What it le
                                  from intake", "next intake item"     retired, session ended
 /write-intake-document   either  "scope a feature", "write an intake  one treatment in intake/, every
                                  document", "add a feature request"   design call asked
+/probe-a-scope           either  "probe this scope", "what's          the one treatment in progress
+                                 unverified here", "poke holes"       with every gap asked or marked
 /fix-bug                 local   "fix a bug", "fix #N",               ONE GitHub issue fixed and
                                  "work the issues"                    proven, session ended
 /report-bug              cloud   "report a bug", "file a bug",        one well-formed GitHub issue per

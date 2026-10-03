@@ -1,0 +1,43 @@
+2026-10-02 21:45 - Wild horse turnover scoped (time is the end of the session)
+
+ASKED
+- /write-intake-document: "I want to overhaul how horses spawn: they should spawn like
+  normal, but then once a wild, untamed horse has been around for 3 days in game, it
+  despawns. Also, every morning ... less than 5 horses in that biome ... an idempotent way
+  to spawn horses back in ... nearby active players, not the whole world."
+  Came of it: intake/Wild horse turnover - implementation treatment.txt.
+- Mid-scoping: "It can spawn in more than 5 horses at a time, that's just the bare
+  minimum per cell." Recorded: 5 is a trigger, not a ceiling.
+
+DONE
+- Wrote the treatment (one unit, size L) and its block in intake/Sizing.txt. Code read:
+  BreedSpawnHandler, HerdManager, BreedHerdsBiomeModifier, HorseSpawnGround, HorseRelease,
+  HorseRealmRules, TicketHandler.arrive, BreedSpawnSettings. No code, wiki or asset touched.
+  Proof: grep of every class named; check-links run for the new log link.
+
+DECIDED (all owner)
+- Tamed never leaves; untamed-but-touched (leash, tack, name, food, ridden) goes to the
+  realm at day 3; untouched vanishes; any waits while a player is within 32 blocks.
+- Game-time stamp; a herd goes together keyed to the lead's stamp.
+- Cells of 8x8 chunks; one top-up with two triggers (cell stamp = day + ecology signature).
+- A roll is a founder-path herd, guaranteed once per stamp; near a player, out of sight.
+- Every dimension with horse breeds spawning in it; old wild horses stamped on first load.
+- Config: despawn days, top-up minimum, cell size and radius, realm hand-off on/off.
+- Release: one piece, patch, saves keep loading.
+
+FOUND ON THE WAY
+- No wild horse ever despawns today (every horse path sets persistence); no per-horse spawn
+  stamp or cell concept exists. Seven UNVERIFIED lines sit in the treatment, riskiest first.
+
+PROCEDURES
+- None.
+
+NOT RUN / NOT CHECKED
+- Nothing built or run; no Verification-tab anchors added (the treatment lists play checks).
+
+RELEASE
+- Not offered (scoping only).
+
+PICK UP FIRST
+- Build it with /process-intake (or whats-next); start with the common/ rules and tests,
+  then UNVERIFIED 1 (spawning a NATURAL pack from server code) before anything else.
