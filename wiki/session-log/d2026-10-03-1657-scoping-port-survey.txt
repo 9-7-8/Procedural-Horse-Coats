@@ -1,0 +1,51 @@
+2026-10-03 16:57 - Port feasibility surveyed and scoped (time is the end of the session)
+
+ASKED
+- /write-intake-document (free text): "Create a survey, and then write it up in intake, that
+  discusses how difficult these ports would be: 1) neoforge on the absolute latest version of
+  mc 2) fabric on 26.1.2 3) any other modloader on 26.1.2 on java 4) bedrock on the latest
+  version of bedrock 5) 1.12.2 on forge (to integrate with the highly-used 1.12.2 technic
+  pack)". Came of it: intake/Port feasibility survey.txt plus five treatments.
+- Answers to four questions: five separate treatments (not one file); the pack is "The 1.12.2
+  Pack" (CurseForge link given); flag Realistic Horse Genetics as a go/no-go check; "I want to
+  wait till I finally hit my 1.0.0 release, and THEN I'll release every port based on that
+  release."
+
+DONE
+- Wrote the survey, five treatments (Port - NeoForge latest, Fabric 26.1.2, other loaders
+  26.1.2, Bedrock, Forge 1.12.2) and their blocks in intake/Sizing.txt. No code, wiki or asset
+  touched. Research: four subagents (Java loader landscape, Bedrock, 1.12.2/Technic, repo
+  coupling inventory). Proof: grep and wc counts in the survey are dated 2026-10-03.
+
+DECIDED (owner)
+- Five treatments plus a survey; target pack is The 1.12.2 Pack; overlap with Realistic
+  Horse Genetics is a go/no-go (piece 1 of port 5); every port releases only after 1.0.0.
+DECIDED (scoping session, not asked; marked Recommended in the files)
+- Order: Fabric, NeoForge latest after 26.3 leaves beta, Forge 1.12.2 after go/no-go,
+  Bedrock after a spike. Fabric as the only extra loader worth shipping.
+
+FOUND ON THE WAY
+- Egress proxy blocked minecraft.wiki, docs.neoforged.net, fabricmc.net, learn.microsoft.com,
+  wiki.bedrock.dev, technicpack.net, curseforge.com, modrinth.com: most outside facts are
+  search snippets and are marked UNVERIFIED. Re-check them from a machine with access.
+- Latest Java is 26.3 (2026-09-15), NeoForge 26.3.0.40-beta; Bedrock stable 26.50.
+- Tekkit Legends is 1.7.10, not 1.12.2.
+- wiki/text/architecture.txt still says "no Java 9+ APIs" for common/; hard rule 2 and
+  common/build.gradle.kts say Java 17.
+- Record counts differ by grep (104 vs 124); the treatments say so.
+- Bedrock has no runtime texture API: the infinite-coat premise (hard rule 4) is the owner's
+  call (Bedrock piece 3).
+
+PROCEDURES
+- None changed. A "survey, not a unit" file type has no procedure; the survey file avoids the
+  "implementation treatment" suffix so process-intake does not count it.
+
+NOT RUN / NOT CHECKED
+- Nothing built or tested. No full :common:test. Every UNVERIFIED line in the treatments.
+
+RELEASE
+- No release offered; owner holds all ports to 1.0.0.
+
+PICK UP FIRST
+- Port - Forge 1.12.2 piece 1 (go/no-go, needs a machine that can open the pack's mod list)
+  or Port - Fabric 26.1.2 piece 1 (the shared seam), via /process-intake.
