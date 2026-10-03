@@ -55,7 +55,14 @@ FOUND ON THE WAY
   code.
 
 PROCEDURES
-None changed.
+- survey-a-mod.txt: step 2 now covers a Bedrock .mcaddon / .mcpack. The procedure
+  assumed a jar, and this session's subject was an addon. The new text says where the
+  roster, mobs and mechanics live, to count texture layers before trusting a
+  "variations" figure, and to check for a re-uploaded paid pack.
+- write-intake-document and write-session-log were followed as written; nothing was
+  wrong with either.
+- end-session: the Gradle build was skipped because no Java, resource or Gradle file
+  changed. check-parity passed (7163 checks).
 
 NOT RUN / NOT CHECKED
 - No tests: no code changed. The treatment's UNVERIFIED list starts with whether
