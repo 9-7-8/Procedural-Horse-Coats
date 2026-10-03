@@ -1,0 +1,68 @@
+2026-10-03 18:00 - Relicensed: code MIT, art CC BY-SA 4.0 (time is the end of the session)
+
+ASKED
+  1. "Let's overhaul how we do licensing ... all the art ... under the GLP license (or
+     whatever the equivalent is for art). Then all of my code should be under the MIT
+     license ... a wiki page just dedicated to licensing, which includes both the formal
+     license language and simple, human-readable language."
+     -> Done. See DONE 1.
+  2. "Retroactively release all the old releases under the new licensing."
+     -> Done as a written grant (DONE 2), not by editing the release pages.
+  3. /end-session "and merge everything to main. It's enough to have the new licensing
+     page, we don't need to edit the dozens of old releases."
+     -> Merged to main; the GitHub release pages were left alone, as asked.
+
+DONE
+  1. Relicense (commit 46e9a645). LICENSE is now plain MIT (Copyright 2026 Ixora);
+     LICENSE-ART is the art notice; LICENSES/CC-BY-SA-4.0.txt is the full legal code
+     (copied from SPDX's text, because creativecommons.org was blocked from the cloud
+     container). New page wiki/licensing.html (plain-language table and FAQ, the formal
+     MIT and CC BY-SA terms, and a table of third-party exceptions: UsefulCarts carts,
+     the three Raven icons, the three Planet Minecraft stables, Mojang). Registered in
+     wiki/pages.js (Project section). Updated gradle.properties mod_license,
+     neoforge.mods.toml, build-test-mod.mjs, neoforge-26.1.2/build.gradle (LICENSE and
+     LICENSE-ART now ship in META-INF), README, THIRD_PARTY_NOTICES.md (stables section
+     added), CLAUDE.md License section, procedures/use-an-art-pack.txt, and the wiki
+     pages that named CC BY-NC (carts, compatibility, stables, item-jumps, releases,
+     item-vet-kit, item-double-gates, index footer).
+     Proof: check-links.mjs green (423 pages), bake-verification-index, build-search-index
+     and bake-agent-text re-run. No Gradle build (cloud session), so the jar change that
+     adds the two licence files is unbuilt.
+  2. Retroactive grant (second commit). README, wiki/licensing.html "Changes of licence"
+     and the LICENSE footer state that every earlier release, tag, commit and jar is also
+     granted under MIT and CC BY-SA 4.0, with the same third-party exceptions. Old tags
+     still hold the CC BY-NC LICENSE file; git history was not rewritten.
+
+DECIDED
+  - Art licence is CC BY-SA 4.0 as the "GPL for art" (owner said "GLP ... or equivalent";
+     the choice of CC BY-SA was mine, accepted by the owner's follow-up). Recorded on
+     wiki/licensing.html.
+  - Data/JSON and the generators count as code (MIT); wiki and README prose counts as art.
+     (mine) Recorded on wiki/licensing.html#scope.
+  - Generated coat images belong to whoever made the horse; no claim made. (mine)
+  - Retroactivity is a written grant, not edits to the dozens of GitHub release pages
+     (owner).
+
+FOUND ON THE WAY
+  - Three licence questions are open and written on wiki/licensing.html's Verification tab:
+    the licences of the three Planet Minecraft stables (also gap 80 on stables.html);
+    whether horse_white*.png and the minecraft/.../*_saddle textures derive from Mojang's
+    art; and that "art" was assigned by folder layout, not by provenance of each image.
+  - No GitHub issues filed.
+
+PROCEDURES
+  procedures/use-an-art-pack.txt: the carve-back now says MIT / CC BY-SA grants.
+  Procedure review: no other procedure followed here was wrong. A "relicense" routine
+  is unlikely to recur.
+
+NOT RUN / NOT CHECKED
+  :neoforge-26.1.2:build, check-parity, check-designer-boots and the :common tests were
+  not run (cloud session; no code logic changed, only metadata and the jar's resource
+  copy). Newly unplayed: nothing in game. Verification tab added: wiki/licensing.html.
+
+RELEASE
+  Not offered: no substantial batch of player-facing change.
+
+PICK UP FIRST
+  Read the stables' Planet Minecraft terms and the horse template / saddle provenance
+  (the Verification tab of wiki/licensing.html), then run /whats-next.
