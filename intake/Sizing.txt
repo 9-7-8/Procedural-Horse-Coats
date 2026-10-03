@@ -252,7 +252,7 @@ Command whistle - implementation treatment.txt                    sized 2026-10-
 Built? No (grep: no releaseUsing / restrictTo / order attachment). Release on the last piece.
 
 ------------------------------------------------------------------------------
-Four-jar split - implementation treatment.txt                    sized 2026-10-03
+Four-jar split - implementation treatment.txt (+ folder four-jar-split/)  sized 2026-10-03
 - Piece 1: Base (framework + all QOL + hunger/healing + sex rule
   + plain wild herds + slim record + extension points + common/
   split in three + Base size gate)                                L+ b  Owner: No; waits on the rename; unblocks 2-3 and every port

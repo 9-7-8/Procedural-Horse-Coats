@@ -79,3 +79,12 @@ ROUND 3 (owner answers, same session; recorded in the treatment)
 - A horse keeps its current sex when Breeding is added. Villager tack trades (leatherworker, metalsmith) go to
   Equipment. Distribution: each jar its own GitHub download, with requires/incompatible stated inside the jar and
   checked on launch. Treatment updated: no Open owner calls remain.
+
+WRITE-UP (owner asked for the treatment in several files, with every decision and every rejected option)
+- intake/four-jar-split/ now holds the treatment in nine files (00 overview, 01 decision log, 02 considered and rejected, 03 code
+  map, 04 piece 1, 05 piece 2, 06 piece 3, 07 cross-cutting rules, 08 unverified/risks/open). The entry file in intake/ is a short
+  pointer. Corrected on the way: carts have six mixins, not seven; there are 8 cart advancements, not 11; FTB Teams compat follows
+  HorseOwnership (Base); ProgressTask is saved by stable id (byId), so moving tasks cannot break saves; sex is deliberately not a
+  stored field today (HorseRecordCodecs comment), so the Base-only horse needs one new optional key (file 04 step 3c).
+- Command whistle Pieces 1 and 3 had already landed on main; the remaining whistle work builds in Base.
+PICK UP FIRST (unchanged): the rename ships first; then /process-intake starts on four-jar-split/04.

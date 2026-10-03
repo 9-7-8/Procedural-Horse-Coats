@@ -1,0 +1,141 @@
+FOUR-JAR SPLIT - 06 PIECE 3: THE BREEDING ADD-ON AND THE FOUR-JAR RELEASE (size L)
+
+Goal: make Breeding a separate unit that needs only Base, build the all-in-one from the three units, and ship four jars with
+every release. This is the piece that changes what a player downloads. Needs pieces 1 and 2 shipped. Read 00, 01, 03, 04 and 05
+first.
+
+WHAT THE PLAYER SEES
+Four downloads per release: Base (required), Breeding, Equipment, and the All-in-One (instead of the others). Each jar says what
+it requires and what it conflicts with, inside itself, and the game stops at launch with a plain message on a wrong combination.
+A world that has used Breeding or Equipment will not load without it unless the server owner turns an override on.
+
+WHAT BREEDING OWNS (D12, D15-D17)
+Everything not assigned to Base or Equipment: genetics, coat painting and the pipeline, breeds, pedigree, body stats,
+autonomous breeding (heat, pregnancy, covers), gelding and the vet kit, the breed and horse designers, breeding and splice carrots,
+research papers, the gene database, stasis chambers, banks and the bank block, DIET (the locus, DietFoods, HorseDietHandler,
+BloodDietHandler, FoodPreferenceHandler), breed herds and founders (HerdManager, BreedHerd, BreedFounder, regions), the horse
+realm and hay portals, stables, the cowboy, horseman, barn, scientist and supplier villagers, the F6 debug corridor, and the
+gene-ability mixins. The full class lists are in file 03.
+
+PART A - SEPARATE THE BREEDING UNIT
+
+STEP 1 - INVENTORY (re-grep; the lists in file 03 are proposals)
+Resolve every UNVERIFIED in file 03 that is Breeding-side. Resolve the supplier question and the unassigned list (files 01 O2/O4).
+CHECKPOINT: the Breeding list is on wiki/architecture.html.
+
+STEP 2 - MODULES AND MIXINS
+- :common-breeding gets genetics, coat, breed, trait, parts, repro, stable, realm and the Breeding parts of horse/ (file 03
+  section 8). Its tests move with it, including the two coat goldens (rebake row a: common/src/test/resources/
+  coat-bake-golden.txt and coat-golden.txt).
+- Breeding's mixins json: LavaTravelMixin, HorseSwimMixin, HorseRearFightMixin, HorseFlightMixin, HorseFlightRiddenMixin,
+  HorseTwoRidersMixin, HorseInstantJumpMixin, HorseUndeadVoiceMixin. Base keeps HorseRegenMixin and HorseAlwaysParentMixin.
+- :web depends on all three common modules; the designer's model (web/HorseEditor.java) and CustomHorseSpawnScreen are one screen in
+  two places (rule 5): both import :common-breeding; behaviour unchanged.
+CHECKPOINT: build green; goldens unchanged; `:web:bakeDesignerAssets` and `node wiki/tools/check-designer-boots.mjs` pass (TeaVM
+compiles only the reachable graph, so build :web after adding or moving anything it reaches).
+
+STEP 3 - THE HOOK IMPLEMENTATIONS
+Breeding registers, through Base's hooks (file 04 step 4): StatProvider (genetic speed, jump, health, size, two-riders), FoodChoice
+and RegenGate (diet), PairingRule additions (heat, gelding, fertility, health), CareSubscriber(s) (the gelded bond bonus and the
+breed-based awards MEET_DHAMPIR and MEET_MAGICAL_HERD), OverlaySource (the coat layers it draws). It replaces the vanilla horse
+renderer with GeneticHorseRenderer in its client setup.
+Genome attaches to a horse: when Breeding first sees a horse that has no genome (a vanilla horse in a world that ran Base only), it
+rolls a genome with that horse's stored sex fixed (D24) and writes the genome fields into the existing record. The saved `gelded`
+field is read as it always was (D28).
+CHECKPOINT: a gametest: a horse made in a Base-only run, then loaded with Breeding, keeps its name, owner, bond and sex and gains a
+genome; the all-in-one's existing horses are unchanged.
+
+STEP 4 - REGISTRIES, PAYLOADS, CONFIG, TASKS, RESOURCES
+Move Breeding's entries out of the shared registers into its own, the same way as piece 2 step 6: items (spawn eggs, carrots, papers,
+seed jars, tickets, stasis chambers), blocks (research shelf, hay portal, stasis bank, golden carrot crop), menus, entity (Cowboy),
+attachments (horse_repro, pregnant, armed_carrots, cowboy_brand, passification, riding_pass per the unassigned list in file 03, lycan_shift, realm_return, the
+genome side of horse_record), payloads (file 03 section 7), biome modifiers and structures (BreedHerdsBiomeModifier, ModStructureTypes,
+BarnPoolInjector), config sections, tasks (the Genetics, Magic, Basic breeding, Projects and People groups and the Breeding parts of
+Wild, Husbandry and Farming) with their advancements and tutorial chapters, lang, assets, data (breeds, genes, villager structures).
+The gene and breed spec loading order in HorseGenetics.java is order-critical (gene order lengthens the genotype code): Breeding's
+constructor keeps ModGeneSpecs.load, api/GeneRegistration.listen, ModBreedSpecs.load, ModPersonNames.load and
+BreedSpawningConfig.register in that order, before its registers.
+Never regenerate genes/index.json from the folder (hard rule 6).
+CHECKPOINT: registry dumps and genotype codes identical before and after; breed spawning and the realm work in the all-in-one.
+
+STEP 5 - COMPAT AND LICENCES
+Waystones follows what it moves (UNVERIFIED which unit); FtbTeamsCompat is Base; JadeHorsePlugin is Base. Each compat class loads
+only when its owning jar is present.
+CHECKPOINT: all-in-one boot with and without each optional mod.
+
+PART B - THE FOUR JARS AND THE RELEASE PIPELINE
+
+STEP 6 - IDS, NAMES AND MOD METADATA
+- Four mods.toml files. Ids: ixoras_horses_base, ixoras_horses_breeding, ixoras_horses_equipment, ixoras_horses (all-in-one).
+  Display names are brand + role ("Ixora's Horse Overhaul: Base" etc.; the exact strings are the building session's, kept in
+  one place). The rename supplies the brand.
+- Dependencies in each file: neoforge and minecraft as today; Breeding and Equipment require Base at the SAME compat series (lockstep
+  version, D6); every jar declares the others it conflicts with as `type = "incompatible"`: the all-in-one is incompatible with Base,
+  Breeding, Equipment; and two copies of any one cannot load anyway. Breeding and Equipment do NOT require each other.
+- Each description names what the jar requires and what it conflicts with, in plain words (D33).
+- Shared namespace: every jar registers under the all-in-one's namespace (D5). UNVERIFIED (file 08 U2): that NeoForge 26.1.2 lets one
+  mod register into a namespace other than its own id, and that two mods can own parts of one namespace's assets/data (including
+  merging `lang`). SPIKE THIS FIRST in the piece: a two-mod test with one block each. If it fails, stop and ask the owner, because
+  the fallback (a namespace per jar) breaks every saved key and is a compat bump (file 02, section 9).
+CHECKPOINT: the spike result is in the session log.
+
+STEP 7 - THE ALL-IN-ONE BUILD
+- A Gradle task assembles ixoras-horses-<version>.jar from the three units: classes, resources, a merged mods.toml with the
+  all-in-one's own id, a merged mixins config. Assets and data keep their paths (same namespace), so there is no collision.
+- Also build the three single jars (Base, Breeding, Equipment). Every jar carries META-INF licences; the cart notices go in Equipment and
+  the all-in-one (file 05 step 8).
+- UNVERIFIED (file 08 U5): that the merged jar loads as one mod. Boot it.
+CHECKPOINT: the four jars exist and the all-in-one boots to "Done (" with the same registry as before piece 1.
+
+STEP 8 - THE LAUNCH CHECKS (D32, D33)
+- Rely first on NeoForge's own dependency screen (required / incompatible in mods.toml). UNVERIFIED how 26.1.2 words that and whether it
+  is clear enough to a player; read the screen by installing the bad combinations.
+- If it is not clear, add a launch check in Base that reads the loaded mod list and fails with ONE plain sentence ("Install ixoras_horses_
+  base", "Remove ixoras_horses: it already contains the other jars"). Do not build this before the unclear case is seen.
+CHECKPOINT: install each wrong combination on a client and a server and read the message: add-on without Base; all-in-one + any other jar;
+two versions of one jar; add-on at a different compat series.
+
+STEP 9 - THE WORLD MARKER AND THE OVERRIDE (D29-D31)
+- Base owns a SavedData file (e.g. data/<ns>/addons_used) listing the add-ons that have written their own saved data into the world. Each add-on
+  registers "I have written data" when it first stores anything (an attachment on an entity, a SavedData file, a block in a chunk): an add-on that
+  has only been loaded does not count.
+- On loading a world: for every add-on listed and not installed, REFUSE with a message naming the add-on (a singleplayer open and a dedicated
+  server start are the same path). Nothing is deleted.
+- Legacy worlds: a world with NO marker but with the mod's old data files was played with the single jar and counts as "all add-ons used" (R7). A
+  world with neither is new.
+- Override: a server.toml key in Base's section (name is the building session's; default OFF). When ON the world loads, the missing add-on's data
+  is kept untouched and ignored, and a WARN names each missing add-on on every start (R8).
+- UNVERIFIED (file 08 U1): that a world can be refused at that point in NeoForge 26.1.2, on both a singleplayer open and a dedicated-server
+  start; the same uncertainty is in the rename treatment. Check the SDK sources before relying on it, and say in the code where it is unverified (hard
+  rule 8).
+CHECKPOINT: tests: a world that used Breeding, loaded without it: refusal message, world intact; with the override on: loads and logs; adding
+Equipment to a world that never used it: loads, marker updated; a new world with any subset: loads.
+
+STEP 10 - RELEASE PIPELINE AND DOCS
+- procedures/release.txt: step 6 builds four jars from a clean tree; step 7 publishes four assets on the GitHub release; notes list each jar with
+  a "needs / conflicts with" line (D33); wiki/releases.html gets the same note.
+- procedures/test-tiers.txt: the release set gains the COMBINATION MATRIX, at least five boots to "Done (": Base alone; Base + Breeding;
+  Base + Equipment; Base + both; all-in-one alone; plus the failure cases (all-in-one + a part; a Breeding world without Breeding; with the
+  override).
+- README.md: which jar to download, one line each, which combinations work (it is user-facing only: no status or architecture).
+- New wiki page "Choosing your jars" (add via procedures/add-a-wiki-page.txt and the SECTIONS array in wiki/pages.js): what each jar contains,
+  what the combinations do, world rules for swapping jars, the override. Every page that names a feature gets a "Jar" line.
+- procedures/rebake.txt: any derived file that is now per jar (read the table; add rows if a bake produces a per-jar output).
+- Offer the owner a release (procedures/release.txt step 1). Piece 3 is the first four-jar release.
+
+TESTS
+The combination matrix (above); the marker tests (step 9); a gametest suite for Base + Breeding (a Base-made horse gains a genome, same sex,
+keeps its record); the existing Breeding unit tests, goldens and gametests unchanged; CommonPortabilityTest for :common-breeding.
+
+PLAY CHECKS (Verification tabs)
+1 Every combination in the matrix on a client and on a dedicated server.
+2 An old all-in-one world loaded with each combination: which load, which refuse, what the message says.
+3 Swap jars in both directions on a copy of the old world; add Breeding to a Base-only world and see the same horses with genomes.
+4 A wrong combination: the message is readable by a player who has never seen the mod.
+
+SAVES (hard rule 10)
+No saved key changes. New: the marker (additive). A Base-made world with Breeding added: genome fields are added to existing records (additive).
+A world saved by the all-in-one loads in the all-in-one and in every combination of its used add-ons.
+
+WHAT MUST NOT HAPPEN IN THE SAME SESSION
+Piece 3 and the rename; the first four-jar release and a compat (second-number) bump unless the owner asks.

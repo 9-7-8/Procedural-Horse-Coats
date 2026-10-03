@@ -1,0 +1,73 @@
+FOUR-JAR SPLIT - 07 CROSS-CUTTING RULES
+
+Rules that hold in every piece. When a piece file and this file disagree, this file wins; fix the piece file.
+
+1. SAVES KEEP LOADING (CLAUDE.md hard rule 10)
+- Nothing saved changes key. Attachment types keep their names (horse_record, horse_care, hunger, horse_social, horse_repro,
+  cart_metres, pregnant, jump_screen_known, horse_cooldowns, armed_carrots, cowboy_brand, passification, riding_pass, horse_gear,
+  lycan_shift, realm_return, leash_placer). Item, block, entity and gene keys keep their ids and the one shared namespace.
+- Additive only: one OPTIONAL Base-sex key (file 04 step 3c) and the world marker (file 06 step 9). Both are written only by new code and
+  ignored by old code.
+- If you find a change that cannot keep an old save loading, STOP: write the migration (a built and tested one, never "the note will warn
+  them"), or ask the owner; the alternatives are a named minimal loss or a compat (second-number) release.
+- A world that used an add-on refuses to load without it (D29). That is a deliberate, owner-chosen loss of "any subset on an old world";
+  it must be stated in the release note and on the "Choosing your jars" page.
+- Rename dependency: the rename's converter must exist first. Whatever it rewrites (gene keys, ids) is the old namespace; this split keeps the
+  NEW namespace for all four jars.
+
+2. CONFIG
+- phc/server.toml and phc/client.toml keep their paths (the rename moves the folder). Each jar contributes its own section; a missing
+  section is fine. Server keys are gameplay; client keys are what the machine draws.
+- New keys: hunger toggle (default ON), sex toggle (default ON), the marker override (default OFF). Names are the building session's; add each
+  through procedures/add-a-config-option.txt (a declared key, a safe try/catch accessor, the value passed into common/, never read there; reload-safe;
+  a test; a server boot with generated files deleted; docs on the feature's own page).
+- A bad value never crashes a world load; it reads as the default. Edits to a file while the game runs are picked up without a restart.
+- The carts keep horsegenetics-carts.toml and horsegenetics-carts-client.toml (names change with the rename).
+
+3. NETWORKING
+- Payloads are registered per jar through a helper that takes the registrar (file 04 step 7). All jars declare side BOTH. A client missing an add-on
+  the server has is refused by NeoForge's mod-list check (UNVERIFIED wording). Never trust a client payload: unchanged from today.
+- Dedicated-server safety: no client class on the server. A mixin on a client-only class goes in a "client" block of its own jar's mixins json.
+
+4. DEPENDENCY DIRECTION (enforced by a test)
+Base depends on nothing of ours. Breeding and Equipment depend on Base only and never on each other. Anything one add-on needs from the
+other goes through a Base hook with a default of "absent". A class that imports across that line is a bug. The three common modules obey the
+same rule and hard rules 1 and 2 (no Minecraft, no third-party library, no JDK API TeaVM lacks: CommonPortabilityTest guards it for each).
+
+5. THE EDITORS AND THE DESIGNERS (hard rules 3 and 5)
+- :web compiles the three common modules to WebAssembly; build :web after any change it can reach (TeaVM compiles only the reachable graph).
+  Never port a gene to JavaScript.
+- wiki/horse-designer and CustomHorseSpawnScreen are one screen in two places: change both. A deliberate divergence goes in the comment on both.
+- common/EditorRules (identical rules) lives once; web/HorseEditor.java mirrors applyGenome / stamp / randomizable / topUpMagical / addRandom /
+  enforceSexLinkage by name. Moving classes between modules must not change these names.
+
+6. GENES AND BREEDS (hard rules 6 and 7)
+- Never regenerate genes/index.json from the folder (an absence is a killswitch).
+- A new wiki page goes in the SECTIONS array in wiki/pages.js and nowhere else; the BEGIN/END generated spans belong to the bakes.
+- Gene order lengthens the genotype code: Breeding's startup order (file 06 step 4) must stay as it is.
+
+7. TESTING (procedures/test-tiers.txt)
+- Never run the full :common test suite unless the owner asks or a release is cut; use --tests and say what a full run would still check.
+- Cheapest tier that proves each step: tier 0 compile and node checks; tier 1 one test class; tier 2 gametests and headless browser checks; tier 3 only
+  for a release.
+- Every checkpoint in files 04-06 names its proof. A step without a recorded proof is not done.
+- Never stop processes except with tools/stop-dev-java.ps1 (hard rule 12). Never disable or skip a test to get green.
+
+8. DOCS (CLAUDE.md rule 9: every open check is written on the page for the thing)
+- Each shipped piece moves from intake to the wiki: the owning page's Coding or Gameplay tab records what became true (with the date and evidence);
+  open play checks go on that page's Verification tab (one summary sentence first); plans stay on Roadmap tabs. Never write checks on
+  wiki/verification.html (it is generated).
+- Pages to touch: architecture, api-reference, api-notes, coding-notes, horse-care, horse-gear, carts, cart-bench, item-whistles, item-stall-signs,
+  item-jumps, item-double-gates, item-equestrian-posts, item-equestrian-bench, item-rescuing-braid, saddle-pads, rider-comfort, item-horse-shoes,
+  licensing, releases; a new "Choosing your jars" page (procedures/add-a-wiki-page.txt).
+- Rebake: after ANY change walk procedures/rebake.txt (the only copy of what-to-rebake-for-what). Moves of common/ code hit the designer wasm,
+  the API reference, the agent text and the gene wiki pages; derived files fail silently when stale.
+- README.md is user-facing only (what the mod does, how to play, install, licence): it gains "which jar to download".
+- CLAUDE.md stays small: add a pointer only if a hard rule changes (it should not).
+
+9. PROCESS
+- Ask the owner with AskUserQuestion (2-4 options, recommendation first) for any call this plan leaves Open or any divergence.
+- Flag unverified API usage in a comment (hard rule 8); NeoForge 26.1.2 API quirks are on wiki/api-notes.html: read it before an unfamiliar system.
+- Each piece ends the session the fixed way (procedures/end-session.txt): regenerate, build, commit, procedure review, session log, docs commit,
+  CLAUDE.md audit, verify clean, kill, summarise. A release is the owner's call and is offered only for a substantial batch.
+- The 1.12.2 backport stays cheap: keep rules and wording in common/ modules; the NeoForge side translates.
