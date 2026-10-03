@@ -23,6 +23,10 @@ DONE
   coupling inventory). Proof: grep and wc counts in the survey are dated 2026-10-03.
 
 DECIDED (owner)
+- Later in the session: common/ is NEVER lowered to Java 8 (in place, as a copy, or as a
+  hand-written common-java8/ overlay). The latest NeoForge build is the single source of
+  truth and every port derives from it by build tooling (survey file, RULE section).
+- The 1.12.2 Pack has no horse mod (owner's pasted dependency list); target stays that pack.
 - Five treatments plus a survey; target pack is The 1.12.2 Pack; overlap with Realistic
   Horse Genetics is a go/no-go (piece 1 of port 5); every port releases only after 1.0.0.
 DECIDED (scoping session, not asked; marked Recommended in the files)
@@ -51,6 +55,24 @@ NOT RUN / NOT CHECKED
 RELEASE
 - No release offered; owner holds all ports to 1.0.0.
 
+ALSO ASKED LATER
+- Is Bedrock basically impossible for the coat mechanic? (Yes for per-pixel coats; only a
+  bounded layered coat or QOL features survive; Bedrock treatment piece 3, Open 2.)
+- Resolve the Java 9+ conflict: done (wiki/architecture.html lede; wiki/text rebaked).
+- What is Cleanroom, and Stonecutter versus Cleanroom: answered in chat; facts in the Forge
+  1.12.2 treatment and the survey's RULE section (all search snippets, UNVERIFIED).
+- Best existing tools: JvmDowngrader for 1.12.2 bytecode, Stonecutter for Fabric and nearby
+  versions, MultiLoader-Template layout. Written in the survey.
+
+PROCEDURES (review)
+- Asked all three questions: write-intake-document has no "survey, not a unit" route (this
+  session used a file without the treatment suffix). Added a bullet to intake/To do.txt.
+
+HELD UNTIL 1.0.0
+- The owner will revisit every port when ready for the 1.0.0 release. Nothing is to be
+  built from these files before then unless she says so.
+
 PICK UP FIRST
-- Port - Forge 1.12.2 piece 1 (go/no-go, needs a machine that can open the pack's mod list)
-  or Port - Fabric 26.1.2 piece 1 (the shared seam), via /process-intake.
+- At 1.0.0: re-read intake/Port feasibility survey.txt, then spike JvmDowngrader on common/
+  (Forge 1.12.2 piece 2) and Stonecutter on the Fabric seam (Fabric piece 1), via
+  /process-intake. Before that, nothing from these files.
