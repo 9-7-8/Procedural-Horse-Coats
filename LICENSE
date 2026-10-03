@@ -24,4 +24,6 @@ SOFTWARE.
 This file covers the CODE (and the data and documentation that is not art).
 The ART is under CC BY-SA 4.0 instead: see LICENSE-ART. Third-party pieces
 keep their own licences: see THIRD_PARTY_NOTICES.md and LICENSES/.
+This grant also applies retroactively to every earlier release and commit of
+this project, which were first published under CC BY-NC 4.0.
 The plain-language version is the wiki page wiki/licensing.html.

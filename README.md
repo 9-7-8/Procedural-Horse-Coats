@@ -231,4 +231,7 @@ Both ship inside the jar, under `META-INF/`.
   and the [Licensing wiki page](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/licensing.html),
   which also has the plain-language version.
 
-Earlier releases were CC BY-NC 4.0; copies you already have stay under that grant.
+**Every earlier release is relicensed too.** Releases and commits made before this change
+were published under CC BY-NC 4.0; the copyright holder (Ixora) now also grants all of
+them, every tag and every jar, under the MIT and CC BY-SA 4.0 terms above, the same
+third-party exceptions applying. You may still use them under CC BY-NC 4.0 if you prefer.
