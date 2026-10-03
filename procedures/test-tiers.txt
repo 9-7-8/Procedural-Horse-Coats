@@ -61,6 +61,12 @@ STEPS
        in, so a horse a few blocks over may sit in a chunk that never ticks (no scan,
        no founding) - ModGameTests.keepTicking forces the 3x3. The harness has no horse
        realm level, and runs with doMobSpawning off, so no natural or top-up spawn fires.
+       A new test is TWO edits: its TEST_FUNCTIONS.register AND a register(event, ...)
+       line in the list ModGameTests builds instances from. Miss the second and the run
+       says "All N required tests passed" without it - count N before and after.
+       A test that gives a horse genes (HorseRecords.apply) waits for
+       HorseRecords.hasRealRecord first: the founding tick rolls a new genome over
+       anything applied before it.
    - Browser checks that drive headless Chrome: check-designer-boots.mjs (after any
      wasm), check-creator-steps.mjs, check-path-canvas.mjs, check-colour-control.mjs,
      check-glow-control.mjs, check-glow-render.mjs and check-ai.mjs. Run them when their

@@ -177,21 +177,20 @@ any monster that comes close.
 
 Decided
 - These three are on the wheel, at bond tier 2.
-- Guard here is a combat order: it needs a fighting gene (Piece 3's gate). If Piece 3 has
-  not shipped, Guard here waits for it (see section 7).
-- Targets for every combat order: hostile mobs EXCEPT creepers.
+- Guard here is a combat order: it needs a fighting gene (Piece 3's gate, shipped).
+- Targets for every combat order: hostile mobs EXCEPT creepers (Piece 3 built this).
 
 Recommended
 - Graze nearby: a tethered stroll, radius 12 around the anchor; outside it the horse walks
-  back. Uses the horse's restriction radius if the API has one (UNVERIFIED, section 6),
-  else its own goal.
+  back. Its own goal, not vanilla's home radius: 26.1.2 has Mob.setHomeTo / isWithinHome,
+  but vanilla saves it and a lead sets it (PathfinderMob), so it would fight leads
+  (answered by Piece 3; wiki/item-whistles.html#combat-code).
 - Go home: calls the existing send-home path (server/StallRecall + common/care/SendHome);
   a horse with no stall refuses with "has no stall". It is a one-shot: the order becomes
   Rejoin herd when the horse arrives. Not a second recall implementation.
 - Guard here: Stay, plus targets hostile mobs within 6 blocks of the anchor; never chases
   beyond 8; returns to the anchor when the target dies or leaves.
-- Creeper exclusion is an entity-type tag, horsegenetics:command_never_target, containing
-  minecraft:creeper, so packs can add to it. Not a config list.
+- Creeper exclusion: the tag horsegenetics:command_never_target already exists (Piece 3).
 
 Where the code lives: radii and the "return to anchor" rule in common/ (HorseOrders); the
 goals in NeoForge.
@@ -204,66 +203,12 @@ leaves a 12 radius and returns.
 Play checks: a grazing horse in an open field stays near; Go home with and without a stall.
 Docs: item-whistles, horse-care, stables (Go home), behaviour-hierarchy rebake.
 
-Piece 3 - Hunt monsters and Defend me (and the fighting-gene gate)
--------------------------------------------------------------------
-What the player sees: a horse bred to fight can be sent to clear monsters around a spot, or
-told to stay at your side and see off anything that comes for you. A horse without the
-genes for it cannot: the slice is grey and says why.
-
-Decided
-- Gene-gated: the combat orders (Hunt monsters, Defend me, Guard here) are available only to
-  a horse that EXPRESSES a fighting gene: an Aggression pair whose target is monsters
-  (Adh, Anh, Aah), Guardian, or Magic Fighter. Others see the slice greyed with the
-  reason.
-- Leashed pursuit, which REOPENS a settled call (wiki/gene-aggression.html, "It holds a
-  radius. It must never chase"; full and owner-leashed pursuit were both rejected). The
-  owner's call, 2026-10-03: an ORDER may pursue inside a leash; the GENE's rule is
-  untouched.
-  - Hunt monsters: seek hostiles within 16 blocks of the anchor, never beyond; then return
-    to the anchor.
-  - Defend me: follow the owner (Piece 1's Follow) and engage hostiles within 8 blocks of
-    the OWNER, then come back to heel.
-- Targets: hostile mobs except creepers (the Piece 2 tag).
-- Bond tier 2.
-
-Recommended
-- Which Aggression alleles count: the three "h" pairs only. An "a" (everything) pair also
-  hunts monsters, but it hunts riders and horses too; it is excluded so the whistle never
-  sends a horse that will turn on you. Confirm with the owner when this piece is built
-  (one question; Open below).
-- "Expresses" uses the same expression test the genes' own abilities use (the
-  GeneAbility path in GeneAbilityHandler), so the gate and the gene never disagree.
-- Break off when hurt: a horse on a combat order below 30% health drops its target and
-  returns to its anchor (Hunt, Guard) or to the owner (Defend). Carrot, not stick: a
-  player's order should not be the thing that kills their horse.
-- Defend me reuses the shape of GeneReactionHandler.onOwnerHurt, but triggers on hostiles
-  NEARING the owner, not only on hits. It must not scan on every hit in the world (the
-  mistake that comment records): the ordered horse scans from its own goal, on an
-  interval (20 ticks, as AggressionGene.INTERVAL_TICKS), MAX_TARGETS bounded.
-- An order never overrides Passification.suppresses, and never turns a horse on players.
-- A horse whose genes already make it aggressive keeps doing so under any order; an order
-  adds behaviour, it does not calm one.
-
-Open
-- Whether an "a" (everything) Aggression pair unlocks the combat orders. Owner, when the
-  piece is built.
-
-Where the code lives: the gate (genotype -> boolean) and the leash maths in common/
-(HorseOrders, reading AggressionGene / GuardianGene / MagicFighterGene keys); goals in
-NeoForge, using HorseMeleeGoal for the swing rather than a second melee goal.
-Data and saves: the gate flag is derived, not saved; it is synced alongside the order for
-the wheel's greying.
-Config (server): hunt_radius (16, 8..32), defend_radius (8, 4..16), break_off_health
-(0.3, 0..1; 0 = fight to the death). Clamped on a bad value.
-Tests: HorseOrdersTest: the gate for every Aggression allele pair, Guardian, Magic Fighter,
-none; leash maths. Gametests (yard pens): a hunting horse with Adh/Adh clears zombies in 16
-and does not leave the radius; a defending horse engages a skeleton near its owner and
-returns; a plain horse refuses with the right reason; the creeper is ignored.
-Play checks: a hunter does not wander off into the dark; a defender does not abandon the
-rider mid-ride (riding pauses the order).
-Docs: gene-aggression Coding tab gets the reopened call recorded ("an order may pursue,
-leashed; the gene may not"); guardian and magic-fighter Gameplay get a line each; item-
-whistles; behaviour-hierarchy rebake.
+Piece 3 - SHIPPED 2026-10-03: the fighting-gene gate, Hunt monsters and Defend me. What it is
+and how it is built: wiki/item-whistles.html#fighters and #combat-code. Piece 2 plugs into it:
+HorseOrders.fighter (the gate - Guard here is a third combat() order, so the refusal and the
+wheel's greying come free), HorseOrders.Leash and ServerConfig.orderLeash (add guard_radius
+there), OrderCombatGoal (its centre() and its leash are per order; Guard here is Hunt monsters
+with a smaller radius), and the never-target tag, which already exists.
 
 
 5. Decisions
@@ -346,25 +291,19 @@ Riskiest first.
    Check in 26.1.2 sources how Minecraft.options.keyUse behaves while a Screen is open
    (a screen normally swallows key-up), and whether the wheel must be an overlay
    rendered over the world rather than a Screen. Spike this before anything else.
-2. Whether Mob has a restriction / home radius API in 26.1.2 (restrictTo, hasRestriction,
-   getRestrictCenter) usable for Stay and Graze. The code base has never called it.
-   Check the Mob / PathfinderMob sources.
 3. That a ridden horse's order goals do not run (rider control drives movement; see
    gene-aggression's "a ridden horse will not pursue"). Confirm "riding pauses" needs no
    extra code beyond canUse checking for a passenger.
 4. Built-in attachment .sync firing when the order changes on the server (precedent:
    HORSE_GEAR). Confirm the client sees an order changed from the H browser too.
-5. That HorseMeleeGoal can be driven by a target set from an order goal without the target
-   goal selector (WildHorseForgetTargetGoal) clearing it on the next tick.
+(2 and 5 were answered by Piece 3: wiki/item-whistles.html#combat-code.)
 
 
 7. Order and size
 =================
 - Piece 1 (M-L): groundwork. The item, the attachment, the wheel, payload and the four
   basic orders; every later slice plugs into it. The wheel spike (UNVERIFIED 1) first.
-- Piece 3 (M): the fighting-gene gate and the two pursuit orders. Before Piece 2 because
-  Guard here needs its gate, and it is the most-asked-for part ("hunt monsters", "defend
-  me").
+- Piece 3: shipped 2026-10-03.
 - Piece 2 (M): Graze nearby, Go home, Guard here.
 Waits on nothing. Unblocks nothing queued. Do NOT build in the same session as anything
 that re-orders horse goals (herds, carts), because behaviour-hierarchy must be rebaked

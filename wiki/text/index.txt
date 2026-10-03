@@ -344,6 +344,7 @@ wiki/gene-agatebound.html#layers	coding	What it paints
 wiki/gene-agatebound.html#outcomes	gameplay	What it can come out as
 wiki/gene-aggression.html#health	gameplay	Health
 wiki/gene-aggression.html#inheritance	gameplay	Two copies of the same allele, or nothing
+wiki/gene-aggression.html#ordered-pursuit	coding	An order may pursue, leashed; the gene may not (2026-10-03)
 wiki/gene-aggression.html#ridden	gameplay	What happens if you are on it
 wiki/gene-aggression.html#split	science	Why aggression and fear are two loci
 wiki/gene-aggression.html#taming	gameplay	If it hunts riders, you may not be able to keep it
@@ -1159,6 +1160,7 @@ wiki/gene-grey.html#variants	coding	Chubari spots and the bloody shoulder
 wiki/gene-guardian.html#best	science	The gene most likely to be somebody’s favourite
 wiki/gene-guardian.html#difference	gameplay	How it differs from a gladiator
 wiki/gene-guardian.html#health	gameplay	Health
+wiki/gene-guardian.html#orders	gameplay	It takes the command whistle’s combat orders
 wiki/gene-guardian.html#owner	coding	Owner, not rider
 wiki/gene-guardian.html#verified	coding	Verified
 wiki/gene-guardian.html#what	gameplay	What it does
@@ -1509,6 +1511,7 @@ wiki/gene-magic-fighter.html#codominant	science	Why codominance is the whole des
 wiki/gene-magic-fighter.html#floor	coding	The floor is on the damage, not on the percentage
 wiki/gene-magic-fighter.html#health	gameplay	Health
 wiki/gene-magic-fighter.html#inheritance	gameplay	Crossing two of them
+wiki/gene-magic-fighter.html#orders	gameplay	A fighter takes the command whistle’s combat orders
 wiki/gene-magic-fighter.html#range	science	Why the wild range is +1 to +3
 wiki/gene-magic-fighter.html#two-values	coding	Two epigenetic values, not one
 wiki/gene-magic-fighter.html#what	gameplay	What it does
@@ -3266,12 +3269,14 @@ wiki/item-whistles.html#blow-key-code	coding	One key, every whistle (2026-09-29)
 wiki/item-whistles.html#bond-gate	gameplay	Binding an ender whistle needs the horse's trust
 wiki/item-whistles.html#bond-gate-code	coding	The bond gate on binding (2026-09-29)
 wiki/item-whistles.html#call	coding	How a call finds a horse
+wiki/item-whistles.html#combat-code	coding	Hunt monsters and Defend me (Piece 3, 2026-10-03)
 wiki/item-whistles.html#command	gameplay	The command whistle: standing orders
 wiki/item-whistles.html#command-code	coding	The command whistle (2026-10-03)
 wiki/item-whistles.html#declined	coding	Two things deliberately not built (2026-09-29)
 wiki/item-whistles.html#ender	gameplay	The ender whistle
 wiki/item-whistles.html#ender-code	coding	The ender whistle
 wiki/item-whistles.html#ender-gaps	coding	Known gaps
+wiki/item-whistles.html#fighters	gameplay	Hunt monsters and Defend me: horses bred to fight
 wiki/item-whistles.html#glint	gameplay	A bound whistle glimmers
 wiki/item-whistles.html#glint-code	coding	Telling a bound whistle apart, without art (2026-09-29)
 wiki/item-whistles.html#leads	coding	The lead, when a whistle moves the horse

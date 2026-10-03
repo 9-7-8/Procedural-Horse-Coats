@@ -245,6 +245,5 @@ Port - Forge 1.12.2 - implementation treatment.txt                sized 2026-10-
 - Piece 5: portal, villagers, carts, stasis, H menu (each re-askable)  L  c  No: each
 Built? No.
 Command whistle - implementation treatment.txt                    sized 2026-10-03
-- Piece 3: fighting-gene gate, Hunt monsters, Defend me          M  c  near-owner: one Open ("a" pairs); P1
-- Piece 2: Graze nearby, Go home, Guard here                     M  c  owner-free; P1, Guard needs P3
-Built? Piece 1 shipped 2026-10-03 (wiki/item-whistles.html#command). Release on the last piece.
+- Piece 2: Graze nearby, Go home, Guard here                     M  a  owner-free; P1 and P3 shipped
+Built? Pieces 1 and 3 shipped 2026-10-03 (wiki/item-whistles.html#command, #fighters). Release on the last piece.

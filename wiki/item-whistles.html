@@ -170,6 +170,8 @@
 <tr><td><strong>Stay</strong></td><td>Stands where it was told. Anything that moves it &mdash; hunger, a fright, a fight, a whistle &mdash; may; it walks back afterwards.</td><td>31</td></tr>
 <tr><td><strong>Follow</strong></td><td>Follows you at a walk and stops a few blocks off. Left far behind with no way through, it is brought to you, as a whistle brings a horse.</td><td>31</td></tr>
 <tr><td><strong>Wander</strong></td><td>Roams freely and ignores you: no following, no watching you.</td><td>61</td></tr>
+<tr><td><strong>Hunt monsters</strong></td><td>Holds the spot it was told, and goes for any monster it can see within 16 blocks of it &mdash; never further &mdash; then walks back. <a href="#fighters">Horses bred to fight only.</a></td><td>61</td></tr>
+<tr><td><strong>Defend me</strong></td><td>Follows you, and goes for any monster that comes within 8 blocks of you, then comes back to heel. <a href="#fighters">Horses bred to fight only.</a></td><td>61</td></tr>
 <tr><td><strong>Rejoin herd</strong></td><td>No order: back to its ordinary life.</td><td>none</td></tr>
 </tbody>
 </table>
@@ -182,15 +184,44 @@
     <li><strong>It is cleared</strong> by calling the horse with any whistle (calling a horse means
         you want it), by Send home, by putting it in a stasis chamber, by selling or giving it away,
         and when it changes dimension.</li>
-    <li><strong>Refused</strong> by a horse on a lead, one pulling a cart, or one not bonded enough;
-        the wheel greys an order the aimed horse cannot take and says why.</li>
+    <li><strong>Refused</strong> by a horse on a lead, one pulling a cart, or one not bonded enough,
+        and the two combat orders by a horse not bred to fight; the wheel greys an order the aimed
+        horse cannot take and says why.</li>
     <li><strong>Getting one:</strong> crafted (above), or from an equestrian supplier at level 3 for
         5 emeralds. Giving your first order ticks the &ldquo;Give a horse an order&rdquo; checklist
         task.</li>
 </ul>
+
+<h3 id="fighters">Hunt monsters and Defend me: horses bred to fight</h3>
 <p>
-    More orders are planned: Graze nearby, Guard here and Go home, then Hunt monsters and Defend me
-    for horses bred to fight.
+    Only a horse whose genes make it a fighter takes the two combat orders. It has to
+    <em>show</em> one of these, not just carry it:
+</p>
+<ul>
+    <li><a href="gene-aggression.html">Aggression</a>, a matched pair that goes for monsters
+        (<code>Adh</code>, <code>Anh</code> or <code>Aah</code>) &mdash; or for everything
+        (<code>Ada</code>, <code>Ana</code>, <code>Aaa</code>). An &ldquo;everything&rdquo; horse
+        still goes for what its genes say, you included: the order adds monsters, it calms
+        nothing.</li>
+    <li><a href="gene-guardian.html">Guardian</a>, two copies.</li>
+    <li><a href="gene-magic-fighter.html">Magic fighter</a>, hitting harder than an ordinary horse:
+        a Fighter or a Champion. A Weak or Harmless horse is not one.</li>
+</ul>
+<ul>
+    <li><strong>Creepers are never picked.</strong> Nor are players, anybody&rsquo;s pet, or a tamed
+        horse &mdash; a tamed zombie horse included.</li>
+    <li><strong>A hurt horse breaks off.</strong> Below 30% of its health it drops the fight and goes
+        back to its spot, or to you. It picks no new fight until it has healed past that.</li>
+    <li><strong>It is a leash, not a chase.</strong> A monster that runs more than a few blocks past
+        the radius, or drags the horse that far, is let go.</li>
+    <li><strong>Riding pauses it</strong>, like every order: a defender does not leave you mid-ride.</li>
+    <li><strong>Server owners</strong> can change the reach and the break-off: <code>orders.hunt_radius</code>
+        (16, from 8 to 32), <code>orders.defend_radius</code> (8, from 4 to 16) and
+        <code>orders.break_off_health</code> (0.3; 0 means fight to the death), in
+        <code>phc/server.toml</code>.</li>
+</ul>
+<p>
+    More orders are planned: Graze nearby, Guard here and Go home.
 </p>
 
 <h2 id="ender">The ender whistle</h2>
@@ -604,6 +635,78 @@
         The recall&rsquo;s clear needs a real <code>ServerPlayer</code>, so it is a play check.</li>
 </ul>
 
+<h3 id="combat-code">Hunt monsters and Defend me (Piece 3, 2026-10-03)</h3>
+<p>
+    Two orders appended to <code>HorseOrder</code>: <code>HUNT_MONSTERS</code> (anchored, so it
+    keeps a spot like Stay) and <code>DEFEND_ME</code> (it <code>follows()</code>, like Follow). Both
+    are <code>combat()</code> and bond tier 2. Nothing new is saved: the order&rsquo;s name and its
+    anchor already were, and the gate is derived from the genes each time.
+</p>
+<ul>
+    <li><strong>The gate</strong> is <code>HorseOrders.fighter(genotype, epigenome)</code> in
+        common/. It asks <code>HorseAbilities.of</code> for each of the three loci &mdash;
+        the path the genes&rsquo; own behaviour runs on, so the gate and the gene cannot disagree
+        &mdash; and passes a horse granted an <code>aggressive</code> temper towards
+        <code>hostile</code> or <code>all</code> (the aggression <code>h</code> and <code>a</code>
+        pairs, and guardian), or a <code>Combat</code> ability above the 3.0 baseline (magic fighter).
+        The <code>a</code> pairs are in by the owner&rsquo;s call, asked when this piece was built: the
+        treatment recommended leaving them out, because such a horse also goes for its rider. The
+        gate is read only through those three genes&rsquo; keys, so a data-driven gene with a temper
+        does not open it. The new refusal <code>NOT_A_FIGHTER</code> is asked after the lead and the
+        cart and <em>before</em> the bond: no amount of bond changes the genes, and &ldquo;not bonded
+        enough&rdquo; would send a player raising the bond for an order the horse can never take.</li>
+    <li><strong>Server and client ask the same question.</strong>
+        <code>HorseOrdering.fighter(record)</code> parses the horse record; the server calls it in
+        <code>situation()</code>, and the wheel calls it on the record the client already has from
+        <code>HorseRecordSyncPayload</code>, so no new sync was needed. A record the client has not
+        received yet does not grey the slice: the server answers for it.</li>
+    <li><strong><code>server/OrderCombatGoal</code></strong>, priority 2 in the <em>target</em>
+        selector, only ever sets or drops the target. The chase and the swing are
+        <code>HorseMeleeGoal</code>&rsquo;s (3), which out-ranks the order goals at 4, so the way
+        home is the existing <code>OrderStayGoal</code> (now any <code>anchored()</code> order) and
+        <code>OrderFollowGoal</code> (any order that <code>follows()</code>). It scans once a second,
+        staggered by entity id, considering at most eight entities &mdash; the aggression locus&rsquo;s
+        beat and cap &mdash; around the leash&rsquo;s centre: the anchor, or the player who gave the
+        order. It does not start while the horse already has a live target, and drops only the target
+        it picked, so a horse whose own genes are fighting keeps fighting.</li>
+    <li><strong>The leash</strong> is <code>HorseOrders.Leash(radius, breakOffHealth)</code>, built
+        by <code>ServerConfig.orderLeash(order)</code> from the three config keys:
+        <code>mayEngage</code> picks only within the radius and only while above the break-off;
+        <code>keepsFighting</code> lets a fight drift <code>LEASH_SLACK_BLOCKS</code> (4) past it,
+        for the quarry or the horse, so a monster on the edge is not picked and dropped every second.
+        This reopens the aggression locus&rsquo;s no-chase rule for orders only; see
+        <a href="gene-aggression.html">its Coding tab</a>.</li>
+    <li><strong>What it may pick</strong>: <code>MobGroups.isHostile</code>, minus players, the
+        entity-type tag <code>horsegenetics:command_never_target</code> (creepers; packs can add to
+        it), anything <code>Passification.suppresses</code>, any owned pet, any tamed horse, and
+        anything the horse cannot <code>canAttack</code>. The last two were found by the gametest. A
+        tamed zombie horse from a neighbouring test turned up as hostile, by its category. And an
+        invulnerable husk was picked every second and never fought, because
+        <code>Mob.getTarget()</code> answers null for a target the mob cannot attack. Only what the
+        horse can see is picked, as the aggression locus does.</li>
+    <li><strong>The treatment&rsquo;s UNVERIFIED 5 is settled.</strong> The only other target goal a
+        horse has, <code>WildHorseForgetTargetGoal</code>, runs for untamed horses only, so nothing
+        clears an ordered horse&rsquo;s target on its own. UNVERIFIED 2 is answered and not used:
+        26.1.2 has <code>Mob.setHomeTo</code> / <code>isWithinHome</code>, and
+        <code>MeleeAttackGoal</code> honours it, but the home is saved by vanilla and is what a lead
+        sets (<code>PathfinderMob</code>), so it would fight the leash code. The leash is our own.</li>
+    <li><strong>Config</strong> (server, <code>phc/server.toml</code>): <code>orders.hunt_radius</code>
+        (16, 8&ndash;32), <code>orders.defend_radius</code> (8, 4&ndash;16),
+        <code>orders.break_off_health</code> (0.3, 0&ndash;1; 0 is fight to the death). The defaults
+        live once, as <code>HorseOrders.DEFAULT_*</code>; accessors fall back to them before the config
+        loads. Read live, so an edit takes effect on the next scan.</li>
+    <li><strong>Tests</strong>: <code>HorseOrdersTest</code> covers the gate for every ordered aggression pair
+        (exactly six pass: three times of day, two targets), guardian, magic fighter and a plain horse. It also covers
+        breeding-before-bond, the leash with its slack, and break-off with its clamps. Breaking the
+        <code>all</code> branch turns it red. Gametests: <code>order_combat_gate</code> (a plain horse
+        refuses both combat orders on the server&rsquo;s own gate, a guardian takes them, and Stay is
+        untouched). And <code>order_hunt_picks_a_monster</code>: a guardian on Hunt picks a husk
+        four blocks off, not a creeper two blocks off. It is a guardian because a guardian starts
+        nothing by itself, so the target can only be the order&rsquo;s. With the tag check removed
+        it went for the creeper. Both wait for the horse to be founded before giving it genes,
+        because a founding afterwards rolls a new genome.</li>
+</ul>
+
 <h2 id="ender-gaps">Known gaps</h2>
 
 <ul>
@@ -624,7 +727,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ender whistles have never been blown, and the <strong>far call is the one that fails invisibly</strong> &mdash; a wrong portal ticket or entity-section wait simply answers nothing across an unloaded chunk; and the three pieces that shipped on 2026-09-29 are navigation, goal arbitration and a keybind, none of which a test can judge, with the walk-in&rsquo;s worst failure being a horse left standing behind a fence.</p>
+    <p>Ender whistles have never been blown, and the <strong>far call is the one that fails invisibly</strong> &mdash; a wrong portal ticket or entity-section wait simply answers nothing across an unloaded chunk; and the three pieces that shipped on 2026-09-29 are navigation, goal arbitration and a keybind, none of which a test can judge, with the walk-in&rsquo;s worst failure being a horse left standing behind a fence; nor has anyone yet opened the command whistle&rsquo;s wheel or watched an ordered horse fight.</p>
 </div>
 
 <h3 id="command-verify">The command whistle (2026-10-03, NOT played)</h3>
@@ -647,6 +750,24 @@
         &ldquo;Now:&rdquo; line says Rejoin herd). Same for an ender whistle.</li>
     <li>Aim at a horse behind a fence or wall within 16 blocks: no wheel.</li>
     <li>On a server, aim at someone else&rsquo;s horse: no wheel, and the normal click happens.</li>
+</ol>
+
+<h3 id="combat-verify">Hunt monsters and Defend me (2026-10-03, NOT played)</h3>
+<p>The gate and the pick are gametested; the fight, the leash and the walk home are not. At night,
+    with a guardian or an <code>Adh</code>/<code>Adh</code> horse at bond 61 or more:</p>
+<ol>
+    <li>The wheel has six slices that do not overlap, and &ldquo;Hunt monsters&rdquo; fits its
+        box.</li>
+    <li>On a plain horse at bond 90, Hunt monsters and Defend me are grey and say &ldquo;Needs a horse
+        bred to fight&rdquo;; releasing on one does nothing.</li>
+    <li>Hunt monsters in a field: it goes for a zombie that comes within 16 blocks of its spot,
+        kills it, and walks back. It ignores a creeper beside it. It does not follow a skeleton that
+        backs off past about 20 blocks from the spot.</li>
+    <li>Let a hunter get hurt below 30%: it stops fighting and goes back to its spot.</li>
+    <li>Defend me, then walk among zombies: it goes for one within 8 blocks of you and comes back
+        to heel. Mount it: it stops defending while ridden and carries on when you get off.</li>
+    <li>On a server, set <code>orders.hunt_radius</code> to 8 in <code>phc/server.toml</code> while
+        it runs: a hunter now ignores a zombie 12 blocks from its spot.</li>
 </ol>
 
 <h3 id="walking-verify">Walking a near horse in (2026-09-29, NOT played)</h3>
