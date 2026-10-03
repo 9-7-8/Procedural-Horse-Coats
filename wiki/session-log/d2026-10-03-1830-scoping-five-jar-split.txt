@@ -1,0 +1,55 @@
+2026-10-03 18:30 - Five-jar split scoped (time is the end of the session; start not recorded)
+
+ASKED
+- "/write-intake-document: I want to make this mod a little more modular, because it breaks
+  into three major parts: the procedural horse coats, the equipment overhaul, and the horse
+  QOL changes. Every release, we should ship those three jars plus a 'all in one' jar. Each
+  jar should be modular, so they can use any subset of the jars (except it's redundant to
+  combine with the all in one)". Came of it: intake/Five-jar split - implementation
+  treatment.txt (four pieces) and its block in intake/Sizing.txt.
+- The owner changed the shape mid-way: a required small Core jar plus three add-ons, or the
+  all-in-one: five jars per release.
+
+DONE
+- Wrote the treatment, with two read-only survey agents mapping the Equipment and QOL/Core
+  seams. No code, wiki or asset was touched. Not committed with a hash recorded here; see git log.
+- Proof: none run (intake only). The self-check was done by reading the file against the
+  procedure's DONE WHEN list. Class and path claims come from the agents and from a path check of
+  the main files (HorseRecords, HorseCareHandler, HorseInfoScreen, HorseBrowserScreen,
+  TutorialPage, ModNetworking, ModAttachments, ModItems, HorseDraft, HorseTackSlot,
+  ServerConfig, HorseGenetics, api/, HorseOwnership, HorseProgress, HorseCarts all exist).
+  The agents' per-file lists were NOT grepped one by one; UNVERIFIED 4 in the treatment says so.
+
+DECIDED (all owner)
+- Coats owns genetics, breeding, stats, breeds, designer, carrots, papers, stasis, vet kit,
+  hunger/diet/water-gated healing (absent without Coats), realm, stables, villagers, wild herds.
+- Equipment: gear slots, tack, shoes, pads, carts, braid (overlay only with Coats).
+  QOL: bond, herd socialising, whistles, signs, jumps, gates, posts, bench.
+- Core: genome-agnostic horse record; extension points for info/browser tabs, checklist,
+  registries and a public API; H-browser frame and Log in Core. common/ splits into four modules.
+- Brand ids ixoras_horses_coats etc.; the all-in-one keeps ixoras_horses; one shared namespace.
+- Lockstep version; Core size gate in the build; split AFTER the rename; a world that used a
+  part refuses to load without it; parts and all-in-one marked incompatible in mods.toml.
+- Piece order 1 Core, 2 Equipment, 3 QOL, 4 Coats + pipeline.
+Where recorded: the treatment only (nothing built).
+
+FOUND ON THE WAY
+- Her "all-in-one + parts is redundant" is handled by incompatible declarations, not tolerated.
+- The bench/braid assignments conflict with the survey's guess (the bench dyes tack, the braid
+  uses gear slots): resolved by her answer, leaving one Open (what the bench does without Equipment).
+- HorseCareHandler mixes bond, hunger, healing and breed-based awards in one tick; Piece 1 splits it.
+- No bug filed.
+
+PROCEDURES
+None changed. (Piece 4 will edit release.txt, test-tiers.txt and rebake.txt.)
+
+NOT RUN / NOT CHECKED
+- No build, test or boot. Seven UNVERIFIED items are listed in the treatment, riskiest first
+  (can a world be refused early; can one jar register into another's namespace).
+
+RELEASE
+Not offered (intake-only session; no player-facing work landed).
+
+PICK UP FIRST
+Run /whats-next; the rename (intake/Rename to Ixora's Horse Overhaul - implementation
+treatment.txt) must ship before this one is built, then /process-intake starts on Piece 1.

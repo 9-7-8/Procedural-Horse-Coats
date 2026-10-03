@@ -250,3 +250,13 @@ Command whistle - implementation treatment.txt                    sized 2026-10-
 - Piece 3: fighting-gene gate, Hunt monsters, Defend me          M  c  near-owner: one Open ("a" pairs); P1
 - Piece 2: Graze nearby, Go home, Guard here                     M  c  owner-free; P1, Guard needs P3
 Built? No (grep: no releaseUsing / restrictTo / order attachment). Release on the last piece.
+
+------------------------------------------------------------------------------
+Five-jar split - implementation treatment.txt                    sized 2026-10-03
+- Piece 1: Core extraction (slim record, extension points,
+  common/ split in four, Core size gate; still one jar)           L  b  Owner: No; waits on the rename; unblocks 2-4 and every port
+- Piece 2: Equipment jar (gear, tack, carts, braid)               L  c  owner-free once P1 ships; one Open (bench without Equipment)
+- Piece 3: Quality of Life jar (bond, herd social, whistles,
+  signs, jumps, gates, posts, bench)                              M-L c  owner-free; needs P1
+- Piece 4: Coats jar + five-jar release pipeline + world marker   L  c  No: API stability promise, escape hatch, file names
+Built? No (grep: no :common-core module, no Core jar, no extension registries).
