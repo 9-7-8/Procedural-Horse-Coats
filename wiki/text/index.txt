@@ -99,6 +99,8 @@ wiki/breeds.html#sources	all	Where a breed may come from
 wiki/breeds.html#spliced	all	Spliced lines
 wiki/breeds.html#stats	all	Stats: the score multiplier curve
 wiki/breeds.html#strains	all	Strains: either this, or that
+wiki/breeds.html#turnover	all	Wild horses move on, and thin ground refills
+wiki/breeds.html#turnover-coding	all	How it is built
 wiki/breeds.html#verified	all	Verified
 wiki/breeds.html#world-settings	all	A world's own ecology: breed-spawning.toml
 wiki/carrots.html#blacklist	all	The Unknown Gene Splice blacklist
@@ -3022,6 +3024,7 @@ wiki/horse-realm.html#the-field	gameplay	The field
 wiki/horse-realm.html#the-table	coding	The table is the census, not a scan
 wiki/horse-realm.html#two-dimensions	coding	Two dimensions, and why they share nothing
 wiki/horse-realm.html#what	gameplay	What it is for
+wiki/horse-realm.html#wild-arrivals	gameplay	Wild horses arrive on their own
 wiki/horse-stasis.html#bank-art-0929	coding	The block finally looks like itself
 wiki/horse-stasis.html#bank-coding	coding	The bank is a filtered chest with a clock on it
 wiki/horse-stasis.html#bank-gameplay	gameplay	The Horse Stasis Bank

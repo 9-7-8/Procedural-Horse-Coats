@@ -237,6 +237,17 @@
     up in one right-click, rather than making you lead it through a portal first.
 </p>
 
+<h2 id="wild-arrivals">Wild horses arrive on their own</h2>
+<p>
+    <strong>A wild horse you led, fed or tried to ride, and then left untamed, ends up here.</strong>
+    Out in the world a wild horse <a href="breeds.html#turnover">moves on after three days</a>; one a
+    player worked with is released into the realm instead of vanishing, still wild and still itself
+    &mdash; name, coat, papers. It arrives at the exit like any traveller, pays nobody, and like every
+    horse that stands here it <a href="#growing">makes the field a little bigger</a>. That is on purpose:
+    the realm is the commons, and a horse somebody once spent time on is the kind it is for.
+    <code>wild.realm_handoff false</code> turns it off, and then those horses vanish like the rest.
+</p>
+
 <h2 id="taking-one-home">Taking one home, without catching it</h2>
 <p>
     Press <kbd>H</kbd> in the realm and the browser opens on the <strong>Horse realm</strong>
@@ -764,6 +775,17 @@
     is theirs and this dimension does not delete things.
 </p>
 
+<p>
+    <strong>A third way in: the wild-horse hand-off</strong> (<code>server/WildTurnover</code>,
+    2026-10-02). It calls <code>makeWild(level, horse, null)</code> in the horse's <em>own</em> level,
+    before the teleport - so the lead and any tack drop where it stood, and nobody is paid - and only then
+    moves it, because a cross-dimension teleport builds a new entity from the old one's saved data and
+    anything done to the old one afterwards is done to nothing. The move uses vanilla's portal ticket, so the
+    arrival chunk loads even with nobody in the realm. <code>makeWild</code> also clears the
+    <a href="breeds.html#turnover-coding">wild lifetime</a>, so nothing in the realm ever expires. The
+    turnout ticket still does it the other way round, which is issue #29.
+</p>
+
 <h2 id="feral">Leaving is a condition, not an event</h2>
 <p>
     <code>HorseRealmFeral</code>. The obvious build is a hook on leaving &mdash; find the
@@ -927,8 +949,19 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of every horse in the field</strong>, built from the census rather than from what is loaded, that you can buy any horse out of for a holding pen ticket &mdash; it drew nothing at all until 2026-09-26 and has still not been seen with rows in it; a horse now only goes through a portal when a player is <strong>taking it through</strong>; turning one out <strong>pays</strong>, with <code>/horsebounty</code> to settle up for the ones given away before it did; and <strong>the census itself starts empty on an existing world</strong>, which is the thing to read first.</p>
+    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of every horse in the field</strong>, built from the census rather than from what is loaded, that you can buy any horse out of for a holding pen ticket &mdash; it drew nothing at all until 2026-09-26 and has still not been seen with rows in it; a horse now only goes through a portal when a player is <strong>taking it through</strong>; turning one out <strong>pays</strong>, with <code>/horsebounty</code> to settle up for the ones given away before it did; and <strong>the census itself starts empty on an existing world</strong>, which is the thing to read first. And <strong>wild horses a player worked with now arrive here by themselves</strong>, which no test could show, because the gametest harness has no realm.</p>
 </div>
+
+<h3 id="verify-wild-arrivals">A touched wild horse arrives here (2026-10-02, NOT played)</h3>
+<p>
+    The <a href="#wild-arrivals">hand-off</a>'s fallback is gametested (no realm: the horse is kept and tries
+    again), but the arrival itself is not: the harness has no realm level. <strong>Where to look:</strong>
+    lead or feed a wild horse in the overworld, leave it untamed, walk 40 blocks off and
+    <code>/tick sprint 72000</code>. A <code>[Wild] ... went to the horse realm</code> line, then in the realm: the
+    horse near the exit, untamed, same name and coat, on the <kbd>H</kbd> table; its lead on the ground where it
+    stood in the overworld. <strong>Fail looks like</strong> the line with no horse in the realm (lost in an
+    unloaded chunk), a tamed arrival, or the field not growing by one.
+</p>
 
 <h3 id="verify-realm-backup">Realm backups and <code>/horserealm restore</code> (2026-10-01, NOT played)</h3>
 <p>

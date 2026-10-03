@@ -676,6 +676,121 @@
     </p>
 </div>
 
+<h2 id="turnover">Wild horses move on, and thin ground refills</h2>
+<p>
+    <strong>The wild keeps changing.</strong> A wild horse stays <strong>three days</strong> and then moves on,
+    and once a day the ground near each player is topped up with new herds wherever it has run thin. Come back
+    to a valley after a few days and the herds in it are different ones; walk somewhere new and there are
+    horses in it. (Owner, 2026-10-02: &ldquo;to have a lot of change between the kind of horses you find in the
+    wild, to make it worth exploring or revisiting areas&rdquo;.) Natural spawning itself is untouched.
+</p>
+<ul>
+    <li><strong>Three days, then gone - but never in front of you.</strong> The days are game time counted from
+        when the horse spawned, so they pass while you are away and its chunk is unloaded too; sleeping and
+        <code>/time set</code> do not move them. A day here is twenty minutes of play, not dawn to dawn. A horse waits
+        while any player is within 32 blocks of it, and a herd goes together.</li>
+    <li><strong>A horse you worked with goes to the <a href="horse-realm.html">horse realm</a> instead.</strong>
+        Lead it, feed it, or get on it and it counts as yours to have met: when its days are up it is released
+        into the realm, still wild and still itself - name, coat, papers - and the field grows a little to fit
+        it. Naming is not on the list only because an untamed horse cannot be renamed here at all.</li>
+    <li><strong>Tame it to keep it.</strong> A tamed horse never moves on, and taming wipes its lifetime. A
+        horse you caught and penned but never tamed is still wild: it goes to the realm on day three.</li>
+    <li><strong>Thin ground refills.</strong> The world is cut into fixed squares of 8 by 8 chunks (128
+        blocks). Once a game day, the first time a player comes within 96 blocks of a square, a square with
+        fewer than five wild horses gets a whole new herd - of whatever breed that ground would found
+        naturally, a natural pack in size, out of sight of everyone and at least 24 blocks from any player.
+        Five is a trigger, not a cap: the herd may take the square well past it.</li>
+    <li><strong>New biomes fill in once.</strong> Give a breed a new biome in <code>breed-spawning.toml</code>
+        (or add a biome mod) and restart, and every square refills once on its next visit, the newly listed
+        biome included; walking out and back the same day adds nothing.</li>
+</ul>
+<table>
+<thead><tr><th>Server setting</th><th>Default</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>wild.despawn_days</code></td><td>3</td><td>How many game days a wild horse stays (0 to 30). <code>0</code> switches the lifetime off, and the realm hand-off with it.</td></tr>
+<tr><td><code>wild.realm_handoff</code></td><td>true</td><td>Whether a horse a player worked with goes to the realm. Off: it vanishes like the rest.</td></tr>
+<tr><td><code>wild.topup_minimum</code></td><td>5</td><td>The fewest wild horses a square should have (0 to 64). <code>0</code> switches the top-up off.</td></tr>
+<tr><td><code>wild.topup_cell_chunks</code></td><td>8</td><td>The square's edge in chunks (2 to 32). Smaller squares mean more horses overall.</td></tr>
+<tr><td><code>wild.topup_player_radius</code></td><td>96</td><td>How near a player a square must be to be checked, in blocks (32 to 256).</td></tr>
+</tbody>
+</table>
+
+<h3 id="turnover-coding">How it is built</h3>
+<p>
+    <strong>The stamp.</strong> <code>BreedSpawnHandler</code> writes <code>horsegenetics:wild_born</code> (the
+    game time) into the persistent data of every horse from a <code>NATURAL</code> or
+    <code>CHUNK_GENERATION</code> spawn it lets through, outside the realm and the debug corridor. Not a
+    <code>SPAWNER</code>'s (somebody built that spawner), not <code>/summon</code>, an egg, the cowboy, a stable,
+    a bred foal or another mod's horse - none of those is ever stamped, so none ever moves on. It cannot be
+    <code>WILD_SPAWN_KEY</code>, which <code>HorseFoundingTickHandler</code> removes once the horse is founded.
+    <code>horsegenetics:wild_touched</code> is set, never unset, by <code>WildTurnover.onInteract</code> (food
+    the horse eats, a lead, the empty-handed click that mounts an untamed horse) and by the scan itself (a
+    lead on it, temper above 0, a saddle or armour, a player riding it). <code>HorseRelease.makeWild</code>
+    clears both, so a horse turned out anywhere is meant to stay.
+</p>
+<p>
+    <strong>The lifetime</strong> is <code>WildTurnover</code>, on the same 30-tick, id-staggered entity-tick
+    scan as <code>HorseCareHandler</code>: a tamed horse, or any horse in the realm or the corridor, has its keys
+    cleared and is left; a stamped one is judged by <code>common/wild/WildLifetime</code>. A herd member is
+    judged on its <em>lead's</em> stamp while the lead is loaded, so a herd that came together goes together,
+    and a foal born into the band goes with it. A stamp later than now (an edited world) is re-stamped rather
+    than left immortal. <strong>Horses from before the stamp</strong> are stamped, with a fresh three days, the
+    first time they are scanned if they are what a natural spawn always became - founded into a wild herd,
+    untamed, never made persistent. Every deliberate path that leaves a horse wild (a release, the cowboy, a
+    stall, the stasis bank) marks it persistent, which is what keeps those out; a lone Feral Mixed from an old
+    natural spawn has no herd and keeps its permanent life.
+</p>
+<p>
+    <strong>The realm hand-off</strong> makes the horse wild <em>before</em> it moves (the lead and any tack drop
+    where it stood), because a cross-dimension teleport builds a new entity from the old one's saved data;
+    then <code>teleport(...)</code> to <code>HorseRealm.arrivalSpot()</code> with vanilla's portal ticket, so the
+    arrival chunk is loaded even with nobody in the realm. No fee and no message. If there is no realm, or the
+    move fails, the stamp and the touched mark are put back and the next scan tries again.
+</p>
+<p>
+    <strong>The top-up</strong> is <code>WildTopUp</code>, once a second from the server tick, over every level
+    but the realm and the corridor, only with <code>doMobSpawning</code> on. For each non-spectator player it
+    lists the cells within <code>wild.topup_player_radius</code> (<code>TopUpPlan.cellsNear</code>); a cell
+    already stamped today under today's signature costs one map lookup and is skipped, and at most four other
+    cells are counted per pass. A count is one entity query over the cell's loaded sections: untamed, unleashed
+    horses that are stamped or in a wild herd. Under the minimum, up to twelve random spots in the cell are
+    tried: a chunk that is ticking entities (none is ever loaded for this), the ground found as
+    <code>NaturalSpawner.getTopNonCollidingPos</code> finds it (walking down under a ceiling), a biome whose own
+    creature list has a horse entry and in which <code>Breeds.anythingMaySpawn</code>, the horse's spawn rules
+    (vanilla's, ORed with <code>HorseSpawnGround</code>), 24 blocks from every player and not in plain view of
+    any of them (in front of a player within 128 blocks with a clear line is refused), and nothing else within
+    <code>HerdManager.HERD_RADIUS</code>, or the pack would join that herd. The pack is the biome's own natural
+    count, spawned with <code>EntityType.HORSE.spawn(..., NATURAL)</code> - so <code>BreedSpawnHandler</code> gates
+    and stamps it and <code>HerdManager</code> founds it, breed and all, exactly as it founds a natural pack -
+    with every member within four blocks of the first, so the founder sees one clump. The cell is stamped
+    whether a herd fitted or not.
+</p>
+<p>
+    <strong>The ledger</strong> (<code>data/WildCellLedger</code>, per level, <code>horsegenetics:wild_cells</code>)
+    holds a stamp per cell: the game day and the <a href="#world-settings">ecology</a> signature. The signature
+    (<code>TopUpPlan.signature</code>, FNV-1a) hashes every wild breed's id, biomes, weight, hour and floors,
+    Feral Mixed's settings, and the cell size and minimum - nothing else, so a breed's description or genes can
+    change without a re-roll - and is computed once per server start. A stamp that is not today's means exactly
+    what no stamp means, so the ledger drops them on the first touch of a new day: it never holds more than the
+    cells visited since the day turned. A world without the file starts empty: every cell rolls once on its
+    first visit.
+</p>
+<p>
+    <strong>How this answered the visited-chunks plan.</strong> The Roadmap used to ask why horses seemed not to
+    spawn in land already explored, and concluded that if vanilla's pass was the cause, &ldquo;the fix is a
+    mod-owned periodic spawner around players&rdquo;. The top-up is that spawner, with its config gate
+    (<code>wild.topup_minimum 0</code>). Whether vanilla's own pass was the cause was never measured.
+</p>
+<p id="turnover-calls">
+    <strong>Calls made while building it</strong> (session calls, 2026-10-02; the owner's own are in the
+    treatment's words above): a cell's biome is read <em>at each spot tried</em>, not at the cell's centre
+    column, so a narrow biome or a river through a plains cell is judged by where the herd would stand;
+    &ldquo;out of sight&rdquo; is vanilla's 24 blocks plus a view cone of about 60&deg; either side with a block
+    raycast, out to 128 blocks; a spawner's horse is not stamped; naming is not a way to touch a horse, because
+    an untamed horse cannot be renamed; a new herd never lands within 32 blocks of another horse; only today's
+    cell stamps are kept.
+</p>
+
 <h2 id="crosses">Breeding: crosses and mixes</h2>
 <p>
     A foal&rsquo;s breed label (<code>BreedLineage.combine</code>, applied in
@@ -964,7 +1079,8 @@
     <li><code>common/breed/BreedLineage</code> &mdash; the label value object: pure / cross / <a href="#spliced">spliced</a> / mixed / feral, <code>combine</code>, <code>displayName</code>, token round-trip.</li>
     <li><code>common/genetics/SpliceOutcome</code> &mdash; did the splice carrot&rsquo;s allele actually reach the foal.</li>
     <li><code>common/trait/{StatAxis,TargetBand,BreedStatTargets}</code> &mdash; the band types, one <code>StatAxis</code> per magical body-stat gene. <code>StatAxis.baseline()</code> is what a band is measured against (1.0 for the four multipliers, <code>HorseTraits.BASE_PULL</code> for the pull score), which is why <code>TargetBand.pushesUp</code> takes it as an argument. Read by <code>BreedFounder</code> and <a href="#founder-only">nowhere else</a>.</li>
-    <li><code>neoforge/server/BreedSpawnHandler</code> &mdash; a one-line <code>FinalizeSpawnEvent</code> hook that flags natural spawns.</li>
+    <li><code>neoforge/server/BreedSpawnHandler</code> &mdash; a <code>FinalizeSpawnEvent</code> hook that flags natural spawns and stamps their <a href="#turnover">wild lifetime</a>.</li>
+    <li><code>neoforge/server/WildTurnover</code>, <code>WildTopUp</code>, <code>data/WildCellLedger</code> &mdash; <a href="#turnover-coding">wild horses move on; thin cells refill</a>. The rules are <code>common/wild/WildLifetime</code> and <code>TopUpPlan</code>.</li>
     <li><code>neoforge/server/HerdManager</code> &mdash; the deferred genome / record / <b>proximity</b> herd formation.</li>
     <li><code>neoforge/server/DebugHighlightHandler</code> &mdash; the F8 glow toggle.</li>
     <li><code>neoforge/server/WildHerdGoal</code> &mdash; a herd member trails its lead.</li>
@@ -1082,8 +1198,8 @@
     <span class="label">What is still planned here</span>
     <p>
         The unbuilt work here is spawning and the render layer: an opt-in weather field that
-        would be the breed parser&rsquo;s <strong>first cross-field validation</strong>, horses
-        that may never spawn in chunks already explored, flowing manes and lower-leg feathering,
+        would be the breed parser&rsquo;s <strong>first cross-field validation</strong>,
+        flowing manes and lower-leg feathering,
         and a herd flood-fill that can still split a pack streaming in over several ticks.
     </p>
 </div>
@@ -1181,27 +1297,6 @@
         today, so this would be the first.</li>
 </ul>
 
-<h3 id="visited-chunks">Horses spawning in chunks already visited</h3>
-
-<p>
-    <strong>The premise needs checking before the work does.</strong> Wild spawning is entirely
-    vanilla's <code>NaturalSpawner</code>, fed by two biome modifiers
-    (<code>add_horse_herds</code>, a herd in listed biomes, and <code>add_horse_loners</code>, a
-    single horse anywhere overworld). Vanilla consumes those from <em>both</em> chunk generation
-    and the ongoing per-tick pass around players, and <code>BreedSpawnHandler</code> accepts
-    <code>NATURAL</code>, <code>CHUNK_GENERATION</code> and <code>SPAWNER</code> identically.
-    <strong>Nothing in this mod keys off a chunk being new</strong> &mdash; no
-    <code>isNewChunk</code>, no <code>ChunkStatus</code> check, no per-chunk attachment.
-</p>
-<p>
-    So horses should already spawn in explored land, and the real cause is likelier to be
-    vanilla's animal rules: <code>CREATURE</code> spawns are weighted heavily toward worldgen,
-    and a night-only breed cannot pass the light check on an existing chunk at all.
-    <strong>Diagnose before building:</strong> if the answer is vanilla's pass rather than ours,
-    the fix is a mod-owned periodic spawner around players, which is a much larger thing than it
-    sounds and wants a config gate.
-</p>
-
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -1209,8 +1304,37 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament or true flight at all, and the first that may now spawn wild somewhere with no grass, which has never once been seen happen &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, a harem that should cap at four mares, and herds in modded overworld, Nether and End biomes - the End's the first there ever - which no world has generated yet; and nine breeds whose climate genes the new spawn-biome rule moved, not yet read off a living horse.</p>
+    <p>Wild horses now move on after three days and thin ground refills with new herds, and no world has seen either - nor a touched horse arrive in the realm; beneath that, herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament or true flight at all, and the first that may now spawn wild somewhere with no grass, which has never once been seen happen &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, a harem that should cap at four mares, and herds in modded overworld, Nether and End biomes - the End's the first there ever - which no world has generated yet; and nine breeds whose climate genes the new spawn-biome rule moved, not yet read off a living horse.</p>
 </div>
+
+<h3 id="turnover-1002">Wild horses move on, and thin ground refills (2026-10-02, NOT played)</h3>
+<p>
+    <a href="#turnover">The turnover</a> is held by <code>WildLifetimeTest</code>, <code>TopUpPlanTest</code> and six
+    gametests (<code>wild_horse_moves_on</code>, <code>wild_touched_horse_goes_to_the_realm</code>,
+    <code>wild_tamed_horse_stays</code>, <code>wild_old_horse_is_stamped</code>, <code>wild_pack_founds_one_herd</code>,
+    <code>wild_cell_rolls_once_a_day</code>). The harness has no realm level, so the hand-off's arrival was only
+    proven to fall back safely; no test has a player in it, so &ldquo;never in front of anyone&rdquo; is
+    unit-tested only. <strong>Where to look</strong> (with <code>debug.announce</code> on, every move is a
+    <code>[Wild]</code> line):
+</p>
+<ol>
+    <li><strong>Turnover.</strong> In a fresh world, find a herd, note it, and walk 40 blocks off. <code>/tick sprint 72000</code>
+        - the days are game time, so sleeping and <code>/time</code> move nothing - and walk back: it is gone, with a <code>[Wild] ... moved on</code> line,
+        and by next morning a different herd stands near. Fail: still there after three days unwatched.</li>
+    <li><strong>Never in front of you.</strong> Stand within 32 blocks of a herd through day three: it stays until
+        you walk away. Fail: it vanishes in view.</li>
+    <li><strong>Touched horses go to the realm.</strong> Lead one wild horse, feed another, try to ride a third, then
+        leave them untamed for three days, 40+ blocks away. Each should be in the horse realm, still wild, same name
+        and coat, with a <code>went to the horse realm</code> line; the lead drops where it stood. Fail: one vanishes,
+        or arrives tamed. <strong>The first real arrival</strong> - no gametest could make one.</li>
+    <li><strong>New biomes fill once.</strong> Add a biome to a breed in <code>phc/breed-spawning.toml</code>, restart,
+        walk into it: a herd appears once (<code>[Wild] cell ... a herd of N arrived</code>); out and back the same day
+        adds none. Fail: a herd on every visit, or none at all.</li>
+    <li><strong>Only near players.</strong> Two players far apart: <code>[Wild] cell</code> lines appear only for cells
+        near each. A tame horse left in a field for a week is still there.</li>
+    <li><strong>The feel.</strong> Is three days too quick, and does a herd's arrival ever read as a pop-in? Both are
+        config, not code: <code>wild.despawn_days</code>, and the view test in <code>WildTopUp.outOfSight</code>.</li>
+</ol>
 
 <h3 id="climate-rule-1001">The climate rule moved nine breeds (2026-10-01, NOT played)</h3>
 <p>

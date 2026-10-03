@@ -661,6 +661,10 @@
         phase-staggered by <code>tickCount + entityId</code>), plus the
         <code>PlayerInteractEvent.EntityInteract</code> hook for feed-bond and
         the <code>EntityJoinLevelEvent</code> hook that adds the goal.</li>
+    <li><code>server/WildTurnover</code> &mdash; a second subscriber on the <strong>same</strong>
+        30-tick, id-staggered phase: the <a href="breeds.html#turnover-coding">wild lifetime</a>.
+        For a horse with no stamp it costs a key lookup; for a stamped one, a long compare,
+        and only a horse that is due looks for a player within 32 blocks.</li>
     <li><code>server/BondFollowGoal</code> &mdash; the AI goal that reads the
         bond tier, added at priority 4 to every <code>Horse</code>, with its
         <code>Watch</code> (tier 1, head-turning, <code>LOOK</code> only) added
@@ -1462,6 +1466,9 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     allowedInPeaceful true, tamed true</code>, the untamed one reading the same, and <code>this mod has no
     MobDespawnEvent subscriber</code> &mdash; <code>CLOCKWORK PASS</code>, 23:54:10. So the fix that check feared
     it would need is not needed. It does not cover another mod's <code>MobDespawnEvent</code> answering ALLOW.
+    <strong>Distance still removes nothing; age now does</strong> (2026-10-02): a wild horse from a natural spawn
+    moves on after <code>wild.despawn_days</code> - see <a href="breeds.html#turnover">the turnover</a>. Tamed,
+    released, bought or bred horses are never stamped, so this record still holds for every one of them.
 </p>
 
 <p id="verified-bond-decay">

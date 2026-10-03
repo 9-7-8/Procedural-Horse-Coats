@@ -240,6 +240,15 @@
     is the first thing to check, and the fix is a datapack overriding
     <code>add_horse_herds</code> / <code>add_horse_loners</code>.
 </p>
+<p>
+    <strong>The wild-horse turnover counts only our own.</strong> A horse is given a
+    <a href="breeds.html#turnover">wild lifetime</a> only by this mod's natural-spawn hook, so another
+    mod's horses, and horses another mod spawns, never move on - and the top-up, which counts wild
+    horses per cell before adding a herd, does not count them either. A world running another horse
+    spawner therefore keeps both: theirs permanent, ours turning over and topped back up to
+    <code>wild.topup_minimum</code>. If that is too many, <code>wild.topup_minimum 0</code> turns the
+    top-up off and leaves the lifetime.
+</p>
 
 <h2 id="third-party-genes">Third-party genes are supported, and are the right seam</h2>
 <p>

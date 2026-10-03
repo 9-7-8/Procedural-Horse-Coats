@@ -26,6 +26,10 @@ BEFORE YOU START
 ----------------
 1. `git pull --ff-only origin main`. intake/To do.txt is edited on github.com, so the
    local copy is routinely stale, and cloud routines push to main too.
+   If the owner names a unit and it is not in intake/, look at the unmerged cloud
+   branches (`git fetch origin`, then `git diff --stat main...origin/claude/<name> --
+   intake/`): a cloud scoping session leaves its treatment on its own branch. Merge
+   that branch first (it carries only intake/, procedures and docs), and say so.
 2. `git status --short`. Untracked files in intake/ are the owner queuing material:
    commit around them, and never flag, add or delete them.
 3. Run `node wiki/tools/check-roadmap-execution.mjs`.
