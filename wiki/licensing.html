@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Licensing &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Project <span class="sep">/</span> who owns what, and what you may do</p>
+<h1>Licensing</h1>
+<p class="lede">
+    <strong>The code is MIT. The art is CC&nbsp;BY&#8209;SA&nbsp;4.0. A few pieces that
+    ship with the mod are somebody else&rsquo;s and keep their own terms.</strong> This page
+    says that twice &mdash; once in plain words, once in the formal language &mdash; and then
+    lists the exceptions file by file. The author is not a lawyer and does not sell this
+    software; the licences are here so people know they may share and build on it, not
+    to be defended in court.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="plain">In plain words</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>What</th><th>Licence</th><th>What you can do</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>The code</strong> &mdash; every <code>.java</code>, <code>.js</code>, <code>.mjs</code>,
+        <code>.gradle</code> file, the tests and the tools, and the data files that drive the
+        game (genes, breeds, recipes, language files)</td>
+    <td><a href="#mit">MIT</a></td>
+    <td>Anything. Use it, change it, sell it, put it in your own mod, closed or open.
+        Keep the copyright line and the licence text with it.</td>
+</tr>
+<tr>
+    <td><strong>The art</strong> &mdash; the textures, sprites, icons, models and wiki
+        illustrations we made, and the wiki and README writing</td>
+    <td><a href="#ccbysa">CC&nbsp;BY&#8209;SA&nbsp;4.0</a></td>
+    <td>Anything, including selling it. Credit us, link back, say what you changed, and
+        release your changed version under the same licence.</td>
+</tr>
+<tr>
+    <td><strong>Other people&rsquo;s pieces</strong> that ship in this repo or the jar</td>
+    <td>Their own, <a href="#third-party">listed below</a></td>
+    <td>Read their row. Some you may reuse, some you may not take out of this mod at all.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 id="faq">Common questions</h3>
+<ul>
+    <li><strong>Can I put it in my modpack?</strong> Yes. Credit the mod; nothing else is
+        asked. A paid modpack is fine as far as our own parts go &mdash; but see the
+        <a href="#third-party">third-party</a> rows before you repackage the files they own.</li>
+    <li><strong>Can I fork it and sell the fork?</strong> Yes for the code (MIT). The art
+        stays CC BY-SA, so a fork that keeps our art must keep it under CC BY-SA and credit it.
+        The three Raven icons may not be redistributed by anyone, forks included.</li>
+    <li><strong>Can I use the code in a closed-source mod?</strong> Yes. That is what MIT
+        allows. The only price is carrying the copyright line and licence text along.</li>
+    <li><strong>Can I use the art in a closed-source mod?</strong> You can ship it in one, but
+        the art itself stays CC BY-SA: credit it, and if you change a texture, the changed
+        texture is CC BY-SA too. Your code is not infected by that.</li>
+    <li><strong>What about the horses?</strong> A coat is drawn by our code from a genome. The
+        picture it makes belongs to whoever made that horse; we claim nothing over it.
+        Screenshots, videos and streams of the game are yours to share.</li>
+    <li><strong>It used to say CC BY-NC.</strong> It did. Copies you already have under that
+        grant stay under it; everything from the change onward is MIT and CC BY-SA. Both
+        are more permissive about money than the old licence was.</li>
+</ul>
+
+<h2 id="formal">The formal language</h2>
+
+<h3 id="mit">Code: MIT License</h3>
+<p>
+    Full text in <code>LICENSE</code> at the root of the repository and inside the jar under
+    <code>META-INF/</code>. SPDX identifier <code>MIT</code>.
+</p>
+<pre><code>MIT License
+
+Copyright (c) 2026 Ixora
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</code></pre>
+
+<h3 id="ccbysa">Art: Creative Commons Attribution-ShareAlike 4.0 International</h3>
+<p>
+    SPDX identifier <code>CC-BY-SA-4.0</code>. The notice is <code>LICENSE-ART</code> at the
+    repository root; the complete legal code is <code>LICENSES/CC-BY-SA-4.0.txt</code> (also
+    inside the jar) and
+    <a href="https://creativecommons.org/licenses/by-sa/4.0/legalcode">online</a>, and it
+    governs. In short, the licensor grants you a worldwide, royalty-free, non-exclusive,
+    perpetual licence to reproduce, share and adapt the art, for any purpose including
+    commercial, on these conditions:
+</p>
+<ul>
+    <li><strong>Attribution.</strong> Credit Ixora, give a link to
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats">the repository</a>, link to the
+        licence, and indicate whether you changed it. You may not suggest the author endorses you.</li>
+    <li><strong>ShareAlike.</strong> If you remix, transform or build on the art, you must
+        distribute your contribution under CC BY-SA 4.0 or a licence the Creative Commons
+        site lists as compatible with it (the GPL&nbsp;v3 is one, in that one direction).</li>
+    <li><strong>No further restrictions.</strong> You may not add legal terms or technical
+        measures that stop others doing what the licence allows.</li>
+    <li><strong>No warranty.</strong> The art is offered as-is.</li>
+</ul>
+<p>
+    <em>Why this one:</em> it is the art world&rsquo;s counterpart to the GPL &mdash; a copyleft
+    licence written for images, sound and text, where the GPL is written for software. It is
+    the same &ldquo;share it forward&rdquo; idea, and it is the licence Wikipedia uses.
+</p>
+
+<h3 id="scope">Which files are which</h3>
+<ul>
+    <li><strong>Art (CC BY-SA 4.0):</strong> the PNG textures under
+        <code>assets/horsegenetics/</code> that we drew or generated, the item, block and gene
+        icons and previews under <code>wiki/assets/</code>, the models, and the prose of the wiki
+        and README.</li>
+    <li><strong>Code (MIT):</strong> everything else we wrote, including the data and JSON that
+        configure the game and the generators that draw coats.</li>
+    <li><strong>Neither:</strong> everything in the table below.</li>
+</ul>
+
+<h2 id="third-party">Pieces that are not ours</h2>
+<p>
+    These ship with, or sit in, this project and keep the licence they came with. The full
+    notices (the wording the licensors require) are in <code>THIRD_PARTY_NOTICES.md</code>,
+    which travels inside the jar.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Piece</th><th>From</th><th>Licence</th><th>What it means for you</th></tr></thead>
+<tbody>
+<tr>
+    <td><strong>The cart system</strong> &mdash; wagons, plows, seed drills, reapers: the
+        <code>carts</code> package, the seven <code>Cart*</code> mixins, and their assets,
+        textures and sounds</td>
+    <td>UsefulCarts, by way of NiftyCarts and AstikorCarts (MennoMax, jmb19905)</td>
+    <td>MIT, text in <code>LICENSES/UsefulCarts-MIT.txt</code></td>
+    <td>Free to reuse, but keep <em>their</em> copyright lines (2019 MennoMax, 2023 jmb19905) with
+        those files. The cart item and GUI textures are MIT, not CC BY-SA.</td>
+</tr>
+<tr>
+    <td><strong>Three item icons</strong> &mdash; vet&rsquo;s kit, freedom stick, golden carrot
+        seeds (<code>textures/item/vet_kit.png</code>, <code>freedom_stick.png</code>,
+        <code>golden_carrot_seeds.png</code>)</td>
+    <td>Raven Fantasy HD Ultimate, by Caio Carlos of Clockwork Raven Studios</td>
+    <td>Clockwork Raven User Asset License Agreement</td>
+    <td><strong>Do not take them out of this mod.</strong> No extracting, reusing, reselling or
+        bundling them in an asset pack, and no training machine-learning models on them. The
+        MIT and CC BY-SA grants above do <em>not</em> reach these three files. They are free
+        from the author&rsquo;s store page if you want your own copy.</td>
+</tr>
+<tr>
+    <td><strong>The three generated stables</strong> (<a href="stables.html">Stables</a>)</td>
+    <td>Seuchendoktor, Alpha_One_Seventeen and Tyiarrah, from Planet Minecraft</td>
+    <td>Each author&rsquo;s own; not yet checked one by one</td>
+    <td>Treat as not ours and not freely reusable. See the Verification tab.</td>
+</tr>
+<tr>
+    <td><strong>Anything of Mojang&rsquo;s</strong></td>
+    <td>Minecraft</td>
+    <td>The Minecraft EULA / Usage Guidelines</td>
+    <td>The mod does not ship Mojang&rsquo;s art; cart textures are assembled at runtime from
+        your own game files. Minecraft is a trademark of Mojang; this project is not
+        affiliated with or endorsed by Mojang or Microsoft.</td>
+</tr>
+<tr>
+    <td><strong>Build and wiki dependencies</strong> (NeoForge, TeaVM, Prism, Gradle, and
+        the rest)</td>
+    <td>Their authors</td>
+    <td>Their own open-source licences</td>
+    <td>Not redistributed from this repository except where a notice says so.</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="history">Changes of licence</h2>
+<p>
+    The project began under CC BY-NC 4.0. It moved to MIT (code) and CC BY-SA 4.0 (art) with the
+    commit that added this page. A licence that has already been granted for a copy you
+    received is not taken back, so releases made before the change may still be used under
+    CC BY-NC 4.0 if you prefer; nothing about the new terms asks you to.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The licence of the three borrowed stable buildings, and whether the white horse coat templates and saddle overrides are Mojang&rsquo;s or ours, have not been established.</p>
+</div>
+
+<ul>
+    <li><strong>The stables.</strong> Planet Minecraft submissions carry no uniform licence. Each
+        of the three has to be read, and permission asked where it is unclear, before the mod
+        is distributed widely. Tracked with the stables themselves on
+        <a href="stables.html">the Stables page</a>.</li>
+    <li><strong>The white templates.</strong> <code>horse_white.png</code> (and its baby and 64px
+        variants) and the three <code>minecraft/textures/entity/equipment/*_saddle</code> sets
+        may be derived from Minecraft&rsquo;s own horse art. If they are, they are not covered by
+        CC BY-SA and the art notice should say so outright. Check where each came from.</li>
+    <li><strong>The art/code split.</strong> The art claim is written from the folder layout. Check
+        that no image under <code>wiki/assets/</code> or <code>textures/</code> was copied
+        from elsewhere before treating it as ours.</li>
+</ul>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="stables.html">Stables</a>
+        <a href="carts.html">Carts</a>
+        <a href="item-vet-kit.html">Vet&rsquo;s kit</a>
+        <a href="releases.html">Releases</a>
+    </div>
+    The code is MIT, the art is CC BY-SA 4.0, and the third-party pieces keep their own terms.
+</div>
+
+</article>
+</main>
+</body>
+</html>

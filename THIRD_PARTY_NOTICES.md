@@ -18,8 +18,8 @@ Credit, as the author's own licence suggests it:
 
 ### These three files are NOT covered by this mod's licence
 
-Horse Genetics is CC BY-NC 4.0, which lets you reuse and redistribute it. That
-grant is **carved back for the three files listed above**, because it is not ours
+Horse Genetics is MIT (code) and CC BY-SA 4.0 (art), which let you reuse and
+redistribute it. Those grants are **carved back for the three files listed above**, because it is not ours
 to give. The Clockwork Raven User Asset License Agreement permits their use in a
 free mod on the condition that the mod's users are told they may not take the
 assets on, so:
@@ -31,7 +31,8 @@ assets on, so:
   * A fork of this mod inherits those restrictions on these three files, and
     inherits nothing more than this mod itself holds.
 
-Everything else in this repository is under the mod's own licence as normal. If
+Everything else in this repository is under the mod's own licences as normal
+(`LICENSE` for code, `LICENSE-ART` for art). If
 you want these icons for your own project, get them from the author's store page
 above - they are free.
 
@@ -120,3 +121,22 @@ runtime from the player's own vanilla block textures by
   - The wagon roof textures were being rebuilt once per wood (sixteen dyes,
     twelve times over). Moved out of the wood loop.
   - `wheel` renamed to `cart_wheel` to keep the host namespace unambiguous.
+
+## Generated stables (three buildings)
+
+The three buildings the mod generates as stables were made by other people and
+downloaded from Planet Minecraft:
+
+  * Horse Stable, by Seuchendoktor
+  * Stables, by Alpha_One_Seventeen
+  * TM U Stable, by Tyiarrah
+
+Sources and sizes are on `wiki/stables.html`. They are **not** covered by this
+mod's licences. Planet Minecraft submissions carry no uniform licence and the
+terms of these three have not yet been checked one by one; until they are,
+treat the buildings as not freely reusable and do not extract them.
+
+## Where the rest is written
+
+The plain-language version of all of this, with a table of every exception, is
+`wiki/licensing.html`.

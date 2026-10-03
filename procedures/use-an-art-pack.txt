@@ -39,7 +39,7 @@ STEPS
       empty USAGE.txt means nothing from that pack is in the game;
    b. THIRD_PARTY_NOTICES.md, the first time anything from a pack is used, with the
       credit line from its notes. Some packs need extra wording: one forbids reuse of
-      its icons and needs the CC BY-NC grant carved back for those files, and another
+      its icons and needs the MIT / CC BY-SA grants carved back for those files, and another
       must say where a tile came from and that its author is unknown. README.txt has
       the exact requirements per pack. THIRD_PARTY_NOTICES.md ships inside the jar and
       stays plain text.
