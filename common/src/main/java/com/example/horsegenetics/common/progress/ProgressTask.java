@@ -210,8 +210,8 @@ public enum ProgressTask {
             "Bind one to a horse you own and it will come from anywhere, even another dimension. "
                     + "It never rebinds, and it crumbles when that horse dies."),
     COMMAND_WHISTLE(Group.HUSBANDRY, "Give a horse an order",
-            "Hold right-click on a horse of yours with a command whistle and pick Stay, Follow, "
-                    + "Wander or Rejoin herd from the wheel."),
+            "Hold right-click on a horse of yours with a command whistle and pick an order "
+                    + "from the wheel: to stay, follow, graze nearby, go home, or fight for you."),
     DYE_TACK(Group.HUSBANDRY, "Dye a piece of tack",
             "Put a saddle or leather horse armour in a Tack Dyeing Bench and give any of the three "
                     + "rows a dye or an ingot. Seat, bridle and fittings colour separately."),

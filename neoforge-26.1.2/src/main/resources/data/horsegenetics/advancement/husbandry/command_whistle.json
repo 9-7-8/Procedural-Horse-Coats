@@ -16,7 +16,7 @@
       "text": "Give a horse an order"
     },
     "description": {
-      "text": "Hold right-click on a horse of yours with a command whistle and pick Stay, Follow, Wander or Rejoin herd from the wheel."
+      "text": "Hold right-click on a horse of yours with a command whistle and pick an order from the wheel: to stay, follow, graze nearby, go home, or fight for you."
     }
   }
 }
