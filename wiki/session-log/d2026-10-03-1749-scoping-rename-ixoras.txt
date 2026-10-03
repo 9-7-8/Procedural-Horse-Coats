@@ -1,0 +1,53 @@
+2026-10-03 17:49 - Scoped the rename to Ixora's Horse Overhaul (time is the end of the session)
+
+Cloud session, intake-only. No Java, resource or Gradle file changed, so the Gradle build
+was skipped (it cannot move); check-parity ran: OK, 7163 checks across 60 cases.
+
+ASKED
+- "Scope out renaming everything to 'Ixora's Horse Overhaul', including in code and in
+  game? Is there any way to do this but make it back compatible with old saves, or to
+  release a tool to convert an old save?" -> surveyed the code, gave a scope in chat.
+- /probe-a-scope "for the converter here for this tool" -> no treatment existed, so one
+  was created and then probed (11 questions, 3 rounds).
+- "commit and push" (stop hook) -> done.
+
+DONE
+- f47f0815: intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt.
+  Proof: none beyond reading code by grep; every claim about world files is UNVERIFIED.
+  No GitHub issue.
+
+DECIDED (all owner)
+- Full rename plus an offline world converter, shipped as compat release 0.6.0.
+- New mod id ixoras_horses.
+- Converter: standalone Java jar (no third-party library); rewrites every id-shaped token
+  everywhere, including player text; output to a new folder, original untouched.
+- New mod refuses to load an unconverted world, no override.
+- Old gene prefix read for the 0.6 series only; phc/ renamed and auto-moved.
+- Converter also finds old-namespace datapacks and asks per pack. Accepts every world that
+  loads in 0.5.041. Proven on a copy of the live server world made by the local session;
+  the live cutover is a later runbook the owner runs.
+Recorded in the treatment file.
+
+FOUND ON THE WAY
+- Naming is already inconsistent (Horse Genetics, Procedural Horse Genetics, phc, PCH,
+  Procedural-Horse-Coats). My chat scope said the old world would be detected "by folder";
+  that is a guess and the treatment says so.
+- No old worlds on disk in the cloud container (only run/config).
+
+PROCEDURES
+- None needed. Asked all three questions. Note: end-session says work on main, but this
+  cloud session was told to use claude/beautiful-ptolemy-3a5k63; that is a conflict for
+  the owner to resolve in the procedure, not changed here.
+
+NOT RUN / NOT CHECKED
+- Full :common:test, the Gradle build and the browser checks were not run (no code moved).
+- Open in the treatment: display names per surface, new config folder name, repo rename,
+  how the live world is copied, fixture world, dry-run flag, resource packs path.
+- No Verification-tab anchors added.
+
+RELEASE
+- Not offered; nothing shipped.
+
+PICK UP FIRST
+- Settle the open display-name and folder-name calls, then build the converter on a copy
+  of the live world: /process-intake on "Rename to Ixora's Horse Overhaul".
