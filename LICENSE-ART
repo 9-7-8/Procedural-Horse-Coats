@@ -19,7 +19,7 @@ WHAT "ART" MEANS HERE
   Art made for this project by its author or by Claude on the author's behalf:
     - item, block, entity, GUI and breed-egg textures and sprites
     - the gene icons, item art and block previews on the wiki
-    - the models
+    - the models (not the coat sheets, which are Mojang's)
     - the artwork and written prose of the wiki and README
   The pipeline that draws a coat is CODE (MIT). A coat texture it produces
   belongs to whoever made that horse and is not covered by this file.
@@ -28,9 +28,9 @@ WHAT IT DOES NOT COVER
   Anything someone else made keeps its own licence, even inside this
   repository or the mod jar: the three Raven Fantasy icons, the UsefulCarts
   textures and sounds (MIT), the three stable buildings, and anything
-  derived from Minecraft itself (Mojang's) - which may include the white horse
-  coat templates and the saddle overrides; their origin is still to be
-  checked. The list, with the exact files, is THIRD_PARTY_NOTICES.md and the
+  derived from Minecraft itself (Mojang's): the horse coat sheets (white,
+  skeleton, zombie, adult and foal) are Mojang's converted art, and the saddle
+  overrides may be too - their origin is still to be checked. The list, with the exact files, is THIRD_PARTY_NOTICES.md and the
   wiki page wiki/licensing.html.
 
 No warranty is given. This file is a notice, not the licence: the legal code

@@ -153,7 +153,7 @@ window.HG.pages = {
                 { href: "saddle-pads.html", text: "Saddle pads", kind: "core", views: ["coding"] },
                 { href: "storm-fed.html", text: "Storm fed", kind: "magical", views: ["coding"] },
                 { href: "troughs.html", text: "Troughs and salt licks", kind: "core", views: ["coding"] },
-                { href: "undead-horses.html", text: "Undead horses", kind: "core", views: ["coding"] },
+                { href: "undead-horses.html", text: "Undead horses", kind: "core", views: ["gameplay","coding"] },
                 { href: "virtual-stables.html", text: "Virtual stables", kind: "core", views: ["coding"] }
             ]
         },
@@ -268,6 +268,7 @@ window.HG.pages = {
                 { href: "gene-ringwork.html", text: "Ringwork", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-serpentine.html", text: "Serpentine", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-shallows.html", text: "Shallows", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-skeleton.html", text: "Skeleton", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-squiggle.html", text: "Squiggle", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-starburst.html", text: "Starburst", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-stormvein.html", text: "Stormvein", kind: "magical", views: ["gameplay","coding"] },
@@ -275,7 +276,8 @@ window.HG.pages = {
                 { href: "gene-synort.html", text: "Synort", kind: "magical", views: ["gameplay","coding"] },
                 { href: "gene-tail-color.html", text: "Tail colour", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-teardrop.html", text: "Teardrop", kind: "magical", views: ["gameplay","coding"] },
-                { href: "gene-wingmargin.html", text: "Wing Margin", kind: "magical", views: ["gameplay","coding"] }
+                { href: "gene-wingmargin.html", text: "Wing Margin", kind: "magical", views: ["gameplay","coding"] },
+                { href: "gene-zombie.html", text: "Zombie", kind: "magical", views: ["gameplay","coding","science"] }
             ]
         },
         {

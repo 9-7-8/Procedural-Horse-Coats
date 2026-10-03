@@ -81,18 +81,24 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  *
  * <h2>realm.breeding_rate_percent</h2>
  * <b>How fast reproduction runs in the horse realm, as a whole percent of
- * normal.</b> 25 by default, meaning every reproductive timer takes four times
- * as long there: heat, the once-a-heat retry, the stallion's day, and
- * gestation. It is a <i>rate</i>, not a chance - 25 does not mean a quarter of
- * covers take, it means the calendar runs at quarter speed, which is the
- * difference between a realm that fills up slowly and one that fills up just as
- * fast with three quarters of the horses disappointed.
+ * normal, while the horse is loaded.</b> 100 by default (owner, 2026-10-02; it
+ * was 25 until then, and a server whose file already says 25 keeps it). At 25
+ * every reproductive timer takes four times as long there: heat, the
+ * once-a-heat retry, the stallion's day, and gestation. It is a <i>rate</i>, not
+ * a chance - 25 does not mean a quarter of covers take, it means the calendar
+ * runs at quarter speed.
  *
  * <p>0 stops it outright, existing pregnancies included. That is only possible
  * because the pacing is a clock rather than a scale factor - see
- * {@code server/HorseRealmRepro}, which also explains why an empty realm
- * advances nothing at all whatever this is set to. Scoped to that one
- * dimension; the Overworld and the debug corridor never read it.
+ * {@code server/HorseRealmRepro}. Scoped to that one dimension; the Overworld
+ * and the debug corridor never read it.
+ *
+ * <h2>realm.pause_when_unloaded</h2>
+ * <b>Whether a realm horse's breeding stands still while nobody is near enough
+ * to keep it loaded.</b> On by default: it does not progress, and does not catch
+ * up when somebody arrives. Off, unloaded time counts at the rate above, so at
+ * 100 a realm foal can be born off-screen exactly as in the Overworld. The rule
+ * is {@code common/realm/RealmClock}.
  *
  * <h2>What none of them can change</h2>
  * <b>All the health genetics are built and inherited regardless.</b> The genes
@@ -262,6 +268,12 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue REALM_BREEDING_RATE;
 
     /**
+     * <b>{@code realm.pause_when_unloaded}</b> - an unloaded realm horse's
+     * breeding stands still. Read through {@link #realmPace()}.
+     */
+    public static final ModConfigSpec.BooleanValue REALM_PAUSE_WHEN_UNLOADED;
+
+    /**
      * <b>{@code realm.release_emeralds}</b> - what turning a horse out into the
      * realm pays. Read through {@link #realmReleaseEmeralds()}, and paid by
      * {@code server/HorseRelease}, never here.
@@ -274,6 +286,20 @@ public final class ServerConfig {
      * mod can answer. 0 turns it off and gives back the old behaviour exactly.
      */
     public static final ModConfigSpec.IntValue REALM_RELEASE_EMERALDS;
+
+    /**
+     * <b>The wild horse turnover</b> ({@code server/WildTurnover}, {@code server/WildTopUp}):
+     * {@code wild.despawn_days}, {@code wild.realm_handoff}, {@code wild.topup_minimum},
+     * {@code wild.topup_cell_chunks} and {@code wild.topup_player_radius}. Read through
+     * {@link #wildDespawnDays()}, {@link #wildRealmHandoff()} and {@link #wildTopUp()};
+     * the rules are {@code common/wild/WildLifetime} and {@code TopUpPlan}, which own the
+     * defaults.
+     */
+    public static final ModConfigSpec.IntValue WILD_DESPAWN_DAYS;
+    public static final ModConfigSpec.BooleanValue WILD_REALM_HANDOFF;
+    public static final ModConfigSpec.IntValue WILD_TOPUP_MINIMUM;
+    public static final ModConfigSpec.IntValue WILD_TOPUP_CELL_CHUNKS;
+    public static final ModConfigSpec.IntValue WILD_TOPUP_PLAYER_RADIUS;
 
     /**
      * <b>{@code ops.resurrect_grace_minutes}</b> - how long a dead horse is kept
@@ -376,6 +402,15 @@ public final class ServerConfig {
      * want the second and not the first.
      */
     public static final ModConfigSpec.BooleanValue HORSE_JOCKEY_COMMAND;
+
+    /**
+     * <b>{@code undead.convert}</b> - does a vanilla zombie or skeleton horse become
+     * one of this mod's horses the first time it is ticked? On by default (undead
+     * treatment D2). Off, the converter returns at once and every vanilla undead
+     * horse is left exactly as vanilla made it; horses already converted stay the
+     * horses they became. See {@code server/UndeadHorseConverter}.
+     */
+    public static final ModConfigSpec.BooleanValue UNDEAD_CONVERT;
 
     /**
      * <b>{@code behaviour.jockey_pass_days}</b> - how many Minecraft days one
@@ -481,15 +516,25 @@ public final class ServerConfig {
                 .defineInRange("fertility.gestation_days",
                         com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS, 1.0, 340.0);
         REALM_BREEDING_RATE = builder
-                .comment("How fast reproduction runs in the horse realm, as a whole percent. (default: 25)",
+                .comment("How fast reproduction runs in the horse realm while a horse is loaded,",
+                        "as a whole percent of normal. (default: 100)",
                         "A rate, not a chance: 25 runs every reproduction timer at a quarter speed,",
                         "so heat, the once-a-heat retry, a stallion's day and gestation all take four",
                         "times as long. It does not mean one cover in four takes.",
                         "0 pauses reproduction there completely, existing pregnancies included.",
-                        "Nothing advances at all while no player is in the realm, whatever this says -",
-                        "an empty field is a still one.",
                         "The horse realm only. The Overworld, and the F6 debug dimension, ignore it.")
-                .defineInRange("realm.breeding_rate_percent", 25, 0, 100);
+                .defineInRange("realm.breeding_rate_percent",
+                        com.example.horsegenetics.common.realm.RealmClock.DEFAULT_RATE_PERCENT, 0, 100);
+        REALM_PAUSE_WHEN_UNLOADED = builder
+                .comment("Whether a horse's breeding in the horse realm stands still while nobody is near",
+                        "enough to keep it loaded. (default: true)",
+                        "On: a mare nobody is near does not progress - pregnancy, heat and the waits",
+                        "between covers - and does not catch up when somebody arrives.",
+                        "Off: unloaded time counts at realm.breeding_rate_percent, as if she had been",
+                        "watched; at 100 that is plain game time, and realm foals are born off-screen.",
+                        "Changing it changes when realm foals are born. Server-side.")
+                .define("realm.pause_when_unloaded",
+                        com.example.horsegenetics.common.realm.RealmClock.DEFAULT_PAUSE_WHEN_UNLOADED);
         REALM_RELEASE_EMERALDS = builder
                 .comment("Emeralds paid for turning one horse out into the horse realm. (default: 2)",
                         "Flat, per horse, whatever the horse is - the realm takes anybody's surplus",
@@ -500,6 +545,52 @@ public final class ServerConfig {
                         "fires you have left the dimension and there is nobody to hand emeralds to.",
                         "0 turns the payment off.")
                 .defineInRange("realm.release_emeralds", 2, 0, 64);
+        WILD_DESPAWN_DAYS = builder
+                .comment("How many Minecraft days a wild horse stays before it moves on. (default: 3)",
+                        "Counted from when it spawned, in game time, so the days pass while its chunk",
+                        "is unloaded too. A horse never goes while a player is within 32 blocks of it,",
+                        "and a herd goes together. A tamed horse never goes.",
+                        "One a player has worked with - led, fed, ridden - goes to the horse realm",
+                        "instead of vanishing (see wild.realm_handoff).",
+                        "0 switches the lifetime off, the realm hand-off with it. Server-side.")
+                .defineInRange("wild.despawn_days",
+                        com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_DAYS,
+                        0, com.example.horsegenetics.common.wild.WildLifetime.MAX_DAYS);
+        WILD_REALM_HANDOFF = builder
+                .comment("Whether a wild horse a player has led, fed or ridden goes to the horse realm",
+                        "when its days are up, rather than vanishing. (default: true)",
+                        "It arrives still wild and still itself - name, coat, papers - and, like any",
+                        "horse in the realm, makes the field a little bigger.",
+                        "Off: it vanishes like the rest. Server-side.")
+                .define("wild.realm_handoff",
+                        com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_REALM_HANDOFF);
+        WILD_TOPUP_MINIMUM = builder
+                .comment("The fewest wild horses a patch of ground near a player should have. (default: 5)",
+                        "Once a Minecraft day, the first time a player comes near each patch (a square",
+                        "of wild.topup_cell_chunks chunks), a patch with fewer gets a whole new herd -",
+                        "a trigger, not a cap: the herd may take it well past this number.",
+                        "Changing the breeds' biomes (phc/breed-spawning.toml) and restarting refills",
+                        "every patch once more on its next visit, so newly added biomes fill in.",
+                        "0 switches the top-up off. Server-side.")
+                .defineInRange("wild.topup_minimum",
+                        com.example.horsegenetics.common.wild.TopUpPlan.DEFAULT_MINIMUM,
+                        0, com.example.horsegenetics.common.wild.TopUpPlan.MAX_MINIMUM);
+        WILD_TOPUP_CELL_CHUNKS = builder
+                .comment("The size of one top-up patch, in chunks along each side. (default: 8)",
+                        "8 is 128 by 128 blocks. Smaller patches mean more horses overall, because",
+                        "every patch is held to wild.topup_minimum. Server-side.")
+                .defineInRange("wild.topup_cell_chunks",
+                        com.example.horsegenetics.common.wild.TopUpPlan.DEFAULT_CELL_CHUNKS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MIN_CELL_CHUNKS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MAX_CELL_CHUNKS);
+        WILD_TOPUP_PLAYER_RADIUS = builder
+                .comment("How near a player a top-up patch must be to be checked, in blocks. (default: 96)",
+                        "Only patches this close to a player who is actually there are ever looked",
+                        "at, and only their loaded chunks; nothing far away is touched. Server-side.")
+                .defineInRange("wild.topup_player_radius",
+                        com.example.horsegenetics.common.wild.TopUpPlan.DEFAULT_PLAYER_RADIUS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MIN_PLAYER_RADIUS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MAX_PLAYER_RADIUS);
         RESURRECT_GRACE_MINUTES = builder
                 .comment("An optional time limit on bringing a dead horse back with /horseresurrect. (default: 0)",
                         "Counted in minutes of the OWNER'S OWN TIME ONLINE since the horse died, not",
@@ -749,6 +840,15 @@ public final class ServerConfig {
                         "for a while - the same thing a jockey pass buys with an item, which",
                         "this does not affect. Off, the command is not registered at all.")
                 .define("commands.horse_jockey", true);
+        UNDEAD_CONVERT = builder
+                .comment("Whether vanilla zombie and skeleton horses become this mod's horses. (default: true)",
+                        "Each one converts the first time it is ticked - old saves included - into a",
+                        "Graveborn Warmblood or a Great Valley Skeleton Horse, keeping its name, owner,",
+                        "saddle, armour, lead, age and health fraction; its stats are re-rolled from its",
+                        "genes. A skeleton trap converts only after it has sprung, and a horse with a",
+                        "player on it waits for the rider to get off. Off, vanilla undead horses are",
+                        "left alone; ones already converted stay converted.")
+                .define("undead.convert", true);
         JOCKEY_PASS_DAYS = builder
                 .comment("How many Minecraft days one jockey pass is worth. (default: 1)",
                         "Also the length of a bare /horsejockey with no number given.",
@@ -937,8 +1037,23 @@ public final class ServerConfig {
         try {
             return REALM_BREEDING_RATE.get();
         } catch (IllegalStateException notLoaded) {
-            return 25;
+            return com.example.horsegenetics.common.realm.RealmClock.DEFAULT_RATE_PERCENT;
         }
+    }
+
+    /** {@code realm.pause_when_unloaded}, safely. */
+    public static boolean realmPauseWhenUnloaded() {
+        try {
+            return REALM_PAUSE_WHEN_UNLOADED.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.realm.RealmClock.DEFAULT_PAUSE_WHEN_UNLOADED;
+        }
+    }
+
+    /** Both realm breeding settings, as the value {@code common/realm/RealmClock} takes. */
+    public static com.example.horsegenetics.common.realm.RealmClock.Pace realmPace() {
+        return new com.example.horsegenetics.common.realm.RealmClock.Pace(
+                realmBreedingRatePercent(), realmPauseWhenUnloaded());
     }
 
     /** {@code realm.release_emeralds}, safely. */
@@ -947,6 +1062,37 @@ public final class ServerConfig {
             return REALM_RELEASE_EMERALDS.get();
         } catch (IllegalStateException notLoaded) {
             return 2;
+        }
+    }
+
+    /** {@code wild.despawn_days}, safely. 0 is off. */
+    public static int wildDespawnDays() {
+        try {
+            return WILD_DESPAWN_DAYS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_DAYS;
+        }
+    }
+
+    /** {@code wild.realm_handoff}, safely. */
+    public static boolean wildRealmHandoff() {
+        try {
+            return WILD_REALM_HANDOFF.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_REALM_HANDOFF;
+        }
+    }
+
+    /**
+     * The three top-up settings as the value {@code common/wild/TopUpPlan} takes. Any
+     * one that cannot be read falls back to the whole default, never a mix.
+     */
+    public static com.example.horsegenetics.common.wild.TopUpPlan.Settings wildTopUp() {
+        try {
+            return new com.example.horsegenetics.common.wild.TopUpPlan.Settings(
+                    WILD_TOPUP_MINIMUM.get(), WILD_TOPUP_CELL_CHUNKS.get(), WILD_TOPUP_PLAYER_RADIUS.get());
+        } catch (IllegalStateException | IllegalArgumentException notLoaded) {
+            return com.example.horsegenetics.common.wild.TopUpPlan.Settings.DEFAULT;
         }
     }
 
@@ -1080,6 +1226,15 @@ public final class ServerConfig {
     public static boolean horseGiveCommand() {
         try {
             return HORSE_GIVE_COMMAND.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code undead.convert}, safely. */
+    public static boolean undeadConvert() {
+        try {
+            return UNDEAD_CONVERT.get();
         } catch (IllegalStateException notLoaded) {
             return true;
         }

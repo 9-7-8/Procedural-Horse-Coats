@@ -1,0 +1,462 @@
+Command whistle - implementation treatment
+
+Scoped with the owner, 2026-10-03. Every "Decided" line below is her call; "Recommended"
+lines are the scoping session's, not asked; "Open" lines are still to be settled, by whom
+is said on the line; "UNVERIFIED" lines are facts this file has not proved and the building
+session must check first. Source of truth for what exists is wiki/item-whistles.html
+(the whistles), wiki/horse-care.html (bond tiers, BondFollowGoal) and
+wiki/gene-aggression.html (horse combat). This file is retired (deleted, per
+/process-intake step 8) as each piece ships and moves onto those pages' Gameplay and
+Coding tabs.
+Release: counts toward a release only when the LAST piece ships (owner). Saves keep loading
+(a new attachment whose default is "no order").
+
+Inspired by the Bedrock addon "1,000,000 Horses!" (Cynosia; scripts by InnerTri), surveyed
+from its .mcaddon on 2026-10-03: its Horse Whistle cycles Stay / Follow / Wander on
+right-click and sneak-applies to all nearby tamed horses. Per the attribution rule
+(wiki/compatibility.html#mod-survey) it is credited on item-whistles' Coding tab when
+Piece 1 ships. NOTHING is copied from it: the copy surveyed was a re-upload of a paid
+Marketplace pack, so no code, art or text from it may enter this repo.
+
+
+1. The request, as given
+========================
+"let's add a "command whistle" which controls the mode of any horse it's pointing at when
+you blow it, and maybe open up a wheel where you just select what you want? So point at a
+horse with the whistle, hold right click, then hover over the option you want from the
+wheel, and then release to pick it. The options are stay, wander, follow, hunt monsters
+(seeks out hostile mobs), defend me (follows the user and attacks any hostile mobs which
+come near), and any other behaviors that would make sense."
+
+Reading: a NEW item (not a mode on the existing area/ender whistles, which keep their one
+job of calling horses in). Aim at an owned horse, hold use, a radial wheel opens; move the
+cursor over a slice and release to give that horse a standing ORDER. The order persists
+until changed. The owner then added Guard here, Go home, Graze nearby and Rejoin herd to
+the wheel, and sneak-hold to order every nearby horse at once.
+
+Also said, and NOT part of this file: "I'd love to eventually add idle animations, and loop
+them into our social system, but that's the lowest possible priority." See section 2.
+
+
+2. In scope, and what is not
+============================
+In scope
+- The command whistle item: recipe, equestrian-supplier trade, tooltip, lang, art,
+  advancement / ProgressTask row.
+- A per-horse ORDER, saved: Stay, Follow, Wander, Graze nearby, Guard here, Go home,
+  Hunt monsters, Defend me, Rejoin herd (= no order).
+- The radial wheel screen, opened by holding use while aimed at an owned horse, or while
+  sneaking (anywhere) for all owned horses within 16 blocks.
+- Gating: bond for every order, plus a fighting gene for the three combat orders.
+- Showing a horse's current order: the whistle's hover on the aimed horse, the H browser
+  roster, the horse info screen.
+
+Not in scope (re-askable)
+- Idle animations (sleep, roll, rear, buck) and tying them to the social system. Owner:
+  "lowest possible priority". Needs its own treatment; nothing here builds toward it.
+- Changing the area or ender whistles beyond "a recall clears an order" (Piece 1).
+- Orders to horses you do not own, or to untamed horses.
+- Pursuit for gene-driven aggression. The no-chase rule on wiki/gene-aggression.html
+  stands for the GENE; only an ORDER may pursue, and only inside a leash (section 5).
+- A keybind that opens the wheel without the item (offered, not chosen).
+- Ordering donkeys, mules, camels, llamas: horses only, the same as every goal in
+  HorseCareHandler, which adds goals to Horse, not AbstractHorse.
+
+
+3. What already exists, so the building session does not redo it
+================================================================
+All paths: NF = neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge,
+COMMON = common/src/main/java/com/example/horsegenetics/common.
+
+Whistles
+- NF/item/WhistleItem.java: basic 16 / golden 32 / echo 64; use() -> blow() -> recall();
+  COOLDOWN_TICKS = 60; private ownedBy() duplicates HorseOwnership.isOwner. No sneak
+  branch, no useOn, no interactLivingEntity, no hold behaviour.
+- NF/server/WhistleCalls.java: walk-vs-teleport (tryWalk, WALK_PATH_BLOCKS = 16), calls
+  ended in onServerTick; ACTIVE map, never saved. NF/server/WhistleCallGoal.java at
+  priority 1 (MOVE+LOOK).
+- NF/item/EnderWhistleItem.java, NF/server/EnderWhistleCalls.java (BIND_BOND_TIER = 2),
+  NF/data/BoundHorse.java, ModDataComponents.BOUND_HORSE.
+- NF/client/WhistleKeyBindings.java + WhistleKeyHandler.java -> BlowWhistlesPayload ->
+  NF/server/WhistleBlowing.blowAll(); COMMON/care/WhistleSelection.pick()
+  (WhistleSelectionTest).
+- Data: recipe/{basic,golden,echo,ender}_whistle.json; advancement/husbandry/whistle_*.json;
+  villager_trade/equestrian_supplier/level_2..5/sell_*_whistle.json.
+- COMMON/progress/ProgressTask.java: WHISTLE_BASIC, WHISTLE_GOLDEN, WHISTLE_ECHO,
+  WHISTLE_ENDER (Group.HUSBANDRY); NF/advancement/ProgressTaskTrigger.java.
+- Whistle tooltips are Component.literal, not lang keys. The command whistle's wording
+  goes in common/ (hard rule 1, "the wording lives in common/").
+
+Goals, and how they collide
+- No registerGoals mixin. Every custom goal is added on EntityJoinLevelEvent, to Horse
+  only, skipping a horse that already has it. HorseCareHandler.onHorseJoin:
+  HorseEscapeGoal 0, InspectHoldGoal 0, WhistleCallGoal 1, CrouchFeedGoal / FoodTemptGoal
+  / HungerFoodGoal 3, BondFollowGoal 4, WildHerdGoal 6, BondFollowGoal.Watch 8.
+- Others: HorseAggroHandler (HorseMeleeGoal 3, target WildHorseForgetTargetGoal 1,
+  HorsePanicGoal replaces PanicGoal); HerdGoals (Spar 3, DamAndFoal 4, StallionGuard 5,
+  Displace 5, HeatAttraction 6, GroomAndRest 7); SunShadeGoal 1; LycanTemperGoal 2;
+  BloodHuntGoal 3; NightWatchGoal 4; CowboyHerdGoal 3; cart goals via
+  carts/util/CartGoalAdder.
+- Vanilla: FloatGoal 0, RunAroundLikeCrazyGoal 1, BreedGoal 2, TemptGoal 3,
+  FollowParentGoal 4, WaterAvoidingRandomStrollGoal 6, LookAtPlayerGoal 7.
+- Equal priority never interrupts; ties go to the goal that started first (WhistleCallGoal
+  javadoc). MOVE is contested at 1, 3 and 4.
+- wiki/tools/bake-behaviour-hierarchy.mjs -> wiki/behaviour-hierarchy.html.
+
+Per-horse state and sync
+- NF/data/ModAttachments.java: AttachmentType.builder(default).serialize(...), optional
+  .copyOnDeath() and .sync(StreamCodec). Built-in sync precedent: CART_METRES, PREGNANT,
+  COWBOY_BRAND, HORSE_GEAR.
+- HorseCareSyncPayload(entityId, bond, inHerd) -> client/ClientHorseCareCache, so the
+  client already knows bond for horses it tracks.
+- NF/data/HorseCareAttachment.behaviourTier(): 0 = 0-30, 1 = 31-60, 2 = 61-80, 3 = 81-100.
+- Payloads registered in NF/network/ModNetworking.java.
+
+Combat
+- Horses CAN fight already: HorseAggroHandler.addAttackDamage gives EntityType.HORSE
+  ATTACK_DAMAGE = MagicFighterGene.BASELINE_DAMAGE (3.0); HorseMeleeGoal (extends
+  MeleeAttackGoal, 10-tick swing, rears); mixin/HorseRearFightMixin keeps a rearing horse's
+  AI running. Any horse with a target fights; nothing yet GIVES a tame horse a target on
+  command.
+- COMMON/genetics/genes/AggressionGene.java (RADIUS 16, INTERVAL_TICKS 20, MAX_TARGETS 8,
+  TIMES 3 x TARGETS 5); GuardianGene.java (RADIUS 16, INTERVAL_TICKS 10, MAX_TARGETS 4);
+  MagicFighterGene.java (BASELINE_DAMAGE 3.0, MIN_DAMAGE 1.0).
+- NF/server/GeneReactionHandler.onOwnerHurt: Guardian targets mobs (never players) that
+  hurt the owner within 16, and holds ground. Defend me is the ORDERED, gene-gated cousin
+  of this; read it first, including its comment on why the first version scanned every
+  hit in the world.
+- NF/server/MobGroups.java: matches(group, candidate), isHostile(candidate). "Monsters"
+  for every combat order is MobGroups.isHostile minus the never-target tag (section 5).
+- NF/server/Passification.java: Passification.suppresses vetoes targets. An order never
+  overrides it.
+
+Ownership
+- NF/server/HorseOwnership.java: isOwner(Horse, UUID), ownerId, bindRefusal, ownerName.
+  Use this, not another private copy like WhistleItem.ownedBy.
+
+Screens opened from item use
+- client/CustomHorseSpawnEggClient handles RightClickBlock / RightClickItem /
+  EntityInteractSpecific / EntityInteract, cancels them and calls setScreen;
+  client/HorseInfoInteraction does the same at HIGHEST priority. That is the precedent for
+  stopping vanilla from mounting the horse or opening its inventory when the whistle is used
+  on it.
+
+Home and tethering
+- Stalls: item/StallSignItem, server/StallSignHandler, StallDetector, data/StallData
+  (SavedData). Send home: server/StallRecall, COMMON/care/SendHome.java, used by the H
+  browser's HorseRecallPayload. Go home is a CALL into this path, not a second one.
+- Leads: server/HorseLeads (untieFor). Hitching: server/CowboyHitchHandler (not read).
+
+Looks built, is not
+- No stay, sit, wander radius or home position exists anywhere: no restrictTo or
+  setHomeTo in the code base. Stay and Graze nearby are new.
+- No radial, pie or hold-to-open UI exists: no releaseUsing, getUseDuration, onUseTick or
+  ItemUseAnimation anywhere. The wheel is new.
+- BondFollowGoal is not a "Follow" order: it is bond-driven, tier 3 only, and gives up. A
+  Follow ORDER is new behaviour that must suppress or take over from it, not edit it.
+- Aggression's "hunts monsters" alleles already hold a 16-block radius. A horse with those
+  alleles needs no order to fight, and an order does not switch that off.
+
+
+4. The pieces
+=============
+
+Piece 1 - The command whistle, the wheel, and Stay / Follow / Wander / Rejoin herd
+---------------------------------------------------------------------------------
+What the player sees: a new whistle. Aim it at a horse you own, hold right-click and a
+wheel opens. Release over Stay and the horse stays put; Follow and it follows you; Wander
+and it roams and ignores you; Rejoin herd and it goes back to its normal life. Sneak-hold
+does the same for every horse of yours within 16 blocks.
+
+Decided
+- A new item, the command whistle. Crafted, AND sold by the equestrian supplier.
+- Hold use while aimed at an owned horse opens the wheel for that horse; release over a
+  slice gives the order; release over the centre, or away from any slice, cancels.
+- Sneak + hold (aimed anywhere) orders every owned horse within 16 blocks. Each horse
+  that cannot take the order says why, in one summary line (e.g. "3 obeyed; 1 not bonded
+  enough").
+- Bond gate: Stay and Follow need bond tier 1 (bond 31+). Every other order needs bond
+  tier 2 (61+). Rejoin herd needs none: clearing an order is always allowed.
+- Wander means roam AND ignore me: it suppresses BondFollowGoal and WildHerdGoal following,
+  and is distinct from Rejoin herd, which restores normal behaviour.
+- Needs break a Stay briefly: HorsePanicGoal / HorseEscapeGoal, and hunger seeking
+  (HungerFoodGoal), may move the horse; it walks back to its anchor afterwards. An order
+  must never starve a horse (carrot, not stick).
+- Riding pauses an order; it resumes on dismount. An area-whistle or ender-whistle recall
+  CLEARS the order to Rejoin herd, because calling a horse means you want it.
+
+Recommended
+- Recipe: a basic whistle + a lead + an amethyst shard (shapeless). The building session
+  checks it clashes with no existing recipe.
+- Trade: equestrian supplier level 3, priced between the basic and golden whistles.
+- Orders live on a new attachment HORSE_ORDER: { order, anchor BlockPos, anchor dimension,
+  orderedBy UUID }. Anchor is set when an anchored order is given (Stay, Graze, Guard,
+  Hunt). Synced with the built-in .sync(StreamCodec), so the client can show it.
+- One goal class per behaviour, each reading HORSE_ORDER in a cheap canUse():
+  OrderStayGoal and OrderFollowGoal at priority 1 (MOVE), inserted AFTER WhistleCallGoal so
+  a live recall wins the tie; Wander adds nothing and suppresses BondFollowGoal and
+  WildHerdGoal (their canUse checks the order). Precise priorities are the building
+  session's, recorded on behaviour-hierarchy.
+- Follow order: follows at a walk, stops ~3 blocks away, real pathfinding (BondFollowGoal's
+  shape), teleports only if more than 24 blocks behind and the route fails, the way
+  WhistleCalls does. It pauses (does not clear) if the owner changes dimension or logs out.
+- The wheel greys the slices a horse cannot take and shows the reason on hover ("Needs
+  bond 61", "Needs a fighting gene"). Piece 1 shows the Piece 2 and 3 slices greyed with
+  "Not yet" ONLY IF the building session prefers a stable layout; otherwise they are
+  absent until their piece ships. Open for the building session.
+- The client decides nothing: it sends CommandHorsePayload(entityIds, order); the server
+  re-checks ownership (HorseOwnership.isOwner), reach (16 blocks), bond and gene gate.
+  The greying uses ClientHorseCareCache's bond and a gene-gate flag that is synced with the
+  order (so the client never needs the genome).
+- A horse pulling a cart (PullCartGoal active) or on a lead refuses orders with a reason;
+  the lead or cart wins. Precedent: compatibility notes that whistle recall should refuse a
+  cart horse.
+- Order is cleared when the horse changes dimension, is put in a stall bank / stasis, is
+  sent home, sold or transferred (owner changes), or dies.
+- Wording (order names, refusals, summary line, tooltip) in common/: COMMON/care/
+  HorseOrders.java (enum + rules: which orders a horse may take, given bond tier, the
+  fighting-gene flag, riding/cart/lead state).
+
+Where the code lives
+- common/: HorseOrder enum (append-only; it is saved by NAME, not ordinal), HorseOrders
+  rules + wording, the wheel's slice geometry (angle -> slice) so it is unit-testable.
+- NeoForge: CommandWhistleItem, HORSE_ORDER attachment, CommandHorsePayload, the order
+  goals, the recall hook in WhistleCalls / EnderWhistleCalls, CommandWheelScreen (client),
+  the interact cancel (client, after HorseInfoInteraction's shape), recipe, trade,
+  advancement, ProgressTask row.
+
+Data and saves: HORSE_ORDER serialised by order NAME plus anchor; an unknown name loads as
+Rejoin herd (no crash, no migration needed). Old worlds have no attachment = Rejoin herd.
+Removing the mod drops the attachment harmlessly.
+Sync: the attachment's own .sync; no new payload for display. One playToServer payload.
+Config: none in Piece 1. The 16-block command reach and the bond tiers are the existing
+ones; a toggle would only switch off an item, which a datapack can already do.
+Tests: HorseOrdersTest (each order x bond tier x riding/cart/lead -> allowed or the right
+refusal); CommandWheelGeometryTest (angles, dead centre, slice edges); a gametest that a
+Stay horse given a hunger need walks to hay and back to its anchor; a gametest that an
+area-whistle recall clears an order.
+Play checks (item-whistles Verification tab): the wheel opens on hold and NOT on a tap;
+holding on a horse does not mount it or open its inventory; release picks the hovered
+slice; sneak-hold orders a field of horses and the summary line is right; a stayed horse
+stays through a night of zombies (panic moves it, it returns).
+Docs: item-whistles (Gameplay, Coding, credit to 1,000,000 Horses), horse-care (orders vs
+bond follow), items (roster), behaviour-hierarchy rebake.
+
+Piece 2 - Graze nearby, Guard here, Go home
+-------------------------------------------
+What the player sees: three more slices. Graze nearby lets a horse roam but never far from
+where you left it. Go home sends it to its stall. Guard here keeps it on the spot, kicking
+any monster that comes close.
+
+Decided
+- These three are on the wheel, at bond tier 2.
+- Guard here is a combat order: it needs a fighting gene (Piece 3's gate). If Piece 3 has
+  not shipped, Guard here waits for it (see section 7).
+- Targets for every combat order: hostile mobs EXCEPT creepers.
+
+Recommended
+- Graze nearby: a tethered stroll, radius 12 around the anchor; outside it the horse walks
+  back. Uses the horse's restriction radius if the API has one (UNVERIFIED, section 6),
+  else its own goal.
+- Go home: calls the existing send-home path (server/StallRecall + common/care/SendHome);
+  a horse with no stall refuses with "has no stall". It is a one-shot: the order becomes
+  Rejoin herd when the horse arrives. Not a second recall implementation.
+- Guard here: Stay, plus targets hostile mobs within 6 blocks of the anchor; never chases
+  beyond 8; returns to the anchor when the target dies or leaves.
+- Creeper exclusion is an entity-type tag, horsegenetics:command_never_target, containing
+  minecraft:creeper, so packs can add to it. Not a config list.
+
+Where the code lives: radii and the "return to anchor" rule in common/ (HorseOrders); the
+goals in NeoForge.
+Data and saves: anchor already stored by Piece 1. Nothing new saved.
+Config (server): graze_radius (default 12, 4..32), guard_radius (6, 3..16). Off state:
+none; a bad value is clamped, never crashes a load.
+Tests: HorseOrdersTest additions (radius maths, return rule); gametest: a guarding horse
+with a fighting gene kills a zombie inside 6 and ignores a creeper; a grazing horse
+leaves a 12 radius and returns.
+Play checks: a grazing horse in an open field stays near; Go home with and without a stall.
+Docs: item-whistles, horse-care, stables (Go home), behaviour-hierarchy rebake.
+
+Piece 3 - Hunt monsters and Defend me (and the fighting-gene gate)
+-------------------------------------------------------------------
+What the player sees: a horse bred to fight can be sent to clear monsters around a spot, or
+told to stay at your side and see off anything that comes for you. A horse without the
+genes for it cannot: the slice is grey and says why.
+
+Decided
+- Gene-gated: the combat orders (Hunt monsters, Defend me, Guard here) are available only to
+  a horse that EXPRESSES a fighting gene: an Aggression pair whose target is monsters
+  (Adh, Anh, Aah), Guardian, or Magic Fighter. Others see the slice greyed with the
+  reason.
+- Leashed pursuit, which REOPENS a settled call (wiki/gene-aggression.html, "It holds a
+  radius. It must never chase"; full and owner-leashed pursuit were both rejected). The
+  owner's call, 2026-10-03: an ORDER may pursue inside a leash; the GENE's rule is
+  untouched.
+  - Hunt monsters: seek hostiles within 16 blocks of the anchor, never beyond; then return
+    to the anchor.
+  - Defend me: follow the owner (Piece 1's Follow) and engage hostiles within 8 blocks of
+    the OWNER, then come back to heel.
+- Targets: hostile mobs except creepers (the Piece 2 tag).
+- Bond tier 2.
+
+Recommended
+- Which Aggression alleles count: the three "h" pairs only. An "a" (everything) pair also
+  hunts monsters, but it hunts riders and horses too; it is excluded so the whistle never
+  sends a horse that will turn on you. Confirm with the owner when this piece is built
+  (one question; Open below).
+- "Expresses" uses the same expression test the genes' own abilities use (the
+  GeneAbility path in GeneAbilityHandler), so the gate and the gene never disagree.
+- Break off when hurt: a horse on a combat order below 30% health drops its target and
+  returns to its anchor (Hunt, Guard) or to the owner (Defend). Carrot, not stick: a
+  player's order should not be the thing that kills their horse.
+- Defend me reuses the shape of GeneReactionHandler.onOwnerHurt, but triggers on hostiles
+  NEARING the owner, not only on hits. It must not scan on every hit in the world (the
+  mistake that comment records): the ordered horse scans from its own goal, on an
+  interval (20 ticks, as AggressionGene.INTERVAL_TICKS), MAX_TARGETS bounded.
+- An order never overrides Passification.suppresses, and never turns a horse on players.
+- A horse whose genes already make it aggressive keeps doing so under any order; an order
+  adds behaviour, it does not calm one.
+
+Open
+- Whether an "a" (everything) Aggression pair unlocks the combat orders. Owner, when the
+  piece is built.
+
+Where the code lives: the gate (genotype -> boolean) and the leash maths in common/
+(HorseOrders, reading AggressionGene / GuardianGene / MagicFighterGene keys); goals in
+NeoForge, using HorseMeleeGoal for the swing rather than a second melee goal.
+Data and saves: the gate flag is derived, not saved; it is synced alongside the order for
+the wheel's greying.
+Config (server): hunt_radius (16, 8..32), defend_radius (8, 4..16), break_off_health
+(0.3, 0..1; 0 = fight to the death). Clamped on a bad value.
+Tests: HorseOrdersTest: the gate for every Aggression allele pair, Guardian, Magic Fighter,
+none; leash maths. Gametests (yard pens): a hunting horse with Adh/Adh clears zombies in 16
+and does not leave the radius; a defending horse engages a skeleton near its owner and
+returns; a plain horse refuses with the right reason; the creeper is ignored.
+Play checks: a hunter does not wander off into the dark; a defender does not abandon the
+rider mid-ride (riding pauses the order).
+Docs: gene-aggression Coding tab gets the reopened call recorded ("an order may pursue,
+leashed; the gene may not"); guardian and magic-fighter Gameplay get a line each; item-
+whistles; behaviour-hierarchy rebake.
+
+
+5. Decisions
+============
+Covered in the pieces, plus:
+- B. Fit: horses only, adds without altering vanilla (vanilla horse behaviour is untouched
+  when no order is given: Rejoin herd is the default). Utility, and it serves the genetics
+  "once removed", like the whistles already do; the combat gate makes fighting genes worth
+  breeding for. Bends one settled call (Aggression's no-chase), asked and decided above.
+- C. Explained by: the item tooltip ("Hold use on a horse to give it an order; sneak for all
+  nearby"), a new ProgressTask row "Give a horse an order" (Recommended: Group.HUSBANDRY,
+  beside the WHISTLE_* rows), the wheel's hover reasons.
+- D. Genetics: no new gene. Reads Aggression, Guardian, Magic Fighter. Rule 5 (designer /
+  spawn screen) untouched: neither edits orders.
+- E. Breeds: none.
+- F. Items: one item, its art (Recommended: recolour of the basic whistle; an art pack under
+  intake/potential-assets may be used, logged per use-an-art-pack). Stack size 1. A section
+  on wiki/item-whistles.html, not a page of its own (Recommended: it is a whistle and the
+  page already covers four). No per-wood variants.
+- G. Config: Piece 2 and 3's radii and break-off, server side, clamped. Nothing client side
+  (Recommended).
+- I. Multiplayer: owner only; the server re-checks everything. Dedicated-server safe: the
+  wheel and the interact cancel are client classes, registered on the client only.
+- J. Compatibility: modded hostiles count via MobGroups.isHostile; packs extend the never-
+  target tag. Other mods that also hook right-click on a horse may fight the interact
+  cancel; same priority as HorseInfoInteraction (HIGHEST).
+- K. Performance: every order goal's canUse reads one attachment; combat scans only for
+  ordered horses, on an interval, bounded. A thousand unordered horses cost one attachment
+  read each per goal tick. Orders never force chunk loads; a horse in an unloaded chunk
+  simply does not tick.
+- L. Testing: rules and geometry in common/ unit tests; behaviours as gametests / yard pens;
+  the wheel's feel only by eye.
+- M. Release: only the last piece counts toward a release (owner). Saves keep loading.
+
+Implications sweep
+- Genetics model / registry: untouched, read only (fighting-gene gate).
+- Coat pipeline, eye colour, body space, grown parts: untouched, no visuals on the horse.
+- Breeding / pedigree / stats: untouched. A foal is born with no order.
+- Breeds, spawning: untouched; wild horses cannot be ordered.
+- Horse body (speed/health/size): touched only by break-off health.
+- Care: touched. Bond gates orders; Wander suppresses bond-follow and herd-following;
+  hunger may break a Stay; herds: an ordered horse still counts as a herd member for
+  healing (Recommended), it just does not follow the herd.
+- AI goals / behaviour hierarchy: touched heavily; rebake it.
+- Items / carrots: one new item. Carrots untouched.
+- Tack and gear: untouched.
+- Villagers: equestrian supplier gains a trade row.
+- Realm / portals / dimension / stables: dimension change clears an order; Go home uses
+  stalls; the public realm's protections are not bypassed (an order cannot be given there
+  to a horse you do not own, which ownership already prevents).
+- H menu: Recommended to show each horse's order in the roster (read-only); its existing
+  Send home stays.
+- Stasis / bank: storing a horse clears its order.
+- Designer / spawn screen: untouched.
+- Gene creator / breed designer / web: untouched.
+- Config: Pieces 2-3 add server keys (procedures/add-a-config-option.txt).
+- Other mods: modded hostiles counted; interact-hook collisions possible.
+- Advancements / checklist: one new ProgressTask row + advancement.
+- 1.12.2 backport: rules, wording and wheel geometry in common/; the rest is thin.
+- Wiki: item-whistles owns it; horse-care, gene-aggression, guardian, magic-fighter,
+  stables, items and behaviour-hierarchy change.
+
+The three most likely ways this goes wrong for a real player
+1. Holding use on a horse mounts it or opens its inventory instead of the wheel: the
+   interact must be cancelled on the client at HIGHEST before vanilla sees it (Piece 1
+   play check; UNVERIFIED 1).
+2. A stayed horse drifts: some other priority-0/1 goal (HorseEscapeGoal, SunShadeGoal,
+   RunAroundLikeCrazyGoal, WhistleCallGoal) moves it and nothing walks it back. Decided
+   handling: those may move it; OrderStayGoal returns it to the anchor. Gametest it.
+3. A hunter dies far from home or a defender drags itself into a creeper: the leash, the
+   creeper tag and break-off health are the handling; yard pens prove them.
+
+
+6. UNVERIFIED
+=============
+Riskiest first.
+1. Hold-to-open on an ENTITY. Vanilla fires the entity interaction once on press; there is
+   no "use duration" while aimed at a mob. The likely shape is: cancel the interact on the
+   client, open the wheel, and read the use key's isDown() each frame; release = pick.
+   Check in 26.1.2 sources how Minecraft.options.keyUse behaves while a Screen is open
+   (a screen normally swallows key-up), and whether the wheel must be an overlay
+   rendered over the world rather than a Screen. Spike this before anything else.
+2. Whether Mob has a restriction / home radius API in 26.1.2 (restrictTo, hasRestriction,
+   getRestrictCenter) usable for Stay and Graze. The code base has never called it.
+   Check the Mob / PathfinderMob sources.
+3. That a ridden horse's order goals do not run (rider control drives movement; see
+   gene-aggression's "a ridden horse will not pursue"). Confirm "riding pauses" needs no
+   extra code beyond canUse checking for a passenger.
+4. Built-in attachment .sync firing when the order changes on the server (precedent:
+   HORSE_GEAR). Confirm the client sees an order changed from the H browser too.
+5. That HorseMeleeGoal can be driven by a target set from an order goal without the target
+   goal selector (WildHorseForgetTargetGoal) clearing it on the next tick.
+
+
+7. Order and size
+=================
+- Piece 1 (M-L): groundwork. The item, the attachment, the wheel, payload and the four
+  basic orders; every later slice plugs into it. The wheel spike (UNVERIFIED 1) first.
+- Piece 3 (M): the fighting-gene gate and the two pursuit orders. Before Piece 2 because
+  Guard here needs its gate, and it is the most-asked-for part ("hunt monsters", "defend
+  me").
+- Piece 2 (M): Graze nearby, Go home, Guard here.
+Waits on nothing. Unblocks nothing queued. Do NOT build in the same session as anything
+that re-orders horse goals (herds, carts), because behaviour-hierarchy must be rebaked
+once against a stable goal list.
+
+
+8. Release
+==========
+Counts toward the next release only when the LAST piece ships (owner, 2026-10-03). Saves:
+keep loading; no compat bump.
+
+
+9. After each piece ships
+=========================
+- procedures/rebake.txt rows: behaviour hierarchy; wiki text (bake-agent-text); the
+  verification and roadmap indexes; lang / recipe / advancement checks; the progress
+  checklist if ProgressTask has a generated view.
+- Lands on: wiki/item-whistles.html (Gameplay + Coding; credit the 1,000,000 Horses addon
+  on Coding), wiki/horse-care.html, wiki/gene-aggression.html Coding (Piece 3's reopened
+  call), wiki/gene-guardian.html and wiki/gene-magic-fighter.html Gameplay (Piece 3),
+  wiki/stables.html (Go home), wiki/items.html.
+- No new page.

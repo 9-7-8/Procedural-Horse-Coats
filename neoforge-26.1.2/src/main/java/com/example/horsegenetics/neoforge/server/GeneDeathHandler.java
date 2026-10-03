@@ -180,6 +180,9 @@ public final class GeneDeathHandler {
             case "meat" -> new ItemStack(Items.BEEF, count);
             case "spawn_egg" -> cloneEgg(horse);
             case "enchanted_sword" -> enchantedSword(level, random);
+            // The undead breeds' drops, instead of the leather (undead treatment D15).
+            case "bones" -> new ItemStack(Items.BONE, count);
+            case "rotten_flesh" -> new ItemStack(Items.ROTTEN_FLESH, count);
             default -> null;   // "vanilla" adds nothing and replaces nothing
         };
     }

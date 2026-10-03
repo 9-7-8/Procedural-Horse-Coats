@@ -34,6 +34,14 @@ STEPS
    - the classes - what they actually do: `javap -p -c` (javap is under ~/.gradle/jdks/,
      not on PATH). Use PowerShell: the Bash tool has neither strings nor javap;
    - META-INF/jarjar - bundled APIs hide there.
+   A Bedrock addon (.mcaddon / .mcpack) is never a compatibility question, only an idea
+   source. The owner uploads it; unzip it into the scratchpad (an .mcaddon may hold the
+   packs as folders, not nested .mcpack files). Read, in this order: the resource pack's
+   texts/en_US.lang (the roster); the behaviour pack's entities/ (the mobs and their
+   components); scripts/*.js (the real mechanics, and comments on what failed); the
+   texture folders (count the layers before believing a "variations" figure); then any
+   in-game guide text. Check the manifest's credits: a re-uploaded paid Marketplace
+   pack is ideas only, and nothing from it may be copied.
 3. Tell the owner what the brief is really about BEFORE posing choices: the premise of
    the request may be what needs correcting.
 4. Then offer add / adapt / skip per feature, 2-4 options each, with a recommendation.

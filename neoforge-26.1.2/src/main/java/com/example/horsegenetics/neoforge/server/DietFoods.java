@@ -75,6 +75,9 @@ public final class DietFoods {
     private static final List<Item> POTION = List.of(
             Items.POTION, Items.SPLASH_POTION, Items.LINGERING_POTION);
 
+    /** The skeleton horse's diet: it eats what it is made of. */
+    private static final List<Item> BONES = List.of(Items.BONE);
+
     private static final List<Item> LAVA = List.of(Items.LAVA_BUCKET);
     private static final List<Item> WATER = List.of(Items.WATER_BUCKET);
 
@@ -95,7 +98,8 @@ public final class DietFoods {
             Diet.CAKE, CAKE,
             Diet.POTION, POTION,
             Diet.LAVA, LAVA,
-            Diet.WATER, WATER);
+            Diet.WATER, WATER,
+            Diet.BONE, BONES);
 
     /**
      * What is left in the player's hand after the horse has eaten - a bucket

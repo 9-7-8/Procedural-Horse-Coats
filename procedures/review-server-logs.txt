@@ -95,6 +95,12 @@ STEPS
    logs AND the .log.gz ones (`zcat -f` reads both), and compare with any open issue
    waiting on that tally. Issue #13 is one: its comment names the frames that should
    be gone once the server runs the release carrying the fix.
+   Count only the logs from builds that carry the fix (each log names its jar near line
+   178), and give the counts with their time range on the waiting issue.
+   The raw logs usually run past the last export's window. Anything found there is
+   still in scope: file it as usual, and say in "Reported by" that it came from the raw
+   log, not from an export. A frame of ours that the fix never named is a new issue
+   (#31 came this way), not a reason to keep the old one open.
 
 4. Commit and push any change to intake/To do.txt.
 

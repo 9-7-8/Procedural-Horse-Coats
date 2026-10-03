@@ -36,8 +36,15 @@ window.HG = window.HG || {};
     bluepink: BASE + "assets/lutbluepink.png",
     greenpink: BASE + "assets/lutgreenpink.png",
     adult: BASE + "assets/horse_white.png",
-    baby: BASE + "assets/horse_white_baby.png"
+    baby: BASE + "assets/horse_white_baby.png",
+    // The undeath loci's whole-sheet art, keyed exactly as
+    // CoatSheetContribution.sheetResources() keys it (setSheet below).
+    skeleton_adult: BASE + "assets/horse_skeleton.png",
+    skeleton_baby: BASE + "assets/horse_skeleton_baby.png",
+    zombie_adult: BASE + "assets/horse_zombie.png",
+    zombie_baby: BASE + "assets/horse_zombie_baby.png"
   };
+  var SHEETS = ["skeleton_adult", "skeleton_baby", "zombie_adult", "zombie_baby"];
 
   // The two name word tables, for the same reason the textures are handed in
   // as pixels: TeaVM is weakest at reading its own classpath.
@@ -363,7 +370,7 @@ window.HG = window.HG || {};
         api = app.exports;
         api.main([]);
         phase(4);
-        var g = group(9);
+        var g = group(9 + SHEETS.length);
         function png(i, url) {
           return fetchTracked(url, g.slot(i)).then(function (bytes) {
             g.settle(i);
@@ -383,7 +390,7 @@ window.HG = window.HG || {};
           text(4, NAMES[0]), text(5, NAMES[1]),
           text(6, BREEDS), text(7, GENES),
           png(8, ASSETS.greenpink)
-        ]);
+        ].concat(SHEETS.map(function (key, k) { return png(9 + k, ASSETS[key]); })));
       })
       .then(function (imgs) {
         phase(5);
@@ -412,6 +419,10 @@ window.HG = window.HG || {};
         api.setAlternateGradient("greenpink", imgs[8].pixels, imgs[8].width, imgs[8].height);
         api.setTemplate(true, imgs[2].pixels);
         api.setTemplate(false, imgs[3].pixels);
+        for (var sh = 0; sh < SHEETS.length; sh++) {
+          var im = imgs[9 + sh];
+          api.setSheet(SHEETS[sh], im.pixels, im.width, im.height);
+        }
         if (!api.ready()) {
           throw new Error("the pipeline did not accept its textures");
         }

@@ -86,6 +86,134 @@
     </p>
 </div>
 
+<h2 id="v0-5-041">0.5.041 &mdash; dragon horns, a free Send home, and papers that teach</h2>
+
+<p>
+    A patch release with one new gene and a handful of quality-of-life changes. Dragon horns are
+    the first part to grow on a horse&rsquo;s head. Send home no longer costs a ticket. Filing a
+    research paper now teaches you its gene. With the size setting off, a server keeps big and
+    small horses apart. Champagne foals get their blue-green baby eyes.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners: Send home is now free by default</p>
+    <p>
+        The horse menu&rsquo;s <strong>Send home</strong> button used to spend a ticket. To
+        charge for it again, set <code>behaviour.send_home_payment_item</code> (see
+        <a href="#v0-5-041-send-home">Send home is free</a>).
+    </p>
+</div>
+
+<h3 id="v0-5-041-dragon-horns">Dragon horns</h3>
+<p>
+    A new recessive gene, <code>dragon_horns</code>, grows a pair of horns behind the ears. They
+    sweep back over the neck in one of three forms: swept, straight or curled. Each copy carries
+    its own length (five size classes) and girth, so no two pairs are quite alike. Either sex
+    can grow them, and they grow in only once the horse is adult. Their colour has its own gene,
+    <code>dragon_horn_colour</code>, separate from the unicorn horn&rsquo;s. A horse can have a
+    white unicorn horn over black dragon horns.
+</p>
+<p>
+    They are rare in the wild: about 1 horse in 400 shows a pair, and about 1 in 10 carries a
+    hidden copy. No breed carries them yet. Breeding carrots, splices and the spawn egg can give
+    them like any other gene.
+    Details: <a href="gene-dragon-horns.html">Dragon horns</a>.
+</p>
+
+<h3 id="v0-5-041-send-home">Send home is free</h3>
+<p>
+    The horse browser&rsquo;s <strong>Send home</strong> button sends a horse to its stall (or
+    to the holding pen) from any world, or out of a stasis chamber, and no longer spends a
+    ticket. A server can set a price again with three new settings in the server config:
+</p>
+<table class="facts">
+    <tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+    <tr><td><code>behaviour.send_home_payment_item</code></td><td><code>""</code> (free)</td><td>An item id each trip costs, e.g. <code>minecraft:emerald</code></td></tr>
+    <tr><td><code>behaviour.send_home_payment_count</code></td><td><code>1</code></td><td>How many of that item one trip takes</td></tr>
+    <tr><td><code>behaviour.send_home_cooldown_seconds</code></td><td><code>5</code></td><td>Seconds a player waits between two trips</td></tr>
+</table>
+<ul>
+    <li>The button shows the price, and greys out when you cannot pay.</li>
+    <li>Creative players never pay.</li>
+    <li>An item id the server does not recognise counts as free, and the server log gets one
+        warning.</li>
+    <li>A refused trip takes nothing and does not start the cooldown.</li>
+    <li>The realm tab&rsquo;s <strong>Bring home</strong> still spends a holding pen ticket.</li>
+    <li>Pressing Send home no longer ticks the &ldquo;use a ticket&rdquo; checklist tasks.</li>
+</ul>
+
+<h3 id="v0-5-041-papers">Research papers teach their gene</h3>
+<p>
+    Placing a paper in a research shelf&rsquo;s paper slot now counts as discovering its gene.
+    The gene is entered in your gene database, its breeding carrot recipe unlocks, and the
+    matching checklist tasks tick. A paper about the plain wild pair teaches nothing, just as
+    taming a plain horse teaches nothing. Hoppers and other automation do not discover genes
+    for anyone.
+</p>
+
+<h3 id="v0-5-041-size">Size with <code>body.size</code> off</h3>
+<p>
+    Before, a server with <code>body.size = false</code> stood every horse at exactly 1.0, so a
+    Shire and a Falabella were the same height. Now each horse&rsquo;s size is squashed into
+    <strong>0.85&ndash;1.15</strong>. The order is kept: a big horse is still bigger than a
+    small one, and an ordinary horse barely changes. The 1.15 cap is chosen so every horse
+    still fits a two-block stall.
+</p>
+<p>
+    The spawn egg screen&rsquo;s size readout shows the size &ldquo;in this world&rdquo; when
+    the setting is off. With the default (<code>body.size = true</code>) nothing changes:
+    magical giants are as big as ever.
+</p>
+
+<h3 id="v0-5-041-smaller">Smaller things</h3>
+<ul>
+    <li><strong>Champagne foals have blue-green eyes</strong> until they grow up, as real
+        champagne foals do. Then their own eye colour shows. A splashed champagne foal keeps its
+        blue eyes.</li>
+    <li><strong>The spawn egg screen&rsquo;s part genes</strong> no longer say &ldquo;no
+        effect&rdquo; on a horse that grows antlers, horns or other parts.</li>
+    <li><strong>The browser horse designer</strong> now lists the grown parts it cannot draw,
+        under &ldquo;Not drawn here - see in game&rdquo;.</li>
+</ul>
+
+<h3 id="v0-5-041-worlds">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading.</strong> A world from 0.5.037 or later loads in this one.
+        Replace 0.5.040 with this jar.</li>
+    <li><strong>Nothing about an existing horse changes.</strong> The new gene arrives on old
+        horses in its plain, hornless form, and no existing allele moved. New wild horses can
+        rarely grow dragon horns.</li>
+    <li><strong>Send home is free by default.</strong> A server that wants it to cost something
+        must set <code>behaviour.send_home_payment_item</code>. The new keys are written to the
+        server config on the first start.</li>
+    <li><strong>A server running with <code>body.size = false</code></strong> will see its
+        horses&rsquo; sizes spread out a little, to between 0.85 and 1.15, the next time each
+        horse&rsquo;s traits are applied.</li>
+    <li><strong>Existing champagne foals</strong> pick up the blue-green eyes the next time
+        their coat is drawn.</li>
+    <li>No recipes, items or breed frequencies changed.</li>
+</ul>
+
+<h3 id="v0-5-041-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>
+        (a hungry horse starved beside a plain hay bale in a test pen),
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a> (the stall
+        detector refuses a slab-floored stall, and splits a stall with a one-block step),
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a> (open until
+        the live server&rsquo;s logs show its chunk loads are gone) and
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (fixed in
+        0.5.040, open until someone checks it in game).</li>
+    <li><strong>Dragon horns have only been seen on a photo stage.</strong> Their placement
+        behind the ears is computed from the model, not tuned. They have not been checked
+        beside other head parts, on a growing foal, or under a low ceiling. At wild lengths
+        they are short hooks.</li>
+    <li>Not seen in game yet: Send home with a price set, discovery by filing a paper, the
+        compressed sizes, and the champagne foal&rsquo;s eye on the real foal skin. Each is
+        covered by a unit test or gametest. What is waiting on someone&rsquo;s eyes is on
+        <a href="verification.html">the verification page</a>.</li>
+</ul>
+
 <h2 id="v0-5-040">0.5.040 &mdash; level stables, dealer and stasis fixes, and a lighter server</h2>
 
 <p>

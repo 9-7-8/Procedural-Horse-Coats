@@ -1,6 +1,7 @@
 package com.example.horsegenetics.common.coat.pattern;
 
 import com.example.horsegenetics.common.CommonMaps;
+import com.example.horsegenetics.common.genetics.CoatSheetContribution;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.LutContribution;
@@ -25,15 +26,41 @@ import java.util.function.Function;
  * <p>Pure data: the {@code int[]}s are loaded by the game module (or a build
  * tool) and handed in, exactly as {@link GradientLut} is.
  */
-public record LutSet(GradientLut base, Map<String, GradientLut> alternates) {
+public record LutSet(GradientLut base, Map<String, GradientLut> alternates,
+                     Map<String, GradientLut> sheets) {
 
     public LutSet {
         alternates = CommonMaps.copyOf(alternates);
+        sheets = sheets == null ? CommonMaps.empty() : CommonMaps.copyOf(sheets);
+    }
+
+    /** No coat sheets - every caller that predates the undead horses. */
+    public LutSet(GradientLut base, Map<String, GradientLut> alternates) {
+        this(base, alternates, null);
     }
 
     /** A set with only the natural gradient - the ordinary case, and every pre-LUT caller. */
     public static LutSet of(GradientLut base) {
         return new LutSet(base, CommonMaps.empty());
+    }
+
+    /**
+     * The whole-sheet art a {@link CoatSheetContribution} gene asks for under
+     * {@code key} - vanilla's skeleton and zombie horse sheets, converted to this
+     * mod's layout - or {@code null} when the host did not load it, in which case
+     * the composer skips that gene's pass and the horse bakes as an ordinary coat.
+     * Carried in a {@link GradientLut} only because that is the image every host's
+     * reader already returns; nothing samples it as a gradient.
+     */
+    public GradientLut sheet(String key) {
+        return sheets.get(key);
+    }
+
+    /** This set with {@code more} sheets added. */
+    public LutSet withSheets(Map<String, GradientLut> more) {
+        Map<String, GradientLut> all = new LinkedHashMap<>(sheets);
+        all.putAll(more);
+        return new LutSet(base, alternates, all);
     }
 
     /**
@@ -53,7 +80,16 @@ public record LutSet(GradientLut base, Map<String, GradientLut> alternates) {
      */
     public static LutSet fromRegistry(GradientLut base, Function<String, GradientLut> reader) {
         Map<String, GradientLut> alternates = new LinkedHashMap<>();
+        Map<String, GradientLut> sheets = new LinkedHashMap<>();
         for (Gene gene : Genes.codeOrder()) {
+            if (gene instanceof CoatSheetContribution art) {
+                for (Map.Entry<String, String> e : art.sheetResources().entrySet()) {
+                    GradientLut loaded = sheets.containsKey(e.getKey()) ? null : reader.apply(e.getValue());
+                    if (loaded != null) {
+                        sheets.put(e.getKey(), loaded);
+                    }
+                }
+            }
             if (!(gene instanceof LutContribution lut)) {
                 continue;
             }
@@ -67,7 +103,7 @@ public record LutSet(GradientLut base, Map<String, GradientLut> alternates) {
                 }
             }
         }
-        return new LutSet(base, alternates);
+        return new LutSet(base, alternates, sheets);
     }
 
     /** The LUT under {@code key}, or the base when {@code key} is {@code null} or unknown. */

@@ -89,6 +89,11 @@ STEPS
        bone, growth)? Are any of these separate modifier genes?
    bb. Does it hide under, or clash with, a saddle, rider, armour or other gear?
    cc. Do mares and foals grow it, and how does it scale with the horse's size gene?
+   dd. Does it realistically have bone in it? Then it needs a BONE VERSION (owner,
+       2026-10-02): the alleles or bands that draw it as bare bone on a skeleton horse -
+       bone-coloured, unlit, nothing soft (wings: the bones alone, no membrane). Ask what
+       the bone version looks like, and whether the skeleton breeds' pools carry it (every
+       horn-like part is in their horn count group).
 
 2. Read the code. Hand open-ended sweeps to an Explore agent (look-it-up). Grep every
    class and file named below before relying on it. Path shorthands:
@@ -181,6 +186,12 @@ STEPS
    3. Write T/genetics/genes/<Name>GeneTest.java. GeneCoatHookTest is the pattern.
    4. The page is HAND-WRITTEN, with tabs gameplay, coding and science, plus
       verification. bakeGeneWikiPages still registers it.
+   5. A gene whose look is a whole sheet of art (the undeath loci) implements
+      CoatSheetContribution and names its sheets in sheetResources(). The game and
+      every tool load them from that by themselves; the horse designer does NOT:
+      add the PNGs to web/build.gradle.kts's include list and the keys to java.js's
+      SHEETS, or the browser silently bakes the plain coat. Sheets converted from
+      vanilla art go through common/sheet-sources/manifest.txt (rebake row z).
 
 5. ABILITY gene.
    1. Pick the shape, in this order of preference:
@@ -293,6 +304,13 @@ STEPS
       - breed tests for any breed that pins it.
    10. The browser editor cannot draw a mesh; the game's spawn screen can. Keep that
        divergence written in BOTH editor files' comments.
+   10b. The bone version (question dd). Build it as alleles or band reach on the part's own
+       loci - a Bon colour allele (AbstractPartColourGene has one), a shade end that only a
+       breed reaches (RamHornsGene's shade below 0), an "off" allele for the soft parts (a
+       wing's membrane) - never as a special case in the renderer. Add it to the skeleton
+       breeds' files (great_valley_skeleton_horse.json, blackened_skeleton_horse.json) when
+       the owner says they carry it, extend UndeadBreedsTest's bone checks, and add the row
+       to wiki/model-parts.html#bone-versions.
    11. Update wiki/model-parts.html's Coding tab: its kind and region counts go stale
        with each part.
    12. Placement is computed from model boxes, so it is unverified until it is seen.

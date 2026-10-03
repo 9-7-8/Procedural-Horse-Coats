@@ -61,6 +61,8 @@ wingmargin
 light
 stormvein
 lut
+skeleton
+zombie
 qular
 fracture
 cleave

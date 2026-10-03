@@ -415,6 +415,31 @@
     same horse as a foal. Neither the game screen's row change nor the panel has been seen by
     a person yet. See <a href="#open-editor-part-rows">the check</a>.
 </p>
+
+<h2 id="bone-versions">Every part with bone in it has a bone version</h2>
+<p>
+    <strong>The owner&rsquo;s rule (2026-10-02):</strong> a grown part that realistically has
+    bone in it ships with a <em>bone version</em> &mdash; the alleles or bands that draw it as
+    bare bone on a <a href="undead-horses.html">skeleton horse</a>: bone-coloured, unlit, and
+    with nothing soft on it. A wing&rsquo;s bone version is the bones alone, with no membrane.
+    It is built on the part&rsquo;s own loci, never as a special case in the renderer, so a
+    bred skeleton can lose it and an ordinary horse can carry it.
+    <code>procedures/add-a-gene.txt</code> (question dd, step 10b) and
+    <code>write-intake-document.txt</code> (5b) ask for it.
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Part</th><th>Its bone version</th><th>On the skeleton breeds</th></tr></thead>
+<tbody>
+<tr><td><a href="gene-unicorn-horn.html">Unicorn horn</a></td><td><code>Bon/Bon</code> on <a href="gene-horn-colour.html">horn colour</a>; horn glow and horn dust <code>n/n</code></td><td>in the horn count group</td></tr>
+<tr><td><a href="gene-antlers.html">Antlers</a></td><td>antler <code>tint</code> banded to its pale-bone end; crystal, glow and bloom <code>n/n</code></td><td>in the horn count group</td></tr>
+<tr><td><a href="gene-ram-horns.html">Ram&rsquo;s horns</a></td><td><code>shade</code> below 0, the bone end no wild horse rolls; tip <code>n/n</code></td><td>in the horn count group</td></tr>
+<tr><td><a href="gene-dragon-horns.html">Dragon horns</a></td><td><code>Bon/Bon</code> on <a href="gene-dragon-horn-colour.html">dragon horn colour</a></td><td>in the horn count group</td></tr>
+<tr><td>Wings (not built)</td><td>the bones alone, no membrane</td><td>to ask when the wing part is built</td></tr>
+</tbody>
+</table>
+</div>
+
 </section>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
@@ -424,7 +449,8 @@
     <span class="label">What is still planned here</span>
     <p>
         The parts the built machinery has no generator for yet &mdash; the five head parts
-        after the dragon horns, dorsal spines and crystalline growths, then hoof feathering, tufted tails and wings &mdash; plus the
+        after the dragon horns, dorsal spines and crystalline growths, then hoof feathering, tufted tails and wings,
+        and the horns the antlered beasts of the bestiaries lack &mdash; plus the
         two hooks that would let something other than one gene ask for a part: a breed file, and
         the worn side, so a horse shoe draws through this layer rather than a bespoke one.
     </p>
@@ -489,6 +515,34 @@
         is a formula rather than an animation asset.</li>
 </ul>
 
+<h3 id="antlered-beasts">What the antlered beasts of the bestiaries lack</h3>
+<p>
+    Five mythic beasts are scoped as breeds, each carrying the nearest horn that has shipped: the
+    Shadawar, the Yale, the Calopus (with the heraldic antelope folded in), the Tarandrus and the
+    Leucrocotta. Each breed&rsquo;s book entry will say what is not drawn. The parts below are what
+    each one lacks. Each is its own piece of work and none is scoped yet.
+</p>
+<ul>
+    <li><strong>A branching hollow horn</strong> (the Shadawar, whose horn has dozens of hollow
+        branches the wind plays through). It needs a new part kind. Antlers branch, but they are
+        tines on a rack, not a single horn that forks. The music stays lore.</li>
+    <li><strong>A saw-edged horn</strong> (the Calopus and the heraldic antelope). It is either a
+        new part kind or a serrated form on the antler generator. First, find out whether any of
+        the five antler forms already reads as saw-edged.</li>
+    <li><strong>Swivelling horns</strong> (the Yale, whose two horns turn independently). This is
+        the first part that would move on its own. Today a part has no motion beyond the bone it
+        hangs from: <code>PartModel.setupAnim</code> sets which boxes show and never a rotation.
+        It would need a rotation rule computed from the horse&rsquo;s state, like the curving tail
+        above. It would not need an animation asset.</li>
+    <li><strong>Boar tusks and a nose tusk</strong> (the Yale, the heraldic antelope). These belong
+        to the tusks gene, which is scoped in <code>intake/</code>: boar tusks on new jaw anchors,
+        and a narwhal horn on a <code>SNOUT</code> anchor. The nose tusk is that horn kept short.</li>
+    <li><strong>A lion&rsquo;s neck and chest, a stag&rsquo;s hindquarters, a mouth to the
+        ears</strong> (the Leucrocotta). Adding a part is not enough here, because part of the
+        vanilla horse has to be hidden first. That is the same capability the Hippocampus and the
+        Hippalektryon wait on. Its lion tail is the tufted-tail item above.</li>
+</ul>
+
 <h2 id="hooks">The two hooks</h2>
 <ul>
     <li><strong>A breed may declare parts.</strong> Touches the breed format,
@@ -503,6 +557,17 @@
         <code>AttachedPart</code> list. Saddle pads follow. Not settled: whether a worn item may
         ever replace a grown part &mdash; a helmet over a horn.</li>
 </ul>
+
+<div class="note" id="bone-wings">
+    <span class="label">The wing&rsquo;s bone version (owner, 2026-10-02)</span>
+    <p>
+        When the wing part is built it ships a bone version: the wing bones alone, no
+        membrane, in bone and unlit (<a href="#bone-versions">the rule</a>). A membrane
+        drawn on the elytra mesh is a texture, so &ldquo;no membrane&rdquo; is a locus that
+        turns the membrane off and a bone sheet region for what is left &mdash; to settle
+        with the owner, with whether the skeleton breeds carry wings at all.
+    </p>
+</div>
 
 <h2 id="elytra-wings">Wings off the elytra &mdash; what transfers and what does not</h2>
 <p>

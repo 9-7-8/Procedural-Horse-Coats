@@ -1,5 +1,17 @@
 Daily realm horse - implementation treatment
 
+OWNER'S ANSWERS, 2026-10-02 (these override any "Open" or "Recommend" line below)
+- Breed: EQUAL chance of literally any breed in the game, rarity ignored, with Feral Mixed as one
+  more entry in that uniform list (option (a), not the recommended (b)).
+- Non-WILD breeds: INCLUDED. Every breed may be the daily horse, cowboy-only, undead and Nether ones too.
+- Clock: CATCH UP ON RETURN. Mornings are counted by the day count; while nobody is in the realm
+  nothing spawns, and the missed mornings spawn when someone next enters, up to 7 at once.
+- Placement: 8-24 blocks from a random untamed realm horse (joins its herd); with none, a random
+  in-bounds point; never on a portal cell or a stable.
+- Soft cap: yes, N untamed realm horses derived from the field's area (not a literal); the catch-up
+  respects it.
+- Still the building session's: the realm_born NBT flag (recommended), config names.
+
 Drafted in a session confined to intake/ (nothing outside this folder was touched).
 Nothing here is built or run. "Decided" lines are the owner's request as given;
 "Open" lines are for the building session to settle; "UNVERIFIED" lines are facts

@@ -66,6 +66,9 @@ usercache.json
 
 # The headless gametest run has its own game directory (see build.gradle).
 neoforge-26.1.2/run-gametest/
+# The stress and wild-turnover soak servers' own game directories (procedures/stress-test.txt).
+neoforge-26.1.2/run-stress*/
+neoforge-26.1.2/run-soak*/
 
 # --- intake/: third-party pack that may not be redistributed ---
 # The Raven icons (licence forbids distributing the pack). The owner keeps them on

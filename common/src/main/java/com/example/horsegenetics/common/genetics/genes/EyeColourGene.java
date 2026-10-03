@@ -76,6 +76,11 @@ public final class EyeColourGene extends AbstractEyeGene {
             {EyeHue.INVISIBLE, 0.05, "No iris is painted at all - the coat on the head shows straight "
                     + "through where the eye should be. Nothing further down this eye's stack "
                     + "shows either: no sector, no glow."},
+            // Appended (2026-10-02), so no saved horse's allele index moves. No wild share:
+            // only a breed that pins it carries it - the two undead breeds, whose eyes are
+            // vanilla's plain black (undead treatment D29).
+            {EyeHue.BLACK, 0.0, "A flat black iris - the eye of the undead horses. Nothing wild "
+                    + "carries it; a breed has to have kept it."},
     };
 
     private final List<EyeHue> hues = new ArrayList<>();
@@ -130,7 +135,7 @@ public final class EyeColourGene extends AbstractEyeGene {
     public String description() {
         return "What colour this horse's " + side(locus()).toLowerCase() + " iris is. Brown is "
                 + "dominant to every variant and to a horse carrying two different ones, so "
-                + "green, gold, the three blues, white, red, chaos and invisible each take a matched "
+                + "green, gold, the three blues, white, red, chaos, invisible and black each take a matched "
                 + "pair. The two eyes are separate loci, which is what makes complete "
                 + "heterochromia something you can breed for rather than wait for - but a wild "
                 + "horse's second eye usually copies its first. Cream, champagne, tiger eye and "

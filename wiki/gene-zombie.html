@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zombie &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> one of the two undeath loci</p>
+
+<h1>Zombie</h1>
+
+<p class="lede">
+    Two copies and the horse is dead flesh: the rotted green-grey hide of a zombie horse,
+    whatever colour its other genes would have made it, though magical markings still show
+    over it. It counts as <a href="undead-horses.html">undead</a>. One copy is a carrier that
+    looks and acts like any other horse. No wild horse has it: every one comes from a vanilla
+    zombie horse that converted into a
+    <a href="breed-book.html#graveborn-warmblood">Graveborn Warmblood</a>, or from breeding them.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.zombie"></div>
+
+<h2 id="what">What two copies do</h2>
+
+<ul>
+    <li><strong>The look.</strong> Vanilla&rsquo;s zombie horse hide is the horse&rsquo;s base
+        coat. Its natural colour &mdash; bay, chestnut, a pattern &mdash; never shows, but a
+        <em>magical</em> marking paints over the hide as over any coat: the Long-buried strain is
+        a zombie with grave dust on it.</li>
+    <li><strong>Black eyes.</strong></li>
+    <li><strong>It is undead</strong> to anything that asks: cleansing light, a holy ward, an aura
+        that names the undead.</li>
+</ul>
+<p>
+    The raw-meat diet, the after-dark temper, the rotten-flesh calm, the flesh drops and the slow,
+    tough body belong to the <em>breed</em>. A zombie foal of two ordinary parents is a rotted
+    hide on an ordinary horse.
+</p>
+
+<h2 id="carrier">One copy</h2>
+<p>Nothing shows and nothing changes. A carrier is not undead for any purpose.</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+<p>It has no health effect at all.</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.zombie</dd></div>
+    <div><dt>Class</dt><dd><code>ZombieGene extends AbstractUndeathGene</code></dd></div>
+    <div><dt>Priority</dt><dd>192 (magical coat band), beside <a href="gene-skeleton.html">skeleton</a> at 191</dd></div>
+    <div><dt>Alleles</dt><dd><code>Zomb</code>, <code>n</code> (wild type, last)</dd></div>
+    <div><dt>Outcomes</dt><dd><code>zombie</code> (a marker), a carrier and the wild type</dd></div>
+    <div><dt>Founders</dt><dd><code>n/n</code> always &mdash; never in the wild, never spliced, no gene carrot</dd></div>
+</dl>
+
+<h2 id="sheet">The seed pass</h2>
+<p>
+    <code>CoatSheetContribution</code> with pass <code>SEED</code>: right after phase 2 the
+    converted zombie sheet (<code>horse_zombie.png</code> / <code>_baby</code>) replaces the
+    colour field the natural genes resolved, so the magical phase paints over it. The white
+    template is <em>divided back out</em> of the seed, because the composite multiplies the field
+    onto the template and the template has shading of its own &mdash; so an unmarked zombie comes
+    out as vanilla&rsquo;s zombie horse, not a shade darker. At the very end the sheet&rsquo;s own
+    alpha cuts its handful of holes (85 texels on vanilla&rsquo;s 64px sheet). Black eyes, the
+    undead check and the voice are shared with the skeleton: see
+    <a href="gene-skeleton.html#eyes">skeleton</a>.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+<p>
+    Zombie horses are not real. The locus is the skeleton&rsquo;s twin, and its look is a base coat
+    rather than a cut-out because vanilla&rsquo;s zombie horse is a whole horse recoloured, with
+    only a few pixels knocked out &mdash; and its green-grey is no pigment a horse has, so it cannot
+    come out of the natural genes.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No zombie horse of this mod has been seen in a running game: the seeded hide and the Long-buried dust are rendered in the side-view preview, not watched in the world.</p>
+</div>
+
+<h3 id="open-zombie-look">The hide under daylight and in the dark</h3>
+<p>
+    Spawn a Graveborn Warmblood egg of each strain: Fresh should be indistinguishable from
+    vanilla&rsquo;s zombie horse at a glance; Long-buried should carry dark grave dust up the legs,
+    along the belly and over the muzzle.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

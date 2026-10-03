@@ -1,5 +1,9 @@
 Horse shoes - implementation treatment
 
+OWNER'S ANSWER, 2026-10-02: the first pass ships TWO enchantments, GRIP (less slipping on ice and
+slick ground) and a SPEED one (a small bonus on paths and roads). Name and number are the building
+session's; define their conflict explicitly. Durability is ordinary item damage, no enchantment.
+
 What already exists, so this session does not redo it
 =======================================================
 - wiki/item-horse-shoes.html is already a separate page from wiki/horse-gear.html

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skeleton &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> one of the two undeath loci</p>
+
+<h1>Skeleton</h1>
+
+<p class="lede">
+    Two copies and the horse is its own bones. Everything that is not skeleton is cut away,
+    the bone shows through the horse&rsquo;s coat, and whatever colour the horse carries is the
+    colour of its bones. It never drowns, and it counts as <a href="undead-horses.html">undead</a>.
+    One copy is a carrier that looks and acts like any other horse. No wild horse has it:
+    every one comes from a vanilla skeleton horse that converted into a
+    <a href="breed-book.html#great-valley-skeleton-horse">Great Valley Skeleton Horse</a>, or
+    from breeding them.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.skeleton"></div>
+
+<h2 id="what">What two copies do</h2>
+
+<ul>
+    <li><strong>The look.</strong> Vanilla&rsquo;s skeleton horse, laid over the horse&rsquo;s own
+        coat: its holes cut the horse away, its bone colour shows through, and its shading is put
+        back on top. A white horse makes clean white bones; a dun, yellowed old ones; a spotted
+        horse, spotted bones.</li>
+    <li><strong>Black eyes</strong>, whatever its other genes would have given it.</li>
+    <li><strong>It never drowns</strong> &mdash; the horse, not its rider.</li>
+    <li><strong>It is undead</strong> to anything that asks: cleansing light, a holy ward, an aura
+        that names the undead.</li>
+</ul>
+<p>
+    Everything else a skeleton horse is known for &mdash; eating bones, turning on its rider after
+    dark until it is given one, dropping bones when it dies, the soul fire at its hooves, its
+    speed &mdash; belongs to the <em>breed</em>, not to this gene. A skeleton foal of two ordinary
+    parents is bones with an ordinary horse&rsquo;s appetite and temper.
+</p>
+
+<h2 id="carrier">One copy</h2>
+<p>
+    Nothing shows and nothing changes. A carrier is not undead for any purpose. Two carriers
+    bred together have a one in four chance of a skeleton foal.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+<p>It has no health effect of its own. The horse cannot drown, which is all it gains.</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.skeleton</dd></div>
+    <div><dt>Class</dt><dd><code>SkeletonGene extends AbstractUndeathGene</code>, also <code>AbilityContribution</code></dd></div>
+    <div><dt>Priority</dt><dd>191 (magical coat band), beside <a href="gene-zombie.html">zombie</a> at 192</dd></div>
+    <div><dt>Alleles</dt><dd><code>Skel</code>, <code>n</code> (wild type, last)</dd></div>
+    <div><dt>Outcomes</dt><dd><code>skeleton</code> (a marker: paints in no phase), a carrier and the wild type</dd></div>
+    <div><dt>Founders</dt><dd><code>n/n</code> always &mdash; never in the wild, never spliced, no gene carrot</dd></div>
+    <div><dt>Epigenome</dt><dd><code>coat_opacity</code> 0.55&ndash;0.65, <code>shade_strength</code> 0.80&ndash;0.90, averaged over both copies</dd></div>
+    <div><dt>Effects</dt><dd><code>traversal underwater_breathing</code>, target <code>self</code></dd></div>
+</dl>
+
+<h2 id="sheet">The sheet pass</h2>
+<p>
+    The gene implements <code>CoatSheetContribution</code> with pass <code>SHAPE</code>, which
+    <code>CoatTextureComposer.bake</code> runs as step 6, <em>after</em> the overlay phase. For
+    each texel, with S the converted skeleton sheet (<code>horse_skeleton.png</code> /
+    <code>_baby</code>, keyed <code>skeleton_adult</code> / <code>skeleton_baby</code>) and C
+    the finished coat: S&rsquo;s alpha replaces C&rsquo;s (binary, so the model&rsquo;s own
+    <code>ENTITY_CUTOUT_NO_CULL</code> discards the holes); the colour is
+    <code>lerp(S, C, coat_opacity &times; C.a)</code>; and it is multiplied by
+    <code>lerp(1, L, shade_strength)</code>, L being S&rsquo;s luminance over its brightest. The
+    eye texels keep C. It runs after the overlay because the bleached strain is locked white by
+    <a href="gene-extreme-white-dominant.html">extreme white dominant</a>, and the lock refuses
+    every overlay write; the cut-outs are not a marking. A host that has not loaded the sheet
+    (a test&rsquo;s synthetic set) skips the pass and bakes the plain coat.
+</p>
+
+<h2 id="eyes">Black eyes</h2>
+<p>
+    <code>AbstractUndeathGene</code> is an <code>EyeRequestContribution</code>: an expressing
+    horse requests <code>Blk</code> at both irises and both sclerae and the wild sector at both
+    eyes. The undeath loci sort after every white locus, so the request wins over a white&rsquo;s
+    blue eye or blue wedge (a skeleton with a hidden splash carrier would otherwise have one).
+</p>
+
+<h2 id="undead-check">Undead, for the rest of the mod</h2>
+<p>
+    <code>common/genetics/Undeath.kindOf(Genotype)</code> is the one answer; the game asks it
+    through <code>server/UndeadHorses</code> (cached per genetic code), and
+    <code>MobGroups</code>&rsquo;s <code>undead</code> group adds it to the entity-type tag.
+    <code>mixin/HorseUndeadVoiceMixin</code> gives an expressing horse vanilla&rsquo;s skeleton horse
+    ambient, hurt and death sounds.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+<p>
+    There is no skeleton horse in nature. The gene is the owner&rsquo;s answer to how much of the
+    mod an undead horse gets: all of it, by making undeath a locus on an ordinary horse rather than
+    an entity type beside it. It is recessive so that it can surface, rarely, from two
+    ordinary-looking parents &mdash; the thing the mod is for &mdash; and it is only the bones:
+    the diet, temper and stats are other loci the breed pins
+    (<a href="undead-horses.html#bundle">the breed sets the bundle</a>).
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No skeleton horse of this mod has been seen in a running game: the cut-outs, underlay and shading are rendered in the side-view preview and unit-tested, not watched on a moving horse.</p>
+</div>
+
+<h3 id="open-skeleton-look">The look on a moving horse</h3>
+<p>
+    Spawn a Great Valley Skeleton Horse egg of each strain and watch it walk, graze and rear: the
+    holes should show the far side of the horse through the ribs, as vanilla&rsquo;s do, with no
+    white flash on the first frame. Tune <code>coat_opacity</code> and <code>shade_strength</code>
+    by eye with a breed band if the bone reads too dark or too much like coat.
+</p>
+
+<h3 id="open-skeleton-foal">A foal</h3>
+<p>A skeleton foal should wear the baby skeleton sheet, cut the same way.</p>
+
+<h3 id="open-skeleton-drown">It never drowns</h3>
+<p>Ride one into deep water and stay under: the horse&rsquo;s air should never run out; the rider&rsquo;s should.</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

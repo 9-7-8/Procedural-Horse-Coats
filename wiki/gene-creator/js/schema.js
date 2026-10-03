@@ -878,7 +878,8 @@ window.HG = window.HG || {};
       doc: "What the horse leaves behind. Every value but 'meat' REPLACES the vanilla drop; "
         + "'meat' is added beside it.",
       params: [
-        eChoice("drop", ["vanilla", "diamonds", "spawn_egg", "enchanted_sword", "meat"], null,
+        eChoice("drop", ["vanilla", "diamonds", "spawn_egg", "enchanted_sword", "meat",
+          "bones", "rotten_flesh"], null,
           "what the horse drops"),
         eNum("min", 1, "fewest items", { min: 0, max: 64, step: 1 }),
         eNum("max", 1, "most items, at least 'min'", { min: 0, max: 64, step: 1 })

@@ -1,4 +1,4 @@
-2026-10-03 18:00 - Relicensed: code MIT, art CC BY-SA 4.0 (time is the end of the session)
+2026-10-03 17:28 - Relicensed: code MIT, art CC BY-SA 4.0 (time is the end of the session)
 
 ASKED
   1. "Let's overhaul how we do licensing ... all the art ... under the GLP license (or
@@ -46,8 +46,9 @@ DECIDED
 FOUND ON THE WAY
   - Three licence questions are open and written on wiki/licensing.html's Verification tab:
     the licences of the three Planet Minecraft stables (also gap 80 on stables.html);
-    whether horse_white*.png and the minecraft/.../*_saddle textures derive from Mojang's
-    art; and that "art" was assigned by folder layout, not by provenance of each image.
+    whether the minecraft/.../*_saddle textures derive from Mojang's art (main's merged
+    notices already settle that the horse coat sheets are Mojang's, and licensing.html
+    and LICENSE-ART now say so); and that "art" was assigned by folder layout, not by provenance of each image.
   - No GitHub issues filed.
 
 PROCEDURES

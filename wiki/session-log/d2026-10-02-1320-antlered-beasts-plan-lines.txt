@@ -1,0 +1,66 @@
+2026-10-02 13:20 (start) - Antlered beasts: the plan lines on model-parts.html
+
+ASKED
+-----
+- "/process-intake" (no arguments). It picked one unit, built it and retired it, below.
+
+DONE
+----
+- 449a3419  Model parts Roadmap: what the antlered beasts of the bestiaries lack.
+  Unit: "Mythical antlered beasts - implementation treatment.txt", Piece 2 (Tier 1: S,
+  impact b, owner-free). The five beasts (Shadawar, Yale, Calopus, Tarandrus,
+  Leucrocotta) are scoped as breeds wearing the nearest shipped horn. The parts none of
+  them gets were written nowhere. They are now one section on the Roadmap tab,
+  wiki/model-parts.html#antlered-beasts: a branching hollow horn, a saw-edged horn
+  (first check whether an AntlerGenerator form already reads as one), swivelling horns,
+  boar tusks and a nose tusk (pointing at the tusks treatment's JAW_ / SNOUT anchors),
+  and the Leucrocotta's lion forepart (waits on hiding a vanilla bone). The tab's
+  summary sentence names them too.
+  Proof: grep of wiki/*.html found no earlier line for any of the five (the hypothesis
+  check). The swivel line's claim was read from source: PartModel.setupAnim
+  (neoforge-26.1.2/.../client/PartModel.java:170) sets box visibility and never a
+  rotation, so a part has no motion of its own. Bakes: bake-roadmap-index (125
+  entries; model-parts 6 -> 7), bake-verification-index, check-roadmap-execution OK,
+  sync-page-views (nothing to update), build-search-index, check-links OK,
+  bake-agent-text, check-parity OK (7163 checks).
+  Retired: Piece 2's section, its order line and its regenerate line in the treatment
+  (one pointer left in section 2); its row in intake/Sizing.txt. Piece 1 (the breeds)
+  remains.
+
+DECIDED
+-------
+- Placement as lines, not pages: the treatment's Recommended line, taken as written.
+- Calls made without the owner: the lines sit as one h3 section under "The parts that
+  have no generator yet", rather than five bullets in that list, so the five beasts
+  stay together. The nose tusk is described as the tusks treatment's narwhal horn kept
+  short. That is a reading, not a scoped decision.
+
+FOUND ON THE WAY
+----------------
+- wiki/text/ bakes no Roadmap tab (model-parts has .all/.coding/.gameplay only), so a
+  grep there cannot prove a plan is unwritten. Written into process-intake.
+- The Sizing block stood (every treatment's last edit predates its 12:07 re-size).
+
+PROCEDURES
+----------
+- process-intake.txt step 6: a plan-only unit's hypothesis check is a grep of
+  wiki/*.html (not wiki/text/), plus a code grep for each fact a plan line states.
+  Step 7: for a plan-only unit, the Roadmap tab is the whole write-up.
+- end-session.txt step 2: a session touching no Java, resource or Gradle file skips the
+  Gradle build and says so; it still runs check-parity.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The Gradle build was not run: no code changed (end-session step 2 as amended).
+- No tests: a wiki-only unit. A full :common:test run would check nothing this session
+  touched.
+- No Verification-tab anchors were added: nothing was built that could be seen in game.
+
+RELEASE
+-------
+Not offered: a plan-only unit does not count toward release step 1's bar.
+
+PICK UP FIRST
+-------------
+/process-intake: the next Tier 1 unit is "Mythical deer" Piece 5, the deer-build.html
+Roadmap-only page (S, b, owner-free; add-a-wiki-page).

@@ -35,8 +35,7 @@ Reading: five breeds (the heraldic antelope folds into the Calopus), each a hors
 ============================
 In scope
  - Piece 1: the five breeds, each as its horse half. Decided.
- - Piece 2: Roadmap lines on model-parts.html for the unbuilt parts these need (see 3c). Decided as "noting what each lacks";
-   Recommended placement as lines, not pages.
+ - (The plan lines for the unbuilt parts in 3c shipped 2026-10-02: wiki/model-parts.html#antlered-beasts.)
 Not in scope (all re-askable)
  - Any new ability. Decided: all lore only (the Tarandrus's colour change, the Calopus's snagging, the Leucrocotta's voice,
    the Shadawar's music).
@@ -106,14 +105,6 @@ What the player sees: five horse breeds that wear horns or antlers, each with a 
    a cross of two with a cross label; a wild herd in each biome.
  Docs: breeds.html, breed-book.html (an Antlered and horned beasts section), the breed census; check-breed-heights.mjs.
 
-Piece 2 - The plan lines
-------------------------
-What the player sees: nothing. One-line Roadmap entries on model-parts.html's Roadmap tab: branching hollow horn, saw-edged horn,
- swivelling horns, nose tusk and boar tusks (point at the Tusks treatment), a lion neck and chest and stag hindquarters (point at
- the audit's gap 7). Decided as "noting what each lacks"; Recommended as lines, not new pages (none has a page of its own to grow).
- Where: wiki only. Docs: model-parts.html Roadmap tab; the roadmap bake; the prose row.
-
-
 5. Decisions (anything not inside a piece)
 ===========================================
 A. The ask: five breeds. Smallest worthwhile version: the Tarandrus and the Leucrocotta (shipped genes only).
@@ -124,7 +115,7 @@ K. Performance: none. L. Tests: see Piece 1. M. Release: rides the next release 
 
 Implications sweep
   Genetics ... untouched (pinned existing alleles). Pipeline/goldens ... untouched. Eye colour ... untouched. Body space/parts ...
-  untouched; plan lines only. Breeding ... untouched. Breeds ... five new. Horse body ... untouched. Care/AI ... untouched. Items ...
+  untouched (plan lines shipped). Breeding ... untouched. Breeds ... five new. Horse body ... untouched. Care/AI ... untouched. Items ...
   untouched. Tack ... untouched. Villagers/stables ... untouched. Realm ... untouched. H menu ... untouched. Stasis ... untouched.
   Designers ... untouched (no gene change). Gene creator ... untouched. Config/mods/advancements ... untouched. Backport ... logic
   in common/. Wiki ... breeds, breed book, census, model-parts Roadmap.
@@ -147,9 +138,8 @@ Three likeliest ways it goes wrong for a real player
 =================
  Piece 1 breeds ..... S each. Tarandrus, Leucrocotta (no horns) first; Yale (needs the ram horn pin; the goat and ram treatments' shape
                       work is not required), Shadawar and Calopus after checking the nearest horn reads.
- Piece 2 plan lines . S, may ride with any breed.
  Waits on: nothing. Unblocks: the later horn parts, the tusks gene, a hide-a-bone capability.
- Do not do in one session: more than a few breeds with a new yard bake; the plan lines and a gene change.
+ Do not do in one session: more than a few breeds with a new yard bake; a gene change.
 
 
 8. Release
@@ -160,5 +150,5 @@ Rides the next release (Decided); applies when each piece ships.
 9. After each piece ships
 =========================
  Regenerate-table rows touched: Piece 1: the breed row (bakeBreedFiles then bakeGeneCensus; check-breed-heights.mjs); anything in
- common/ would add the wasm rebake (none expected). Piece 2: the prose row, the roadmap and verification bakes. ProgressTask untouched.
- Wiki: breeds.html and breed-book.html (a section); model-parts.html Roadmap tab. No new page.
+ common/ would add the wasm rebake (none expected). ProgressTask untouched.
+ Wiki: breeds.html and breed-book.html (a section). No new page.

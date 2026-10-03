@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -156,7 +157,13 @@ public final class Passification {
     // The offering
     // ------------------------------------------------------------------
 
-    @SubscribeEvent
+    /**
+     * HIGH, ahead of the diet handler, because one item can be both: the skeleton
+     * horse's bone is its offering and its food (undead treatment D17). Unpaid, the
+     * bone is the offering; once the calm is permanent for this player it is food
+     * again, and this handler leaves it alone (below).
+     */
+    @SubscribeEvent(priority = EventPriority.HIGH)
     static void onOffer(PlayerInteractEvent.EntityInteract event) {
         if (!(event.getTarget() instanceof Horse horse)) {
             return;
@@ -173,9 +180,17 @@ public final class Passification {
         Player player = event.getEntity();
         long now = horse.level().getGameTime();
 
+        PassificationAttachment settled = horse.getData(ModAttachments.PASSIFICATION.get());
         for (PassificationGene.Route route : routes) {
             if (!route.item().equals(offered) || !windowOpen(route, horse)) {
                 continue;
+            }
+            if (settled.permanent(player.getUUID())) {
+                // Paid for good: the item is not an offering any more. Not claimed,
+                // so a horse that also eats it (the skeleton's bone) is fed instead.
+                // UNVERIFIED that the attachment is synced, so a client may still
+                // predict the claim; the server's answer is the one that counts.
+                return;
             }
             // Cancel on BOTH sides, as every other claimed interaction here does:
             // a client that predicts a mount it then has to take back is worse

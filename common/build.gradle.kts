@@ -106,6 +106,18 @@ tasks.register<JavaExec>("bakeGeneWikiPages") {
 
 // One side-on snapshot per data-driven gene, on a standard bay, for the wiki's
 // gene index. Also the fastest way to look at every gene at once - see the class.
+// Every coat sheet converted from a vanilla-mesh sheet (the white template, the
+// undead sheets), regenerated from common/sheet-sources/manifest.txt. Rewrites a
+// file only when its pixels change. See HorseSheetConverter.
+tasks.register<JavaExec>("convertHorseSheets") {
+    group = "horsegenetics"
+    description = "Regenerate the converted horse sheets listed in common/sheet-sources/manifest.txt"
+    dependsOn(tasks.named("classes"))
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.example.horsegenetics.common.coat.skin.HorseSheetConvertTool")
+    args(rootProject.layout.projectDirectory.asFile.absolutePath)
+}
+
 tasks.register<JavaExec>("bakeGeneIcons") {
     group = "horsegenetics"
     description = "Write wiki/assets/gene-icons/*.png - one bay horse per data-driven gene"

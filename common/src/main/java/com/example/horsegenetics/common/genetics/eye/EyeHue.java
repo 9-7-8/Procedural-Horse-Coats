@@ -167,7 +167,7 @@ public enum EyeHue {
      * two agree.
      */
     public static final EyeHue[] IRIS_PALETTE = {
-            BROWN, GREEN, GOLD, DARK_BLUE, MID_BLUE, LIGHT_BLUE, WHITE, RED, CHAOS, INVISIBLE};
+            BROWN, GREEN, GOLD, DARK_BLUE, MID_BLUE, LIGHT_BLUE, WHITE, RED, CHAOS, INVISIBLE, BLACK};
 
     /**
      * The hues a sector-colour locus offers. {@link #MID_BLUE} first, because

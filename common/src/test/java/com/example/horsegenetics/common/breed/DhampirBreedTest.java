@@ -119,7 +119,11 @@ class DhampirBreedTest {
             }
             for (long seed = 0; seed < 10; seed++) {
                 Genotype g = BreedFounder.roll(breed, new SeededRng(seed)).genotype();
-                assertEquals(0, g.pair(Genes.MAGIC_WHITE).count(Genes.MAGIC_WHITE.Wm), breed.id());
+                // The bleached skeleton horse is white bone because it is Wm/Wm under EWD
+                // (owner's design, undead treatment D39) - Wm alone is not the dhampir.
+                if (!breed.undead()) {
+                    assertEquals(0, g.pair(Genes.MAGIC_WHITE).count(Genes.MAGIC_WHITE.Wm), breed.id());
+                }
                 assertEquals(0, g.pair(Genes.SUN_SENSITIVITY).count(Genes.SUN_SENSITIVITY.Sun), breed.id());
                 for (AbstractMagicStatGene stat : STATS) {
                     assertEquals(0, g.pair(stat).count(stat.vampiric), breed.id() + " " + stat.key());

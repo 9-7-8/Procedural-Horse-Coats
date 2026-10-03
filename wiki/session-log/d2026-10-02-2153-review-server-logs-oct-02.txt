@@ -1,0 +1,73 @@
+2026-10-02 21:53 (end) - Reviewing the server log exports 2026-10-02 and 2026-10-02-run2
+
+ASKED
+-----
+- "/review-server-logs": review the PCH export folders not reviewed yet. Two were new,
+  2026-10-02 and 2026-10-02-run2. Both are reviewed and added to the local record
+  (memory pch-server-logs).
+- "/end-session": this file, and the procedure fix below.
+
+DONE
+----
+- Reviewed export 2026-10-02 (window 2026-10-01 22:04 to 2026-10-02 12:04; builds
+  0.5.037, then 0.5.040) and 2026-10-02-run2 (window 12:08 to 13:11; build 0.5.041).
+  Neither window holds player chat, player activity or equine deaths, so intake/To do.txt
+  is unchanged. No code commit; this session changed no code.
+- #16 (refmap warning) is confirmed fixed on the live server: the warning appears on the
+  0.5.037 boot and on neither the 0.5.040 nor the 0.5.041 boot.
+- #14 (armour for absent metals) is confirmed live: modded metals dropped from 167 to 164.
+  SortCraft now warns that black_quartz_horse_armor and chimerite_horse_armor are
+  unknown. That is the operator's SortCraft config still naming the removed items; it is
+  harmless and not a mod bug.
+- #13 tally (comment on #13). Cupboard "Trying to load chunk" traces were counted in the
+  raw prev-nightly.log (0.5.040) and latest.log (0.5.041, up to 21:39), by the top frame
+  of ours: zero for HorseRealmLift, HorseRealmTerrain.pool, HungerFoodGoal,
+  PortalEventHandler and reconcileGlow. The issue's closing condition is met. It is left
+  open for the owner to close.
+- Filed #31 (bug, PLAYERS urgency). At 16:25 an operator pressed F6 on the live server.
+  DebugPenManager.enter built the corridor in one tick, with 115 synchronous chunk loads
+  (fastSet 60, sweepPlot 54, DebugWorldWatch.start 1), and the server logged "Can't keep
+  up! ... 3078ms or 61 ticks behind" with three players online. Suspected cause: fastSet
+  (DebugPenManager.java:1320) writes with flag 2, the same neighbour-shape mechanism #13
+  fixed with 2|16. Entering also builds LOOKAHEAD_PENS = 30 segments in the same tick.
+
+DECIDED
+-------
+- #13 left open for the owner, rather than closed by this session (made without her).
+  Recorded in the #13 comment.
+- #31 filed as bug only, not needs-owner, because the flag fix is not a design call
+  (made without her).
+
+FOUND ON THE WAY
+----------------
+- Filed #31, above.
+- The F6 packet is operator-gated (ModNetworking, LEVEL_GAMEMASTERS or debug.tools), so
+  the entry itself was legitimate. Only its cost is the bug.
+- wiki/session-log.html was not in time order at the top (17:15 sat above 22:18). This
+  entry went on top, and the order was left alone.
+
+PROCEDURES
+----------
+- procedures/review-server-logs.txt step 3:
+  - count only the logs from builds that carry the fix, and give the time range;
+  - the raw logs run past the last export window, and findings there are filed and
+    attributed to the raw log;
+  - a new frame of ours is a new issue.
+  Why: this session's #31 came from exactly that case, and the procedure did not cover it.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No Gradle build: the session touched no Java, resource or Gradle file.
+  check-parity.mjs is OK.
+- A full :common:test run would check nothing this session changed.
+- Not checked: whether any player holds one of the two removed armour items, and how
+  bad #31 is on a busier server (seen once).
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: nothing player-facing shipped.
+
+PICK UP FIRST
+-------------
+Fix #31 (the F6 corridor stall) with fix-bug, and close #13 on its tally comment.

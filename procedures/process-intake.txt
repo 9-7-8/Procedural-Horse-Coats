@@ -26,6 +26,10 @@ BEFORE YOU START
 ----------------
 1. `git pull --ff-only origin main`. intake/To do.txt is edited on github.com, so the
    local copy is routinely stale, and cloud routines push to main too.
+   If the owner names a unit and it is not in intake/, look at the unmerged cloud
+   branches (`git fetch origin`, then `git diff --stat main...origin/claude/<name> --
+   intake/`): a cloud scoping session leaves its treatment on its own branch. Merge
+   that branch first (it carries only intake/, procedures and docs), and say so.
 2. `git status --short`. Untracked files in intake/ are the owner queuing material:
    commit around them, and never flag, add or delete them.
 3. Run `node wiki/tools/check-roadmap-execution.mjs`.
@@ -63,6 +67,10 @@ STEPS
    Get the date it was written (`git log --date=short -S 'phrase' -- intake/`) and the
    date the matching work landed. A unit written after that work asks for more than was
    built, so it is still open.
+   Also grep for the MECHANISM, not only the treatment's own words: a treatment can
+   miss code already doing half of it under another name (the realm breeding pause was
+   already HorseRealmRepro's offset clock, 2026-10-02). Then the unit is only the
+   remainder, and any clash with what was built is an owner question for step 5.
    If a unit is already done, delete its text (step 8) and say so in the session log.
    That deletion is not this run's unit: carry on and pick one.
 
@@ -134,11 +142,16 @@ STEPS
    - Run every rebake row the change touched.
    - If the unit turns out bigger than its score, ship the part that stands alone and
      put the rest back in the treatment as its next piece. Do not widen the run.
+   - A plan-only unit (Roadmap lines or a Roadmap-only page) has no test to break. Its
+     hypothesis is that the plan is not written anywhere yet: grep wiki/*.html for its
+     key words (wiki/text/ bakes no Roadmap tab). Grep the code for every fact a plan
+     line states, so the plan does not describe machinery that does not exist.
 
 7. Write it up on the wiki.
    - What shipped goes on the owning page's Gameplay and Coding tabs.
    - What nobody has seen in a game goes on its Verification tab.
-   - What is still planned goes on its Roadmap tab.
+   - What is still planned goes on its Roadmap tab. For a plan-only unit that is the
+     whole write-up: nothing moves to Gameplay or Coding.
    - If the subject has no page, write one.
 
 8. Retire it from intake/.

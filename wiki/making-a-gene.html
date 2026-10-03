@@ -2855,7 +2855,7 @@ Component  &rarr;  (Trigger, Condition, Selector, Effect)</code></pre>
 <table>
 <thead><tr><th>Field</th><th>Default</th><th>Meaning</th></tr></thead>
 <tbody>
-<tr><td><code>drop</code></td><td><em>required</em></td><td>One of <code>vanilla</code>, <code>diamonds</code>, <code>spawn_egg</code>, <code>enchanted_sword</code>, <code>meat</code>.</td></tr>
+<tr><td><code>drop</code></td><td><em>required</em></td><td>One of <code>vanilla</code>, <code>diamonds</code>, <code>spawn_egg</code>, <code>enchanted_sword</code>, <code>meat</code>, <code>bones</code>, <code>rotten_flesh</code> (the last two the undead breeds&rsquo; drops).</td></tr>
 <tr><td><code>min</code></td><td><code>1</code></td><td>Fewest items, 0&ndash;64.</td></tr>
 <tr><td><code>max</code></td><td><code>1</code></td><td>Most items, at least <code>min</code>.</td></tr>
 </tbody>
@@ -4214,6 +4214,12 @@ public List&lt;GeneAbility&gt; abilitiesFor(AllelePair pair, Genotype genotype,
     <td><a href="gene-lut.html">LUT locus</a></td>
     <td><code>LutContribution</code></td>
     <td><strong>Closed.</strong> Exactly one gene implements it, permanently &mdash; a new palette is a new <em>allele</em> there, never a new gene.</td>
+</tr>
+<tr>
+    <td>A whole sheet of art</td>
+    <td><a href="gene-skeleton.html">skeleton</a>, <a href="gene-zombie.html">zombie</a></td>
+    <td><code>CoatSheetContribution</code></td>
+    <td><strong>First claimant per pass.</strong> A gene names its sheets (<code>sheetResources()</code>); every host loads them into the <code>LutSet</code>&rsquo;s <code>sheets</code>. Pass <code>SEED</code> replaces the colour field before phase 3; <code>SHAPE</code> runs after the overlay phase (cut-out, underlay, shading), beyond the white lock. A sheet not loaded skips the pass. See <a href="undead-horses.html#sheets">undead horses</a>.</td>
 </tr>
 <tr>
     <td>The cutie mark</td>

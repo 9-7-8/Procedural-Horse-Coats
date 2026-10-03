@@ -1,0 +1,82 @@
+2026-10-02 13:30 (start, approximate) - Owner question sweep: eight units unblocked
+
+ASKED
+-----
+1. "/whats-next" - surveyed every queue. Unreleased: 2 code commits since v0.5.041 (no
+   release offered). Open bugs #26, #25, #13, #10; no needs-owner issues; no open design
+   calls; two unreviewed PCH export folders (2026-10-02, 2026-10-02-run2). Offered #26 hay
+   bales (recommended), the server logs, deer Piece 5, #10.
+2. "Do something that needs me but is on the faster side, because I'm attentive right
+   now" - offered four owner-needing quick units; she picked the mythic biome questions.
+3. "Keep going with questions you need me to answer" - swept the Open lines of the intake
+   treatments in six rounds of questions (23 answers in all), recorded below.
+4. "/end-session" - this log.
+
+DONE
+----
+- 7f8e2202: the mythic breeds' four open questions answered and recorded on
+  wiki/breed-book.html#plan-mythic-breeds (Roadmap tab), a pointer on
+  wiki/decisions.html#settled, and an answers block in
+  intake/Mythic breeds - biome assignments.txt; Sizing.txt updated.
+- a8718faa: the rest of the sweep. Recorded on wiki/gene-cutie-mark.html#plan-pool-bias,
+  wiki/breed-book.html#plan-studbooks and #plan-mythic-breeds,
+  wiki/troughs.html#plan-owner-answers (new Roadmap section, summary sentence reworded),
+  four decisions.html pointers, and an "OWNER'S ANSWERS, 2026-10-02" block at the top of
+  intake/ Troughs and salt licks, Daily realm horse, Villagers in every village, Horse
+  shoes; Mythical equids' Zebra commonness line; Sizing.txt owner column (8 rows).
+- Proof: bake-verification-index, bake-roadmap-index, check-roadmap-execution,
+  build-search-index, check-links (OK), bake-agent-text, check-parity (OK, 7163 checks).
+  No code changed; the Gradle build was skipped (end-session step 2).
+- No issue opened or closed.
+
+DECIDED
+-------
+All (owner), 2026-10-02:
+- Mythic breeds spawn ["wild","spawn_egg"]. The twelve plain horses (eight Aesir steeds,
+  Freyfaxi, Attach/Gaoth/Sidhe) are ONE breed with all names, uncommon. The sun teams
+  (Helios, Arvakr+Alsvidr, Lampos+Phaethon) are ONE breed, day, rare. Named lineages get
+  no breed (pedigree flavour later). Coast crowding stays; blocked sea breeds unspawned.
+  Zebra of the waterhole: rare. -> breed-book.html#plan-mythic-breeds.
+- Cutie-mark bias declared on a gene's effects block AND a breed file, breed wins; first
+  pass milk + themed magicals; breeds get the field, no entries. -> gene-cutie-mark.
+- Open performance studbook admits on resolved-stat minimums. -> breed-book#plan-studbooks.
+- Daily realm horse: uniform over EVERY breed incl. Feral Mixed and non-WILD breeds;
+  catch up missed mornings on return, max 7; placed 8-24 blocks from an untamed realm
+  horse; soft cap from field area. -> the treatment's answers block.
+- Villagers: cowboy + four posts; one barn with run-time palette swap; config list of
+  pools for modded villages; /horsevillage list + backfill, dry-run default. -> treatment.
+- Horse shoes: first pass ships Grip and a speed enchantment. -> treatment.
+- Troughs: any connected shape; rung just above hay (a bale inside counts as hay); a
+  stalled horse leaves an empty-trough stall only at zero hunger; hoppers allowed; salt
+  licks crafted from sand, also cowboy trade and loot, other mods' salt by tag (no salt
+  item of ours); wear per lick. -> troughs.html#plan-owner-answers.
+Without her: recording the answers in a top-of-treatment block rather than rewriting
+every Open line.
+
+FOUND ON THE WAY
+----------------
+- The breed format has no names list (HorseNameGenerator reads none), so the two merged
+  mythic breeds need a "names" field first; sized as a new S-M row in intake/Sizing.txt.
+- Roadmap tabs are not baked into wiki/text/ (the studbook plan was never there either);
+  left alone.
+- A transient .git/index.lock failed the first commit attempt; it had cleared on retry.
+
+PROCEDURES
+----------
+- procedures/whats-next.txt step 2e: added the QUESTION SWEEP for when the owner says she
+  is free to answer, with where each answer is recorded. This session did it by hand.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No code changed, so no tests ran; a full :common:test run would check nothing new.
+- No Verification-tab anchors added. Issue #26 (horses not eating hay bales, possibly in
+  the released jar) is still unexamined; the two PCH export folders are unreviewed.
+
+RELEASE
+-------
+Not offered: 2 code commits since v0.5.041, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/fix-bug #26: a hungry horse starved beside a plain hay bale in the yard; rule out the pen
+first, then HayBales / HungerFoodGoal.rungOf - if real, horses stopped eating hay in 0.5.041.

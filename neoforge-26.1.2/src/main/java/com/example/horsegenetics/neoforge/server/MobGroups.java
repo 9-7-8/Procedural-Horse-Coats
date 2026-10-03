@@ -60,7 +60,11 @@ public final class MobGroups {
             case "passive" -> candidate instanceof Animal && !isHostile(candidate)
                     && !(candidate instanceof AbstractHorse);
             case "animals" -> candidate instanceof Animal && !isHostile(candidate);
-            case "undead" -> candidate.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD);
+            // A horse is undead by its genes, not its type: two copies of the skeleton
+            // or zombie allele, never one (undead treatment D6). This is the only place
+            // that clause lives.
+            case "undead" -> candidate.getType().builtInRegistryHolder().is(EntityTypeTags.UNDEAD)
+                    || UndeadHorses.isUndead(candidate);
             case "non_horse" -> !(candidate instanceof AbstractHorse);
             // The aggression locus names its own kind, so "horses" is a group in
             // its own right rather than the negation of non_horse. Every equine,

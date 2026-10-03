@@ -15,7 +15,7 @@ or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on
 
 ------------------------------------------------------------------------------
 To do.txt                                                         sized 2026-10-02
-- Cutie-mark pool bias / four studbook kinds                     -  -  No: "needs a few more owner answers"
+- Cutie-mark pool bias / four studbook kinds                     M  c  owner answered 2026-10-02 (bias: gene+breed, breed wins; performance = stat minimums)
 - Procedure write-ups (compat-test, measure-worldgen,
   add-a-wood-family, answer-a-tester)                            S each, owner-free
 - Natural dapple gene (Balius wants one)                         M  c  near-owner: add-a-gene asks its design calls
@@ -81,7 +81,7 @@ Built? No.
 
 ------------------------------------------------------------------------------
 Daily realm horse - implementation treatment.txt                  sized 2026-10-02
-- One unit                                                       M  c  No: seven Open lines (SLEEP and /time set,
+- One unit                                                       M  c  owner answered 2026-10-02 (any breed uniform, catch-up 7, area cap; was: SLEEP and /time set,
   ticking with no players, breed weighting - recommends Feral Mixed 1 in 4 -, non-WILD breeds,
   placement, NBT tag, soft cap)
 Built? No.
@@ -94,42 +94,28 @@ Piece 2 (Send home free) shipped 2026-10-02. Built? Piece 1 no.
 ------------------------------------------------------------------------------
 Horse shoes.txt                                                   sized 2026-10-02
 - One unit: shoe items per metal, the four SHOE_* tags,
-  effects/enchantments, HorseShoeLayer (needs hoof anchors)      M-L c  near-owner: which 1-2 enchantments ship first
-Built? No.
-
-------------------------------------------------------------------------------
-Realm breeding pause - implementation treatment.txt               sized 2026-10-02
-- One unit: shift pregnancy by unloaded time (pure common/),
-  server config, gametest                                        S-M a  owner-free; one UNVERIFIED: the realm scales no time
+  effects/enchantments, HorseShoeLayer (needs hoof anchors)      M-L c  owner-free: Grip + a speed one (2026-10-02)
 Built? No.
 
 ------------------------------------------------------------------------------
 Troughs and salt licks - implementation treatment.txt             sized 2026-10-02
 Gate: after the feeding rules are fixed (check-roadmap-execution).
-- Piece 1: wooden trough, the first block entity, every wood     L  b  No: Open lines (rung, foreign troughs, ...)
+- Piece 1: wooden trough, the first block entity, every wood     L  b  owner answered 2026-10-02 (rung, shape, hoppers)
 - Piece 2: connected troughs share an inventory                  M  c  needs 1
-- Piece 3a fill readout S; 3b stall trough M; 3c salt lick M     c     No: "where the salt comes from" etc.
-Built? No.
-
-------------------------------------------------------------------------------
-Undead horse conversion.txt   (PLAN ONLY)                         sized 2026-10-02
-Release: stages 1-4 all finished before any is released; stage 4 may be a later release.
-- Stage 1: sheet converter, alpha op, art, skeleton/zombie genes, two breeds   L  b  No: breeds, philosophy.html, D27/D28
-- Stage 2: wire the reused machinery                             M     needs 1
-- Stage 3: the converter                                         L     needs 1-2 seen in game
-- Stage 4: spawning overhaul                                     M     needs 3
+- Piece 3a fill readout S; 3b stall trough M; 3c salt lick M     c     owner answered 2026-10-02 (salt from sand/cowboy/loot/tag)
 Built? No.
 
 ------------------------------------------------------------------------------
 Villagers in every village - implementation treatment.txt         sized 2026-10-02
-- Piece 1: barns in all five village pools (option a first)      M  c  No: "confirm with the owner", one barn vs per style
-- Piece 2: /horsevillage backfill command                        L  c  No: command name, list command, ...
+- Piece 1: barns in all five village pools (run-time palette swap) M c owner-free (answered 2026-10-02)
+- Piece 2: /horsevillage list + backfill (dry-run default)      L  c  owner-free (answered 2026-10-02)
 Built? No.
 
 ------------------------------------------------------------------------------
 Mythic breeds - biome assignments.txt   (A PROPOSAL)                  sized 2026-10-02
-- One unit: biome/spawn_time/commonness for 59 entries          S  a  No: owner questions (spawn kinds;
-  plain horses one breed or many); rides with each breed as it ships
+- One unit: biome/spawn_time/commonness for 59 entries          S  a  owner answered 2026-10-02 (wild+egg;
+  plain horses one breed, sun teams one breed); rides with each breed as it ships
+- NEW: a breed "names" list field (format change; the two merged breeds need it)   S-M b  owner-free
 Built? No.
 
 ------------------------------------------------------------------------------
@@ -141,7 +127,6 @@ Built? No.
 ------------------------------------------------------------------------------
 Mythical antlered beasts - implementation treatment.txt              sized 2026-10-02
 - Piece 1: five breeds (Tarandrus, Leucrocotta first; ...)       S each c  No: creates breeds
-- Piece 2: plan lines on model-parts.html Roadmap tab            S  b  owner-free
 Built? No.
 
 ------------------------------------------------------------------------------
@@ -159,7 +144,7 @@ Built? No.
 Mythical equids - implementation treatment.txt                       sized 2026-10-02
 - Piece 1: head colour coat gene (Red, Black)                    M  b  owner-free (L if no head mask)
 - Piece 2: three-band horn colour allele "Tri"                   S-M b owner-free
-- Piece 3a: Zebra of the waterhole                               S  c  No: creates breed; commonness Open
+- Piece 3a: Zebra of the waterhole                               S  c  No: creates breed; commonness rare (2026-10-02)
 - Piece 3b: One-horned Indian wild ass                           S  c  No: creates breed; needs P1, P2
 Built? No.
 
@@ -210,6 +195,7 @@ Sheep horns and body genes - implementation treatment.txt   (LOWEST PRIORITY)   
 - Piece 3: callipyge parent-of-origin plan (Roadmap entry)       S  c  owner-free; the kind; with P1
 Built? No.
 
+
 ------------------------------------------------------------------------------
 Wild horse turnover - implementation treatment.txt                sized 2026-10-02
 - One unit: 3-day wild lifetime (touched horses to the realm), cell top-up (<5 per 8x8-chunk cell)   L  c  owner-free; no Open needs the owner
@@ -258,3 +244,9 @@ Port - Forge 1.12.2 - implementation treatment.txt                sized 2026-10-
 - Piece 4: breeding, names, stats, a few items                      M  c  No: which items
 - Piece 5: portal, villagers, carts, stasis, H menu (each re-askable)  L  c  No: each
 Built? No.
+Command whistle - implementation treatment.txt                    sized 2026-10-03
+- Piece 1: item, order attachment, hold-wheel, Stay/Follow/
+  Wander/Rejoin herd, sneak = all nearby                         M-L b  owner-free; spike the wheel first
+- Piece 3: fighting-gene gate, Hunt monsters, Defend me          M  c  near-owner: one Open ("a" pairs); P1
+- Piece 2: Graze nearby, Go home, Guard here                     M  c  owner-free; P1, Guard needs P3
+Built? No (grep: no releaseUsing / restrictTo / order attachment). Release on the last piece.

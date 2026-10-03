@@ -88,12 +88,16 @@ public final class DietGene implements Gene, DietContribution {
     private static final Diet[] NARROW = {
             Diet.ANYTHING, Diet.RAW_MEAT, Diet.FISH, Diet.RAW_VEGETABLES, Diet.WHEAT,
             Diet.HUMAN_FOOD, Diet.CAKE, Diet.POTION, Diet.LAVA, Diet.WATER,
-            Diet.INGOT, Diet.GEM, Diet.BLOOD};
+            Diet.INGOT, Diet.GEM, Diet.BLOOD,
+            // Appended before n (2026-10-02): saves name alleles by token, and n stays
+            // last, so every existing pair still sorts the way it did.
+            Diet.BONE};
 
     private static final String[] TOKENS = {
             "Dany", "Dmeat", "Dfish", "Dveg", "Dwht",
             "Dhum", "Dcake", "Dpot", "Dlava", "Dwat",
-            "Ding", "Dgem", "Dbld"};
+            "Ding", "Dgem", "Dbld",
+            "Dbone"};
 
     /** How many founders in a hundred have each narrow diet outright. */
     private static final double EACH_PERCENT = 1.0;
@@ -151,6 +155,12 @@ public final class DietGene implements Gene, DietContribution {
                 wild.weight(a, n, BLOOD_CARRIER_PERCENT);   // a carrier only - see the constant
                 wildSpent += BLOOD_CARRIER_PERCENT;
                 continue;                                   // and never a splice
+            }
+            if (e.getKey() == Diet.BONE) {
+                // Not in the wild at all, and never a splice: only a breed that names it
+                // (the skeleton horse) carries it. Left out of both tables rather than
+                // weighted zero, so every feral founder rolls exactly as it did before.
+                continue;
             }
             wild.weight(a, a, EACH_PERCENT);        // outright, never a carrier
             splice.weight(a, n, EACH_PERCENT);      // a carrier, never outright

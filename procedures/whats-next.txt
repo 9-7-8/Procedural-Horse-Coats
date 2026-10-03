@@ -53,6 +53,14 @@ STEPS
       - unreviewed server logs (review-server-logs);
       - Tier 1 or Tier 2 intake units (process-intake).
    e. Work that needs her answers. Gather its questions so one round unblocks it.
+      If she says she is free to answer ("something that needs me"), run a QUESTION
+      SWEEP instead of one unit: take intake/Sizing.txt's "No"/"near-owner" rows, grep
+      each treatment for its Open lines, and ask them in rounds of up to 4 (the
+      treatment's own recommendation first). Record each answer where its builder looks:
+      an "OWNER'S ANSWERS, <date>" block at the top of the treatment (it overrides the
+      Open lines), the plan section on its wiki page with a decisions.html pointer, and
+      the Sizing.txt owner column. Write an answer that differs from the recommendation
+      exactly as she gave it.
    f. The big ones: Tier 3 intake units, foundations, long Roadmap items.
    g. Visual-only checks come last, always.
    Never offer two options that are really one. Never offer work whose prerequisite has

@@ -182,10 +182,14 @@ SOFTWARE.</code></pre>
     <td>Treat as not ours and not freely reusable. See the Verification tab.</td>
 </tr>
 <tr>
-    <td><strong>Anything of Mojang&rsquo;s</strong></td>
+    <td><strong>Anything of Mojang&rsquo;s</strong> &mdash; including the horse coat sheets
+        (<code>textures/entity/horse/horse_white*</code>, <code>horse_skeleton*</code>,
+        <code>horse_zombie*</code>), which are Minecraft&rsquo;s own horse art converted to this
+        mod&rsquo;s layout</td>
     <td>Minecraft</td>
     <td>The Minecraft EULA / Usage Guidelines</td>
-    <td>The mod does not ship Mojang&rsquo;s art; cart textures are assembled at runtime from
+    <td>Not covered by MIT or CC BY-SA; do not reuse the sheets outside a Minecraft mod.
+        Cart textures are not shipped from Mojang &mdash; they are assembled at runtime from
         your own game files. Minecraft is a trademark of Mojang; this project is not
         affiliated with or endorsed by Mojang or Microsoft.</td>
 </tr>
@@ -217,7 +221,7 @@ SOFTWARE.</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The licence of the three borrowed stable buildings, and whether the white horse coat templates and saddle overrides are Mojang&rsquo;s or ours, have not been established.</p>
+    <p>The licence of the three borrowed stable buildings, and whether the saddle overrides are Mojang&rsquo;s or ours, have not been established.</p>
 </div>
 
 <ul>
@@ -225,10 +229,11 @@ SOFTWARE.</code></pre>
         of the three has to be read, and permission asked where it is unclear, before the mod
         is distributed widely. Tracked with the stables themselves on
         <a href="stables.html">the Stables page</a>.</li>
-    <li><strong>The white templates.</strong> <code>horse_white.png</code> (and its baby and 64px
-        variants) and the three <code>minecraft/textures/entity/equipment/*_saddle</code> sets
-        may be derived from Minecraft&rsquo;s own horse art. If they are, they are not covered by
-        CC BY-SA and the art notice should say so outright. Check where each came from.</li>
+    <li><strong>The saddle overrides.</strong> The three
+        <code>minecraft/textures/entity/equipment/*_saddle</code> sets may be derived from
+        Minecraft&rsquo;s own saddle art. If they are, they are not covered by CC BY-SA and the
+        art notice and the Mojang row above should say so. (The horse coat sheets are already
+        settled: Mojang&rsquo;s, see <code>THIRD_PARTY_NOTICES.md</code>.)</li>
     <li><strong>The art/code split.</strong> The art claim is written from the folder layout. Check
         that no image under <code>wiki/assets/</code> or <code>textures/</code> was copied
         from elsewhere before treating it as ours.</li>

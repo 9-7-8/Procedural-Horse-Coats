@@ -1,0 +1,162 @@
+{
+  "id": "blackened_skeleton_horse",
+  "name": "Blackened Skeleton Horse",
+  "description": "A skeleton horse of the Nether, charred black to the bone and past caring about fire. Like its paler cousin it eats only bones, turns on its rider after dark until given one, and wears horns of bone now and then; unlike it, it walks out of lava and runs wild in the soul sand.",
+  "kind": "magical",
+  "magical_variant": false,
+  "spawn_weight": 2,
+  "spawn": ["wild", "spawn_egg"],
+  "undead_of": "skeleton",
+  "biomes": [
+    "minecraft:nether_wastes",
+    "minecraft:crimson_forest",
+    "minecraft:warped_forest",
+    "minecraft:soul_sand_valley",
+    "minecraft:basalt_deltas"
+  ],
+  "spawn_ground": [
+    "minecraft:netherrack",
+    "minecraft:crimson_nylium",
+    "minecraft:warped_nylium",
+    "minecraft:soul_sand",
+    "minecraft:soul_soil",
+    "minecraft:basalt",
+    "minecraft:blackstone",
+    "minecraft:magma_block",
+    "regions_unexplored:brimsprout_nylium",
+    "regions_unexplored:cobalt_nylium",
+    "regions_unexplored:glistering_nylium",
+    "regions_unexplored:mycotoxic_nylium"
+  ],
+  "spawn_in_dark": true,
+  "stats": {
+    "speed": 8,
+    "jump": 7,
+    "health": 2,
+    "size": [0.86, 0.95],
+    "pull": 3
+  },
+  "genes": {
+    "horsegenetics.skeleton": [
+      { "pair": "Skel/Skel", "weight": 100 }
+    ],
+    "horsegenetics.diet": [
+      { "pair": "Dbone/Dbone", "weight": 100 }
+    ],
+    "horsegenetics.aggression": [
+      { "pair": "Anp/Anp", "weight": 100 }
+    ],
+    "horsegenetics.passification": [
+      { "pair": "Prm/Prm", "weight": 100 }
+    ],
+    "horsegenetics.magic_item_drop": [
+      { "pair": "Bne/Bne", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_left": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_colour_right": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_left": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.eye_sclera_right": [
+      { "pair": "Blk/Blk", "weight": 100 }
+    ],
+    "horsegenetics.particle": [
+      { "pair": "Bflm/Bflm", "weight": 100 }
+    ],
+    "horsegenetics.horn_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.horn_glow": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.horn_dust": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.antler_form": [
+      { "pair": "n/n", "weight": 20 },
+      { "pair": "Frk/Frk", "weight": 20 },
+      { "pair": "Brw/Brw", "weight": 20 },
+      { "pair": "Pal/Pal", "weight": 20 },
+      { "pair": "Crn/Crn", "weight": 20 }
+    ],
+    "horsegenetics.antler_glow": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.antler_crystal": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.antler_bloom": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.ram_horn_form": [
+      { "pair": "Crl/Crl", "weight": 40 },
+      { "pair": "Crk/Crk", "weight": 25 },
+      { "pair": "Fhn/Fhn", "weight": 20 },
+      { "pair": "Scr/Scr", "weight": 15 }
+    ],
+    "horsegenetics.ram_horn_tip": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.dragon_horn_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.extension": [
+      { "pair": "E/E", "weight": 100 }
+    ],
+    "horsegenetics.agouti": [
+      { "pair": "a/a", "weight": 100 }
+    ],
+    "horsegenetics.magic_white": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.extreme_white_dominant": [
+      { "pair": "n/n", "weight": 100 }
+    ],
+    "horsegenetics.fireproof": [
+      { "pair": "Frp/Frp", "weight": 100 }
+    ],
+    "horsegenetics.magic_heat": [
+      { "pair": "Htol/Htol", "weight": 100 }
+    ]
+  },
+  "count_groups": [
+    {
+      "name": "horns",
+      "counts": [5350, 640, 320, 80, 10],
+      "loci": {
+        "horsegenetics.unicorn_horn": "Horn/Horn",
+        "horsegenetics.antlers": "Ant/Ant",
+        "horsegenetics.ram_horns": "Rh/Rh",
+        "horsegenetics.dragon_horns": "Drg/Drg"
+      }
+    }
+  ],
+  "bands": {
+    "horsegenetics.passification": {
+      "offering": 14,
+      "amount": 1
+    },
+    "horsegenetics.particle": {
+      "site": 2
+    },
+    "horsegenetics.antlers": {
+      "tint": [0, 0.06]
+    },
+    "horsegenetics.ram_horns": {
+      "shade": [-1, -0.95]
+    },
+    "horsegenetics.skeleton": {
+      "coat_opacity": [0.85, 0.92]
+    }
+  },
+  "notes": [
+    "The Nether's skeleton horse, and its commonest horse of any kind (owner, 2026-10-02: rare in general, but the most common Nether horse) - spawn_weight 2, above the Mirrorgazer's rare 1.5 and the Netherhorse's and Nightmare's very rare. Herds on the Netherhorse's floors, in the dark.",
+    "A vanilla skeleton horse that converts in the Nether becomes one of these: the converter gives a pool's breed that lives in the horse's biome first, and a breed that lives nowhere (the Great Valley Skeleton Horse) everywhere else.",
+    "The Great Valley's whole bundle - skeleton Skel/Skel, bone diet, Anp after dark, one bone passifies it for good, bone drops, soul fire at the hooves, black eyes, every horn-like part in the count group, all bone - plus fireproof Frp/Frp and the heat tolerance every Nether breed pins.",
+    "Charred bone: a black horse (E/E a/a, white loci pinned off) under the skeleton sheet, with the skeleton's coat_opacity banded to 0.85-0.92 so the black covers more of the bone than the 0.6 a white skeleton shows, while the sheet's shading still gives the bones their shape. Its horns stay bone (owner's choice)."
+  ]
+}

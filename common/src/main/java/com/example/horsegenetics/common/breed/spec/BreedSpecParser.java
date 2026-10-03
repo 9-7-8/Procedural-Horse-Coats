@@ -60,7 +60,7 @@ public final class BreedSpecParser {
     private static final Set<String> KEYS = Set.of(
             "id", "name", "country", "description", "kind", "commonness", "spawn_weight", "biomes",
             "spawn", "spawn_time", "price", "stats", "genes", "strains", "bands", "notes", "magical_variant",
-            "herd", "spawn_ground", "spawn_in_dark");
+            "herd", "spawn_ground", "spawn_in_dark", "undead_of", "count_groups");
 
     private BreedSpecParser() {
     }
@@ -237,9 +237,22 @@ public final class BreedSpecParser {
             b.note(note);
         }
 
+        // --- the undead pool it joins (undead treatment D12) --------------
+        // Thrown rather than forgiven: a pool is keyed on, like "country", and a
+        // misspelt one would leave a vanilla undead horse with nothing to become.
+        if (root.containsKey("undead_of")) {
+            String pool = asString(root.get("undead_of"), "undead_of");
+            if (!Breed.UNDEAD_POOLS.contains(pool)) {
+                throw new IllegalArgumentException("\"undead_of\" is one of " + Breed.UNDEAD_POOLS
+                        + ", got \"" + pool + "\"");
+            }
+            b.undeadOf(pool);
+        }
+
         readStats(root, b);
         readGenes(root, b, source, warn);
         readStrains(root, b, source, warn);
+        readCountGroups(root, b, source, warn);
         readBands(root, b, source, warn);
         readHerd(root, b);
         Breed breed = b.build();
@@ -305,6 +318,81 @@ public final class BreedSpecParser {
                     ? readPools(strain.get("genes"), at + ".genes", source, warn)
                     : new java.util.LinkedHashMap<>();
             b.strain(name, weight, pools, readStrainStats(strain, at));
+        }
+    }
+
+    /**
+     * <pre>
+     *   "count_groups": [{
+     *     "name": "horns",
+     *     "counts": [5350, 640, 320, 80, 10],
+     *     "loci": { "horsegenetics.unicorn_horn": "Horn/Horn", "horsegenetics.antlers": "Ant/Ant" }
+     *   }]
+     * </pre>
+     * {@code counts[k]} is the relative weight of exactly {@code k} of the loci
+     * expressing; the founder draws that number, then picks which loci at random.
+     * See {@code Breed.CountGroup}.
+     *
+     * <p>A locus this install has not got, or a pair its gene does not declare,
+     * drops that locus and is warned about, like a gene pool. A locus the breed
+     * already names in {@code genes} or a strain is thrown: the two would disagree
+     * about the same locus, and neither could win quietly.
+     */
+    private static void readCountGroups(Map<String, Object> root, Breed.Builder b,
+                                        String source, Consumer<String> warn) {
+        if (!root.containsKey("count_groups")) {
+            return;
+        }
+        Breed partial = b.build();
+        List<Object> list = asArray(root.get("count_groups"), "count_groups");
+        Set<String> seen = new LinkedHashSet<>();
+        for (int i = 0; i < list.size(); i++) {
+            String at = "count_groups[" + i + "]";
+            Map<String, Object> group = asObject(list.get(i), at);
+            expectKeys(group, Set.of("name", "counts", "loci"));
+            String name = string(group, "name", "");
+            List<Double> counts = new ArrayList<>();
+            List<Object> raw = asArray(group.get("counts") == null ? List.of() : group.get("counts"), at + ".counts");
+            for (int k = 0; k < raw.size(); k++) {
+                double w = asNumber(raw.get(k), at + ".counts[" + k + "]");
+                if (w < 0.0) {
+                    throw new IllegalArgumentException(at + ".counts[" + k + "] is a weight and cannot be negative");
+                }
+                counts.add(w);
+            }
+            if (counts.isEmpty()) {
+                throw new IllegalArgumentException(at + ".counts is required: the weight of 0, 1, 2 ... loci expressing");
+            }
+            List<Breed.GroupLocus> loci = new ArrayList<>();
+            Map<String, Object> named = asObject(group.get("loci") == null ? new java.util.LinkedHashMap<String, Object>() : group.get("loci"), at + ".loci");
+            for (Map.Entry<String, Object> e : named.entrySet()) {
+                String key = e.getKey();
+                Gene gene = Genes.byKeyOrNull(key);
+                if (gene == null) {
+                    warn.accept(source + ": no gene \"" + key + "\" is installed - " + at + " draws without it");
+                    continue;
+                }
+                if (partial.constrains(key) || !seen.add(key)) {
+                    throw new IllegalArgumentException(at + ".loci names " + key
+                            + ", which the breed already draws elsewhere");
+                }
+                String[] tokens = splitPair(asString(e.getValue(), at + ".loci." + key), at + ".loci." + key);
+                if (!hasAllele(gene, tokens[0]) || !hasAllele(gene, tokens[1])) {
+                    warn.accept(source + ": " + at + ".loci." + key + " names allele(s) \"" + tokens[0] + "/"
+                            + tokens[1] + "\" that it does not declare - that locus is dropped");
+                    continue;
+                }
+                loci.add(new Breed.GroupLocus(key, tokens[0], tokens[1]));
+            }
+            if (loci.isEmpty()) {
+                warn.accept(source + ": nothing in " + at + " survived - the group is dropped");
+                continue;
+            }
+            if (counts.size() > loci.size() + 1) {
+                warn.accept(source + ": " + at + ".counts has " + counts.size() + " entries for " + loci.size()
+                        + " loci - the ones past " + loci.size() + " can never be drawn");
+            }
+            b.countGroup(new Breed.CountGroup(name, counts, loci));
         }
     }
 

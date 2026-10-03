@@ -230,6 +230,29 @@
         breed designer carries strains through import and export but has no editor for
         them yet.</td>
 </tr>
+<tr id="undead-of">
+    <td><code>undead_of</code></td>
+    <td><code>"skeleton"</code> or <code>"zombie"</code></td>
+    <td>in no pool. A breed in a pool is one a vanilla skeleton or zombie horse may
+        <a href="undead-horses.html#converter">convert into</a>; the converter picks uniformly
+        among a pool&rsquo;s breeds, seeded by the horse&rsquo;s UUID. Any other value is a
+        hard error, like a misspelt <code>country</code>.</td>
+</tr>
+<tr id="count-groups">
+    <td><code>count_groups</code></td>
+    <td>an array of <code>{ "name": "horns", "counts": [5350, 640, 320, 80, 10],
+        "loci": { "&lt;gene key&gt;": "Horn/Horn", &hellip; } }</code></td>
+    <td>none. <strong>&ldquo;Some of these, rarely several.&rdquo;</strong>
+        <code>counts[k]</code> is the relative weight of exactly <em>k</em> of the loci
+        expressing; each founder draws that number, then picks which loci at random, and every
+        locus not picked is its gene&rsquo;s wild pair. Independent pools cannot tune
+        &ldquo;one is common&rdquo; against &ldquo;two is rare&rdquo;; this can. A locus in a
+        group may not also be in <code>genes</code> or a strain (a hard error), and to the census
+        and the band checks it looks like a pool holding its pair at the group&rsquo;s mean share.
+        The <a href="breed-book.html#great-valley-skeleton-horse">skeleton horse</a>&rsquo;s horns
+        are the worked example. The breed designer carries groups through import and export but
+        has no editor for them.</td>
+</tr>
 <tr>
     <td><code>bands</code></td>
     <td>gene key &rarr; value name &rarr; <code>[lo, hi]</code>, a single number (a lock), or

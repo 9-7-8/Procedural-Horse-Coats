@@ -1,5 +1,15 @@
 Troughs and salt licks - implementation treatment
 
+OWNER'S ANSWERS, 2026-10-02 (these override any "Open" line below; also on wiki/troughs.html#plan-owner-answers)
+- Shape: ANY connected set is one trough (L, ring, mixed woods); joins by adjacency only.
+- Rung: just above HAY, below FAVOURITE and CAKE. A hay bale in a trough counts as HAY (80).
+- Empty in-stall trough: the horse stays put until its hunger hits ZERO, then forages (may leave).
+- Hoppers: allowed.
+- Salt: no new salt item or ore. The lick is CRAFTED FROM SAND (sand stands in for salt), ALSO a
+  cowboy trade row and a loot find, AND any other mod's salt is accepted via a tag (support, not add).
+- Lick wear: per lick tick-window, so a herd wears it down faster.
+- Still open: the lick's heal amount/duration and capacity per segment (building session's numbers).
+
 Scoped with the owner. Every "Decided" line below is her call; "Open" lines are
 still to be settled by the building session. One piece per session per START
 HERE. Source of truth for what exists is wiki/troughs.html (Roadmap tab only

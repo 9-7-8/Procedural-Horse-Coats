@@ -140,6 +140,15 @@ public final class GradientLut {
                 Math.sqrt(best));
     }
 
+    /**
+     * One pixel, as stored - for an image carried in this wrapper that is not a
+     * gradient at all: a coat sheet ({@link LutSet#sheet}) the composer reads
+     * texel by texel, which every host already loads through the same reader.
+     */
+    public int pixel(int x, int y) {
+        return argb[y * width + x];
+    }
+
     /** Bilinearly sampled coat colour (0xFFRRGGBB) for a pigment level pair, each clamped to [0,1]. */
     public int sample(float redLevel, float blackLevel) {
         float fx = chartX(redLevel) * (width - 1);   // red max -> x = 0 (left)

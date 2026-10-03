@@ -87,13 +87,13 @@ window.HG = window.HG || {};
     return {
       id: "", name: "", country: "", description: "",
       kind: undefined, magical_variant: undefined, commonness: undefined, spawn: undefined,
-      spawn_time: undefined, herd: undefined,
+      spawn_time: undefined, herd: undefined, undead_of: undefined,
       biomes: [], spawn_ground: [], spawn_in_dark: undefined, price: undefined,
       // Health, speed and jump are always asked, so they always have a score;
       // size starts as "an ordinary horse" rather than unset, because an unset
       // size is not an obvious thing to leave alone.
       stats: { size: [0.95, 1.05], health: 5, speed: 5, jump: 5 },
-      genes: genes, strains: [], bands: {}, notes: [],
+      genes: genes, count_groups: [], strains: [], bands: {}, notes: [],
       // Not in the file: the base step's colour weights, so reopening the step
       // shows the sliders where they were left.
       _base: null
@@ -116,6 +116,9 @@ window.HG = window.HG || {};
     if (s.magical_variant === false) out.magical_variant = false;
     if (s.commonness) out.commonness = s.commonness;
     if (s.spawn) out.spawn = s.spawn;
+    // The undead pool, BreedSpecWriter's place for it. No step sets it yet; it is
+    // carried through so the two undead breeds survive a round trip.
+    if (s.undead_of) out.undead_of = s.undead_of;
     if (s.spawn_time && s.spawn_time !== "any") out.spawn_time = s.spawn_time;
     // The state is the file, so the block goes out as it stands - and only when
     // it holds something, so a breed that founds herds the ordinary way writes
@@ -135,8 +138,9 @@ window.HG = window.HG || {};
     var pools = {};
     Object.keys(s.genes).forEach(function (k) { if (s.genes[k].length) pools[k] = s.genes[k]; });
     if (Object.keys(pools).length) out.genes = pools;
-    // Strains are carried through untouched - the designer has no editor for
-    // them yet, but a breed that has them must not lose them on a round trip.
+    // Count groups and strains are carried through untouched - the designer has no
+    // editor for either yet, but a breed that has them must not lose them on a round trip.
+    if (s.count_groups && s.count_groups.length) out.count_groups = s.count_groups;
     if (s.strains && s.strains.length) out.strains = s.strains;
     var bands = {};
     Object.keys(s.bands).forEach(function (k) { if (Object.keys(s.bands[k]).length) bands[k] = s.bands[k]; });
@@ -159,7 +163,7 @@ window.HG = window.HG || {};
   bd.fromJson = function (text) {
     var parsed = JSON.parse(text);
     var s = bd.blank();
-    ["id", "name", "country", "description", "kind", "magical_variant", "commonness", "spawn", "spawn_time", "herd", "price", "spawn_in_dark"]
+    ["id", "name", "country", "description", "kind", "magical_variant", "commonness", "spawn", "spawn_time", "herd", "price", "spawn_in_dark", "undead_of"]
       .forEach(function (k) { if (parsed[k] !== undefined) s[k] = parsed[k]; });
     s.biomes = parsed.biomes || [];
     s.spawn_ground = parsed.spawn_ground || [];
@@ -167,6 +171,7 @@ window.HG = window.HG || {};
     // The file is the truth, including about the eyes: a breed file that names
     // no eye locus gets none named here either.
     s.genes = parsed.genes || {};
+    s.count_groups = parsed.count_groups || [];
     s.strains = parsed.strains || [];
     s.bands = parsed.bands || {};
     s.notes = parsed.notes || [];

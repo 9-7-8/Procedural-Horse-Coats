@@ -385,6 +385,73 @@ public final class HorseSkinGeometry {
         return mesh(skin).has(part);
     }
 
+    /**
+     * <b>One box's patch</b>, as a vanilla-layout sheet holds it and as this mod's
+     * sheet wants it, in 64-space texels. A cube's unwrap is {@code 2(d + w)} wide
+     * and {@code d + h} tall at its texOffs; a patch here is that rectangle.
+     *
+     * @param src            where a vanilla-mesh sheet paints this box
+     * @param dst            where this mod's mesh samples it ({@code HdHorseModel})
+     * @param vanillaMirrors vanilla builds this box with {@code .mirror()} - the
+     *                       adult's left legs, read out of the 26.1.2
+     *                       {@code AbstractEquineModel} with javap (2026-10-02); the
+     *                       ears are not mirrored, and nothing on the foal is
+     */
+    public record Patch(Part part, int srcU, int srcV, int dstU, int dstV,
+                        int w, int h, int d, boolean vanillaMirrors) {
+
+        public int width() {
+            return 2 * (d + w);
+        }
+
+        public int height() {
+            return d + h;
+        }
+
+        /** Does a vanilla-layout sheet need this patch moved or flipped to suit the mod's mesh? */
+        public boolean relaid() {
+            return srcU != dstU || srcV != dstV || vanillaMirrors;
+        }
+    }
+
+    /**
+     * Every box's {@link Patch}, so a tool that converts a vanilla-mesh sheet
+     * ({@code HorseSheetConverter}) reads the layout from here rather than
+     * typing it a second time. Only the adult moves anything: vanilla points all
+     * four legs at {@code (48, 21)} and both ears at {@code (19, 16)} for want of
+     * room, and the HD sheet gives each its own.
+     */
+    public static List<Patch> patches(Skin skin) {
+        List<Raw> raws = skin == Skin.BABY ? BABY_RAW : ADULT_RAW;
+        java.util.ArrayList<Patch> out = new java.util.ArrayList<>(raws.size());
+        for (Raw r : raws) {
+            int su = r.tu;
+            int sv = r.tv;
+            boolean mirrors = false;
+            if (skin == Skin.ADULT) {
+                switch (r.part) {
+                    case LEFT_FRONT_LEG, LEFT_HIND_LEG -> {
+                        su = 48;
+                        sv = 21;
+                        mirrors = true;
+                    }
+                    case RIGHT_FRONT_LEG, RIGHT_HIND_LEG -> {
+                        su = 48;
+                        sv = 21;
+                    }
+                    case LEFT_EAR, RIGHT_EAR -> {
+                        su = 19;
+                        sv = 16;
+                    }
+                    default -> { }
+                }
+            }
+            out.add(new Patch(r.part, su, sv, r.tu, r.tv,
+                    (int) Math.round(r.w), (int) Math.round(r.h), (int) Math.round(r.d), mirrors));
+        }
+        return List.copyOf(out);
+    }
+
     public static Bounds bounds(Part part) {
         return ADULT_MESH.bounds(part);
     }

@@ -114,7 +114,11 @@ public final class PassificationGene implements Gene {
             "minecraft:beetroot",
             "minecraft:pumpkin",
             "minecraft:nether_wart",
-            "minecraft:cake");
+            "minecraft:cake",
+            // 14 and 15 (2026-10-02): the skeleton horse's bone and the zombie horse's
+            // rotten flesh - undead treatment D13/D14. Append only.
+            "minecraft:bone",
+            "minecraft:rotten_flesh");
 
     /** Fewest and most of the offering a horse may ask for. */
     public static final double MIN_AMOUNT = 1.0;

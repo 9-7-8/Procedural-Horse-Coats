@@ -1,0 +1,128 @@
+2026-10-02 17:15 (start, local time) - Wild horse turnover built
+
+ASKED
+-----
+- "Let's implement the vanilla horse overhaul from the intake folder" - corrected straight
+  away to "Sorry, I meant the spawning overhaul", then, when no such file was on main:
+  "There should be one that respawns horses and despawns them after a couple days?"
+  It was "Wild horse turnover - implementation treatment.txt", written by tonight's cloud
+  scoping session and sitting only on the unmerged branch claude/beautiful-ptolemy-3a5k63.
+  That branch (intake treatments, the probe-a-scope procedure, session logs) was merged
+  into main (83477fac; wiki/session-log.html conflict resolved by keeping both lists,
+  search index rebaked), and the treatment was built as one unit (process-intake).
+
+DONE
+----
+- 88395471 Wild horse turnover: a three-day lifetime, and thin cells refill.
+  * common/wild/WildLifetime (judge a stamp, the fate: stay / remove / to the realm) and
+    common/wild/TopUpPlan (cells, cellsNear, the daily stamp, the ecology signature,
+    pack size, debug wording).
+  * BreedSpawnHandler stamps horsegenetics:wild_born on NATURAL / CHUNK_GENERATION horses
+    it lets through (not SPAWNER, not in the realm or the F6 corridor).
+  * server/WildTurnover: on the 30-tick id-staggered entity scan; tamed -> stamp cleared;
+    old non-persistent wild-herd horses get a fresh stamp; a herd member is judged on
+    its loaded lead's stamp; nobody leaves with a player within 32 blocks; touched
+    (lead, temper, tack, rider; plus food / lead / empty-hand mount on EntityInteract)
+    -> HorseRelease.makeWild in its own level, then teleport to the realm with the
+    portal ticket; failure puts the stamp back. makeWild now clears the stamp.
+  * server/WildTopUp + data/WildCellLedger: once a second, at most four unstamped cells
+    near non-spectator players are counted; under the minimum, up to twelve spots are
+    tried (ticking chunk, horse's spawn rules, biome with a horse entry,
+    anythingMaySpawn, 24 blocks and out of view of every player, no horse within 32);
+    the pack is the biome's own count, spawned NATURAL so HerdManager founds it. The
+    ledger keeps only today's stamps.
+  * Five server keys: wild.despawn_days 3, wild.realm_handoff true,
+    wild.topup_minimum 5, wild.topup_cell_chunks 8, wild.topup_player_radius 96.
+  Proof: WildLifetimeTest (9), TopUpPlanTest (15), CommonPortabilityTest green;
+  WildLifetimeTest mutated (>= to >) went red, reverted. runGameTest 38/38 with six new
+  tests (wild_horse_moves_on, wild_touched_horse_goes_to_the_realm, wild_tamed_horse_stays,
+  wild_old_horse_is_stamped, wild_pack_founds_one_herd, wild_cell_rolls_once_a_day);
+  mutating the tamed exemption failed exactly wild_tamed_horse_stays. The pack test is
+  the proof that a NATURAL EntityType.spawn from server code fires FinalizeSpawnEvent
+  (stamped) and founds one herd (treatment UNVERIFIED 1). runServer reached Done( with
+  the five keys written at their defaults; no ERROR, WARNs all pre-existing (the
+  stasis_chamber recipe warning is in the owner's previous log too); run/phc, run/config
+  and logs restored from a copy afterwards. :neoforge-26.1.2:build green,
+  check-parity OK, check-designer-boots OK.
+- Docs (next commit): breeds.html #turnover (gameplay, settings table), #turnover-coding,
+  #turnover-calls, code map, the Verification check #turnover-1002; the Roadmap's
+  "Horses spawning in chunks already visited" plan retired into #turnover-coding (the
+  top-up is the "mod-owned periodic spawner" it called for). horse-realm.html
+  #wild-arrivals and its Coding note, Verification #verify-wild-arrivals.
+  horse-care.html: the scan list and the #verified-despawn record (distance still
+  removes nothing; age now does). compatibility.html #spawning. config.html rebaked
+  (HOME entries added in bake-config-keys.mjs). decisions.html pointer.
+- Retired: intake/Wild horse turnover - implementation treatment.txt deleted, its block
+  removed from intake/Sizing.txt.
+
+- Follow-up, owner: "can you try and test this, cause when I made a similar-osh patch
+  before, it led to lots and lots of game instability". Built server/DebugWildSoak and the
+  runWildSoakServer run (a FakePlayer walks twelve waypoints while the server sprints;
+  each hop waits at 20 TPS for its ground to tick). Run 3 (6 game days, seed 20261002):
+  RESULT PASS - 102 moved on, 15 to the realm (0 failed), 47 herds / 102 horses topped up,
+  peak 39 loaded horses, tick mean 3.4-4.1 ms, p99 6-12 ms, worst 1.48 s (world
+  generation on arrival), no ERROR, no duplicate/removed-entity warning; WildTurnover +
+  WildTopUp ~27 of 49157 server-thread JFR samples. Runs 1-2 failed on harness faults
+  (mock player's unnegotiated channels crashed login; FakePlayer ignores teleports;
+  sprinting starved chunk generation; a control horse walked off a cliff), each fixed.
+  Hardening from review: WildTurnover's tick handler is now EventPriority.LOWEST, so the
+  mod's 27 other EntityTickEvent.Post subscribers never see a horse it just discarded or
+  moved. Gametests 38/38 and the full build green again after it.
+  Filed #30: a cowboy at 99 63 673 on that seed loses himself and his stock to a lava
+  cave below the hitch, in both runs - pre-existing, not the turnover.
+
+DECIDED
+-------
+Owner calls are the treatment's (3 days, touched -> realm, 32-block watch, 8x8 cells,
+minimum 5 as a trigger, herd keyed to the lead, five config keys). Calls made without the
+owner, recorded at breeds.html#turnover-calls:
+- the biome is read at each spot tried, not the cell's centre column (treatment UNVERIFIED
+  6 allowed this);
+- "out of sight" = vanilla's 24 blocks plus a ~60-degree view cone with a block raycast,
+  out to 128 blocks (vanilla itself checks distance only);
+- a SPAWNER's horse is not stamped;
+- naming is dropped from "touched": an untamed horse cannot be renamed in this mod
+  (HorseInteractionHandler opens the window only for the owner);
+- a new herd never lands within HerdManager.HERD_RADIUS of another horse, so it is a new
+  herd rather than more of the old one;
+- the ledger keeps only today's stamps (an older one means what a missing one means);
+- old horses: only untamed, never-persistent, wild-herd members get a fresh stamp, so
+  released / cowboy / stall / egg horses and lone old Feral Mixed keep their old life.
+
+FOUND ON THE WAY
+----------------
+- #29 (bug, open): the turnout ticket calls makeWild on the horse AFTER the
+  cross-dimension teleport, i.e. on the removed entity; the realm copy may stay tamed and
+  the tack may duplicate. Not reproduced in game.
+- The treatment's play checks used /time add and sleeping; game time ignores both, so
+  the checks use /tick sprint 72000 instead.
+- The gametest harness has no realm level, so the arrival itself is untested (the
+  fallback is tested).
+- First gametest run failed 4/6: horses at z offsets 4+ stood in a chunk the harness does
+  not force, which never ticks. Fixed with ModGameTests.keepTicking (3x3 forced).
+
+PROCEDURES
+----------
+- process-intake.txt: if a named unit is not in intake/, look at unmerged cloud
+  branches and merge the one that carries it (this session's first twenty minutes).
+- test-tiers.txt: writing a gametest - only the test's own chunk is forced; no realm
+  level; doMobSpawning off.
+- Nothing else was wrong; no new routine needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Full :common:test not run (a full run would also re-check every breed file, coat golden
+  and parity snapshot; none of those moved).
+- Nothing seen in game. New Verification checks: breeds.html#turnover-1002 (turnover,
+  watch radius, touched -> realm, new biomes once, per-player cells, the feel) and
+  horse-realm.html#verify-wild-arrivals (the first real arrival).
+
+RELEASE
+-------
+Not offered: one feature (patch) on top of a few small changes since 0.5.041 - below
+release step 1's bar.
+
+PICK UP FIRST
+-------------
+/process-intake: Body parts slice A (SPINE anchor, saddle-zone mask, dorsal spine row) -
+tier 2, owner-free, the foundation slices B and D wait on.

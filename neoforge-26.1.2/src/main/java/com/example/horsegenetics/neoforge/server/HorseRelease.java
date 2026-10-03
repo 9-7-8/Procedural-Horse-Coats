@@ -80,6 +80,9 @@ public final class HorseRelease {
         HorseRecords.setOwner(horse, null);
         horse.setPersistenceRequired();
         horse.getPersistentData().putBoolean(BreedSpawnHandler.WILD_SPAWN_KEY, true);
+        // A horse turned out is meant to stay: it gets no wild lifetime, and loses
+        // any it had (the wild-horse hand-off comes through here too).
+        WildTurnover.clear(horse);
         level.playSound(null, horse.blockPosition(), SoundEvents.HORSE_BREATHE,
                 SoundSource.NEUTRAL, 0.8F, 1.1F);
         // Last, so the fee lands after everything it is a fee for - and, since

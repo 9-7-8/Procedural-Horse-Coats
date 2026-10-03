@@ -81,7 +81,8 @@ cart sounds come from the same MIT repository and are covered by this notice.
 
 **Cart entity textures are not redistributed at all.** Each is assembled at
 runtime from the player's own vanilla block textures by
-`mixin/CartModelManagerMixin`, so no Mojang art ships in this jar.
+`mixin/CartModelManagerMixin`, so no Mojang art ships for the carts. (Mojang art
+does ship for the horse coats - see the next section.)
 
 ### Modifications from upstream UsefulCarts
 
@@ -135,6 +136,38 @@ Sources and sizes are on `wiki/stables.html`. They are **not** covered by this
 mod's licences. Planet Minecraft submissions carry no uniform licence and the
 terms of these three have not yet been checked one by one; until they are,
 treat the buildings as not freely reusable and do not extract them.
+
+## Horse coat sheets (Mojang)
+
+The coat sheets below are **Minecraft textures by Mojang Studios**, converted to
+this mod's layout. They are not covered by this mod's licence: Mojang's art is
+Mojang's, and is shipped here only because the mod paints its coats onto the same
+vanilla horse mesh, inside Minecraft, for Minecraft players, under Mojang's terms
+for mods (the Minecraft EULA and Usage Guidelines). Do not reuse them outside a
+Minecraft mod.
+
+Each is the vanilla 64px sheet scaled 2x by nearest neighbour, with the leg and
+ear patches that vanilla shares copied into the room this mod's mesh gives each
+leg and ear. `common/sheet-sources/manifest.txt` lists every one of them with its
+source file, and `./gradlew :common:convertHorseSheets` regenerates them from it;
+a new sheet converted from Mojang art is a new line there and here.
+
+    assets/horsegenetics/textures/entity/horse/horse_white.png
+        from minecraft:textures/entity/horse/horse_white.png
+    assets/horsegenetics/textures/entity/horse/horse_white_baby.png
+        from minecraft:textures/entity/horse/horse_white_baby.png
+    assets/horsegenetics/textures/entity/horse/horse_skeleton.png
+        from minecraft:textures/entity/horse/horse_skeleton.png
+    assets/horsegenetics/textures/entity/horse/horse_skeleton_baby.png
+        from minecraft:textures/entity/horse/horse_skeleton_baby.png
+    assets/horsegenetics/textures/entity/horse/horse_zombie.png
+        from minecraft:textures/entity/horse/horse_zombie.png
+    assets/horsegenetics/textures/entity/horse/horse_zombie_baby.png
+        from minecraft:textures/entity/horse/horse_zombie_baby.png
+
+The unconverted 64px originals of the two white sheets ship beside them
+(`horse_white_vanilla64.png`, `horse_white_baby_vanilla64.png`); the undead
+originals are kept in the repository only, under `common/sheet-sources/minecraft/`.
 
 ## Where the rest is written
 

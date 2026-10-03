@@ -29,7 +29,11 @@ STEPS
    (full keys, horsegenetics.<gene>=<a>/<b>, joined with "-"), and a dragon horn form or
    -1. Genes left out are wild type. Epigenetic numbers (length, girth, shade) are rolled
    per horse and differ every run; to pin one, extend record() to re-roll until it is met,
-   as the dragon horn form already does. The camera frames head and shoulders; a long
+   as the dragon horn form already does.
+   A code of breed:<id> rolls a founder of that breed instead (every pin and band
+   applies): "|+key=a/b" stamps a pair onto the roll, "|key=a/b" re-rolls until it is
+   there. Stamp anything rare - re-rolling for a 1-in-640 founder outran the camera and
+   saved an empty stage. Framing.WIDE shows the whole horse, Framing.FOAL a whole foal. The camera frames head and shoulders; a long
    unicorn horn still leaves the top of the frame. Grep every allele token before using it.
 2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
 3. Launch by launch-game step 5, with the task :neoforge-26.1.2:runClientTestWorld and

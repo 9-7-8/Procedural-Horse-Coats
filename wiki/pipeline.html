@@ -477,6 +477,20 @@ overlay.lock(locked);                                    // and phase 6 cannot g
     </p>
 </div>
 
+<div class="note" id="sheet-passes">
+    <span class="label">Two passes that are not painting: the undeath sheets</span>
+    <p>
+        The <a href="gene-zombie.html">zombie</a> locus stamps vanilla&rsquo;s zombie horse
+        sheet into the colour field <em>between phase 2 and phase 3</em> (the template
+        divided back out, so an unmarked zombie is vanilla&rsquo;s), and the
+        <a href="gene-skeleton.html">skeleton</a> locus runs a sixth step <em>after the
+        overlay phase</em>: the sheet&rsquo;s alpha cuts the horse to its bones, its colour sits
+        under the coat, its shading goes back on top. Both through
+        <code>CoatSheetContribution</code>, read out of band like the LUT and the white lock.
+        The alpha is binary, and the model draws a cutout, so no translucent pass is needed.
+    </p>
+</div>
+
 <h3 id="shadow-pass">The shadow pass &mdash; nothing phase 3 paints is true black</h3>
 
 <div class="codebox">

@@ -1204,6 +1204,39 @@
         <a href="gene-molten-hooves.html">molten hooves</a>,
         <a href="gene-magic-night-watch.html">night watch</a> and
         <a href="gene-shadowcreature.html">shadowcreature</a>.</dd>
+    <dt id="great-valley-skeleton-horse">Great Valley Skeleton Horse <span class="tag">13.5&ndash;15.0 hh &middot; very rare</span></dt>
+    <dd>Named for a valley nobody goes to any more. Nobody can say who first kept a horse with
+        nothing on its bones; the line survives because it needs so little and gives so much. It
+        is light, quick and hollow, and it eats what it is made of: a bone heals it whole. It will
+        not carry anyone after dark who has not paid it a bone &mdash; one bone, once, and never
+        again &mdash; and it walks on soul fire, and the water cannot drown what has no breath to
+        lose. Most are bleached clean; the rest are old and yellowed, crazed like glaze and dusty
+        at the joints. A few have kept horns of one kind or another, all of it bone, and a very
+        few have kept every kind there is. None was ever bred on purpose: they come out of the
+        storms, and out of old stables where something else used to stand.
+        See <a href="gene-skeleton.html">skeleton</a>,
+        <a href="gene-diet.html">diet</a>,
+        <a href="gene-passification.html">passification</a> and
+        <a href="undead-horses.html">undead horses</a>.</dd>
+    <dt id="blackened-skeleton-horse">Blackened Skeleton Horse <span class="tag">13.5&ndash;15.0 hh &middot; rare</span></dt>
+    <dd>The Great Valley horse&rsquo;s cousin from the other side of the portal, burnt black to
+        the bone and long past minding it. It eats bones, it turns on its rider after dark until
+        it is given one, it trails soul fire, and now and then it wears a horn or a rack of bone
+        &mdash; all of it the same as the pale ones, except that this one walks out of lava. It is
+        the horse you are likeliest to meet in the Nether: rare, but nothing else there is less
+        so. A skeleton horse that comes through a portal and is left too long comes out like this.
+        See <a href="gene-skeleton.html">skeleton</a>,
+        <a href="gene-fireproof.html">fireproof</a> and
+        <a href="undead-horses.html">undead horses</a>.</dd>
+    <dt id="graveborn-warmblood">Graveborn Warmblood <span class="tag">13.5&ndash;15.0 hh &middot; very rare</span></dt>
+    <dd>A warmblood in build, deep in the chest and heavy in the bone, and by every account
+        buried once and not kept. It is slow and very hard to kill, it eats raw meat, and after
+        dark it throws whoever is on its back. Rotten flesh calms it for a while; a calm horse can
+        be tamed, if you are quick about it. The fresh ones look like what they are; the
+        long-buried still carry the grave in their coats.
+        See <a href="gene-zombie.html">zombie</a>,
+        <a href="gene-passification.html">passification</a> and
+        <a href="undead-horses.html">undead horses</a>.</dd>
 </dl>
 
 <h2 id="reading">Reading the book against the game</h2>
@@ -1232,8 +1265,9 @@
     <p>
         The catalogue&rsquo;s backlog is a shopping list, not a commitment: a <strong>continental
         draft cluster</strong> from the Ardennais to the Schleswig Coldblood, the sport-horse
-        books waiting on studbook kinds, and the reindeer mod&rsquo;s breeds, whose wings
-        and horns mean learning to 3D model.
+        books waiting on studbook kinds, the reindeer mod&rsquo;s breeds, whose wings
+        and horns mean learning to 3D model, and the mythic breeds, whose spawning is now
+        decided.
     </p>
 </div>
 
@@ -1292,8 +1326,10 @@
     existing strain system is the nearest hook and cannot express any of these. This is a
     format change, so it lands in the four places
     <a href="breed-format.html">the format page</a> lists, and the cross labels on
-    <a href="breeds.html">breeds</a> have to read it. Before building, ask the owner how a
-    performance book admits a horse, since the mod has no competitions. Settled on
+    <a href="breeds.html">breeds</a> have to read it. The mod has no competitions, so an open
+    performance book admits a horse of any parentage <strong>once its resolved stats (speed,
+    jump, health) meet the book&rsquo;s minimums</strong> (owner, 2026-10-02). The breed file
+    declares those minimums. Settled on
     <a href="breed-format.html#studbook-kinds">the format page</a>.
 </p>
 
@@ -1333,6 +1369,42 @@
         <a href="compatibility.html#mod-survey">the Bedrock cluster</a> &mdash; ideas and shapes,
         nothing installable.</li>
 </ul>
+
+<h3 id="plan-mythic-breeds">Mythic breeds: how they spawn and which are one breed (owner&rsquo;s call, 2026-10-02)</h3>
+<p>
+    The mythic breeds of <code>intake/Mythic breeds - gene audit.txt</code> take their biomes,
+    <code>spawn_time</code> and commonness from <code>intake/Mythic breeds - biome
+    assignments.txt</code>, with these answers from the owner:
+</p>
+<ul>
+    <li><strong>Spawn kinds: <code>["wild", "spawn_egg"]</code></strong>, the same as the
+        Nether trio. The cowboy does not sell them and the stable does not hold them.</li>
+    <li><strong>The plain horses are one breed with all their names.</strong> These are the eight
+        Aesir steeds, Freyfaxi, and the Irish trio Attach, Gaoth and Sidhe. Nothing sets them
+        apart, so they become one entry in the spawn pool instead of twelve. Its biomes are the
+        union of theirs, at <code>uncommon</code>.</li>
+    <li><strong>The sun teams are one breed with all their names.</strong> These are the Horses
+        of Helios, Arvakr and Alsvidr, and Lampos and Phaethon. The breed spawns by day, and its
+        biomes are the union of the teams&rsquo; biomes. It is <code>rare</code>, about the
+        weight of the three <code>very_rare</code> pools it replaces.</li>
+    <li><strong>Named lineages get no breed.</strong> Hofvarpnir&rsquo;s parents and the sire of
+        Askhetos and Kygnos have no tale of their own. They never spawn, and later they may
+        appear as named ancestors in those breeds&rsquo; pedigrees.</li>
+    <li><strong>Zebra of the waterhole is <code>rare</code></strong>: it is a type, not a named
+        individual.</li>
+    <li><strong>Coast crowding stays as proposed.</strong> The blocked sea breeds (Hippocampus,
+        Kelpie, Each-uisge, Nuckelavee) do not spawn until they are built, so most of that
+        crowding never happens yet. Recheck the beach and stony-shore shares when they ship.</li>
+</ul>
+<p>
+    <strong>Prerequisite:</strong> &ldquo;one breed, many names&rdquo; needs something the
+    format does not have. A breed file cannot list the names its horses draw from, because
+    <a href="breed-format.html">the format</a> has no such field and the
+    <code>HorseNameGenerator</code> reads none. The plain-horse and sun breeds wait on that
+    field. It is a format change, so it lands in every place the format page lists. These two
+    answers settle &ldquo;named individuals versus breeds&rdquo; only for the twelve plain
+    horses and the sun teams. The other named individuals are still open in the audit.
+</p>
 
 </section>
 

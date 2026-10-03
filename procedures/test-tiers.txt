@@ -57,6 +57,10 @@ STEPS
      handler, attachment, payload, registry or config path changed.
      - If it goes red, stash your diff and run HEAD before blaming the change:
        gametests depend on tick phase, and a moving failure is a flake to fix.
+     - Writing one: the harness forces only the chunk a test's 1x1 structure stands
+       in, so a horse a few blocks over may sit in a chunk that never ticks (no scan,
+       no founding) - ModGameTests.keepTicking forces the 3x3. The harness has no horse
+       realm level, and runs with doMobSpawning off, so no natural or top-up spawn fires.
    - Browser checks that drive headless Chrome: check-designer-boots.mjs (after any
      wasm), check-creator-steps.mjs, check-path-canvas.mjs, check-colour-control.mjs,
      check-glow-control.mjs, check-glow-render.mjs and check-ai.mjs. Run them when their
