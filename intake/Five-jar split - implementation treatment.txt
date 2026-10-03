@@ -1,4 +1,4 @@
-Five-jar split (Core, Coats, Equipment, Quality of Life, All-in-One) - implementation treatment
+Five-jar split (Core, Breeding, Equipment, Quality of Life, All-in-One) - implementation treatment
 
 Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines
 are the scoping session's, not asked; "Open" lines are still to be settled, by
@@ -24,7 +24,7 @@ Her answer to how the shared code is handled: "There's a core base game code jar
 to download, then they pick their add-ons, and they can pick 'all in one' instead. So we
 ship five jars with each release. The goal is to keep the file size of the core base game
 jar as small as possible."
-Read as: Core (small, required by the three parts), Coats, Equipment, Quality of Life
+Read as: Core (small, required by the three parts), Breeding, Equipment, Quality of Life
 (each needs Core, none needs another part), and All-in-One (Core plus all three parts in
 one file, used INSTEAD of them). Confirmed in the answers below.
 
@@ -43,7 +43,7 @@ In scope
 - Release procedure, README, wiki and tests updated for five jars.
 Not in scope (re-askable unless stated)
 - Any new feature. The split moves code and splits registries; no gameplay changes except
-  the ones Decided below (hunger/healing absent without Coats).
+  the ones Decided below (hunger/healing absent without Breeding).
 - The rename to Ixora's Horse Overhaul (own treatment; this waits on it, see Decision N).
 - Bridle/saddle split, horse shoes, command whistle, troughs: each stays its own treatment
   and lands in the jar assigned below (Decision B).
@@ -83,7 +83,7 @@ common/src/main/java/com/example/horsegenetics/common/):
   gear doll, picker, Dress button and drawDraught (uses CartDraft, CartKind, CART_METRES).
 - client/HorseBrowserScreen.java (about 4500 lines): a private Tab enum of ten tabs
   (Getting started, Recipes, My horses, Horse realm, Query, Breeding preview, Log, Gene
-  database, Alleles, Breeds). Mostly Coats content; the Log tab is C/log/HorseEventLog.
+  database, Alleles, Breeds). Mostly Breeding content; the Log tab is C/log/HorseEventLog.
 - client/TutorialPage.java: the chapter-to-task mapping, hard-coded (about 69 ProgressTask
   references, about 8 cart pages). C/progress/ProgressTask.java: one enum, about 103
   constants, completed by HorseProgress.complete from about 44 files; one advancement
@@ -109,12 +109,12 @@ LOOKS BUILT BUT IS NOT
   mane.json and tail.json (rescuing_braid). Equipment's real content today is carts, the
   19-slot screen, the rescuing braid and dyed tack on the bench.
 - common/ is NOT organised by the three parts. Hunger, bond, herd, braid and send-home logic
-  sit together in C/care/ and C/herd/; 'wild herds' (HerdManager) is Coats despite the name.
+  sit together in C/care/ and C/herd/; 'wild herds' (HerdManager) is Breeding despite the name.
 - Horse speed does not read shoes yet.
 
 4. THE PIECES
 -------------
-ORDER: 1 Core extraction -> 2 Equipment jar -> 3 Quality of Life jar -> 4 Coats jar plus the
+ORDER: 1 Core extraction -> 2 Equipment jar -> 3 Quality of Life jar -> 4 Breeding jar plus the
 five-jar pipeline (owner picked this order). Until piece 4, the shipped artifact stays the
 one all-in-one jar, so each piece leaves a playable game and a release can still be cut.
 
@@ -125,12 +125,12 @@ boundaries and a Core size report in the build output.
 Decided
 - Core contents = only what two or more parts need. Everything else belongs to a part.
 - HorseRecord in Core is genome-agnostic: id, name, sex, gelded, owner, and a hook for a
-  stat provider and for part data (owner). Coats attaches the genome and supplies stats;
-  without Coats a plain record and vanilla stats are used.
+  stat provider and for part data (owner). Breeding attaches the genome and supplies stats;
+  without Breeding a plain record and vanilla stats are used.
 - Extension points in scope: info-screen tabs and H-browser tabs; checklist/tutorial tasks
   per jar; per-jar registries (items, blocks, attachments, payloads, menus, config specs,
   mixins); and a public third-party API on all of these.
-- H-browser frame and its Log tab live in Core, so every jar can write log events; Coats adds
+- H-browser frame and its Log tab live in Core, so every jar can write log events; Breeding adds
   the other tabs.
 - common/ splits into :common-core, :common-coats, :common-equipment, :common-qol. :web
   and the all-in-one depend on all four. Hard rules 1 and 2 hold for each of them.
@@ -139,7 +139,7 @@ Decided
   deliberate edit with a reason.
 Recommended
 - The attachment keys and the horse_record codec keep their exact current serialised form
-  so no migration is needed; Coats' genome is stored under the same key it has today.
+  so no migration is needed; Breeding' genome is stored under the same key it has today.
   (Rule 10: if this cannot be kept, stop and write the migration.)
 - The ProgressTask enum becomes a registered task id list; each jar contributes its own
   tasks, with the existing ids and advancement JSONs unchanged.
@@ -175,7 +175,7 @@ PIECE 2 - Equipment jar (L)
 ---------------------------
 What the player sees: a horse-gear jar that works with Core alone: the 19-slot Gear tab, tack
 slots and right-click equip, dyed tack, carts, and the rescuing braid. The braid only draws an
-overlay if Coats is installed.
+overlay if Breeding is installed.
 Decided
 - Equipment owns: the 19 gear slots (HorseTackSlot, HorseGear attachment, HorseGearMenu and
   Screen, TackEquipHandler, the two tack payloads), tack look/tint, shoes and saddle pads
@@ -185,7 +185,7 @@ Decided
 - The Equestrian Bench goes to QUALITY OF LIFE, not Equipment (owner's second answer
   overrode the survey's suggestion). Its dye-tack function is then the Gear tab's job; see
   Open 1.
-- The braid's overlay renders only when Coats is installed (owner). Without Coats the item and
+- The braid's overlay renders only when Breeding is installed (owner). Without Breeding the item and
   its slot still work and no overlay is drawn.
 - The Gear tab, gear doll, picker, Dress button and the Draught section move out of
   HorseInfoScreen into tabs registered by Equipment.
@@ -199,11 +199,11 @@ Open
   absent (Recommended: it shows the tack tab disabled with a one-line "needs Equipment"; or its
   dye recipes quietly vanish)?
 - 2 (building session): the braid's "sends home" half uses SendHome/stall logic. Whether it needs
-  QOL's stall signs or Coats' realm: check, and degrade quietly if the partner is absent.
+  QOL's stall signs or Breeding' realm: check, and degrade quietly if the partner is absent.
 Where the code lives: C: :common-equipment (CartDraft, CartKind, the slot table). NeoForge: the
 Equipment jar's registries, payloads, mixins, screens, renderers, tags, models, lang, loot
 modifier add_horse_tack, equestrian villager trades (check who sells the leatherworker's
-tack; trades belong where the villagers do, i.e. Coats: see Open 4 of piece 4).
+tack; trades belong where the villagers do, i.e. Breeding: see Open 4 of piece 4).
 Data and saves: HORSE_GEAR and CART_METRES attachments and the cart/gear item and entity ids
 keep their keys. A world that held Equipment data and loads without it is refused (Decision H).
 Sync: the gear payloads and the five cart payloads move to the Equipment registrar.
@@ -211,7 +211,7 @@ Config: carts keep horsegenetics-carts.toml and the -client file (names change o
 rename); behaviour.rightclick_equips_tack moves to Equipment's section.
 Tests: CartDraftTest and the new common-equipment tests; MaterialScanTest; the gear gametests
 in ModGameTests (TackEquipHandler, HorseTackSlot) run against a build with Equipment+Core
-only; a gametest that a cart is pulled by a vanilla horse with no Coats.
+only; a gametest that a cart is pulled by a vanilla horse with no Breeding.
 Play checks: Core + Equipment on a fresh world: place a cart, hitch a vanilla horse, drive;
 open the Gear tab, equip a tack piece, use the braid.
 Docs: wiki/horse-gear.html, carts.html, cart-bench.html, item-rescuing-braid.html,
@@ -224,26 +224,26 @@ What the player sees: a jar that works with Core alone: bond and following, the 
 herds, whistles, stall signs, jumps, double gates, equestrian posts and the bench.
 Decided
 - QOL owns: bond (Bond, BondFollowGoal), herd socialising (HerdSocialHandler, HerdGoals,
-  HorseSocialAttachment; NOT wild-herd spawning, which is Coats), whistles and the
+  HorseSocialAttachment; NOT wild-herd spawning, which is Breeding), whistles and the
   ender whistle (WhistleItem, WhistleCalls, the keybindings), stall signs (StallSignHandler,
   StallDetector, StallRecall), jumps, gates, posts, the Equestrian Bench, the leash helpers
   (LeashPlacerMixin and LeashDropMixin), and the generated jump and gate materials.
 - Hunger, healing, the diet gene and the water-gated healing are COATS ONLY (owner). Without
-  Coats the game treats every horse as full and horses eat and heal as vanilla horses do:
+  Breeding the game treats every horse as full and horses eat and heal as vanilla horses do:
   the vanilla free heal is NOT switched off.
-- Without Coats the QOL whistle/bond/herd/stall code runs on the slim Core record.
+- Without Breeding the QOL whistle/bond/herd/stall code runs on the slim Core record.
 Recommended
 - Bond tier effects that depended on gelded() read it from the slim record in Core.
-- StallionSeedJarHandler stays with breeding (Coats).
+- StallionSeedJarHandler stays with breeding (Breeding).
 Open (building session)
 - Which bond/herd progress awards read the breed (MEET_DHAMPIR, MEET_MAGICAL_HERD): they move
-  to Coats as subscribers; confirm there is no QOL task that silently never completes.
+  to Breeding as subscribers; confirm there is no QOL task that silently never completes.
 - Command whistle treatment (intake/Command whistle - implementation treatment.txt) will build
   in QOL; this piece must leave the whistle code in a shape that treatment can extend.
 Where the code lives: C: :common-qol (Bond, SocialLedger, herd rules, whistle selection, stall
 rules); NeoForge: the QOL jar. JumpBarCooldown client mixin goes with it.
 Data and saves: HORSE_CARE (bond), HORSE_SOCIAL, HORSE_COOLDOWNS, JUMP_SCREEN_KNOWN and
-LEASH_PLACER attachments keep their keys. Hunger attachment (HUNGER) moves to Coats.
+LEASH_PLACER attachments keep their keys. Hunger attachment (HUNGER) moves to Breeding.
 Sync: the care, social, whistle and stall-highlight payloads move to QOL's registrar.
 Config: the ServerConfig keys for these features move to QOL's section.
 Tests: the existing bond, herd, whistle and stall tests; a gametest that Core + QOL runs
@@ -253,20 +253,20 @@ hang a stall sign, ride a jump, place a double gate; confirm no hunger bar or he
 Docs: wiki/horse-care.html (split by jar), item-whistles.html, item-stall-signs.html,
 item-jumps.html, item-double-gates.html, item-equestrian-posts.html, item-equestrian-bench.html.
 
-PIECE 4 - Coats jar and the five-jar release (L)
+PIECE 4 - Breeding jar and the five-jar release (L)
 ------------------------------------------------
 What the player sees: download Core plus any of the three parts, or the all-in-one on its own.
 Decided
-- Coats owns everything not assigned elsewhere: genetics, coat painting and pipeline, breeds,
+- Breeding owns everything not assigned elsewhere: genetics, coat painting and pipeline, breeds,
   breeding, pedigree, body stats, breed designer and horse designer, breeding/splice carrots,
   research papers and the gene database, stasis chambers, banks and the bank block, the vet kit,
   hunger/diet/healing, wild herds (HerdManager), the horse realm and hay portals, stables,
   villagers (the cowboy, horseman, the barn), the F6 debug corridor, and the ten gene mixins.
-- The five jars: ixoras_horses_core (Core); ixoras_horses_coats, ixoras_horses_equipment,
+- The five jars: ixoras_horses_core (Core); ixoras_horses_breeding, ixoras_horses_equipment,
   ixoras_horses_qol (parts, each requires Core, none requires another);
   ixoras_horses (the all-in-one, which keeps the existing id and holds Core plus all three
   parts, with no separate Core needed). Display names: brand + role (owner: "Brand + role:
-  ixoras_horses_coats, and so on").
+  ixoras_horses_breeding, and so on").
 - Namespace: every jar registers under the one namespace of the all-in-one, so items, blocks,
   entities, attachments and gene keys keep identical ids and a world moves between the
   all-in-one and any combination (owner: shared namespace).
@@ -285,20 +285,20 @@ Recommended
   neither is new and may start with any subset.
 - No override flag (matches the rename treatment, which also has none). Open for the owner:
   does she want an escape hatch for a server owner who deliberately drops a part?
-- Name the Core id ixoras_horses_core (derived from "ixoras_horses_coats, and so on"; not asked).
+- Name the Core id ixoras_horses_core (derived from "ixoras_horses_breeding, and so on"; not asked).
 Open
 - 3 (owner): the public API's stability promise. She chose to include it; what does it promise?
   Recommended: documented but marked unstable until 1.0.0, with the extension points listed on
   wiki/api-reference.html.
 - 4 (building session): the horse villager professions and trades for tack (leatherworker,
-  metalsmith): do they ship with Coats because they need the villager machinery, with their trade
-  contents split by jar, or does Equipment add them? Recommended: Coats owns the professions;
+  metalsmith): do they ship with Breeding because they need the villager machinery, with their trade
+  contents split by jar, or does Equipment add them? Recommended: Breeding owns the professions;
   Equipment adds its trades through a Core trade-table hook.
 - 5 (owner): the downloads' file naming, page layout and whether the release note lists five
   files. Recommended: names like ixoras-horses-<part>-<version>.jar, one note, five assets.
 Where the code lives: Gradle (new modules, a build-wide version, a jarJar-free all-in-one task
 that merges the four module outputs and a merged mods.toml and mixins config), the release
-procedure, README.md, wiki/releases.html. NeoForge: the Coats registries, mixins json, config
+procedure, README.md, wiki/releases.html. NeoForge: the Breeding registries, mixins json, config
 sections.
 Data and saves: no registry id changes; the world marker is new and additive.
 Sync: unchanged.
@@ -306,7 +306,7 @@ Config: phc/ stays the folder (the rename treatment moves it). Each jar writes o
 sections.
 Tests: the combination matrix, minimum five boots to "Done (": Core alone; Core + each single
 part; Core + all three parts; all-in-one alone; plus the failure cases: all-in-one + a part,
-and a world marked with Coats loaded without it (expect the refusal message and an intact
+and a world marked with Breeding loaded without it (expect the refusal message and an intact
 world). The gametest run is repeated for the all-in-one. Existing tests for the genetics side.
 Play checks: the same play-through on each combination; load an old all-in-one world with
 every combination and see which load and which refuse.
@@ -323,7 +323,7 @@ A. The ask: Decided. Five jars from one build; any subset of parts on top of Cor
 B. Fit: bends no settled decision in the text read (decisions.html is a pointer page only;
    philosophy read in wiki/text/philosophy.txt). UNVERIFIED that it bends none: the building
    session re-reads philosophy for "horses only" and "carrot not stick" before piece 1.
-   Parts assignments (Decided, owner): Coats = genetics, breeding, stats, breeds, breed designer,
+   Parts assignments (Decided, owner): Breeding = genetics, breeding, stats, breeds, breed designer,
    carrots, papers, stasis, vet kit, hunger and healing, realm, stables, villagers, wild herds.
    Equipment = gear, tack, shoes, pads, carts, braid. QOL = bond, herd socialising, whistles,
    signs, jumps, gates, posts, bench.
@@ -331,7 +331,7 @@ C. How the player meets it: Decided that the three parts are downloads on the mo
    alongside Core. The tutorial/checklist/H-menu only show a part's content when it is
    installed (Piece 1). Recommended: Core's H-menu "Getting started" lists which parts are
    installed and which jars add what.
-D. Genetics: untouched in rules; Coats keeps the gene registry. Gene keys and allele order are
+D. Genetics: untouched in rules; Breeding keeps the gene registry. Gene keys and allele order are
    unchanged. Both editors (rule 5): unchanged by this piece except the module imports.
 E. Breeds: no change.
 F. Items and blocks: no new items. Ids unchanged. Per-wood variants (jumps, gates, carts) keep
@@ -346,7 +346,7 @@ I. Multiplayer: payloads split by registrar; a client missing a part the server 
    NeoForge's own mod-list check (UNVERIFIED how it words it for optional mods; if a part is declared
    required on both sides there is nothing to design). Recommended: all parts declare side=BOTH.
 J. Compatibility: Jade, Waystones, FTB Teams and HorsePowered compat stay where their feature is
-   (Jade: Core or Coats; Waystones and FTB Teams: Coats' ownership/teleport; HorsePowered: Equipment's carts).
+   (Jade: Core or Breeding; Waystones and FTB Teams: Breeding' ownership/teleport; HorsePowered: Equipment's carts).
    Recommended: a compat class loads only if its owning jar is present.
 K. Performance: one shared slow tick (Piece 1) so no extra passes; cost per horse unchanged.
 L. Testing: see each piece; plus a unit test that no Core class imports a part package.
@@ -357,26 +357,26 @@ N. Sequencing: Decided (owner) that the split lands AFTER the rename to Ixora's 
 
 6. IMPLICATIONS SWEEP (Part 5)
 -----------------------------
-- Genetics model, registry, priorities: touches - Coats owns it; Core must not import it.
-- Coat pipeline and goldens: untouched - moves with Coats as is; goldens re-baked only if a package
+- Genetics model, registry, priorities: touches - Breeding owns it; Core must not import it.
+- Coat pipeline and goldens: untouched - moves with Breeding as is; goldens re-baked only if a package
   path is in them.
 - Eye colour: untouched.
 - Body space, model, grown parts: untouched in logic; touches - GeneticHorseRenderer reads gear slots for
   the braid layer (Piece 2): the renderer gets a "worn overlay" extension point.
-- Breeding, pedigree, records, stat inheritance: touches - the record is now slim in Core, with Coats
-  adding genome, pedigree and stats; breeding code stays in Coats.
-- Breeds, spawning, breed files: untouched - Coats.
-- Horse body: touches - speed/health/jump are Coats stats; Core's stat-provider hook falls back to vanilla.
+- Breeding, pedigree, records, stat inheritance: touches - the record is now slim in Core, with Breeding
+  adding genome, pedigree and stats; breeding code stays in Breeding.
+- Breeds, spawning, breed files: untouched - Breeding.
+- Horse body: touches - speed/health/jump are Breeding stats; Core's stat-provider hook falls back to vanilla.
 - Healing, bond, herds, slow tick, hunger: touches - the tick is split by owner (Piece 1/3).
 - AI goals and the behaviour hierarchy bake: touches - goals are registered per jar; the bake must read
   all jars' goals. UNVERIFIED how the bake discovers goals (check wiki/behaviour-hierarchy.html).
 - Items, carrots, splices, papers: touches - ModItems split by jar.
 - Tack and gear slots: touches - Equipment (Piece 2); HorseInfoScreen loses its Gear tab to a plug-in.
-- Villagers, cowboy, barn, trades: touches - Coats owns; Equipment's tack trades need a hook (Open 4).
-- Realm, portals, dimension, stables: untouched - Coats. The realm's yard pens use QOL blocks when
+- Villagers, cowboy, barn, trades: touches - Breeding owns; Equipment's tack trades need a hook (Open 4).
+- Realm, portals, dimension, stables: untouched - Breeding. The realm's yard pens use QOL blocks when
   present (jumps); UNVERIFIED which pens reference jumps; degrade by omitting them.
 - The H menu, log, search: touches - frame and Log in Core, tabs per jar.
-- Stasis chambers and bank: Coats (owner). They copy attachments wholesale (survey); UNVERIFIED that
+- Stasis chambers and bank: Breeding (owner). They copy attachments wholesale (survey); UNVERIFIED that
   Equipment's HORSE_GEAR still travels with a stasis horse when Equipment is installed.
 - Horse designer and spawn screen (rule 5): touches - both import :common-coats; no behaviour change.
 - Gene creator, breed designer, :web (wasm): touches - :web depends on all four common modules; TeaVM
@@ -419,18 +419,57 @@ THREE MOST LIKELY WAYS IT GOES WRONG FOR A REAL PLAYER
 
 8. ORDER AND SIZE
 -----------------
-Order: 1 Core extraction, 2 Equipment, 3 Quality of Life, 4 Coats plus the pipeline. Reason: Core is
+Order: 1 Core extraction, 2 Equipment, 3 Quality of Life, 4 Breeding plus the pipeline. Reason: Core is
 the groundwork (rule: groundwork first even when not smallest), Equipment is the most self-contained
-(carts), and Coats is the largest and goes last when the contract is proven twice.
+(carts), and Breeding is the largest and goes last when the contract is proven twice.
 Sizes: Piece 1 L (several sessions); Piece 2 L; Piece 3 M-L; Piece 4 L. Add to Sizing.txt.
 Waits on: the rename (Decision N). Unblocks: every port treatment (they now size per jar), command
-whistle (QOL), bridle/saddle split and shoes (Equipment), troughs (QOL or Coats: decide when scoped).
+whistle (QOL), bridle/saddle split and shoes (Equipment), troughs (QOL or Breeding: decide when scoped).
 Must NOT be done together: the rename and any piece of this; Piece 1 and any new gene or item treatment;
 the compat release and the first five-jar release unless the owner asks.
 Release (Part 4 M): Decided that each piece counts toward the next patch release. The first five-jar
 release is Piece 4. Can this keep saves loading: Decided yes, by keeping every key (H). If a key cannot be
 kept, that is a compat bump and needs the owner (hard rule 10). Both answers are Recommended-to-confirm
 at release time, per procedures/release.txt.
+
+9a. PROBE ROUND (owner, asked 2026-10-03) - supersedes any earlier line it contradicts
+------------------------------------------------------------------------------------
+The part that was called "Coats" in earlier drafts is now the BREEDING addon (owner: "gelding lives
+in [it]... we should also probably rename this to the breeding addon"). Everywhere above "Breeding"
+means that jar. The coat-painting FEATURE inside it keeps its name.
+Decided (owner):
+- Jar: display "Breeding", id ixoras_horses_breeding, file ixoras-horses-breeding-<version>.jar.
+  The Core and part ids follow: ixoras_horses_core / _breeding / _equipment / _qol; all-in-one
+  ixoras_horses.
+- Gelding and autonomous breeding (NaturalBreedingHandler, heat, pregnancy, covers) exist ONLY
+  with the Breeding addon. The vet kit and stallion seed jars were already Breeding-owned.
+- Without the addon vanilla hand-feeding (golden food) still breeds two horses and gives a vanilla
+  foal; the mod adds no genes, heat, pregnancy or covers.
+- The slim Core horse record keeps SEX but loses gelded as a feature. Without the addon a horse's
+  sex is assigned at random; adding the Breeding addon turns it into the genetic sex automatically.
+- The saved `gelded` field survives untouched when the addon is absent (the record codec still
+  round-trips it), so a gelding is still a gelding when the addon comes back. No migration.
+- A part counts as "used" once it has written its own saved data into the world; merely launching
+  with a jar does not lock the world. (Replaces the "active on each load" marker wording above.)
+- A horse with no Breeding addon still gets a plain record, a generated name, and reduced screens:
+  the info screen shows Overview plus tabs from installed parts; the H menu shows Log and My
+  horses. (Core keeps the name tables.)
+- Creative tabs: Core owns one main tab; each part appends its items to it and keeps its own extra
+  tabs (Horse Carts, Breeds).
+- Rider comfort: horse leads, mining from the saddle, ALT+E, rider fade and the leash mixins go
+  to QOL; right-click-equips-tack and the armour/material generators (GeneratedArmour,
+  ModdedArmour, MaterialScan) go to Equipment.
+Open / Recommended:
+- Recommended: when the Breeding addon adds a genome to an existing horse it takes that horse's
+  CURRENT sex, so adding the addon does not flip a mare to a stallion. (Owner said "automatically";
+  this is the reading, not asked.) Open (owner): confirm; also what a horse that was random-sexed
+  at first sight does if it is later bred to a parent of unknown sex.
+- Bond-tier effects that read gelded(): Core/QOL no longer have it. Recommended: those effects are
+  Breeding-only; a Core+QOL horse never counts as gelded. UNVERIFIED which tiers read it; grep
+  HorseCareAttachment and BondFollowGoal before piece 3.
+- Recommended: the QOL nameplate (HorseNameplateSex) shows the random sex without the addon.
+  UNVERIFIED that the random sex is stored once (not re-rolled each load): it must be saved on the
+  record the first time it is assigned.
 
 9. AFTER EACH PIECE SHIPS
 -------------------------
