@@ -253,8 +253,9 @@ Built? No (grep: no releaseUsing / restrictTo / order attachment). Release on th
 
 ------------------------------------------------------------------------------
 Four-jar split - implementation treatment.txt                    sized 2026-10-03
-- Piece 1: Base (framework + all QOL features + slim record +
-  extension points + common/ split in three + Base size gate)     L  b  Owner: No; waits on the rename; unblocks 2-3 and every port
-- Piece 2: Equipment add-on (gear, tack, carts, braid)            L  c  owner-free once P1 ships; one Open (tack trades hook)
-- Piece 3: Breeding add-on + four-jar release pipeline + marker   L  c  No: Open on the download page layout; needs 1 and 2
+- Piece 1: Base (framework + all QOL + hunger/healing + sex rule
+  + plain wild herds + slim record + extension points + common/
+  split in three + Base size gate)                                L+ b  Owner: No; waits on the rename; unblocks 2-3 and every port
+- Piece 2: Equipment add-on (gear, tack, carts, braid)            L  c  owner-free once P1 ships; owner-free; leatherworker/metalsmith trades included
+- Piece 3: Breeding add-on + four-jar release pipeline + marker   L  c  owner-free; needs 1 and 2; launch-time dependency messages
 Built? No (grep: no :common-base module, no Base jar, no extension registries).

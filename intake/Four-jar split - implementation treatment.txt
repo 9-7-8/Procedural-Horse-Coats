@@ -49,7 +49,8 @@ In scope
 - Release procedure, README, wiki and tests updated for four jars.
 Not in scope (re-askable unless stated)
 - Any new feature. The split moves code and splits registries; no gameplay change except the ones
-  Decided below (no hunger/healing, gelding or autonomous breeding without Breeding).
+  Decided below (gelding, autonomous breeding, diet and breed herds exist only with Breeding; the sex rule and a hunger
+  toggle are new Base config).
 - The rename to Ixora's Horse Overhaul (own treatment; this waits on it, Decision N).
 - Bridle/saddle split, horse shoes, command whistle, troughs: each stays its own treatment and lands
   in the jar assigned below (Decision B).
@@ -148,14 +149,28 @@ Decided
   name (Base keeps the name tables) and reduced screens: the info screen shows Overview plus tabs
   from installed parts; the H menu shows Log and My horses.
 - Sex stays in Base. Without Breeding it is assigned at random; adding Breeding turns it into the
-  genetic sex automatically.
+  genetic sex automatically, and a horse KEEPS its current sex when that happens (owner).
+- Base enforces the sex rule on vanilla breeding: only an opposite-sex pair can breed. A config toggle
+  turns sex OFF, changeable at any time on the same save. Off: sex is hidden everywhere (nameplate, info
+  screen, herd roles, H menu) and is not used for pairing, so any two adult horses may breed. The sex
+  already stored on each horse is kept, so toggling back on shows the same sexes. With Breeding installed
+  and sex off, the genetic X/Y sex still exists (sex-linked genes keep working) but is hidden and ignored
+  for pairing; autonomous covers choose any adult pair, and a gelding still never breeds.
+- HUNGER moves to Base (owner), together with food-seeking (HungerFoodGoal) and the water-gated healing it
+  pays for, under ONE config toggle (name is the building session's, e.g. hunger.enabled). Toggle off:
+  vanilla healing, nothing hidden or gated. HorseRegenMixin (the vanilla free-heal switch-off, a plain
+  Horse mixin, not a gene mixin) moves to Base and honours the toggle. DIET does NOT move: the diet
+  locus, DietFoods, HorseDietHandler and BloodDietHandler stay in Breeding. Base horses look for and eat
+  the standard foods; with Breeding installed, diet overrides what a horse eats through a food-choice hook
+  in Base.
+- Wild herds, at their plain level, are Base (owner): herd behaviour (WildHerdGoal, HerdGoals, the herd flag)
+  and wild upkeep on ordinary vanilla horses (wild.despawn_days, top-up of sparse patches). Breeding owns
+  breed-specific herds (BreedHerd, founders, regions, HerdManager's breed spawning) and the realm
+  hand-off key (wild.realm_handoff), which needs the realm.
 - Gelding (the gelded flag's meaning, the vet kit) and autonomous breeding (NaturalBreedingHandler,
   heat, pregnancy, covers) exist only with Breeding. The saved `gelded` field is kept untouched by
   Base's record codec when Breeding is absent, so a gelding is still a gelding when Breeding returns.
   Vanilla hand-feeding still breeds two horses and gives a vanilla foal.
-- Hunger, healing, the diet gene and water-gated healing are Breeding only. Without Breeding the game
-  treats every horse as full and horses eat and heal as vanilla horses do (vanilla's free heal is NOT
-  switched off).
 - Extension points: info-screen tabs, H-browser tabs, checklist/tutorial tasks per jar, per-jar
   registries (items, blocks, attachments, payloads, menus, config specs, mixins), and a public API on
   all of them (documented on wiki/api-reference.html, UNSTABLE until 1.0.0).
@@ -169,6 +184,9 @@ Decided
   budget, set from the first measured Base build and raised only by a deliberate edit with a reason.
   Rule: Base holds only what every install needs.
 Recommended
+- HorseAlwaysParentMixin (relaxes AbstractHorse.canParent to the golden carrot) is where the opposite-sex
+  rule most likely hooks. UNVERIFIED which jar owns it; Recommended: Base owns the pairing rule and the
+  mixin, Breeding adds its own conditions through a hook.
 - The attachment keys and the horse_record codec keep their exact current serialised form (the genome
   fields live in the same record, written and read by Breeding; Base round-trips fields it does not
   understand) so no migration is needed. (Rule 10: if this cannot be kept, stop and write one.)
@@ -186,18 +204,17 @@ Recommended
   UNVERIFIED which bond tiers read it (grep HorseCareAttachment, BondFollowGoal before building).
 - The QOL nameplate (HorseNameplateSex) shows the random sex without Breeding. UNVERIFIED that the
   random sex is saved the first time it is assigned (it must not re-roll on reload).
-- Adding Breeding to an existing horse keeps that horse's CURRENT sex rather than flipping a mare to a
-  stallion. The owner said "automatically"; this is the reading. Open (owner): confirm, and what a
-  horse random-sexed at first sight does if later bred to a parent of unknown sex.
 Open (building session)
 - Which classes are "needed by every install" for Base: start from a dependency scan and post the list
   on wiki/architecture.html.
 - ServerConfig: one spec per jar (Recommended: phc/server.toml keeps its path; each jar adds its own
   section, and a missing section is fine) or a shared file with optional sections.
+- Which hunger and healing hooks read the diet locus (HorseDietHandler's canRegenerate gate): that gate
+  moves to Breeding as a hook into Base's healing rule.
 - Which QOL message awards read the breed (MEET_DHAMPIR, MEET_MAGICAL_HERD): they move to Breeding as
   subscribers; confirm no Base task silently never completes.
-- That BarebackSteeringHandler and HorseEscapeGoal read neither genome nor hunger (both classes exist
-  in neoforge/server/); any read goes behind a Base hook.
+- That BarebackSteeringHandler and HorseEscapeGoal read no genome (both classes exist in neoforge/server/;
+  hunger is Base now, so reading it is fine); any genome read goes behind a Base hook.
 - Command whistle (intake/Command whistle - implementation treatment.txt) builds in Base; this piece
   leaves the whistle code extendable.
 Where the code lives: C: :common-base (the slim record, ProgressTask registry, Bond, herd rules,
@@ -206,15 +223,18 @@ whistle selection, stall rules, event log, Hunger interface that needs no genome
 frames, DebugAnnounce, creative tab helper, lang merge, all the features listed above). JumpBarCooldown
 and FadingGear client mixins go with Base.
 Data and saves: HORSE_CARE (bond), HORSE_SOCIAL, HORSE_COOLDOWNS, JUMP_SCREEN_KNOWN, LEASH_PLACER and
-HORSE_RECORD keep their keys. HUNGER moves to Breeding with its key unchanged.
+HORSE_RECORD keep their keys. HUNGER stays in Base with its key unchanged.
 Sync: the record sync payload carries the slim record; care, social, whistle and stall-highlight
 payloads move to Base's registrar; add-ons ship their own payloads.
-Config: the keys for these features move to Base's section. The size budget is a build check, not a
+Config: the keys for these features move to Base's section. NEW keys (names are the building session's):
+the hunger toggle (default ON, matching today) and the sex toggle (default ON); both server-side, both
+changeable on a live save, neither may crash a world load; bad values read as the default. The size budget is a build check, not a
 game config.
 Tests: C-level tests for the slim record round trip (including an unknown `gelded` and genome field),
 the task registry, a scan that no :common-base class imports :common-breeding or :common-equipment,
 and the existing bond, herd, whistle and stall tests (--tests only); runGameTest; a server boot to
-"Done (" ; a gametest that Base alone runs with a vanilla horse and no hunger system.
+"Done (" ; a gametest that Base alone runs with a vanilla horse, with the hunger toggle on and off, and the sex
+toggle flipped on a live save (pairing rule on, then off, sexes preserved).
 Play checks: Base alone on a fresh world: tame a vanilla horse, bond with it, blow a whistle, hang a
 stall sign, ride a jump, place a double gate, dye a vanilla saddle at the bench, see leads persist;
 load an old world and see the same horses, names, genomes, gear and hunger in the all-in-one.
@@ -236,6 +256,11 @@ Decided
   armour/material generators (GeneratedArmour, ModdedArmour, MaterialScan).
 - The braid's overlay renders only when Breeding is installed. Without Breeding the item and its slot
   still work and no overlay is drawn.
+- Villager tack trades are Equipment (owner): the equestrian_leatherworker and equestrian_metalsmith
+  professions, their POIs (the leatherworker's and metalsmith's post blocks), recipes and all five trade
+  levels each (data/horsegenetics/villager_trade/). The equestrian_scientist and equestrian_supplier
+  professions stay in Breeding. UNVERIFIED what the supplier sells (read the trade files; if it sells
+  Equipment items, those trades move too).
 - The Gear tab, gear doll, picker, Dress button and Draught section move out of HorseInfoScreen into
   tabs registered by Equipment.
 - Carts take pull and speed from Base's stat-provider hook; with no provider they use vanilla
@@ -245,9 +270,6 @@ Recommended
 Open
 - 1 (building session): the braid's "sends home" half uses SendHome and stall logic (stall signs are
   Base, the realm is Breeding). Degrade quietly if Breeding is absent.
-- 2 (building session): the villager professions and trades for tack (leatherworker, metalsmith).
-  Recommended: Breeding owns the professions; Equipment adds its trades through a trade-table hook in
-  Base.
 Where the code lives: C: :common-equipment (CartDraft, CartKind, the slot table). NeoForge: Equipment's
 registries, payloads, mixins, screens, renderers, tags, models, lang, loot modifier add_horse_tack.
 Data and saves: HORSE_GEAR and CART_METRES attachments and the cart and gear item/entity ids keep
@@ -271,8 +293,10 @@ Decided
 - Breeding owns everything not assigned to Base or Equipment: genetics, coat painting and pipeline,
   breeds, breeding, pedigree, body stats, gelding and the vet kit, autonomous breeding, the breed and
   horse designers, breeding/splice carrots, research papers, the gene database, stasis chambers, banks
-  and the bank block, hunger/diet/healing, wild herds (HerdManager), the horse realm and hay portals,
-  stables, villagers (cowboy, horseman, barn), the F6 debug corridor and the ten gene mixins.
+  and the bank block, diet (the locus, DietFoods and its handlers), breed herds and founders (HerdManager),
+  the horse realm and hay portals, stables, villagers (cowboy, horseman, barn, scientist, supplier), the F6
+  debug corridor and the gene-ability mixins (the free-heal mixin is Base's; the AlwaysParent mixin is Open
+  above).
 - The four jars: ixoras_horses_base (required, "Base"), ixoras_horses_breeding ("Breeding") and
   ixoras_horses_equipment ("Equipment") (each requires Base; neither requires the other), and
   ixoras_horses (the all-in-one: it keeps the existing id and holds Base plus both add-ons, no separate
@@ -299,10 +323,18 @@ Recommended
   `world.load_without_used_addons = false`); when on, a WARN line names each missing add-on on every
   start. A singleplayer world is a server, so there is one code path.
 - Public API stability: documented, unstable until 1.0.0.
+- Distribution (owner): first GitHub releases, later whatever sites host the mod. Each of the four jars is
+  its own download. Each jar states, inside itself and on launch, which jars it requires and which it is
+  incompatible with, so a wrong combination is caught as foolproofly as possible.
+Recommended
+- Each jar's neoforge.mods.toml lists its required and incompatible jars (type required / incompatible) and
+  names them in its description; Base additionally runs a launch check that reads the loaded mod list and,
+  on a bad combination, fails with one plain sentence ("Remove X" / "Install Base"). Lets NeoForge's own
+  dependency screen do the work where it can. UNVERIFIED how NeoForge 26.1.2 words a missing or incompatible
+  dependency to the player and whether a custom message is possible; check before writing any custom check.
+- The README and the release note list each jar with a one-line "needs / conflicts with".
 Open
-- 1 (owner): the downloads' page layout and whether the release note lists four files (Recommended:
-  one note, four assets).
-- 2 (building session): see Equipment Open 2 for the tack-trade hook.
+- None for this piece except UNVERIFIED items.
 Where the code lives: Gradle (new modules, a build-wide version, an all-in-one task that merges the three
 module outputs, mods.toml and mixin configs), the release procedure, README.md, wiki/releases.html.
 NeoForge: Breeding's registries, mixins json and config sections.
@@ -328,10 +360,10 @@ A. The ask: Decided. Four jars from one build; any subset of add-ons on top of B
 B. Fit: bends no settled decision in the text read (decisions.html is a pointer page; philosophy read in
    wiki/text/philosophy.txt). UNVERIFIED that it bends none: the building session re-reads philosophy for
    "horses only" and "carrot not stick" before piece 1.
-   Assignments (Decided, owner): Base = framework + everything quality of life (above). Equipment = gear,
+   Assignments (Decided, owner): Base = framework + everything quality of life (above) + hunger and healing + sex + plain wild herds. Equipment = gear,
    tack, shoes, pads, carts, braid, right-click-equips, armour generators. Breeding = genetics, breeding,
-   stats, breeds, designers, carrots, papers, stasis, vet kit, gelding, hunger and healing, realm, stables,
-   villagers, wild herds.
+   stats, breeds, designers, carrots, papers, stasis, vet kit, gelding, diet, realm, stables, villagers
+   (not tack trades), breed herds.
 C. How the player meets it: the add-ons are downloads beside Base. The tutorial, checklist and H menu show
    an add-on's content only when installed. Recommended: Base's H-menu "Getting started" lists which jars
    are installed and what each adds.

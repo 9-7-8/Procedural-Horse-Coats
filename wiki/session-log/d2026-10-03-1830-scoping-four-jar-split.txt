@@ -70,3 +70,12 @@ Not offered (intake-only session; no player-facing work landed).
 PICK UP FIRST
 Run /whats-next; the rename (intake/Rename to Ixora's Horse Overhaul - implementation
 treatment.txt) must ship before this one is built, then /process-intake starts on Piece 1.
+
+ROUND 3 (owner answers, same session; recorded in the treatment)
+- Hunger and the water-gated healing move to Base under one config toggle; diet stays in Breeding.
+- Plain wild herds (behaviour and wild upkeep on vanilla horses) are Base; breed herds and founders are Breeding.
+- Base enforces opposite-sex-only breeding; a config toggle turns sex off (hidden, unused for pairing), flippable on
+  the same save; with Breeding present genetic sex remains but is ignored for pairing.
+- A horse keeps its current sex when Breeding is added. Villager tack trades (leatherworker, metalsmith) go to
+  Equipment. Distribution: each jar its own GitHub download, with requires/incompatible stated inside the jar and
+  checked on launch. Treatment updated: no Open owner calls remain.
