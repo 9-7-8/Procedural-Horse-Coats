@@ -86,6 +86,71 @@
     </p>
 </div>
 
+<h2 id="v0-5-043">0.5.043 &mdash; the command whistle</h2>
+
+<p>
+    A patch release with one new item: the <strong>command whistle</strong>. Point it at a horse of yours, hold right-click, and choose a standing order from a wheel. There are nine orders, and three of them send a horse bred to fight after monsters. Its licence files now carry the MIT / CC BY-SA 4.0 terms.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners</p>
+    <ul>
+        <li>Nothing changes in an existing world until a player gives an order. The new keys in <code>phc/server.toml</code> are <code>orders.hunt_radius</code>, <code>orders.guard_radius</code>, <code>orders.defend_radius</code>, <code>orders.break_off_health</code> and <code>orders.graze_radius</code>. They are added with their defaults the first time the server starts; the &ldquo;server.toml is not correct. Correcting&rdquo; line at boot is that, and it is harmless.</li>
+    </ul>
+</div>
+
+<h3 id="v0-5-043-command-whistle">The command whistle</h3>
+<p>
+    Craft it from a basic whistle, a lead and an amethyst shard, or buy it from an equestrian supplier at level 3 for 5 emeralds.
+</p>
+<ul>
+    <li><strong>Hold right-click on a horse you own</strong> to open the wheel. Move the mouse over an order and let go to give it, or let go in the middle to change nothing. A quick tap does nothing. It reaches 16 blocks, never through a wall, and does not mount the horse or open its inventory.</li>
+    <li><strong>Sneak and hold</strong> anywhere to order every horse of yours within 16 blocks. Chat then says how many obeyed and why the rest did not.</li>
+</ul>
+
+<table>
+    <tr><th>Order</th><th>What the horse does</th><th>Bond</th></tr>
+    <tr><td>Stay</td><td>Stands where it was told, and walks back after anything moves it</td><td>31</td></tr>
+    <tr><td>Follow</td><td>Follows you at a walk. If it is left far behind with no way through, it is brought to you</td><td>31</td></tr>
+    <tr><td>Wander</td><td>Roams freely, and stops following or watching you</td><td>61</td></tr>
+    <tr><td>Graze nearby</td><td>Lives as it likes, but walks back in if it gets more than 12 blocks from where you left it</td><td>61</td></tr>
+    <tr><td>Go home</td><td>Goes to its stall now, or to your holding pen, as Send home does (at its price, if the server set one)</td><td>61</td></tr>
+    <tr><td>Hunt monsters</td><td>Holds its spot and goes for monsters within 16 blocks of it</td><td>61, and bred to fight</td></tr>
+    <tr><td>Guard here</td><td>Holds its spot and goes for monsters within 6 blocks of it</td><td>61, and bred to fight</td></tr>
+    <tr><td>Defend me</td><td>Follows you and goes for monsters within 8 blocks of you</td><td>61, and bred to fight</td></tr>
+    <tr><td>Rejoin herd</td><td>No order: the horse goes back to its ordinary life</td><td>none</td></tr>
+</table>
+
+<ul>
+    <li><strong>An order lasts until you change it.</strong> It pauses while the horse is ridden or on a lead. It never stops a hungry horse eating or a frightened horse running.</li>
+    <li><strong>An order is cleared</strong> when you call the horse with any whistle, use Send home, put it in a stasis chamber, sell or give it away, or it changes dimension.</li>
+    <li><strong>Bred to fight</strong> means the horse shows an aggression pair that goes for monsters or for everything, two copies of Guardian, or a Magic fighter that hits harder than an ordinary horse. The wheel greys out the orders a horse cannot take and says why.</li>
+    <li><strong>Combat orders are leashed.</strong> A horse never picks a creeper, a player, a pet or a tamed horse. It drops a fight a few blocks past its radius, or when it falls below 30% health.</li>
+    <li>Your first order completes the new checklist task and advancement, &ldquo;Give a horse an order&rdquo;.</li>
+</ul>
+<p>
+    Details: <a href="item-whistles.html#command">Whistles &mdash; the command whistle</a>.
+</p>
+
+<h3 id="v0-5-043-licence">Licence</h3>
+<p>
+    This is the first jar whose bundled licence files carry the new terms announced with 0.5.042: code under <strong>MIT</strong>, original art under <strong>CC BY-SA 4.0</strong>. Every earlier release is covered by them too. Third-party pieces keep their own terms (<a href="licensing.html">licensing</a>).
+</p>
+
+<h3 id="v0-5-043-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<ul>
+    <li>Nothing until an order is given. Each horse saves its order, by name. A horse with no order saves nothing new, and older worlds load unchanged.</li>
+    <li>Five new server config keys, added with their defaults (see the box above).</li>
+</ul>
+
+<h3 id="v0-5-043-not-played-yet">Not played yet</h3>
+<p>
+    Open bugs carried over: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a> (F6 debug corridor freezes a server for a few seconds), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/30">#30</a> (a cowboy hitched at a cave edge loses stock to lava), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/29">#29</a> (a turnout ticket marks the wrong horse wild), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a> (a hungry horse ignored a plain hay bale), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a> (slab-floored and stepped stalls), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a> (horse AI forces synchronous chunk loads), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (stasis bank arrow on the wrong tab).
+</p>
+<p>
+    None of the command whistle has been seen in a game yet. The rules, the target picking and the graze tether are covered by automated tests. The wheel itself, the walking, the fights and Go home are not. The open checks are on <a href="item-whistles.html#places-verify">the whistle page&rsquo;s Verification tab</a> and in <a href="verification.html">the verification index</a>.
+</p>
+
 <h2 id="v0-5-042">0.5.042 &mdash; undead horses, and wild herds that come and go</h2>
 
 <p>

@@ -84,8 +84,20 @@ RELEASE
 -------
 The treatment's last piece shipped, so the finished command whistle (a new item, the
 wheel, nine orders) counts as a substantial feature under release step 1. Offered with the
-question tool; the owner answered "Cut 0.5.043 now". The release runs after this docs
-commit, by procedures/release.txt, and records itself in its own note.
+question tool; the owner answered "Cut 0.5.043 now". Cut by procedures/release.txt:
+- Release set, all green: tier-0 node checks (9); full :common:test 1576 tests, 0 failed,
+  22m 23s (slowest classes the same ten as 0.5.042's, so test-tiers was left as it is);
+  :neoforge-26.1.2:test; runGameTest 47/47; all seven headless browser checks; a server
+  boot to Done( whose only WARNs are the two known harmless ones plus vanilla's own.
+- The range audit found the recipe-book text, the COMMAND_WHISTLE checklist task and its
+  baked advancement still listing only Piece 1's four orders. Fixed in 9ed59251 with the
+  version bump (the advancement re-baked by bake-advancements.mjs, which agreed).
+- Tag v0.5.043 on 9ed59251; GitHub release "0.5.043 - the command whistle" with
+  horsegenetics-0.5.043.jar (7,201,460 bytes); the same note on wiki/releases.html#v0-5-043.
+- The first config boot this session backed up run/phc and run/config but not run/logs,
+  against launch-game 8a. Nothing was lost: Minecraft rolled the owner's 2026-10-02 client
+  log into run/logs/2026-10-02-2.log.gz. The release boot backed up all three and restored
+  them byte-identical.
 
 PICK UP FIRST
 -------------
