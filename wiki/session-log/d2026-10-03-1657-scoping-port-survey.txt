@@ -12,6 +12,11 @@ ASKED
   release."
 
 DONE
+- Follow-up (same session): owner pasted The 1.12.2 Pack's dependency list. It has no horse
+  mod (go on overlap), MixinBooter (plain Forge, Java 8 likely), Hwyla/Patchouli/Baubles
+  hooks, and a licence of All Rights Reserved on the pack itself. Recorded in
+  intake/Port - Forge 1.12.2 piece 1 and the survey. Also fixed the stale "no Java 9+" lede
+  on wiki/architecture.html (rebaked wiki/text/architecture.txt).
 - Wrote the survey, five treatments (Port - NeoForge latest, Fabric 26.1.2, other loaders
   26.1.2, Bedrock, Forge 1.12.2) and their blocks in intake/Sizing.txt. No code, wiki or asset
   touched. Research: four subagents (Java loader landscape, Bedrock, 1.12.2/Technic, repo

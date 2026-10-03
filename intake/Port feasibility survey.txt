@@ -77,10 +77,11 @@ D. 1.12.2 IS JAVA 8 AND SRG NAMES. common/ is Java 17 with ~100-125 record files
    pattern instanceofs, a handful of sealed/var/text-block uses (counts differ by regex; see
    treatment 5). All ~111k lines of platform code are a rewrite, as are data-driven formats
    (item definitions, trade sets, dimension JSON, jigsaw pools) that 1.12.2 does not have.
-E. THE 1.12.2 MARKET ALREADY HAS REALISTIC HORSE GENETICS. "Realistic Horse Genetics"
-   (sekelsta; 2.4M CurseForge downloads; 1.12.2 builds; replaces the horse texture) covers
-   the same ground. Whether the target pack ships it decides whether port 5 is a
-   replacement, a complement, or a clash. Go/no-go check, first thing in treatment 5.
+E. THE 1.12.2 MARKET HAS REALISTIC HORSE GENETICS (sekelsta; 2.4M CurseForge downloads),
+   BUT THE TARGET PACK DOES NOT SHIP IT. The owner pasted The 1.12.2 Pack's full dependency
+   list on 2026-10-03: no horse mod of any kind, so no overlap. The pack is on plain Forge
+   with MixinBooter (Java 8 likely), 274 dependencies, ~5 GB RAM, pack licence All Rights
+   Reserved (the pack author must choose to add us). See treatment 5, piece 1.
 
 RECOMMENDED ORDER (the owner has said all ports ship only after 1.0.0; see RELEASE)
 -----------------------------------------------------------------------------------
@@ -117,7 +118,8 @@ set at that time (release procedure).
 
 OPEN FOR THE OWNER (also on each treatment)
 -------------------------------------------
-1. Port 5 target pack: she gave "The 1.12.2 Pack" (CurseForge, also on Technic; 200+ mods).
-   Not Tekkit Legends (that is 1.7.10). Whether it ships a horse mod is UNVERIFIED.
+1. Port 5 target pack: "The 1.12.2 Pack" (CurseForge, also on Technic; 274 dependencies;
+   no horse mod, per her pasted list). Not Tekkit Legends (that is 1.7.10). Still open: its
+   Java runtime, and whether the pack author would add us.
 2. Port 4: does the "infinite coat space" premise survive a bounded layered coat on Bedrock?
 3. Port 2: ship as separate jar, or in one multiloader jar? (Recommended: separate jars.)

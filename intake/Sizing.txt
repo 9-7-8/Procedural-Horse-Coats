@@ -252,7 +252,7 @@ Built? No.
 
 ------------------------------------------------------------------------------
 Port - Forge 1.12.2 - implementation treatment.txt                sized 2026-10-03
-- Piece 1: go/no-go (pack mod list, Realistic Horse Genetics, licence)   S  b  No: complement, replace or stop
+- Piece 1: go/no-go (pack list read 2026-10-03: no horse mod = GO; licence/pack author left)   S  b  No: licence, ask the pack author
 - Piece 2: common/ builds on Java 8                                 L  b  No: in place or generated copy
 - Piece 3: forge-1.12.2 skeleton and the horse                      L  c  needs 1 and 2
 - Piece 4: breeding, names, stats, a few items                      M  c  No: which items

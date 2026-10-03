@@ -67,19 +67,40 @@ tools (unchanged); every compat hook.
 Piece 1 - Go / no-go: what horse mods does the pack ship, and may we join it?
   Player sees: nothing. Output: a note on architecture.html's Verification tab.
   Decided (owner): flag the Realistic Horse Genetics overlap as a go/no-go check, not an
-    assumption either way. Decided (owner, 2026-10-03, later): The 1.12.2 Pack has NO horse
-    mods. So the overlap check is satisfied for the pack as shipped; Open 1 shrinks to "a
-    player who adds Realistic Horse Genetics beside us" (a clash to test, not a blocker), and
-    the remaining piece-1 work is licence and the pack author's willingness only.
-  Steps: read the pack's mod list (CurseForge and Technic /mods pages: the surveying session
-    could not); check for Realistic Horse Genetics, Animania, Mo' Creatures, Horse Stats;
-    read each licence; ask the pack author whether they would add a mod (Technic is
-    Solder-based; there is no central submission, UNVERIFIED).
-  Open 1 (owner): if the pack ships Realistic Horse Genetics: build a complement (breeds,
-    items, care, portal, no coat genes), a replacement, or stop? CC BY-NC 4.0 permits free
-    redistribution with credit; a paid server host may count as commercial (a legal
-    question: the owner).
-  Tests: none. Play checks: none. This piece is research and is S.
+    assumption either way.
+  RESOLVED 2026-10-03 from the owner's pasted dependency list of The 1.12.2 Pack (v1.6.6,
+  2025-04-13; Forge; 274 dependencies; 295,960 CurseForge downloads; pack licence All Rights
+  Reserved; by "Jon"). Read by the scoping session: the list has NO horse, animal-breeding or
+  horse-genetics mod (no Realistic Horse Genetics, Animania, Mo' Creatures, Horse Stats,
+  Gender Mod). So the go/no-go is GO on overlap. What it does carry, which matters:
+    * MixinBooter (CleanroomMC), so mixins into EntityHorse are possible; the pack is therefore
+      on plain Forge, not Cleanroom (Cleanroom bundles Mixin), so Java 8 is the likely runtime
+      (UNVERIFIED: read the pack's launcher/server start script).
+    * Steve's Carts Reborn - a carts mod; our carts are a different feature (out of scope here).
+    * Forestry, Gendustry, Binnie's Mods Patched - the pack's existing genetics theme (bees,
+      trees): the audience already likes breeding games.
+    * Hwyla (+ Waila Harvestability, ThaumicWaila), HEI (JEI fork), Patchouli, Guide-API,
+      Akashic Tome, Baubles, Inventory Tweaks, Mouse Tweaks Unofficial: the hooks a compat
+      layer would use (a Hwyla horse tooltip is the Jade-equivalent; Patchouli or Guide-API
+      for an in-game guide; Baubles for gear). None is required by us.
+    * Biomes O' Plenty, Natura, The Twilight Forest, Aroma1997s Dimensional World, Mystcraft,
+      Recurrent Complex, Roguelike Dungeons: they add biomes/dimensions our breed regions
+      (biome tags in the breed format) must tolerate (a 1.12.2 biome is a registry name, not a
+      tag: the region code needs a name-based mapping, UNVERIFIED).
+    * Morph (iChun), RenderLib / Entity Culling / Particle Culling (meldexun), VintageFix,
+      Roughly Enough IDs, Dynamic Lights: mods that touch entity rendering, model loading or
+      registries; each is a place a generated coat or a custom horse layer could misbehave.
+      Test with them on (play check).
+    * ~5 GB recommended RAM and ~270 mods: the coat texel budget must stay small.
+  Remaining steps (owner, not the building session): (1) the pack is distributed through
+    CurseForge project files, so our mod needs a CurseForge 1.12.2 project for the pack author
+    to list, or players add the jar by hand: ask Jon (the pack's author) whether he would
+    add it; (2) Open 1 (owner): the licence. CC BY-NC 4.0 permits free redistribution with
+    credit; CurseForge pays authors (its Rewards program) and some hosts sell servers, which
+    may count as "commercial" - a legal question that is hers alone; (3) Open 7 (owner): if
+    the pack author declines, still build it for players who add it themselves?
+    Recommended: yes, but later.
+  Tests: none. Play checks: none. This piece is research and is S; it is now mostly done.
 Piece 2 - common/ builds on Java 8
   Player sees: nothing.
   Recommended: add a second compile of common/ at --release 8 as a build variant (the Java 17
@@ -126,7 +147,9 @@ B Fit: no philosophy change. D, E: genetics and breeds live in common/ and port 
   breed JSON loads the same. F Items: 1.12.2 item model JSON is the older format; a few
   items only. G Config: Forge annotations. H Saves: own world; a 1.12.2 save does not carry
   to Java 26.1.2. I Multiplayer: 1.12.2 networking is hand-built.
-J Compatibility: Realistic Horse Genetics (Piece 1), plus whichever horse mod the pack ships.
+J Compatibility: no horse mod in the pack (piece 1). A player who adds Realistic Horse Genetics
+  beside us would clash (both replace the horse texture): test it once, document the result.
+  Pack-specific hooks and risks are listed in piece 1.
 K Performance: 32-bit JVMs and 4-5 GB packs; cap texel budget (TexelBudgetCache exists).
 L Testing: no gametest framework on 1.12.2; yard play checks.
 Open 6 (owner): the version line: a separate 0.x for the 1.12.2 jar? Recommended: yes.
@@ -134,9 +157,13 @@ M Release: Decided, held to 1.0.0.
 
 6. UNVERIFIED (riskiest first)
 ------------------------------
-1. Which mods the pack ships, and its Forge build. Check: CurseForge / Technic /mods.
+1. The pack's Forge build and Java runtime (it lists "Forge" only; the exact build and Java
+   version are in the launcher or the server pack's start script). The mod list itself is
+   settled (owner's paste, 2026-10-03).
 2. Whether Jabel supports records (believed no). Check: Jabel's README and a test compile.
-3. Whether the audience's Java is 8 or 21 (Cleanroom): the target pack's launcher decides.
+3. Whether the pack runs on Java 8 (likely: MixinBooter is present, Cleanroom is absent) or
+   Java 21. The answer decides whether the Java 8 downgrade (piece 2) is needed at all; if the
+   pack is on Cleanroom (Java 21, Mixin built in), Java 17 source might run unchanged.
 4. Whether DynamicTexture on 1.12.2 is cheap enough at the coat resolution used today.
 5. Forge 14.23.5.2860 is the last build. 6. MCP names (stable_39) vs Mojang names.
 7. A published example of a successful modern-to-1.12.2 backport: none found.
