@@ -1,0 +1,451 @@
+Four-jar split (Base, Breeding, Equipment, All-in-One) - implementation treatment
+
+Scoped with the owner and probed (/probe-a-scope, two rounds). Every "Decided" line below is her
+call; "Recommended" lines are the scoping session's, not asked; "Open" lines are still to be
+settled, by whom is said on the line; "UNVERIFIED" lines are facts this file has not proved and
+the building session must check first. Source of truth for what exists is wiki/architecture.html,
+wiki/horse-gear.html, wiki/carts.html, wiki/horse-care.html, wiki/horse-browser.html and
+wiki/api-notes.html. This file is retired (deleted, per /process-intake step 8) as each piece
+ships and moves onto those pages' Coding tabs.
+Written from the cloud session (no game, no jar build): every claim about code comes from reading
+it or from two read-only survey agents whose file lists the building session must re-grep before
+relying on them.
+History: this file began as a FIVE-jar plan (Core, Coats, Equipment, QOL, All-in-One). The owner
+then (1) renamed Coats to Breeding and (2) merged Core and QOL into one required Base jar and
+dropped Core as a concept. This file is the rewritten four-jar version; earlier wording is gone.
+Release: each piece counts toward the next patch release; the four-jar release itself only turns
+on with the last piece. Saves keep loading (hard rule 10) - see Decision H.
+
+1. THE REQUEST, AS GIVEN
+------------------------
+"I want to make this mod a little more modular, because it breaks into three major parts: the
+procedural horse coats, the equipment overhaul, and the horse QOL changes. Every release, we
+should ship those three jars plus a 'all in one' jar. Each jar should be modular, so they can use
+any subset of the jars (except it's redundant to combine with the all in one)" (owner, 2026-10-03).
+Later: "There's a core base game code jar they have to download, then they pick their add-ons, and
+they can pick 'all in one' instead ... The goal is to keep the file size of the core base game jar
+as small as possible." Then: "gelding lives in coats, not in core. You can't geld a horse, and they
+don't autonomously breed, without the coats addon. We should also probably rename this to the
+breeding addon." Then: "Let's also just make the QOL changes into the core, and remove core as
+separate. QOL becomes the base (as I can't imagine someone wanting the breeding changes but not the
+'leads don't disappear' change) and we remove core as a concept."
+Read as: ONE required Base jar (the shared framework plus every quality-of-life change), two
+optional add-ons that each require Base and not each other (Breeding, Equipment), and an
+All-in-One that holds all three and is used INSTEAD of them. Four jars per release. Confirmed.
+
+2. IN SCOPE, AND WHAT IS NOT
+----------------------------
+In scope
+- Four jars per release, one lockstep version number, built by one Gradle build.
+- Splitting :common into three Gradle modules (:common-base, :common-breeding, :common-equipment)
+  and :neoforge-26.1.2 into the matching jars.
+- A genome-agnostic horse record in Base; extension points in Base for info-screen tabs,
+  H-browser tabs, checklist tasks and per-jar registries (items, blocks, attachments, payloads,
+  menus, config specs, mixins); a public documented API on them (unstable until 1.0.0).
+- A size report and a budget gate on Base in the build.
+- A world marker so a world that used an add-on refuses to load without it, plus a server.toml
+  override.
+- Readable "incompatible" errors for all-in-one plus a part.
+- Release procedure, README, wiki and tests updated for four jars.
+Not in scope (re-askable unless stated)
+- Any new feature. The split moves code and splits registries; no gameplay change except the ones
+  Decided below (no hunger/healing, gelding or autonomous breeding without Breeding).
+- The rename to Ixora's Horse Overhaul (own treatment; this waits on it, Decision N).
+- Bridle/saddle split, horse shoes, command whistle, troughs: each stays its own treatment and lands
+  in the jar assigned below (Decision B).
+- A separate jar for carts, or for realm/villagers (offered, not chosen).
+- Per-jar version numbers (offered, not chosen).
+- Other loaders and other Minecraft versions (the port treatments): each now multiplies by four
+  jars, so they must be re-sized after this ships.
+
+3. WHAT ALREADY EXISTS, SO THE BUILDING SESSION DOES NOT REDO IT
+----------------------------------------------------------------
+Today: three Gradle modules (settings.gradle.kts: :common, :neoforge-26.1.2, :web), ONE jar.
+neoforge-26.1.2/build.gradle's 'jar' task copies :common's compiled classes into it (excluding
+*Tool classes and example-genes). mod_id (horsegenetics), mod_version and mod_group_id are one set
+in gradle.properties; there is one neoforge.mods.toml and one horsegenetics.mixins.json (14 common
++ 6 client mixins; read 2026-10-03). common/ is 400 files (survey counts: genetics 247, coat 36,
+breed 23, horse 18, trait 16, parts 15, repro 11, care 9, name 4, herd 4, stable 3, cart 2, log 2,
+realm 2, wild 2, progress 1); neoforge has about 545.
+
+The seams, each one a single hard-coded file today (paths under
+neoforge-26.1.2/src/main/java/com/example/horsegenetics/neoforge/ unless marked C =
+common/src/main/java/com/example/horsegenetics/common/):
+- HorseGenetics.java: the one constructor registering everything, order-sensitive. Gene and breed
+  specs load first (ModGeneSpecs.load, api/GeneRegistration, ModBreedSpecs.load); then
+  DeferredRegisters (ModAttachments, ModDataComponents, ModBlocks, ModBlockEntities, ModMenus,
+  ModItems, ModEntities, ModAttributes, ModPoiTypes, ModVillagerProfessions, ModRecipes, loot,
+  ModBiomeModifiers, ModStructureTypes, ModTriggers, ModCreativeTabs). ModdedMaterials.scan(),
+  ModdedArmour.init(), DoubleGates.init() and Jumps.init() must run BEFORE ModBlocks/ModItems attach
+  to the bus (they register as the classes load): the nastiest seam. HorseCarts.init() registers
+  through RegisterEvent.
+- network/ModNetworking.java (942 lines): all 44 payloads in one method. data/ModAttachments (17
+  types). menu/ModMenus. item/ModItems (590 lines), block/ModBlocks. ServerConfig (one SPEC, 1394
+  lines) and ClientConfig, written to phc/server.toml and phc/client.toml. The carts already keep
+  their own two files (carts/CartsConfig).
+- client/HorseInfoScreen.java (about 2300 lines): a private Tab enum of eight tabs (Overview, Gear,
+  Genes, Health, Coat, Other genes, Offspring, Family tree), including the gear doll, picker, Dress
+  button and drawDraught (uses CartDraft, CartKind, CART_METRES).
+- client/HorseBrowserScreen.java (about 4500 lines): a private Tab enum of ten tabs (Getting
+  started, Recipes, My horses, Horse realm, Query, Breeding preview, Log, Gene database, Alleles,
+  Breeds). Mostly Breeding content; the Log tab is C/log/HorseEventLog.
+- client/TutorialPage.java: the chapter-to-task mapping, hard-coded (about 69 ProgressTask
+  references, about 8 cart pages). C/progress/ProgressTask.java: one enum of 103 constants,
+  completed by HorseProgress.complete from about 44 files; one advancement trigger
+  (ModTriggers.PROGRESS_TASK) is data-driven off it.
+- server/HorseRecords.java and C/horse/HorseRecord.java hold the genome. HorseRecord has 15 fields
+  (id, firstName, lastName, barnName, geneticCode, epigenomeCode, breed, motherId, fatherId, tamedBy,
+  bredBy, generation, parentStats, gelded, ownerId); HorseRecords. is called in 79 neoforge files
+  (grep 2026-10-03). Read by herd/stall/whistle code and by Equipment (server/HorseDraft: pullOf,
+  speedOf; TackEquipHandler). Serialised by data/HorseRecordCodecs (the horse_record attachment).
+- server/HorseCareHandler.java (554 lines): ONE slow tick doing bond, hunger, healing, herd flag and
+  breed-based progress awards. C/care/Hunger.java drains by the vanilla SCALE attribute, not the
+  genome; healing is gated by the diet locus (HorseDietHandler).
+- server/NaturalBreedingHandler (autonomous covers) and server/VetKitHandler read the gelded flag.
+- api/: only RegisterHorseGenesEvent and GeneRegistration (genes only; javadoc says unverified in a
+  running game).
+- compat/ModList.isLoaded guards (WaystonesCompat, FtbTeamsCompat, HorsePoweredCompat) are the
+  precedent for "load this only if its partner is present".
+
+Closest precedent: carts. A self-contained subsystem with its own config files, registry
+(HorseCarts.init), payloads and cart-only mixins, touching the horse only through server/HorseDraft.
+Treat carts as the template for how an add-on plugs in.
+
+LOOKS BUILT BUT IS NOT
+- There is no extension API for tabs, rows, tasks, payloads or items; gene registration is the only
+  hook.
+- Shoes, saddle pads, saddlebags, bridles and halters are slot enums and planned wiki pages only. The
+  17 gear item tags under data/horsegenetics/tags/item/gear/ are empty except mane.json and tail.json
+  (rescuing_braid). Equipment's real content today is carts, the 19-slot screen, the rescuing braid
+  and dyed tack.
+- common/ is NOT organised by the parts. Hunger, bond, herd, braid and send-home logic sit together in
+  C/care/ and C/herd/; "wild herds" (HerdManager) is Breeding despite the name.
+- Horse speed does not read shoes yet.
+
+4. THE PIECES
+-------------
+ORDER (owner): 1 Base (framework plus the quality-of-life features, still shipped as the one
+all-in-one jar) -> 2 Equipment -> 3 Breeding plus the four-jar pipeline. Until piece 3, the shipped
+artifact stays the one all-in-one jar, so every piece leaves a playable game and a release can still
+be cut.
+
+PIECE 1 - The Base: framework and quality of life, built as its own module (L)
+-----------------------------------------------------------------------------
+What the player sees: nothing yet. The same jar plays the same; the owner can see the module
+boundaries and a Base size report in the build output. (The first player-visible change is that
+ONE required jar now carries every quality-of-life feature.)
+Decided
+- Base owns the shared framework AND the quality-of-life features: bond (Bond, BondFollowGoal), herd
+  socialising (HerdSocialHandler, HerdGoals, HorseSocialAttachment; NOT wild-herd spawning, which is
+  Breeding), whistles and the ender whistle (WhistleItem, WhistleCalls, keybindings), stall signs
+  (StallSignHandler, StallDetector, StallRecall), jumps, double gates, equestrian posts, the
+  Equestrian Bench with its dyeing of vanilla saddles and armour (and the DYE_TACK task), bareback
+  steering (BarebackSteeringHandler) and bolting (HorseEscapeGoal), horse leads, mining from the
+  saddle, ALT+E, rider fade, and the leash mixins (LeashPlacerMixin, LeashDropMixin); plus the
+  generated jump and gate materials (GeneratedJumps, GeneratedGates).
+- Base is genome-agnostic. HorseRecord in Base holds id, names, barn name, sex, owner, tamedBy and a
+  hook for part data and a stat provider. Without Breeding a horse gets a plain record, a generated
+  name (Base keeps the name tables) and reduced screens: the info screen shows Overview plus tabs
+  from installed parts; the H menu shows Log and My horses.
+- Sex stays in Base. Without Breeding it is assigned at random; adding Breeding turns it into the
+  genetic sex automatically.
+- Gelding (the gelded flag's meaning, the vet kit) and autonomous breeding (NaturalBreedingHandler,
+  heat, pregnancy, covers) exist only with Breeding. The saved `gelded` field is kept untouched by
+  Base's record codec when Breeding is absent, so a gelding is still a gelding when Breeding returns.
+  Vanilla hand-feeding still breeds two horses and gives a vanilla foal.
+- Hunger, healing, the diet gene and water-gated healing are Breeding only. Without Breeding the game
+  treats every horse as full and horses eat and heal as vanilla horses do (vanilla's free heal is NOT
+  switched off).
+- Extension points: info-screen tabs, H-browser tabs, checklist/tutorial tasks per jar, per-jar
+  registries (items, blocks, attachments, payloads, menus, config specs, mixins), and a public API on
+  all of them (documented on wiki/api-reference.html, UNSTABLE until 1.0.0).
+- The H-browser frame and its Log tab are Base, so every jar can write log events; Breeding adds the
+  other tabs.
+- Creative tabs: Base owns the one main tab; each add-on appends its items to it and keeps its own
+  extra tabs (Horse Carts, Breeds).
+- common/ splits into :common-base, :common-breeding, :common-equipment. :web and the all-in-one
+  depend on all three. Hard rules 1 and 2 hold for each.
+- Base size is enforced by the build: it prints per-jar sizes and FAILS if Base exceeds a recorded
+  budget, set from the first measured Base build and raised only by a deliberate edit with a reason.
+  Rule: Base holds only what every install needs.
+Recommended
+- The attachment keys and the horse_record codec keep their exact current serialised form (the genome
+  fields live in the same record, written and read by Breeding; Base round-trips fields it does not
+  understand) so no migration is needed. (Rule 10: if this cannot be kept, stop and write one.)
+- The ProgressTask enum becomes a registered task list; each jar contributes its own tasks with the
+  existing ids and advancement JSONs unchanged.
+- HorseCareHandler is split into a Base scheduler (the shared slow tick with a subscriber list) plus one
+  subscriber per jar, so the tick is still one pass.
+- ModdedMaterials, ModdedArmour, DoubleGates and Jumps registrations become explicit init calls in a
+  fixed order from each jar's own constructor, not class-load side effects.
+- The dye-tint data component, SaddleTint and the client tint source stay in Base (the bench is Base;
+  Equipment's tack loot uses the same component). A tack piece from Equipment dyes at the Base bench,
+  so there is no "bench without Equipment" case any more.
+- The server.toml override (see Decision H) sits in Base's config section.
+- Bond effects that read gelded(): Breeding-only; a Base-only horse never counts as gelded.
+  UNVERIFIED which bond tiers read it (grep HorseCareAttachment, BondFollowGoal before building).
+- The QOL nameplate (HorseNameplateSex) shows the random sex without Breeding. UNVERIFIED that the
+  random sex is saved the first time it is assigned (it must not re-roll on reload).
+- Adding Breeding to an existing horse keeps that horse's CURRENT sex rather than flipping a mare to a
+  stallion. The owner said "automatically"; this is the reading. Open (owner): confirm, and what a
+  horse random-sexed at first sight does if later bred to a parent of unknown sex.
+Open (building session)
+- Which classes are "needed by every install" for Base: start from a dependency scan and post the list
+  on wiki/architecture.html.
+- ServerConfig: one spec per jar (Recommended: phc/server.toml keeps its path; each jar adds its own
+  section, and a missing section is fine) or a shared file with optional sections.
+- Which QOL message awards read the breed (MEET_DHAMPIR, MEET_MAGICAL_HERD): they move to Breeding as
+  subscribers; confirm no Base task silently never completes.
+- That BarebackSteeringHandler and HorseEscapeGoal read neither genome nor hunger (both classes exist
+  in neoforge/server/); any read goes behind a Base hook.
+- Command whistle (intake/Command whistle - implementation treatment.txt) builds in Base; this piece
+  leaves the whistle code extendable.
+Where the code lives: C: :common-base (the slim record, ProgressTask registry, Bond, herd rules,
+whistle selection, stall rules, event log, Hunger interface that needs no genome). NeoForge: Base jar
+(extension registries, ModNetworking helper taking a registrar, config plumbing, info and browser
+frames, DebugAnnounce, creative tab helper, lang merge, all the features listed above). JumpBarCooldown
+and FadingGear client mixins go with Base.
+Data and saves: HORSE_CARE (bond), HORSE_SOCIAL, HORSE_COOLDOWNS, JUMP_SCREEN_KNOWN, LEASH_PLACER and
+HORSE_RECORD keep their keys. HUNGER moves to Breeding with its key unchanged.
+Sync: the record sync payload carries the slim record; care, social, whistle and stall-highlight
+payloads move to Base's registrar; add-ons ship their own payloads.
+Config: the keys for these features move to Base's section. The size budget is a build check, not a
+game config.
+Tests: C-level tests for the slim record round trip (including an unknown `gelded` and genome field),
+the task registry, a scan that no :common-base class imports :common-breeding or :common-equipment,
+and the existing bond, herd, whistle and stall tests (--tests only); runGameTest; a server boot to
+"Done (" ; a gametest that Base alone runs with a vanilla horse and no hunger system.
+Play checks: Base alone on a fresh world: tame a vanilla horse, bond with it, blow a whistle, hang a
+stall sign, ride a jump, place a double gate, dye a vanilla saddle at the bench, see leads persist;
+load an old world and see the same horses, names, genomes, gear and hunger in the all-in-one.
+Docs: wiki/architecture.html (module split, packages, data flow), api-reference.html and api-notes.html
+(the extension API), coding-notes.html (how to add an add-on), horse-care.html (split by jar),
+item-whistles, item-stall-signs, item-jumps, item-double-gates, item-equestrian-posts and
+item-equestrian-bench (each notes its jar).
+
+PIECE 2 - The Equipment add-on (L)
+----------------------------------
+What the player sees: an add-on jar that needs only Base: the 19-slot Gear tab, tack slots and
+right-click equip, carts, and the rescuing braid. The braid only draws an overlay if Breeding is
+installed.
+Decided
+- Equipment owns: the 19 gear slots (HorseTackSlot, HorseGear attachment, HorseGearMenu and Screen,
+  TackEquipHandler, the two tack payloads), tack look, shoes and saddle pads (planned), the rescuing
+  braid item and handler, all carts (about 72 neoforge files, CartDraft and CartKind in common, the
+  cart mixins, its two cart config files, 5 payloads, CART_METRES), right-click-equips-tack, and the
+  armour/material generators (GeneratedArmour, ModdedArmour, MaterialScan).
+- The braid's overlay renders only when Breeding is installed. Without Breeding the item and its slot
+  still work and no overlay is drawn.
+- The Gear tab, gear doll, picker, Dress button and Draught section move out of HorseInfoScreen into
+  tabs registered by Equipment.
+- Carts take pull and speed from Base's stat-provider hook; with no provider they use vanilla
+  attributes. This replaces HorseDraft's direct HorseRecords/genome reads.
+Recommended
+- The braid writes to the event log in Base (it already does, via the Rescues/Homings kinds).
+Open
+- 1 (building session): the braid's "sends home" half uses SendHome and stall logic (stall signs are
+  Base, the realm is Breeding). Degrade quietly if Breeding is absent.
+- 2 (building session): the villager professions and trades for tack (leatherworker, metalsmith).
+  Recommended: Breeding owns the professions; Equipment adds its trades through a trade-table hook in
+  Base.
+Where the code lives: C: :common-equipment (CartDraft, CartKind, the slot table). NeoForge: Equipment's
+registries, payloads, mixins, screens, renderers, tags, models, lang, loot modifier add_horse_tack.
+Data and saves: HORSE_GEAR and CART_METRES attachments and the cart and gear item/entity ids keep
+their keys. A world that used Equipment and loads without it is refused (Decision H).
+Sync: the gear payloads and the five cart payloads move to Equipment's registrar.
+Config: carts keep horsegenetics-carts.toml and the -client file (names change only with the rename);
+behaviour.rightclick_equips_tack moves to Equipment's section.
+Tests: CartDraftTest and new :common-equipment tests; MaterialScanTest; the gear gametests in
+ModGameTests (TackEquipHandler, HorseTackSlot) against a Base + Equipment build; a gametest that a cart
+is pulled by a vanilla horse with no Breeding.
+Play checks: Base + Equipment on a fresh world: place a cart, hitch a vanilla horse, drive; open the
+Gear tab, equip a tack piece, dye it at the bench, use the braid.
+Docs: wiki/horse-gear.html, carts.html, cart-bench.html, item-rescuing-braid.html, saddle-pads.html,
+rider-comfort.html (each notes its jar); THIRD_PARTY_NOTICES.md (the cart licence notice must ship in
+the Equipment jar and the all-in-one, not Base).
+
+PIECE 3 - The Breeding add-on and the four-jar release (L)
+----------------------------------------------------------
+What the player sees: download Base plus either or both add-ons, or the all-in-one on its own.
+Decided
+- Breeding owns everything not assigned to Base or Equipment: genetics, coat painting and pipeline,
+  breeds, breeding, pedigree, body stats, gelding and the vet kit, autonomous breeding, the breed and
+  horse designers, breeding/splice carrots, research papers, the gene database, stasis chambers, banks
+  and the bank block, hunger/diet/healing, wild herds (HerdManager), the horse realm and hay portals,
+  stables, villagers (cowboy, horseman, barn), the F6 debug corridor and the ten gene mixins.
+- The four jars: ixoras_horses_base (required, "Base"), ixoras_horses_breeding ("Breeding") and
+  ixoras_horses_equipment ("Equipment") (each requires Base; neither requires the other), and
+  ixoras_horses (the all-in-one: it keeps the existing id and holds Base plus both add-ons, no separate
+  Base needed). Files: ixoras-horses-<name>-<version>.jar.
+- Namespace: every jar registers under the one namespace of the all-in-one, so items, blocks, entities,
+  attachments and gene keys keep identical ids and a world moves freely between the all-in-one and any
+  combination.
+- Lockstep versioning: one number 0.<compat>.<patch> for all four; every release ships all four; each
+  add-on requires Base at the same compat series.
+- The add-ons and the all-in-one declare each other `incompatible` where they overlap (all-in-one
+  against Base, Breeding and Equipment; two copies of one jar) so loading stops with a message naming
+  the jar to remove.
+- A world that has used an add-on (Breeding or Equipment) refuses to load without it, with a message
+  naming the add-on. Base is always present, so it is never a marker case. An add-on counts as "used"
+  once it has written its own saved data into the world; merely launching with the jar does not lock
+  the world. Nothing is deleted.
+- Override: a server.toml switch, default OFF, lets a world load without an add-on it used; that
+  add-on's data is kept untouched and ignored.
+Recommended
+- The world marker is a SavedData file in Base listing the add-ons that have written data to the world.
+  An older world with no marker but with the mod's old data files is treated as "all add-ons used" (it
+  was played with the single jar); a world with neither is new and may start with any subset.
+- The switch is one key in Base's section (name is the building session's, e.g.
+  `world.load_without_used_addons = false`); when on, a WARN line names each missing add-on on every
+  start. A singleplayer world is a server, so there is one code path.
+- Public API stability: documented, unstable until 1.0.0.
+Open
+- 1 (owner): the downloads' page layout and whether the release note lists four files (Recommended:
+  one note, four assets).
+- 2 (building session): see Equipment Open 2 for the tack-trade hook.
+Where the code lives: Gradle (new modules, a build-wide version, an all-in-one task that merges the three
+module outputs, mods.toml and mixin configs), the release procedure, README.md, wiki/releases.html.
+NeoForge: Breeding's registries, mixins json and config sections.
+Data and saves: no registry id changes; the world marker is new and additive.
+Sync: unchanged.
+Config: phc/ stays the folder (the rename treatment moves it). Each jar writes only its own sections.
+Tests: the combination matrix, at least five boots to "Done (": Base alone; Base + Breeding; Base +
+Equipment; Base + both; all-in-one alone; plus failure cases: all-in-one + an add-on, and a world marked
+with Breeding loaded without it (expect the refusal message and an intact world, then the same world with
+the override on). Gametests repeat for the all-in-one. Existing tests for the genetics side.
+Play checks: the same play-through on each combination; load an old all-in-one world with every
+combination and see which load and which refuse.
+Docs: README.md (which jar to download), wiki/releases.html, wiki/architecture.html,
+procedures/release.txt and procedures/test-tiers.txt (the release set gains the matrix),
+procedures/rebake.txt (any derived file now per jar), CLAUDE.md only if a hard rule changes (it should
+not).
+
+5. DECISIONS (Part 4 headings not already covered inside a piece)
+-----------------------------------------------------------------
+A. The ask: Decided. Four jars from one build; any subset of add-ons on top of Base, or the all-in-one
+   alone. For server owners, modpack makers and players who want only part of the mod. Smallest worthwhile
+   version: Base alone (leads, whistles, jumps) on vanilla horses.
+B. Fit: bends no settled decision in the text read (decisions.html is a pointer page; philosophy read in
+   wiki/text/philosophy.txt). UNVERIFIED that it bends none: the building session re-reads philosophy for
+   "horses only" and "carrot not stick" before piece 1.
+   Assignments (Decided, owner): Base = framework + everything quality of life (above). Equipment = gear,
+   tack, shoes, pads, carts, braid, right-click-equips, armour generators. Breeding = genetics, breeding,
+   stats, breeds, designers, carrots, papers, stasis, vet kit, gelding, hunger and healing, realm, stables,
+   villagers, wild herds.
+C. How the player meets it: the add-ons are downloads beside Base. The tutorial, checklist and H menu show
+   an add-on's content only when installed. Recommended: Base's H-menu "Getting started" lists which jars
+   are installed and what each adds.
+D. Genetics: untouched in rules; Breeding keeps the gene registry. Gene keys and allele order unchanged.
+   Both editors (rule 5): unchanged except the module imports.
+E. Breeds: no change.
+F. Items and blocks: no new items; ids unchanged. Per-wood variants (jumps, gates, carts) keep their
+   author-time bake and run-time twin; bakes read their module's registry.
+G. Config: an absent add-on simply has no config. A bad value never crashes a world load (existing rule).
+H. Saves and permanence: Decided that nothing saved changes key. Decided that a world that used an add-on
+   refuses to load without it, with the server.toml override (above). UNVERIFIED that the marker can be read
+   before chunks load, on both a singleplayer open and a dedicated-server start (same uncertainty as the
+   rename treatment). Removing an add-on and re-adding it restores everything.
+I. Multiplayer: payloads split by registrar. A client missing an add-on the server has is refused by
+   NeoForge's own mod-list check; UNVERIFIED how it words that. Recommended: all jars declare side=BOTH.
+J. Compatibility: Jade, Waystones, FTB Teams and HorsePowered compat stay with the feature they serve (Jade:
+   Base; Waystones and FTB Teams: Breeding's ownership and teleport; HorsePowered: Equipment's carts).
+   Recommended: a compat class loads only if its owning jar is present.
+K. Performance: one shared slow tick (Piece 1), no extra passes; cost per horse unchanged.
+L. Testing: see each piece; plus a unit test that no :common-base class imports an add-on module.
+M. Release: see section 8.
+N. Sequencing (owner): the split lands AFTER the rename to Ixora's Horse Overhaul. The four ids use the
+   new brand. If the rename slips, this treatment waits; do not build both before the converter exists.
+
+6. IMPLICATIONS SWEEP
+---------------------
+- Genetics model, registry, priorities: touches - Breeding owns it; Base must not import it.
+- Coat pipeline and goldens: untouched - moves with Breeding; goldens re-baked only if a package path is
+  in them.
+- Eye colour: untouched.
+- Body space, model, grown parts: untouched in logic; touches - GeneticHorseRenderer reads gear slots for the
+  braid layer (Piece 2): the renderer gets a "worn overlay" extension point.
+- Breeding, pedigree, records, stat inheritance: touches - the record is slim in Base; Breeding adds genome,
+  pedigree, stats and gelding.
+- Breeds, spawning, breed files: untouched - Breeding.
+- Horse body: touches - speed/health/jump are Breeding stats; Base's stat-provider hook falls back to vanilla.
+- Healing, bond, herds, slow tick, hunger: touches - the tick is split by owner (Piece 1).
+- AI goals and the behaviour hierarchy bake: touches - goals register per jar; the bake must read all jars'
+  goals. UNVERIFIED how the bake discovers goals (check wiki/behaviour-hierarchy.html).
+- Items, carrots, splices, papers: touches - ModItems split by jar.
+- Tack and gear slots: touches - Equipment (Piece 2); HorseInfoScreen loses its Gear tab to a plug-in.
+- Villagers, cowboy, barn, trades: touches - Breeding owns; Equipment's tack trades need a hook (Equipment
+  Open 2).
+- Realm, portals, dimension, stables: untouched - Breeding. The yard pens may use Base blocks (jumps), which
+  is now always safe because Base is required.
+- The H menu, log, search: touches - frame and Log in Base, tabs per jar.
+- Stasis chambers and bank: Breeding (owner). They copy attachments wholesale (survey); UNVERIFIED that
+  Equipment's HORSE_GEAR still travels with a stasis horse when Equipment is installed.
+- Horse designer and spawn screen (rule 5): touches - both import :common-breeding; no behaviour change.
+- Gene creator, breed designer, :web (wasm): touches - :web depends on all three common modules; TeaVM compiles
+  only reachable code, so rebuild :web after the split.
+- Config, server and client: touches - per-jar sections; keep phc/ paths.
+- Other mods: touches - see J.
+- Advancements and checklist: touches - tasks and advancement JSONs ship per jar; the cart advancements go to
+  Equipment, DYE_TACK to Base.
+- 1.12.2 backport: improved - :common-* modules let the backport take only what it needs.
+- The wiki: touches - every page that names a feature gets a "Jar" line; one new page (section 9).
+
+THREE MOST LIKELY WAYS IT GOES WRONG FOR A REAL PLAYER
+1. A server owner swaps the all-in-one for Base + one add-on and the world refuses to load, or loads and
+   silently loses an add-on's data. Handling: marker plus refusal, kept data and the override (Decision H);
+   play check: swap jars in both directions on a copy of the old world.
+2. A player installs the all-in-one and a part. Handling: the incompatible declarations; play check: boot with
+   the pair and read the screen.
+3. One jar's screen or task refers to a class from an add-on that is missing and crashes (the info screen today
+   cannot compile without gear and cart classes). Handling: the dependency-scan test, and the matrix boot in
+   Piece 3 on every subset.
+
+7. UNVERIFIED (riskiest first)
+------------------------------
+1. That a world can be refused at the point the marker is read, on a singleplayer open and a dedicated server
+   start, in NeoForge 26.1.2. Check: read the 26.1.2 sources; same as the rename treatment.
+2. That NeoForge 26.1.2 lets one jar register into a namespace other than its own mod id (DeferredRegister
+   namespace argument) and lets two mods own parts of one namespace's assets and data, including the merge of
+   `assets/<ns>/lang`. Check: build a two-mod spike with one block each.
+3. That the horse_record attachment can keep its serialised form while the Java type is split and the genome
+   fields are written by Breeding. Check: load a saved horse's NBT through the new codec and compare, with and
+   without Breeding.
+4. That the survey's counts and file lists are accurate (agent-made; not grepped file by file). Check: re-grep
+   before piece 1 and fix this file's numbers.
+5. That a Gradle-built all-in-one jar can merge three mods.toml files, mixin configs and resource folders and
+   load as one mod. Check: build it and boot it.
+6. That the class-load-order registrations can become explicit calls without changing the registry order saved
+   worlds record.
+7. That the api/ javadoc claim ("unverified against 26.1.2 in a running game") still stands once it is the
+   public API.
+8. That Base stays small enough to be worth the gate: it holds the jump and gate wood variants (about 300 cart
+   resources are Equipment's, but the jump and gate resources are Base's). Check: measure at piece 1.
+
+8. ORDER AND SIZE
+-----------------
+Order: 1 Base, 2 Equipment, 3 Breeding plus the pipeline. Reason: Base is the groundwork every other piece
+needs (groundwork first even when it is not the smallest); Equipment is the most self-contained add-on
+(carts); Breeding is the largest and goes last, when the contract has been proven twice.
+Sizes: Piece 1 L (several sessions; it is the framework and the QOL move together, the riskiest part); Piece 2
+L; Piece 3 L.
+Waits on: the rename (Decision N). Unblocks: every port treatment (they now size per jar), command whistle
+(Base), bridle/saddle split (Base and Equipment) and shoes (Equipment), troughs (Base or Breeding: decide when
+scoped).
+Must NOT be done together: the rename and any piece of this; Piece 1 and any new gene or item treatment; the
+compat release and the first four-jar release unless the owner asks.
+Release (Part 4 M): each piece counts toward the next patch release (Recommended, not asked in this round; the
+first four-jar release is Piece 3). Can this keep saves loading: Recommended yes, by keeping every key (H). If
+a key cannot be kept it is a compat bump and needs the owner (hard rule 10). Both are confirmed at release time
+per procedures/release.txt.
+
+9. AFTER EACH PIECE SHIPS
+-------------------------
+- procedures/rebake.txt rows: the module moves invalidate the API reference, gene wiki pages (class paths),
+  wiki/text agent text, the lang merge, the :web build and the Gradle size report. Walk the table after each
+  piece. UNVERIFIED which rows name a package path; read rebake.txt first.
+- Pages: architecture (all pieces), api-reference and api-notes (1), horse-care and the QOL item pages (1),
+  horse-gear, carts and cart-bench (2), releases, README and a new page (3).
+- New wiki page: "Choosing your jars" (what each of the four contains, what the combinations do, world rules for
+  swapping jars). Add it via procedures/add-a-wiki-page.txt and the SECTIONS array in wiki/pages.js.
+- procedures/release.txt (step 6: build four jars; step 7: four assets) and procedures/test-tiers.txt change in
+  Piece 3.

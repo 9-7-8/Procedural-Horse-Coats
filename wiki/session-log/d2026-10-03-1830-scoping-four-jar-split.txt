@@ -1,11 +1,11 @@
-2026-10-03 18:30 - Five-jar split scoped (time is the end of the session; start not recorded)
+2026-10-03 18:30 - Four-jar split scoped (time is the end of the session; start not recorded)
 
 ASKED
 - "/write-intake-document: I want to make this mod a little more modular, because it breaks
   into three major parts: the procedural horse coats, the equipment overhaul, and the horse
   QOL changes. Every release, we should ship those three jars plus a 'all in one' jar. Each
   jar should be modular, so they can use any subset of the jars (except it's redundant to
-  combine with the all in one)". Came of it: intake/Five-jar split - implementation
+  combine with the all in one)". Came of it: intake/Four-jar split - implementation
   treatment.txt (four pieces) and its block in intake/Sizing.txt.
 - The owner changed the shape mid-way: a required small Core jar plus three add-ons, or the
   all-in-one: five jars per release.
@@ -32,6 +32,23 @@ DECIDED (all owner)
   part refuses to load without it; parts and all-in-one marked incompatible in mods.toml.
 - Piece order 1 Core, 2 Equipment, 3 QOL, 4 Coats + pipeline.
 Where recorded: the treatment only (nothing built).
+
+LATER IN THE SAME SESSION (probe rounds; all owner answers)
+- Coats was renamed Breeding (ixoras_horses_breeding). Gelding, the vet kit and autonomous breeding exist only
+  with it; sex stays in the base and is random without it; the saved gelded flag is kept untouched.
+- Vanilla hand-feeding still breeds without the add-on.
+- Bareback steering and bolting, the bench and its dyeing of vanilla saddles and armour, leads, rider fade
+  and the leash mixins go to the quality-of-life side; right-click-equips and the armour generators go to
+  Equipment.
+- A server.toml switch (default off) lets a world load without an add-on it used; the public API is
+  documented and unstable until 1.0.0.
+- Core and QOL were MERGED into one required Base (ixoras_horses_base): four jars, not five. The treatment was
+  rewritten as "Four-jar split - implementation treatment.txt" (the file was renamed). Pieces are now 1 Base,
+  2 Equipment, 3 Breeding plus the four-jar pipeline. The Base size gate stays, set from the first measured build.
+- Still Open (owner): whether an existing horse keeps its current sex when Breeding is added; the download page
+  layout. (Building session): the tack-trade hook, bond tiers that read gelded(), whether the random sex is saved
+  once.
+Where the earlier text above says "five jars", "Core", "Coats" or "QOL", read the four-jar plan.
 
 FOUND ON THE WAY
 - Her "all-in-one + parts is redundant" is handled by incompatible declarations, not tolerated.
