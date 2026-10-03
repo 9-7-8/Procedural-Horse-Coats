@@ -12,7 +12,7 @@ import java.util.Locale;
  * a removed order loads as "no order" rather than as a crash or a migration.
  *
  * <p>Piece 1 of the command whistle shipped the first four, Piece 3 the two combat
- * orders. Graze nearby, Guard here and Go home are appended by Piece 2.
+ * orders, Piece 2 Graze nearby, Guard here and Go home.
  */
 public enum HorseOrder {
 
@@ -33,7 +33,22 @@ public enum HorseOrder {
      * Follow the player who gave it, and go for any monster within the defend radius of
      * them, then come back to heel. Needs a horse bred to fight.
      */
-    DEFEND_ME("Defend me", 2, false, true);
+    DEFEND_ME("Defend me", 2, false, true),
+    /**
+     * Roam and graze as it likes, but never further than the graze radius from the spot
+     * it was given: past that it walks back in.
+     */
+    GRAZE_NEARBY("Graze nearby", 2, true, false),
+    /**
+     * Stand at the spot it was given, and go for any monster within the guard radius of
+     * it - Hunt monsters with a short reach. Needs a horse bred to fight.
+     */
+    GUARD_HERE("Guard here", 2, true, true),
+    /**
+     * Go to its stall (or the holding pen), by the Send home trip. A one-shot: it is
+     * carried out when given and never stands, so a horse never holds it.
+     */
+    GO_HOME("Go home", 2, false, false);
 
     private final String label;
     private final int bondTier;
@@ -71,6 +86,19 @@ public enum HorseOrder {
      */
     public boolean combat() {
         return combat;
+    }
+
+    /**
+     * Does this order hold the horse STILL at its spot, walking it back after anything
+     * that moved it? Graze nearby is anchored too, but roams inside its radius.
+     */
+    public boolean stands() {
+        return this == STAY || this == HUNT_MONSTERS || this == GUARD_HERE;
+    }
+
+    /** Is this order carried out the moment it is given, and never left standing on the horse? */
+    public boolean oneShot() {
+        return this == GO_HOME;
     }
 
     /** Does this order keep the horse at the heels of the player who gave it? */

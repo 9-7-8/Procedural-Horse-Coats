@@ -2083,6 +2083,8 @@ public final class ModGameTests {
         register(event, environment, ORDER_COMBAT_GATE, 100);
         // Founded at 25, then a combat scan once a second.
         register(event, environment, ORDER_HUNT_PICKS_A_MONSTER, 200);
+        register(event, environment, ORDER_GUARD_HOLDS_ITS_REACH, 300);
+        register(event, environment, ORDER_GRAZE_TETHER, 200);
         // Twenty-five ticks to be founded, then a scan (every thirty) to act on it.
         register(event, environment, WILD_HORSE_MOVES_ON, 200);
         register(event, environment, WILD_TOUCHED_HORSE_GOES_TO_THE_REALM, 200);
@@ -2854,6 +2856,104 @@ public final class ModGameTests {
             if (husk[0] == null || t != husk[0]) {
                 throw new GameTestAssertException(Component.literal("the hunting horse has not picked the husk (target "
                         + (t == null ? "none" : t.getName().getString()) + ")"), 0);
+            }
+        });
+    }
+
+    /**
+     * <b>A guarding horse goes for a monster inside its short reach and no further</b>
+     * (Piece 2): a guardian told to Guard here, with a frozen husk eight blocks off -
+     * inside Hunt monsters' reach, outside Guard here's six - ignores it for three scans;
+     * a second husk four blocks off is then picked, and the creeper nearer still never is.
+     * Guards against Guard here quietly taking the hunt radius.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ORDER_GUARD_HOLDS_ITS_REACH =
+            TEST_FUNCTIONS.register("order_guard_holds_its_reach", () -> ModGameTests::orderGuardHoldsItsReach);
+
+    private static void orderGuardHoldsItsReach(GameTestHelper helper) {
+        keepTicking(helper);
+        if (com.example.horsegenetics.neoforge.ServerConfig.ordersGuardRadius() >= 8) {
+            throw new GameTestAssertException(Component.literal("orders.guard_radius is "
+                    + com.example.horsegenetics.neoforge.ServerConfig.ordersGuardRadius()
+                    + " in this run's server config, so the far husk is inside it - set it below 8"), 0);
+        }
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        var horse = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.GUARD_HERE,
+                new BlockPos(2, 0, 2));
+        var creeper = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, new BlockPos(2, 0, 0));
+        creeper.setNoAi(true);
+        net.minecraft.world.entity.LivingEntity[] far = {null};
+        net.minecraft.world.entity.LivingEntity[] near = {null};
+        int[] since = {0};
+        helper.succeedWhen(() -> {
+            if (far[0] == null && com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                makeGuardian(horse);
+                far[0] = helper.spawn(net.minecraft.world.entity.EntityType.HUSK, new BlockPos(2, 0, -6));
+                ((net.minecraft.world.entity.Mob) far[0]).setNoAi(true);
+            }
+            var t = horse.getTarget();
+            if (t == creeper) {
+                helper.fail("a guarding horse went for a creeper");
+            }
+            if (far[0] != null && t == far[0]) {
+                helper.fail("a guarding horse went for a husk eight blocks off - past orders.guard_radius");
+            }
+            if (far[0] == null) {
+                throw new GameTestAssertException(Component.literal("the horse is not founded yet"), 0);
+            }
+            // Three scans with only the far husk to pick from; then the near one.
+            if (near[0] == null) {
+                if (++since[0] < com.example.horsegenetics.common.care.HorseOrders.COMBAT_SCAN_TICKS * 3) {
+                    throw new GameTestAssertException(Component.literal("waiting out the far husk"), 0);
+                }
+                near[0] = helper.spawn(net.minecraft.world.entity.EntityType.HUSK, new BlockPos(2, 0, -2));
+                ((net.minecraft.world.entity.Mob) near[0]).setNoAi(true);
+            }
+            if (t != near[0]) {
+                throw new GameTestAssertException(Component.literal("the guarding horse has not picked the near husk (target "
+                        + (t == null ? "none" : t.getName().getString()) + ")"), 0);
+            }
+        });
+    }
+
+    /**
+     * <b>Graze nearby leaves a horse alone inside its tether and walks it back outside</b>
+     * (Piece 2). Two horses: one anchored where it stands, whose graze goal must never
+     * run; one whose spot is set past {@code orders.graze_radius}, whose goal must run
+     * and keep running. Not where it steers: that spot is outside the test's space, where
+     * the floor (and so a path) is not promised. The walk is the same navigation call as
+     * Stay's, which order_stay_walks_back proves; what is under test is the tether deciding when.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ORDER_GRAZE_TETHER =
+            TEST_FUNCTIONS.register("order_graze_tether", () -> ModGameTests::orderGrazeTether);
+
+    private static void orderGrazeTether(GameTestHelper helper) {
+        keepTicking(helper);
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        var home = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.GRAZE_NEARBY,
+                new BlockPos(2, 0, 2));
+        var strayed = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.GRAZE_NEARBY,
+                new BlockPos(0, 0, 2));
+        var type = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get();
+        var o = strayed.getData(type);
+        int past = com.example.horsegenetics.neoforge.ServerConfig.ordersGrazeRadius() + 3;
+        // The spot moved, not the horse: the horse stays inside its own test's space.
+        BlockPos spot = strayed.blockPosition().south(past);
+        strayed.setData(type, new com.example.horsegenetics.neoforge.data.HorseOrderAttachment(
+                o.order(), java.util.Optional.of(spot), o.dimension(), o.orderedBy()));
+        int[] homeRan = {0};
+        int[] strayRan = {0};
+        int[] ticks = {0};
+        helper.succeedWhen(() -> {
+            ticks[0]++;
+            running(home, com.example.horsegenetics.neoforge.server.OrderGrazeGoal.class, homeRan);
+            if (homeRan[0] > 0) {
+                helper.fail("the graze goal pulled in a horse standing on its own spot");
+            }
+            running(strayed, com.example.horsegenetics.neoforge.server.OrderGrazeGoal.class, strayRan);
+            if (strayRan[0] < 20 || ticks[0] < 60) {
+                throw new GameTestAssertException(Component.literal("the strayed horse's graze goal has run "
+                        + strayRan[0] + " ticks (" + ticks[0] + " in)"), 0);
             }
         });
     }

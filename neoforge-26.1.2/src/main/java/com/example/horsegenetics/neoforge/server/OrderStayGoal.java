@@ -12,7 +12,9 @@ import java.util.EnumSet;
 /**
  * <b>The Stay order</b>: hold MOVE at the spot it was given, and walk back to it after
  * anything that moved the horse. It is also Hunt monsters' way home: that order is
- * anchored too, and between fights the hunter stands at its spot like a stayed horse.
+ * anchored too, and between fights the hunter stands at its spot like a stayed horse -
+ * and so does a horse told to Guard here, which is Hunt monsters with a short reach.
+ * Graze nearby is anchored but roams, so it is {@link OrderGrazeGoal}'s, not this one's.
  * The fight itself is {@link OrderCombatGoal} picking a target and {@code HorseMeleeGoal}
  * (3) out-ranking this to chase it; when the order lets the target go, this walks it back.
  *
@@ -49,7 +51,7 @@ public final class OrderStayGoal extends Goal {
             return false;
         }
         HorseOrderAttachment o = HorseOrdering.current(horse);
-        if (!o.order().anchored() || o.anchor().isEmpty()) {
+        if (!o.order().stands() || o.anchor().isEmpty()) {
             return false;
         }
         BlockPos given = o.anchor().get();

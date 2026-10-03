@@ -112,6 +112,8 @@ const HOME = {
     'orders.hunt_radius': 'item-whistles.html#fighters',
     'orders.defend_radius': 'item-whistles.html#fighters',
     'orders.break_off_health': 'item-whistles.html#fighters',
+    'orders.guard_radius': 'item-whistles.html#fighters',
+    'orders.graze_radius': 'item-whistles.html#fighters',
     'chaos.exclude_mods': 'gene-lycan.html#chaos',
     'chaos.exclude_ids': 'gene-lycan.html#chaos',
     'debug.announce': 'architecture.html#verified-debug-announce',

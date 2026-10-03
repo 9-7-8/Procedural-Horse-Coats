@@ -36,7 +36,15 @@ import java.util.List;
  */
 public final class CommandWheelScreen extends Screen {
 
-    private static final int RING = 62;
+    /**
+     * The ring is an ellipse, wider than tall: nine 78-wide labels on a circle small enough
+     * to fit a GUI-scale-4 1080p screen (270 high) overlap at the top and the bottom.
+     * These two clear every neighbour by a border with nine slices; the cursor is
+     * squashed by the same ratio before {@link CommandWheel#sliceAt}, so each label sits
+     * inside its own slice.
+     */
+    private static final int RING_X = 118;
+    private static final int RING_Y = 86;
     private static final int DEAD = 18;
     private static final int SLICE_W = 78;
     private static final int SLICE_H = 18;
@@ -125,7 +133,8 @@ public final class CommandWheelScreen extends Screen {
     }
 
     private int hovered() {
-        return CommandWheel.sliceAt(mouseX - width / 2.0, mouseY - height / 2.0, slices.size(), DEAD);
+        return CommandWheel.sliceAt((mouseX - width / 2.0) * RING_Y / RING_X, mouseY - height / 2.0,
+                slices.size(), DEAD);
     }
 
     @Override
@@ -178,18 +187,18 @@ public final class CommandWheelScreen extends Screen {
         int cy = height / 2;
         int hover = hovered();
 
-        g.centeredText(font, title, cx, cy - RING - SLICE_H - 14, TEXT);
+        g.centeredText(font, title, cx, cy - RING_Y - SLICE_H - 14, TEXT);
         Horse h = horse();
         if (h != null) {
             HorseOrder now = h.hasData(ModAttachments.HORSE_ORDER.get())
                     ? h.getData(ModAttachments.HORSE_ORDER.get()).order() : HorseOrder.REJOIN_HERD;
-            g.centeredText(font, Component.literal("Now: " + now.label()), cx, cy - RING - SLICE_H - 3, DIM);
+            g.centeredText(font, Component.literal("Now: " + now.label()), cx, cy - RING_Y - SLICE_H - 3, DIM);
         }
 
         for (int i = 0; i < slices.size(); i++) {
             double a = CommandWheel.centreAngle(i, slices.size());
-            int sx = cx + (int) Math.round(Math.sin(a) * RING);
-            int sy = cy - (int) Math.round(Math.cos(a) * RING);
+            int sx = cx + (int) Math.round(Math.sin(a) * RING_X);
+            int sy = cy - (int) Math.round(Math.cos(a) * RING_Y);
             Refusal r = refusal(slices.get(i));
             int l = sx - SLICE_W / 2;
             int t = sy - SLICE_H / 2;
@@ -198,10 +207,10 @@ public final class CommandWheelScreen extends Screen {
             g.centeredText(font, Component.literal(slices.get(i).label()), sx, sy - 4, r != null ? DIM : TEXT);
             if (i == hover && r != null) {
                 String why = HorseOrders.needs(slices.get(i), r);
-                g.centeredText(font, Component.literal(why), cx, cy + RING + SLICE_H, DIM);
+                g.centeredText(font, Component.literal(why), cx, cy + RING_Y + SLICE_H, DIM);
             }
         }
         g.fill(cx - 3, cy - 3, cx + 4, cy + 4, hover < 0 ? TEXT : BORDER);
-        g.centeredText(font, Component.literal("Release to choose"), cx, cy + RING + SLICE_H + 12, DIM);
+        g.centeredText(font, Component.literal("Release to choose"), cx, cy + RING_Y + SLICE_H + 12, DIM);
     }
 }

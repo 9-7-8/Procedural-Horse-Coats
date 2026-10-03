@@ -440,6 +440,8 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue ORDERS_HUNT_RADIUS;
     public static final ModConfigSpec.IntValue ORDERS_DEFEND_RADIUS;
     public static final ModConfigSpec.DoubleValue ORDERS_BREAK_OFF_HEALTH;
+    public static final ModConfigSpec.IntValue ORDERS_GUARD_RADIUS;
+    public static final ModConfigSpec.IntValue ORDERS_GRAZE_RADIUS;
 
     /**
      * <b>What a Chaos allele may never name.</b> The three mob loci each have one
@@ -920,6 +922,26 @@ public final class ServerConfig {
                         "whose own genes make it aggressive goes on as they say. Server-side.")
                 .defineInRange("orders.break_off_health",
                         com.example.horsegenetics.common.care.HorseOrders.DEFAULT_BREAK_OFF_HEALTH, 0.0, 1.0);
+        ORDERS_GUARD_RADIUS = builder
+                .comment("How close to its spot a monster must come before a horse told to Guard here",
+                        "goes for it, in blocks. (default: " + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GUARD_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_GUARD_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_GUARD_RADIUS + ")",
+                        "It lets a fight go a few blocks past this, then walks back to its spot. Server-side.")
+                .defineInRange("orders.guard_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GUARD_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_GUARD_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_GUARD_RADIUS);
+        ORDERS_GRAZE_RADIUS = builder
+                .comment("How far from its spot a horse told to Graze nearby may roam, in blocks.",
+                        "(default: " + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GRAZE_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_GRAZE_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_GRAZE_RADIUS + ")",
+                        "Past it the horse walks back until it is halfway in. Server-side.")
+                .defineInRange("orders.graze_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GRAZE_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_GRAZE_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_GRAZE_RADIUS);
         CHAOS_EXCLUDE_MODS = builder
                 .comment("Mods whose mobs a Chaos allele may never name, by mod id. (default: [])",
                         "Lycanthropy, Leader of the pack and Spawner each have one Chaos allele that",
@@ -1352,6 +1374,29 @@ public final class ServerConfig {
         }
     }
 
+    /** {@code orders.guard_radius}, safely. */
+    public static int ordersGuardRadius() {
+        try {
+            return ORDERS_GUARD_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GUARD_RADIUS;
+        }
+    }
+
+    /** {@code orders.graze_radius}, safely. */
+    public static int ordersGrazeRadius() {
+        try {
+            return ORDERS_GRAZE_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GRAZE_RADIUS;
+        }
+    }
+
+    /** The tether on Graze nearby, from this world's config. */
+    public static com.example.horsegenetics.common.care.HorseOrders.Tether grazeTether() {
+        return new com.example.horsegenetics.common.care.HorseOrders.Tether(ordersGrazeRadius());
+    }
+
     /** {@code orders.break_off_health}, safely. */
     public static double ordersBreakOffHealth() {
         try {
@@ -1367,8 +1412,11 @@ public final class ServerConfig {
      */
     public static com.example.horsegenetics.common.care.HorseOrders.Leash orderLeash(
             com.example.horsegenetics.common.care.HorseOrder order) {
-        int radius = order == com.example.horsegenetics.common.care.HorseOrder.DEFEND_ME
-                ? ordersDefendRadius() : ordersHuntRadius();
+        int radius = switch (order) {
+            case DEFEND_ME -> ordersDefendRadius();
+            case GUARD_HERE -> ordersGuardRadius();
+            default -> ordersHuntRadius();
+        };
         return new com.example.horsegenetics.common.care.HorseOrders.Leash(radius, ordersBreakOffHealth());
     }
 

@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.care.HorseOrders.Refusal;
 import com.example.horsegenetics.common.care.SendHome;
 import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.block.HorseStasisBankBlockEntity;
@@ -198,53 +199,85 @@ public final class StallRecall {
     // ------------------------------------------------------------------
 
     /**
-     * The horse is in hand. Work out where home is, check the price, and hand
-     * the actual move to {@link TicketHandler}.
+     * The horse is in hand: check it answers to this player, make the trip, and say how
+     * it went. The trip itself is {@link #travel}, shared with the command whistle's Go home.
      */
     private static void send(ServerPlayer player, Horse horse) {
-        MinecraftServer server = player.level().getServer();
-        if (server == null || !(horse.level() instanceof ServerLevel from)) {
-            return;
-        }
         if (!HorseOwnership.isOwner(horse, player.getUUID())) {
             say(player, "That horse does not answer to you.");
             return;
         }
-        if (horse.isVehicle()) {
-            say(player, "That horse has a rider, and stays put.");
-            return;
-        }
-
         Home home = homeOf(player, horse.getUUID());
-        if (home == null) {
-            say(player, "That horse has no stall, and you have no holding pen. Bind a stall sign to "
+        switch (travel(player, horse, home)) {
+            case RIDDEN -> say(player, "That horse has a rider, and stays put.");
+            case NO_HOME -> say(player, "That horse has no stall, and you have no holding pen. Bind a stall sign to "
                     + "it, or hang a holding pen sign, and try again.");
-            return;
+            case WORLD_GONE -> say(player, home.worldGoneLine());
+            case UNPAID -> {
+                SendHomePayment.Charge charge = SendHomePayment.current();
+                say(player, SendHome.cannotPayLine(charge.price(), charge.itemName(), SendHomePayment.alternatives()));
+            }
+            case NO_ROOM -> say(player, home.noRoomLine());
+            case ARRIVED -> {
+                String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
+                say(player, name + home.arrivedLine());
+            }
+            case NOT_HERE -> { }
+        }
+    }
+
+    /**
+     * <b>Go home, from the command whistle</b>: the Send home trip for a horse the order
+     * gate has already let through (it checked ownership, the lead, the cart and the
+     * bond). The same destination, the same live stall measure and the same price - but
+     * no cooldown, which is there to stop a button pulling far chunks in over and over;
+     * a whistle only reaches horses already loaded and standing near the player.
+     *
+     * @return why the horse did not go, or {@code null} when it is home
+     */
+    public static @Nullable Refusal goHome(ServerPlayer player, Horse horse) {
+        return switch (travel(player, horse, homeOf(player, horse.getUUID()))) {
+            case ARRIVED -> null;
+            case RIDDEN -> Refusal.HAS_A_RIDER;
+            case NO_HOME -> Refusal.NO_HOME;
+            case UNPAID -> Refusal.CANNOT_PAY;
+            case WORLD_GONE, NO_ROOM, NOT_HERE -> Refusal.CANNOT_GET_HOME;
+        };
+    }
+
+    /** How a trip home went. Every outcome but ARRIVED moved nothing and spent nothing. */
+    private enum Trip { ARRIVED, NOT_HERE, RIDDEN, NO_HOME, WORLD_GONE, UNPAID, NO_ROOM }
+
+    /** Check the price, and hand the actual move to {@link TicketHandler}. */
+    private static Trip travel(ServerPlayer player, Horse horse, @Nullable Home home) {
+        MinecraftServer server = player.level().getServer();
+        if (server == null || !(horse.level() instanceof ServerLevel from)) {
+            return Trip.NOT_HERE;
+        }
+        if (horse.isVehicle()) {
+            return Trip.RIDDEN;
+        }
+        if (home == null) {
+            return Trip.NO_HOME;
         }
         ServerLevel target = server.getLevel(home.dimension());
         if (target == null) {
-            say(player, home.worldGoneLine());
-            return;
+            return Trip.WORLD_GONE;
         }
-
         SendHomePayment.Charge charge = SendHomePayment.current();
-        if (!canPay(player, charge)) {
-            return;
+        if (!SendHomePayment.canPay(player, charge)) {
+            return Trip.UNPAID;
         }
-
         Vec3 landing = TicketHandler.landingSpot(target, home.signPos(), horse);
         if (landing == null) {
             // Nothing spent, nothing moved - see TicketHandler, where a guessed
             // landing spot once suffocated a horse inside a wall.
-            say(player, home.noRoomLine());
-            return;
+            return Trip.NO_ROOM;
         }
-
         HorseOrdering.clear(horse); // sent home, it lives there now, not under an order
         TicketHandler.arrive(from, target, horse, landing, player);
         paid(player, charge);
-        String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
-        say(player, name + home.arrivedLine());
+        return Trip.ARRIVED;
     }
 
     // ------------------------------------------------------------------

@@ -54,6 +54,22 @@ public final class HorseOrders {
     public static final int MIN_DEFEND_RADIUS = 4;
     public static final int MAX_DEFEND_RADIUS = 16;
 
+    /** Guard here's reach from its spot, unless the server says otherwise (orders.guard_radius). */
+    public static final int DEFAULT_GUARD_RADIUS = 6;
+    public static final int MIN_GUARD_RADIUS = 3;
+    public static final int MAX_GUARD_RADIUS = 16;
+
+    /** How far from its spot a horse told to Graze nearby may roam (orders.graze_radius). */
+    public static final int DEFAULT_GRAZE_RADIUS = 12;
+    public static final int MIN_GRAZE_RADIUS = 4;
+    public static final int MAX_GRAZE_RADIUS = 32;
+
+    /**
+     * A grazing horse that strayed past its radius is walked back until it is within this
+     * share of it - well inside, so a horse at the edge is not turned back every step.
+     */
+    public static final double TETHER_RETURN_SHARE = 0.5;
+
     /**
      * Below this share of its health a horse on a combat order drops its quarry and goes
      * back (orders.break_off_health; 0 = fight to the death). An order should not be the
@@ -75,6 +91,31 @@ public final class HorseOrders {
 
     /** What the horse is doing that an order has to get past, and whether it was bred to fight. */
     public record Situation(int bondTier, boolean leashed, boolean pullingCart, boolean fighter) {
+    }
+
+    /**
+     * <b>The tether on Graze nearby</b>: free inside the radius, walked back once outside
+     * it, and let go again only well inside ({@link #TETHER_RETURN_SHARE}). Distances are
+     * squared and across the ground, as the Stay order judges its spot.
+     *
+     * @param radius blocks from the spot the horse may roam
+     */
+    public record Tether(double radius) {
+
+        public Tether {
+            radius = Math.max(1.0, radius);
+        }
+
+        /** Has the horse roamed past its radius, so it must be walked back? */
+        public boolean strayed(double fromSpotSq) {
+            return fromSpotSq > radius * radius;
+        }
+
+        /** Is a horse being walked back far enough in to be let go? */
+        public boolean backInside(double fromSpotSq) {
+            double in = radius * TETHER_RETURN_SHARE;
+            return fromSpotSq <= in * in;
+        }
     }
 
     /**
@@ -160,7 +201,13 @@ public final class HorseOrders {
         ON_A_LEAD("is on a lead", "on a lead"),
         PULLING_A_CART("is pulling a cart", "pulling a cart"),
         NOT_A_FIGHTER("was not bred to fight", "not bred to fight"),
-        NOT_BONDED("is not bonded enough", "not bonded enough");
+        NOT_BONDED("is not bonded enough", "not bonded enough"),
+        // Go home's own answers, given by the Send home trip after the gate above has
+        // passed. The wheel never greys for them: the client does not know the stalls.
+        HAS_A_RIDER("has a rider, and stays put", "ridden"),
+        NO_HOME("has no stall, and you have no holding pen", "no stall"),
+        CANNOT_GET_HOME("cannot get home - check its stall sign is up and there is room", "cannot get home"),
+        CANNOT_PAY("cannot go: you cannot pay for the trip home", "unpaid");
 
         private final String text;
         private final String summary;
@@ -220,10 +267,14 @@ public final class HorseOrders {
         };
     }
 
-    /** The orders on the wheel, clockwise from the top. */
+    /**
+     * The orders on the wheel, clockwise from the top, kin beside kin: the three that hold
+     * a spot, then the two at your side, then the free ones and the ways back.
+     */
     public static List<HorseOrder> wheel() {
-        return List.of(HorseOrder.STAY, HorseOrder.FOLLOW, HorseOrder.WANDER,
-                HorseOrder.HUNT_MONSTERS, HorseOrder.DEFEND_ME, HorseOrder.REJOIN_HERD);
+        return List.of(HorseOrder.STAY, HorseOrder.GUARD_HERE, HorseOrder.HUNT_MONSTERS,
+                HorseOrder.DEFEND_ME, HorseOrder.FOLLOW, HorseOrder.WANDER,
+                HorseOrder.GRAZE_NEARBY, HorseOrder.GO_HOME, HorseOrder.REJOIN_HERD);
     }
 
     /** The one chat line for an order given to one horse. */
@@ -238,6 +289,9 @@ public final class HorseOrders {
             case WANDER -> horseName + " wanders off on its own.";
             case HUNT_MONSTERS -> horseName + " hunts the monsters around here.";
             case DEFEND_ME -> horseName + " stays at your side and sees off monsters.";
+            case GRAZE_NEARBY -> horseName + " grazes around here.";
+            case GUARD_HERE -> horseName + " guards this spot.";
+            case GO_HOME -> horseName + " goes home.";
         };
     }
 
@@ -271,7 +325,7 @@ public final class HorseOrders {
         return List.of(
                 "Hold use on a horse of yours to give it an order.",
                 "Sneak and hold to order every horse of yours within " + REACH_BLOCKS + " blocks.",
-                "Stay and Follow need bond 31; Wander needs 61.",
-                "Hunt monsters and Defend me need 61, and a horse bred to fight.");
+                "Stay and Follow need bond 31; Wander, Graze nearby and Go home need 61.",
+                "Hunt monsters, Guard here and Defend me need 61, and a horse bred to fight.");
     }
 }

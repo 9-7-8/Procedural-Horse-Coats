@@ -34,6 +34,9 @@ import java.util.UUID;
  * ownership or portal code is needed. The places that move a horse within one dimension
  * call {@link #clear} themselves: a whistle or ender-whistle recall (calling a horse
  * means you want it), Send home, and storing it in a stasis chamber or stall bank.
+ *
+ * <p><b>Go home is not stored at all.</b> It is the Send home trip ({@link StallRecall#goHome}),
+ * run the moment the order is given, which clears whatever order the horse had.
  */
 public final class HorseOrdering {
 
@@ -59,7 +62,8 @@ public final class HorseOrdering {
         boolean otherDimension = !o.dimension().equals(dimensionOf(horse));
         boolean otherOwner = !(horse instanceof Horse h)
                 || o.orderedBy().map(id -> !HorseOwnership.isOwner(h, id)).orElse(true);
-        if (otherDimension || otherOwner) {
+        // A one-shot is never stored; one that somehow was (a hand-edited save) is dropped.
+        if (otherDimension || otherOwner || o.order().oneShot()) {
             clear(horse);
             return HorseOrderAttachment.NONE;
         }
@@ -119,8 +123,13 @@ public final class HorseOrdering {
                 continue;
             }
             Refusal refusal = HorseOrders.refusal(order, situation(horse));
+            if (refusal == null && order == HorseOrder.GO_HOME) {
+                // A one-shot: the Send home trip, done now. It clears any order on arrival
+                // and leaves nothing standing, so a horse never holds Go home.
+                refusal = StallRecall.goHome(player, horse);
+            }
             answers.add(refusal);
-            if (refusal != null) {
+            if (refusal != null || order.oneShot()) {
                 continue;
             }
             if (order == HorseOrder.REJOIN_HERD) {

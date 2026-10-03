@@ -133,7 +133,9 @@ public final class HorseCareHandler {
         // it. Why 4 and not 1 is on OrderStayGoal: needs (hunger, panic) must pre-empt.
         horse.goalSelector.addGoal(OrderStayGoal.PRIORITY, new OrderStayGoal(horse));
         horse.goalSelector.addGoal(OrderFollowGoal.PRIORITY, new OrderFollowGoal(horse));
-        // Hunt monsters and Defend me pick their quarry here, in the TARGET selector; the
+        // Graze nearby: idle as it likes, walked back only once past its tether.
+        horse.goalSelector.addGoal(OrderGrazeGoal.PRIORITY, new OrderGrazeGoal(horse));
+        // Hunt monsters, Guard here and Defend me pick their quarry here, in the TARGET selector; the
         // chase is HorseMeleeGoal's (3), which out-ranks the two above while it has one.
         horse.targetSelector.addGoal(OrderCombatGoal.PRIORITY, new OrderCombatGoal(horse));
         // Tier 1 is head-turning only, so it goes BELOW every herd goal

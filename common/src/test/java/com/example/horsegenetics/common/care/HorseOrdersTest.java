@@ -88,10 +88,18 @@ class HorseOrdersTest {
     }
 
     @Test
-    void stayAndHuntAreAnchored() {
+    void theSpotOrdersAreAnchored() {
         assertTrue(HorseOrder.STAY.anchored());
         assertTrue(HorseOrder.HUNT_MONSTERS.anchored());
-        assertEquals(2, Arrays.stream(HorseOrder.values()).filter(HorseOrder::anchored).count());
+        assertTrue(HorseOrder.GUARD_HERE.anchored());
+        assertTrue(HorseOrder.GRAZE_NEARBY.anchored());
+        assertEquals(4, Arrays.stream(HorseOrder.values()).filter(HorseOrder::anchored).count());
+        // Every order that stands still is anchored; grazing is anchored and roams.
+        for (HorseOrder order : HorseOrder.values()) {
+            assertTrue(!order.stands() || order.anchored(), order.name());
+        }
+        assertFalse(HorseOrder.GRAZE_NEARBY.stands());
+        assertEquals(3, Arrays.stream(HorseOrder.values()).filter(HorseOrder::stands).count());
         assertTrue(HorseOrder.FOLLOW.follows());
         assertTrue(HorseOrder.DEFEND_ME.follows());
         assertEquals(2, Arrays.stream(HorseOrder.values()).filter(HorseOrder::follows).count());
@@ -109,7 +117,8 @@ class HorseOrdersTest {
                 assertNull(r, order.name());
             }
         }
-        assertEquals(2, Arrays.stream(HorseOrder.values()).filter(HorseOrder::combat).count());
+        assertEquals(3, Arrays.stream(HorseOrder.values()).filter(HorseOrder::combat).count());
+        assertTrue(HorseOrder.GUARD_HERE.combat(), "Guard here is a combat order (owner)");
     }
 
     @Test
@@ -188,6 +197,56 @@ class HorseOrdersTest {
         // A bad value is clamped, never trusted.
         assertEquals(1.0, new Leash(8, 7).breakOffHealth());
         assertEquals(1.0, new Leash(-3, 0.3).radius());
+    }
+
+    @Test
+    void pieceTwoOrdersAreTierTwo() {
+        // Owner: Graze nearby, Guard here and Go home are all on the wheel at bond tier 2.
+        assertEquals(2, HorseOrder.GRAZE_NEARBY.bondTier());
+        assertEquals(2, HorseOrder.GUARD_HERE.bondTier());
+        assertEquals(2, HorseOrder.GO_HOME.bondTier());
+        assertEquals(Refusal.NOT_BONDED, HorseOrders.refusal(HorseOrder.GO_HOME, free(1)));
+        assertNull(HorseOrders.refusal(HorseOrder.GO_HOME, free(2)));
+    }
+
+    @Test
+    void goHomeIsTheOnlyOneShot() {
+        assertTrue(HorseOrder.GO_HOME.oneShot());
+        assertEquals(1, Arrays.stream(HorseOrder.values()).filter(HorseOrder::oneShot).count());
+        assertFalse(HorseOrder.GO_HOME.anchored(), "a one-shot holds no spot");
+        assertFalse(HorseOrder.GO_HOME.combat());
+    }
+
+    @Test
+    void theTetherLetsAHorseRoamThenWalksItWellIn() {
+        HorseOrders.Tether tether = new HorseOrders.Tether(12);
+        assertFalse(tether.strayed(12 * 12), "the edge itself is still inside");
+        assertTrue(tether.strayed(12.1 * 12.1));
+        // Walked back until it is at half the radius, not merely back over the edge.
+        assertFalse(tether.backInside(11 * 11));
+        assertFalse(tether.backInside(6.1 * 6.1));
+        assertTrue(tether.backInside(6 * 6));
+        // Clamped, never trusted.
+        assertEquals(1.0, new HorseOrders.Tether(-4).radius());
+    }
+
+    @Test
+    void theRadiiDefaultsSitInsideTheirBounds() {
+        assertTrue(HorseOrders.MIN_GRAZE_RADIUS <= HorseOrders.DEFAULT_GRAZE_RADIUS
+                && HorseOrders.DEFAULT_GRAZE_RADIUS <= HorseOrders.MAX_GRAZE_RADIUS);
+        assertTrue(HorseOrders.MIN_GUARD_RADIUS <= HorseOrders.DEFAULT_GUARD_RADIUS
+                && HorseOrders.DEFAULT_GUARD_RADIUS <= HorseOrders.MAX_GUARD_RADIUS);
+        assertTrue(HorseOrders.DEFAULT_GUARD_RADIUS < HorseOrders.DEFAULT_HUNT_RADIUS,
+                "Guard here is Hunt monsters with a short reach");
+    }
+
+    @Test
+    void goHomesAnswersCountInTheSummary() {
+        String line = HorseOrders.summary(HorseOrder.GO_HOME, Arrays.asList(
+                null, Refusal.NO_HOME, Refusal.CANNOT_PAY, null));
+        assertEquals("Go home: 2 obeyed; 1 no stall; 1 unpaid.", line);
+        assertEquals("Bramble has no stall, and you have no holding pen.",
+                HorseOrders.oneLine("Bramble", HorseOrder.GO_HOME, Refusal.NO_HOME));
     }
 
     @Test

@@ -21,7 +21,9 @@ import net.minecraft.world.phys.Vec3;
 import java.util.EnumSet;
 
 /**
- * <b>The combat orders' quarry</b>: Hunt monsters and Defend me (command whistle, Piece 3).
+ * <b>The combat orders' quarry</b>: Hunt monsters and Defend me (command whistle, Piece 3),
+ * and Guard here (Piece 2) - which is Hunt monsters with {@code orders.guard_radius} as its
+ * reach, centred on its spot like a hunter's.
  * A TARGET goal - it only ever picks or drops the horse's target. The chase and the swing
  * are {@link HorseMeleeGoal}'s, as for every other fight a horse has, and the way back
  * is {@link OrderStayGoal} (a hunter's spot) or {@link OrderFollowGoal} (a defender's
@@ -160,7 +162,7 @@ public final class OrderCombatGoal extends Goal {
         return code != null && fighter;
     }
 
-    /** The middle of the leash: the hunter's spot, or the defender's player if they are here. */
+    /** The middle of the leash: the hunter's or guard's spot, or the defender's player if they are here. */
     private Vec3 centre(HorseOrderAttachment o) {
         if (o.order() == HorseOrder.DEFEND_ME) {
             ServerPlayer p = HorseOrdering.orderedByHere(horse, o);
