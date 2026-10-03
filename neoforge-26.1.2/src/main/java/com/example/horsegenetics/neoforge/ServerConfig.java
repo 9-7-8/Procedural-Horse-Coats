@@ -405,10 +405,13 @@ public final class ServerConfig {
 
     /**
      * <b>{@code undead.convert}</b> - does a vanilla zombie or skeleton horse become
-     * one of this mod's horses the first time it is ticked? On by default (undead
-     * treatment D2). Off, the converter returns at once and every vanilla undead
-     * horse is left exactly as vanilla made it; horses already converted stay the
-     * horses they became. See {@code server/UndeadHorseConverter}.
+     * one of this mod's horses the first time it is ticked? <b>Off by default</b>
+     * (owner, 2026-10-03, reversing treatment D2 until conversion has been watched in
+     * play): an operator runs {@code /horseundead test} on their own server and, once
+     * it passes, {@code /horseundead enable} turns this on. Off, the converter returns
+     * at once and every vanilla undead horse is left exactly as vanilla made it;
+     * horses already converted stay the horses they became. See
+     * {@code server/UndeadHorseConverter} and {@code server/HorseUndeadCommand}.
      */
     public static final ModConfigSpec.BooleanValue UNDEAD_CONVERT;
 
@@ -434,6 +437,11 @@ public final class ServerConfig {
 
     /** Seconds between two Send home trips by one player; 0 is off. */
     public static final ModConfigSpec.IntValue SEND_HOME_COOLDOWN_SECONDS;
+    public static final ModConfigSpec.IntValue ORDERS_HUNT_RADIUS;
+    public static final ModConfigSpec.IntValue ORDERS_DEFEND_RADIUS;
+    public static final ModConfigSpec.DoubleValue ORDERS_BREAK_OFF_HEALTH;
+    public static final ModConfigSpec.IntValue ORDERS_GUARD_RADIUS;
+    public static final ModConfigSpec.IntValue ORDERS_GRAZE_RADIUS;
 
     /**
      * <b>What a Chaos allele may never name.</b> The three mob loci each have one
@@ -841,14 +849,16 @@ public final class ServerConfig {
                         "this does not affect. Off, the command is not registered at all.")
                 .define("commands.horse_jockey", true);
         UNDEAD_CONVERT = builder
-                .comment("Whether vanilla zombie and skeleton horses become this mod's horses. (default: true)",
+                .comment("Whether vanilla zombie and skeleton horses become this mod's horses. (default: false)",
                         "Each one converts the first time it is ticked - old saves included - into a",
-                        "Graveborn Warmblood or a Great Valley Skeleton Horse, keeping its name, owner,",
-                        "saddle, armour, lead, age and health fraction; its stats are re-rolled from its",
-                        "genes. A skeleton trap converts only after it has sprung, and a horse with a",
-                        "player on it waits for the rider to get off. Off, vanilla undead horses are",
-                        "left alone; ones already converted stay converted.")
-                .define("undead.convert", true);
+                        "Graveborn Warmblood, a Great Valley Skeleton Horse, or in the Nether a Blackened",
+                        "Skeleton Horse, keeping its name, owner, saddle, armour, lead, age and health",
+                        "fraction; its stats are re-rolled from its genes and its bond starts at zero.",
+                        "A skeleton trap converts only after it has sprung, and a horse with a player on",
+                        "it waits for the rider to get off. This cannot be undone: ones already converted",
+                        "stay converted. Try it first with /horseundead test, which converts one test",
+                        "horse of each kind; /horseundead enable then turns this on.")
+                .define("undead.convert", false);
         JOCKEY_PASS_DAYS = builder
                 .comment("How many Minecraft days one jockey pass is worth. (default: 1)",
                         "Also the length of a bare /horsejockey with no number given.",
@@ -881,6 +891,57 @@ public final class ServerConfig {
                         "refusal never starts it. 0 turns it off.")
                 .defineInRange("behaviour.send_home_cooldown_seconds",
                         com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS, 0, 3600);
+        ORDERS_HUNT_RADIUS = builder
+                .comment("How far from its spot a horse told to Hunt monsters goes after them, in blocks.",
+                        "(default: " + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_HUNT_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_HUNT_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_HUNT_RADIUS + ")",
+                        "It never picks a monster further than this from where it was told, and lets a",
+                        "fight go a few blocks past it, then walks back. Server-side.")
+                .defineInRange("orders.hunt_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_HUNT_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_HUNT_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_HUNT_RADIUS);
+        ORDERS_DEFEND_RADIUS = builder
+                .comment("How close to its player a monster must come before a horse told to Defend me",
+                        "goes for it, in blocks. (default: "
+                                + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_DEFEND_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_DEFEND_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_DEFEND_RADIUS + ")",
+                        "It comes back to heel once the monster is dead or gone. Server-side.")
+                .defineInRange("orders.defend_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_DEFEND_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_DEFEND_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_DEFEND_RADIUS);
+        ORDERS_BREAK_OFF_HEALTH = builder
+                .comment("Below this share of its health a horse on Hunt monsters or Defend me drops",
+                        "the fight and goes back. (default: "
+                                + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_BREAK_OFF_HEALTH
+                                + ", range 0.0-1.0)",
+                        "0 is fight to the death. Only the fight the ORDER picked is dropped: a horse",
+                        "whose own genes make it aggressive goes on as they say. Server-side.")
+                .defineInRange("orders.break_off_health",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_BREAK_OFF_HEALTH, 0.0, 1.0);
+        ORDERS_GUARD_RADIUS = builder
+                .comment("How close to its spot a monster must come before a horse told to Guard here",
+                        "goes for it, in blocks. (default: " + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GUARD_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_GUARD_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_GUARD_RADIUS + ")",
+                        "It lets a fight go a few blocks past this, then walks back to its spot. Server-side.")
+                .defineInRange("orders.guard_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GUARD_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_GUARD_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_GUARD_RADIUS);
+        ORDERS_GRAZE_RADIUS = builder
+                .comment("How far from its spot a horse told to Graze nearby may roam, in blocks.",
+                        "(default: " + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GRAZE_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_GRAZE_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_GRAZE_RADIUS + ")",
+                        "Past it the horse walks back until it is halfway in. Server-side.")
+                .defineInRange("orders.graze_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GRAZE_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_GRAZE_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_GRAZE_RADIUS);
         CHAOS_EXCLUDE_MODS = builder
                 .comment("Mods whose mobs a Chaos allele may never name, by mod id. (default: [])",
                         "Lycanthropy, Leader of the pack and Spawner each have one Chaos allele that",
@@ -1236,7 +1297,21 @@ public final class ServerConfig {
         try {
             return UNDEAD_CONVERT.get();
         } catch (IllegalStateException notLoaded) {
+            return false;
+        }
+    }
+
+    /**
+     * Turn {@code undead.convert} on or off and write it to the world's server config.
+     * Returns false when the config is not loaded, so nothing was changed.
+     */
+    public static boolean setUndeadConvert(boolean on) {
+        try {
+            UNDEAD_CONVERT.set(on);
+            UNDEAD_CONVERT.save();
             return true;
+        } catch (IllegalStateException notLoaded) {
+            return false;
         }
     }
 
@@ -1279,6 +1354,70 @@ public final class ServerConfig {
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS;
         }
+    }
+
+    /** {@code orders.hunt_radius}, safely. */
+    public static int ordersHuntRadius() {
+        try {
+            return ORDERS_HUNT_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_HUNT_RADIUS;
+        }
+    }
+
+    /** {@code orders.defend_radius}, safely. */
+    public static int ordersDefendRadius() {
+        try {
+            return ORDERS_DEFEND_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_DEFEND_RADIUS;
+        }
+    }
+
+    /** {@code orders.guard_radius}, safely. */
+    public static int ordersGuardRadius() {
+        try {
+            return ORDERS_GUARD_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GUARD_RADIUS;
+        }
+    }
+
+    /** {@code orders.graze_radius}, safely. */
+    public static int ordersGrazeRadius() {
+        try {
+            return ORDERS_GRAZE_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_GRAZE_RADIUS;
+        }
+    }
+
+    /** The tether on Graze nearby, from this world's config. */
+    public static com.example.horsegenetics.common.care.HorseOrders.Tether grazeTether() {
+        return new com.example.horsegenetics.common.care.HorseOrders.Tether(ordersGrazeRadius());
+    }
+
+    /** {@code orders.break_off_health}, safely. */
+    public static double ordersBreakOffHealth() {
+        try {
+            return ORDERS_BREAK_OFF_HEALTH.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_BREAK_OFF_HEALTH;
+        }
+    }
+
+    /**
+     * The leash for a combat order, from this world's config: the radius and the
+     * break-off together, so nothing downstream falls back to a default constant.
+     */
+    public static com.example.horsegenetics.common.care.HorseOrders.Leash orderLeash(
+            com.example.horsegenetics.common.care.HorseOrder order) {
+        int radius = switch (order) {
+            case DEFEND_ME -> ordersDefendRadius();
+            case GUARD_HERE -> ordersGuardRadius();
+            default -> ordersHuntRadius();
+        };
+        return new com.example.horsegenetics.common.care.HorseOrders.Leash(radius, ordersBreakOffHealth());
     }
 
     /** {@code behaviour.leads_return}, safely. */

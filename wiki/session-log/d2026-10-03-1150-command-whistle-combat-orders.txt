@@ -1,0 +1,112 @@
+2026-10-03 11:50 (end) - Command whistle Piece 3: Hunt monsters and Defend me
+
+ASKED
+-----
+- "/process-intake on Command whistle Piece 3" - built; the unit is shipped, written up and
+  retired from intake/.
+- One question asked up front (the treatment's only Open line): should an "everything"
+  Aggression pair (Ada/Ana/Aaa) unlock the combat orders? Answer: "Yes - any
+  monster-hunting pair" (owner). The treatment had recommended no.
+
+DONE
+----
+Commit aa5ed8f0 (code), plus the docs commit that carries this file.
+
+- What was missing: the command whistle (Piece 1) had Stay / Follow / Wander / Rejoin herd
+  only. The two orders players asked for most - "hunt monsters" and "defend me" - and the
+  fighting-gene gate that Piece 2's Guard here also needs, were not built.
+- common/care/HorseOrder: HUNT_MONSTERS (anchored) and DEFEND_ME (follows()), both
+  combat() and bond tier 2. Appended, saved by name, so nothing new is saved and every
+  world loads unchanged.
+- common/care/HorseOrders: fighter(genotype, epigenome) - the gate, read through
+  HorseAbilities.of for Aggression, Guardian and Magic fighter only (an aggressive temper
+  towards hostile/all, or a Combat ability above the 3.0 baseline). Refusal.NOT_A_FIGHTER,
+  asked after the lead and the cart and before the bond. Leash(radius, breakOffHealth) with
+  mayEngage / keepsFighting / breaksOff and LEASH_SLACK_BLOCKS = 4. needs() for the wheel's
+  hover text. The two new chat lines and a tooltip line.
+- neoforge server/OrderCombatGoal (new; target selector, priority 2): scans once a second
+  (staggered by entity id, at most 8 entities) around the anchor or the ordering player,
+  picks the nearest visible monster inside the leash, drops only what it picked. Never a
+  player, a creeper (new tag data/horsegenetics/tags/entity_type/command_never_target.json),
+  an owned pet, a tamed horse, a passification veto, or anything the horse cannot
+  canAttack. HorseMeleeGoal (3) does the chase; OrderStayGoal now runs for any anchored()
+  order and OrderFollowGoal for any follows() order, so the walk home is the existing one.
+- HorseOrdering.fighter(record) and situation(): the server's gate. CommandWheelScreen asks
+  the same function on the record the client already has (HorseRecordSyncPayload), so no
+  new sync; six slices now.
+- ServerConfig: orders.hunt_radius (16, 8-32), orders.defend_radius (8, 4-16),
+  orders.break_off_health (0.3, 0-1), with safe accessors and orderLeash(order). HOME added
+  in bake-config-keys.mjs; wiki/config.html rebaked.
+- Proof:
+  - :common:test --tests '*HorseOrdersTest' --tests '*CommandWheelGeometryTest' green.
+    Mutated: removing the "all" branch of the gate turned HorseOrdersTest red.
+  - :neoforge-26.1.2:runGameTest: All 45 required tests passed (43 before + the two new:
+    order_combat_gate, order_hunt_picks_a_monster). Mutated: removing the never-target tag
+    check made order_hunt_picks_a_monster fail with "a hunting horse went for a creeper".
+  - :neoforge-26.1.2:build green; check-parity OK; check-designer-boots OK.
+  - runServer to "Done (" with the [orders] section written; WARN lines were vanilla's
+    command ambiguities, offline mode, and the existing stasis_chamber recipe warning. The
+    owner's run/phc, run/config and logs were copied aside first and put back after.
+- Nothing seen in game.
+- Retired: the Piece 3 section of intake/Command whistle - implementation treatment.txt
+  (left as a pointer for Piece 2), its row in intake/Sizing.txt, and UNVERIFIED 2 and 5
+  (answered).
+
+DECIDED
+-------
+- "a" (everything) Aggression pairs unlock the combat orders (owner). Recorded on
+  wiki/gene-aggression.html#ordered-pursuit and item-whistles.html#combat-code.
+- Calls made without the owner (recorded on item-whistles.html#combat-code):
+  - NOT_A_FIGHTER is asked before NOT_BONDED: the bond cannot change the genes.
+  - Magic fighter counts when its Combat ability is above the 3.0 baseline: Fighter,
+    Champion, or a Balanced horse whose gladiator copy outweighs its wimp copy. Weak and
+    Harmless do not.
+  - The gate reads only the three named genes, so a data-driven gene with a temper does
+    not open it.
+  - Between fights a hunter stands at its spot like a stayed horse; it does not roam.
+  - Picked by nearest to the leash's centre, line of sight required (as the locus does).
+  - Owned pets and tamed horses are never picked (a tamed zombie horse counted as hostile).
+  - Vanilla's Mob home radius (setHomeTo / isWithinHome) exists in 26.1.2 but is not used:
+    vanilla saves it and a lead sets it.
+  - LEASH_SLACK_BLOCKS = 4, so an edge monster is not picked and dropped every second.
+
+FOUND ON THE WAY
+----------------
+- My first gametest run reported "All 43 required tests passed" without my two tests: a
+  test needs a register(event, ...) line as well as its TEST_FUNCTIONS.register. Caught by
+  counting, now in procedures/test-tiers.txt.
+- The hunt gametest first failed twice for test reasons: the horse's founding tick rolled a
+  new genome over the guardian genes I had applied (fixed by waiting on hasRealRecord), and
+  an invulnerable husk was picked every second but Mob.getTarget() answers null for a
+  target the mob cannot attack. The second one is a real rule, so the goal now filters on
+  canAttack.
+- A long Bash heredoc truncated once (a known trap); the patch went through a file.
+- No bugs filed.
+
+PROCEDURES
+----------
+- procedures/test-tiers.txt, tier 2 "Writing one": a gametest is two edits (TEST_FUNCTIONS
+  and the register list), and a test that applies genes waits for HorseRecords.hasRealRecord.
+- Checked and unchanged: process-intake, add-a-config-option, rebake, launch-game,
+  end-session.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run; it would additionally check the whole gene
+  registry and coat goldens, none of which this change touches (HorseOrders only reads the
+  genes).
+- Nobody has opened the six-slice wheel or watched an ordered horse fight, break off, or
+  walk home. New Verification block: wiki/item-whistles.html#combat-verify (and the tab's
+  summary sentence now says the wheel has never been opened).
+- Defend me has no gametest: a mock player is not in the level, so the order's player
+  cannot be found. It is a play check (#combat-verify, item 5).
+
+RELEASE
+-------
+Not offered. The treatment counts toward a release only when its last piece ships, and
+Piece 2 is still open.
+
+PICK UP FIRST
+-------------
+Command whistle Piece 2 (Graze nearby, Go home, Guard here) by /process-intake - Tier 2,
+owner-free, and Guard here plugs straight into OrderCombatGoal and HorseOrders.Leash.

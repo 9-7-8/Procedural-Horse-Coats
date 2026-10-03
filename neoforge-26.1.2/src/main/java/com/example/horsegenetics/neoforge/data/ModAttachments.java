@@ -186,6 +186,17 @@ public final class ModAttachments {
     // re-summoned horse is still dressed - the same call HORSE_CARE makes,
     // and losing a full set of tack to a death you did not see would be worse
     // than losing a bond.
+    // The command whistle's standing order (HorseOrderAttachment). SYNCED, so the
+    // wheel greys and the screens show it without asking the server. NOT
+    // copyOnDeath: an order dies with the horse. Default: no order, which is also
+    // what every world from before the whistle loads as.
+    public static final Supplier<AttachmentType<HorseOrderAttachment>> HORSE_ORDER =
+            ATTACHMENT_TYPES.register("horse_order", () -> AttachmentType
+                    .builder(() -> HorseOrderAttachment.NONE)
+                    .serialize(HorseOrderAttachment.MAP_CODEC)
+                    .sync(HorseOrderAttachment.STREAM_CODEC)
+                    .build());
+
     public static final Supplier<AttachmentType<HorseGear>> HORSE_GEAR =
             ATTACHMENT_TYPES.register("horse_gear", () -> AttachmentType
                     .builder(() -> HorseGear.EMPTY)

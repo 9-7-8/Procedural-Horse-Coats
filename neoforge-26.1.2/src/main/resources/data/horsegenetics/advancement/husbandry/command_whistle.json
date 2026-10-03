@@ -1,0 +1,22 @@
+{
+  "parent": "horsegenetics:husbandry",
+  "criteria": {
+    "done": {
+      "trigger": "horsegenetics:progress_task",
+      "conditions": {
+        "task": "command_whistle"
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "horsegenetics:command_whistle"
+    },
+    "title": {
+      "text": "Give a horse an order"
+    },
+    "description": {
+      "text": "Hold right-click on a horse of yours with a command whistle and pick an order from the wheel: to stay, follow, graze nearby, go home, or fight for you."
+    }
+  }
+}

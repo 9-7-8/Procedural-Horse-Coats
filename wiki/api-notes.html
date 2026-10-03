@@ -222,7 +222,7 @@
         sources jar and the NeoForge sources jar. Every tutorial written about GameTest describes a version this is
         not. A test here is an object in the <code>minecraft:test_instance</code> <em>datapack</em> registry whose
         body is a <code>Consumer&lt;GameTestHelper&gt;</code> in <code>minecraft:test_function</code>, so it is
-        registered in two halves - see <code>ModGameTests</code>. Five things that cost time:
+        registered in two halves - see <code>ModGameTests</code>. Things that cost time:
         <ul>
             <li><code>GameTestHelper.makeMockPlayer(GameType.CREATIVE)</code> overrides
                 <code>isCreative()</code> and nothing else: its <code>getAbilities()</code> are a
@@ -244,6 +244,25 @@
                 overloads that take no position measure against the structure bounds, so use the ones that take a
                 <code>BlockPos</code> and a distance. <code>setBlock</code> does no bounds check and may reach
                 outside freely.</li>
+            <li><strong>A test that succeeds discards its neighbours&rsquo; strays.</strong>
+                <code>GameTestInfo.succeed</code> removes every non-player entity within one block of its
+                structure, and <code>StructureGridSpawner</code> puts columns six blocks apart. So a horse
+                moved five blocks from its own test sits in the next test&rsquo;s sweep and vanishes
+                (<code>removed</code>, <code>tickCount</code> 0) when that test passes. Keep a test&rsquo;s
+                entities within three blocks of its structure (2026-10-03, <code>order_stay_walks_back</code>).</li>
+            <li><strong>Each test stands on a one-block pedestal</strong> (its test-instance block):
+                <code>helper.spawn(type, BlockPos.ZERO)</code> puts the entity on top of it, two blocks above the
+                ground around. A horse pushed off cannot climb back. Spawn a walker beside it, at (2, 0, 2).</li>
+            <li><strong>Tests in a batch share the world, so movement checks pick up noise.</strong> A
+                horse can stand frozen for about a hundred ticks after it spawns, and neighbouring
+                tests&rsquo; horses pull it about through herd goals. With the walk-back code cut out, a
+                &ldquo;walked back within 1.5 blocks&rdquo; check still passed once. Assert the intent as
+                well, for example the navigation&rsquo;s target, and break the code once to prove the test
+                can fail. Two NATURAL horse spawns close together can also share a wild herd, which held
+                a turnover test&rsquo;s horse in place (#32).</li>
+            <li><code>makeMockPlayer</code> never joins the level: it is a bare
+                <code>new Player(level, profile)</code>, so <code>level.players()</code> does not see it.
+                Only the deprecated <code>makeMockServerPlayerInLevel</code> joins.</li>
         </ul>
     </li>
     <li id="rungame-directory"><strong>Every ModDevGradle run defaults to the same <code>run/</code>

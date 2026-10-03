@@ -86,6 +86,187 @@
     </p>
 </div>
 
+<h2 id="v0-5-043">0.5.043 &mdash; the command whistle</h2>
+
+<p>
+    A patch release with one new item: the <strong>command whistle</strong>. Point it at a horse of yours, hold right-click, and choose a standing order from a wheel. There are nine orders, and three of them send a horse bred to fight after monsters. Its licence files now carry the MIT / CC BY-SA 4.0 terms.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners</p>
+    <ul>
+        <li>Nothing changes in an existing world until a player gives an order. The new keys in <code>phc/server.toml</code> are <code>orders.hunt_radius</code>, <code>orders.guard_radius</code>, <code>orders.defend_radius</code>, <code>orders.break_off_health</code> and <code>orders.graze_radius</code>. They are added with their defaults the first time the server starts; the &ldquo;server.toml is not correct. Correcting&rdquo; line at boot is that, and it is harmless.</li>
+    </ul>
+</div>
+
+<h3 id="v0-5-043-command-whistle">The command whistle</h3>
+<p>
+    Craft it from a basic whistle, a lead and an amethyst shard, or buy it from an equestrian supplier at level 3 for 5 emeralds.
+</p>
+<ul>
+    <li><strong>Hold right-click on a horse you own</strong> to open the wheel. Move the mouse over an order and let go to give it, or let go in the middle to change nothing. A quick tap does nothing. It reaches 16 blocks, never through a wall, and does not mount the horse or open its inventory.</li>
+    <li><strong>Sneak and hold</strong> anywhere to order every horse of yours within 16 blocks. Chat then says how many obeyed and why the rest did not.</li>
+</ul>
+
+<table>
+    <tr><th>Order</th><th>What the horse does</th><th>Bond</th></tr>
+    <tr><td>Stay</td><td>Stands where it was told, and walks back after anything moves it</td><td>31</td></tr>
+    <tr><td>Follow</td><td>Follows you at a walk. If it is left far behind with no way through, it is brought to you</td><td>31</td></tr>
+    <tr><td>Wander</td><td>Roams freely, and stops following or watching you</td><td>61</td></tr>
+    <tr><td>Graze nearby</td><td>Lives as it likes, but walks back in if it gets more than 12 blocks from where you left it</td><td>61</td></tr>
+    <tr><td>Go home</td><td>Goes to its stall now, or to your holding pen, as Send home does (at its price, if the server set one)</td><td>61</td></tr>
+    <tr><td>Hunt monsters</td><td>Holds its spot and goes for monsters within 16 blocks of it</td><td>61, and bred to fight</td></tr>
+    <tr><td>Guard here</td><td>Holds its spot and goes for monsters within 6 blocks of it</td><td>61, and bred to fight</td></tr>
+    <tr><td>Defend me</td><td>Follows you and goes for monsters within 8 blocks of you</td><td>61, and bred to fight</td></tr>
+    <tr><td>Rejoin herd</td><td>No order: the horse goes back to its ordinary life</td><td>none</td></tr>
+</table>
+
+<ul>
+    <li><strong>An order lasts until you change it.</strong> It pauses while the horse is ridden or on a lead. It never stops a hungry horse eating or a frightened horse running.</li>
+    <li><strong>An order is cleared</strong> when you call the horse with any whistle, use Send home, put it in a stasis chamber, sell or give it away, or it changes dimension.</li>
+    <li><strong>Bred to fight</strong> means the horse shows an aggression pair that goes for monsters or for everything, two copies of Guardian, or a Magic fighter that hits harder than an ordinary horse. The wheel greys out the orders a horse cannot take and says why.</li>
+    <li><strong>Combat orders are leashed.</strong> A horse never picks a creeper, a player, a pet or a tamed horse. It drops a fight a few blocks past its radius, or when it falls below 30% health.</li>
+    <li>Your first order completes the new checklist task and advancement, &ldquo;Give a horse an order&rdquo;.</li>
+</ul>
+<p>
+    Details: <a href="item-whistles.html#command">Whistles &mdash; the command whistle</a>.
+</p>
+
+<h3 id="v0-5-043-licence">Licence</h3>
+<p>
+    This is the first jar whose bundled licence files carry the new terms announced with 0.5.042: code under <strong>MIT</strong>, original art under <strong>CC BY-SA 4.0</strong>. Every earlier release is covered by them too. Third-party pieces keep their own terms (<a href="licensing.html">licensing</a>).
+</p>
+
+<h3 id="v0-5-043-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<ul>
+    <li>Nothing until an order is given. Each horse saves its order, by name. A horse with no order saves nothing new, and older worlds load unchanged.</li>
+    <li>Five new server config keys, added with their defaults (see the box above).</li>
+</ul>
+
+<h3 id="v0-5-043-not-played-yet">Not played yet</h3>
+<p>
+    Open bugs carried over: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a> (F6 debug corridor freezes a server for a few seconds), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/30">#30</a> (a cowboy hitched at a cave edge loses stock to lava), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/29">#29</a> (a turnout ticket marks the wrong horse wild), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a> (a hungry horse ignored a plain hay bale), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a> (slab-floored and stepped stalls), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a> (horse AI forces synchronous chunk loads), <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (stasis bank arrow on the wrong tab).
+</p>
+<p>
+    None of the command whistle has been seen in a game yet. The rules, the target picking and the graze tether are covered by automated tests. The wheel itself, the walking, the fights and Go home are not. The open checks are on <a href="item-whistles.html#places-verify">the whistle page&rsquo;s Verification tab</a> and in <a href="verification.html">the verification index</a>.
+</p>
+
+<h2 id="v0-5-042">0.5.042 &mdash; undead horses, and wild herds that come and go</h2>
+
+<p>
+    A patch release with two new systems. Undead horses arrive: skeleton and zombie genes, three undead breeds, and a way to turn vanilla&rsquo;s undead horses into real horses of this mod. Wild horses now come and go: a wild herd moves on after three days, and thin ground near players fills up again. Realm breeding also runs at normal speed now, and only while somebody is near.
+</p>
+
+<div class="note warn">
+    <p class="label">Server owners</p>
+    <ul>
+        <li><strong>Wild horses now leave after three in-game days.</strong> This is on by default. A horse you led, fed or rode but <strong>did not tame</strong> counts as wild. It goes to the horse realm, and drops its lead and tack where it stood. Tame the ones you want to keep, or set <code>wild.despawn_days = 0</code> to turn this off.</li>
+        <li><strong>Vanilla undead horses are not converted unless you turn it on.</strong> Conversion cannot be undone. Run <code>/horseundead test</code> first, then <code>/horseundead enable</code> (see "Undead horses" below).</li>
+        <li><strong>An existing server config keeps realm breeding at 25%.</strong> Set <code>realm.breeding_rate_percent = 100</code> by hand to get the new normal speed.</li>
+    </ul>
+</div>
+
+<h3 id="v0-5-042-undead-horses">Undead horses</h3>
+<p>
+    Two new genes, <strong>Skeleton</strong> and <strong>Zombie</strong>, make a horse undead. Three breeds carry them:
+</p>
+
+<ul>
+    <li><strong>Great Valley Skeleton Horse</strong>: a frail, quick horse of bare bones, in Bleached and Weathered strains. It eats bones.</li>
+    <li><strong>Graveborn Warmblood</strong>: a tough, slow, rotting horse, in Fresh and Long-buried strains. It eats raw meat. It is very rare.</li>
+    <li><strong>Blackened Skeleton Horse</strong>: a fireproof, heat-tolerant skeleton that runs wild in all five Nether biomes, in the dark. It is the most common Nether horse.</li>
+</ul>
+
+<p>
+    The first two come only from their spawn eggs and from converting vanilla undead horses. The Blackened one also spawns wild.
+</p>
+
+<p>
+    All three turn on their rider after dark until the horse is offered its item: bones for a skeleton, rotten flesh for a zombie. They have black eyes, do not burn in daylight and use vanilla&rsquo;s undead sounds. When they die they drop bones or rotten flesh. Skeleton horses breathe underwater. A skeleton horse&rsquo;s horns, if it has any, are bare bone; ram&rsquo;s horns can now be bone too.
+</p>
+
+<p>
+    Details: <a href="undead-horses.html">Undead horses</a>.
+</p>
+
+<h4 id="v0-5-042-converting-vanilla-undead-horses">Converting vanilla undead horses</h4>
+<p>
+    A vanilla zombie or skeleton horse can become one of these breeds. A skeleton horse in the Nether becomes a Blackened. The new horse keeps its name, owner, tame state, saddle, armour, lead, age and share of health. Its speed, jump and hearts are re-rolled from its new genes, and its bond starts at zero. A horse its owner already had stays calm toward that owner.
+</p>
+
+<p>
+    This is <strong>off by default</strong>, because a converted horse never goes back. An operator turns it on in two steps:
+</p>
+
+<ol>
+    <li><code>/horseundead test</code> spawns one vanilla skeleton horse beside you, tamed to you, named and saddled. The real converter changes it, and the result is checked. Then it does the same with a zombie horse. Chat says whether it PASSED.</li>
+    <li><code>/horseundead enable</code> is accepted only after a test has passed since the server started. It turns on <code>undead.convert</code> and saves it. From then on, every vanilla undead horse converts the first time it is loaded, old saves included.</li>
+</ol>
+
+<p>
+    <code>/horseundead</code> on its own says where things stand, and <code>/horseundead disable</code> turns conversion off again. Horses already converted stay converted.
+</p>
+
+<h3 id="v0-5-042-wild-horses-come-and-go">Wild horses come and go</h3>
+<ul>
+    <li><strong>A wild horse stays three in-game days</strong>, then moves on the next time its chunk is loaded with nobody within 32 blocks. It never vanishes in front of you. A whole herd goes together. The clock runs on game time, so it keeps counting while the chunk is unloaded. Sleeping and <code>/time set</code> do not speed it up.</li>
+    <li><strong>A horse a player led, fed, rode or saddled</strong> goes to the horse realm instead of vanishing. Its lead and tack are dropped where it stood.</li>
+    <li><strong>What counts as wild:</strong> only horses from natural spawns and new chunks. Tamed horses never leave, and taming clears the clock. Bred foals, spawn-egg and <code>/summon</code> horses, released or turned-out horses, cowboy stock and stabled horses never leave either.</li>
+    <li><strong>Thin ground fills up again.</strong> Once a game day, each patch of 8&times;8 chunks near a player with fewer than five wild horses gets one new herd. That includes land you explored long ago, and the Nether. Herds are placed by vanilla&rsquo;s spawn rules, out of sight, at least 24 blocks from players and 32 blocks from any horse. Nothing spawns while <code>doMobSpawning</code> is off.</li>
+</ul>
+
+<p>
+    Five new server settings:
+</p>
+
+<table>
+    <tr><th>Key</th><th>Default</th><th>What it does</th></tr>
+    <tr><td><code>wild.despawn_days</code></td><td><code>3</code></td><td>Days a wild horse stays; <code>0</code> turns leaving off</td></tr>
+    <tr><td><code>wild.realm_handoff</code></td><td><code>true</code></td><td>A horse a player touched goes to the realm; off, it simply leaves</td></tr>
+    <tr><td><code>wild.topup_minimum</code></td><td><code>5</code></td><td>The fewest wild horses a patch should have; <code>0</code> turns the top-up off</td></tr>
+    <tr><td><code>wild.topup_cell_chunks</code></td><td><code>8</code></td><td>Patch size, in chunks along each side</td></tr>
+    <tr><td><code>wild.topup_player_radius</code></td><td><code>96</code></td><td>How near a player a patch must be to be checked, in blocks</td></tr>
+</table>
+
+<h3 id="v0-5-042-realm-breeding">Realm breeding</h3>
+<ul>
+    <li>Breeding in the horse realm now runs at <strong>normal speed</strong> by default: <code>realm.breeding_rate_percent</code> is now 100 instead of 25.</li>
+    <li>It still stands still while nobody is near. A new setting, <code>realm.pause_when_unloaded</code> (default <code>true</code>), lets a server count that time too.</li>
+    <li>A realm mare&rsquo;s breeding line now ends "(stops while nobody is near)".</li>
+</ul>
+
+<h3 id="v0-5-042-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saves keep loading.</strong> A world from 0.5.037 or later loads in this one. Replace 0.5.041 with this jar.</li>
+    <li><strong>Wild herds already in your world start their three-day clock the first time they are seen</strong> after the update, so nothing vanishes the moment you load. Untamed horses you have penned at a base and led, fed or ridden count as wild, and will leave for the realm three days on. Tame them, or set <code>wild.despawn_days = 0</code>.</li>
+    <li><strong>New herds will appear near players</strong> in explored land, and Blackened Skeleton Horse herds in the Nether.</li>
+    <li><strong>Vanilla undead horses stay vanilla</strong> until an operator enables conversion.</li>
+    <li><strong>The realm breeding rate in an existing server config stays at 25.</strong> The new default of 100 is written only to a fresh file.</li>
+    <li><strong>Licence:</strong> this jar&rsquo;s bundled licence files still say CC BY-NC 4.0, because it was built just before the project was relicensed. Like every earlier release, it is covered by the new terms: code MIT, art CC BY-SA 4.0 (<a href="licensing.html">licensing</a>).</li>
+    <li>The new settings are written to the server config on first start. No existing allele, horse or breed frequency changed. No recipes or items changed.</li>
+</ul>
+
+<h3 id="v0-5-042-not-played-yet-known-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li><strong>Open bugs:</strong>
+        <ul>
+            <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a>: an operator pressing F6 freezes the server for about 3 seconds.</li>
+            <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/30">#30</a>: a cowboy at a cave edge loses his stock to lava.</li>
+            <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/29">#29</a>: a turnout ticket untames the wrong copy of the horse.</li>
+            <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>: a hungry horse starved beside a plain hay bale.</li>
+            <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a>: the stall detector refuses slab floors.</li>
+            <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/13">#13</a>: horse AI forces chunk loads.</li>
+            <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a>: a stray arrow on the stasis bank&rsquo;s Chambers tab.</li>
+        </ul></li>
+    <li><strong>Nothing new in this release has been watched in a played game.</strong>
+        <ul>
+            <li>Undead horses and the conversion are covered by gametests and a photo stage.</li>
+            <li>Wild turnover passed an automated six-day server soak. A turned-over horse arriving in the realm has not been seen.</li>
+            <li><code>/horseundead test</code> exists for exactly this reason: try it on your own server before enabling.</li>
+        </ul></li>
+    <li>What is waiting on someone&rsquo;s eyes is on <a href="verification.html">the verification page</a>.</li>
+</ul>
+
 <h2 id="v0-5-041">0.5.041 &mdash; dragon horns, a free Send home, and papers that teach</h2>
 
 <p>

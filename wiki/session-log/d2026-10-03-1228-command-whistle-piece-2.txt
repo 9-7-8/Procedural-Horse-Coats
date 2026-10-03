@@ -1,0 +1,105 @@
+2026-10-03 12:28 (end) - Command whistle Piece 2: Graze nearby, Guard here, Go home
+
+ASKED
+-----
+- "/process-intake Command whistle Piece 2" - build the last piece of the command whistle
+  treatment. Built, written up, retired from intake/ (the whole treatment file went, as it
+  was the last piece).
+
+DONE
+----
+- 8f67c0d4 Command whistle, Piece 2 (code). The wheel's last three orders, all bond tier 2:
+  - Guard here (GUARD_HERE): anchored + combat, i.e. Hunt monsters with a short reach.
+    No goal of its own: OrderStayGoal now runs for HorseOrder.stands() (Stay, Hunt, Guard)
+    instead of anchored() - anchored() would have pinned a grazing horse to its spot -
+    OrderCombatGoal centres it on the anchor, ServerConfig.orderLeash gives it the new key
+    orders.guard_radius (6, 3-16).
+  - Graze nearby (GRAZE_NEARBY): anchored, does not stand. New server/OrderGrazeGoal
+    (MOVE, priority 4) starts only past orders.graze_radius (12, 4-32) of the anchor and
+    walks the horse back to half of it - common/care HorseOrders.Tether,
+    TETHER_RETURN_SHARE 0.5.
+  - Go home (GO_HOME): HorseOrder.oneShot(), never stored. HorseOrdering.give calls the
+    new StallRecall.goHome, which shares a refactored StallRecall.travel() with the H
+    browser's Send home button: same stall-or-holding-pen, same price, same live landing
+    spot, but no cooldown. Four new server-only Refusal values (HAS_A_RIDER, NO_HOME,
+    CANNOT_GET_HOME, CANNOT_PAY). HorseOrdering.current drops a stored one-shot.
+  - The wheel: nine slices (Stay, Guard here, Hunt monsters, Defend me, Follow, Wander,
+    Graze nearby, Go home, Rejoin herd) on an ellipse, RING_X 118 / RING_Y 86, with the
+    cursor squashed by the same ratio before CommandWheel.sliceAt. A script checked the nine
+    label boxes (+border) never overlap and each label falls in its own slice.
+  Proof: HorseOrdersTest 20/20 (red first on the old anchored/combat counts, as predicted;
+  mutating TETHER_RETURN_SHARE to 0.6 turned theTetherLetsAHorseRoamThenWalksItWellIn
+  red). runGameTest: "All 47 required tests passed" (45 instances before, 47 now); new
+  order_guard_holds_its_reach went red with the right message when GUARD_HERE was given the
+  hunt radius; new order_graze_tether. :neoforge-26.1.2:build green, check-parity OK,
+  check-designer-boots OK. runServer booted to Done( with no ERROR lines, both new keys
+  written to run/phc/server.toml; the owner's run/phc and run/config were backed up first
+  and restored byte-identical after.
+- Docs commit (this one): wiki/item-whistles.html Gameplay table + #fighters, Coding
+  #places-code, Verification #places-verify (and #combat-verify's wheel check now says
+  nine slices); one-line updates on horse-care, horse-browser (#send-home), gene-guardian,
+  gene-magic-fighter, gene-aggression, items. Treatment
+  "intake/Command whistle - implementation treatment.txt" deleted and its Sizing block
+  removed.
+
+DECIDED
+-------
+Calls made without the owner (all recorded on wiki/item-whistles.html#places-code):
+- Guard here keeps the shared LEASH_SLACK_BLOCKS (4), so a fight may drift to 10 blocks at
+  the default, not the treatment's recommended "never beyond 8": one slack rule for every
+  combat order.
+- Go home keeps Send home's holding-pen fallback (the treatment said "refuses with has no
+  stall"); the refusal is "has no stall, and you have no holding pen". It pays the server's
+  price per horse and skips the button's cooldown.
+- Go home is the existing teleporting trip, not a walk - the treatment's "not a second
+  recall implementation".
+- Wheel order regrouped kin beside kin; Piece 1/3's slice positions moved (unreleased, so
+  no player has the old layout in muscle memory).
+- Go home's docs went on horse-browser.html#send-home, where Send home lives, not on
+  stables.html as the treatment listed.
+
+FOUND ON THE WAY
+----------------
+- Mistake: a Bash command started with `cat > file` with no input and hung until stopped;
+  then a long python heredoc failed to parse in Bash (the known "long heredocs truncate"
+  trap). Edits were redone with Edit and a scratchpad script; nothing was half-applied.
+- behaviour-hierarchy now lists DamAndFoal and NightWatchGoal sharing priority 4 / MOVE
+  with OrderGrazeGoal, so a foal trailing its dam may follow her past the tether until that
+  goal ends; the graze goal then walks it back. Left as is (same as Stay).
+
+PROCEDURES
+----------
+None needed. The three review questions were asked: process-intake, add-a-config-option,
+rebake, test-tiers and end-session all fit this session as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Full :common:test not run; it would additionally check every other common class against
+  the enum growing (anything iterating HorseOrder.values() outside HorseOrdersTest).
+- Nothing seen in game: the nine-slice wheel, grazing on the tether, Go home, Guard here.
+  Verification anchors: wiki/item-whistles.html#places-verify (new), #combat-verify,
+  #command-verify.
+
+RELEASE
+-------
+The treatment's last piece shipped, so the finished command whistle (a new item, the
+wheel, nine orders) counts as a substantial feature under release step 1. Offered with the
+question tool; the owner answered "Cut 0.5.043 now". Cut by procedures/release.txt:
+- Release set, all green: tier-0 node checks (9); full :common:test 1576 tests, 0 failed,
+  22m 23s (slowest classes the same ten as 0.5.042's, so test-tiers was left as it is);
+  :neoforge-26.1.2:test; runGameTest 47/47; all seven headless browser checks; a server
+  boot to Done( whose only WARNs are the two known harmless ones plus vanilla's own.
+- The range audit found the recipe-book text, the COMMAND_WHISTLE checklist task and its
+  baked advancement still listing only Piece 1's four orders. Fixed in 9ed59251 with the
+  version bump (the advancement re-baked by bake-advancements.mjs, which agreed).
+- Tag v0.5.043 on 9ed59251; GitHub release "0.5.043 - the command whistle" with
+  horsegenetics-0.5.043.jar (7,201,460 bytes); the same note on wiki/releases.html#v0-5-043.
+- The first config boot this session backed up run/phc and run/config but not run/logs,
+  against launch-game 8a. Nothing was lost: Minecraft rolled the owner's 2026-10-02 client
+  log into run/logs/2026-10-02-2.log.gz. The release boot backed up all three and restored
+  them byte-identical.
+
+PICK UP FIRST
+-------------
+/process-intake: the breed "names" list field (intake/Mythic breeds - biome assignments.txt),
+Tier 1 (S-M, b, owner-free).

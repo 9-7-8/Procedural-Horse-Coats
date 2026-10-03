@@ -160,6 +160,9 @@ public class WhistleItem extends Item {
         int placed = 0;
         Set<UUID> handled = new HashSet<>();
         for (AbstractHorse horse : horses) {
+            // Calling a horse means you want it: a recall clears any command-whistle
+            // order, the near ones included (owner, 2026-10-03).
+            com.example.horsegenetics.neoforge.server.HorseOrdering.clear(horse);
             if (horse.distanceToSqr(player) < ALREADY_HERE_SQR) {
                 continue;
             }

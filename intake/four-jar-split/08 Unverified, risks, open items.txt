@@ -40,7 +40,11 @@ U15 What is the actual Base tab list for the H browser (Recipes and Getting star
 - PLAYER MISTAKES. Installing the all-in-one next to a part, or an add-on without Base: the incompatible/required declarations and the launch message are the
   mitigation (file 06 step 8). Test every wrong combination.
 - THE RENAME. This plan assumes it shipped. If its converter slips, this plan waits.
-- CONCURRENT TREATMENTS. Command whistle Pieces 1 and 3 are already on main (commits 8b6ce8da and aa5ed8f0); its remaining piece builds in Base. Bridle/saddle split,
+- COMMAND WHISTLE IS NOW FULLY ON MAIN (0.5.042-0.5.043; its treatment is retired). It added C/care/CommandWheel, HorseOrder and HorseOrders and N/server HorseOrdering,
+  OrderCombatGoal, OrderFollowGoal, OrderGrazeGoal, OrderStayGoal. It belongs in Base, BUT HorseOrders imports common.genetics.Gene: the "fighter" test (Hunt monsters, Defend
+  me, Guard need a horse bred to fight) reads a gene. That is a Base-to-Breeding import. Resolve in piece 1 step 4: add a hook (e.g. OrderEligibility) in Base whose default
+  allows only the orders that need no gene, and Breeding supplies the fighter test. OPEN for the owner: without Breeding, are the combat orders hidden (recommended) or
+  available to every horse? Re-run the dependency scan against main, not against the survey. Bridle/saddle split,
   horse shoes, troughs and the port treatments edit the same screens and registries: sequence them around, not inside, a piece here.
 - THREE LIKELY PLAYER FAILURES: (1) a jar swap strands a world (refusal) - tested both ways; (2) all-in-one plus a part - declared incompatible; (3) one jar's
   screen or task calls a class from a missing jar and crashes - the import-scan test and the combination matrix.

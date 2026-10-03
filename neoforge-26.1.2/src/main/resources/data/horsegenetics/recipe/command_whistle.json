@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "horsegenetics:basic_whistle",
+    "minecraft:lead",
+    "minecraft:amethyst_shard"
+  ],
+  "result": {
+    "id": "horsegenetics:command_whistle"
+  }
+}

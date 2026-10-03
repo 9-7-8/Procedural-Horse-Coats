@@ -168,6 +168,26 @@
     </p>
 </div>
 
+<h3 id="ordered-pursuit">An order may pursue, leashed; the gene may not (2026-10-03)</h3>
+<p>
+    The owner reopened the call above once, for <strong>orders</strong> only. A horse told to
+    <a href="item-whistles.html#fighters">Hunt monsters, Guard here or Defend me</a> with the command whistle
+    may go after a monster, but only one inside a leash: within <code>orders.hunt_radius</code>
+    (or <code>orders.guard_radius</code>) of the spot it was told, or <code>orders.defend_radius</code> of its player. It lets the fight
+    go once the monster or the horse is a few blocks past that, or once the horse is badly hurt.
+    The <em>gene&rsquo;s</em> rule is untouched: this locus still never chases, and
+    <code>GeneAbilityHandler.temper</code> still drops a target that leaves its radius.
+</p>
+<p>
+    These pairs open the combat orders: the three that hunt monsters (<code>Adh</code>,
+    <code>Anh</code>, <code>Aah</code>), and the three that hunt everything (<code>Ada</code>,
+    <code>Ana</code>, <code>Aaa</code>). The owner chose to include the second three when the
+    piece was built; the scoping had recommended leaving them out. An order only adds monsters
+    to what the horse goes for. An &ldquo;everything&rdquo; horse on an order goes for you too,
+    as it always did. How it is built: <a href="item-whistles.html#combat-code">the command
+    whistle&rsquo;s Coding tab</a>.
+</p>
+
 <div class="note danger">
     <span class="label">&ldquo;Everything&rdquo; includes other horses, and &ldquo;herds&rdquo; does not</span>
     <p>

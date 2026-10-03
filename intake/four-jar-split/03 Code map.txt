@@ -90,7 +90,7 @@ THINGS THAT LOOK BUILT BUT ARE NOT
 
 3. WHICH JAR OWNS WHAT: neoforge/server (N/server)
 --------------------------------------------------
-BASE: BandLife, BandSpacing, BarebackSteeringHandler, BondFollowGoal, CrouchFeedGoal (hunger-feeding,
+BASE (command whistle, added on main 2026-10-03: HorseOrdering, OrderCombatGoal, OrderFollowGoal, OrderGrazeGoal, OrderStayGoal and C/care CommandWheel, HorseOrder, HorseOrders; HorseOrders reads Gene, see file 08): BandLife, BandSpacing, BarebackSteeringHandler, BondFollowGoal, CrouchFeedGoal (hunger-feeding,
   check), DebugAnnounce, EnderWhistleCalls, EquestrianHandler (UNVERIFIED: levelling for jumps),
   FeedFeedback (UNVERIFIED), HerdGoals, HerdSocialHandler, HorseCareHandler (split: scheduler, bond, hunger,
   healing, herd in Base; breed awards and the gelded bonus to Breeding subscribers), HorseEscapeGoal,

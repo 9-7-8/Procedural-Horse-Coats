@@ -69,6 +69,9 @@ public final class BondFollowGoal extends Goal {
         if (!horse.isTamed() || horse.isLeashed() || horse.isVehicle()) {
             return false;
         }
+        if (HorseOrdering.hasOrder(horse)) {
+            return false; // an order (Stay, Follow, Wander) owns where this horse goes
+        }
         int tier = tierOf(horse);
         if (tier < 2) {
             return false;
@@ -91,7 +94,7 @@ public final class BondFollowGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
-        if (!horse.isTamed() || horse.isLeashed() || horse.isVehicle()) {
+        if (!horse.isTamed() || horse.isLeashed() || horse.isVehicle() || HorseOrdering.hasOrder(horse)) {
             return false;
         }
         if (tierOf(horse) < 2) {
@@ -172,6 +175,9 @@ public final class BondFollowGoal extends Goal {
             if (!horse.isTamed() || horse.isLeashed() || horse.isVehicle() || tierOf(horse) < 1) {
                 return false;
             }
+            if (HorseOrdering.current(horse).order() == com.example.horsegenetics.common.care.HorseOrder.WANDER) {
+                return false; // Wander means "ignore me", eyes included
+            }
             LivingEntity o = horse.getOwner();
             if (!ownerUsable(horse, o) || horse.distanceToSqr(o) > LOOK_RANGE * LOOK_RANGE
                     || !reach.test(horse, o)) {
@@ -185,6 +191,9 @@ public final class BondFollowGoal extends Goal {
         public boolean canContinueToUse() {
             if (!horse.isTamed() || horse.isLeashed() || horse.isVehicle() || tierOf(horse) < 1) {
                 return false;
+            }
+            if (HorseOrdering.current(horse).order() == com.example.horsegenetics.common.care.HorseOrder.WANDER) {
+                return false; // Wander means "ignore me", eyes included
             }
             LivingEntity o = this.owner;
             return ownerUsable(horse, o)

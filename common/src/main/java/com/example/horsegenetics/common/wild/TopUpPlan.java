@@ -165,7 +165,7 @@ public final class TopUpPlan {
     // Days and stamps
     // ------------------------------------------------------------------
 
-    /** The game day a game time falls on. Game time, so /time set moves nothing; sleeping does. */
+    /** The game day a game time falls on. Game time, so neither /time set nor sleeping moves it. */
     public static long dayOf(long gameTime) {
         return Math.floorDiv(gameTime, WildLifetime.DAY_TICKS);
     }

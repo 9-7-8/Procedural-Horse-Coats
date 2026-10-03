@@ -475,6 +475,12 @@ public final class ModItems {
      */
     public static final DeferredItem<EnderWhistleItem> ENDER_WHISTLE =
             register("ender_whistle", p -> new EnderWhistleItem(p.stacksTo(1)));
+    /**
+     * Gives a horse a standing order from a wheel - see {@link CommandWhistleItem}. One
+     * to a stack, like the ender whistle.
+     */
+    public static final DeferredItem<CommandWhistleItem> COMMAND_WHISTLE =
+            register("command_whistle", p -> new CommandWhistleItem(p.stacksTo(1)));
 
     public static void register(IEventBus modEventBus) {
         ITEMS.register(modEventBus);

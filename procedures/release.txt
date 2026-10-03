@@ -132,7 +132,11 @@ STEPS
    `./gradlew :neoforge-26.1.2:build`. Open the jar to confirm its version and the new
    classes.
 
-7. Tag and publish:
+7. Tag and publish. FIRST `git fetch origin main` and look at `git log HEAD..origin/main`
+   as its own step. If it lists anything, merge it (a merge commit), rebuild and stop to
+   re-read the note, and only then tag. Never chain the fetch and the tag in one command:
+   on 2026-10-03 a relicensing landed between the jar and the tag, the push of main was
+   rejected, and the tag and release went up from a commit not yet on main.
      git tag -a v<new> -m "<title>"
      git push origin main --tags
      gh release create v<new> <jar> --title "<title>" --notes-file <note>

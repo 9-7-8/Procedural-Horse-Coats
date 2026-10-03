@@ -146,6 +146,7 @@ public final class HorseStasisHandler {
      * {@code transmuteCopy}.
      */
     public static ItemStack swallow(ServerLevel level, Horse horse, ItemStack chamber, String name) {
+        HorseOrdering.clear(horse); // a horse comes out of a chamber with no order (command whistle)
         ItemStack filled = StasisChamberItem.withHorse(chamber, snapshot(horse, name));
         // Written before the discard, while the horse still has a position. This
         // is the last thing that will ever be recorded about where it is: a

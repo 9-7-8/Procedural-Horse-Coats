@@ -123,3 +123,4 @@ O3  ServerConfig split style.
 O4  What the supplier villager sells (if Equipment items, those trades move to Equipment).
 O5  Which QOL progress awards read the breed (they move to Breeding as subscribers).
 O6  Whether a Base-only horse's random sex is saved at first sight (it must not re-roll on reload).
+O7  Command whistle combat orders without Breeding (they read a gene): hide them (Recommended) or allow every horse. See file 08, risks.

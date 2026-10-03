@@ -172,6 +172,11 @@ const RECIPES = [
     out: 'ender_whistle', from: 'horse_whistle', mode: 'flat', hue: 0.78, sat: 0.70, light: -0.02,
     note: "Ender purple. It teleports the horse to you rather than calling it.",
   },
+  {
+    out: 'command_whistle', from: 'horse_whistle', mode: 'flat', hue: 0.33, sat: 0.55, light: 0.0,
+    note: "Green, for go: it gives orders rather than calling. Not amethyst purple, although "
+        + "a shard is in the recipe, because the ender whistle already owns purple.",
+  },
 
   // Three papers were one sprite - which is drawn as a BOOK, and has been since
   // both items existed. The research paper keeps it.
