@@ -4,8 +4,8 @@ SAY        : "ship a release", "cut a release", "push a release", "release it",
              "new version", "tag it", "is it worth a release"
 RUNS       : local only (the jar cannot build in the cloud sandbox)
 TAKES      : a substantial batch of unreleased work on main, and the owner's yes
-LEAVES     : every code test green, a tag, a GitHub release with the jar, and the same
-             note on wiki/releases.html
+LEAVES     : every code test green, README.md brought up to date, a tag, a GitHub release
+             with the jar, and the same note on wiki/releases.html
 ==============================================================================
 
 WHEN TO USE
@@ -112,6 +112,22 @@ STEPS
    - when replacing a broken release, the "replace <version>" line, and whether saves
      made under it are damaged.
 
+5b. Bring README.md up to date, BEFORE the build and the tag, so the README in the tagged
+   commit describes the release. It is the page every new player sees first. Use the note
+   you just wrote as the checklist:
+   - plain player-facing language, as it is now: what a player can do, never genes-as-code,
+     class names or how it is built (the wiki holds that);
+   - every player-facing feature in the range is in "What you can do", in the same voice and
+     one short paragraph each; fold a small one into a paragraph that exists;
+   - nothing in it describes something unbuilt. Move a finished feature out of "Still being
+     built"; never add a planned one to the body;
+   - the numbered facts still hold: the Minecraft and loader lines, the install steps, the
+     `phc` folder and settings files and their key names (grep the config classes), the
+     "Your saves carry forward" baseline against wiki/releases.html#saves, and a new compat
+     series if step 2b moved it;
+   - links resolve (check-links.mjs covers wiki pages; look at the GitHub ones by eye).
+   Commit it with the version bump (step 4) so the tag points at a README that is true.
+
 6. Build the jar from a CLEAN tree whose HEAD is the commit you will tag:
    `./gradlew :neoforge-26.1.2:build`. Open the jar to confirm its version and the new
    classes.
@@ -142,6 +158,7 @@ and the summary says which; or:
 - the release set is green;
 - `gh release view` lists the jar;
 - the wiki note matches the GitHub note;
+- README.md was reviewed against the range and is in the tagged commit;
 - main and the tag are pushed, and the tree is clean.
 
 NEVER
@@ -154,6 +171,7 @@ NEVER
   saves loading, and never without confirming with the owner.
 - Never reuse a version number, or reissue one with different bytes.
 - Never skip the release set: the full suite runs before every release.
+- Never tag with a README that is out of date: it is the first thing a new player reads.
 - Never stop at a pushed tag.
 - Never write the note from memory instead of the tag range.
 - Never release from the cloud.
@@ -161,6 +179,6 @@ NEVER
 
 SEE ALSO
 --------
-test-tiers (the release set); launch-game (the server boot); end-session; fix-bug;
+README.md (step 5b); test-tiers (the release set); launch-game (the server boot); end-session; fix-bug;
 process-intake; wiki/releases.html (the numbering and saves notes); CLAUDE.md hard
 rule 10.
