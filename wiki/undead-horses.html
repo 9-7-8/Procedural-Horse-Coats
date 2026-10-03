@@ -34,8 +34,13 @@
 
 <h2 id="your-old-horses">What happens to your vanilla undead horses</h2>
 <p>
-    Each one becomes one of this mod&rsquo;s horses the first time its chunk loads, with nothing
-    to do. It keeps its <strong>name, owner, tame state, saddle, armour, lead, age and the share
+    <strong>Nothing happens to them until a server operator turns conversion on.</strong> It ships
+    off, because it cannot be undone. An operator first runs <code>/horseundead test</code>: one
+    vanilla skeleton horse and then one zombie horse are spawned beside them (tamed to them, named
+    and saddled), converted by the real converter, and checked. Once that passes,
+    <code>/horseundead enable</code> turns it on for the whole server
+    (<a href="#config">below</a>). From then on, each vanilla undead horse becomes one of this
+    mod&rsquo;s horses the first time its chunk loads, with nothing more to do. It keeps its <strong>name, owner, tame state, saddle, armour, lead, age and the share
     of its health it had left</strong>, and gets a pedigree and a coat of its own.
     <strong>Its speed, jump and hearts are re-rolled from its new genes</strong>, so a zombie
     horse comes out slower and much tougher than it was, a skeleton horse quicker and frailer. A
@@ -47,9 +52,9 @@
     <li><strong>A skeleton trap is still a trap.</strong> It springs as vanilla&rsquo;s does; the
         horse it leaves behind converts after.</li>
     <li><strong>Other mods&rsquo; undead horses are left alone.</strong></li>
-    <li><strong>A server can switch it off:</strong> <code>undead.convert</code> in the server
-        config (<a href="#config">below</a>). Off, vanilla undead horses stay vanilla; ones already
-        converted stay what they became.</li>
+    <li><strong>It can be switched off again</strong> with <code>/horseundead disable</code> or
+        <code>undead.convert</code> in the server config (<a href="#config">below</a>). Off,
+        vanilla undead horses stay vanilla; ones already converted stay what they became.</li>
 </ul>
 
 <h2 id="the-breeds">The two breeds</h2>
@@ -100,7 +105,14 @@
 
 <h2 id="config">The switch</h2>
 <p>
-    <code>undead.convert</code> (server config, default <code>true</code>). Removing the mod, or
+    <code>undead.convert</code> (server config, default <code>false</code> since 0.5.042; the
+    owner reversed treatment D2 on 2026-10-03, so a server opts in only after watching it work).
+    <code>/horseundead</code> (operators, level 2) says whether it is on and whether a test has
+    passed since the server started; <code>test</code> converts one skeleton and one zombie horse
+    beside the operator; <code>enable</code>, refused until a test has passed, sets the key and
+    saves it; <code>disable</code> clears it. Each test subject carries the persistent flag
+    <code>horsegenetics:convert_anyway</code>, which lets the converter take that one horse on
+    its own entity tick with the key off; the command never converts from its own call. Removing the mod, or
     turning this off, leaves any converted horse as a plain <code>minecraft:horse</code>, as every
     other horse of this mod is left.
 </p>
@@ -296,6 +308,9 @@
     times baseline, not a true doubling); the offering amounts and the zombie&rsquo;s calm window;
     the drop counts; the size band. None has been looked at in a game.
 </p>
+
+<h3 id="open-undead-test-command">The test command</h3>
+<p>Run <code>/horseundead test</code> as an operator: a tamed, named, saddled skeleton horse and then a zombie horse appear beside you, each converts within a second or two, chat says PASSED, and <code>/horseundead enable</code> is accepted only after that. Checked by the conversion gametests and <code>undead_test_command</code>, which runs the command through the real dispatcher; never run in a game.</p>
 
 <h3 id="open-undead-off">Switched off</h3>
 <p>With <code>undead.convert = false</code>, vanilla undead horses stay vanilla and converted ones keep working as horses.</p>

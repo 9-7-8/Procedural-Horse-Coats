@@ -78,7 +78,8 @@ import java.util.UUID;
  * has crashed the chunk system before (3.2). And not while a player is riding it
  * (D8), not while it is an unsprung skeleton trap (D5), never a dead or dying one,
  * never a modded subclass (exact types only, D7), never one a debug pen marked
- * {@link #KEEP_VANILLA}, and never at all with {@code undead.convert} off. Which breed
+ * {@link #KEEP_VANILLA}, and never with {@code undead.convert} off unless the horse
+ * carries {@link #CONVERT_ANYWAY}. Which breed
  * of the pool it becomes is {@code UndeadPools.pick}: one living in its biome first.
  */
 @EventBusSubscriber
@@ -86,6 +87,12 @@ public final class UndeadHorseConverter {
 
     /** A persistent-data flag that keeps a vanilla undead horse vanilla - for a debug pen's control case. */
     public static final String KEEP_VANILLA = "horsegenetics:keep_vanilla";
+
+    /**
+     * A persistent-data flag that converts this one horse even with {@code undead.convert}
+     * off - the subjects of {@code /horseundead test} and the conversion gametest.
+     */
+    public static final String CONVERT_ANYWAY = "horsegenetics:convert_anyway";
 
     /** Tries per entity per level load before it is left vanilla for the session. */
     private static final int MAX_TRIES = 5;
@@ -123,7 +130,8 @@ public final class UndeadHorseConverter {
                 || !(entity.level() instanceof ServerLevel level)) {
             return;
         }
-        if (!ServerConfig.undeadConvert() || HANDLED.contains(entity.getId())) {
+        if (HANDLED.contains(entity.getId())
+                || !(ServerConfig.undeadConvert() || undead.getPersistentData().getBooleanOr(CONVERT_ANYWAY, false))) {
             return;
         }
         if (!readyToConvert(undead)) {
@@ -214,6 +222,8 @@ public final class UndeadHorseConverter {
         if (!load(horse, tag, undead)) {
             return null;
         }
+        // The flag did its job; the horse it made is an ordinary horse.
+        horse.getPersistentData().remove(CONVERT_ANYWAY);
         found(horse, breed, rng, customName, owner, fraction);
         if (tamed && owner != null) {
             arrivePassified(horse, owner, level.getGameTime());

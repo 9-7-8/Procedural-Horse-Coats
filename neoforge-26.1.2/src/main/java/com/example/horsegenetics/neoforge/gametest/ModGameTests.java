@@ -1524,6 +1524,9 @@ public final class ModGameTests {
         zombie.setInvulnerable(true);
         net.minecraft.world.entity.animal.equine.SkeletonHorse skeleton =
                 helper.spawn(net.minecraft.world.entity.EntityType.SKELETON_HORSE, new BlockPos(2, 0, 0));
+        // undead.convert ships off; the flag converts these two as /horseundead test's subjects are.
+        zombie.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
+        skeleton.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
         UUID zombieId = zombie.getUUID();
         UUID skeletonId = skeleton.getUUID();
         UUID ownerId = owner.getUUID();
@@ -1598,6 +1601,7 @@ public final class ModGameTests {
         net.minecraft.world.entity.animal.equine.SkeletonHorse trap =
                 helper.spawn(net.minecraft.world.entity.EntityType.SKELETON_HORSE, BlockPos.ZERO);
         trap.setTrap(true);
+        trap.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
         UUID id = trap.getUUID();
         ServerLevel level = helper.getLevel();
         helper.runAfterDelay(12L, () -> {
@@ -1612,6 +1616,61 @@ public final class ModGameTests {
         });
     }
 
+    /**
+     * <b>With {@code undead.convert} at its default (off), a vanilla undead horse stays
+     * vanilla</b> - conversion reaches a world only through {@code /horseundead enable}.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_OFF_BY_DEFAULT =
+            TEST_FUNCTIONS.register("undead_off_by_default", () -> ModGameTests::undeadOffByDefault);
+
+    private static void undeadOffByDefault(GameTestHelper helper) {
+        // The declared default, not the live value: phc/server.toml belongs to the game
+        // directory, and run-gametest's may still hold a value written under the old default.
+        if (com.example.horsegenetics.neoforge.ServerConfig.UNDEAD_CONVERT.getDefault()) {
+            throw new GameTestAssertException(Component.literal("undead.convert is on by default"), 0);
+        }
+        // In memory only (never saved): every other undead test converts through its own flag.
+        com.example.horsegenetics.neoforge.ServerConfig.UNDEAD_CONVERT.set(false);
+        net.minecraft.world.entity.animal.equine.SkeletonHorse skeleton =
+                helper.spawn(net.minecraft.world.entity.EntityType.SKELETON_HORSE, BlockPos.ZERO);
+        UUID id = skeleton.getUUID();
+        helper.runAfterDelay(12L, () -> {
+            if (!(helper.getLevel().getEntity(id) instanceof net.minecraft.world.entity.animal.equine.SkeletonHorse)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a skeleton horse was converted with undead.convert off"), 0);
+            }
+            helper.succeed();
+        });
+    }
+
+    /**
+     * <b>{@code /horseundead test} works through the real dispatcher</b>: {@code enable}
+     * is refused before a test has passed, and the test then converts its skeleton and
+     * zombie subjects and reports a pass. {@code enable} is not run after it, because it
+     * writes the config file.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_TEST_COMMAND =
+            TEST_FUNCTIONS.register("undead_test_command", () -> ModGameTests::undeadTestCommand);
+
+    private static void undeadTestCommand(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        net.minecraft.commands.CommandSourceStack source = level.getServer().createCommandSourceStack()
+                .withSuppressedOutput().withLevel(level)
+                .withPosition(net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(2, 0, 2))));
+        com.example.horsegenetics.neoforge.ServerConfig.UNDEAD_CONVERT.set(false);
+        level.getServer().getCommands().performPrefixedCommand(source, "horseundead enable");
+        if (com.example.horsegenetics.neoforge.ServerConfig.undeadConvert()
+                && !com.example.horsegenetics.neoforge.server.HorseUndeadCommand.testPassed()) {
+            throw new GameTestAssertException(Component.literal("/horseundead enable was accepted before a test"), 0);
+        }
+        level.getServer().getCommands().performPrefixedCommand(source, "horseundead test");
+        helper.succeedWhen(() -> {
+            if (!com.example.horsegenetics.neoforge.server.HorseUndeadCommand.testPassed()) {
+                throw new GameTestAssertException(Component.literal("/horseundead test has not passed yet"), 0);
+            }
+        });
+    }
+
     /** <b>A horse marked to stay vanilla stays vanilla</b> - the debug pens' control case. */
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_KEEP_VANILLA =
             TEST_FUNCTIONS.register("undead_keep_vanilla", () -> ModGameTests::undeadKeepVanilla);
@@ -1621,6 +1680,8 @@ public final class ModGameTests {
                 helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE_HORSE, BlockPos.ZERO);
         zombie.getPersistentData().putBoolean(
                 com.example.horsegenetics.neoforge.server.UndeadHorseConverter.KEEP_VANILLA, true);
+        // Asked to convert anyway as well: keep_vanilla must still win.
+        zombie.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
         UUID id = zombie.getUUID();
         helper.runAfterDelay(12L, () -> {
             if (!(helper.getLevel().getEntity(id) instanceof net.minecraft.world.entity.animal.equine.ZombieHorse)) {
@@ -2002,6 +2063,8 @@ public final class ModGameTests {
         // Twelve ticks armed, then disarmed and converted.
         register(event, environment, UNDEAD_TRAP_WAITS, 100);
         register(event, environment, UNDEAD_KEEP_VANILLA, 100);
+        register(event, environment, UNDEAD_OFF_BY_DEFAULT, 100);
+        register(event, environment, UNDEAD_TEST_COMMAND, 300);
         // Twenty-five ticks to be founded, then a scan (every thirty) to act on it.
         register(event, environment, WILD_HORSE_MOVES_ON, 200);
         register(event, environment, WILD_TOUCHED_HORSE_GOES_TO_THE_REALM, 200);

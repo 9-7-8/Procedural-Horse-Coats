@@ -405,10 +405,13 @@ public final class ServerConfig {
 
     /**
      * <b>{@code undead.convert}</b> - does a vanilla zombie or skeleton horse become
-     * one of this mod's horses the first time it is ticked? On by default (undead
-     * treatment D2). Off, the converter returns at once and every vanilla undead
-     * horse is left exactly as vanilla made it; horses already converted stay the
-     * horses they became. See {@code server/UndeadHorseConverter}.
+     * one of this mod's horses the first time it is ticked? <b>Off by default</b>
+     * (owner, 2026-10-03, reversing treatment D2 until conversion has been watched in
+     * play): an operator runs {@code /horseundead test} on their own server and, once
+     * it passes, {@code /horseundead enable} turns this on. Off, the converter returns
+     * at once and every vanilla undead horse is left exactly as vanilla made it;
+     * horses already converted stay the horses they became. See
+     * {@code server/UndeadHorseConverter} and {@code server/HorseUndeadCommand}.
      */
     public static final ModConfigSpec.BooleanValue UNDEAD_CONVERT;
 
@@ -841,14 +844,16 @@ public final class ServerConfig {
                         "this does not affect. Off, the command is not registered at all.")
                 .define("commands.horse_jockey", true);
         UNDEAD_CONVERT = builder
-                .comment("Whether vanilla zombie and skeleton horses become this mod's horses. (default: true)",
+                .comment("Whether vanilla zombie and skeleton horses become this mod's horses. (default: false)",
                         "Each one converts the first time it is ticked - old saves included - into a",
-                        "Graveborn Warmblood or a Great Valley Skeleton Horse, keeping its name, owner,",
-                        "saddle, armour, lead, age and health fraction; its stats are re-rolled from its",
-                        "genes. A skeleton trap converts only after it has sprung, and a horse with a",
-                        "player on it waits for the rider to get off. Off, vanilla undead horses are",
-                        "left alone; ones already converted stay converted.")
-                .define("undead.convert", true);
+                        "Graveborn Warmblood, a Great Valley Skeleton Horse, or in the Nether a Blackened",
+                        "Skeleton Horse, keeping its name, owner, saddle, armour, lead, age and health",
+                        "fraction; its stats are re-rolled from its genes and its bond starts at zero.",
+                        "A skeleton trap converts only after it has sprung, and a horse with a player on",
+                        "it waits for the rider to get off. This cannot be undone: ones already converted",
+                        "stay converted. Try it first with /horseundead test, which converts one test",
+                        "horse of each kind; /horseundead enable then turns this on.")
+                .define("undead.convert", false);
         JOCKEY_PASS_DAYS = builder
                 .comment("How many Minecraft days one jockey pass is worth. (default: 1)",
                         "Also the length of a bare /horsejockey with no number given.",
@@ -1236,7 +1241,21 @@ public final class ServerConfig {
         try {
             return UNDEAD_CONVERT.get();
         } catch (IllegalStateException notLoaded) {
+            return false;
+        }
+    }
+
+    /**
+     * Turn {@code undead.convert} on or off and write it to the world's server config.
+     * Returns false when the config is not loaded, so nothing was changed.
+     */
+    public static boolean setUndeadConvert(boolean on) {
+        try {
+            UNDEAD_CONVERT.set(on);
+            UNDEAD_CONVERT.save();
             return true;
+        } catch (IllegalStateException notLoaded) {
+            return false;
         }
     }
 
