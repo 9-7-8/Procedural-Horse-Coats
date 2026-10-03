@@ -58,6 +58,13 @@ public final class BreedSpawnHandler {
                 event.setSpawnCancelled(true);
             }
             horse.getPersistentData().putBoolean(WILD_SPAWN_KEY, true);
+            // ...and its lifetime (WildTurnover). Not a spawner's horse: somebody
+            // built that spawner. Not in the realm or the debug corridor, which
+            // never turn anything over.
+            if (reason != EntitySpawnReason.SPAWNER && !event.isSpawnCancelled()
+                    && !WildTurnover.excluded(event.getLevel().getLevel())) {
+                WildTurnover.stamp(horse, event.getLevel().getLevel().getGameTime());
+            }
         }
     }
 }

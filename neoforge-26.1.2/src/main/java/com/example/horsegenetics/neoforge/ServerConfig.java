@@ -288,6 +288,20 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue REALM_RELEASE_EMERALDS;
 
     /**
+     * <b>The wild horse turnover</b> ({@code server/WildTurnover}, {@code server/WildTopUp}):
+     * {@code wild.despawn_days}, {@code wild.realm_handoff}, {@code wild.topup_minimum},
+     * {@code wild.topup_cell_chunks} and {@code wild.topup_player_radius}. Read through
+     * {@link #wildDespawnDays()}, {@link #wildRealmHandoff()} and {@link #wildTopUp()};
+     * the rules are {@code common/wild/WildLifetime} and {@code TopUpPlan}, which own the
+     * defaults.
+     */
+    public static final ModConfigSpec.IntValue WILD_DESPAWN_DAYS;
+    public static final ModConfigSpec.BooleanValue WILD_REALM_HANDOFF;
+    public static final ModConfigSpec.IntValue WILD_TOPUP_MINIMUM;
+    public static final ModConfigSpec.IntValue WILD_TOPUP_CELL_CHUNKS;
+    public static final ModConfigSpec.IntValue WILD_TOPUP_PLAYER_RADIUS;
+
+    /**
      * <b>{@code ops.resurrect_grace_minutes}</b> - how long a dead horse is kept
      * resurrectable, counted <b>only while its owner is logged in</b>. Read
      * through {@link #resurrectGraceTicks()}, spent by
@@ -531,6 +545,52 @@ public final class ServerConfig {
                         "fires you have left the dimension and there is nobody to hand emeralds to.",
                         "0 turns the payment off.")
                 .defineInRange("realm.release_emeralds", 2, 0, 64);
+        WILD_DESPAWN_DAYS = builder
+                .comment("How many Minecraft days a wild horse stays before it moves on. (default: 3)",
+                        "Counted from when it spawned, in game time, so the days pass while its chunk",
+                        "is unloaded too. A horse never goes while a player is within 32 blocks of it,",
+                        "and a herd goes together. A tamed horse never goes.",
+                        "One a player has worked with - led, fed, ridden - goes to the horse realm",
+                        "instead of vanishing (see wild.realm_handoff).",
+                        "0 switches the lifetime off, the realm hand-off with it. Server-side.")
+                .defineInRange("wild.despawn_days",
+                        com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_DAYS,
+                        0, com.example.horsegenetics.common.wild.WildLifetime.MAX_DAYS);
+        WILD_REALM_HANDOFF = builder
+                .comment("Whether a wild horse a player has led, fed or ridden goes to the horse realm",
+                        "when its days are up, rather than vanishing. (default: true)",
+                        "It arrives still wild and still itself - name, coat, papers - and, like any",
+                        "horse in the realm, makes the field a little bigger.",
+                        "Off: it vanishes like the rest. Server-side.")
+                .define("wild.realm_handoff",
+                        com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_REALM_HANDOFF);
+        WILD_TOPUP_MINIMUM = builder
+                .comment("The fewest wild horses a patch of ground near a player should have. (default: 5)",
+                        "Once a Minecraft day, the first time a player comes near each patch (a square",
+                        "of wild.topup_cell_chunks chunks), a patch with fewer gets a whole new herd -",
+                        "a trigger, not a cap: the herd may take it well past this number.",
+                        "Changing the breeds' biomes (phc/breed-spawning.toml) and restarting refills",
+                        "every patch once more on its next visit, so newly added biomes fill in.",
+                        "0 switches the top-up off. Server-side.")
+                .defineInRange("wild.topup_minimum",
+                        com.example.horsegenetics.common.wild.TopUpPlan.DEFAULT_MINIMUM,
+                        0, com.example.horsegenetics.common.wild.TopUpPlan.MAX_MINIMUM);
+        WILD_TOPUP_CELL_CHUNKS = builder
+                .comment("The size of one top-up patch, in chunks along each side. (default: 8)",
+                        "8 is 128 by 128 blocks. Smaller patches mean more horses overall, because",
+                        "every patch is held to wild.topup_minimum. Server-side.")
+                .defineInRange("wild.topup_cell_chunks",
+                        com.example.horsegenetics.common.wild.TopUpPlan.DEFAULT_CELL_CHUNKS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MIN_CELL_CHUNKS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MAX_CELL_CHUNKS);
+        WILD_TOPUP_PLAYER_RADIUS = builder
+                .comment("How near a player a top-up patch must be to be checked, in blocks. (default: 96)",
+                        "Only patches this close to a player who is actually there are ever looked",
+                        "at, and only their loaded chunks; nothing far away is touched. Server-side.")
+                .defineInRange("wild.topup_player_radius",
+                        com.example.horsegenetics.common.wild.TopUpPlan.DEFAULT_PLAYER_RADIUS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MIN_PLAYER_RADIUS,
+                        com.example.horsegenetics.common.wild.TopUpPlan.MAX_PLAYER_RADIUS);
         RESURRECT_GRACE_MINUTES = builder
                 .comment("An optional time limit on bringing a dead horse back with /horseresurrect. (default: 0)",
                         "Counted in minutes of the OWNER'S OWN TIME ONLINE since the horse died, not",
@@ -1002,6 +1062,37 @@ public final class ServerConfig {
             return REALM_RELEASE_EMERALDS.get();
         } catch (IllegalStateException notLoaded) {
             return 2;
+        }
+    }
+
+    /** {@code wild.despawn_days}, safely. 0 is off. */
+    public static int wildDespawnDays() {
+        try {
+            return WILD_DESPAWN_DAYS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_DAYS;
+        }
+    }
+
+    /** {@code wild.realm_handoff}, safely. */
+    public static boolean wildRealmHandoff() {
+        try {
+            return WILD_REALM_HANDOFF.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_REALM_HANDOFF;
+        }
+    }
+
+    /**
+     * The three top-up settings as the value {@code common/wild/TopUpPlan} takes. Any
+     * one that cannot be read falls back to the whole default, never a mix.
+     */
+    public static com.example.horsegenetics.common.wild.TopUpPlan.Settings wildTopUp() {
+        try {
+            return new com.example.horsegenetics.common.wild.TopUpPlan.Settings(
+                    WILD_TOPUP_MINIMUM.get(), WILD_TOPUP_CELL_CHUNKS.get(), WILD_TOPUP_PLAYER_RADIUS.get());
+        } catch (IllegalStateException | IllegalArgumentException notLoaded) {
+            return com.example.horsegenetics.common.wild.TopUpPlan.Settings.DEFAULT;
         }
     }
 

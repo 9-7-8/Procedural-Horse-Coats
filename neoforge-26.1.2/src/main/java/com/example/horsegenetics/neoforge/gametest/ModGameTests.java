@@ -1631,6 +1631,292 @@ public final class ModGameTests {
         });
     }
 
+    // ------------------------------------------------------------------
+    // Wild horse turnover (WildTurnover, WildTopUp). The gametest server runs
+    // with mob spawning off, so the top-up's own tick never fires here; these
+    // call its pieces directly. "Nobody leaves while watched" is pinned in
+    // common (WildLifetimeTest) and is a play check: a mock player joins the whole
+    // level, and would hold every other test's horse in place too.
+    // ------------------------------------------------------------------
+
+    private static final long WILD_DAY = com.example.horsegenetics.common.wild.WildLifetime.DAY_TICKS;
+
+    /** A natural spawn from server code, as the top-up makes one - the path that must fire FinalizeSpawnEvent. */
+    private static net.minecraft.world.entity.animal.equine.Horse naturalHorse(GameTestHelper helper, BlockPos rel) {
+        net.minecraft.world.entity.animal.equine.Horse horse = net.minecraft.world.entity.EntityType.HORSE.spawn(
+                helper.getLevel(), helper.absolutePos(rel), net.minecraft.world.entity.EntitySpawnReason.NATURAL);
+        if (horse == null) {
+            throw new GameTestAssertException(Component.literal(
+                    "a NATURAL horse spawn was refused here - the breed settings allow nothing in this biome?"), 0);
+        }
+        if (!com.example.horsegenetics.neoforge.server.WildTurnover.stamped(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a NATURAL spawn from server code carries no wild_born stamp - FinalizeSpawnEvent did not "
+                            + "reach BreedSpawnHandler"), 0);
+        }
+        return horse;
+    }
+
+    /**
+     * Force-load the 3x3 chunks round a wild test. The harness forces only the
+     * chunk its 1x1 structure stands in, and a horse a few blocks over can be in a
+     * neighbour that never ticks - so no scan, no founding, no placement. The
+     * harness unforces every forced chunk when the batch ends.
+     */
+    private static void keepTicking(GameTestHelper helper) {
+        BlockPos at = helper.absolutePos(BlockPos.ZERO);
+        int cx = at.getX() >> 4;
+        int cz = at.getZ() >> 4;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                helper.getLevel().setChunkForced(cx + dx, cz + dz, true);
+            }
+        }
+    }
+
+    /** Make a stamped horse four days old. */
+    private static void age(net.minecraft.world.entity.animal.equine.Horse horse, ServerLevel level) {
+        horse.getPersistentData().putLong(com.example.horsegenetics.neoforge.server.WildTurnover.BORN_KEY,
+                level.getGameTime() - 4 * WILD_DAY);
+    }
+
+    /** <b>An untouched wild horse past its days, with nobody near, is gone.</b> */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WILD_HORSE_MOVES_ON =
+            TEST_FUNCTIONS.register("wild_horse_moves_on", () -> ModGameTests::wildHorseMovesOn);
+
+    private static void wildHorseMovesOn(GameTestHelper helper) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        net.minecraft.world.entity.animal.equine.Horse horse = naturalHorse(helper, BlockPos.ZERO);
+        UUID id = horse.getUUID();
+        // Founded first (twenty ticks), so what goes is a real horse with a record.
+        helper.runAfterDelay(25L, () -> {
+            if (level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse h) {
+                age(h, level);
+            }
+            helper.succeedWhen(() -> {
+                if (level.getEntity(id) != null) {
+                    throw new GameTestAssertException(Component.literal(
+                            "a four-day-old untouched wild horse is still here"), 0);
+                }
+            });
+        });
+    }
+
+    /** <b>A wild horse a player worked with goes to the realm, wild, instead of vanishing.</b> */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WILD_TOUCHED_HORSE_GOES_TO_THE_REALM =
+            TEST_FUNCTIONS.register("wild_touched_horse_goes_to_the_realm", () -> ModGameTests::wildTouchedHorseGoesToTheRealm);
+
+    private static void wildTouchedHorseGoesToTheRealm(GameTestHelper helper) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        // The harness has no realm (see HORSE_REALM_IS_BUILT), so there this proves the
+        // other half of the rule: a hand-off that cannot happen never throws the horse away.
+        ServerLevel realm = level.getServer().getLevel(HorseRealm.REALM_LEVEL);
+        net.minecraft.world.entity.animal.equine.Horse horse = naturalHorse(helper, BlockPos.ZERO);
+        UUID id = horse.getUUID();
+        helper.runAfterDelay(25L, () -> {
+            if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse h)) {
+                throw new GameTestAssertException(Component.literal("the horse was gone before it was aged"), 0);
+            }
+            String name = com.example.horsegenetics.neoforge.server.HorseRecords.of(h).displayName();
+            h.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.WildTurnover.TOUCHED_KEY, true);
+            age(h, level);
+            if (realm == null) {
+                helper.runAfterDelay(65L, () -> {
+                    if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse still)
+                            || !still.isAlive()) {
+                        throw new GameTestAssertException(Component.literal(
+                                "with no realm to go to, the touched horse was thrown away"), 0);
+                    }
+                    if (!com.example.horsegenetics.neoforge.server.WildTurnover.stamped(still)
+                            || !still.getPersistentData().getBooleanOr(
+                                    com.example.horsegenetics.neoforge.server.WildTurnover.TOUCHED_KEY, false)) {
+                        throw new GameTestAssertException(Component.literal(
+                                "a failed hand-off lost the horse's stamp or its touched mark, so it never tries again"), 0);
+                    }
+                    helper.succeed();
+                });
+                return;
+            }
+            helper.succeedWhen(() -> {
+                if (level.getEntity(id) != null) {
+                    throw new GameTestAssertException(Component.literal("the touched horse has not left yet"), 0);
+                }
+                if (!(realm.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse there)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "the touched horse left but is not in the realm - it was thrown away"), 0);
+                }
+                if (there.isTamed() || !there.isPersistenceRequired()
+                        || com.example.horsegenetics.neoforge.server.WildTurnover.stamped(there)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "the horse in the realm is tamed, not persistent, or still on a wild lifetime"), 0);
+                }
+                String arrived = com.example.horsegenetics.neoforge.server.HorseRecords.of(there).displayName();
+                if (!arrived.equals(name)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "it left as " + name + " and arrived as " + arrived), 0);
+                }
+                there.discard();
+            });
+        });
+    }
+
+    /** <b>A tamed horse never leaves, and taming takes its lifetime away.</b> */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WILD_TAMED_HORSE_STAYS =
+            TEST_FUNCTIONS.register("wild_tamed_horse_stays", () -> ModGameTests::wildTamedHorseStays);
+
+    private static void wildTamedHorseStays(GameTestHelper helper) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        net.minecraft.world.entity.animal.equine.Horse horse = naturalHorse(helper, BlockPos.ZERO);
+        UUID id = horse.getUUID();
+        helper.runAfterDelay(25L, () -> {
+            if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse h)) {
+                throw new GameTestAssertException(Component.literal("the horse was gone before it was tamed"), 0);
+            }
+            h.setTamed(true);
+            age(h, level);
+            // Two scans' worth.
+            helper.runAfterDelay(65L, () -> {
+                if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse still)
+                        || !still.isAlive()) {
+                    throw new GameTestAssertException(Component.literal("a tamed horse was turned over"), 0);
+                }
+                if (com.example.horsegenetics.neoforge.server.WildTurnover.stamped(still)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "a tamed horse still carries its wild lifetime"), 0);
+                }
+                helper.succeed();
+            });
+        });
+    }
+
+    /**
+     * <b>A wild horse from before the stamp gets a fresh lifetime; a kept one does not.</b>
+     * Both are founded wild-herd members; only the persistent one - what every
+     * deliberate path (release, cowboy, stall) makes a horse - must be left alone.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WILD_OLD_HORSE_IS_STAMPED =
+            TEST_FUNCTIONS.register("wild_old_horse_is_stamped", () -> ModGameTests::wildOldHorseIsStamped);
+
+    private static void wildOldHorseIsStamped(GameTestHelper helper) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        net.minecraft.world.entity.animal.equine.Horse old = net.minecraft.world.entity.EntityType.HORSE.spawn(
+                level, helper.absolutePos(BlockPos.ZERO), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        net.minecraft.world.entity.animal.equine.Horse kept = net.minecraft.world.entity.EntityType.HORSE.spawn(
+                level, helper.absolutePos(new BlockPos(1, 0, 0)), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        if (old == null || kept == null) {
+            throw new GameTestAssertException(Component.literal("a summoned horse was refused"), 0);
+        }
+        kept.setPersistenceRequired();
+        if (com.example.horsegenetics.neoforge.server.WildTurnover.stamped(old)) {
+            throw new GameTestAssertException(Component.literal("a summoned horse was stamped at spawn"), 0);
+        }
+        UUID oldId = old.getUUID();
+        UUID keptId = kept.getUUID();
+        helper.runAfterDelay(5L, () -> {
+            for (UUID id : new UUID[] {oldId, keptId}) {
+                if (level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse h) {
+                    var care = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get();
+                    h.setData(care, h.getData(care).withWildHerd(id, "feral_mixed", "TRADITIONAL"));
+                }
+            }
+            helper.succeedWhen(() -> {
+                if (!(level.getEntity(oldId) instanceof net.minecraft.world.entity.animal.equine.Horse o)
+                        || !com.example.horsegenetics.neoforge.server.WildTurnover.stamped(o)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "an old non-persistent wild-herd horse has not been stamped yet"), 0);
+                }
+                if (level.getEntity(keptId) instanceof net.minecraft.world.entity.animal.equine.Horse k
+                        && com.example.horsegenetics.neoforge.server.WildTurnover.stamped(k)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "a persistent (kept) horse was given a wild lifetime"), 0);
+                }
+            });
+        });
+    }
+
+    /**
+     * <b>A top-up pack is stamped and founds as one herd.</b> The pack is placed by
+     * the top-up's own code, so this is what its natural spawn from server code
+     * does: every member stamped through BreedSpawnHandler, and, once founded, all
+     * of them following one lead.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WILD_PACK_FOUNDS_ONE_HERD =
+            TEST_FUNCTIONS.register("wild_pack_founds_one_herd", () -> ModGameTests::wildPackFoundsOneHerd);
+
+    private static void wildPackFoundsOneHerd(GameTestHelper helper) {
+        keepTicking(helper);
+        helper.runAfterDelay(2L, () -> spawnTestPack(helper));
+    }
+
+    private static void spawnTestPack(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos origin = helper.absolutePos(BlockPos.ZERO);
+        BlockPos spot = com.example.horsegenetics.neoforge.server.WildTopUp.groundAt(level, origin.getX(), origin.getZ());
+        java.util.List<net.minecraft.world.entity.animal.equine.Horse> pack =
+                com.example.horsegenetics.neoforge.server.WildTopUp.spawnPack(level, spot, 4, level.getRandom());
+        if (pack.size() < 2) {
+            throw new GameTestAssertException(Component.literal(
+                    "the top-up placed " + pack.size() + " of a pack of 4 at " + spot.toShortString()), 0);
+        }
+        for (net.minecraft.world.entity.animal.equine.Horse h : pack) {
+            if (!com.example.horsegenetics.neoforge.server.WildTurnover.stamped(h)) {
+                throw new GameTestAssertException(Component.literal("a top-up horse carries no wild_born stamp"), 0);
+            }
+        }
+        java.util.List<UUID> ids = pack.stream().map(net.minecraft.world.entity.Entity::getUUID).toList();
+        helper.succeedWhen(() -> {
+            java.util.Set<UUID> leads = new java.util.HashSet<>();
+            for (UUID id : ids) {
+                if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse h)) {
+                    throw new GameTestAssertException(Component.literal("a pack member is gone"), 0);
+                }
+                var care = h.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get());
+                if (!care.inWildHerd()) {
+                    throw new GameTestAssertException(Component.literal("a pack member is not founded into a herd yet"), 0);
+                }
+                leads.add(care.herd().orElseThrow());
+            }
+            if (leads.size() != 1) {
+                throw new GameTestAssertException(Component.literal(
+                        "one top-up pack founded " + leads.size() + " herds"), 0);
+            }
+        });
+    }
+
+    /** <b>A cell is rolled once a day:</b> the second pass on the same day does nothing and spawns nothing. */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WILD_CELL_ROLLS_ONCE_A_DAY =
+            TEST_FUNCTIONS.register("wild_cell_rolls_once_a_day", () -> ModGameTests::wildCellRollsOnceADay);
+
+    private static void wildCellRollsOnceADay(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        // The largest minimum, so the first pass is sure to roll whatever stands here.
+        com.example.horsegenetics.common.wild.TopUpPlan.Settings settings =
+                new com.example.horsegenetics.common.wild.TopUpPlan.Settings(
+                        com.example.horsegenetics.common.wild.TopUpPlan.MAX_MINIMUM, 2, 96);
+        BlockPos at = helper.absolutePos(BlockPos.ZERO);
+        long cell = com.example.horsegenetics.common.wild.TopUpPlan.cellKey(
+                com.example.horsegenetics.common.wild.TopUpPlan.cellOf(at.getX(), 2),
+                com.example.horsegenetics.common.wild.TopUpPlan.cellOf(at.getZ(), 2));
+        long today = com.example.horsegenetics.common.wild.TopUpPlan.dayOf(level.getGameTime());
+        long sig = 0x5eed_5eedL;
+        com.example.horsegenetics.neoforge.data.WildCellLedger ledger =
+                com.example.horsegenetics.neoforge.data.WildCellLedger.get(level);
+        com.example.horsegenetics.neoforge.server.WildTopUp.rollCell(level, cell, settings, today, sig, ledger);
+        if (!com.example.horsegenetics.common.wild.TopUpPlan.current(ledger.stampOf(cell, today), today, sig)) {
+            throw new GameTestAssertException(Component.literal("a rolled cell was not stamped"), 0);
+        }
+        int second = com.example.horsegenetics.neoforge.server.WildTopUp.rollCell(level, cell, settings, today, sig, ledger);
+        if (second != 0) {
+            throw new GameTestAssertException(Component.literal(
+                    "the second pass on the same day spawned " + second + " horses"), 0);
+        }
+        helper.succeed();
+    }
+
     public static void register(IEventBus modEventBus) {
         TEST_FUNCTIONS.register(modEventBus);
         modEventBus.addListener(ModGameTests::onRegisterGameTests);
@@ -1716,6 +2002,15 @@ public final class ModGameTests {
         // Twelve ticks armed, then disarmed and converted.
         register(event, environment, UNDEAD_TRAP_WAITS, 100);
         register(event, environment, UNDEAD_KEEP_VANILLA, 100);
+        // Twenty-five ticks to be founded, then a scan (every thirty) to act on it.
+        register(event, environment, WILD_HORSE_MOVES_ON, 200);
+        register(event, environment, WILD_TOUCHED_HORSE_GOES_TO_THE_REALM, 200);
+        register(event, environment, WILD_TAMED_HORSE_STAYS, 200);
+        register(event, environment, WILD_OLD_HORSE_IS_STAMPED, 200);
+        // A pack placed at once, then about twenty ticks for the founder to run.
+        register(event, environment, WILD_PACK_FOUNDS_ONE_HERD, 200);
+        // Two synchronous passes over one cell.
+        register(event, environment, WILD_CELL_ROLLS_ONCE_A_DAY, 100);
     }
 
     /**
