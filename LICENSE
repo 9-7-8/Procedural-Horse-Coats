@@ -1,69 +1,29 @@
-Horse Genetics
+MIT License
+
 Copyright (c) 2026 Ixora
 
-This project is licensed under the Creative Commons
-Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-Full legal code: https://creativecommons.org/licenses/by-nc/4.0/legalcode
-Human-readable summary (from Creative Commons): https://creativecommons.org/licenses/by-nc/4.0/
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-================================================================================
-SUMMARY IN PLAIN LANGUAGE (not a substitute for the license itself)
-================================================================================
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
-You are free to:
-
-  - SHARE   - copy and redistribute this project, or any part of it, in any
-              medium or format.
-  - ADAPT   - remix, transform, and build on this project to make something
-              new, for any purpose, even one you intend to charge money for
-              overall - see the NonCommercial term below for the one limit
-              on that.
-
-You do not need to ask permission to do either of these, as long as you
-follow the terms below.
-
-Under the following terms:
-
-  - ATTRIBUTION
-    You must credit Ixora and link back to this repository:
-        https://github.com/9-7-8/Procedural-Horse-Coats
-    State clearly what you changed, if anything. Any reasonable way of
-    doing this is fine - a line in your README or credits screen is enough.
-    You may not imply that I endorse you or your project.
-
-  - NONCOMMERCIAL, WITH A SPECIFIC MEANING HERE
-    Any portion of this project that you use, adapt, or build on may not
-    appear in a version of your work that is sold exclusively for money.
-    Concretely:
-
-      OK:      Free mod, accepting donations or tips.
-      OK:      "Pay what you want" IF $0 is a real, unrestricted option.
-      NOT OK:  Selling a modpack, plugin, or derivative that includes any
-               part of this project, with no free version available.
-      NOT OK:  Putting a derivative behind a paywall, even a small one.
-
-    In short: if it contains something from this project, a free version
-    has to exist and be genuinely available - donations and optional
-    payment are fine, a payment requirement is not.
-
-  - NO ADDITIONAL RESTRICTIONS
-    You may not add legal terms or technical measures (DRM, license keys,
-    etc.) that would stop others from doing anything this license already
-    allows them to do.
-
-================================================================================
-NOTICES
-================================================================================
-
-No warranties are given. This license may not give you every permission
-needed for your intended use - for example, other rights such as
-trademark, privacy, or publicity rights may still apply and are not
-covered here.
-
-Public domain material, and anything covered by an applicable exception
-or limitation to copyright, is unaffected by this license.
-
-This summary is provided for convenience and does not replace the license.
-The full legal terms are at the link above and govern in the event of any
-conflict with this summary.
+--------------------------------------------------------------------------------
+This file covers the CODE (and the data and documentation that is not art).
+The ART is under CC BY-SA 4.0 instead: see LICENSE-ART. Third-party pieces
+keep their own licences: see THIRD_PARTY_NOTICES.md and LICENSES/.
+This grant also applies retroactively to every earlier release and commit of
+this project, which were first published under CC BY-NC 4.0.
+The plain-language version is the wiki page wiki/licensing.html.

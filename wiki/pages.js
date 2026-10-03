@@ -109,6 +109,7 @@ window.HG.pages = {
                 { href: "for-testers.html", text: "For Testers", kind: "core", views: ["coding"] },
                 { href: "known-gaps.html", text: "Known gaps & lessons", kind: "core", views: ["coding"] },
                 { href: "compatibility.html", text: "Mod compatibility", kind: "core", views: ["coding"] },
+                { href: "licensing.html", text: "Licensing", kind: "core", views: ["gameplay"] },
                 { href: "roadmap.html", text: "Roadmap", kind: "core", views: ["coding"] },
                 { href: "roadmap-execution.html", text: "Roadmap execution", kind: "core", views: ["coding"] },
                 { href: "decisions.html", text: "Design decisions", kind: "core", views: ["coding","science"] },

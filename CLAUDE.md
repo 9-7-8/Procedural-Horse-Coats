@@ -192,7 +192,7 @@ session log (`write-session-log`), docs commit, this file's audit, verify clean,
 
 ---
 ## License
-CC BY-NC 4.0 (see `LICENSE`). Forks and derivatives are welcome without asking
-but must credit the original repo and link back, and no portion may appear in a
-paid derivative with no free version available. Donations on an otherwise-free
-derivative are fine. Check a third-party licence is compatible before vendoring.
+Code is MIT (`LICENSE`); original art is CC BY-SA 4.0 (`LICENSE-ART`,
+`LICENSES/CC-BY-SA-4.0.txt`); third-party pieces keep their own terms. The
+single source of truth is `wiki/licensing.html`. Check a third-party licence is
+compatible before vendoring, and add it to `THIRD_PARTY_NOTICES.md` and that page.

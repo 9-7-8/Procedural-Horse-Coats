@@ -197,6 +197,53 @@ Built? No.
 
 
 ------------------------------------------------------------------------------
+Wild horse turnover - implementation treatment.txt                sized 2026-10-02
+- One unit: 3-day wild lifetime (touched horses to the realm), cell top-up (<5 per 8x8-chunk cell)   L  c  owner-free; no Open needs the owner
+Built? No (no wild despawn, cell ledger or spawn stamp exists).
+
+------------------------------------------------------------------------------
+Port feasibility survey.txt   (NOT A UNIT: evidence for the five Port treatments)   sized 2026-10-03
+All five ports ship only after 1.0.0 (owner, 2026-10-03). Recommended order: Fabric, NeoForge latest, Forge 1.12.2 (after its go/no-go), Bedrock (after its spike).
+
+------------------------------------------------------------------------------
+Port - NeoForge latest - implementation treatment.txt             sized 2026-10-03
+- Piece 1: build and boot on latest NeoForge (version-by-version)   M-L a  No: which version is "latest" and keep 26.1.2? Waits on 26.3 leaving beta
+- Piece 2: rendering and mixin repairs                              S-L a  owner-free; with piece 1
+Built? No (everything is pinned to 26.1.2).
+
+------------------------------------------------------------------------------
+Port - Fabric 26.1.2 - implementation treatment.txt               sized 2026-10-03
+- Piece 1: shared seam (extract 334 vanilla-only files + data)      L  b  No: module style, one jar or two
+- Piece 2: Fabric boots and registers                               M  c  needs piece 1
+- Piece 3: events (273 handlers)                                    L  c  needs piece 2
+- Piece 4: client                                                   M-L c needs piece 2
+- Piece 5: compat and distribution                                  S  c  No: which compat hooks
+Built? No (no Fabric code exists).
+
+------------------------------------------------------------------------------
+Port - other loaders 26.1.2 - implementation treatment.txt        sized 2026-10-03
+- Piece 1: Quilt boot test of the Fabric jar                        S  c  owner-free; needs Fabric piece 2
+- Piece 2: MinecraftForge 26.1.2 module (optional)                  M  c  No: build at all?
+- Piece 3: written verdict on the rest                              S  c  owner-free
+Built? No.
+
+------------------------------------------------------------------------------
+Port - Bedrock - implementation treatment.txt                     sized 2026-10-03
+- Piece 1: one-day spike (five questions; local-only)               S  b  owner-free to run, owner must OK installing the client
+- Piece 2: genetics core as generated JS (:bedrock-js)              L  b  owner-free; needs piece 1
+- Piece 3: bounded layered coat                                     L  c  No: touches philosophy (infinite coat space)
+- Piece 4: horse, breeding, names, items                            L  c  No: free vs Marketplace
+- Piece 5: forms, villagers, dimension (re-askable)                 M-L c  No: void-only dimension
+Built? No.
+
+------------------------------------------------------------------------------
+Port - Forge 1.12.2 - implementation treatment.txt                sized 2026-10-03
+- Piece 1: go/no-go (pack list read 2026-10-03: no horse mod = GO; licence/pack author left)   S  b  No: licence, ask the pack author
+- Piece 2: common/ builds on Java 8                                 L  b  No: in place or generated copy
+- Piece 3: forge-1.12.2 skeleton and the horse                      L  c  needs 1 and 2
+- Piece 4: breeding, names, stats, a few items                      M  c  No: which items
+- Piece 5: portal, villagers, carts, stasis, H menu (each re-askable)  L  c  No: each
+Built? No.
 Command whistle - implementation treatment.txt                    sized 2026-10-03
 - Piece 1: item, order attachment, hold-wheel, Stay/Follow/
   Wander/Rejoin herd, sneak = all nearby                         M-L b  owner-free; spike the wheel first

@@ -1,0 +1,5 @@
+Licensing
+(Project / who owns what, and what you may do)
+The code is MIT. The art is CC BY‑SA 4.0. A few pieces that ship with the mod are somebody else’s and keep their own terms. This page says that twice — once in plain words, once in the formal language — and then lists the exceptions file by file. The author is not a lawyer and does not sell this software; the licences are here so people know they may share and build on it, not to be defended in court.
+
+Project / who owns what, and what you may do Licensing The code is MIT. The art is CC BY‑SA 4.0. A few pieces that ship with the mod are somebody else’s and keep their own terms. This page says that twice — once in plain words, once in the formal language — and then lists the exceptions file by file. The author is not a lawyer and does not sell this software; the licences are here so people know they may share and build on it, not to be defended in court. Stables Carts Vet’s kit Releases The code is MIT, the art is CC BY-SA 4.0, and the third-party pieces keep their own terms.

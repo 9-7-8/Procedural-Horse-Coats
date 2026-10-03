@@ -149,7 +149,7 @@ function jar(entries) {
 const TOML = `
 modLoader = "javafml"
 loaderVersion = "[1,)"
-license = "CC BY-NC 4.0"
+license = "MIT"
 
 [[mods]]
 modId = "${MOD_ID}"

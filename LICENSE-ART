@@ -1,0 +1,37 @@
+Horse Genetics - art licence
+
+Copyright (c) 2026 Ixora
+
+The ORIGINAL ART of this project is licensed under the Creative Commons
+Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
+
+    SPDX-License-Identifier: CC-BY-SA-4.0
+    Full legal code: LICENSES/CC-BY-SA-4.0.txt
+    Also online:     https://creativecommons.org/licenses/by-sa/4.0/legalcode
+
+CC BY-SA is the copyleft licence for creative work: the same idea as the GPL,
+written for art rather than for code. Use it, change it, share it, even sell
+it - credit Ixora, link back to
+https://github.com/9-7-8/Procedural-Horse-Coats, say what you changed, and
+release your adapted version under CC BY-SA 4.0 too.
+
+WHAT "ART" MEANS HERE
+  Art made for this project by its author or by Claude on the author's behalf:
+    - item, block, entity, GUI and breed-egg textures and sprites
+    - the gene icons, item art and block previews on the wiki
+    - the models (not the coat sheets, which are Mojang's)
+    - the artwork and written prose of the wiki and README
+  The pipeline that draws a coat is CODE (MIT). A coat texture it produces
+  belongs to whoever made that horse and is not covered by this file.
+
+WHAT IT DOES NOT COVER
+  Anything someone else made keeps its own licence, even inside this
+  repository or the mod jar: the three Raven Fantasy icons, the UsefulCarts
+  textures and sounds (MIT), the three stable buildings, and anything
+  derived from Minecraft itself (Mojang's): the horse coat sheets (white,
+  skeleton, zombie, adult and foal) are Mojang's converted art, and the saddle
+  overrides may be too - their origin is still to be checked. The list, with the exact files, is THIRD_PARTY_NOTICES.md and the
+  wiki page wiki/licensing.html.
+
+No warranty is given. This file is a notice, not the licence: the legal code
+in LICENSES/CC-BY-SA-4.0.txt governs.

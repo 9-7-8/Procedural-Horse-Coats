@@ -4,6 +4,7 @@ Decided by the owner on 2026-10-01:
 - Decided 2026-10-01 but each needs a few more owner answers before building: cutie marks get a gene/breed-biased item pool (wiki/gene-cutie-mark.html#plan-pool-bias), and the breed format gets all four studbook kinds before any sport horse (wiki/breed-book.html#plan-studbooks).
 
 Routines to write up as procedures (procedures/FORMAT.txt; then a row in procedures/INDEX.txt, a .claude/skills wrapper and the keyword memory):
+- A "survey" route for write-intake-document: a dated evidence file in intake/ with no treatment suffix (so process-intake does not count it), plus one treatment per option. First used 2026-10-03 for the port survey.
 - compat-test: build the synthetic mod and boot with it, to prove the modded-material layer.
 - measure-worldgen: run Structure.generate headlessly with a control, before claiming a worldgen change helped.
 - add-a-wood-family: a per-wood block or item (gates, jumps, carts), written twice (author-time bake and run-time compat). Rare and easy to get wrong: a drift shows as a purple cube and logs nothing. add-an-item step 15 covers the outline today.

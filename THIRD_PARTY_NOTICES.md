@@ -18,8 +18,8 @@ Credit, as the author's own licence suggests it:
 
 ### These three files are NOT covered by this mod's licence
 
-Horse Genetics is CC BY-NC 4.0, which lets you reuse and redistribute it. That
-grant is **carved back for the three files listed above**, because it is not ours
+Horse Genetics is MIT (code) and CC BY-SA 4.0 (art), which let you reuse and
+redistribute it. Those grants are **carved back for the three files listed above**, because it is not ours
 to give. The Clockwork Raven User Asset License Agreement permits their use in a
 free mod on the condition that the mod's users are told they may not take the
 assets on, so:
@@ -31,7 +31,8 @@ assets on, so:
   * A fork of this mod inherits those restrictions on these three files, and
     inherits nothing more than this mod itself holds.
 
-Everything else in this repository is under the mod's own licence as normal. If
+Everything else in this repository is under the mod's own licences as normal
+(`LICENSE` for code, `LICENSE-ART` for art). If
 you want these icons for your own project, get them from the author's store page
 above - they are free.
 
@@ -122,6 +123,20 @@ does ship for the horse coats - see the next section.)
     twelve times over). Moved out of the wood loop.
   - `wheel` renamed to `cart_wheel` to keep the host namespace unambiguous.
 
+## Generated stables (three buildings)
+
+The three buildings the mod generates as stables were made by other people and
+downloaded from Planet Minecraft:
+
+  * Horse Stable, by Seuchendoktor
+  * Stables, by Alpha_One_Seventeen
+  * TM U Stable, by Tyiarrah
+
+Sources and sizes are on `wiki/stables.html`. They are **not** covered by this
+mod's licences. Planet Minecraft submissions carry no uniform licence and the
+terms of these three have not yet been checked one by one; until they are,
+treat the buildings as not freely reusable and do not extract them.
+
 ## Horse coat sheets (Mojang)
 
 The coat sheets below are **Minecraft textures by Mojang Studios**, converted to
@@ -153,3 +168,8 @@ a new sheet converted from Mojang art is a new line there and here.
 The unconverted 64px originals of the two white sheets ship beside them
 (`horse_white_vanilla64.png`, `horse_white_baby_vanilla64.png`); the undead
 originals are kept in the repository only, under `common/sheet-sources/minecraft/`.
+
+## Where the rest is written
+
+The plain-language version of all of this, with a table of every exception, is
+`wiki/licensing.html`.

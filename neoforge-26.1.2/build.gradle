@@ -310,5 +310,7 @@ tasks.named('jar', Jar) {
     // inside it - a file sitting in the repository is not a copy shipping with
     // the build. See THIRD_PARTY_NOTICES.md.
     from(rootProject.file('LICENSES')) { into 'META-INF/licenses' }
+    from(rootProject.file('LICENSE')) { into 'META-INF' }
+    from(rootProject.file('LICENSE-ART')) { into 'META-INF' }
     from(rootProject.file('THIRD_PARTY_NOTICES.md')) { into 'META-INF' }
 }

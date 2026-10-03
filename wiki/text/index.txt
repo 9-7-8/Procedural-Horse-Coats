@@ -3298,6 +3298,14 @@ wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
 wiki/items.html#verified-carrot-growth	coding	Verified: the crop grows
 wiki/items.html#verified-chest-loot	coding	Verified: the rates are the configured ones
 wiki/known-gaps.html#migrated	all	Migrated open checks
+wiki/licensing.html#ccbysa	gameplay	Art: Creative Commons Attribution-ShareAlike 4.0 International
+wiki/licensing.html#faq	gameplay	Common questions
+wiki/licensing.html#formal	gameplay	The formal language
+wiki/licensing.html#history	gameplay	Changes of licence
+wiki/licensing.html#mit	gameplay	Code: MIT License
+wiki/licensing.html#plain	gameplay	In plain words
+wiki/licensing.html#scope	gameplay	Which files are which
+wiki/licensing.html#third-party	gameplay	Pieces that are not ours
 wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
 wiki/model-parts.html#bone-versions	coding	Every part with bone in it has a bone version

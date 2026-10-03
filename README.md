@@ -12,7 +12,7 @@ a serious horse-breeding sim, but for horses in Minecraft.
 
 - **Minecraft:** 26.1.2
 - **Loader:** [NeoForge](https://neoforged.net/)
-- **License:** [CC BY-NC 4.0](#license) - free to use, share, and build on
+- **License:** code [MIT](LICENSE), art [CC BY-SA 4.0](LICENSE-ART) - free to use, share, and build on
 - **Wiki:** **[9-7-8.github.io/Procedural-Horse-Coats](https://9-7-8.github.io/Procedural-Horse-Coats/)**
   - every gene's alleles, odds, and effects; the breed list; the breeding and
     stat-inheritance rules; the coat-generation engine; and a walkthrough for
@@ -226,22 +226,19 @@ Both ship inside the jar, under `META-INF/`.
 
 ## License
 
-**[CC BY-NC 4.0](LICENSE)** - Attribution-NonCommercial.
+- **Code: [MIT](LICENSE).** Use it, change it, sell it, put it in your own mod -
+  just keep the copyright line and licence text with it.
+- **Art: [CC BY-SA 4.0](LICENSE-ART)** (the art-world counterpart of the GPL; full
+  text in [LICENSES/CC-BY-SA-4.0.txt](LICENSES/CC-BY-SA-4.0.txt)). Use and share
+  it freely, even commercially - credit this repository, say what you changed,
+  and release your changed version under the same licence.
+- **Third-party pieces keep their own terms**: the cart system (MIT, as above),
+  three item icons you may not take out of this mod, and three borrowed stable
+  buildings. The file-by-file list is [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+  and the [Licensing wiki page](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/licensing.html),
+  which also has the plain-language version.
 
-The cart system is the exception: it is MIT-licensed third-party code, and
-stays MIT. MIT code is free to live inside a differently licensed mod, and the
-licence above covers everything else.
-
-In short:
-
-- **Share and adapt it freely**, for any purpose, including one you charge
-  money for overall.
-- **Credit this repository** and link back to it.
-- **Don't sell a derivative with no free version available.** A modpack,
-  plugin, or fork that includes any part of this project has to have a
-  genuinely free way to get it - accepting donations or tips on an otherwise
-  free release is fine; requiring payment is not.
-
-The [full license file](LICENSE) has the complete plain-language summary and
-links to the legal text; that file is authoritative if anything here reads
-differently.
+**Every earlier release is relicensed too.** Releases and commits made before this change
+were published under CC BY-NC 4.0; the copyright holder (Ixora) now also grants all of
+them, every tag and every jar, under the MIT and CC BY-SA 4.0 terms above, the same
+third-party exceptions applying. You may still use them under CC BY-NC 4.0 if you prefer.

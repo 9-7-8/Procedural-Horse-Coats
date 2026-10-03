@@ -1,0 +1,78 @@
+2026-10-03 16:57 - Port feasibility surveyed and scoped (time is the end of the session)
+
+ASKED
+- /write-intake-document (free text): "Create a survey, and then write it up in intake, that
+  discusses how difficult these ports would be: 1) neoforge on the absolute latest version of
+  mc 2) fabric on 26.1.2 3) any other modloader on 26.1.2 on java 4) bedrock on the latest
+  version of bedrock 5) 1.12.2 on forge (to integrate with the highly-used 1.12.2 technic
+  pack)". Came of it: intake/Port feasibility survey.txt plus five treatments.
+- Answers to four questions: five separate treatments (not one file); the pack is "The 1.12.2
+  Pack" (CurseForge link given); flag Realistic Horse Genetics as a go/no-go check; "I want to
+  wait till I finally hit my 1.0.0 release, and THEN I'll release every port based on that
+  release."
+
+DONE
+- Follow-up (same session): owner pasted The 1.12.2 Pack's dependency list. It has no horse
+  mod (go on overlap), MixinBooter (plain Forge, Java 8 likely), Hwyla/Patchouli/Baubles
+  hooks, and a licence of All Rights Reserved on the pack itself. Recorded in
+  intake/Port - Forge 1.12.2 piece 1 and the survey. Also fixed the stale "no Java 9+" lede
+  on wiki/architecture.html (rebaked wiki/text/architecture.txt).
+- Wrote the survey, five treatments (Port - NeoForge latest, Fabric 26.1.2, other loaders
+  26.1.2, Bedrock, Forge 1.12.2) and their blocks in intake/Sizing.txt. No code, wiki or asset
+  touched. Research: four subagents (Java loader landscape, Bedrock, 1.12.2/Technic, repo
+  coupling inventory). Proof: grep and wc counts in the survey are dated 2026-10-03.
+
+DECIDED (owner)
+- Later in the session: common/ is NEVER lowered to Java 8 (in place, as a copy, or as a
+  hand-written common-java8/ overlay). The latest NeoForge build is the single source of
+  truth and every port derives from it by build tooling (survey file, RULE section).
+- The 1.12.2 Pack has no horse mod (owner's pasted dependency list); target stays that pack.
+- Five treatments plus a survey; target pack is The 1.12.2 Pack; overlap with Realistic
+  Horse Genetics is a go/no-go (piece 1 of port 5); every port releases only after 1.0.0.
+DECIDED (scoping session, not asked; marked Recommended in the files)
+- Order: Fabric, NeoForge latest after 26.3 leaves beta, Forge 1.12.2 after go/no-go,
+  Bedrock after a spike. Fabric as the only extra loader worth shipping.
+
+FOUND ON THE WAY
+- Egress proxy blocked minecraft.wiki, docs.neoforged.net, fabricmc.net, learn.microsoft.com,
+  wiki.bedrock.dev, technicpack.net, curseforge.com, modrinth.com: most outside facts are
+  search snippets and are marked UNVERIFIED. Re-check them from a machine with access.
+- Latest Java is 26.3 (2026-09-15), NeoForge 26.3.0.40-beta; Bedrock stable 26.50.
+- Tekkit Legends is 1.7.10, not 1.12.2.
+- wiki/text/architecture.txt still says "no Java 9+ APIs" for common/; hard rule 2 and
+  common/build.gradle.kts say Java 17.
+- Record counts differ by grep (104 vs 124); the treatments say so.
+- Bedrock has no runtime texture API: the infinite-coat premise (hard rule 4) is the owner's
+  call (Bedrock piece 3).
+
+PROCEDURES
+- None changed. A "survey, not a unit" file type has no procedure; the survey file avoids the
+  "implementation treatment" suffix so process-intake does not count it.
+
+NOT RUN / NOT CHECKED
+- Nothing built or tested. No full :common:test. Every UNVERIFIED line in the treatments.
+
+RELEASE
+- No release offered; owner holds all ports to 1.0.0.
+
+ALSO ASKED LATER
+- Is Bedrock basically impossible for the coat mechanic? (Yes for per-pixel coats; only a
+  bounded layered coat or QOL features survive; Bedrock treatment piece 3, Open 2.)
+- Resolve the Java 9+ conflict: done (wiki/architecture.html lede; wiki/text rebaked).
+- What is Cleanroom, and Stonecutter versus Cleanroom: answered in chat; facts in the Forge
+  1.12.2 treatment and the survey's RULE section (all search snippets, UNVERIFIED).
+- Best existing tools: JvmDowngrader for 1.12.2 bytecode, Stonecutter for Fabric and nearby
+  versions, MultiLoader-Template layout. Written in the survey.
+
+PROCEDURES (review)
+- Asked all three questions: write-intake-document has no "survey, not a unit" route (this
+  session used a file without the treatment suffix). Added a bullet to intake/To do.txt.
+
+HELD UNTIL 1.0.0
+- The owner will revisit every port when ready for the 1.0.0 release. Nothing is to be
+  built from these files before then unless she says so.
+
+PICK UP FIRST
+- At 1.0.0: re-read intake/Port feasibility survey.txt, then spike JvmDowngrader on common/
+  (Forge 1.12.2 piece 2) and Stonecutter on the Fabric seam (Fabric piece 1), via
+  /process-intake. Before that, nothing from these files.

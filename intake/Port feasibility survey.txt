@@ -1,0 +1,150 @@
+Port feasibility survey (NOT a unit: nothing is built from this file)
+
+Surveyed 2026-10-03 for the owner. Five ports, each scoped as its own treatment:
+  1. Port - NeoForge latest - implementation treatment.txt
+  2. Port - Fabric 26.1.2 - implementation treatment.txt
+  3. Port - other loaders 26.1.2 - implementation treatment.txt
+  4. Port - Bedrock - implementation treatment.txt
+  5. Port - Forge 1.12.2 - implementation treatment.txt
+This file is the shared evidence and the comparison. The treatments point back here and do
+not repeat it. Delete this file when the last port ships or is dropped.
+
+HOW TO READ IT
+--------------
+Sources: web research on 2026-10-03 plus a read of this repo. The egress proxy blocked
+minecraft.wiki, docs.neoforged.net, fabricmc.net, learn.microsoft.com, wiki.bedrock.dev,
+technicpack.net, curseforge.com and modrinth.com, so most outside facts come from search
+snippets. Anything not read in a primary source is marked UNVERIFIED. Effort figures in
+weeks are the surveying session's judgement, not measurements.
+Repo numbers were measured 2026-10-03 (non-blank Java lines; counts are of files):
+  common/ main 389 files / ~69.7k lines; 167 test files / ~28.8k lines (JUnit 5)
+  neoforge-26.1.2 main 538 files / ~102k lines; 2 test files; gametest/ModGameTests 2.5k
+  web/ 4 files / ~2.5k lines (TeaVM 0.15.0, wasm-gc, 65 @JSExport methods)
+  neoforge-26.1.2 resources: 1,460 files (models 618, textures 209, recipes 144, items 142,
+  advancements 112, villager_trade 71)
+Re-measure with `find common/src/main -name '*.java' | xargs cat | wc -l` and the greps in
+the treatments before trusting a number: they are dated, not derived, and drift.
+
+THE ONE-LINE ANSWER FOR EACH PORT
+---------------------------------
+                                         Difficulty    Rough effort      Keeps the premise?
+ 1 NeoForge, latest MC (26.3)            LOW-MEDIUM    1-3 weeks         yes
+ 2 Fabric 26.1.2                         MEDIUM-HIGH   2-4 weeks         yes
+ 3 Any other Java loader, 26.1.2         LOW if Fabric is done (Quilt: free;
+                                         Forge 26.1.2: MEDIUM)            yes
+ 4 Bedrock, latest (26.50)               VERY HIGH     months; a new     NO (bounded coats)
+                                                       product
+ 5 Forge 1.12.2 (Java 8)                 VERY HIGH     months; a new     yes, if the pack
+                                                       product                 has the GPU/heap
+Ordered cheapest to dearest. Ports 1-3 are Java edition and reuse the vanilla-named code.
+Ports 4 and 5 reuse only common/.
+
+WHAT CHANGED SINCE 26.1.2 (the facts all five rest on)
+------------------------------------------------------
+Minecraft Java: 26.1.2 released 2026-04-09. 26.2 followed (Vulkan backend added, sulfur
+caves). LATEST RELEASE 26.3 "Wilderness Bound", 2026-09-15. Latest snapshot 26.4 snapshot 1,
+2026-09-22 (Vulkan default; needs Java 25; data pack format 122). UNVERIFIED: whether a
+later 26.4 snapshot exists.
+NeoForge: 26.2.0.64 (2026-08-19) looks stable (UNVERIFIED). 26.3.0.40-BETA as of ~2026-10-01;
+beta means breaking changes are still allowed, and beta has lasted ~8-10 weeks on the last
+two versions. A 26.4 primer PR already exists.
+Fabric: supports 26.1.x through 26.3 (posts 2026-03-14 and 2026-09-15). Unobfuscated, Mojang
+names, new Loom plugin id net.fabricmc.fabric-loom, Yarn dropped.
+Bedrock: stable 26.50 (2026-09-15), preview 26.60.29, 26.60 due 2026-10-27.
+1.12.2: Forge 14.23.5.2860 is the last build (UNVERIFIED); modern toolchains are
+RetroFuturaGradle and Cleanroom (Java 21 fork of 1.12.2).
+
+THE FIVE FACTS THAT DECIDE EVERYTHING
+-------------------------------------
+A. 334 of 538 neoforge files import only net.minecraft.*, and ~3,500 import lines are vanilla.
+   Only 204 files (38%) touch net.neoforged.* (273 @SubscribeEvent handlers over ~45 event
+   types; 37 DeferredRegister files; 6 data attachments; 4 ModConfigSpec files; 45 payload
+   files; 4 global loot modifiers; 2 biome modifiers; 13 access-transformer lines). So ports
+   1-3 are a loader layer on top of mostly shared vanilla-named code. Port 1 is also a
+   Minecraft-version change, which hits that vanilla code instead.
+B. RENDERING IS THE FRAGILE PART ACROSS MINECRAFT VERSIONS. 26.1->26.2 replaced vertex
+   formats (GpuFormat, dynamic VertexFormat builder) and split Gui into Hud. This mod has 62
+   files on ModelPart / LayerDefinition / RenderState / EntityRenderer and a DynamicTexture
+   path (client/GeneticCoatTextureFactory). 19 mixins, 6 client side, several into render
+   classes (EquipmentLayerRenderer, ModelManager, ModelPart, JumpableVehicleBarRenderer).
+C. BEDROCK HAS NO RUNTIME TEXTURE API. A pack ships texture files and picks among them with
+   Molang (render-controller arrays, entity_multitexture layers, overlay_color tint, at most
+   32 entity properties, enums of at most 16 values). The coat can be a bounded layered
+   approximation, never the per-pixel gene pipeline. This bends CLAUDE.md hard rule 4's
+   premise (a "functionally infinite space"). Owner's call, see treatment 4.
+D. 1.12.2 IS JAVA 8 AND SRG NAMES. common/ is Java 17 with ~100-125 record files, ~180
+   files using List.of/Map.of/Set.of, ~90 switch statements (arrow forms in ~70-100), ~20
+   pattern instanceofs, a handful of sealed/var/text-block uses (counts differ by regex; see
+   treatment 5). All ~111k lines of platform code are a rewrite, as are data-driven formats
+   (item definitions, trade sets, dimension JSON, jigsaw pools) that 1.12.2 does not have.
+E. THE 1.12.2 MARKET HAS REALISTIC HORSE GENETICS (sekelsta; 2.4M CurseForge downloads),
+   BUT THE TARGET PACK DOES NOT SHIP IT. The owner pasted The 1.12.2 Pack's full dependency
+   list on 2026-10-03: no horse mod of any kind, so no overlap. The pack is on plain Forge
+   with MixinBooter (Java 8 likely), 274 dependencies, ~5 GB RAM, pack licence All Rights
+   Reserved (the pack author must choose to add us). See treatment 5, piece 1.
+
+RECOMMENDED ORDER (the owner has said all ports ship only after 1.0.0; see RELEASE)
+-----------------------------------------------------------------------------------
+ 1. Fabric 26.1.2 first. It is independent of Minecraft's version, and doing it forces the
+    loader seam (events, registries, attachments, networking, config) that makes every later
+    Java port cheaper. It also gives Quilt for free (Quilt loads Fabric-API mods).
+ 2. NeoForge latest AFTER 26.3 leaves beta, and after the Fabric seam exists, so a Minecraft
+    bump is done once in shared vanilla code, not twice. Read the 26.2 and 26.3 primers first.
+ 3. Forge 26.1.2 / any other loader only if a real audience asks. No loader besides Fabric
+    and NeoForge is worth it today (Forge's share sits on legacy versions; Quilt's is small).
+ 4. Forge 1.12.2: only after the go/no-go check passes, and as a reduced-scope mod.
+ 5. Bedrock last, and only after a one-day spike answers its five open questions and the
+    owner decides about the infinite-coat premise.
+Do not start port 4 or 5 in the same session as anything else: each is a new product with
+its own repo-shaped module.
+
+STALE FACTS FOUND IN THE REPO (fix when a port touches them; not fixed here)
+---------------------------------------------------------------------------
+- wiki/text/architecture.txt still says common/ has "no Java 9+ APIs"; hard rule 2 and
+  common/build.gradle.kts say Java 17 (settled 2026-09-26). Port 5 must reopen that choice.
+- wiki/api-notes.txt says the mixin refmap was removed (issue 16) and "a 1.12.2 backport
+  does remap and will need the refmap back". Still true; it is a port-5 piece.
+- Nothing in wiki/decisions.txt mentions Fabric or Bedrock. Port 2 and 4 each need a
+  decisions.html entry on shipping (see their treatments).
+
+RELEASE
+-------
+Owner, 2026-10-03: "I want to wait till I finally hit my 1.0.0 release, and THEN I'll
+release every port based on that release." So no port ships, and none is built to ship,
+before 1.0.0. Building a port earlier is allowed only if the owner says so. A port is a new
+jar or add-on, not a save change, so it carries no compat bump of its own (hard rule 10); a
+Bedrock or 1.12.2 world is separate from a Java one. The version of each port release is
+set at that time (release procedure).
+
+OPEN FOR THE OWNER (also on each treatment)
+-------------------------------------------
+1. Port 5 target pack: "The 1.12.2 Pack" (CurseForge, also on Technic; 274 dependencies;
+   no horse mod, per her pasted list). Not Tekkit Legends (that is 1.7.10). Still open: its
+   Java runtime, and whether the pack author would add us.
+2. Port 4: does the "infinite coat space" premise survive a bounded layered coat on Bedrock?
+3. Port 2: ship as separate jar, or in one multiloader jar? (Recommended: separate jars.)
+
+RULE (owner, 2026-10-03): THE LATEST NEOFORGE BUILD IS THE SOURCE OF TRUTH
+--------------------------------------------------------------------------
+common/ stays Java 17 and is never lowered. Every other port (Fabric, older or newer
+Minecraft, Forge 1.12.2) is derived from the current NeoForge sources by build tooling, not
+by maintaining a hand-written second copy. Existing tools surveyed 2026-10-03 (search
+snippets; UNVERIFIED until a spike runs each):
+- Stonecutter (dev.kikugie.stonecutter): a Gradle plugin that keeps ONE source tree and a
+  controller project with one subproject per Minecraft version. A comment preprocessor
+  turns code segments on or off, or swaps snippets, per version (// ?if ... style
+  directives), over Java, Kotlin and resource files. It targets "compatible release
+  versions" (1.21.x to 26.x), not 1.12.2: 1.12.2's API is too different for a comment
+  switch. Best fit: Fabric + NeoForge, and neighbouring Minecraft versions.
+- Cleanroom is NOT an alternative to Stonecutter. It is a 1.12.2 runtime/loader (Forge
+  continuation on modern Java), the thing a 1.12.2 mod runs ON. Stonecutter is a build tool
+  for source across versions. Different layer.
+- JvmDowngrader: bytecode to Java 8 plus API stubs; the way to ship common/ to 1.12.2
+  without changing source.
+- MultiLoader-Template (jaredlll08; a 26.1.2 branch): a plain common + one module per loader
+  layout; this repo already has the shape. Architectury: not needed.
+- Fabric Loom (net.fabricmc.fabric-loom, no remap on 26.x); Mixin and MixinExtras shared across
+  loaders; RetroFuturaGradle or Cleanroom's template for the 1.12.2 build.
+Open (owner): adopt Stonecutter for the Fabric and later-version ports? Recommended: try
+it on the Fabric port first (port 2 piece 1), because that port needs the same source built
+for two loaders.
