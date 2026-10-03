@@ -1312,9 +1312,13 @@
     <a href="#turnover">The turnover</a> is held by <code>WildLifetimeTest</code>, <code>TopUpPlanTest</code> and six
     gametests (<code>wild_horse_moves_on</code>, <code>wild_touched_horse_goes_to_the_realm</code>,
     <code>wild_tamed_horse_stays</code>, <code>wild_old_horse_is_stamped</code>, <code>wild_pack_founds_one_herd</code>,
-    <code>wild_cell_rolls_once_a_day</code>). The harness has no realm level, so the hand-off's arrival was only
-    proven to fall back safely; no test has a player in it, so &ldquo;never in front of anyone&rdquo; is
-    unit-tested only. <strong>Where to look</strong> (with <code>debug.announce</code> on, every move is a
+    <code>wild_cell_rolls_once_a_day</code>), and by a six-game-day soak on a dedicated server
+    (<code>runWildSoakServer</code>, 2026-10-02: a stand-in player walking 59 legs over a normal world): 102 horses
+    moved on, 15 touched ones reached the realm with no failed hand-off, 47 herds topped up, overworld horses
+    peaked at 39 loaded, the tamed and kept controls untouched, tick mean 3.5&ndash;4 ms, no error and no
+    entity-duplicate warning, and the turnover's own handlers about 0.05% of the server thread's samples. So the
+    realm arrival is proven on a server; what no test has had is a real client watching, so &ldquo;never in front
+    of anyone&rdquo; is unit-tested only. <strong>Where to look</strong> (with <code>debug.announce</code> on, every move is a
     <code>[Wild]</code> line):
 </p>
 <ol>

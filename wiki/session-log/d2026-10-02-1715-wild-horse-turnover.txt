@@ -55,6 +55,22 @@ DONE
 - Retired: intake/Wild horse turnover - implementation treatment.txt deleted, its block
   removed from intake/Sizing.txt.
 
+- Follow-up, owner: "can you try and test this, cause when I made a similar-osh patch
+  before, it led to lots and lots of game instability". Built server/DebugWildSoak and the
+  runWildSoakServer run (a FakePlayer walks twelve waypoints while the server sprints;
+  each hop waits at 20 TPS for its ground to tick). Run 3 (6 game days, seed 20261002):
+  RESULT PASS - 102 moved on, 15 to the realm (0 failed), 47 herds / 102 horses topped up,
+  peak 39 loaded horses, tick mean 3.4-4.1 ms, p99 6-12 ms, worst 1.48 s (world
+  generation on arrival), no ERROR, no duplicate/removed-entity warning; WildTurnover +
+  WildTopUp ~27 of 49157 server-thread JFR samples. Runs 1-2 failed on harness faults
+  (mock player's unnegotiated channels crashed login; FakePlayer ignores teleports;
+  sprinting starved chunk generation; a control horse walked off a cliff), each fixed.
+  Hardening from review: WildTurnover's tick handler is now EventPriority.LOWEST, so the
+  mod's 27 other EntityTickEvent.Post subscribers never see a horse it just discarded or
+  moved. Gametests 38/38 and the full build green again after it.
+  Filed #30: a cowboy at 99 63 673 on that seed loses himself and his stock to a lava
+  cave below the hitch, in both runs - pre-existing, not the turnover.
+
 DECIDED
 -------
 Owner calls are the treatment's (3 days, touched -> realm, 32-block watch, 8x8 cells,

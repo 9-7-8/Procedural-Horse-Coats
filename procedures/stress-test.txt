@@ -56,6 +56,16 @@ NEVER
 - Never start a stress server that does not halt itself.
 - Never call a change faster from one run: compare stages with equal horse counts.
 
+THE WILD-TURNOVER SOAK (a sibling run, for stability rather than cost)
+--------------------------------------------------------------------
+`:neoforge-26.1.2:runWildSoakServer -PsoakDays=6 [-PsoakDir=run-soak]` (server/DebugWildSoak).
+A FakePlayer walks twelve waypoints round spawn while the server sprints through game
+days, pausing each hop until its ground is ticking; one `[soak] day N` line a day (tick
+cost, horses, the turnover's counters), a `[soak] RESULT PASS|FAIL` verdict, then it halts.
+Run directory as above, but level-type=minecraft\:normal, and set `debug.tools = false` in
+<dir>/phc/server.toml after the first boot writes it. Use it after any change to wild
+spawning, the turnover, the top-up or the realm hand-off. About 11 minutes for six days.
+
 SEE ALSO
 --------
 test-tiers; launch-game; the 2026-10-01 23:15 session log (the first run and its report).
