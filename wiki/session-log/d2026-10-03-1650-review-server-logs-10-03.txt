@@ -1,0 +1,107 @@
+2026-10-03 16:50 (end) - Server log review: export folder 2026-10-03
+
+ASKED
+-----
+1. "/review-server-logs" - review every export folder not yet reviewed. One was new,
+   2026-10-03. Reviewed in full: issues #33 and #34 filed, #13 commented, two wants
+   added to intake/To do.txt.
+2. "did you get the issues reported in the text chat by a player?" - yes, all four
+   reports players addressed to the mod on 2 Oct (the table below). A recheck of the
+   raw log around a later run of chat found the operator's suffocation-rescue script
+   firing, which the first pass had missed. That became #35.
+3. "/end-session" - this log.
+
+DONE
+----
+- 2b5b6c21: intake/To do.txt gains a heading "From the server (unscoped)" with two
+  player wants. (1) The breeding preview hides every locus both parents settle the
+  same way (BreedingPreview.groups, toggle "Only what varies" / "All loci",
+  HorseBrowserScreen.showSettled defaults false), and a player read that as missing
+  genes. The want is for the pane to say what it hides. (2) True flight steers by
+  pitch while forward is held (HorseFlightRiddenMixin.getRiddenInput), so a rider
+  who looks down dives. The want is a way to fly level while looking around. Both
+  are by design today, so neither is a bug.
+- Issue #33 (open, bug): every member of a magical wild herd logs a false NOT ON ITS
+  SHEET warning for the herd's own magical pair. HerdManager.java:167-168 logs the
+  genotype after BreedFounder.roll applied MagicalVariant's pair. Same shape as #12,
+  whose fix (4899f7d2) covered only the stable path. Evidence: eight Haflinger
+  "Nymphaline Wn/Wf" warnings on 2 Oct, 0.5.041.
+- Issue #34 (open, bug): HorseListing.displayName() (HorseListing.java:140-143)
+  ignores barnName, so the H browser's My horses table, the breeding preview
+  pickers and heading, and the Realm roster show the registered name. HorseRecord's
+  documented rule is that the barn name is what shows in game. A player reported it
+  on 2 Oct.
+- Issue #35 (open, bug, DAMAGE): horses end up inside blocks and suffocate. Four
+  named horses died in walls on 27 Sep, within 15 s and at four heights, with no mod
+  line nearby. The operator's KubeJS suffocation_rescue.js (tweaks/, written 1 Oct)
+  has rescued four more near death since 2 Oct (16:30, 19:18, 20:30 on 2 Oct, 07:44
+  on 3 Oct), and that is hiding the deaths. Cause unknown. The issue lists the
+  candidate paths and a first step: find where the rescued UUIDs were.
+- Issue #13 (open): extended the live tally. Cupboard chunk-load traces from 2 Oct
+  21:39 to 3 Oct 13:00, all 0.5.041: 45 traces, none with a frame of ours. Control:
+  the same awk counter on the whole 2 Oct log reproduced the earlier 115
+  DebugPenManager / DebugWorldWatch frames (60 + 54 + 1).
+- Checked and not filed, with the reason:
+  - saved loci the build can't read (lycan Bat/Prt, magic_on_death Xpl): retired on
+    purpose. Lycan keeps only GROUND forms (LycanGene javadoc), and Xpl was retired
+    by the owner on 2026-09-24 (MagicOnDeathGene javadoc).
+  - removed-recipe errors for braided_rope and horse_hair_bundle: one-time vanilla
+    cleanup on 21 Sep.
+  - [chaos] skipping auroral:thrown_shimmer_spear: handled.
+  - a jukebox in the F6 yard: an operator's block.
+  - the dealer pen killings and powder-snow freezes: already #17 and #18 (closed).
+  - dyed tack in village chests: a player asked to confirm. The rates were proven on
+    2026-10-02 (wiki/items.html). Only the in-hand look is open on its Verification
+    tab.
+Proof: every finding was checked in code on main. A subagent read the four player
+reports; I re-read #34's two displayName methods myself. check-parity: OK.
+
+DECIDED
+-------
+- All calls made without the owner, by the procedure's rules. The preview and flight
+  reports are wants, not bugs, because the code and a comment (or the gene-flying
+  page) call the behaviour deliberate. Recorded in intake/To do.txt.
+- The bloodthirsty bred line in one player's pasture was not filed: killing its own
+  herd is the settled "its own herd included" call (#17's option 4).
+- #35 is labelled bug, not needs-owner: the next step is to find the cause, not to
+  make a decision.
+
+FOUND ON THE WAY
+----------------
+- The 2026-10-03 export's watermark had been reset ("first ever run"), so its window
+  ran from 17 Sep and overlapped every folder already reviewed. The procedure said
+  folders never overlap. Fixed (PROCEDURES).
+- Mistake: the first pass set aside the 2 Oct 21:00-21:27 chat as vague talk with the
+  server's Claude, and did not read the raw log around it. Doing that on the owner's
+  question showed the operator making two horses into spawn eggs (the player said
+  both work), and also the [suffrescue] lines that became #35.
+- The operator's console /tellraw "[Perf]" report threw an NPE on 25 Sep: operator
+  side, reported to the owner, not filed.
+- Some chat was too vague to act on: something that "kills leads", a breed attempt
+  that "keeps failing", and a recipe where "the wood had to match".
+
+PROCEDURES
+----------
+- procedures/review-server-logs.txt changed in three places:
+  - step 1: read the Watermark line, because a reset folder overlaps the reviewed
+    ones;
+  - step 2d: read the raw log around chat aimed at the server's Claude;
+  - step 3: grep the raw logs for [suffrescue], since the operator's rescue script
+    hides deaths, and add the count to #35.
+  Why: all three cost this session either time or a missed finding.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No code changed, so no build and no tests ran (end-session step 2 skips them). A
+  full :common:test run would check nothing this session touched.
+- #35's cause is not investigated. The rescued horses' positions are unknown.
+- No Verification-tab anchors were added.
+
+RELEASE
+-------
+Not offered: no code changed.
+
+PICK UP FIRST
+-------------
+#35, horses suffocating in blocks: find where the rescued horses were, then the path
+that put them there (fix-bug).

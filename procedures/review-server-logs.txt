@@ -41,9 +41,13 @@ BEFORE YOU START
 
 STEPS
 -----
-1. Work out what is new. The folders are already incremental: each holds only what was
-   new when it was written. They never overlap, and nothing needs de-duplicating
-   across them.
+1. Work out what is new. The folders are normally incremental: each holds only what
+   was new when it was written. But the exporter's watermark can be reset, and then a
+   folder repeats everything since the first log. Its 00-SUMMARY.txt says so on the
+   Watermark line ("first ever run - everything retained"), and its Window starts weeks
+   back. 2026-10-03 was one. Read that line before anything else. In an overlapping
+   folder, most findings are already filed: check each against the open AND closed
+   issues before filing, and say in the report that the folder overlapped.
    a. List the dated folders.
    b. Skip every folder name already in the record.
    c. Take the rest in chronological order: by date, then plain, then -run2, -run3.
@@ -78,6 +82,10 @@ STEPS
         labelled tuning, plus needs-owner when it is a balance call. Say what the player
         found, the current value and where it lives, and 2-4 options.
       Either way, paraphrase: no player name and no quote.
+      Players also talk to the server's own Claude in chat, and only their side is
+      logged. When such a run of lines might be about the mod (eggs, horses, genes),
+      read the raw log around it: the operator's command output ("Gave 1 [...]",
+      "Malformed 'horsegenetics:...' component") is the other half of the conversation.
    e. How horses die: 04-equine-deaths.txt. Look for patterns, not single deaths: a
       cause that repeats, a place, a mob, a time. A pattern that is a defect becomes a
       bug issue. A pattern that is balance or AI becomes a tuning issue (with
@@ -97,6 +105,11 @@ STEPS
    be gone once the server runs the release carrying the fix.
    Count only the logs from builds that carry the fix (each log names its jar near line
    178), and give the counts with their time range on the waiting issue.
+   The operator's scripts can HIDE a mod defect. suffocation_rescue.js pulls a nearly
+   dead horse out of a wall and logs "[suffrescue] moved horse <uuid>". Each line is a
+   death that did not happen, so it never reaches 04-equine-deaths.txt, and the exporter
+   does not tag it. Grep the raw logs for it (`zcat -f *.log.gz latest.log | grep
+   suffrescue`) and add the count to issue #35, or to whatever replaced it.
    The raw logs usually run past the last export's window. Anything found there is
    still in scope: file it as usual, and say in "Reported by" that it came from the raw
    log, not from an export. A frame of ours that the fix never named is a new issue
