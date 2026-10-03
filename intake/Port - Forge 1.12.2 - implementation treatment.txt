@@ -107,6 +107,17 @@ Piece 2 - common/ builds on Java 8
     source stays the truth for NeoForge and web/), and downgrade the 100-125 records and
     the ~180 collection factories in a mechanical way. Jabel covers switch expressions and
     var but (UNVERIFIED) not records; records would be hand-expanded or generated.
+    Cleanroom (CleanroomMC/Cleanroom, searched 2026-10-03, UNVERIFIED beyond the README): a
+    1.12.2 Forge continuation on modern Java (the README says Java 25+; other pages say 21 or
+    22), LWJGL 3 + SDL 3, Mixin built in; "compatible with almost all Forge mods", edge cases
+    handled by "Fugue". A relauncher mod lets a Forge pack relaunch on Cleanroom, so players
+    of a Java 8 pack may or may not be on it. Java 8 BYTECODE runs on both; Java 17 bytecode
+    runs only on Cleanroom. So the downgrade is needed unless the pack is Cleanroom-only.
+    Open 8 (owner): "common-java8/" overlay folder of alternate files. Scoping reading: it is
+    not "a couple of files" - ~100-125 record files and ~180 collection-factory files differ
+    (about 300 of 389); an overlay of that size is a second copy that drifts. Recommended:
+    mechanical, not hand-written: collection factories go through one helper (CommonMaps
+    already exists), records become generated classes; keep ONE source of truth in common/.
     Open 2 (owner): rewrite common/ in place to Java 8 (one codebase, loses records for
     everyone), or keep Java 17 as the source and GENERATE a Java 8 copy (a tool, delombok-style,
     tested by running common's tests on it). Recommended: a generator, because it leaves the
