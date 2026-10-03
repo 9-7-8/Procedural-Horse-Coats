@@ -11,7 +11,10 @@ import java.util.EnumSet;
 
 /**
  * <b>The Stay order</b>: hold MOVE at the spot it was given, and walk back to it after
- * anything that moved the horse.
+ * anything that moved the horse. It is also Hunt monsters' way home: that order is
+ * anchored too, and between fights the hunter stands at its spot like a stayed horse.
+ * The fight itself is {@link OrderCombatGoal} picking a target and {@code HorseMeleeGoal}
+ * (3) out-ranking this to chase it; when the order lets the target go, this walks it back.
  *
  * <p><b>Priority {@link #PRIORITY} (4), not the 1 the treatment recommended.</b> A goal at
  * equal or worse priority is never even asked {@code canUse} while a better one runs, so
@@ -46,7 +49,7 @@ public final class OrderStayGoal extends Goal {
             return false;
         }
         HorseOrderAttachment o = HorseOrdering.current(horse);
-        if (o.order() != HorseOrder.STAY || o.anchor().isEmpty()) {
+        if (!o.order().anchored() || o.anchor().isEmpty()) {
             return false;
         }
         BlockPos given = o.anchor().get();

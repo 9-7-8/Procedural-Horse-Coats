@@ -1,5 +1,14 @@
 package com.example.horsegenetics.common.care;
 
+import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.genes.AggressionGene;
+import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
+import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -12,7 +21,10 @@ import java.util.Map;
  * the wording lives in common/).
  *
  * <p>The gate, in the order it is asked, so a horse gives the reason a player can act on
- * first: the lead or the cart wins over any order; then the bond. Rejoin herd is never
+ * first: the lead or the cart wins over any order; then, for a combat order, whether the
+ * horse was bred to fight at all; then the bond. Breeding comes before the bond because
+ * it is the one answer no amount of care changes - a player told "not bonded enough"
+ * would raise the bond for an order the horse can never take. Rejoin herd is never
  * refused - clearing an order is always allowed, even from a horse on a lead.
  */
 public final class HorseOrders {
@@ -32,14 +44,122 @@ public final class HorseOrders {
     /** A Stay horse further than this from its spot walks back to it. */
     public static final double STAY_SLACK_BLOCKS = 1.5;
 
-    /** What the horse is doing that an order has to get past. */
-    public record Situation(int bondTier, boolean leashed, boolean pullingCart) {
+    /** Hunt monsters' reach from its spot, unless the server says otherwise (orders.hunt_radius). */
+    public static final int DEFAULT_HUNT_RADIUS = 16;
+    public static final int MIN_HUNT_RADIUS = 8;
+    public static final int MAX_HUNT_RADIUS = 32;
+
+    /** Defend me's reach from its player, unless the server says otherwise (orders.defend_radius). */
+    public static final int DEFAULT_DEFEND_RADIUS = 8;
+    public static final int MIN_DEFEND_RADIUS = 4;
+    public static final int MAX_DEFEND_RADIUS = 16;
+
+    /**
+     * Below this share of its health a horse on a combat order drops its quarry and goes
+     * back (orders.break_off_health; 0 = fight to the death). An order should not be the
+     * thing that kills a player's horse.
+     */
+    public static final double DEFAULT_BREAK_OFF_HEALTH = 0.3;
+
+    /**
+     * How far past its radius a fight may drift before the horse lets it go. Without it
+     * a monster stepping in and out of the edge would be picked and dropped every scan.
+     */
+    public static final double LEASH_SLACK_BLOCKS = 4.0;
+
+    /** Ticks between a combat order's scans: the aggression locus's beat, a second. */
+    public static final int COMBAT_SCAN_TICKS = AggressionGene.INTERVAL_TICKS;
+
+    /** Most monsters one scan may consider. Every radius effect states a cap. */
+    public static final int COMBAT_MAX_TARGETS = AggressionGene.MAX_TARGETS;
+
+    /** What the horse is doing that an order has to get past, and whether it was bred to fight. */
+    public record Situation(int bondTier, boolean leashed, boolean pullingCart, boolean fighter) {
+    }
+
+    /**
+     * <b>The leash on a combat order</b>: how far from its centre (the spot, for Hunt
+     * monsters; the player, for Defend me) the horse may pick a fight, and when it gives
+     * one up. An order may pursue, but only inside this - the aggression locus's
+     * no-chase rule stands for the gene (wiki/gene-aggression.html).
+     *
+     * @param radius         blocks from the centre a monster may be picked within
+     * @param breakOffHealth the share of its health below which the horse stops; 0 never
+     */
+    public record Leash(double radius, double breakOffHealth) {
+
+        public Leash {
+            radius = Math.max(1.0, radius);
+            breakOffHealth = Math.max(0.0, Math.min(1.0, breakOffHealth));
+        }
+
+        /** Is the horse too hurt to keep fighting for an order? */
+        public boolean breaksOff(double health, double maxHealth) {
+            return breakOffHealth > 0.0 && health < maxHealth * breakOffHealth;
+        }
+
+        /** May a monster this far (squared) from the centre be picked by a horse this healthy? */
+        public boolean mayEngage(double targetFromCentreSq, double health, double maxHealth) {
+            return targetFromCentreSq <= radius * radius && !breaksOff(health, maxHealth);
+        }
+
+        /**
+         * Does a fight the order started go on? Not once the quarry or the horse is more
+         * than {@link #LEASH_SLACK_BLOCKS} past the radius, nor once the horse breaks off.
+         */
+        public boolean keepsFighting(double targetFromCentreSq, double horseFromCentreSq,
+                                     double health, double maxHealth) {
+            double outer = radius + LEASH_SLACK_BLOCKS;
+            return targetFromCentreSq <= outer * outer && horseFromCentreSq <= outer * outer
+                    && !breaksOff(health, maxHealth);
+        }
+    }
+
+    /**
+     * <b>Was this horse bred to fight?</b> The gate on every combat order (owner, 2026-10-03):
+     * it must EXPRESS one of three loci -
+     * <ul>
+     *   <li>Aggression, a matched pair whose target includes monsters: the {@code h}
+     *       pairs, and the {@code a} ("everything") pairs too (owner's call when Piece 3
+     *       was built - an order only adds a target; what the gene already goes for, it
+     *       still goes for);</li>
+     *   <li>Guardian, two copies;</li>
+     *   <li>Magic fighter, hitting harder than the {@value MagicFighterGene#BASELINE_DAMAGE}
+     *       baseline - a fighter or a champion, or a balanced horse whose gladiator copy
+     *       outweighs its wimp copy. A weak or harmless horse is not one.</li>
+     * </ul>
+     * Read through the abilities each gene grants ({@link HorseAbilities#of}), the same
+     * path the genes' own behaviour runs on, so the gate and the gene never disagree.
+     *
+     * @param epigenome may be {@code null}: each copy then reads its midpoint
+     */
+    public static boolean fighter(Genotype genotype, Epigenome epigenome) {
+        return grants(Genes.AGGRESSION, genotype, epigenome)
+                || grants(Genes.GUARDIAN, genotype, epigenome)
+                || grants(Genes.MAGIC_FIGHTER, genotype, epigenome);
+    }
+
+    private static boolean grants(Gene gene, Genotype genotype, Epigenome epigenome) {
+        if (genotype.pair(gene) == null) {
+            return false;
+        }
+        for (GeneAbility ability : HorseAbilities.of(gene, genotype, epigenome)) {
+            if (ability instanceof GeneAbility.Temper t && "aggressive".equals(t.mood())
+                    && ("hostile".equals(t.towards()) || "all".equals(t.towards()))) {
+                return true;
+            }
+            if (ability instanceof GeneAbility.Combat c && c.damage() > MagicFighterGene.BASELINE_DAMAGE) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** Why a horse would not take an order. {@code text} finishes "Name ...". */
     public enum Refusal {
         ON_A_LEAD("is on a lead", "on a lead"),
         PULLING_A_CART("is pulling a cart", "pulling a cart"),
+        NOT_A_FIGHTER("was not bred to fight", "not bred to fight"),
         NOT_BONDED("is not bonded enough", "not bonded enough");
 
         private final String text;
@@ -72,6 +192,9 @@ public final class HorseOrders {
         if (horse.pullingCart()) {
             return Refusal.PULLING_A_CART;
         }
+        if (order.combat() && !horse.fighter()) {
+            return Refusal.NOT_A_FIGHTER;
+        }
         if (horse.bondTier() < order.bondTier()) {
             return Refusal.NOT_BONDED;
         }
@@ -88,9 +211,19 @@ public final class HorseOrders {
         };
     }
 
+    /** Why the wheel greys a slice, under the wheel: "Needs bond 61", "Needs a horse bred to fight". */
+    public static String needs(HorseOrder order, Refusal refusal) {
+        return switch (refusal) {
+            case NOT_BONDED -> bondNeeded(order);
+            case NOT_A_FIGHTER -> "Needs a horse bred to fight";
+            default -> "Not while " + refusal.summary();
+        };
+    }
+
     /** The orders on the wheel, clockwise from the top. */
     public static List<HorseOrder> wheel() {
-        return List.of(HorseOrder.STAY, HorseOrder.FOLLOW, HorseOrder.WANDER, HorseOrder.REJOIN_HERD);
+        return List.of(HorseOrder.STAY, HorseOrder.FOLLOW, HorseOrder.WANDER,
+                HorseOrder.HUNT_MONSTERS, HorseOrder.DEFEND_ME, HorseOrder.REJOIN_HERD);
     }
 
     /** The one chat line for an order given to one horse. */
@@ -103,6 +236,8 @@ public final class HorseOrders {
             case STAY -> horseName + " stays here.";
             case FOLLOW -> horseName + " follows you.";
             case WANDER -> horseName + " wanders off on its own.";
+            case HUNT_MONSTERS -> horseName + " hunts the monsters around here.";
+            case DEFEND_ME -> horseName + " stays at your side and sees off monsters.";
         };
     }
 
@@ -136,6 +271,7 @@ public final class HorseOrders {
         return List.of(
                 "Hold use on a horse of yours to give it an order.",
                 "Sneak and hold to order every horse of yours within " + REACH_BLOCKS + " blocks.",
-                "Stay and Follow need bond 31; Wander needs 61.");
+                "Stay and Follow need bond 31; Wander needs 61.",
+                "Hunt monsters and Defend me need 61, and a horse bred to fight.");
     }
 }

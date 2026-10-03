@@ -437,6 +437,9 @@ public final class ServerConfig {
 
     /** Seconds between two Send home trips by one player; 0 is off. */
     public static final ModConfigSpec.IntValue SEND_HOME_COOLDOWN_SECONDS;
+    public static final ModConfigSpec.IntValue ORDERS_HUNT_RADIUS;
+    public static final ModConfigSpec.IntValue ORDERS_DEFEND_RADIUS;
+    public static final ModConfigSpec.DoubleValue ORDERS_BREAK_OFF_HEALTH;
 
     /**
      * <b>What a Chaos allele may never name.</b> The three mob loci each have one
@@ -886,6 +889,37 @@ public final class ServerConfig {
                         "refusal never starts it. 0 turns it off.")
                 .defineInRange("behaviour.send_home_cooldown_seconds",
                         com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS, 0, 3600);
+        ORDERS_HUNT_RADIUS = builder
+                .comment("How far from its spot a horse told to Hunt monsters goes after them, in blocks.",
+                        "(default: " + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_HUNT_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_HUNT_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_HUNT_RADIUS + ")",
+                        "It never picks a monster further than this from where it was told, and lets a",
+                        "fight go a few blocks past it, then walks back. Server-side.")
+                .defineInRange("orders.hunt_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_HUNT_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_HUNT_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_HUNT_RADIUS);
+        ORDERS_DEFEND_RADIUS = builder
+                .comment("How close to its player a monster must come before a horse told to Defend me",
+                        "goes for it, in blocks. (default: "
+                                + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_DEFEND_RADIUS
+                                + ", range " + com.example.horsegenetics.common.care.HorseOrders.MIN_DEFEND_RADIUS
+                                + "-" + com.example.horsegenetics.common.care.HorseOrders.MAX_DEFEND_RADIUS + ")",
+                        "It comes back to heel once the monster is dead or gone. Server-side.")
+                .defineInRange("orders.defend_radius",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_DEFEND_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MIN_DEFEND_RADIUS,
+                        com.example.horsegenetics.common.care.HorseOrders.MAX_DEFEND_RADIUS);
+        ORDERS_BREAK_OFF_HEALTH = builder
+                .comment("Below this share of its health a horse on Hunt monsters or Defend me drops",
+                        "the fight and goes back. (default: "
+                                + com.example.horsegenetics.common.care.HorseOrders.DEFAULT_BREAK_OFF_HEALTH
+                                + ", range 0.0-1.0)",
+                        "0 is fight to the death. Only the fight the ORDER picked is dropped: a horse",
+                        "whose own genes make it aggressive goes on as they say. Server-side.")
+                .defineInRange("orders.break_off_health",
+                        com.example.horsegenetics.common.care.HorseOrders.DEFAULT_BREAK_OFF_HEALTH, 0.0, 1.0);
         CHAOS_EXCLUDE_MODS = builder
                 .comment("Mods whose mobs a Chaos allele may never name, by mod id. (default: [])",
                         "Lycanthropy, Leader of the pack and Spawner each have one Chaos allele that",
@@ -1298,6 +1332,44 @@ public final class ServerConfig {
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.care.SendHome.DEFAULT_COOLDOWN_SECONDS;
         }
+    }
+
+    /** {@code orders.hunt_radius}, safely. */
+    public static int ordersHuntRadius() {
+        try {
+            return ORDERS_HUNT_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_HUNT_RADIUS;
+        }
+    }
+
+    /** {@code orders.defend_radius}, safely. */
+    public static int ordersDefendRadius() {
+        try {
+            return ORDERS_DEFEND_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_DEFEND_RADIUS;
+        }
+    }
+
+    /** {@code orders.break_off_health}, safely. */
+    public static double ordersBreakOffHealth() {
+        try {
+            return ORDERS_BREAK_OFF_HEALTH.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.HorseOrders.DEFAULT_BREAK_OFF_HEALTH;
+        }
+    }
+
+    /**
+     * The leash for a combat order, from this world's config: the radius and the
+     * break-off together, so nothing downstream falls back to a default constant.
+     */
+    public static com.example.horsegenetics.common.care.HorseOrders.Leash orderLeash(
+            com.example.horsegenetics.common.care.HorseOrder order) {
+        int radius = order == com.example.horsegenetics.common.care.HorseOrder.DEFEND_ME
+                ? ordersDefendRadius() : ordersHuntRadius();
+        return new com.example.horsegenetics.common.care.HorseOrders.Leash(radius, ordersBreakOffHealth());
     }
 
     /** {@code behaviour.leads_return}, safely. */

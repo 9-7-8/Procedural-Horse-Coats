@@ -2079,6 +2079,10 @@ public final class ModGameTests {
         register(event, environment, ORDER_STAY_WALKS_BACK, 300);
         register(event, environment, ORDER_YIELDS_TO_NEEDS, 100);
         register(event, environment, ORDER_CLEARS, 100);
+        // Twenty-five ticks to be founded, then the gate is read once.
+        register(event, environment, ORDER_COMBAT_GATE, 100);
+        // Founded at 25, then a combat scan once a second.
+        register(event, environment, ORDER_HUNT_PICKS_A_MONSTER, 200);
         // Twenty-five ticks to be founded, then a scan (every thirty) to act on it.
         register(event, environment, WILD_HORSE_MOVES_ON, 200);
         register(event, environment, WILD_TOUCHED_HORSE_GOES_TO_THE_REALM, 200);
@@ -2756,6 +2760,101 @@ public final class ModGameTests {
                 throw new GameTestAssertException(Component.literal("a horse went into stasis with its order"), 0);
             }
             helper.succeed();
+        });
+    }
+
+    /** A guardian (Grd/Grd): bred to fight, and - unlike a monster-hunting pair - starts nothing by itself. */
+    private static void makeGuardian(net.minecraft.world.entity.animal.equine.Horse horse) {
+        var gene = com.example.horsegenetics.common.genetics.Genes.GUARDIAN;
+        var grd = gene.alleles().stream().filter(a -> a.token().equals("Grd")).findFirst().orElseThrow();
+        var genotype = com.example.horsegenetics.common.genetics.Genotype.wildType()
+                .with(new com.example.horsegenetics.common.genetics.AllelePair(grd, grd));
+        com.example.horsegenetics.neoforge.server.HorseRecords.apply(horse,
+                com.example.horsegenetics.neoforge.server.HorseRecords.newFounder(horse,
+                        new com.example.horsegenetics.neoforge.NeoRng(horse.getRandom()), genotype));
+    }
+
+    /**
+     * <b>Only a horse bred to fight takes a combat order</b>, on the server's own gate: a
+     * plain horse refuses Hunt monsters and Defend me with "not bred to fight", a guardian
+     * takes both, and the plain horse still takes Stay.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ORDER_COMBAT_GATE =
+            TEST_FUNCTIONS.register("order_combat_gate", () -> ModGameTests::orderCombatGate);
+
+    private static void orderCombatGate(GameTestHelper helper) {
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        var plain = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.REJOIN_HERD);
+        var guardian = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.REJOIN_HERD);
+        boolean[] checked = {false};
+        helper.succeedWhen(() -> {
+            if (checked[0]) {
+                return;
+            }
+            // Only once both are founded: a founding after makeGuardian would roll it a new genome.
+            if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(plain)
+                    || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(guardian)) {
+                throw new GameTestAssertException(Component.literal("the horses are not founded yet"), 0);
+            }
+            makeGuardian(guardian);
+            var nope = com.example.horsegenetics.common.care.HorseOrders.Refusal.NOT_A_FIGHTER;
+            for (var order : java.util.List.of(com.example.horsegenetics.common.care.HorseOrder.HUNT_MONSTERS,
+                    com.example.horsegenetics.common.care.HorseOrder.DEFEND_ME)) {
+                var p = com.example.horsegenetics.common.care.HorseOrders.refusal(order,
+                        com.example.horsegenetics.neoforge.server.HorseOrdering.situation(plain));
+                if (p != nope) {
+                    throw new GameTestAssertException(Component.literal("a plain horse answered " + p + " to " + order), 0);
+                }
+                var g = com.example.horsegenetics.common.care.HorseOrders.refusal(order,
+                        com.example.horsegenetics.neoforge.server.HorseOrdering.situation(guardian));
+                if (g != null) {
+                    throw new GameTestAssertException(Component.literal("a bonded guardian refused " + order + ": " + g), 0);
+                }
+            }
+            if (com.example.horsegenetics.common.care.HorseOrders.refusal(com.example.horsegenetics.common.care.HorseOrder.STAY,
+                    com.example.horsegenetics.neoforge.server.HorseOrdering.situation(plain)) != null) {
+                throw new GameTestAssertException(Component.literal("the fighting gate reached a non-combat order"), 0);
+            }
+            checked[0] = true;
+        });
+    }
+
+    /**
+     * <b>A hunting horse picks the monster and leaves the creeper</b>: a guardian told to
+     * Hunt monsters, with a husk four blocks off and a creeper nearer, takes the husk as
+     * its target (OrderCombatGoal). A guardian, because it starts nothing by itself - the
+     * target can only be the order's. Both monsters are frozen (no AI), so neither moves
+     * nor explodes; the pick is what is under test, the fight is HorseMeleeGoal's.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ORDER_HUNT_PICKS_A_MONSTER =
+            TEST_FUNCTIONS.register("order_hunt_picks_a_monster", () -> ModGameTests::orderHuntPicksAMonster);
+
+    private static void orderHuntPicksAMonster(GameTestHelper helper) {
+        keepTicking(helper);
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        var horse = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.HUNT_MONSTERS,
+                new BlockPos(2, 0, 2));
+        var creeper = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, new BlockPos(2, 0, 0));
+        creeper.setNoAi(true);
+        net.minecraft.world.entity.LivingEntity[] husk = {null};
+        helper.succeedWhen(() -> {
+            // Made a guardian only once founded: a founding afterwards would roll a new genome.
+            if (husk[0] == null && com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                makeGuardian(horse);
+                husk[0] = helper.spawn(net.minecraft.world.entity.EntityType.HUSK, new BlockPos(2, 0, -2));
+                ((net.minecraft.world.entity.Mob) husk[0]).setNoAi(true);
+                // NOT invulnerable: Mob.getTarget() answers null for a target the horse cannot
+                // attack, so an invulnerable husk is picked and never held. It is checked the
+                // tick it is picked, well before four kicks could kill it.
+            }
+            var t = horse.getTarget();
+            if (t == creeper) {
+                helper.fail("a hunting horse went for a creeper");
+            }
+            if (husk[0] == null || t != husk[0]) {
+                throw new GameTestAssertException(Component.literal("the hunting horse has not picked the husk (target "
+                        + (t == null ? "none" : t.getName().getString()) + ")"), 0);
+            }
         });
     }
 

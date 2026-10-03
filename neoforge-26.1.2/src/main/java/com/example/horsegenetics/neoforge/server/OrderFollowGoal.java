@@ -11,7 +11,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import java.util.EnumSet;
 
 /**
- * <b>The Follow order</b>: follow the player who gave it, at a walk, stopping
+ * <b>The Follow order</b>, and Defend me's heel: follow the player who gave it, at a walk, stopping
  * {@link HorseOrders#FOLLOW_STOP_BLOCKS} away. More than
  * {@link HorseOrders#FOLLOW_TELEPORT_BLOCKS} behind with no path that reaches them, it is
  * brought to them the way a whistle brings a horse ({@code WhistleCalls.teleportTo}).
@@ -42,7 +42,7 @@ public final class OrderFollowGoal extends Goal {
             return false;
         }
         HorseOrderAttachment o = HorseOrdering.current(horse);
-        if (o.order() != HorseOrder.FOLLOW) {
+        if (!o.order().follows()) {
             return false;
         }
         ServerPlayer p = HorseOrdering.orderedByHere(horse, o);

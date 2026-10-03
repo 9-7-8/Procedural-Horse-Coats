@@ -79,11 +79,29 @@ public final class HorseOrdering {
         }
     }
 
-    /** What this horse is doing that an order has to get past. */
+    /** What this horse is doing that an order has to get past, and whether it was bred to fight. */
     public static Situation situation(Horse horse) {
         HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
         return new Situation(care == null ? 0 : care.behaviourTier(), horse.isLeashed(),
-                CartWorld.get(horse.level()).isPulling(horse));
+                CartWorld.get(horse.level()).isPulling(horse), fighter(HorseRecords.of(horse)));
+    }
+
+    /**
+     * Was the horse with this record bred to fight ({@link HorseOrders#fighter})? Server and
+     * client both ask it from the record - the client has it from HorseRecordSyncPayload -
+     * so the wheel greys exactly what the server would refuse. An unreadable code is not a
+     * fighter: a horse whose genes cannot be read is not sent after monsters.
+     */
+    public static boolean fighter(com.example.horsegenetics.common.horse.HorseRecord record) {
+        if (record == null || !record.hasName()) {
+            return false;
+        }
+        try {
+            return HorseOrders.fighter(com.example.horsegenetics.common.genetics.Genotype.parse(record.geneticCode()),
+                    com.example.horsegenetics.common.genetics.Epigenome.parse(record.epigenomeCode()));
+        } catch (RuntimeException unreadable) {
+            return false;
+        }
     }
 
     /**
@@ -147,7 +165,7 @@ public final class HorseOrdering {
         }
     }
 
-    /** The anchor's owner, for Follow: the player who gave the order, if they are here. */
+    /** The player who gave the order, if they are here: whom Follow and Defend me stay with. */
     static ServerPlayer orderedByHere(AbstractHorse horse, HorseOrderAttachment o) {
         if (o.orderedBy().isEmpty() || !(horse.level() instanceof ServerLevel level)) {
             return null;

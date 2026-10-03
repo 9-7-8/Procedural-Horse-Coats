@@ -50,6 +50,7 @@ public final class CommandWheelScreen extends Screen {
     private final int entityId;
     private final boolean all;
     private final List<HorseOrder> slices = HorseOrders.wheel();
+    private Boolean fighter;
     private boolean done;
     private int mouseX;
     private int mouseY;
@@ -94,9 +95,10 @@ public final class CommandWheelScreen extends Screen {
     }
 
     /**
-     * Why the aimed horse would refuse this slice, as far as the client can tell (bond
-     * and lead; the cart only the server knows). Null when it may take it, or for the
-     * all-horses wheel, where each horse answers for itself in the summary line.
+     * Why the aimed horse would refuse this slice, as far as the client can tell (bond,
+     * lead, and whether it was bred to fight; the cart only the server knows). Null when
+     * it may take it, or for the all-horses wheel, where each horse answers for itself in
+     * the summary line.
      */
     private Refusal refusal(HorseOrder order) {
         Horse h = horse();
@@ -106,7 +108,20 @@ public final class CommandWheelScreen extends Screen {
         ClientHorseCareCache.Care care = ClientHorseCareCache.get(h.getId());
         int bond = care == null ? 0 : care.bond();
         int tier = bond >= 81 ? 3 : bond >= 61 ? 2 : bond >= 31 ? 1 : 0;
-        return HorseOrders.refusal(order, new Situation(tier, h.isLeashed(), false));
+        return HorseOrders.refusal(order, new Situation(tier, h.isLeashed(), false, fighter(h)));
+    }
+
+    /**
+     * From the synced record, worked out once per wheel - the same question the server
+     * asks ({@code HorseOrdering.fighter}). A horse whose record has not arrived is given
+     * the benefit of the doubt: the server answers for it.
+     */
+    private boolean fighter(Horse h) {
+        if (fighter == null) {
+            var record = ClientHorseRecordCache.get(h.getId());
+            fighter = record == null || com.example.horsegenetics.neoforge.server.HorseOrdering.fighter(record);
+        }
+        return fighter;
     }
 
     private int hovered() {
@@ -182,8 +197,7 @@ public final class CommandWheelScreen extends Screen {
             g.fill(l, t, l + SLICE_W, t + SLICE_H, r != null ? GREY : i == hover ? HOVER : PANEL);
             g.centeredText(font, Component.literal(slices.get(i).label()), sx, sy - 4, r != null ? DIM : TEXT);
             if (i == hover && r != null) {
-                String why = r == Refusal.NOT_BONDED ? HorseOrders.bondNeeded(slices.get(i))
-                        : "Not while " + r.summary();
+                String why = HorseOrders.needs(slices.get(i), r);
                 g.centeredText(font, Component.literal(why), cx, cy + RING + SLICE_H, DIM);
             }
         }
