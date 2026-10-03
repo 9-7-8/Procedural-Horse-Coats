@@ -101,8 +101,20 @@ Piece 1 - Go / no-go: what horse mods does the pack ship, and may we join it?
     the pack author declines, still build it for players who add it themselves?
     Recommended: yes, but later.
   Tests: none. Play checks: none. This piece is research and is S; it is now mostly done.
-Piece 2 - common/ builds on Java 8
+Piece 2 - common/ ships to 1.12.2 as Java 8 bytecode (source stays Java 17)
   Player sees: nothing.
+  Decided (owner, 2026-10-03): common/ is NOT lowered to Java 8, in place or as a copy, and
+    there is no hand-written common-java8/ overlay. The latest NeoForge build is the single
+    SOURCE OF TRUTH; every port derives from it. This supersedes Open 2, Open 3's wording and
+    Open 8 below (kept for the record). The Java 8 jar is produced by a build step, not by
+    editing source: the candidate is JvmDowngrader (unimined/JvmDowngrader, Gradle plugin
+    xyz.wagyourtail.jvmdowngrader): it downgrades class files to Java 8 and supplies stubs
+    for missing APIs, and is said to handle records, sealed types, indy string concat and
+    List.of-style calls (search snippets only, UNVERIFIED: build common/ with it and run the
+    167 test files on the result before anything else). Fallbacks if it fails: Jabel for
+    syntax (not records, UNVERIFIED) plus a generated records-to-classes step; last resort
+    a generator. A few real overlay files remain allowed for code that cannot downgrade
+    (java.awt tool classes are not shipped to the mod anyway).
   Recommended: add a second compile of common/ at --release 8 as a build variant (the Java 17
     source stays the truth for NeoForge and web/), and downgrade the 100-125 records and
     the ~180 collection factories in a mechanical way. Jabel covers switch expressions and

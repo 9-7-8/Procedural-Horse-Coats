@@ -123,3 +123,28 @@ OPEN FOR THE OWNER (also on each treatment)
    Java runtime, and whether the pack author would add us.
 2. Port 4: does the "infinite coat space" premise survive a bounded layered coat on Bedrock?
 3. Port 2: ship as separate jar, or in one multiloader jar? (Recommended: separate jars.)
+
+RULE (owner, 2026-10-03): THE LATEST NEOFORGE BUILD IS THE SOURCE OF TRUTH
+--------------------------------------------------------------------------
+common/ stays Java 17 and is never lowered. Every other port (Fabric, older or newer
+Minecraft, Forge 1.12.2) is derived from the current NeoForge sources by build tooling, not
+by maintaining a hand-written second copy. Existing tools surveyed 2026-10-03 (search
+snippets; UNVERIFIED until a spike runs each):
+- Stonecutter (dev.kikugie.stonecutter): a Gradle plugin that keeps ONE source tree and a
+  controller project with one subproject per Minecraft version. A comment preprocessor
+  turns code segments on or off, or swaps snippets, per version (// ?if ... style
+  directives), over Java, Kotlin and resource files. It targets "compatible release
+  versions" (1.21.x to 26.x), not 1.12.2: 1.12.2's API is too different for a comment
+  switch. Best fit: Fabric + NeoForge, and neighbouring Minecraft versions.
+- Cleanroom is NOT an alternative to Stonecutter. It is a 1.12.2 runtime/loader (Forge
+  continuation on modern Java), the thing a 1.12.2 mod runs ON. Stonecutter is a build tool
+  for source across versions. Different layer.
+- JvmDowngrader: bytecode to Java 8 plus API stubs; the way to ship common/ to 1.12.2
+  without changing source.
+- MultiLoader-Template (jaredlll08; a 26.1.2 branch): a plain common + one module per loader
+  layout; this repo already has the shape. Architectury: not needed.
+- Fabric Loom (net.fabricmc.fabric-loom, no remap on 26.x); Mixin and MixinExtras shared across
+  loaders; RetroFuturaGradle or Cleanroom's template for the 1.12.2 build.
+Open (owner): adopt Stonecutter for the Fabric and later-version ports? Recommended: try
+it on the Fabric port first (port 2 piece 1), because that port needs the same source built
+for two loaders.
