@@ -1,109 +1,123 @@
 # Horse Genetics
 
-**A Minecraft mod that gives every horse a real genome.** Coat color isn't
-picked from a fixed list of textures - it's generated pixel by pixel from a
-Mendelian genotype of allele objects, the same way a real horse's coat comes
-from its DNA. Breed two horses and the foal inherits its colors, patterns,
-stats, and even hidden carrier genes the honest way, through segregation and
-dominance, not a random roll. It's genetic horse breeding, procedural coat
-generation, and pedigree tracking built as one Minecraft mod - for anyone
-who's wanted Rimworld/Sims-style genetics, a Wildermyth-esque family tree, or
-a serious horse-breeding sim, but for horses in Minecraft.
+**Every horse in your world has its own genes - and no two coats are drawn the
+same way.** Breed two horses and the foal gets a mix of what both parents carry:
+its colours, markings, eyes, speed, health, jump and size all come from them,
+including traits that skipped a generation. There are no fixed coat textures; every
+coat is painted fresh from the horse's genes, so there are effectively endless
+horses to find, breed and keep. It is horse breeding with a real family tree
+behind it - for anyone who has wanted Sims-style genetics, or a proper breeding
+game, in Minecraft.
 
 - **Minecraft:** 26.1.2
 - **Loader:** [NeoForge](https://neoforged.net/)
 - **License:** code [MIT](LICENSE), art [CC BY-SA 4.0](LICENSE-ART) - free to use, share, and build on
 - **Wiki:** **[9-7-8.github.io/Procedural-Horse-Coats](https://9-7-8.github.io/Procedural-Horse-Coats/)**
-  - every gene's alleles, odds, and effects; the breed list; the breeding and
-    stat-inheritance rules; the coat-generation engine; and a walkthrough for
-    writing your own gene, no Java required
+  - every gene and what it does, every breed, how breeding and stats work, every item
+    and block, and a walkthrough for making your own genes and breeds
 
 ---
 
-## What it does
+## What you can do
 
-**Genetics, not textures.** Every horse carries a full genotype - dozens of
-genes covering base color, dilutions, white spotting patterns, and more -
-stored as real allele pairs. Its coat is drawn fresh from that genotype onto
-a 128px texture, so two horses with the same genes look the same, and an
-unusual combination produces a coat nothing else in the world has. There are
-functionally infinite possible coats.
+**Find horses that look like nothing else.** Every horse carries dozens of genes -
+base colour, dilutions, white patterns, brindle, eye colour and more. Its
+coat is painted from them, so a horse with the same genes always looks the same, and an
+unusual mix gives a coat nothing else in the world has.
 
-**Some traits run down one side of the family.** Brindle - irregular vertical
-striping - sits on the X chromosome, so a stallion carries one copy and can
-never be a hidden carrier, while a mare needs two. A brindle stallion throws no
-brindle sons at all and every daughter a carrier, so the pattern skips a
-generation and comes back through the mares. A brindle mare is a real breeding
-project.
+**Breed on purpose.** A foal gets one copy of each gene from each parent. Hidden
+traits can skip generations, two plain-looking parents can surprise you, and some
+traits only pass through the mares (brindle is one). Speed, health, jump and size come
+from the genes too, so breeding for a fast horse means choosing the right pairs, not
+getting lucky. Mares come into heat and carry their foals for a while, and a few
+real-world disorders exist - most are survivable, a few are not. A server setting can turn
+the disorders down or off.
 
-**Eye colour is inherited too.** A splashed white or dominant white horse has
-blue eyes; a horse carrying two copies of tiger eye - a gene essentially confined
-to the Puerto Rican Paso Fino - has a bright amber iris and an entirely ordinary
-coat. Blue wins over amber on a horse that is both, because there is no pigment
-left in the iris to be amber.
+**Keep a family history.** Every horse has a name, a family tree you can browse back
+several generations (with a small 3D model of each ancestor), and a record of its
+foals. Sell a horse and it stays in the family tree.
 
-**Breeding is Mendelian.** Foals inherit one allele from each parent at every
-gene, so recessive traits can hide for generations and surface unexpectedly,
-two ordinary-looking parents can throw a surprising foal, and a pedigree
-becomes something worth actually keeping. Some real-world genetic disorders
-are modeled too - most survivable-but-visible, a few lethal - so breeding
-carelessly has real consequences, with a server setting to dial that down or
-off.
+**Meet wild horses of real breeds.** Shires, Arabians, Falabellas and many more
+spawn in herds suited to their biome, each with its own build, colours and temper.
+Cross two breeds and you get a named cross, and fantasy breeds sit alongside the real ones.
 
-**Every horse has a pedigree.** A generated two-part name, a family tree you
-can browse back several generations (with a little 3D model of each
-ancestor), and speed/health/jump/size stats that come out of its genes rather
-than a dice roll - so "breeding for speed" means finding and fixing the right
-alleles, not getting lucky.
+**Look after them.** Horses get hungry and look for food; a hurt horse heals beside
+water. The more time you spend with a horse, the more it trusts you: it starts to
+face you, then wander toward you, then follow you - and a horse that trusts you
+enough lets you ride it without a saddle. Wild horses form herds with a lead
+stallion.
 
-**Wild horses come in breeds.** Real-world breeds - from Shires to Arabians
-to Falabellas - spawn in herds keyed to biome, each with its own build, color
-pool, and temperament, and cross-breeding produces properly labeled crosses
-and mixes.
+**Dress them.** Open a horse's screen (the small **i** button beside its inventory) and
+the Gear tab shows everything it can wear on a picture of the horse. The saddle,
+body armour and braids you can put on today, and you can dye saddles and armour
+colour by colour at the Tack Dyeing Bench - with any dye, ingot or gem, including
+ones from other mods. Right-click your horse holding a piece of tack and it goes on.
 
-**Your zombie and skeleton horses come along.** Vanilla's undead horses - in
-an old world, from a skeleton trap, from an egg - quietly become this mod's
-horses the first time they load: a Graveborn Warmblood or a Great Valley
-Skeleton Horse (a Blackened one, in the Nether, where they also run wild), keeping their name, owner, saddle, armour and lead, with new
-stats from their genes. Undeath is two genes, so skeletons and zombies breed
-like any horse. A server can turn this off with `undead.convert`.
+**Ride comfortably.** Mine from the saddle, open your own pack with **Alt + E**, get
+your lead back when a horse is called to you, and see through the horse when you
+look at the ground.
 
-**Genes beyond real biology.** Alongside the natural coat genes, there's a
-whole layer of magical genes with no real-world counterpart: particle
-trails, glowing manes, size and speed genes, water-walking, milk that isn't
-milk, and more - built to combine in ways nobody explicitly coded. A breed
-carries only the magic (and the disorders) it was made with; stray magical
-traits turn up in unbred wild horses, and breeding them into a line is up to
-you.
+**Shape the next generation.** Breeding carrots nudge what a parent hands down, and
+splice carrots add a gene to a foal - one you pick, or one at random. Seed jars keep
+a stallion's genetics so you can breed with him later; a vet's kit can geld a
+stallion and check a mare's heat and pregnancy. Research papers and the Equine Research
+Shelf record the genes you have discovered, and the **H** menu is your horse browser:
+every horse you own, a gene database that fills in as you learn, recipes, breeds, a
+breeding preview and a log of what has happened to your stable.
 
-**Write your own genes with no code.** An in-browser
-[gene creator](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/gene-creator/)
-lets you design a new gene - where it paints, what it does - and preview it
-live on a 3D horse over a range of base coats. Export the file, drop it in
-`.minecraft/phc/genes/`, and it inherits, breeds, and shows up in-game
-exactly like a built-in gene.
+**Call and carry your horses.** Whistles call the horses you own nearby, or - with
+an ender whistle bound to one horse - one horse from anywhere. Tickets send a horse to
+its stall. Stasis chambers store a horse cheaply, and a stasis bank holds many and can
+even breed a pair for you. Double gates, showjumping fences and stall signs
+are there for building a yard.
 
-**Make your own breeds.** A breed is where a whole idea lives: not a
-"zombie gene" but a zombie *breed* - rotted-looking markings, a bad temper,
-slow and tough. The in-browser
+**Trade for horses.** A cowboy in a plains village sells horses as transfer papers
+you can also sign and sell on. Four villager jobs - a leatherworker, a scientist, a
+supplier and a metalsmith - sell what a horse operation needs. Stables with horses
+already inside generate in the world: horses you could not have bred yet.
+
+**Haul with your horses.** Horse-drawn wagons, plows, seed drills, reapers, supply
+carts and animal carts come in every wood your modpack has. How fast a horse pulls
+depends on its own speed and strength.
+
+**Send the surplus somewhere safe.** Build a cobblestone portal, light it with a
+golden carrot, and lead horses through to the **horse realm**: a sunlit, walled field
+where nothing can hurt them. Horses you set free there stay healthy, keep their names and
+family, and anyone can take one home.
+
+**Undead horses are horses too.** Vanilla zombie and skeleton horses - in an old
+world, from a trap, or from an egg - become this mod's horses the first time they load,
+keeping their name, owner, tack and lead. They breed like any other horse. A server can
+turn this off with `undead.convert`.
+
+**Some horses are magical.** Alongside the real coat genes there is a layer of
+invented ones: glowing manes, particle trails, extra speed or size, walking on water,
+milk that is not milk, a unicorn's horn or a rack of antlers. A breed carries only the
+magic it was made with. Now and then a foal turns up with a magical gene neither parent had.
+
+**Design your own.** Three tools run in your browser from the wiki, with no coding:
+a [horse designer](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/horse-designer/)
+to build and look at any horse; a
+[gene creator](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/gene-creator/) to
+make a new gene and preview it on a 3D horse; and a
 [breed designer](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/breed-designer/)
-walks you through one step at a time - colour, size, dilutions, white, eyes,
-magical markings, health, diet, temper, abilities, speed, jump, where it lives -
-and shows the horses it makes as you go. Export it (any time; it saves your
-progress), put the file in `.minecraft/phc/breeds/`, and restart: the game
-starts spawning it in the biomes you picked, and the cowboy, stables and spawn
-eggs know it too. `.minecraft/phc/breed-spawning.toml` (below) is where you
-switch off or reshape the breeds the mod ships, if yours should have the world
-to themselves. The `phc` folder is made the first time the game runs with
-the mod, and the **Breeds** tab of the in-game **H** menu has a button that opens it.
+that walks you step by step through colour, size, markings, eyes, health, temper,
+speed, where it lives and more. Save the file into `.minecraft/phc/genes/` or
+`.minecraft/phc/breeds/` and restart: your gene or breed shows up in the game - the
+breed spawns in the biomes you chose, and the cowboy, stables and spawn eggs know it.
+The `phc` folder appears the first time the game runs with the mod, and the **Breeds**
+tab of the **H** menu has a button that opens it.
 
-**A whole world of it.** A player-built portal leads to a self-contained
-horse dimension for browsing genotypes, plus stallion seed jars, whistles,
-shearing, a gene database you fill in by discovery, and more.
+**Take a look around first.** Press **F6** for a private showroom: one side shows
+markings on different base coats, the other shows every breed in the game, a mare and a
+stallion each.
 
-All of that is documented in depth on **[the wiki](https://9-7-8.github.io/Procedural-Horse-Coats/)**
-rather than here - it's the source of truth for every gene, every rule, and
-every system, and it stays current as the mod grows.
+Everything is explained in depth on **[the wiki](https://9-7-8.github.io/Procedural-Horse-Coats/)**,
+which is the full guide to every gene, breed, item and rule, and is kept up to date as the
+mod grows.
+
+**Still being built:** better tack (pads, bridles, boots, shoes, saddlebags), feeding
+troughs, a lasso, and more fantasy breeds. The wiki's roadmap pages list what is planned.
 
 ---
 
@@ -123,7 +137,7 @@ drop in, and three settings files - `breed-spawning.toml`, `server.toml` and
 `client.toml`. Nothing goes in `config/`.
 
 **If walking toward a big herd stutters, look in `client.toml`.** Every horse gets a
-coat texture made just for it, and making one takes real work. Horses further away than
+coat made just for it, and making one takes some work. Horses further away than
 `coats.detailDistance` (32 blocks by default) wear a plain stand-in coat until you come
 closer, and `coats.bakeBudgetMs` caps how much time per moment goes into making new
 ones. Lower either on a slower computer.
