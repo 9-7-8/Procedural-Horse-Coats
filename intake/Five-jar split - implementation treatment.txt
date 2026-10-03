@@ -132,7 +132,7 @@ Decided
   mixins); and a public third-party API on all of these.
 - H-browser frame and its Log tab live in Core, so every jar can write log events; Breeding adds
   the other tabs.
-- common/ splits into :common-core, :common-coats, :common-equipment, :common-qol. :web
+- common/ splits into :common-core, :common-breeding, :common-equipment, :common-qol. :web
   and the all-in-one depend on all four. Hard rules 1 and 2 hold for each of them.
 - Core size is enforced by the build: it prints per-jar sizes and FAILS if Core exceeds a
   recorded budget; the budget is set from the first measured build and raised only by a
@@ -183,8 +183,8 @@ Decided
   CartDraft/CartKind in common, 7 mixins, its two cart config files, 5 payloads, CART_METRES).
   Armour/material generation (GeneratedArmour, ModdedArmour, MaterialScan) goes with it.
 - The Equestrian Bench goes to QUALITY OF LIFE, not Equipment (owner's second answer
-  overrode the survey's suggestion). Its dye-tack function is then the Gear tab's job; see
-  Open 1.
+  overrode the survey's suggestion), and so does its dyeing of VANILLA saddles and armour
+  (owner, probe round 2: it moves to QOL). See the section 9b for what stays in Equipment.
 - The braid's overlay renders only when Breeding is installed (owner). Without Breeding the item and
   its slot still work and no overlay is drawn.
 - The Gear tab, gear doll, picker, Dress button and the Draught section move out of
@@ -195,11 +195,10 @@ Recommended
 - Rescue-by-braid logging: the braid writes to the Core event log (it already does via the
   Rescues/Homings kinds in HorseEventLog).
 Open
-- 1 (owner): the bench dyes tack but sits in QOL; does the bench dye anything when Equipment is
-  absent (Recommended: it shows the tack tab disabled with a one-line "needs Equipment"; or its
-  dye recipes quietly vanish)?
+- 1 (settled, owner): the bench and its dyeing of vanilla saddles and armour live in QOL, so
+  Core + QOL dyes with no Equipment. Remaining detail is Recommended in section 9b.
 - 2 (building session): the braid's "sends home" half uses SendHome/stall logic. Whether it needs
-  QOL's stall signs or Breeding' realm: check, and degrade quietly if the partner is absent.
+  QOL's stall signs or Breeding's realm: check, and degrade quietly if the partner is absent.
 Where the code lives: C: :common-equipment (CartDraft, CartKind, the slot table). NeoForge: the
 Equipment jar's registries, payloads, mixins, screens, renderers, tags, models, lang, loot
 modifier add_horse_tack, equestrian villager trades (check who sells the leatherworker's
@@ -228,7 +227,7 @@ Decided
   ender whistle (WhistleItem, WhistleCalls, the keybindings), stall signs (StallSignHandler,
   StallDetector, StallRecall), jumps, gates, posts, the Equestrian Bench, the leash helpers
   (LeashPlacerMixin and LeashDropMixin), and the generated jump and gate materials.
-- Hunger, healing, the diet gene and the water-gated healing are COATS ONLY (owner). Without
+- Hunger, healing, the diet gene and the water-gated healing are BREEDING ONLY (owner). Without
   Breeding the game treats every horse as full and horses eat and heal as vanilla horses do:
   the vanilla free heal is NOT switched off.
 - Without Breeding the QOL whistle/bond/herd/stall code runs on the slim Core record.
@@ -283,13 +282,11 @@ Recommended
   the world, updated on each load. An older world with no marker but with the mod's old data
   files is treated as "all parts used" (it was played with the single jar). A world with
   neither is new and may start with any subset.
-- No override flag (matches the rename treatment, which also has none). Open for the owner:
-  does she want an escape hatch for a server owner who deliberately drops a part?
+- Escape hatch: see section 9b (owner chose a server.toml switch, default off).
 - Name the Core id ixoras_horses_core (derived from "ixoras_horses_breeding, and so on"; not asked).
 Open
-- 3 (owner): the public API's stability promise. She chose to include it; what does it promise?
-  Recommended: documented but marked unstable until 1.0.0, with the extension points listed on
-  wiki/api-reference.html.
+- 3 (settled, owner): the public API is documented on wiki/api-reference.html and marked
+  UNSTABLE until 1.0.0; it may change between patch releases.
 - 4 (building session): the horse villager professions and trades for tack (leatherworker,
   metalsmith): do they ship with Breeding because they need the villager machinery, with their trade
   contents split by jar, or does Equipment add them? Recommended: Breeding owns the professions;
@@ -346,7 +343,7 @@ I. Multiplayer: payloads split by registrar; a client missing a part the server 
    NeoForge's own mod-list check (UNVERIFIED how it words it for optional mods; if a part is declared
    required on both sides there is nothing to design). Recommended: all parts declare side=BOTH.
 J. Compatibility: Jade, Waystones, FTB Teams and HorsePowered compat stay where their feature is
-   (Jade: Core or Breeding; Waystones and FTB Teams: Breeding' ownership/teleport; HorsePowered: Equipment's carts).
+   (Jade: Core or Breeding; Waystones and FTB Teams: Breeding's ownership/teleport; HorsePowered: Equipment's carts).
    Recommended: a compat class loads only if its owning jar is present.
 K. Performance: one shared slow tick (Piece 1) so no extra passes; cost per horse unchanged.
 L. Testing: see each piece; plus a unit test that no Core class imports a part package.
@@ -378,7 +375,7 @@ N. Sequencing: Decided (owner) that the split lands AFTER the rename to Ixora's 
 - The H menu, log, search: touches - frame and Log in Core, tabs per jar.
 - Stasis chambers and bank: Breeding (owner). They copy attachments wholesale (survey); UNVERIFIED that
   Equipment's HORSE_GEAR still travels with a stasis horse when Equipment is installed.
-- Horse designer and spawn screen (rule 5): touches - both import :common-coats; no behaviour change.
+- Horse designer and spawn screen (rule 5): touches - both import :common-breeding; no behaviour change.
 - Gene creator, breed designer, :web (wasm): touches - :web depends on all four common modules; TeaVM
   compiles only reachable code, so rebuild :web after the split.
 - Config, server and client: touches - per-jar sections; keep phc/ paths.
@@ -470,6 +467,31 @@ Open / Recommended:
 - Recommended: the QOL nameplate (HorseNameplateSex) shows the random sex without the addon.
   UNVERIFIED that the random sex is stored once (not re-rolled each load): it must be saved on the
   record the first time it is assigned.
+
+9b. PROBE ROUND 2 (owner, asked 2026-10-03)
+------------------------------------------
+Decided (owner):
+- Bareback steering (BarebackSteeringHandler, bond tier 3 lends a hidden saddle) and bolting
+  (HorseEscapeGoal) go to QOL, with bond. UNVERIFIED that neither reads the genome or hunger;
+  grep both before piece 3 and put any read behind a Core hook.
+- The Equestrian Bench, and its dyeing of vanilla saddles and armour, are QOL. Core + QOL players
+  can dye vanilla tack. The DYE_TACK checklist task goes with the bench to QOL.
+- Escape hatch: a server.toml switch that lets a world load without a part it used. Default OFF.
+- Public API: documented, unstable until 1.0.0 (recorded above in Open 3).
+Recommended (not asked):
+- The escape switch is one key under Core's section, e.g. `world.load_without_used_parts = false`
+  (name is the building session's); when on, data belonging to a missing part is kept untouched
+  and ignored, nothing is deleted, and a WARN line names each missing part on every start. It is
+  server-side only; on a client singleplayer world it reads the world's own copy. Dedicated server and
+  singleplayer are the same code path (a singleplayer world is a server).
+- The dye tint data component (ModDataComponents tint), SaddleTint and the client tint source are
+  needed by the QOL bench AND by Equipment's tack loot (SetTackTintFunction, AddHorseTackModifier).
+  Put the component and the client tint source in CORE (small, shared by two parts), so neither part
+  needs the other. Open (building session): confirm it is under the Core size budget.
+- Equipment's own tack (once it exists) dyes at the QOL bench when QOL is installed; with Equipment
+  and no QOL there is no bench, so tack stays undyed. Say so on item-equestrian-bench.html.
+UNVERIFIED:
+- (Checked: HorseEscapeGoal and BarebackSteeringHandler both exist in neoforge/server/.)
 
 9. AFTER EACH PIECE SHIPS
 -------------------------
