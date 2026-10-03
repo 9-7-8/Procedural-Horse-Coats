@@ -1,0 +1,156 @@
+2026-10-03 11:19 (end) - Release 0.5.042, and the command whistle (Piece 1)
+
+ASKED
+-----
+- "/whats-next". Surveyed every queue. The owner picked "Command whistle P1
+  (Recommended)", and for the release question chose "Yes, first".
+- On the undead-conversion gate (the undead treatment's rule was to ship conversion
+  only after it had been seen in game): "Ship; create a command to run conversion, that
+  has a test version first (spawns in a single skeleton horse, then converts it, then
+  does the same with a zombie) which, if it runs good, then the user can enable
+  conversion server-wide". Built as /horseundead (below), and 0.5.042 was released.
+- Then Command whistle Piece 1, run under process-intake.
+
+DONE
+----
+1. /horseundead and undead.convert off by default (8e076a4b).
+   - Why: conversion cannot be undone and had never been watched in play.
+   - The setting: undead.convert now defaults to false (ServerConfig, comment and doc).
+   - The flag: a per-horse persistent flag horsegenetics:convert_anyway
+     (UndeadHorseConverter.CONVERT_ANYWAY) converts one horse even with the key off. It
+     still converts on the horse's own entity tick, never from a command call.
+   - The command, server/HorseUndeadCommand (op level 2):
+     - /horseundead says whether conversion is on, and whether a test has passed.
+     - test spawns a tamed, named, saddled skeleton horse, then a zombie horse, beside
+       the operator, watches each convert, and checks the result.
+     - enable is refused until a test has passed since the server started; it then sets
+       the key and saves it.
+     - disable turns it off again.
+   - Gametests:
+     - the conversion tests now set the flag;
+     - new: undead_off_by_default (it checks the declared default, because
+       run-gametest/phc/server.toml is per game directory and held true from older
+       runs);
+     - new: undead_test_command, which drives the real dispatcher.
+   - Proof: all gametests green, including a run with run-gametest's file forced to
+     false.
+2. Release 0.5.042 (tag v0.5.042 -> 8e076a4b; GitHub release with the jar; wiki note in
+   86dc6c96).
+   - Release set run:
+     - tier-0 node checks: 13, all green;
+     - full :common:test: green in 21m 50s (slowest classes recorded in test-tiers);
+     - :neoforge-26.1.2:test: green;
+     - runGameTest: green;
+     - the 7 headless browser checks: green;
+     - a runServer boot to Done, with only the known WARNs.
+   - The note was written from an audit of the whole tag range (subagent) and opens with
+     a server-owner warning box:
+     - wild horses now leave after 3 days, including untamed horses players led or rode;
+     - undead conversion is opt-in;
+     - an existing server.toml keeps realm.breeding_rate_percent = 25.
+3. Merge of origin/main's relicensing into main (92e28af1). See FOUND for why it came
+   after the tag. A licence line was added to the 0.5.042 note on GitHub and on the
+   wiki.
+4. Command whistle Piece 1 (8b6ce8da).
+   - What it is: a new item. Hold use on an owned horse and a wheel opens: Stay, Follow,
+     Wander, Rejoin herd. Sneak-hold orders every horse of yours within 16 blocks, with
+     a summary line. Bond gates the orders (31 / 61); a lead or a cart refuses.
+   - common/: care/HorseOrder, care/HorseOrders, care/CommandWheel.
+   - NeoForge side:
+     - data/HorseOrderAttachment (horsegenetics:horse_order, synced);
+     - server/HorseOrdering, server/OrderStayGoal, server/OrderFollowGoal;
+     - client/CommandWhistleClient, client/CommandWheelScreen;
+     - network/CommandHorsePayload, item/CommandWhistleItem.
+   - Recipe and trade: basic whistle + lead + amethyst shard; equestrian supplier
+     level 3, 5 emeralds.
+   - Checklist and art: ProgressTask COMMAND_WHISTLE with its advancement; green
+     recolour art.
+   - Clears: whistle recall, ender call, Send home and stasis clear an order. A new
+     owner or dimension drops it lazily.
+   - Proof:
+     - HorseOrdersTest and CommandWheelGeometryTest pass, and a geometry mutant failed
+       5 assertions.
+     - Gametests: order_stay_walks_back (a mutant with the walk-back removed now fails
+       it), order_yields_to_needs, order_clears.
+     - runGameTest: 43/43 on 5 consecutive runs.
+     - Checks green: check-recipes, check-progress-tasks, check-duplicate-item-art and
+       check-block-models.
+     - A runServer boot was clean; :neoforge-26.1.2:build is green.
+   - Retired: Piece 1's section in the treatment (a pointer is left) and its Sizing
+     row.
+5. Issue #32 (the wild_horse_moves_on flake): filed this session, then fixed in
+   8b6ce8da and closed.
+   - Cause: a wild horse is judged on its herd lead's stamp, and a neighbouring test's
+     young wild horse could become its lead.
+   - Fix: the test makes its horse its own lead.
+
+DECIDED
+-------
+- (owner) Release 0.5.042 before the whistle work.
+- (owner) Undead conversion ships behind /horseundead test, then enable. Recorded on
+  wiki/undead-horses.html#config and in the ServerConfig comment.
+- Made without the owner:
+  - Stay and Follow sit at goal priority 4, not the treatment's recommended 1. At 1 a
+    stayed horse never gets to start HungerFoodGoal (3), and the owner's own rule says
+    an order must never starve a horse. Recorded on item-whistles #command-code and
+    behaviour-hierarchy.
+  - The wheel shows only Piece 1's four slices (the treatment left it open); Pieces 2
+    and 3 append to HorseOrders.wheel().
+  - The art is green, because the ender whistle already owns purple.
+  - The trade is 5 emeralds, between the basic (2) and the golden (8).
+  - Stay's anchor is snapped to the ground, and "at the spot" is judged horizontally
+    (it was found by a gametest).
+  - The 0.5.042 jar's licence line: the bundled files predate the relicensing, and the
+    note says the new terms cover it, as LICENSE says for every earlier release.
+
+FOUND ON THE WAY
+----------------
+- MISTAKE: I fetched and tagged in one chained command, so v0.5.042 and its GitHub
+  release went up before origin/main's relicensing commits had been merged.
+  - The tag is now in main's history (merge 92e28af1).
+  - The 0.5.042 jar carries the old CC BY-NC LICENSE file and mods.toml licence string.
+    Reissuing it is forbidden, so the note covers it.
+  - release.txt step 7 now separates the fetch from the tag.
+- The release-range audit found two stale comments, both fixed:
+  - TopUpPlan.dayOf said "sleeping does" move game time (it does not);
+  - undead.convert's comment omitted the Blackened breed.
+- /horseundead itself has never run on a live server. The undead_test_command gametest
+  drives it through the dispatcher.
+- Gametest harness traps, all written up on wiki/api-notes.html#gametest:
+  - the success sweep;
+  - the one-block pedestal;
+  - horses frozen after spawning;
+  - makeMockPlayer never joins the level, which disproved my first theory for #32.
+
+PROCEDURES
+----------
+- release.txt step 7: fetch and look at HEAD..origin/main as a separate step before
+  tagging (this session's mistake).
+- test-tiers.txt: the slowest-class timings were refreshed for 0.5.042.
+- Reviewed, no change needed: whats-next, process-intake, add-an-item, launch-game
+  step 8, rebake.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test ran green for the release, BEFORE the whistle's common/
+  classes. Since then only HorseOrdersTest, CommandWheelGeometryTest and
+  CommonPortabilityTest ran. A full run would also cover whatever reads ProgressTask.
+- Nothing from either piece has been seen in game. Where to look first:
+  - The whistle's play checks: wiki/item-whistles.html#command-verify. These are the
+    wheel on hold versus a tap, not mounting the horse, greying, the sneak summary, the
+    Stay walk-back after a scare or a meal, Follow's teleport, the recall clear, and
+    no wheel through walls or on others' horses.
+  - /horseundead on a server: wiki/undead-horses.html#open-undead-test-command.
+
+RELEASE
+-------
+- 0.5.042 was cut on the owner's yes. Its title is "undead horses, and wild herds
+  that come and go".
+- The command whistle does not count toward the next one until its last piece ships
+  (the treatment's Release line).
+
+PICK UP FIRST
+-------------
+/process-intake: Command whistle Piece 3 (the fighting-gene gate, Hunt monsters, Defend
+me). It has one owner question to ask first: whether an "a" (everything) Aggression pair
+unlocks the combat orders.

@@ -12,6 +12,7 @@ window.HG_ITEM_NAMES = {
   "bound_stall_sign": "Bound Stall Sign",
   "bound_ticket": "Bound Ticket",
   "cart_wheel": "Cart Wheel",
+  "command_whistle": "Command Whistle",
   "custom_horse_spawn_egg": "Custom Horse Spawn Egg",
   "dilution_gene_splice_carrot": "Dilution Gene Splice Carrot",
   "echo_whistle": "Echo Whistle",

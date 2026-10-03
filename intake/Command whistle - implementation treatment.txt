@@ -161,86 +161,13 @@ Looks built, is not
 4. The pieces
 =============
 
-Piece 1 - The command whistle, the wheel, and Stay / Follow / Wander / Rejoin herd
----------------------------------------------------------------------------------
-What the player sees: a new whistle. Aim it at a horse you own, hold right-click and a
-wheel opens. Release over Stay and the horse stays put; Follow and it follows you; Wander
-and it roams and ignores you; Rejoin herd and it goes back to its normal life. Sneak-hold
-does the same for every horse of yours within 16 blocks.
-
-Decided
-- A new item, the command whistle. Crafted, AND sold by the equestrian supplier.
-- Hold use while aimed at an owned horse opens the wheel for that horse; release over a
-  slice gives the order; release over the centre, or away from any slice, cancels.
-- Sneak + hold (aimed anywhere) orders every owned horse within 16 blocks. Each horse
-  that cannot take the order says why, in one summary line (e.g. "3 obeyed; 1 not bonded
-  enough").
-- Bond gate: Stay and Follow need bond tier 1 (bond 31+). Every other order needs bond
-  tier 2 (61+). Rejoin herd needs none: clearing an order is always allowed.
-- Wander means roam AND ignore me: it suppresses BondFollowGoal and WildHerdGoal following,
-  and is distinct from Rejoin herd, which restores normal behaviour.
-- Needs break a Stay briefly: HorsePanicGoal / HorseEscapeGoal, and hunger seeking
-  (HungerFoodGoal), may move the horse; it walks back to its anchor afterwards. An order
-  must never starve a horse (carrot, not stick).
-- Riding pauses an order; it resumes on dismount. An area-whistle or ender-whistle recall
-  CLEARS the order to Rejoin herd, because calling a horse means you want it.
-
-Recommended
-- Recipe: a basic whistle + a lead + an amethyst shard (shapeless). The building session
-  checks it clashes with no existing recipe.
-- Trade: equestrian supplier level 3, priced between the basic and golden whistles.
-- Orders live on a new attachment HORSE_ORDER: { order, anchor BlockPos, anchor dimension,
-  orderedBy UUID }. Anchor is set when an anchored order is given (Stay, Graze, Guard,
-  Hunt). Synced with the built-in .sync(StreamCodec), so the client can show it.
-- One goal class per behaviour, each reading HORSE_ORDER in a cheap canUse():
-  OrderStayGoal and OrderFollowGoal at priority 1 (MOVE), inserted AFTER WhistleCallGoal so
-  a live recall wins the tie; Wander adds nothing and suppresses BondFollowGoal and
-  WildHerdGoal (their canUse checks the order). Precise priorities are the building
-  session's, recorded on behaviour-hierarchy.
-- Follow order: follows at a walk, stops ~3 blocks away, real pathfinding (BondFollowGoal's
-  shape), teleports only if more than 24 blocks behind and the route fails, the way
-  WhistleCalls does. It pauses (does not clear) if the owner changes dimension or logs out.
-- The wheel greys the slices a horse cannot take and shows the reason on hover ("Needs
-  bond 61", "Needs a fighting gene"). Piece 1 shows the Piece 2 and 3 slices greyed with
-  "Not yet" ONLY IF the building session prefers a stable layout; otherwise they are
-  absent until their piece ships. Open for the building session.
-- The client decides nothing: it sends CommandHorsePayload(entityIds, order); the server
-  re-checks ownership (HorseOwnership.isOwner), reach (16 blocks), bond and gene gate.
-  The greying uses ClientHorseCareCache's bond and a gene-gate flag that is synced with the
-  order (so the client never needs the genome).
-- A horse pulling a cart (PullCartGoal active) or on a lead refuses orders with a reason;
-  the lead or cart wins. Precedent: compatibility notes that whistle recall should refuse a
-  cart horse.
-- Order is cleared when the horse changes dimension, is put in a stall bank / stasis, is
-  sent home, sold or transferred (owner changes), or dies.
-- Wording (order names, refusals, summary line, tooltip) in common/: COMMON/care/
-  HorseOrders.java (enum + rules: which orders a horse may take, given bond tier, the
-  fighting-gene flag, riding/cart/lead state).
-
-Where the code lives
-- common/: HorseOrder enum (append-only; it is saved by NAME, not ordinal), HorseOrders
-  rules + wording, the wheel's slice geometry (angle -> slice) so it is unit-testable.
-- NeoForge: CommandWhistleItem, HORSE_ORDER attachment, CommandHorsePayload, the order
-  goals, the recall hook in WhistleCalls / EnderWhistleCalls, CommandWheelScreen (client),
-  the interact cancel (client, after HorseInfoInteraction's shape), recipe, trade,
-  advancement, ProgressTask row.
-
-Data and saves: HORSE_ORDER serialised by order NAME plus anchor; an unknown name loads as
-Rejoin herd (no crash, no migration needed). Old worlds have no attachment = Rejoin herd.
-Removing the mod drops the attachment harmlessly.
-Sync: the attachment's own .sync; no new payload for display. One playToServer payload.
-Config: none in Piece 1. The 16-block command reach and the bond tiers are the existing
-ones; a toggle would only switch off an item, which a datapack can already do.
-Tests: HorseOrdersTest (each order x bond tier x riding/cart/lead -> allowed or the right
-refusal); CommandWheelGeometryTest (angles, dead centre, slice edges); a gametest that a
-Stay horse given a hunger need walks to hay and back to its anchor; a gametest that an
-area-whistle recall clears an order.
-Play checks (item-whistles Verification tab): the wheel opens on hold and NOT on a tap;
-holding on a horse does not mount it or open its inventory; release picks the hovered
-slice; sneak-hold orders a field of horses and the summary line is right; a stayed horse
-stays through a night of zombies (panic moves it, it returns).
-Docs: item-whistles (Gameplay, Coding, credit to 1,000,000 Horses), horse-care (orders vs
-bond follow), items (roster), behaviour-hierarchy rebake.
+Piece 1 - SHIPPED 2026-10-03: the item, the order attachment, the wheel, the payload, and
+Stay / Follow / Wander / Rejoin herd. What it is and how it is built: wiki/item-whistles.html
+#command and #command-code. Pieces 2 and 3 plug into its HorseOrder enum (append-only, saved
+by name), HorseOrders (gate + wording), HORSE_ORDER (anchor already stored) and the wheel
+(HorseOrders.wheel(): append the new slices; the wheel sizes itself). Its order goals sit at
+priority 4, not 1, so needs pre-empt them (wiki, #command-code) - a Guard / Hunt goal that
+must fight should sit with them, below hunger.
 
 Piece 2 - Graze nearby, Guard here, Go home
 -------------------------------------------

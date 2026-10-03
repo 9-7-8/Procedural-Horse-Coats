@@ -3266,6 +3266,8 @@ wiki/item-whistles.html#blow-key-code	coding	One key, every whistle (2026-09-29)
 wiki/item-whistles.html#bond-gate	gameplay	Binding an ender whistle needs the horse's trust
 wiki/item-whistles.html#bond-gate-code	coding	The bond gate on binding (2026-09-29)
 wiki/item-whistles.html#call	coding	How a call finds a horse
+wiki/item-whistles.html#command	gameplay	The command whistle: standing orders
+wiki/item-whistles.html#command-code	coding	The command whistle (2026-10-03)
 wiki/item-whistles.html#declined	coding	Two things deliberately not built (2026-09-29)
 wiki/item-whistles.html#ender	gameplay	The ender whistle
 wiki/item-whistles.html#ender-code	coding	The ender whistle

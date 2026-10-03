@@ -26,10 +26,12 @@
     to simply come <a href="#walking">walks in</a> rather than appearing, the ender whistle
     <a href="#bond-gate">asks for a bond</a> before it will bind, and
     <a href="#blow-key">one key blows the lot</a>, and a bound ender whistle
-    <a href="#glint">glimmers</a> so you can pick it out of a hotbar.
+    <a href="#glint">glimmers</a> so you can pick it out of a hotbar. The fifth, the
+    <strong><a href="#command">command whistle</a></strong>, does not call at all: hold it on a
+    horse and a wheel of standing orders opens.
 </p>
 
-<div class="item-art" data-items="basic_whistle,golden_whistle,echo_whistle,ender_whistle"></div>
+<div class="item-art" data-items="basic_whistle,golden_whistle,echo_whistle,ender_whistle,command_whistle"></div>
 
 <section class="tab-panel" data-tab="gameplay">
 <h2 id="use">What happens when you blow an area whistle</h2>
@@ -147,9 +149,49 @@
 <tr><td><strong>Golden whistle</strong></td><td>basic whistle + gold ingot</td><td>within 32 blocks</td></tr>
 <tr><td><strong>Echo whistle</strong></td><td>golden whistle + echo shard</td><td>within 64 blocks</td></tr>
 <tr><td><strong>Ender whistle</strong></td><td>echo whistle + eye of ender + ender pearl</td><td><strong>one</strong> horse, from anywhere, any dimension</td></tr>
+<tr><td><strong>Command whistle</strong></td><td>basic whistle + lead + amethyst shard</td><td>gives orders (<a href="#command">below</a>) to the horse you aim at, or every horse of yours within 16 blocks</td></tr>
 </tbody>
 </table>
 </div>
+
+<h2 id="command">The command whistle: standing orders</h2>
+<p>
+    Aim at a horse you own, <strong>hold right-click</strong>, and a wheel opens. Move the mouse
+    over an order and <strong>let go</strong> to give it; let go in the middle to change nothing.
+    A quick tap opens nothing. It reaches a horse up to 16 blocks away, never through a wall, and
+    the horse is not mounted and its inventory does not open. <strong>Sneak and hold</strong>
+    anywhere to give the order to every horse of yours within 16 blocks; chat then says how many
+    obeyed and why the rest did not (&ldquo;Stay: 3 obeyed; 1 not bonded enough&rdquo;).
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Order</th><th>What the horse does</th><th>Bond it needs</th></tr></thead>
+<tbody>
+<tr><td><strong>Stay</strong></td><td>Stands where it was told. Anything that moves it &mdash; hunger, a fright, a fight, a whistle &mdash; may; it walks back afterwards.</td><td>31</td></tr>
+<tr><td><strong>Follow</strong></td><td>Follows you at a walk and stops a few blocks off. Left far behind with no way through, it is brought to you, as a whistle brings a horse.</td><td>31</td></tr>
+<tr><td><strong>Wander</strong></td><td>Roams freely and ignores you: no following, no watching you.</td><td>61</td></tr>
+<tr><td><strong>Rejoin herd</strong></td><td>No order: back to its ordinary life.</td><td>none</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+    <li><strong>An order lasts</strong> until you change it. It pauses while the horse is ridden
+        or on a lead, and while the player it follows is in another world or offline.</li>
+    <li><strong>An order never starves a horse.</strong> A hungry horse still goes to eat, and a
+        frightened one still bolts.</li>
+    <li><strong>It is cleared</strong> by calling the horse with any whistle (calling a horse means
+        you want it), by Send home, by putting it in a stasis chamber, by selling or giving it away,
+        and when it changes dimension.</li>
+    <li><strong>Refused</strong> by a horse on a lead, one pulling a cart, or one not bonded enough;
+        the wheel greys an order the aimed horse cannot take and says why.</li>
+    <li><strong>Getting one:</strong> crafted (above), or from an equestrian supplier at level 3 for
+        5 emeralds. Giving your first order ticks the &ldquo;Give a horse an order&rdquo; checklist
+        task.</li>
+</ul>
+<p>
+    More orders are planned: Graze nearby, Guard here and Go home, then Hunt monsters and Defend me
+    for horses bred to fight.
+</p>
 
 <h2 id="ender">The ender whistle</h2>
 
@@ -488,6 +530,80 @@
         this with &ldquo;unless someone wants the ladder back&rdquo;; it does not any more.</li>
 </ul>
 
+<h2 id="command-code">The command whistle (2026-10-03)</h2>
+<p>
+    Piece 1 of the command whistle treatment. The idea came from the Bedrock addon
+    <strong>1,000,000 Horses!</strong> (Cynosia; scripts by InnerTri), whose Horse Whistle cycles
+    Stay / Follow / Wander on right-click and applies to every nearby tamed horse when sneaking. It
+    was surveyed from its <code>.mcaddon</code> on 2026-10-03. <strong>Nothing is copied from
+    it</strong>: the copy surveyed was a re-upload of a paid Marketplace pack, so no code, art or
+    text from it is in this repository. The wheel, the bond gates and the order goals are this
+    mod&rsquo;s own.
+</p>
+<ul>
+    <li><strong>common/</strong>: <code>care/HorseOrder</code>, the orders. The enum is append-only
+        and saved by NAME, so an unknown name loads as Rejoin herd. <code>care/HorseOrders</code> holds
+        the gate (lead, then cart, then bond; Rejoin herd never refused) and every word a player reads.
+        <code>care/CommandWheel</code> is the slice geometry: slice 0 is centred straight up and the
+        slices run clockwise, with a dead centre. Tests: <code>HorseOrdersTest</code>,
+        <code>CommandWheelGeometryTest</code>.</li>
+    <li><strong>The order</strong> is the attachment <code>horsegenetics:horse_order</code>
+        (<code>data/HorseOrderAttachment</code>): the order, an anchor, the dimension it was given in,
+        and who gave it. It is synced, and not copied on death. The default is no order, so every
+        older world loads unchanged.</li>
+    <li><strong>Clearing is lazy where it can be.</strong> <code>server/HorseOrdering.current</code>
+        drops an order whose giver no longer owns the horse, or that was given in another dimension.
+        No hook in the ownership or portal code is needed. The moves within one dimension clear it
+        themselves: the area whistle&rsquo;s recall, the ender whistle&rsquo;s call, Send home
+        (<code>StallRecall</code>), and <code>HorseStasisHandler.swallow</code>.</li>
+    <li><strong>Opening the wheel</strong> (<code>client/CommandWhistleClient</code>) cancels
+        <code>InputEvent.InteractionKeyMappingTriggered</code>. That event fires in
+        <code>Minecraft.startUseItem</code> before <code>MultiPlayerGameMode.interact</code> sends the
+        interact packet (read from the 26.1.2 sources), so the server never hears the click and nothing
+        on the server has to be kept in step. The entity-interact events would not do: they fire after
+        the packet has gone. The aimed horse is ray-cast out to 16 blocks and stopped at the first
+        block.</li>
+    <li><strong>Picking on release</strong> (<code>client/CommandWheelScreen</code>) works two ways.
+        Opening a screen calls <code>KeyMapping.releaseAll()</code>, so <code>keyUse.isDown()</code> is
+        useless from then on. The screen gets the right button&rsquo;s <code>mouseReleased</code>, and
+        <code>tick()</code> also polls GLFW. The poll catches a release that came before the screen
+        opened, which is a tap: the cursor is still in the dead centre, so a tap picks nothing. The
+        screen does not pause single-player.</li>
+    <li><strong>The client decides nothing.</strong> <code>CommandHorsePayload</code> carries entity
+        ids and the order&rsquo;s name. <code>HorseOrdering.handle</code> re-finds the horses and
+        re-checks ownership, reach (16 + 2 blocks of slack), lead, cart and bond.</li>
+    <li><strong>Goals</strong>: <code>OrderStayGoal</code> and <code>OrderFollowGoal</code>, both at
+        <strong>priority 4</strong>, not the 1 the treatment recommended. A goal at equal or worse
+        priority is never even asked <code>canUse</code> while a better one runs, so at 1 a stayed horse
+        would never start <code>HungerFoodGoal</code> (3), and the owner&rsquo;s rule is that an order
+        never starves a horse. At 4, every need pre-empts the order: escape (0), panic and a whistle call
+        (1), and hunger, food, sparring and fighting (3). Idling is held off: herd life (5&ndash;7) and
+        vanilla&rsquo;s stroll (6). <code>BondFollowGoal</code> shares 4 and stands down under any order,
+        and its tier-1 <code>Watch</code> under Wander. <code>WildHerdGoal</code> needs no hook, because
+        it already refuses tamed horses and only tamed horses take orders.</li>
+    <li><strong>Stay&rsquo;s anchor is snapped to the ground</strong> (<code>HorseOrdering.groundAt</code>),
+        and &ldquo;at the spot&rdquo; is judged across the ground. A horse ordered mid-jump, or still
+        landing, was otherwise anchored in the air where no path reaches. The
+        <code>order_stay_walks_back</code> gametest found this, because its horse had not landed
+        yet.</li>
+    <li><strong>The item</strong> is <code>item/CommandWhistleItem</code>, stack size 1, and does
+        nothing by itself. Its art is a recolour of the basic whistle in
+        <code>bake-item-recolours.mjs</code>: green, because the ender whistle already owns purple. The
+        trade is level 3 at 5 emeralds. The checklist task is <code>COMMAND_WHISTLE</code>.</li>
+    <li><strong>Gametests</strong>:
+        <ul>
+            <li><code>order_stay_walks_back</code>: a stayed horse moved three blocks is steered back to
+                its spot. It checks the navigation&rsquo;s target, not only the distance, because the
+                neighbouring tests&rsquo; horses pull it about. With the walk-back cut out, the horse
+                still drifted home once.</li>
+            <li><code>order_yields_to_needs</code>: the order goals sit below every need, and bond-follow
+                stands down.</li>
+            <li><code>order_clears</code>: an order is dropped on a new owner, in another dimension, and
+                in stasis.</li>
+        </ul>
+        The recall&rsquo;s clear needs a real <code>ServerPlayer</code>, so it is a play check.</li>
+</ul>
+
 <h2 id="ender-gaps">Known gaps</h2>
 
 <ul>
@@ -510,6 +626,28 @@
     <span class="label">What needs verifying here</span>
     <p>Ender whistles have never been blown, and the <strong>far call is the one that fails invisibly</strong> &mdash; a wrong portal ticket or entity-section wait simply answers nothing across an unloaded chunk; and the three pieces that shipped on 2026-09-29 are navigation, goal arbitration and a keybind, none of which a test can judge, with the walk-in&rsquo;s worst failure being a horse left standing behind a fence.</p>
 </div>
+
+<h3 id="command-verify">The command whistle (2026-10-03, NOT played)</h3>
+<p>The wheel is client input that no test can press. Try each of these:</p>
+<ol>
+    <li><strong>Hold</strong> right-click on your horse: the wheel opens, and the horse is
+        <strong>not mounted</strong> and its inventory does not open. <strong>Tap</strong> instead: no
+        wheel, nothing happens.</li>
+    <li>Release over each slice. Chat names the horse and what it does. Release in the middle: no
+        message, no change.</li>
+    <li>On a horse with bond under 31, every slice but Rejoin herd is grey and says &ldquo;Needs bond
+        31&rdquo;. On a leashed horse, &ldquo;Not while on a lead&rdquo;.</li>
+    <li>Sneak and hold among several horses, some unbonded and one on a lead: the summary line counts
+        them right.</li>
+    <li>Stay, then lead the horse off with food or let a zombie scare it: it comes back to its spot.
+        Stay a hungry horse near hay: it goes to eat, then returns.</li>
+    <li>Follow, then run off: it walks after you. Fly or pearl more than 24 blocks across water: it is
+        brought to you.</li>
+    <li>Give an order, then blow a basic whistle: the order is gone (the H screen or the wheel&rsquo;s
+        &ldquo;Now:&rdquo; line says Rejoin herd). Same for an ender whistle.</li>
+    <li>Aim at a horse behind a fence or wall within 16 blocks: no wheel.</li>
+    <li>On a server, aim at someone else&rsquo;s horse: no wheel, and the normal click happens.</li>
+</ol>
 
 <h3 id="walking-verify">Walking a near horse in (2026-09-29, NOT played)</h3>
 
