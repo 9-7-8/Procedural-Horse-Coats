@@ -176,6 +176,7 @@ const ICON = {
   WHISTLE_GOLDEN: "horsegenetics:golden_whistle",
   WHISTLE_ECHO: "horsegenetics:echo_whistle",
   WHISTLE_ENDER: "horsegenetics:ender_whistle",
+  COMMAND_WHISTLE: "horsegenetics:command_whistle",
   DYE_TACK: "minecraft:leather_horse_armor",
   MILK_MARE: "minecraft:milk_bucket",
 

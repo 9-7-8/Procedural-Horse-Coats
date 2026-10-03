@@ -1656,7 +1656,9 @@ public final class ModGameTests {
         ServerLevel level = helper.getLevel();
         net.minecraft.commands.CommandSourceStack source = level.getServer().createCommandSourceStack()
                 .withSuppressedOutput().withLevel(level)
-                .withPosition(net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(new BlockPos(2, 0, 2))));
+                // At the structure itself: the subjects stand two blocks either side, inside
+                // this test's own ground (see order_stay_walks_back on the harness's sweep).
+                .withPosition(net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(BlockPos.ZERO)));
         com.example.horsegenetics.neoforge.ServerConfig.UNDEAD_CONVERT.set(false);
         level.getServer().getCommands().performPrefixedCommand(source, "horseundead enable");
         if (com.example.horsegenetics.neoforge.ServerConfig.undeadConvert()
@@ -1754,11 +1756,20 @@ public final class ModGameTests {
         helper.runAfterDelay(25L, () -> {
             if (level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse h) {
                 age(h, level);
+                // Its own herd lead. A herd member is judged on its lead's stamp, and
+                // another wild test's NATURAL horse spawned beside this one can be made
+                // its lead - a young one, so this horse stayed (issue #32, which flaked
+                // whenever a new test moved the grid so two wild tests sat together).
+                var care = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get();
+                h.setData(care, h.getData(care).withHerd(java.util.Optional.of(id)));
             }
             helper.succeedWhen(() -> {
-                if (level.getEntity(id) != null) {
+                if (level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse still) {
+                    var care = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get();
                     throw new GameTestAssertException(Component.literal(
-                            "a four-day-old untouched wild horse is still here"), 0);
+                            "a four-day-old untouched wild horse is still here (herd lead "
+                                    + still.getData(care).herd().map(l -> l.equals(id) ? "itself" : l.toString())
+                                            .orElse("none") + ")"), 0);
                 }
             });
         });
@@ -2065,6 +2076,9 @@ public final class ModGameTests {
         register(event, environment, UNDEAD_KEEP_VANILLA, 100);
         register(event, environment, UNDEAD_OFF_BY_DEFAULT, 100);
         register(event, environment, UNDEAD_TEST_COMMAND, 300);
+        register(event, environment, ORDER_STAY_WALKS_BACK, 300);
+        register(event, environment, ORDER_YIELDS_TO_NEEDS, 100);
+        register(event, environment, ORDER_CLEARS, 100);
         // Twenty-five ticks to be founded, then a scan (every thirty) to act on it.
         register(event, environment, WILD_HORSE_MOVES_ON, 200);
         register(event, environment, WILD_TOUCHED_HORSE_GOES_TO_THE_REALM, 200);
@@ -2569,6 +2583,180 @@ public final class ModGameTests {
                     "a horse at the bond threshold was refused: " + atTier), 0);
         }
         helper.succeed();
+    }
+
+    // ------------------------------------------------------------------
+    // The command whistle's orders (HorseOrdering, OrderStayGoal, OrderFollowGoal).
+    // ------------------------------------------------------------------
+
+    /** An owned, bonded horse of a mock player's, with an order set as the server sets one. */
+    private static net.minecraft.world.entity.animal.equine.Horse orderedHorse(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player owner, com.example.horsegenetics.common.care.HorseOrder order) {
+        return orderedHorse(helper, owner, order, BlockPos.ZERO);
+    }
+
+    private static net.minecraft.world.entity.animal.equine.Horse orderedHorse(GameTestHelper helper,
+            net.minecraft.world.entity.player.Player owner, com.example.horsegenetics.common.care.HorseOrder order,
+            BlockPos rel) {
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, rel);
+        horse.setTamed(true);
+        horse.setOwner(owner);
+        setBond(horse, 90);
+        horse.setData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get(),
+                new com.example.horsegenetics.neoforge.data.HorseOrderAttachment(order,
+                        order.anchored() ? java.util.Optional.of(horse.blockPosition()) : java.util.Optional.empty(),
+                        horse.level().dimension().identifier().toString(), java.util.Optional.of(owner.getUUID())));
+        return horse;
+    }
+
+    /**
+     * <b>A stayed horse that something moved walks back to its spot</b> - the command
+     * whistle treatment's "a stayed horse drifts" risk, and the walk-back that answers it.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ORDER_STAY_WALKS_BACK =
+            TEST_FUNCTIONS.register("order_stay_walks_back", () -> ModGameTests::orderStayWalksBack);
+
+    /** Counts the ticks a goal of {@code type} has been running, in {@code counter[0]}; true past 60. */
+    private static boolean running(net.minecraft.world.entity.animal.equine.Horse horse, Class<?> type, int[] counter) {
+        boolean now = horse.goalSelector.getAvailableGoals().stream()
+                .anyMatch(w -> w.isRunning() && type.isInstance(w.getGoal()));
+        counter[0] = now ? counter[0] + 1 : counter[0];
+        return counter[0] > 60;
+    }
+
+    private static void orderStayWalksBack(GameTestHelper helper) {
+        keepTicking(helper);
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        // Beside the structure, not on it: the harness stands each test on a one-block
+        // pedestal (its test-instance block), and a horse ordered up there and pushed off
+        // can never climb back - which is right, and not what this test is about.
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.STAY, new BlockPos(2, 0, 2));
+        BlockPos anchor = com.example.horsegenetics.neoforge.server.HorseOrdering.groundAt(helper.getLevel(), horse
+                .getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get()).anchor().orElseThrow());
+        // Three blocks, and toward the structure rather than away: a test that succeeds
+        // discards every entity within one block of its structure (GameTestInfo.succeed),
+        // and the grid puts the next one six blocks along - a horse moved five landed in
+        // that sweep.
+        horse.snapTo(horse.getX(), horse.getY(), horse.getZ() - 3, horse.getYRot(), 0F);
+        int[] stayTicks = {0};
+        helper.runAfterDelay(2L, () -> {
+            double dx0 = horse.getX() - (anchor.getX() + 0.5);
+            double dz0 = horse.getZ() - (anchor.getZ() + 0.5);
+            if (dx0 * dx0 + dz0 * dz0 < 2.5 * 2.5) {
+                throw new GameTestAssertException(Component.literal("the horse did not stay moved ("
+                        + Math.sqrt(dx0 * dx0 + dz0 * dz0) + " from its spot) - the premise is broken"), 0);
+            }
+        });
+        boolean[] headedHome = {false};
+        helper.succeedWhen(() -> {
+            // Judged only once the order has been in force a while: a gametest horse can
+            // stand frozen for a hundred ticks or so after it is spawned (seen in the
+            // logs).
+            boolean longEnough = running(horse, com.example.horsegenetics.neoforge.server.OrderStayGoal.class, stayTicks);
+            // And it must have been STEERED to its spot, not merely drifted near it: the
+            // neighbouring tests' horses pull it about (sparring and the like, at 3), and
+            // with the walk-back cut out it still wandered 1.6 blocks back once.
+            headedHome[0] |= anchor.equals(horse.getNavigation().getTargetPos());
+            if (!longEnough || !headedHome[0]) {
+                throw new GameTestAssertException(Component.literal("the stay order has not steered it home yet"), 0);
+            }
+            double dx = horse.getX() - (anchor.getX() + 0.5);
+            double dz = horse.getZ() - (anchor.getZ() + 0.5);
+            double d = dx * dx + dz * dz; // across the ground, as OrderStayGoal judges it
+            double slack = com.example.horsegenetics.common.care.HorseOrders.STAY_SLACK_BLOCKS;
+            if (d > slack * slack) {
+                throw new GameTestAssertException(Component.literal(
+                        "a stayed horse moved three blocks has not walked back (" + Math.sqrt(d) + " away)"), 0);
+            }
+        });
+    }
+
+    /**
+     * <b>An order never out-ranks a need</b> (owner: an order must never starve a horse).
+     * Structural, because "a horse that would have eaten did" needs food the neighbouring
+     * tests' horses could take: the order goals sit below hunger, panic and escape, so
+     * each of those pre-empts them, and bond-follow stands down under any order.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ORDER_YIELDS_TO_NEEDS =
+            TEST_FUNCTIONS.register("order_yields_to_needs", () -> ModGameTests::orderYieldsToNeeds);
+
+    private static void orderYieldsToNeeds(GameTestHelper helper) {
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.STAY);
+        int stay = -1;
+        int follow = -1;
+        int worstNeed = -1;
+        com.example.horsegenetics.neoforge.server.BondFollowGoal bond = null;
+        for (net.minecraft.world.entity.ai.goal.WrappedGoal w : horse.goalSelector.getAvailableGoals()) {
+            var g = w.getGoal();
+            if (g instanceof com.example.horsegenetics.neoforge.server.OrderStayGoal) {
+                stay = w.getPriority();
+            } else if (g instanceof com.example.horsegenetics.neoforge.server.OrderFollowGoal) {
+                follow = w.getPriority();
+            } else if (g instanceof com.example.horsegenetics.neoforge.server.HungerFoodGoal
+                    || g instanceof com.example.horsegenetics.neoforge.server.HorseEscapeGoal
+                    || g instanceof net.minecraft.world.entity.ai.goal.PanicGoal) {
+                worstNeed = Math.max(worstNeed, w.getPriority());
+            } else if (g instanceof com.example.horsegenetics.neoforge.server.BondFollowGoal b) {
+                bond = b;
+            }
+        }
+        if (stay < 0 || follow < 0) {
+            throw new GameTestAssertException(Component.literal("the order goals were not added to a horse"), 0);
+        }
+        if (worstNeed < 0 || stay <= worstNeed || follow <= worstNeed) {
+            throw new GameTestAssertException(Component.literal("an order goal (stay " + stay + ", follow " + follow
+                    + ") is not below every need (worst " + worstNeed + "): a stayed horse could starve"), 0);
+        }
+        if (bond == null || bond.canUse()) {
+            throw new GameTestAssertException(Component.literal("bond-follow is missing, or runs under an order"), 0);
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>An order is dropped when the horse leaves its giver's keeping</b>: sold or
+     * transferred (another owner), in another dimension, or stored in a stasis chamber.
+     * The whistle recall's clear needs a real ServerPlayer, and is a play check instead.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> ORDER_CLEARS =
+            TEST_FUNCTIONS.register("order_clears", () -> ModGameTests::orderClears);
+
+    private static void orderClears(GameTestHelper helper) {
+        var type = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get();
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.player.Player buyer = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+
+        var sold = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.FOLLOW);
+        if (!com.example.horsegenetics.neoforge.server.HorseOrdering.hasOrder(sold)) {
+            throw new GameTestAssertException(Component.literal("a fresh order does not stand - the premise is broken"), 0);
+        }
+        sold.setOwner(buyer);
+        if (com.example.horsegenetics.neoforge.server.HorseOrdering.hasOrder(sold) || sold.getData(type).hasOrder()) {
+            throw new GameTestAssertException(Component.literal("a horse with a new owner kept the old owner's order"), 0);
+        }
+
+        var moved = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.WANDER);
+        var o = moved.getData(type);
+        moved.setData(type, new com.example.horsegenetics.neoforge.data.HorseOrderAttachment(
+                o.order(), o.anchor(), "minecraft:the_nether", o.orderedBy()));
+        if (com.example.horsegenetics.neoforge.server.HorseOrdering.hasOrder(moved)) {
+            throw new GameTestAssertException(Component.literal("an order given in another dimension still stands"), 0);
+        }
+
+        var stored = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.STAY);
+        helper.runAfterDelay(25L, () -> {
+            com.example.horsegenetics.neoforge.server.HorseStasisHandler.swallow(helper.getLevel(), stored,
+                    new net.minecraft.world.item.ItemStack(
+                            com.example.horsegenetics.neoforge.item.ModItems.INTERMEDIATE_STASIS_CHAMBER.get()), "Test");
+            if (stored.getData(type).hasOrder()) {
+                throw new GameTestAssertException(Component.literal("a horse went into stasis with its order"), 0);
+            }
+            helper.succeed();
+        });
     }
 
     private static void setBond(net.minecraft.world.entity.animal.equine.Horse horse, int bond) {

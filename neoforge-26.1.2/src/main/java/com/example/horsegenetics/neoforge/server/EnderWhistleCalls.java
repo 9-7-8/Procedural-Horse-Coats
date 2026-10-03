@@ -253,6 +253,7 @@ public final class EnderWhistleCalls {
             return;     // already under you
         }
         HorseLeads.untieFor(horse, player);
+        HorseOrdering.clear(horse); // calling a horse means you want it: no order survives a recall
         horse.getNavigation().stop();
 
         ServerLevel from = (ServerLevel) horse.level();

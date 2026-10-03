@@ -128,6 +128,11 @@ public final class HorseCareHandler {
         // panic is written by hand instead of coming from the priority.
         horse.goalSelector.addGoal(WhistleCallGoal.PRIORITY, new WhistleCallGoal(horse));
         horse.goalSelector.addGoal(GOAL_PRIORITY, new BondFollowGoal(horse));
+        // The command whistle's Stay and Follow orders. At BondFollowGoal's priority and
+        // after it; BondFollowGoal stands down under any order, so they never contest
+        // it. Why 4 and not 1 is on OrderStayGoal: needs (hunger, panic) must pre-empt.
+        horse.goalSelector.addGoal(OrderStayGoal.PRIORITY, new OrderStayGoal(horse));
+        horse.goalSelector.addGoal(OrderFollowGoal.PRIORITY, new OrderFollowGoal(horse));
         // Tier 1 is head-turning only, so it goes BELOW every herd goal
         // (HerdGoals runs 3-7): it claims LOOK alone, but a goal of a lower
         // priority number wins the flag outright, and watching its owner used

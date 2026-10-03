@@ -552,6 +552,17 @@
       "count": 1
     },
     {
+      "id": "command_whistle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:basic_whistle",
+        "minecraft:lead",
+        "minecraft:amethyst_shard"
+      ],
+      "out": "horsegenetics:command_whistle",
+      "count": 1
+    },
+    {
       "id": "cowboy_hitch",
       "kind": "shapeless",
       "in": [

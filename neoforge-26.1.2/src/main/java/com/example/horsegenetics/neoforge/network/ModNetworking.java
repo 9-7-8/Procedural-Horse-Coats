@@ -154,6 +154,18 @@ public final class ModNetworking {
                 })
         );
 
+        // The command whistle's pick. Every check is on the far side - HorseOrdering.handle.
+        registrar.playToServer(
+                CommandHorsePayload.TYPE,
+                CommandHorsePayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                        com.example.horsegenetics.neoforge.server.HorseOrdering.handle(
+                                serverPlayer, payload.entityIds(), payload.all(), payload.parsedOrder());
+                    }
+                })
+        );
+
         // The horse browser's Send home button. Every check that matters is on
         // the far side of this - see StallRecall.request.
         registrar.playToServer(

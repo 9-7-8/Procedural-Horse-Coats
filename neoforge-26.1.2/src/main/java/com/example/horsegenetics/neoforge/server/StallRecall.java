@@ -240,6 +240,7 @@ public final class StallRecall {
             return;
         }
 
+        HorseOrdering.clear(horse); // sent home, it lives there now, not under an order
         TicketHandler.arrive(from, target, horse, landing, player);
         paid(player, charge);
         String name = horse.hasCustomName() ? horse.getCustomName().getString() : "The horse";
