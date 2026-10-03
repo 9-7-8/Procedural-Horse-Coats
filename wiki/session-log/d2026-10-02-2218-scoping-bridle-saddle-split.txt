@@ -10,6 +10,10 @@ ASKED
   settled the open calls (slot, item id, tier-3 steering, bridle-only, nothing-worn, stats,
   source, passenger ride, equids, switch, release).
 - /probe-a-scope on the saddle transition: eight more questions, recorded in section 4b.
+- "Rewrite the readme to be up to date, and use player facing language" -> README.md
+  rewritten (commit "Rewrite the README in player-facing language").
+- "Update the release procedure that it should update the readme as well" -> new step 5b in
+  procedures/release.txt, plus its LEAVES, DONE WHEN, NEVER and SEE ALSO lines.
 - /end-session.
 
 DONE
@@ -18,6 +22,11 @@ DONE
   BarebackSteeringHandler, HorseEscapeGoal, HorseTackSlot, TackEquipHandler, SaddleTint,
   CartHorseMixin (by grep), CowboySale, trades. No code, wiki or asset changed.
   Proof: grep of each named class; check-links run.
+- README.md: "What it does" replaced by "What you can do", player language, only built
+  features (checked against wiki/text pages; unbuilt ones such as dapples, wild turnover,
+  the bridle split were left out). Install, saves, build, credits and licence kept. The saves
+  baseline (0.5.037) was not re-checked against wiki/releases.html#saves.
+- procedures/release.txt step 5b: review README before the build and tag.
 - Cloud session: build, parity and process steps skipped. Worked on the designated branch
   claude/beautiful-ptolemy-3a5k63, not main.
 
@@ -36,7 +45,8 @@ FOUND
 - Earlier in this session an unrelated session's log was edited by mistake; reverted here.
 
 PROCEDURES CHANGED
-- None needed. write-intake-document step 7 says push to main; this session pushed to the
+- release.txt gained step 5b (README review). INDEX.txt and the /release wrapper summaries
+  do not mention it; left as is. write-intake-document step 7 says push to main; this session pushed to the
   designated branch as instructed.
 
 NOT RUN
