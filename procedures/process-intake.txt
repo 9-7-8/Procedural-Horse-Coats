@@ -52,6 +52,10 @@ STEPS
      USAGE.txt, add THIRD_PARTY_NOTICES.md on a pack's first use, and never put a
      whole pack in git or a release;
    - *-draft/ and tools/ folders. They retire with the treatment that uses them.
+   - a folder named in a treatment's entry file (e.g. intake/four-jar-split/). A big treatment may
+     be written across several files in such a folder (owner, 2026-10-03); the "*implementation
+     treatment.txt" entry file in intake/ is the unit, the folder holds its pieces, and its Sizing
+     block is the entry file's.
    Start from intake/Sizing.txt: it holds every unit's size, impact, owner calls and
    dependencies, dated per treatment. A block stands while
    `git log --since=<its date>T00:00 -- "intake/<file>"` is empty (a bare date counts
@@ -159,7 +163,8 @@ STEPS
    "done" marker and no strike-through: a shipped unit still sitting here is a second
    description competing with the wiki.
    - The last piece of a treatment -> delete the whole file, plus any *-draft/ folder
-     only it used. Grep intake/ for that folder's name first.
+     or multi-file treatment folder only it used (a shipped piece's own file in such a folder is
+     deleted with that piece). Grep intake/ for that folder's name first.
    - Not the last piece -> delete that piece's section. If the remaining pieces refer
      to it, leave a one-line pointer to where it now lives on the wiki.
    - A To do.txt bullet -> delete it, and its heading if the heading is now empty.

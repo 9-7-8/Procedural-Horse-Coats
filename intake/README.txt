@@ -1,6 +1,7 @@
 intake/ - the queue of NEW FEATURES waiting to be built
 
-Each *implementation treatment.txt here is one feature, scoped with the owner and ready
+Each *implementation treatment.txt here is one feature (a big one may keep its pieces in a
+folder named in that file, e.g. four-jar-split/), scoped with the owner and ready
 for a building session. Nothing in this folder is a source of truth once it has been
 built: the wiki is.
 

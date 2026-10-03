@@ -110,6 +110,11 @@ PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS
 - SAY WHAT IS OUT. An "In scope / not in scope" list stops the building session from
   growing the feature. Anything the owner chose to leave for later is listed here,
   marked re-askable.
+- A BIG TREATMENT MAY BE SEVERAL FILES. Keep the "<Feature> - implementation treatment.txt" entry
+  file in intake/ (header, Release line, one-sentence ask, a file list, the order) and put the
+  rest in a folder beside it: overview, decision log, a "considered and rejected" file, a code
+  map, one file per piece, cross-cutting rules, unverified/open. intake/four-jar-split/ is the
+  example. The entry file is the unit for Sizing.txt.
 - NO CODE IN THE TREATMENT. Name classes, fields and files freely. Sketch a signature
   if it settles a design call. Never write the implementation: the building session
   reads the real code anyway, and pasted code goes stale before it is used.

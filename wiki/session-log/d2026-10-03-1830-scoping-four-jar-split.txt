@@ -88,3 +88,15 @@ WRITE-UP (owner asked for the treatment in several files, with every decision an
   stored field today (HorseRecordCodecs comment), so the Base-only horse needs one new optional key (file 04 step 3c).
 - Command whistle Pieces 1 and 3 had already landed on main; the remaining whistle work builds in Base.
 PICK UP FIRST (unchanged): the rename ships first; then /process-intake starts on four-jar-split/04.
+
+END OF SESSION
+- PROCEDURES changed: process-intake (multi-file treatment folders are not separate units; retire with the entry file), write-intake-document
+  (a big treatment may be several files in a folder; four-jar-split is the example) and intake/README.txt (one line). Why: this session wrote a nine-file
+  treatment at the owner's request and no procedure said whether a folder in intake/ is a unit.
+- Another procedure gap, not changed: write-intake-document step 7 and end-session step 3c say "push to main", but a cloud session is told to work on its designated
+  branch (claude/beautiful-ptolemy-3a5k63); this session pushed there. The owner should decide whether the procedures should say "the working branch".
+- NOT RUN: no Gradle build (no Java, resource or Gradle file changed; cloud session), no rebake (intake/, procedures/ and wiki prose only).
+  check-parity ran (parity OK, 7163 checks) and check-links ran. A full :common:test would still check everything; none of it was touched.
+- No Verification-tab change (nothing built). No bug filed. No release offered (no player-facing work).
+- PICK UP FIRST: the rename (intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt) must ship first; then /process-intake starts on
+  intake/four-jar-split/04 Piece 1 - Base.txt.
