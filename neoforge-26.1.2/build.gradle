@@ -66,6 +66,17 @@ neoForge {
             jvmArgument '-Xmx2G'
             jvmArgument '-XX:StartFlightRecording=filename=' + project.layout.projectDirectory.file((project.hasProperty('stressDir') ? project.property('stressDir').toString() : 'run-stress') + '/stress.jfr').asFile.absolutePath + ',settings=profile,dumponexit=true'
         }
+        // The wild-turnover soak (2026-10-02): ./gradlew :neoforge-26.1.2:runWildSoakServer [-PsoakDays=12]
+        // [-PsoakDir=run-soak]. A dedicated server in its own directory where a stand-in player walks a route
+        // while the server sprints through game days (server/DebugWildSoak); it halts itself with a verdict.
+        wildSoakServer {
+            server()
+            gameDirectory = project.layout.projectDirectory.dir(project.hasProperty('soakDir') ? project.property('soakDir').toString() : 'run-soak')
+            programArgument '--nogui'
+            systemProperty 'horsegenetics.wildSoak', project.hasProperty('soakDays') ? project.property('soakDays').toString() : '12'
+            jvmArgument '-Xmx3G'
+            jvmArgument '-XX:StartFlightRecording=filename=' + project.layout.projectDirectory.file((project.hasProperty('soakDir') ? project.property('soakDir').toString() : 'run-soak') + '/soak.jfr').asFile.absolutePath + ',settings=profile,dumponexit=true'
+        }
         // Headless in-game tests: ./gradlew :neoforge-26.1.2:runGameTest
         // There is no gameTestServer() helper in ModDevGradle - the run type is a
         // plain string, and 'gameTestServer' is a real key in the userdev config
@@ -85,7 +96,7 @@ neoForge {
         configureEach {
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             // The stress run measures what a player's server pays, and a DEBUG log is not that.
-            logLevel = name == 'stressServer' ? org.slf4j.event.Level.INFO : org.slf4j.event.Level.DEBUG
+            logLevel = (name == 'stressServer' || name == 'wildSoakServer') ? org.slf4j.event.Level.INFO : org.slf4j.event.Level.DEBUG
         }
     }
 

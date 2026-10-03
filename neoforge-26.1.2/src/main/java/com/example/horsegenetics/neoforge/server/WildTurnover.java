@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -76,6 +77,11 @@ public final class WildTurnover {
     public static final String TOUCHED_KEY = "horsegenetics:wild_touched";
 
     private static final int SCAN_INTERVAL = 30;
+
+    /** Running totals since start, read by {@code DebugWildSoak}. Server thread only. */
+    static int removedTotal;
+    static int handedOffTotal;
+    static int handOffFailedTotal;
 
     private WildTurnover() {
     }
@@ -164,7 +170,11 @@ public final class WildTurnover {
     // The scan
     // ------------------------------------------------------------------
 
-    @SubscribeEvent
+    /**
+     * LOWEST priority: this may discard the horse or move it to another level, and every other subscriber to the
+     * same tick event (founding, care, genes) must have had its turn on a living, present horse first.
+     */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     static void onHorseTick(EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Horse horse) || !(horse.level() instanceof ServerLevel level)) {
             return;
@@ -209,12 +219,16 @@ public final class WildTurnover {
                 DebugAnnounce.log("Wild", WildLifetime.leftLine(describe(horse),
                         horse.blockPosition().toShortString(), fate, now - born));
                 horse.discard();
+                removedTotal++;
             }
             case TO_REALM -> {
                 String who = describe(horse);
                 String where = horse.blockPosition().toShortString();
                 if (toRealm(level, horse)) {
+                    handedOffTotal++;
                     DebugAnnounce.log("Wild", WildLifetime.leftLine(who, where, fate, now - born));
+                } else {
+                    handOffFailedTotal++;
                 }
             }
         }

@@ -101,6 +101,12 @@ public final class WildTopUp {
     private static Settings signedFor;
     private static long signature;
 
+    /** Running totals since start, read by {@code DebugWildSoak}. Server thread only. */
+    static int cellsCountedTotal;
+    static int rollsTotal;
+    static int herdsTotal;
+    static int horsesSpawnedTotal;
+
     private WildTopUp() {
     }
 
@@ -153,11 +159,17 @@ public final class WildTopUp {
     /** Count one cell and, if it is thin, spawn a herd in it. Always stamps it. */
     public static int rollCell(ServerLevel level, long cell, Settings settings, long today, long sig, WildCellLedger ledger) {
         int counted = countWild(level, cell, settings);
+        cellsCountedTotal++;
         Decision decision = TopUpPlan.decide(ledger.stampOf(cell, today), today, sig, counted, settings);
         int spawned = 0;
         if (decision == Decision.ROLL) {
             Herd herd = spawnHerd(level, cell, settings);
             spawned = herd.spawned();
+            rollsTotal++;
+            if (spawned > 0) {
+                herdsTotal++;
+                horsesSpawnedTotal += spawned;
+            }
             if (herd.horseCountry()) {
                 DebugAnnounce.log("Wild", TopUpPlan.rolledLine(cell, herd.biome(), counted, spawned, herd.where()));
             }
