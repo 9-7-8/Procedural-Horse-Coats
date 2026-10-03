@@ -1,0 +1,68 @@
+2026-10-03 09:08 (start) - Survey of the 1,000,000 Horses addon; command whistle scoped
+
+ASKED
+- "What does this add on do that we don't?" (a YouTube link: ECKOSOLDIER, "1 MILLION
+  HORSES ADDON is AMAZING for Minecraft Bedrock Edition players!"). Answered first from
+  store pages, then from the addon itself.
+- The owner uploaded the .mcaddon. It was unpacked to the scratchpad and read per
+  procedures/survey-a-mod.txt (manifest, lang, entities, scripts, textures, guide-book
+  text).
+- Asked which ideas to adapt, the owner said: "let's add a "command whistle" which
+  controls the mode of any horse it's pointing at when you blow it, and maybe open up a
+  wheel ... stay, wander, follow, hunt monsters, defend me, and any other behaviors that
+  would make sense." Also: idle animations tied to the social system "eventually", the
+  lowest possible priority. That became intake/Command whistle - implementation
+  treatment.txt (procedures/write-intake-document.txt).
+
+DONE
+- Survey (no commit of its own): the "million" is five texture layers from lists,
+  22 x 13 x 17 x 15 x 14 = 1,021,020. Inheritance picks a parent's index per layer, with
+  a 1-in-10 random swap. The sizes are averaged and then multiplied by 0.75-1.25. Its
+  source records that stat inheritance failed under Bedrock. It has twelve separate mobs,
+  flight for three of them, idle animations, and a Stay/Follow/Wander whistle. The copy
+  was a re-upload of a paid Marketplace pack, branded "by Panda's" with a Telegram link,
+  so nothing from it may be copied. Recorded as a row in the survey backlog on
+  wiki/compatibility.html#mod-survey.
+- Treatment: intake/Command whistle - implementation treatment.txt, three pieces, and its
+  block in intake/Sizing.txt. No code was touched.
+- Checks: node wiki/tools/bake-agent-text.mjs (exit 0), node wiki/tools/check-links.mjs
+  (OK).
+
+DECIDED (all owner, 2026-10-03; recorded in the treatment)
+- It is a new item. You hold use on a horse to open a radial wheel and release to pick.
+  Sneak-hold orders every owned horse within 16 blocks.
+- The wheel's orders: Stay, Follow, Wander (roam and ignore me, which is distinct from
+  Rejoin herd), Graze nearby, Guard here, Go home, Hunt monsters, Defend me, Rejoin herd.
+- Bond: Stay and Follow need tier 1 (31+). The owner first said "a day's worth", which
+  was offered as 15 and became tier 1. Everything else needs tier 2.
+- The combat orders are gene-gated: Aggression with monster targets, Guardian, or Magic
+  Fighter.
+- Leashed pursuit. This REOPENS gene-aggression's settled no-chase call, for orders
+  only. Hunt stays within 16 of the anchor; Defend stays within 8 of the owner.
+- Needs (panic, hunger) break a Stay briefly and the horse returns. Riding pauses an
+  order. A recall whistle clears it.
+- Targets are hostiles, excluding creepers.
+- Obtained by crafting AND from an equestrian supplier trade.
+- Release: counts only when the LAST piece ships.
+- Session calls, marked Recommended in the treatment, not asked: the recipe, the
+  attachment shape, the break-off health, the tag-not-config creeper exclusion, a section
+  on item-whistles rather than a new page.
+
+FOUND ON THE WAY
+- Horses already fight: HorseAggroHandler gives them attack damage, and HorseMeleeGoal
+  and HorseRearFightMixin exist. Nothing anywhere gives a tame horse a target on command.
+- No restrictTo/home radius, and no hold-to-open or radial UI, exists anywhere in the
+  code.
+
+PROCEDURES
+None changed.
+
+NOT RUN / NOT CHECKED
+- No tests: no code changed. The treatment's UNVERIFIED list starts with whether
+  "hold use on an entity" can drive a wheel at all in 26.1.2.
+
+RELEASE
+Not offered: no player-facing change.
+
+PICK UP FIRST
+process-intake on "Command whistle" Piece 1, starting with the wheel spike (UNVERIFIED 1).
