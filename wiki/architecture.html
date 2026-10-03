@@ -22,8 +22,10 @@
     1.12.2 backport cheap, the package layout inside each, how a genome gets from the
     server to a pixel, and what it takes to build and run the thing.
     <strong>The load-bearing rule is the first one:</strong> <code>common/</code> has no
-    Minecraft imports and no Java&nbsp;9+ APIs, because it has three targets &mdash;
-    NeoForge, a browser, and one day Java&nbsp;8.
+    Minecraft imports and no third-party library or JDK API TeaVM lacks (Java&nbsp;17
+    language level; <a href="#verified-java-level">settled 2026-09-26</a>), because it has
+    three targets &mdash; NeoForge, a browser, and one day a Java&nbsp;8 backport that pays a
+    source downgrade.
 </p>
 
 <h2 id="modules">Three modules, split deliberately</h2>

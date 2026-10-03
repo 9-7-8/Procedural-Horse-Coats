@@ -67,7 +67,10 @@ tools (unchanged); every compat hook.
 Piece 1 - Go / no-go: what horse mods does the pack ship, and may we join it?
   Player sees: nothing. Output: a note on architecture.html's Verification tab.
   Decided (owner): flag the Realistic Horse Genetics overlap as a go/no-go check, not an
-    assumption either way.
+    assumption either way. Decided (owner, 2026-10-03, later): The 1.12.2 Pack has NO horse
+    mods. So the overlap check is satisfied for the pack as shipped; Open 1 shrinks to "a
+    player who adds Realistic Horse Genetics beside us" (a clash to test, not a blocker), and
+    the remaining piece-1 work is licence and the pack author's willingness only.
   Steps: read the pack's mod list (CurseForge and Technic /mods pages: the surveying session
     could not); check for Realistic Horse Genetics, Animania, Mo' Creatures, Horse Stats;
     read each licence; ask the pack author whether they would add a mod (Technic is
