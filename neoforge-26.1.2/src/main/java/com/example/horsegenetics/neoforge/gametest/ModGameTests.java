@@ -1026,6 +1026,70 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>Building the F6 corridor loads no chunk but the one it writes.</b>
+     * Issue #31: one operator pressing F6 froze the live server for three
+     * seconds, and 59 of the 60 chunk loads it forced came from
+     * {@code DebugPenManager.fastSet} - the same flag-2 shape update as #13,
+     * crossing a chunk edge into a neighbour nobody had loaded.
+     *
+     * <p>So: every edge cell of an untouched chunk gets a corridor column
+     * (bedrock, dirt, gravel) and a plank wall block through the real
+     * {@code fastSet}. All four neighbours must still be unloaded afterwards.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> DEBUG_CORRIDOR_LOADS_NO_NEIGHBOUR =
+            TEST_FUNCTIONS.register("debug_corridor_loads_no_neighbour", () -> ModGameTests::debugCorridorLoadsNoNeighbour);
+
+    private static void debugCorridorLoadsNoNeighbour(GameTestHelper helper) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        // Far from the test structures, the spawn chunks and the realm-lift test's chunk.
+        net.minecraft.world.level.ChunkPos at = new net.minecraft.world.level.ChunkPos(4133, -3881);
+        net.minecraft.world.level.ChunkPos[] around = {
+                new net.minecraft.world.level.ChunkPos(at.x() - 1, at.z()),
+                new net.minecraft.world.level.ChunkPos(at.x() + 1, at.z()),
+                new net.minecraft.world.level.ChunkPos(at.x(), at.z() - 1),
+                new net.minecraft.world.level.ChunkPos(at.x(), at.z() + 1)};
+        level.getChunk(at.x(), at.z());
+        for (net.minecraft.world.level.ChunkPos n : around) {
+            if (level.hasChunk(n.x(), n.z())) {
+                helper.fail("chunk " + n + " was loaded before the build ran - the test proves "
+                        + "nothing from here; move it somewhere nobody has been");
+                return;
+            }
+        }
+
+        int x0 = at.getMinBlockX();
+        int z0 = at.getMinBlockZ();
+        int gy = 100;
+        BlockState[] column = {Blocks.BEDROCK.defaultBlockState(), Blocks.DIRT.defaultBlockState(),
+                Blocks.DIRT.defaultBlockState(), Blocks.GRAVEL.defaultBlockState(),
+                Blocks.OAK_PLANKS.defaultBlockState()};
+        for (int i = 0; i < 16; i++) {
+            for (BlockPos edge : new BlockPos[] {new BlockPos(x0, 0, z0 + i), new BlockPos(x0 + 15, 0, z0 + i),
+                    new BlockPos(x0 + i, 0, z0), new BlockPos(x0 + i, 0, z0 + 15)}) {
+                for (int dy = 0; dy < column.length; dy++) {
+                    com.example.horsegenetics.neoforge.server.DebugPenManager.fastSet(
+                            level, edge.atY(gy - 3 + dy), column[dy]);
+                }
+            }
+        }
+
+        BlockPos built = new BlockPos(x0 + 15, gy + 1, z0 + 7);
+        if (!level.getBlockState(built).is(Blocks.OAK_PLANKS)) {
+            helper.fail("the build did not run - no planks at " + built.toShortString()
+                    + ", so the neighbour check below would be checking nothing");
+            return;
+        }
+        for (net.minecraft.world.level.ChunkPos n : around) {
+            if (level.hasChunk(n.x(), n.z())) {
+                helper.fail("building the corridor in chunk " + at + " loaded its neighbour " + n
+                        + " - a shape update crossed the edge (issue #31)");
+                return;
+            }
+        }
+        helper.succeed();
+    }
+
+    /**
      * <b>A horse lost after a realm backup comes back from it, as itself.</b>
      * The whole of {@code RealmBackup} end to end, in whatever level the harness
      * has (it has no realm; the backup does not ask which level it is): take a
@@ -2107,6 +2171,8 @@ public final class ModGameTests {
         register(event, environment, HORSE_REALM_GRID_IS_STABLE, 100);
         // One chunk generated, one lifted; all in one tick.
         register(event, environment, REALM_LIFT_LOADS_NO_NEIGHBOUR, 200);
+        // One chunk generated, its edge built; all in one tick.
+        register(event, environment, DEBUG_CORRIDOR_LOADS_NO_NEIGHBOUR, 200);
         // Ten ticks to be founded, a backup and a plan (two flushing saves), then
         // a raise on the next server tick.
         register(event, environment, REALM_BACKUP_RAISES_A_LOST_HORSE, 200);

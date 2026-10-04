@@ -1316,15 +1316,27 @@ public final class DebugPenManager {
                 Math.min(declared.maxX, xHi), declared.maxY, declared.maxZ);
     }
 
-    static void fastSet(ServerLevel level, BlockPos pos, BlockState state) {
-        level.setBlock(pos, state, 2); // UPDATE_CLIENTS only - bulk terrain, skip neighbour updates
+    /**
+     * Bulk terrain: {@code UPDATE_CLIENTS} (2) plus {@code UPDATE_KNOWN_SHAPE} (16),
+     * so no neighbour updates of either kind. Flag 2 alone still re-shapes all six
+     * neighbours, and on a chunk edge that neighbour is in the next chunk over:
+     * the first F6 on the live server forced 59 synchronous loads that way and
+     * froze it for three seconds (issue #31, the same thing as #13 in the realm).
+     *
+     * <p>Safe because every caller writes full blocks or air (planks, bedrock,
+     * dirt, gravel, glowstone, hay, plain glass, lamps). The one cost is that a
+     * fence, pane or wall standing beside a changed cell keeps its old
+     * connections. The corridor rebuilds the same blocks in the same places, so
+     * nothing there changes. UNVERIFIED for the yards' glass cells and path cut,
+     * which can clear a cell next to a fence: at worst, a fence arm reaching into air.
+     */
+    public static void fastSet(ServerLevel level, BlockPos pos, BlockState state) {
+        level.setBlock(pos, state, 2 | 16);
     }
 
     /**
-     * Like {@link #fastSet}, plus bit 16 ({@code UPDATE_KNOWN_SHAPE}) to suppress
-     * neighbour <b>shape</b> updates - which flag 2 does <i>not</i>.
-     *
-     * <p>Only the portal cells need it, and they genuinely do:
+     * {@link #fastSet}'s flags, kept as its own method for the portal cells,
+     * where the 16 is not an optimisation but a requirement:
      * {@link HayPortalBlock#updateShape} turns an unenclosed portal block into
      * air, and this method builds the frame a row at a time, so a portal block
      * placed before the hay above it would ask itself whether it is enclosed,
