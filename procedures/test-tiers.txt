@@ -61,6 +61,9 @@ STEPS
        in, so a horse a few blocks over may sit in a chunk that never ticks (no scan,
        no founding) - ModGameTests.keepTicking forces the 3x3. The harness has no horse
        realm level, and runs with doMobSpawning off, so no natural or top-up spawn fires.
+       An attribute write (SCALE) reaches the hitbox only on the entity's NEXT tick:
+       assert on getBbHeight(), never getScale(), or the test passes before it starts.
+       helper.spawn at a test's origin puts a horse into the harness's barrier walls.
        A new test is TWO edits: its TEST_FUNCTIONS.register AND a register(event, ...)
        line in the list ModGameTests builds instances from. Miss the second and the run
        says "All N required tests passed" without it - count N before and after.

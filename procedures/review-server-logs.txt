@@ -119,6 +119,10 @@ STEPS
    death that did not happen, so it never reaches 04-equine-deaths.txt, and the exporter
    does not tag it. Grep the raw logs for it (`zcat -f *.log.gz latest.log | grep
    suffrescue`) and add the count to issue #35, or to whatever replaced it.
+   From 0.5.044 the mod logs its own "[clearance] <uuid> grew into blocks at x, y, z":
+   a horse it moved out of a wall after growing. Count those beside the rescues, and pair
+   them by UUID. A rescue with no clearance line before it for the same horse means
+   something other than growth is putting horses in walls (#35's open question).
    The raw logs usually run past the last export's window. Anything found there is
    still in scope: file it as usual, and say in "Reported by" that it came from the raw
    log, not from an export. A frame of ours that the fix never named is a new issue

@@ -1,0 +1,94 @@
+2026-10-04 13:06 (session end) - #35: a horse that grew could be left inside the blocks
+
+ASKED
+- "/whats-next". I read every queue and offered four options: fix #35 (recommended: DAMAGE
+  urgency, and the last session's pick-up line), fix #31 (F6 freezes a server), the rename
+  through process-intake, or an owner-free intake unit (Body parts slice A or Feathering).
+  There was no release to offer: main since v0.5.043 held only docs and intake. Every PCH
+  export folder had been reviewed, and decisions.html has no open calls.
+- The owner picked "Fix #35 suffocation" (procedures/fix-bug.txt). Done; see below.
+
+DONE
+- 8e477dbd "#35: a horse that grew could be left inside the blocks around it".
+  What was wrong: almost every horse is placed at vanilla size and grown afterwards.
+  Natural spawns, the cowboy (CowboyHandler.roomForAHorse) and the wild top-up
+  (WildTopUp) check room for a scale-1 horse, and HorseFoundingTickHandler writes the
+  breed's real SCALE 1-20 ticks later. A reloaded horse is rebuilt at scale 1 and grows
+  back on its first tick, and a foal grows up where it stands. All of these end in
+  vanilla's Entity.refreshDimensions, and its fudgePositionAfterSizeChange gives up
+  silently when nothing within the size difference is clear. Its fallback also places
+  for the new width at the OLD height and then keeps the taller box, and the whole nudge
+  is skipped for a box over 4 blocks (magical giants). Under a two-block ceiling, a horse
+  of scale 1.32 or more is left with its eyes in the stone.
+  The fix: the new neoforge/server/HorseClearance notes each horse that grows
+  (EntityEvent.Size; it only stores the id, since the event can fire mid-load). On its
+  EntityTickEvent.Post, a horse whose box still collides is moved to the nearest clear
+  spot within 3 blocks, or failing that, if its eyes are buried, lifted to the
+  MOTION_BLOCKING_NO_LEAVES surface. The shell search is LycanthropyHandler's old
+  clearOfBlocks, moved into HorseClearance; the lycanthropy restore now calls it. Every
+  move logs "[clearance] <uuid> grew into blocks at x, y, z (scale s) - ..." through
+  HorseGenetics.LOGGER, so it is logged with or without debug tools.
+  Proof: new gametest grown_horse_leaves_the_ceiling (ModGameTests, registered at 200
+  ticks) grows a horse from 1.0 to 1.75 under a two-block stone ceiling. With the
+  handler disabled it FAILS ("still inside the blocks"). With it, all 48 required
+  gametests pass. :neoforge-26.1.2:build green, check-parity OK, check-links OK.
+  Wiki: horse-body.html#growing-room.
+  Issue #35: OPEN, commented with the evidence. It waits on the live server running the
+  next release: [clearance] lines and no [suffrescue] lines close it. A rescue with no
+  clearance line before it for the same UUID means horses reach walls some other way.
+
+DECIDED
+- The owner picked #35 (owner).
+- My calls:
+  - Fix it at the growth, in one handler, rather than make each placement
+    (roomForAHorse, WildTopUp, natural spawns) size its check by the horse's final scale.
+    One hook covers every path, including reloads and foals, and it frees horses that are
+    already stuck the next time their chunk loads.
+  - Committed as "#35:" and not "Fix #35". The test proves the mechanism, not that it is
+    what buried the live server's horses.
+  - No Verification-tab entry: the open runtime question is #35's, and the issue names
+    the log lines that answer it.
+
+FOUND ON THE WAY
+- The 27 Sep deaths: at 17:23:42 a player came out of a Nether portal near (272, -288).
+  Vanilla's PortalForcer loaded the chunks the four horses were in (Cupboard's chunk-load
+  trace in 2026-09-27-1.log.gz), and the first horse died about a second later. They were
+  already in the walls and already hurt from earlier ticking. The live logs cannot say
+  how they got there: suffocation_rescue.js logs a UUID and health, never a position, and
+  the four rescued UUIDs appear in no other log line.
+- My mistake, fixed before commit: the first version of the gametest asserted as soon as
+  getScale() read 1.75. The hitbox only follows on the horse's next tick, so the test
+  passed with the fix disabled. The mutation run caught it. The test now waits on
+  getBbHeight().
+- With the fix on, six other gametests' horses were moved by it. A one-off trace showed
+  each one overlapping the barrier blocks that wall a 1x1 test structure, because
+  helper.spawn at the origin puts a 1.4-wide horse into them. So those moves were real,
+  and all 48 tests still pass.
+- order_combat_gate failed once (in the run with the fix disabled) and passed in the
+  other four runs. It does not touch sizes. Treated as the known tick-phase flake; not
+  filed.
+
+PROCEDURES
+- review-server-logs.txt: count the mod's new "[clearance]" lines beside the
+  "[suffrescue]" rescues, and pair them by UUID.
+- test-tiers.txt, "Writing one": an attribute write reaches the hitbox only on the next
+  tick (assert on getBbHeight(), not getScale()), and helper.spawn at a test's origin
+  puts a horse into the harness's barrier walls.
+- whats-next, fix-bug and end-session were followed as written. None needed for them.
+
+NOT RUN / NOT CHECKED
+- Full :common:test was not run. common/ did not change, so it cannot have moved.
+- Nobody has seen the clearance move in game. The only evidence is the gametest; the
+  live server's next release is the real check (#35).
+- Not handled, and not seen anywhere: a horse SMALLER than scale 1 that is somehow in a
+  wall (a shrink is never checked), and a move into a neighbouring chunk that is not
+  loaded (collision treats unloaded blocks as empty).
+- No Verification-tab anchors were added.
+
+RELEASE
+- Not offered: one fix is below release step 1's bar.
+
+PICK UP FIRST
+- /fix-bug on #31 (F6 freezes a server for ~3s, PLAYERS urgency). After that, the rename
+  (intake/Rename to Ixora's Horse Overhaul) through /process-intake, which comes before
+  the four-jar split.
