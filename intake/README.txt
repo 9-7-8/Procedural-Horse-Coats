@@ -9,6 +9,8 @@ built: the wiki is.
 - To build one: procedures/process-intake.txt          (/process-intake)
 - A BUG never goes here. It is a GitHub issue: procedures/report-bug.txt (/report-bug),
   fixed by procedures/fix-bug.txt (/fix-bug).
+- discord-*/ folders hold announcement posts and their images for the Discord bot; they are
+  not treatments or units.
 - To do.txt is the owner's free-form inbox. Never delete it.
 - Sizing.txt is every unit's size, impact and owner calls, dated, kept by process-intake
   so a run re-sizes only what changed. It is an index, not a unit.
