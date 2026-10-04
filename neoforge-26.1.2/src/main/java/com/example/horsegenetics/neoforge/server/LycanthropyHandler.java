@@ -444,45 +444,21 @@ public final class LycanthropyHandler {
         return horse;
     }
 
-    /** How far, in blocks, a restored horse may be moved to get it out of a wall. */
-    private static final int CLEAR_REACH = 3;
-
     /**
      * <b>A horse is bigger than most of its animal forms.</b> A wolf, a fox or a cat fits against a fence or under a
      * roof where a horse's box does not, and restoring the horse where the animal stood put it inside the blocks: the
      * yard's LYCAN WOLF foals suffocated ten seconds after dawn, and their sire took 23 wall hits (2026-09-15 run). So
-     * a horse that would collide is moved to the nearest spot within {@link #CLEAR_REACH} blocks where its whole box is
-     * clear, searching outward in shells and upward before down. If none is found it is left where it is, as before.
+     * a horse that would collide is moved to the nearest clear spot by {@link HorseClearance#clearOfBlocks}, the same
+     * search a horse that grows gets. If none is found it is left where it is, as before.
      */
     private static void clearOfBlocks(Horse horse, ServerLevel level, LycanShift shift) {
-        net.minecraft.world.phys.AABB box = horse.getBoundingBox();
-        if (level.noCollision(horse, box)) {
+        if (level.noCollision(horse, horse.getBoundingBox())) {
             return;
         }
-        for (int r = 1; r <= CLEAR_REACH; r++) {
-            for (int dy = 0; dy <= r; dy = dy <= 0 ? 1 - dy : -dy) {
-                if (dy < -r) {
-                    break;
-                }
-                for (int dx = -r; dx <= r; dx++) {
-                    for (int dz = -r; dz <= r; dz++) {
-                        if (Math.max(Math.max(Math.abs(dx), Math.abs(dz)), Math.abs(dy)) != r) {
-                            continue;   // only the shell at this distance; the inside was tried already
-                        }
-                        if (level.noCollision(horse, box.move(dx, dy, dz))) {
-                            horse.snapTo(horse.getX() + dx, horse.getY() + dy, horse.getZ() + dz,
-                                    horse.getYRot(), horse.getXRot());
-                            ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " came back from a "
-                                    + shift.mob() + " inside blocks - moved " + dx + ", " + dy + ", " + dz
-                                    + " to " + horse.blockPosition().toShortString());
-                            return;
-                        }
-                    }
-                }
-            }
-        }
+        String moved = HorseClearance.clearOfBlocks(horse, level);
         ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " came back from a " + shift.mob()
-                + " inside blocks and no clear spot within " + CLEAR_REACH + " - left where it was");
+                + " inside blocks - " + (moved == null
+                        ? "no clear spot within " + HorseClearance.CLEAR_REACH + ", left where it was" : moved));
     }
 
     /**

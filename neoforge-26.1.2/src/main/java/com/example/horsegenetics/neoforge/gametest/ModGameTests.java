@@ -1230,6 +1230,67 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>A horse that grows under a low ceiling does not end up inside it</b> (#35).
+     *
+     * <p>A stone floor and a stone ceiling two blocks over it: room for a vanilla
+     * horse (1.6 tall) and not for a scale-1.75 one (2.8). The horse is put in
+     * at scale 1 and grown, the way the founding tick grows every horse placed at
+     * vanilla size. Vanilla's own nudge finds no room for the new height and, by
+     * its fallback, keeps the horse's eyes in the ceiling; {@code HorseClearance}
+     * has to get it out. Passes when the grown box collides with nothing and the
+     * eyes are in air.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GROWN_HORSE_LEAVES_THE_CEILING =
+            TEST_FUNCTIONS.register("grown_horse_leaves_the_ceiling",
+                    () -> ModGameTests::grownHorseLeavesTheCeiling);
+
+    private static void grownHorseLeavesTheCeiling(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos origin = helper.absolutePos(BlockPos.ZERO).above(40);
+        fill(level, origin, Blocks.AIR.defaultBlockState());
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -4; z <= 4; z++) {
+                level.setBlock(origin.offset(x, -1, z), Blocks.STONE.defaultBlockState(), 2);
+                level.setBlock(origin.offset(x, 2, z), Blocks.STONE.defaultBlockState(), 2);
+            }
+        }
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(40));
+        horse.setNoAi(true);
+        net.minecraft.world.entity.ai.attributes.AttributeInstance scale =
+                horse.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE);
+        boolean[] grown = {false};
+        helper.onEachTick(() -> {
+            if (grown[0] || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                return;
+            }
+            // Founded (which rolled a scale of its own): back to vanilla size, in
+            // the gap, and grown a tick later so the growth is its own refresh.
+            if (scale.getBaseValue() != 1.0) {
+                scale.setBaseValue(1.0);
+                horse.snapTo(origin.getX() + 0.5, origin.getY(), origin.getZ() + 0.5, 0.0F, 0.0F);
+                return;
+            }
+            horse.snapTo(origin.getX() + 0.5, origin.getY(), origin.getZ() + 0.5, 0.0F, 0.0F);
+            scale.setBaseValue(1.75);
+            grown[0] = true;
+        });
+        helper.succeedWhen(() -> {
+            // The box, not getScale(): the attribute reads 1.75 at once, and the
+            // hitbox follows only on the horse's next tick.
+            if (!grown[0] || horse.getBbHeight() < 2.7F) {
+                throw new GameTestAssertException(Component.literal("the horse has not grown yet"), 0);
+            }
+            if (!level.noCollision(horse, horse.getBoundingBox()) || horse.isInWall()) {
+                throw new GameTestAssertException(Component.literal("a horse grown to scale 1.75 under a "
+                        + "two-block ceiling is still inside the blocks at " + horse.blockPosition().toShortString()
+                        + " - it will suffocate there."), 0);
+            }
+            fill(level, origin, Blocks.AIR.defaultBlockState());
+        });
+    }
+
+    /**
      * <b>A second jockey pass adds a day; it does not replace one.</b>
      *
      * <p>{@code RidingPassAttachment} is arithmetic on deadlines, and every way
@@ -2052,6 +2113,7 @@ public final class ModGameTests {
         register(event, environment, A_DEAD_HORSE_COMES_BACK_WHOLE, 200);
         // Two scratch-box fills and an exhaustive scan, all inside one tick.
         register(event, environment, WAYSTONE_CLEARANCE_IS_NEAREST, 200);
+        register(event, environment, GROWN_HORSE_LEAVES_THE_CEILING, 200);
         // Pure arithmetic on a record; no world touched.
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
         // One horse spawned and three events posted, all inside a single tick.

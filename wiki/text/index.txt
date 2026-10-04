@@ -2900,6 +2900,7 @@ wiki/horse-body.html#config	all	The server settings
 wiki/horse-body.html#contributing	all	How a gene contributes
 wiki/horse-body.html#disorder-shapes	all	The two shapes a disorder comes in
 wiki/horse-body.html#epigenetic	all	The per-horse twin 2026-09-04
+wiki/horse-body.html#growing-room	all	A horse that grows is checked for room (2026-10-04, #35)
 wiki/horse-body.html#invisible	all	The non-coat genes cost the coat nothing
 wiki/horse-body.html#lethals	all	The two kinds of lethal
 wiki/horse-body.html#magical-scale	all	Scale has two stages, and only one is clamped

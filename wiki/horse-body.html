@@ -829,6 +829,31 @@ public interface GeneEpigenetics {
     </p>
 </div>
 
+<h3 id="growing-room">A horse that grows is checked for room (2026-10-04, #35)</h3>
+
+<p>
+    A horse is nearly always placed at one size and grown to another. Natural spawns,
+    the cowboy and the wild top-up check room for a <em>vanilla</em> horse, and the
+    founding tick writes the real <code>SCALE</code> up to twenty ticks later. A
+    reloaded horse is rebuilt at scale 1 and grows back on its first tick, and a foal
+    grows up where it stands. Vanilla&rsquo;s own nudge in
+    <code>refreshDimensions</code> gives up silently when nothing near is clear. Its
+    fallback makes room for the new width at the <em>old</em> height and keeps the
+    taller box anyway, and it is skipped outright for a box over four blocks. Under
+    a two-block ceiling, a horse of scale 1.32 or more ends up with its eyes in the
+    stone, and suffocates whenever its chunk ticks.
+</p>
+<p>
+    <code>HorseClearance</code> notes every horse that grows (NeoForge&rsquo;s
+    <code>EntityEvent.Size</code>). After that tick, a horse whose box still collides
+    is moved to the nearest clear spot within three blocks, using the shell search the
+    lycanthropy restore already used. Failing that, a horse with its eyes buried is lifted
+    to the surface of its column. Each move is logged as <code>[clearance]</code>, debug
+    tools or not, so a server log now says where a horse was buried. The gametest
+    <code>grown_horse_leaves_the_ceiling</code> holds it: the test goes red without the
+    handler.
+</p>
+
 <h2 id="notbuilt">What this is not</h2>
 
 <ul>
