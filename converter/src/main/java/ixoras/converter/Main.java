@@ -13,7 +13,8 @@ import java.util.Scanner;
  * ixoras world converter: moves a world saved under the old namespace to the new one, into a NEW folder.
  *
  * <pre>
- *   java -jar ixoras-converter.jar "&lt;world folder&gt;" [--dry-run] [--yes] [--packs &lt;pack&gt; ...]
+ *   java -jar ixoras-converter.jar                      (no arguments: opens the window, when there is a display)
+ *   java -jar ixoras-converter.jar "&lt;world folder&gt;" [--dry-run] [--yes] [--packs &lt;pack&gt; ...] [--options &lt;options.txt&gt;]
  *                                  [--old horsegenetics] [--new ixoras_horses] [--self-test]
  * </pre>
  *
@@ -28,7 +29,10 @@ public final class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        System.exit(run(args, System.out));
+        int code = run(args, System.out);
+        if (code >= 0) {
+            System.exit(code);
+        }
     }
 
     static int run(String[] args, PrintStream log) throws Exception {
@@ -37,6 +41,7 @@ public final class Main {
         boolean dry = false;
         boolean yes = false;
         List<Path> packs = new ArrayList<>();
+        Path options = null;
         Path world = null;
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -57,6 +62,9 @@ public final class Main {
                         packs.add(Path.of(args[++i]));
                     }
                     break;
+                case "--options":
+                    options = Path.of(args[++i]);
+                    break;
                 case "--self-test":
                     return SelfTest.run(log);
                 default:
@@ -67,13 +75,24 @@ public final class Main {
                     world = Path.of(args[i]);
             }
         }
-        if (world == null && packs.isEmpty()) {
-            log.println("usage: java -jar ixoras-converter.jar <world folder> [--dry-run] [--yes] [--packs <pack> ...]");
+        if (world == null && packs.isEmpty() && options == null) {
+            if (args.length == 0 && !java.awt.GraphicsEnvironment.isHeadless()) {
+                Gui.open();
+                return -1; // the window is open; do not exit
+            }
+            log.println("usage: java -jar ixoras-converter.jar <world folder> [--dry-run] [--yes] [--packs <pack> ...] [--options <options.txt>]");
             return 1;
         }
         int code = 0;
         if (world != null) {
             code = convertWorld(world, oldNs, newNs, dry, log);
+        }
+        if (code == 0 && options != null) {
+            if (dry) {
+                log.println("dry run: would move key bindings in " + options);
+            } else {
+                OptionsConverter.convert(options, oldNs, newNs, log);
+            }
         }
         if (code == 0 && !packs.isEmpty()) {
             new PackConverter(oldNs, newNs, log).convertAll(packs, yes, dry, new Scanner(System.in));

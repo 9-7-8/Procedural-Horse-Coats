@@ -46,6 +46,7 @@ final class SelfTest {
                     Files.readString(out.resolve("advancements/a.json")).contains("item.ixoras_horses.whistle")
                             && Files.readString(out.resolve("advancements/a.json")).contains("xhorsegenetics:no"));
             fails += packs(log, tmp);
+            fails += options(log, tmp);
             Path world2 = out;
             int code2 = Main.convertWorld(world2, "horsegenetics", "ixoras_horses", false, log);
             fails += check(log, "second run is a no-op, exit 0", code2 == 0 && !Files.exists(tmp.resolve("World (converted) (converted)")));
@@ -178,6 +179,19 @@ final class SelfTest {
             f += check(log, "zip entry renamed and rewritten", e != null
                     && new String(zf.getInputStream(e).readAllBytes(), StandardCharsets.UTF_8).contains("ixoras_horses:a"));
         }
+        return f;
+    }
+
+    private static int options(PrintStream log, Path tmp) throws IOException {
+        Path o = tmp.resolve("options.txt");
+        Files.writeString(o, "fov:0.5\nkey_key.horsegenetics.blow_whistles:key.keyboard.k\nkey_key.jump:key.keyboard.space\n");
+        long n = OptionsConverter.convert(o, "horsegenetics", "ixoras_horses", log);
+        String now = Files.readString(o);
+        int f = 0;
+        f += check(log, "options: one binding moved", n == 1 && now.contains("key_key.ixoras_horses.blow_whistles:key.keyboard.k")
+                && now.contains("key_key.jump:key.keyboard.space"));
+        f += check(log, "options: original kept", Files.readString(tmp.resolve("options.txt.before-ixoras")).contains("horsegenetics"));
+        f += check(log, "options: second run changes nothing", OptionsConverter.convert(o, "horsegenetics", "ixoras_horses", log) == 0);
         return f;
     }
 

@@ -6,7 +6,9 @@
 // you can read `git diff --stat` first):
 //   1  Java package: oldPackage -> newPackage in text files, and move the package directories.
 //   2  Id token: every lowercase `horsegenetics` -> `ixoras_horses` in tracked text files (not the excluded folders).
-//   3  Path segments and file names containing the old id are renamed with `git mv`, deepest first.
+//   2b Class names (config classRenames: HorseGenetics -> IxorasHorses, HorseGeneticsEventHandler -> IxorasHorsesEventHandler),
+//      in text, and in file names.
+//   3  Path segments and file names containing the old id or an old class name are renamed with `git mv`, deepest first.
 //   4  Display strings from rename.config.json.
 // It never touches binary files, the excluded prefixes, or anything git does not track.
 // What it does NOT do (see tools/rename/README.txt): the config folder rename, the old-prefix read alias, the
@@ -72,15 +74,21 @@ for (const d of [...pkgDirs].sort()) {
 files = apply ? trackedFiles() : files;
 replaceInFiles('2 id token', [[config.oldId, config.newId]], files);
 
-// 3 - path segments and file names containing the old id, deepest first
+// 2b - class names
 files = apply ? trackedFiles() : files;
+replaceInFiles('2b class names', config.classRenames, files);
+
+// 3 - path segments and file names containing the old id or an old class name, deepest first
+files = apply ? trackedFiles() : files;
+const nameMap = [[config.oldId, config.newId], ...config.classRenames];
+const mapName = (n) => nameMap.reduce((acc, [a, b]) => acc.split(a).join(b), n);
 const renames = new Map();
 for (const f of files) {
   const parts = f.split('/');
   for (let i = 0; i < parts.length; i++) {
-    if (parts[i].includes(config.oldId)) {
+    if (mapName(parts[i]) !== parts[i]) {
       const from = parts.slice(0, i + 1).join('/');
-      renames.set(from, from.split('/').slice(0, -1).concat(parts[i].split(config.oldId).join(config.newId)).join('/'));
+      renames.set(from, from.split('/').slice(0, -1).concat(mapName(parts[i])).join('/'));
     }
   }
 }

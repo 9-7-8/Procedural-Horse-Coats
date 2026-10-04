@@ -22,9 +22,11 @@ WHAT IS HERE
     staged/LegacyPrefixTest.java.txt  the test to add for the alias (not compiled)
     staged/OldWorldGuard.java.txt     the refuse-to-load guard, all UNVERIFIED NeoForge API (not compiled)
     runbook-live-cutover.txt          the owner's steps for the real server, written, never to be run by a session
+  converter/launchers/                Convert Worlds.bat and convert-worlds.sh (double-click launchers; Java search UNVERIFIED)
 
 THE ORDER (matches the treatment: converter first, it gates everything)
- 0. Settle the two Opens in rename.config.json: newPackage (the Java group) and configFolder.new (Recommended ixoras_horses).
+ 0. Settled (owner, 2026-10-04): newPackage ixoras_horses, configFolder.new ixoras_horses, class renames, intake/ rewritten except the
+    rename and four-jar-split treatments. No TODO is left in rename.config.json. The freeze (nothing else lands on main) starts first.
  1. Turn the converter on:  add  include(":converter")  to settings.gradle.kts.
     ./gradlew :converter:jar      then      java -jar converter/build/libs/ixoras-converter.jar --self-test
     The self-test builds a synthetic world, converts it, checks zero old tokens, a byte-identical original and a no-op
@@ -43,6 +45,15 @@ THE ORDER (matches the treatment: converter first, it gates everything)
     the search index, check-parity, check-links, :neoforge-26.1.2:build, runGameTest, a server boot to "Done (".
  5. The release is the compat release 0.6.0 (owner confirms at release time). The LIVE cutover is a later, separate step
     run by the owner from runbook-live-cutover.txt.
+
+MANUAL EDITS AFTER apply.mjs (the script cannot do them)
+ - Add "formerly Horse Genetics" to the README opening, the mod description in neoforge.mods.toml and the 0.6.0 release notes (the display
+   step rewrote the name everywhere else).
+ - Declare the old mod id incompatible in neoforge.mods.toml (a [[dependencies.ixoras_horses]] entry with modId = "horsegenetics",
+   type = "incompatible").
+ - mods.toml authors / displayURL / issueTrackerURL / logo for the new brand (Open: owner).
+ - The browser tools and drop-in file loaders read the OLD prefix too for 0.6 (designer and CustomHorseSpawnScreen together).
+ - The repo rename (ixoras-horse-overhaul) and every wiki/README/release link, on the day 0.6.0 is released.
 
 WHAT THE SCRIPTS DO NOT DO (so nobody assumes they did)
  - the config/breed folder rename (phc/ to the new name) and its first-launch auto-move;

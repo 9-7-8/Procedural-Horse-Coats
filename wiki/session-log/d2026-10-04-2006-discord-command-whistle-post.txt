@@ -50,3 +50,12 @@ LATER STILL (2026-10-04): converter self-test run (owner chose "compile it and r
 - Owner on backup: "If you're not touching the original, then you don't need to [back up]." The converter keeps its decided design (new folder, original
   untouched and proven byte-identical); no backup step was added.
 - Owner asked whether the new Java package should simply be ixoras_horses; the answer is pending (the config value stays TODO until confirmed).
+
+THOROUGH RENAME DECISION PASS (same session, owner: "What else is there left to decide? Let's be extremely thorough")
+- Three question rounds, all answers recorded in the rename treatment ("THOROUGH DECISION PASS") and in tools/rename/rename.config.json: package
+  ixoras_horses, config folder ixoras_horses/, rename every HorseGenetics class (two), repo to ixoras-horse-overhaul on release day (old wiki links die,
+  accepted), freeze while the rename lands, converter window for players, key bindings step, old jar incompatible, old prefix read in the browser tools and
+  drop-in files, three proof worlds, intake/ rewritten except the rename and split treatments, "formerly Horse Genetics" only in README/description/notes.
+- Built: converter GUI (Swing, never seen), launchers, --options (options.txt, original kept as options.txt.before-ixoras); self-test extended and passes (15
+  checks). apply.mjs gained the class-rename step; rename.config.json has no TODO left.
+- Still open: see the list at the end of the rename treatment (freeze date, testers, hosting slug, mods.toml metadata, report detail, log scripts).

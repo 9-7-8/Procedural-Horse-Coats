@@ -211,3 +211,46 @@ the converter and upgrade, every re-bake and test. The UNVERIFIED items above st
 the guard's hook), and the converter's own assumptions are listed in its class comments.
 Owner asked whether to do the rename and the four-jar split at once; the recommendation (no, rename first, then split) is in
 tools/rename/README.txt.
+
+THOROUGH DECISION PASS (owner, 2026-10-04) - every call settled in that session
+===============================================================================
+Decided (owner, asked with the question tool):
+- Java package: plain ixoras_horses (no reverse-domain prefix; the owner has no domain; only the mod id is permanent).
+- Mod id and namespace ixoras_horses; display name "Ixora's Horse Overhaul" everywhere, PLUS "formerly Horse Genetics" in the README,
+  the mod description and the release notes only. Jar file names ixoras-horses-<version>.jar (no apostrophe).
+- Class names: EVERY class with HorseGenetics in its name is renamed (today exactly two: HorseGenetics -> IxorasHorses, about 494 uses,
+  and HorseGeneticsEventHandler -> IxorasHorsesEventHandler, 16 uses).
+- Config and drop-in folder phc/ becomes ixoras_horses/, moved automatically on first launch; if both exist keep the new, leave the old
+  untouched, log a warning.
+- The new jar declares the OLD mod id (horsegenetics) incompatible, so a server with both jars stops with a plain message.
+- Keybindings: the converter gets an optional options.txt step (built: --options, and a checkbox in the window); release notes say so too.
+- Converter for players: a double-click window (built, never seen on a screen) plus the command line for servers; launchers
+  converter/launchers/Convert Worlds.bat and convert-worlds.sh look for the Minecraft launcher's Java (UNVERIFIED).
+- Old-prefix READ for the 0.6 series also in the browser tools (designers, saved designs, pasted codes) and in drop-in gene and breed files;
+  only the new prefix is written. Designer and CustomHorseSpawnScreen both change (hard rule 5).
+- Repo: renamed to ixoras-horse-overhaul on the day 0.6.0 is released; the wiki's GitHub Pages address changes with it and old wiki links
+  die (accepted). README, in-repo links, release notes and Discord posts go out with the new address from day one.
+- Parallel work: FREEZE. Nothing else lands on main from the day the rename starts until it merges; in-flight branches merge first. After
+  the rename any other branch re-runs tools/rename/apply.mjs on itself, then merges main.
+- Proofs required before the rename release: a copy of the live world, the dev test world, AND a generated fixture world (one of every
+  block, item and horse kind).
+- The rest of intake/ is rewritten with the same script (not this treatment, not four-jar-split, not the Discord post), so queued
+  treatments match the renamed tree.
+- No backup step in the converter: it never changes the original (new folder; original verified byte-identical), so a backup adds nothing.
+Earlier decisions stand: full rename plus offline converter; compat release 0.6.0; converter is a standalone Java jar; output is a new
+folder; every id-shaped token is rewritten, including player text; the old gene prefix is read for the 0.6 series; the mod refuses to load
+an unconverted world with no override; the live cutover is a separate later step by the owner.
+
+STILL OPEN after that pass (nobody has decided these)
+- (owner) The day the freeze starts, and which in-flight branches/fixes must merge first.
+- (owner) Outside testers on current tags: when to tell them, and whether the old 0.5.x releases stay up on GitHub with a "renamed" note.
+- (owner) Where the mod is hosted after GitHub (Modrinth, CurseForge): the slug there is a separate, permanent choice. Not needed for 0.6.0.
+- (owner) mods.toml metadata for the new brand: authors, displayURL, issueTrackerURL (the new repo), logo. Recommended: authors "Ixora".
+- (owner) The creative tab titles and the in-game "Horse Genetics" text: Recommended all become the new display name (the display-string step
+  does this; read the dry-run list first).
+- (owner) Whether the converter's report also lists player-text hits (books, signs, command blocks); default is a count only. Recommended: count only.
+- (owner, outside the repo) The live server's log-export scripts and any tooling that reads phc/ or old ids: they need the same rename.
+- (building session) Progress line while converting (Recommended yes) and resume after interruption (Recommended no, re-run into a fresh folder).
+- (building session) Everything UNVERIFIED in this file and in the converter's comments: where SavedData lives in 26.1.2, region compression
+  types in use, the guard's hook and whether a refusal is possible, id-order or hash dependence in stored values, the window and launchers on
+  a real screen and a real machine.

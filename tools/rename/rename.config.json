@@ -3,25 +3,87 @@
   "oldId": "horsegenetics",
   "newId": "ixoras_horses",
   "oldPackage": "com.example.horsegenetics",
-  "newPackage": "TODO",
-  "_newPackageNote": "Open (owner): the Java group. 'com.example' is a placeholder, so the treatment moves it in the same sweep. Must start with the same dotted form, e.g. a package you own. The last segment need not be the id.",
+  "newPackage": "ixoras_horses",
+  "_newPackageNote": "Decided (owner, 2026-10-04): the Java package is plain ixoras_horses (no reverse-domain prefix; the owner has no domain, and only the mod id is permanent).",
   "oldDisplay": "Horse Genetics",
   "newDisplay": "Ixora's Horse Overhaul",
   "displayReplacements": [
-    ["Horse Genetics Wiki", "Ixora's Horse Overhaul Wiki"],
-    ["Procedural Horse Genetics", "Ixora's Horse Overhaul"],
-    ["Horse Genetics", "Ixora's Horse Overhaul"]
+    [
+      "Horse Genetics Wiki",
+      "Ixora's Horse Overhaul Wiki"
+    ],
+    [
+      "Procedural Horse Genetics",
+      "Ixora's Horse Overhaul"
+    ],
+    [
+      "Horse Genetics",
+      "Ixora's Horse Overhaul"
+    ]
   ],
   "_displayNote": "Applied in order, longest first. Display strings are a judgement call (the treatment lists the surfaces as Open: jar file name, repo name, wiki title, README title, creative tab). Run plan.mjs and read the counts before accepting.",
-  "configFolder": { "old": "phc", "new": "TODO", "_note": "Open: Recommended 'ixoras_horses'. NOT applied by apply.mjs: the folder name lives in 16 Java files and needs the auto-move code from the treatment's piece 2. Listed so plan.mjs can count it." },
+  "configFolder": {
+    "old": "phc",
+    "new": "ixoras_horses",
+    "_note": "Decided: renamed to ixoras_horses/, auto-moved on first launch, if both exist keep the new one, leave the old, log a warning. NOT applied by apply.mjs (16 Java files read the name; needs the auto-move code)."
+  },
   "excludePrefixes": [
-    ".git/", "build/", ".gradle/", "node_modules/", "run/", "run-gametest/", "run-stress/", "run-soak/",
-    "intake/", "wiki/session-log/", "wiki/text/", "wiki/search-index.js", "tools/rename/", "converter/",
-    "LICENSES/"
+    ".git/",
+    "build/",
+    ".gradle/",
+    "node_modules/",
+    "run/",
+    "run-gametest/",
+    "run-stress/",
+    "run-soak/",
+    "wiki/session-log/",
+    "wiki/text/",
+    "wiki/search-index.js",
+    "tools/rename/",
+    "converter/",
+    "LICENSES/",
+    "intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt",
+    "intake/Four-jar split - implementation treatment.txt",
+    "intake/four-jar-split/",
+    "intake/potential-assets/",
+    "intake/discord-command-whistle/"
   ],
-  "_excludeNote": "wiki/text is generated (re-bake it, do not edit it). intake/ and the session log describe the rename itself and must keep the old names. converter/ and tools/rename/ must keep them too.",
+  "_excludeNote": "wiki/text is generated (re-bake it). The rename and four-jar-split treatments describe the change itself and keep both names. Decided (owner): the REST of intake/ is rewritten with the same script, so queued treatments match the renamed tree. The Discord post for the command whistle is kept (it is a dated announcement).",
   "textExtensions": [
-    "java", "json", "mcmeta", "toml", "properties", "gradle", "kts", "md", "txt", "html", "js", "mjs", "css",
-    "mcfunction", "snbt", "lang", "yml", "yaml", "xml", "svg", "ps1", "sh", "cfg", "csv"
-  ]
+    "java",
+    "json",
+    "mcmeta",
+    "toml",
+    "properties",
+    "gradle",
+    "kts",
+    "md",
+    "txt",
+    "html",
+    "js",
+    "mjs",
+    "css",
+    "mcfunction",
+    "snbt",
+    "lang",
+    "yml",
+    "yaml",
+    "xml",
+    "svg",
+    "ps1",
+    "sh",
+    "cfg",
+    "csv"
+  ],
+  "classRenames": [
+    [
+      "HorseGeneticsEventHandler",
+      "IxorasHorsesEventHandler"
+    ],
+    [
+      "HorseGenetics",
+      "IxorasHorses"
+    ]
+  ],
+  "_classNote": "Decided (owner): rename every class with HorseGenetics in its name. Today that is exactly two: HorseGenetics (the main class, about 494 uses) and HorseGeneticsEventHandler. Longest first."
 }

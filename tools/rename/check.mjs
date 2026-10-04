@@ -5,7 +5,7 @@ import { config, trackedFiles, isText, read, count, fileExists } from './common.
 
 const files = trackedFiles();
 let fail = 0;
-const left = { id: [], package: [], display: [] };
+const left = { id: [], package: [], display: [], classes: [] };
 for (const f of files) {
   if (f.includes(config.oldId)) left.id.push('PATH ' + f);
   if (!isText(f)) continue;
@@ -13,6 +13,7 @@ for (const f of files) {
   if (count(t, config.oldId)) left.id.push(f);
   if (count(t, config.oldPackage)) left.package.push(f);
   if (count(t, config.oldDisplay)) left.display.push(f);
+  for (const [cls] of config.classRenames) if (count(t, cls)) { left.classes.push(f); break; }
 }
 for (const [k, v] of Object.entries(left)) {
   console.log(`${k}: ${v.length} file(s) still carry the old ${k}`);
