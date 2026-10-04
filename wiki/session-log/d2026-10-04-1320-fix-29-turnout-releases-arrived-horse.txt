@@ -1,0 +1,82 @@
+2026-10-04 13:20 (local time, approximately the start; the first gametest ran at 13:23)
+- Fix #29: a turnout ticket released the horse it left behind
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Ran procedures/fix-bug.txt. #35 and #36 were already
+  fixed and waiting on checks. Took #29: damage tier (the tack could be duplicated), and
+  the only damage-tier issue whose cause was already written in it. #30 (the cowboy at a
+  cave edge) is also damage tier, but its cause is not known.
+
+DONE
+----
+- 71d34593 "Fix #29: a turnout ticket released the horse it left behind, not the one that
+  arrived".
+  Wrong: TicketHandler.arrive called Entity.teleportTo(ServerLevel, ...), which is
+  Entity.teleport(...) with the result thrown away (Entity.java:3253 in the 26.1.2
+  patched sources). Across worlds, teleportCrossDimension builds a new entity from the
+  old one's saved data and removes the old one. turnOut then ran HorseRelease.makeWild on
+  the removed horse. The copy in the realm stayed tamed, owned and saddled, and the saddle
+  was also put in the player's pack.
+  Same hole in RescuingBraidHandler.home: slot.set(horse, EMPTY) after arrive took the
+  braid off the removed horse. A braid that sent a horse to a stall in another world was
+  never spent.
+  Fix: arrive now returns the horse as it exists after the move (null if it did not
+  move). The new TicketHandler.turnOutTo moves the horse, then runs makeWild and
+  StallData.removeHorse on the returned horse. turnOut refuses, spending nothing, when the
+  move fails. The braid is spent off the returned horse. StallRecall and RealmClaim do
+  nothing to the horse after arrive, so they were left as they were.
+  Proof: new gametest turnout_releases_the_horse_that_arrived (ModGameTests; registered in
+  both places, timeout 20). It turns a tamed, saddled horse out into the Nether, and checks
+  that the far side holds a new, live, untamed, unowned horse and that exactly one saddle
+  exists, in the pack. With makeWild pointed back at the old reference it failed: "the
+  horse in the other world is still tamed or owned". With the fix it passed.
+  :neoforge-26.1.2:build was green, and check-parity was OK.
+  Issue #29: closed by the commit, with the proof comment posted.
+- Wiki: item-tickets.html (Coding tab, and the "Known gaps" line about the cross-world
+  move), item-rescuing-braid.html (#the-move), horse-realm.html (the WildTurnover
+  paragraph no longer says "still the other way round"). Rebake row i was run.
+
+DECIDED
+-------
+- Fix by applying the release to the returned entity rather than releasing before the
+  teleport as WildTurnover does. Releasing first keeps the "tack goes to the player"
+  behaviour either way, but a failed move would then leave a wild horse and a paid fee
+  behind. The issue offered both options; this call was made without the owner.
+  Recorded on item-tickets.html's Coding tab.
+- The braid fix rides with #29 (same root cause, and the issue asked for the other
+  callers to be read). Made without the owner.
+
+FOUND ON THE WAY
+----------------
+- #37 filed (bug): order_guard_holds_its_reach and order_combat_gate fail on alternate
+  runGameTest runs. One of the two was red in each of four runs, including HEAD 73f9d6ba
+  with this diff stashed. So every runGameTest is currently red.
+- Mistake: the first version of the new test looked the horse up with
+  nether.getEntity(id) and failed with the fix in. A forced chunk's entity section loads
+  asynchronously. The test now asserts on the returned entity.
+
+PROCEDURES
+----------
+- test-tiers.txt, tier 2 "Writing one": the harness has the Nether and the End, and a
+  test of a cross-world move must assert on the returned entity, not
+  getEntity(id). This is the trap above.
+- fix-bug, end-session: none needed. Both were followed as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. No common/ code changed, so it cannot move.
+- In game: a turnout ticket into the real realm, and a braid sending a horse to a stall
+  in another world, have not been seen. The gametest covers the cross-world move itself.
+  No Verification-tab anchors were added (neither page has a Verification tab).
+- runGameTest is red on #37, so any other gametest that broke would be hidden behind it.
+  This run showed only the #37 tests red.
+
+RELEASE
+-------
+Not offered. One fix is below the bar.
+
+PICK UP FIRST
+-------------
+#37 (the flaky order-goal gametests) by procedures/fix-bug.txt: until it is fixed every
+gametest run is red.

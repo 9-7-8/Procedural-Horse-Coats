@@ -64,6 +64,10 @@ STEPS
        An attribute write (SCALE) reaches the hitbox only on the entity's NEXT tick:
        assert on getBbHeight(), never getScale(), or the test passes before it starts.
        helper.spawn at a test's origin puts a horse into the harness's barrier walls.
+       The harness HAS the Nether and the End (no realm): a cross-world move can be
+       tested Overworld to Nether. Assert on the entity the teleport returned, never
+       otherLevel.getEntity(id): a just-forced chunk's entity section loads
+       asynchronously, so the lookup misses a horse that is there (#29).
        A new test is TWO edits: its TEST_FUNCTIONS.register AND a register(event, ...)
        line in the list ModGameTests builds instances from. Miss the second and the run
        says "All N required tests passed" without it - count N before and after.
