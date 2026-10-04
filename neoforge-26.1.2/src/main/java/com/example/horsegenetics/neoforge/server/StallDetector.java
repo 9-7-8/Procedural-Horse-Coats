@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -420,6 +421,15 @@ public final class StallDetector {
         if (!under.blocksMotion() || under.getBlock() instanceof SignBlock) {
             return false; // nothing to stand on - a drop, open air, or a sign
         }
+        // NOR IS THE TOP OF A FENCE, A WALL OR A CLOSED GATE (#25). Their
+        // collision is 1.5 tall, so blocksMotion() is true and the cell over one
+        // read as floor a step up from the stall's - the walk climbed the gate
+        // and left through it. A flat stall survived that only because the wall
+        // ring at its own floor level closes; a slab floor starts above that
+        // ring (refused), and a raised step cuts it in half (half the stall).
+        if (tallerThanABlock(level, p, under)) {
+            return false;
+        }
         for (int i = 0; i < HEADROOM; i++) {
             p.set(x, y + i, z);
             if (level.isOutsideBuildHeight(p)) {
@@ -431,6 +441,16 @@ public final class StallDetector {
             }
         }
         return true;
+    }
+
+    /**
+     * A block whose collision reaches above its own cell - a fence, a wall, a
+     * closed gate. Nothing stands on top of one: a horse cannot step up 1.5, and
+     * a player who builds one has built the edge of the stall, not its floor.
+     */
+    private static boolean tallerThanABlock(LevelReader level, BlockPos pos, BlockState state) {
+        VoxelShape shape = state.getCollisionShape(level, pos);
+        return !shape.isEmpty() && shape.max(Direction.Axis.Y) > 1.0;
     }
 
     /**

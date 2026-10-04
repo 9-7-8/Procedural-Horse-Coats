@@ -166,7 +166,7 @@ final class DebugTestYard {
      */
     /** WALL PAIR and FENCE PAIR (east, {@link DebugYardReach}); WEATHER COPIES (west) answered on 2026-10-02 and went. */
     static final int ROW_AW = ROW_W + ROW_W_D + PACKED_AISLE;
-    /** RESEARCH SHELF (west), STALL SHAPES (east) - {@link DebugYardShelf}. */
+    /** RESEARCH SHELF (west) - {@link DebugYardShelf}; STALL SHAPES (east) answered on 2026-10-04 (#25) and went. */
     static final int ROW_AX = ROW_AW + NEW_ROW_D + PACKED_AISLE;
     /** CHEST LOOT (west), CARROT CROP (east) - {@link DebugYardLoot}. */
     static final int ROW_AY = ROW_AX + NEW_ROW_D + PACKED_AISLE;

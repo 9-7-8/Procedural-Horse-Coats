@@ -2189,6 +2189,8 @@ public final class ModGameTests {
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
         // A small scratch box filled and read, all inside one tick.
         register(event, environment, NO_HORSE_STANDS_IN_POWDER_SNOW, 100);
+        // Five stalls built and read, all inside one tick.
+        register(event, environment, STALL_SHAPES_BIND_AS_ONE_ROOM, 100);
         // A scratch shore and basin built, three horses spawned and checked; one tick.
         register(event, environment, COWBOY_STOCK_LEAVES_THE_WHIRLPOOL, 100);
         // One horse spawned, two attachment writes, two calls; one tick.
@@ -4035,6 +4037,121 @@ public final class ModGameTests {
             shore.discard();
         } finally {
             fill(level, origin, Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>A slab floor and a one-block step are each one stall</b> (issue #25).
+     *
+     * <p>The yard's STALL SHAPES pen, cut to the five stalls that settle it, all
+     * read in one tick with {@code StallDetector.forSign} - the call the stall
+     * sign makes before it exists. Each is a 2-wide floor inside a stone-brick
+     * ring three high, shut by a closed oak gate on the north wall's west tile
+     * with open air over it, the sign wall on the west at head height:
+     * <ul>
+     *   <li><b>SLAB</b> (oak bottom slabs, a 2 x 1 floor) and <b>STEP</b> (the east
+     *       column one stone higher) must bind exactly their floor tiles. They
+     *       did not: a closed gate is 1.5 tall, so its top read as floor and the
+     *       walk climbed over it into the open, and only the wall ring at the
+     *       floor's own level brought it back - a ring the slab floor starts
+     *       above, and the raised stone cuts in half.</li>
+     *   <li><b>PLAIN</b> (flat, closed gate) and <b>FENCES</b> (a ring of oak
+     *       fences and a gate) are the shapes that already bound, so a fix that
+     *       loses them fails here.</li>
+     *   <li><b>DROP</b> (the east column two stones higher) must still not be
+     *       one room.</li>
+     * </ul>
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STALL_SHAPES_BIND_AS_ONE_ROOM =
+            TEST_FUNCTIONS.register("stall_shapes_bind_as_one_room",
+                    () -> ModGameTests::stallShapesBindAsOneRoom);
+
+    private static void stallShapesBindAsOneRoom(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos o = helper.absolutePos(BlockPos.ZERO).above(40);
+        BlockState brick = Blocks.STONE_BRICKS.defaultBlockState();
+        BlockState gate = Blocks.OAK_FENCE_GATE.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.FenceGateBlock.FACING, net.minecraft.core.Direction.NORTH)
+                .setValue(net.minecraft.world.level.block.FenceGateBlock.OPEN, false);
+        List<String> wrong = new ArrayList<>();
+        try {
+            fill(level, o, Blocks.AIR.defaultBlockState());
+            // The whole scratch box: the open floor round the stalls must be more
+            // than StallDetector.MAX_COLUMNS, as the yard's is, or it closes as a
+            // "room" of its own and the controls read differently from the yard.
+            for (int x = -SCRATCH; x <= SCRATCH; x++) {
+                for (int z = -SCRATCH; z <= SCRATCH; z++) {
+                    level.setBlock(o.offset(x, -1, z), Blocks.STONE.defaultBlockState(), 2);
+                }
+            }
+            // {name, ox, oz, depth, ring (brick 3 high, or fences), floor (0 bare, 1 slab), raise}
+            Object[][] stalls = {
+                    {"SLAB", -8, -8, 3, true, 1, 0},
+                    {"STEP", -3, -8, 4, true, 0, 1},
+                    {"DROP", 2, -8, 4, true, 0, 2},
+                    {"PLAIN", -8, 0, 3, true, 0, 0},
+                    {"FENCES", -3, 0, 4, false, 0, 0},
+            };
+            for (Object[] s : stalls) {
+                String name = (String) s[0];
+                int ox = (int) s[1];
+                int oz = (int) s[2];
+                int depth = (int) s[3];
+                boolean bricks = (boolean) s[4];
+                for (int x = ox; x <= ox + 3; x++) {
+                    for (int z = oz; z <= oz + depth - 1; z++) {
+                        boolean edge = x == ox || x == ox + 3 || z == oz || z == oz + depth - 1;
+                        if (!edge) {
+                            if ((int) s[5] == 1) {
+                                level.setBlock(o.offset(x, 0, z), Blocks.OAK_SLAB.defaultBlockState(), 2);
+                            }
+                            for (int y = 0; y < (x == ox + 2 ? (int) s[6] : 0); y++) {
+                                level.setBlock(o.offset(x, y, z), Blocks.STONE.defaultBlockState(), 2);
+                            }
+                        } else if (bricks) {
+                            for (int y = 0; y <= 2; y++) {
+                                level.setBlock(o.offset(x, y, z), brick, 2);
+                            }
+                        } else {
+                            // Flag 3, so each post connects to the one before it.
+                            level.setBlock(o.offset(x, 0, z), Blocks.OAK_FENCE.defaultBlockState(), 3);
+                        }
+                    }
+                }
+                // The way in: the north wall's west tile, a closed gate with open air over it.
+                for (int y = 0; y <= 2; y++) {
+                    level.setBlock(o.offset(ox + 1, y, oz), Blocks.AIR.defaultBlockState(), 2);
+                }
+                level.setBlock(o.offset(ox + 1, 0, oz), gate, 2);
+
+                BlockPos wall = o.offset(ox, bricks ? 1 : 0, oz + 1);
+                com.example.horsegenetics.neoforge.server.StallDetector.Result r =
+                        com.example.horsegenetics.neoforge.server.StallDetector.forSign(level, wall,
+                                net.minecraft.core.Direction.WEST);
+                java.util.Set<Long> want = new java.util.HashSet<>();
+                for (int x = ox + 1; x <= ox + 2; x++) {
+                    for (int z = oz + 1; z <= oz + depth - 2; z++) {
+                        want.add(((long) o.getX() + x << 32) ^ ((o.getZ() + z) & 0xFFFFFFFFL));
+                    }
+                }
+                java.util.Set<Long> got = r == null ? java.util.Set.of()
+                        : com.example.horsegenetics.common.stable.StallFill.keysOf(r.region());
+                String read = r == null ? "refused" : "bound " + r.blockCount() + " tiles";
+                if (name.equals("DROP")) {
+                    if (r != null && got.containsAll(want)) {
+                        wrong.add("DROP (a two-block drop) " + read + " - it is not one room");
+                    }
+                } else if (!got.equals(want)) {
+                    wrong.add(name + " " + read + ", expected exactly its " + want.size() + " floor tiles");
+                }
+            }
+        } finally {
+            fill(level, o, Blocks.AIR.defaultBlockState());
+        }
+        if (!wrong.isEmpty()) {
+            helper.fail("stall shapes (#25): " + String.join("; ", wrong));
+            return;
         }
         helper.succeed();
     }

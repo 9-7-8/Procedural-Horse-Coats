@@ -170,7 +170,10 @@
         spilled into the aisle and reported &ldquo;not a room&rdquo;. A column counts if a
         horse could stand in it: something underfoot, and that cell clear. Neighbouring
         columns may differ by one block, so a slab, a carpet or an uneven floor is one
-        room and a two-block drop is not. <strong>A stall has no height requirement at
+        room and a two-block drop is not. <strong>The top of a fence, a wall or a closed
+        gate is never floor</strong> (<a href="#verified-gate-top">#25</a>): its collision is
+        1.5 tall, so it used to count as a one-block step up, and the walk climbed the gate
+        and left. <strong>A stall has no height requirement at
         all</strong> (2026-09-17): it asked for two clear cells over every tile until
         testers found that this refused roofed stalls and low doorways outright, and
         shoved a dismounting rider up into the ceiling of the ones it did accept. A stall
@@ -256,8 +259,8 @@
     or gate as the room's edge in every state, and lives in <code>common/</code> as <code>StallFill</code> with tests.
     A stall with nowhere to stand refuses the ticket without consuming it. Landing was then moved (2026-09-10) from
     the centre of the middle floor tile, which put a 1.4-wide horse into the side wall of every two-wide stall, to
-    the floor centroid checked against the horse's own box with <code>noCollision</code>. The three judgement calls
-    still unmet in play are <a href="known-gaps.html#gap-153">gap 153</a>.
+    the floor centroid checked against the horse's own box with <code>noCollision</code>. The judgement calls of
+    <a href="known-gaps.html#gap-153">gap 153</a> were measured on 2026-10-02 and 2026-10-04 (below).
 </p>
 
 <p id="verified-sign-floor">
@@ -278,8 +281,8 @@
 <p id="verified-binding">
     <strong>The rewritten detector binds an ordinary stall</strong> (owner-confirmed in play,
     2026-09-10): the sign binds and finds the inside of a stall with a fence and a gate. The cases
-    its rules guess at were measured on 2026-10-02 (<a href="#verified-shapes-1002">below</a>); only
-    the slab floor and the one-block step are still on <a href="#verification">the verification tab</a>.
+    its rules guess at were measured on 2026-10-02 (<a href="#verified-shapes-1002">below</a>), and
+    the slab floor and the one-block step on 2026-10-04 (<a href="#verified-gate-top">below</a>).
 </p>
 
 <p id="verified-shapes-1002">
@@ -300,8 +303,23 @@
     <li>The slab floor and the one-block step <strong>failed</strong> &mdash; the slab stall refused outright, the
         step bound 2 of 4 tiles &mdash; and are <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">issue #25</a>. A slab stall with the ring carried over its gate
         bound both tiles, which points at the gate's standable top and the wall-ring search starting a level too
-        high.</li>
+        high. Fixed on 2026-10-04 (<a href="#verified-gate-top">below</a>).</li>
 </ul>
+
+<p id="verified-gate-top">
+    <strong>A slab floor and a one-block step are each one stall</strong> (2026-10-04, issue
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a>, gametest
+    <code>stall_shapes_bind_as_one_room</code>). The cause was the gate, not the floor. A closed gate's collision is
+    1.5 tall, so <code>blocksMotion()</code> is true and <code>StallDetector.standable</code> took the air over it for
+    floor one step up. The walk climbed the gate and left into the open, and only the wall ring at the floor's own level
+    could bring it back. A slab floor starts a level above that ring, so it was refused. In the step stall the raised
+    stone cuts that ring to the low column, so the step stall bound half its floor. Now a block whose collision rises
+    above its own cell (a fence, a wall or a closed gate) is never floor, so the walk stops at the gate the way it already
+    stopped at a fence. The gametest builds the yard's shapes in one tick and reads them with <code>forSign</code>.
+    Without the fix it reported exactly the yard's two failures (<em>SLAB refused; STEP bound 2 tiles</em>), with the
+    plain-gate, fence-ring and two-block-drop controls unchanged. With it, all 55 gametests pass. The yard's STALL
+    SHAPES pen went with it.
+</p>
 
 <h3 id="art-0929">Three signs that are three different drawings</h3>
 
@@ -368,7 +386,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The detector's shapes are measured (<a href="item-stall-signs.html?view=coding#verified-shapes-1002">2026-10-02</a>) except a slab floor and a one-block step, which fail (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">issue #25</a>); what is left needs a player &mdash; getting off a horse in a roofed stall unhurt, the double-gate checklist tick, signs refusing horses you do not own, and sign upkeep.</p>
+    <p>The detector's shapes are all measured (<a href="item-stall-signs.html?view=coding#verified-shapes-1002">2026-10-02</a>, <a href="item-stall-signs.html?view=coding#verified-gate-top">2026-10-04</a>); what is left needs a player &mdash; getting off a horse in a roofed stall unhurt, the double-gate checklist tick, signs refusing horses you do not own, and sign upkeep.</p>
 </div>
 
 <h3 id="double-gates-0917-stall">A stall shut with a double gate (2026-09-17, NOT played)</h3>
@@ -406,7 +424,7 @@
 <p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
 <ul>
     <li><strong>Awkward stalls</strong> (tester guide, <em>Stall signs and tickets</em>; <a href="item-stall-signs.html">stall signs</a>). An L-shape and a stall narrower than the horse still land it in the middle. A stall full of hay refuses the ticket without using it up, and the size message reports the room it measured.</li>
-    <li><strong>The stall detector's guesses</strong> (<a href="known-gaps.html#gap-153">gap 153</a>): a stall floored with slabs must be one room, and so must one with a one-block step. Both failed in the yard on 2026-10-02 &mdash; <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">issue #25</a>; carpet, the two-block drop, the open gate and the roofed, one-tall and fence-ring stalls are <a href="#verified-shapes-1002">verified</a>. Still open too: getting off a horse inside a roofed stall must not hurt you.</li>
+    <li><strong>Getting off a horse inside a roofed stall must not hurt you</strong> (<a href="known-gaps.html#gap-153">gap 153</a>; every stall shape it names is <a href="#verified-shapes-1002">verified</a>). Ride into a roofed stall and dismount. <strong>Pass:</strong> no damage, no shove into the ceiling.</li>
     <li><strong>Stall sign upkeep.</strong> <kbd>F7</kbd> re-flashes every stall within about 96 blocks; breaking the placed sign releases the stall (&ldquo;its sign was broken&rdquo;) and F7 stops showing it; binding a new sign to the same horse on another stall replaces the old record and survives a reload; a sign on a top or bottom face is refused. Binding is <a href="item-stall-signs.html#verified-binding">verified</a>.</li>
 </ul>
 
