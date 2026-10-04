@@ -199,7 +199,13 @@
     the only thing that remembers the temper reset and the wild-spawn mark. The order is
     load-bearing - <strong>move first, release second</strong> - so the tack is handed to a
     player still standing in the world the horse left, rather than dropped on the realm
-    floor where they cannot reach it. It is also the only release that clears the horse&rsquo;s
+    floor where they cannot reach it. <strong>The release goes to the horse <code>arrive</code>
+    returns</strong>, not the one it was handed: across worlds vanilla builds a new entity from the
+    old one's saved data, and until issue #29 (2026-10-04) the release went to the removed one - the
+    horse in the realm stayed tamed and saddled while the saddle was also handed back. The gametest
+    <code>turnout_releases_the_horse_that_arrived</code> turns a saddled horse out into the Nether (the
+    harness has no realm) and holds one saddle, in the pack, and a wild horse on the far side; it goes
+    red with the old reference. If the move fails, nothing is released or spent. It is also the only release that clears the horse&rsquo;s
     <code>StallRecord</code>: the freedom stick works only inside the realm and
     <code>HorseRealmFeral</code> only fires on a horse already there, so neither can ever
     meet a horse that still has a stall. It has no destination to measure - the realm has
@@ -213,9 +219,10 @@
 <ul>
     <li><strong>Never played.</strong> Shipped in 0.3.7 and not once used in-game
         &mdash; see <a href="#verification">the Verification tab</a>.</li>
-    <li>The cross-dimension <code>teleportTo</code> signature is the same one the
-        <a href="horse-dimension.html">hay portal</a> uses, which is itself listed as
-        unverified.</li>
+    <li>The cross-dimension move (<code>Entity.teleport</code>, which vanilla's
+        <code>teleportTo</code> wraps) is the one the <a href="horse-dimension.html">hay portal</a>
+        uses; the gametest <code>turnout_releases_the_horse_that_arrived</code> now runs it
+        Overworld to Nether, but not in a played game.</li>
     <li>All four share one texture.</li>
 </ul>
 

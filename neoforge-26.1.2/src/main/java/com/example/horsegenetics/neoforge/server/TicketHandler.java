@@ -202,11 +202,8 @@ public final class TicketHandler {
      * ({@link HorseRealm#arrivalSpot}) and it is flat ground the dimension
      * guarantees, so there is nothing here that can fail late.
      *
-     * <p><b>Order matters.</b> The horse is moved first and released second, so
-     * {@code HorseRelease.makeWild} hands the tack back to a player who is
-     * standing in the world the horse just left - rather than dropping a saddle
-     * on the realm floor where they cannot reach it. Everything else about what
-     * "wild" means is that method's business and deliberately not repeated here.
+     * <p>Everything else about what "wild" means is
+     * {@code HorseRelease.makeWild}'s business and deliberately not repeated here.
      */
     private static void turnOut(ServerLevel level, Horse horse, Player player, ItemStack stack) {
         MinecraftServer server = level.getServer();
@@ -231,22 +228,53 @@ public final class TicketHandler {
                 ? HorseRecords.of(horse).displayName()
                 : (horse.hasCustomName() ? horse.getCustomName().getString() : "The horse");
 
-        arrive(level, realm, horse, HorseRealm.arrivalSpot(), player);
-        HorseRelease.makeWild(realm, horse, player);
-        // A stall bound to a horse that is no longer yours is a sign nobody can
-        // rebind. Neither existing release path clears one, because neither can
-        // reach a horse that HAS one: the freedom stick only works inside the
-        // realm and HorseRealmFeral only fires on a horse already there. This
-        // one starts wherever the horse lives, so it is the first release that
-        // has to tidy up after itself.
-        StallData.get(server).removeHorse(horse.getUUID());
+        Horse arrived = turnOutTo(level, realm, HorseRealm.arrivalSpot(), horse, player);
+        if (arrived == null) {
+            // Nothing spent, nothing released: the horse is still where it was.
+            say(player, "The horse could not be moved into the realm. Nothing was spent.");
+            return;
+        }
 
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
         say(player, name + " is loose in the horse realm, and is nobody's now.");
         ActionTrace.log("ticket", player.getGameProfile().name() + " turned out "
-                + ActionTrace.describeShort(horse) + " into the realm - unowned, stall binding cleared");
+                + ActionTrace.describeShort(arrived) + " into the realm - unowned, stall binding cleared");
+    }
+
+    /**
+     * The move and the release, without the refusals or the ticket: the horse
+     * that arrives at {@code at} in {@code realm}, wild, or {@code null} when
+     * the move did not happen (and nothing was released).
+     *
+     * <p><b>The release is applied to the horse {@link #arrive} returns</b>
+     * (issue #29). Across worlds that is a <i>new entity</i> built from the old
+     * one's saved data; released on the old reference, the horse in the realm
+     * stayed tamed, owned and saddled while its saddle was handed to the player
+     * too. Moved first and released second, so {@code HorseRelease.makeWild}
+     * hands the tack to the player rather than dropping it on the realm floor.
+     *
+     * <p>Public for the gametest {@code turnout_releases_the_horse_that_arrived},
+     * which has no realm and turns a horse out into the Nether instead.
+     */
+    public static @org.jspecify.annotations.Nullable Horse turnOutTo(ServerLevel from, ServerLevel realm,
+                                                                     Vec3 at, Horse horse, Player player) {
+        Horse arrived = arrive(from, realm, horse, at, player);
+        if (arrived == null) {
+            return null;
+        }
+        HorseRelease.makeWild(realm, arrived, player);
+        // A stall bound to a horse that is no longer yours is a sign nobody can
+        // rebind. Neither existing release path clears one, because neither can
+        // reach a horse that HAS one: the freedom stick only works inside the
+        // realm and HorseRealmFeral only fires on a horse already there. This
+        // one starts wherever the horse lives, so it is the first release that
+        // has to tidy up after itself.
+        if (from.getServer() != null) {
+            StallData.get(from.getServer()).removeHorse(arrived.getUUID());
+        }
+        return arrived;
     }
 
     /**
@@ -255,25 +283,39 @@ public final class TicketHandler {
      * <p>{@code player} is here only to be handed the lead: an interdimensional
      * ticket on a leashed horse used to leave the lead in the dimension it
      * started in. See {@link HorseLeads}.
+     *
+     * <p><b>Use what it returns, not {@code horse}.</b> Within one world it is
+     * the same entity. Across worlds vanilla's {@code teleportCrossDimension}
+     * builds a new one from the old one's saved data and removes the old one, so
+     * anything done to {@code horse} after this call is done to nothing - issue
+     * #29, where a turnout released the removed horse and a braid was "spent" off
+     * it. {@code null} when the move did not happen.
      */
     // Package-private, not private: StallRecall spends tickets too, from the
     // horse browser's Send home button, and it must use THESE rules rather
     // than a second copy of them. See that class.
-    static void arrive(ServerLevel from, ServerLevel target, Horse horse, Vec3 landing,
-                               Player player) {
+    static @org.jspecify.annotations.Nullable Horse arrive(ServerLevel from, ServerLevel target, Horse horse,
+                                                           Vec3 landing, @org.jspecify.annotations.Nullable Player player) {
         from.sendParticles(ParticleTypes.PORTAL, horse.getX(), horse.getY() + 0.8, horse.getZ(),
                 24, 0.4, 0.6, 0.4, 0.2);
         from.playSound(null, horse.getX(), horse.getY(), horse.getZ(),
                 SoundEvents.ENDERMAN_TELEPORT, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
         HorseLeads.untieFor(horse, player);
-        horse.teleportTo(target, landing.x, landing.y, landing.z,
-                Set.of(), horse.getYRot(), horse.getXRot(), false);
+        // Entity.teleportTo(ServerLevel, ...) is exactly this call with the
+        // result thrown away (Entity.java:3253); the result is the point here.
+        net.minecraft.world.entity.Entity moved = horse.teleport(new net.minecraft.world.level.portal.TeleportTransition(
+                target, landing, Vec3.ZERO, horse.getYRot(), horse.getXRot(), Set.of(),
+                net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING));
+        if (!(moved instanceof Horse arrived)) {
+            return null;
+        }
 
         target.sendParticles(ParticleTypes.PORTAL, landing.x, landing.y + 0.8, landing.z,
                 24, 0.4, 0.6, 0.4, 0.2);
         target.playSound(null, landing.x, landing.y, landing.z, SoundEvents.ENDERMAN_TELEPORT,
                 SoundSource.NEUTRAL, 1.0F, 1.0F);
+        return arrived;
     }
 
     /** Does a ticket of this tier reach from {@code from} to {@code to}? */
