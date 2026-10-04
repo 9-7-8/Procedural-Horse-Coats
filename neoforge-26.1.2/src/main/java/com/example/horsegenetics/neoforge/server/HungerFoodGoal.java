@@ -253,7 +253,8 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
             repathCooldown = REPATH_INTERVAL;
             if (prey != null) {
                 horse.getNavigation().moveTo(prey, SPEED);
-            } else if (!horse.getNavigation().moveTo(at.x, at.y, at.z, SPEED) && pursuitTicks > REPATH_INTERVAL) {
+            } else if (!(block != null ? horse.getNavigation().moveTo(pathTo(block), SPEED)
+                    : horse.getNavigation().moveTo(at.x, at.y, at.z, SPEED)) && pursuitTicks > REPATH_INTERVAL) {
                 pursuitTicks = MAX_PURSUIT;     // no path at all: give up now and ignore it
                 return;
             } else {
@@ -445,8 +446,24 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
      * {@link #REPATH_INTERVAL} ticks for up to {@link #MAX_PURSUIT}.
      */
     private boolean reachable(BlockPos pos) {
-        Path path = horse.getNavigation().createPath(pos, REACH_ACCURACY);
+        Path path = pathTo(pos);
         return path != null && path.canReach();
+    }
+
+    /**
+     * <b>A path to stand beside a block, not on it</b> (#26). The plain
+     * {@code createPath(BlockPos, int)} is {@code GroundPathNavigation}'s, and it lifts a
+     * solid target to the first non-solid block above it ({@code findSurfacePosition}), so
+     * for a hay bale - or a pumpkin, a melon, a grass block - the question it answered was
+     * "can the horse stand on top of it?". Under open sky the horse jumps on the bale and
+     * the answer happens to be yes. Under a roof two blocks up, or with a second bale
+     * stacked on the first, it is no, and the bale was never food: a yard horse starved
+     * beside one for ten minutes. The {@code Set} overload goes straight to
+     * {@code PathNavigation} with no lift. The block above is a target too, so standing on
+     * it - all a grass block ever needed - still counts.
+     */
+    private @Nullable Path pathTo(BlockPos pos) {
+        return horse.getNavigation().createPath(Set.of(pos, pos.above()), REACH_ACCURACY);
     }
 
     private boolean reachable(Entity target) {

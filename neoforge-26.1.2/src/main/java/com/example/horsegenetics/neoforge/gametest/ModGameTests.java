@@ -2090,6 +2090,9 @@ public final class ModGameTests {
         register(event, environment, BUILDING_BLOCKS_SURVIVES, 100);
         // Two tag lookups in one tick.
         register(event, environment, HAY_IS_STILL_A_BALE, 100);
+        // Founding (up to 20 ticks), a search every 40, a short walk and one mouthful.
+        register(event, environment, HAY_UNDER_A_LOW_ROOF_IS_EATEN, 400);
+        register(event, environment, STACKED_HAY_IS_EATEN, 400);
         // One horse spawned, saved and read back, all inside a single tick.
         register(event, environment, STASIS_TAG_IS_READABLE, 100);
         // Three codec round trips in one tick.
@@ -3474,6 +3477,84 @@ public final class ModGameTests {
                             + " Check data/horsegenetics/tags/item/hay_bales.json."), 0);
         }
         helper.succeed();
+    }
+
+    /**
+     * <b>A hungry horse eats a hay bale under a low roof</b> (#26). The yard's GRAZING cell,
+     * block for block: three wide, a stone floor, glass walls two high and a glass lid
+     * on them, one bale a row in from the north wall, and a vanilla-size horse five
+     * blocks south of it. A horse used to reach a bale only by standing on top of it
+     * ({@code HungerFoodGoal#pathTo}), and under this lid there is no room to, so it
+     * starved beside it. Passes when the horse has eaten.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HAY_UNDER_A_LOW_ROOF_IS_EATEN =
+            TEST_FUNCTIONS.register("hay_under_a_low_roof_is_eaten", () -> h -> hayCell(h, 80, true, false));
+
+    /**
+     * <b>A hungry horse eats from a stack of bales</b> (#26) - the same cell open to the
+     * sky, with a second bale on the first. Standing on top of a two-bale stack is a
+     * jump no horse makes, so this failed the same way the low roof did, and a stack is
+     * how a stable keeps its hay.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STACKED_HAY_IS_EATEN =
+            TEST_FUNCTIONS.register("stacked_hay_is_eaten", () -> h -> hayCell(h, 90, false, true));
+
+    private static void hayCell(GameTestHelper helper, int up, boolean roofed, boolean stacked) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        // In the air, so the harness floor and its neighbours are out of reach: walls
+        // at x -2 and 2 and z -2 and 8 round a 3 x 9 floor, the bale at the origin.
+        BlockPos bale = helper.absolutePos(BlockPos.ZERO).above(up);
+        for (int x = -2; x <= 2; x++) {
+            for (int z = -2; z <= 8; z++) {
+                level.setBlock(bale.offset(x, -1, z), Blocks.STONE.defaultBlockState(), 2);
+                boolean wall = x == -2 || x == 2 || z == -2 || z == 8;
+                for (int y = 0; y <= 1; y++) {
+                    level.setBlock(bale.offset(x, y, z),
+                            wall ? Blocks.GLASS.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
+                }
+                level.setBlock(bale.offset(x, 2, z),
+                        roofed ? Blocks.GLASS.defaultBlockState() : Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
+        level.setBlock(bale, Blocks.HAY_BLOCK.defaultBlockState(), 2);
+        if (stacked) {
+            level.setBlock(bale.above(), Blocks.HAY_BLOCK.defaultBlockState(), 2);
+        }
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(up).offset(0, 0, 5));
+        var hunger = com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get();
+        boolean[] ready = {false};
+        helper.onEachTick(() -> {
+            if (ready[0] || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                return;
+            }
+            // Founded: now an ordinary eater (the wild type), vanilla size and hungry.
+            com.example.horsegenetics.neoforge.server.HorseRecords.apply(horse,
+                    com.example.horsegenetics.neoforge.server.HorseRecords.newFounder(horse,
+                            new com.example.horsegenetics.neoforge.NeoRng(horse.getRandom()),
+                            com.example.horsegenetics.common.genetics.Genotype.wildType()));
+            horse.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE).setBaseValue(1.0);
+            horse.snapTo(bale.getX() + 0.5, bale.getY(), bale.getZ() + 5.5, 0.0F, 0.0F);
+            horse.setData(hunger, 20.0);
+            ready[0] = true;
+        });
+        helper.succeedWhen(() -> {
+            if (!ready[0] || horse.getData(hunger) < 60.0) {
+                throw new GameTestAssertException(Component.literal("a hungry horse has not eaten the "
+                        + (stacked ? "stacked bales" : "bale under a two-block roof") + " in its cell (hunger "
+                        + Math.round(horse.getData(hunger)) + ", bale " + (level.getBlockState(bale).is(Blocks.HAY_BLOCK)
+                        ? "still there" : "gone") + ") - HungerFoodGoal is asking whether it can stand on the"
+                        + " bale, not beside it"), 0);
+            }
+            for (int x = -2; x <= 2; x++) {
+                for (int z = -2; z <= 8; z++) {
+                    for (int y = -1; y <= 2; y++) {
+                        level.setBlock(bale.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
+                    }
+                }
+            }
+        });
     }
 
     /**
