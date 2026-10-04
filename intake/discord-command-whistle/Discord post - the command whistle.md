@@ -32,12 +32,10 @@ ATTACH: order_wheel_diagram.png
 ![The nine orders (diagram, not a screenshot)](order_wheel_diagram.png)
 
 ## How it works
-1. **Aim** at one of your horses (up to 16 blocks away, not through walls).
+1. **Sneak** and aim at one of your horses (up to 16 blocks away, not through walls).
 2. **Hold right-click.** A wheel of orders opens.
 3. **Move the mouse** over an order and **let go** to give it.
-4. Let go in the **middle** to change nothing. A quick tap does nothing at all.
-
-**Sneak + hold** anywhere to give the order to **every horse of yours within 16 blocks**. Chat tells you how many obeyed, and why the others didn't.
+4. Let go in the **middle** to change nothing.
 
 *Picture above is a diagram of the nine orders, not a screenshot. The real wheel may look a bit different.*
 
