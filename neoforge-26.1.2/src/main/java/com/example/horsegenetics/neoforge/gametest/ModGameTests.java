@@ -2120,6 +2120,8 @@ public final class ModGameTests {
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
         // A small scratch box filled and read, all inside one tick.
         register(event, environment, NO_HORSE_STANDS_IN_POWDER_SNOW, 100);
+        // A scratch shore and basin built, three horses spawned and checked; one tick.
+        register(event, environment, COWBOY_STOCK_LEAVES_THE_WHIRLPOOL, 100);
         // One horse spawned, two attachment writes, two calls; one tick.
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
         // Four horses spawned and seven interact events posted, all in one tick.
@@ -2145,6 +2147,8 @@ public final class ModGameTests {
         register(event, environment, ORDER_COMBAT_GATE, 100);
         // Founded at 25, then three owner-mirror passes, one every 40 ticks.
         register(event, environment, WHISTLE_SEES_THE_OWNER, 300);
+        // Synchronous: one cross-world move, checked in the same tick.
+        register(event, environment, TURNOUT_RELEASES_THE_HORSE_THAT_ARRIVED, 20);
         // Founded at 25, then a combat scan once a second.
         register(event, environment, ORDER_HUNT_PICKS_A_MONSTER, 200);
         register(event, environment, ORDER_GUARD_HOLDS_ITS_REACH, 300);
@@ -2947,6 +2951,73 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>A turnout releases the horse that arrived, not the one that left</b> (issue #29).
+     * A cross-world move builds a new entity, so a release applied to the old reference
+     * left the horse in the realm tamed, owned and saddled while its saddle was also handed
+     * back. The harness has no realm, so the horse is turned out into the Nether: what is
+     * under test is the cross-world move, not the realm. One saddle must exist afterwards,
+     * in the player's pack, and the horse standing in the other world must be wild.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> TURNOUT_RELEASES_THE_HORSE_THAT_ARRIVED =
+            TEST_FUNCTIONS.register("turnout_releases_the_horse_that_arrived",
+                    () -> ModGameTests::turnoutReleasesTheHorseThatArrived);
+
+    private static void turnoutReleasesTheHorseThatArrived(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ServerLevel other = level.getServer().getLevel(net.minecraft.world.level.Level.NETHER);
+        if (other == null || other == level) {
+            helper.fail("the harness has no Nether, so there is no second world to turn a horse out into");
+            return;
+        }
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        owner.getInventory().clearContent();
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, new BlockPos(2, 0, 2));
+        horse.setTamed(true);
+        horse.setOwner(owner);
+        horse.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+        UUID id = horse.getUUID();
+
+        // Above the Nether's roof: open air in a chunk forced for the length of the move.
+        other.setChunkForced(0, 0, true);
+        try {
+            net.minecraft.world.entity.animal.equine.Horse arrived =
+                    com.example.horsegenetics.neoforge.server.TicketHandler.turnOutTo(
+                            level, other, new net.minecraft.world.phys.Vec3(0.5, 200.0, 0.5), horse, owner);
+            if (arrived == null) {
+                helper.fail("the turnout did not move the horse at all");
+                return;
+            }
+            // The returned entity itself, not other.getEntity(id): a forced chunk's
+            // entity section loads asynchronously, so the lookup misses a horse
+            // that is there.
+            net.minecraft.world.entity.animal.equine.Horse there = arrived;
+            if (there.level() != other || there.isRemoved() || there == horse || !there.getUUID().equals(id)
+                    || !horse.isRemoved()) {
+                helper.fail("the move did not replace the horse with a live copy of it in the other world");
+                return;
+            }
+            boolean wild = !there.isTamed() && there.getOwnerReference() == null;
+            boolean bare = there.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.SADDLE).isEmpty();
+            int handed = owner.getInventory().countItem(Items.SADDLE);
+            there.discard();
+            if (!wild) {
+                helper.fail("the horse in the other world is still tamed or owned - the release went to the"
+                        + " entity that was left behind");
+                return;
+            }
+            if (!bare || handed != 1) {
+                helper.fail("saddles: " + (bare ? 0 : 1) + " on the arrived horse, " + handed
+                        + " in the pack - there must be exactly one, in the pack");
+                return;
+            }
+        } finally {
+            other.setChunkForced(0, 0, false);
+        }
+        helper.succeed();
+    }
+
+    /**
      * <b>A hunting horse picks the monster and leaves the creeper</b>: a guardian told to
      * Hunt monsters, with a husk four blocks off and a creeper nearer, takes the husk as
      * its target (OrderCombatGoal). A guardian, because it starts nothing by itself - the
@@ -3714,6 +3785,100 @@ public final class ModGameTests {
             }
         } finally {
             fill(level, feet, Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>A cowboy's string keeps off the water, and a whirlpool gives it back</b>
+     * (issue #30).
+     *
+     * <p>A stone shore beside a basin of water five deep, with a magma block
+     * under its middle and a downward bubble column over it - the sea-floor
+     * whirlpool that took a whole string on seed 20261002. Three horses, all in
+     * one tick: a branded one in the column must come out onto the shore, dry,
+     * on solid ground; an unbranded one in the same column must be left alone
+     * (only the dealer's own are his to protect); and a branded one on the shore
+     * must get a water malus that keeps every path out of the basin.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> COWBOY_STOCK_LEAVES_THE_WHIRLPOOL =
+            TEST_FUNCTIONS.register("cowboy_stock_leaves_the_whirlpool",
+                    () -> ModGameTests::cowboyStockLeavesTheWhirlpool);
+
+    private static void cowboyStockLeavesTheWhirlpool(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos origin = helper.absolutePos(BlockPos.ZERO).above(40);
+        try {
+            fill(level, origin, Blocks.AIR.defaultBlockState());
+            // The shore: z -8..-1. The basin's stone shell: z -1..5, y -6..-1.
+            for (int x = -6; x <= 6; x++) {
+                for (int z = -8; z <= 5; z++) {
+                    for (int y = -6; y <= -1; y++) {
+                        level.setBlock(origin.offset(x, y, z), Blocks.STONE.defaultBlockState(), 2);
+                    }
+                }
+            }
+            for (int x = -2; x <= 2; x++) {
+                for (int z = 0; z <= 4; z++) {
+                    for (int y = -5; y <= -1; y++) {
+                        level.setBlock(origin.offset(x, y, z), Blocks.WATER.defaultBlockState(), 2);
+                    }
+                }
+            }
+            level.setBlock(origin.offset(0, -6, 2), Blocks.MAGMA_BLOCK.defaultBlockState(), 2);
+            for (int y = -5; y <= -1; y++) {
+                level.setBlock(origin.offset(0, y, 2), Blocks.BUBBLE_COLUMN.defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.BubbleColumnBlock.DRAG_DOWN, true), 2);
+            }
+            com.example.horsegenetics.neoforge.data.CowboyBrand brand = com.example.horsegenetics.neoforge.data.CowboyBrand.of(java.util.UUID.randomUUID());
+            net.minecraft.world.entity.EntityType<net.minecraft.world.entity.animal.equine.Horse> horseType =
+                    net.minecraft.world.entity.EntityType.HORSE;
+
+            // A wild horse in the whirlpool first: the rescue is the dealer's, so
+            // one that moves this horse is moving everyone's.
+            net.minecraft.world.entity.animal.equine.Horse wild = helper.spawn(horseType, BlockPos.ZERO.above(37).south(2));
+            wild.setNoAi(true);
+            BlockPos wildAt = wild.blockPosition();
+            if (com.example.horsegenetics.neoforge.server.CowboyWaterSafety.check(wild, level) != null
+                    || !wild.blockPosition().equals(wildAt)) {
+                helper.fail("an unbranded horse was moved out of a whirlpool - only a cowboy's string is his to rescue.");
+                return;
+            }
+
+            net.minecraft.world.entity.animal.equine.Horse caught = helper.spawn(horseType, BlockPos.ZERO.above(37).south(2));
+            caught.setNoAi(true);
+            caught.setData(com.example.horsegenetics.neoforge.data.ModAttachments.COWBOY_BRAND.get(), brand);
+            String moved = com.example.horsegenetics.neoforge.server.CowboyWaterSafety.check(caught, level);
+            BlockPos at = caught.blockPosition();
+            if (moved == null) {
+                helper.fail("a cowboy's horse in a downward bubble column was left there (#30).");
+                return;
+            }
+            // Its own feet, then the basin's whole footprint, then the margin rule.
+            boolean inBasin = Math.abs(at.getX() - origin.getX()) <= 2
+                    && at.getZ() - origin.getZ() >= 0 && at.getZ() - origin.getZ() <= 4;
+            if (!level.getFluidState(at).isEmpty() || inBasin || at.getY() != origin.getY()
+                    || !com.example.horsegenetics.neoforge.server.CowboyWaterSafety.fits(caught, level, at)) {
+                helper.fail("the rescued horse was put at " + at.toShortString() + ", which is not dry ground "
+                        + "a step back from the water (" + moved + ").");
+                return;
+            }
+
+            net.minecraft.world.entity.animal.equine.Horse shore = helper.spawn(horseType, BlockPos.ZERO.above(40).north(5));
+            shore.setNoAi(true);
+            shore.setData(com.example.horsegenetics.neoforge.data.ModAttachments.COWBOY_BRAND.get(), brand);
+            com.example.horsegenetics.neoforge.server.CowboyWaterSafety.check(shore, level);
+            float malus = shore.getPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.WATER);
+            if (malus >= 0.0F) {
+                helper.fail("a cowboy's horse on dry land has water malus " + malus
+                        + ", so a path can still take it into the sea (#30).");
+                return;
+            }
+            caught.discard();
+            wild.discard();
+            shore.discard();
+        } finally {
+            fill(level, origin, Blocks.AIR.defaultBlockState());
         }
         helper.succeed();
     }

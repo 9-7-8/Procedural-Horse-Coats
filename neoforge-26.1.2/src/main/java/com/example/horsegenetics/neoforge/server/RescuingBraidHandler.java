@@ -172,11 +172,13 @@ public final class RescuingBraidHandler {
         // braid is a ticket the horse is wearing, so it had better look like
         // one - and reusing the call means a change to how a horse travels
         // reaches this without anyone remembering it exists.
-        TicketHandler.arrive(level, destination.level(), horse, destination.landing(), rider);
+        Horse arrived = TicketHandler.arrive(level, destination.level(), horse, destination.landing(), rider);
         reseat(destination.level(), horseId, rider, destination.landing());
 
-        // Spent. Taken off the horse rather than dropped: it broke.
-        slot.set(horse, ItemStack.EMPTY);
+        // Spent. Taken off the horse rather than dropped: it broke. Off the horse
+        // that ARRIVED: across worlds that is a new entity, and taken off the old
+        // one the braid stayed in the new one's hair, unspent (issue #29).
+        slot.set(arrived != null ? arrived : horse, ItemStack.EMPTY);
         LAST_TOLD.remove(horseId);
 
         // Nothing forces the escape behaviour and nothing should: HorseEscapeGoal

@@ -1,0 +1,94 @@
+2026-10-04 14:44 - Fix #30: the whirlpool off the cowboy barn (time is the end of the session)
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Took #30, "Cowboy at a cave edge: his stock (and he) keep
+  dying in lava below the hitch (seed 20261002, 99 63 673)": the only open issue at the
+  damage level that was not already fixed and waiting on a check (#35 and #36 are). Its
+  cause was not written in it.
+- Mid-session, asked with the question tool how to fix it (a gameplay call): the owner
+  chose "Avoid water + rescue". Done; issue closed.
+
+DONE
+----
+- 1d8e5b4b "Fix #30: a whirlpool off the barn's edge took every cowboy's string there".
+  Cause, read from the saved soak world (neoforge-26.1.2/run-soak/world) block by block:
+  it was never a lava cave. The plains village builds out over the sea on 2-4 blocks of
+  fill; the cowboy barn (home 101, 63, 673) stands on it over water from y 21 to y 61. A
+  downward bubble column over magma blocks at y 19 is open at the surface at 102-103, 62,
+  671 - one block off the barn's north edge. Every death in the soak logs is at its foot
+  (102/103, 20, 671); "discovered the floor was lava" is the magma block's death message.
+  The drowned and the "suffocated in a wall" at y 58 are ones that floated back up under
+  the fill. The hitch then hires the next villager (CowboyHitchHandler re-hires when no
+  cowboy is within 32) and the restock breeds a new string, so it loops.
+  Fix: new server/CowboyWaterSafety, an EntityTickEvent.Post handler every 10 ticks, for
+  the Cowboy and horses carrying a CowboyBrand and not tamed (sold). (1) On dry land
+  their PathType.WATER malus is -1 (vanilla 8 again while in water, and for a horse once
+  sold), so no path crosses water. (2) One whose feet are in a BUBBLE_COLUMN with
+  DRAG_DOWN is moved to the nearest dry ground (square rings out to 12, loaded chunks
+  only) around an anchor: the man's home(); a horse's cowboy if loaded and dry; else the
+  surface of its own column. The ground must be solid, not magma, within 4 blocks of the
+  anchor's height, and have no liquid within a block of the box, down to ground level.
+  Always logged: "[whirlpool] <name> <uuid> caught in a downward bubble column at ... -
+  moved to ...". wiki/villagers.html#water describes it.
+  Proof: gametest cowboy_stock_leaves_the_whirlpool (a stone shore, a basin five deep, a
+  magma-fed downward column; an unbranded horse in the column is left, a branded one comes
+  out onto the shore at shore height, a branded one on the shore gets malus -1). All 51
+  gametests pass. Mutations: with the rescue removed it fails "left there"; with the malus
+  write removed it fails "malus 8.0". Then a fresh 3-day runWildSoakServer on seed
+  20261002 (-PsoakDir=run-soak30, new world): a cowboy founded at the barn with 6 horses;
+  on day 2 one horse (Cloud Compass) still entered the column at 103, 62, 671 despite the
+  malus and was moved to 105, 64, 677; at the end herd 6, live 6, no deaths at the barn.
+  The same window lost the cowboy and five horses before. :neoforge-26.1.2:build green,
+  check-parity OK. Issue #30 CLOSED, with the proof comment.
+
+DECIDED
+-------
+- Fix shape: keep the dealer's own off water by pathfinding, and rescue them from a
+  downward bubble column (owner, via the question tool). Recorded on #30 and
+  villagers.html#water.
+- Without the owner: only the cowboy and his branded unsold stock are covered, never
+  wild, sold or players' horses; the rescue anchors on the cowboy (or his home); a 4-block
+  height bound and a one-block water margin on the landing spot; the malus is restored in
+  water so a shoved horse can path out. All in CowboyWaterSafety's comments and on #30.
+
+FOUND ON THE WAY
+----------------
+- My own mistake, caught by the first gametest run's log line: the rescue first took the
+  nearest fitting surface at any height, and put the test horse 40 blocks down beside
+  the scratch platform. Fixed before commit (RESCUE_RISE, and the self anchor is the
+  column's surface, not the sunk horse); the test now asserts shore height.
+- The soak's 3-day verdict "RESULT FAIL: no wild horse ever moved on" is expected: a wild
+  horse lives 3 days. Not a bug; noted in stress-test.txt.
+- The malus alone did not keep every horse out (the soak's Cloud Compass). How it got in
+  (a shove from Displace/Spar, or the cowboy's PanicGoal) is still unknown; the rescue
+  covers it. Not filed: nothing is dying.
+- #37 (order-goal gametest flake) did not fire in any of this session's four runs.
+- The 20:06 entry in wiki/session-log.html (the Discord post session) sits below older
+  entries, apparently a UTC time; left as it is.
+
+PROCEDURES
+----------
+- look-it-up.txt step 9 (new): a death at known coordinates is a terrain question; read
+  the saved world's blocks with the new tools/world-blocks.py (plain Python, no libraries:
+  `block X Y Z` or `slice Z X0 X1 Y0 Y1`) rather than guess from the log.
+- stress-test.txt: a soak of 3 days or fewer always ends RESULT FAIL; give a short run a
+  fresh -PsoakDir so the seed regenerates.
+- test-tiers.txt (writing a gametest): a scratch platform at origin.above(40) has the
+  harness floor 40 blocks below; bound any "surface" search in height.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run (nothing in common/ changed); it would still
+  check every common/ rule, none of which this touched.
+- Not seen in a client: a rescue as a player would see it (a horse popping out of the sea
+  beside its cowboy). The soak is headless.
+- No Verification-tab anchor added: the gametest and the soak answered it.
+
+RELEASE
+-------
+Not offered: one fix, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#37, the order-goal gametest flake that can turn any runGameTest red - /fix-bug 37.

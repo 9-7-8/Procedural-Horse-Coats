@@ -213,6 +213,9 @@
     <code>TicketHandler.arrive</code> is called rather than copied, so the braid gets the portal
     particles, the enderman sound and <code>HorseLeads.untieFor</code> for free &mdash; and a
     future change to how a horse travels reaches this without anyone remembering it exists.
+    The braid is spent off the horse <code>arrive</code> <em>returns</em>: across worlds that is a
+    new entity, and until issue #29 (2026-10-04) it was taken off the removed one, so a braid that
+    sent a horse to a stall in another world stayed in its hair, unspent. Unverified in-game.
 </p>
 <p>
     The rider is the part that is genuinely new. Within one level, <code>teleportTo</code> carries

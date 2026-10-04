@@ -783,7 +783,8 @@
     anything done to the old one afterwards is done to nothing. The move uses vanilla's portal ticket, so the
     arrival chunk loads even with nobody in the realm. <code>makeWild</code> also clears the
     <a href="breeds.html#turnover-coding">wild lifetime</a>, so nothing in the realm ever expires. The
-    turnout ticket still does it the other way round, which is issue #29.
+    turnout ticket moves first and releases second, but releases the horse <code>TicketHandler.arrive</code>
+    <em>returns</em> - the copy in the realm - not the reference it was handed (issue #29, 2026-10-04).
 </p>
 
 <h2 id="feral">Leaving is a condition, not an event</h2>
