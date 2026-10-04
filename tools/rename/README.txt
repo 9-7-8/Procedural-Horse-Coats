@@ -1,8 +1,9 @@
-RENAME MACHINERY - WRITTEN, NEVER RUN (2026-10-04)
+RENAME MACHINERY - WRITTEN 2026-10-04; converter self-test passed on synthetic data; nothing run on a real world
 
 Everything here and in converter/ was written from a cloud session while another change was in flight on the owner's
-machine, so NOTHING was executed against the repo, a world or the build. The converter's Java was compiled once with
-plain javac into a scratch folder (clean, no warnings) to catch typos; no class was run. The node scripts were only
+machine, so NOTHING was executed against the repo, a real world or the Gradle build. The converter's Java was compiled
+with plain javac into a scratch folder and its --self-test (synthetic world, temp folder) PASSED on 2026-10-04 after one
+fix it found (translation keys such as item.horsegenetics.x were being left behind). The node scripts were only
 syntax-checked (node --check). No existing file in the repo was edited: settings.gradle.kts, neoforge.mods.toml and
 every source file are as they were. Treatment: intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt.
 

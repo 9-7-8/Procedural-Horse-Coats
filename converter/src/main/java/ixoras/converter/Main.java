@@ -20,7 +20,8 @@ import java.util.Scanner;
  * Exit codes: 0 done (or nothing to do), 1 bad arguments or refusal, 2 the conversion hit errors (the output
  * folder is left in place, marked CONVERSION-INCOMPLETE.txt; nothing is deleted).
  *
- * <p>WRITTEN, NEVER RUN. The first run belongs on a COPY of the live world (see tools/rename/runbook).
+ * <p>The self-test (--self-test) passes on synthetic worlds (2026-10-04). It has NEVER run on a real world: the first
+ * real run belongs on a COPY of the live world (see tools/rename/runbook-live-cutover.txt).
  */
 public final class Main {
     private Main() {

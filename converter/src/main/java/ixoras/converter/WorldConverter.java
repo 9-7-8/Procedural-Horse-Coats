@@ -35,7 +35,7 @@ import java.util.zip.GZIPOutputStream;
  * region compression types in use. Anything unreadable fails the run loudly rather than being skipped.
  */
 final class WorldConverter {
-    static final String VERSION = "0.1 (written, never run)";
+    static final String VERSION = "0.1 (self-test passed on synthetic worlds; never run on a real world)";
 
     private static final Set<String> TEXT_EXT = Set.of("json", "mcmeta", "txt", "toml", "snbt", "properties", "mcfunction");
     private static final Set<String> NBT_EXT = Set.of("dat", "dat_old", "nbt");

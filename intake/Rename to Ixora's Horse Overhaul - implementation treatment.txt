@@ -202,7 +202,7 @@ edited (another change was in flight on the owner's machine):
 - converter/ : the standalone world converter (Piece 1), a Gradle module NOT yet listed in settings.gradle.kts. Java 17, no
   third-party library: NBT and Anvil region reader/writer, LZ4 decode, per-chunk streaming, new-folder output, original
   verified byte-identical, free-space check, no-op on an already converted world, dry run, pack conversion with y/n per pack,
-  a --self-test on a synthetic world. Compiled once with javac to catch typos; never run.
+  a --self-test on a synthetic world. Compiled with javac and its --self-test PASSED in a temp folder (2026-10-04); never run on a real world.
 - tools/rename/ : plan.mjs (read-only), apply.mjs (dry run by default), check.mjs, apply-alias.mjs (the old-prefix READ alias),
   staged/ (the alias patch and test, and the refuse-to-load guard as UNVERIFIED notes), runbook-live-cutover.txt, README.txt
   with the order. Open values left as TODO in tools/rename/rename.config.json: the new Java package and the config folder name.

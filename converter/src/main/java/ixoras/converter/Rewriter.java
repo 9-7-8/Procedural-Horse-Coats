@@ -9,12 +9,14 @@ import java.util.regex.Pattern;
  * old namespace followed by ':' or '.' becomes the new one, in any NBT string value or key and in any text
  * file, including text a player typed (book pages, signs, custom names).
  *
- * <p>Anchored: the token must not be preceded by a letter, digit, '_', '.' or '/', so a class name such as
- * "com.example.horsegenetics.x", the word "xhorsegenetics:" and a path "assets/horsegenetics/" are not touched
- * by the rule. A genotype code such as "horsegenetics.extension=E/e-horsegenetics.agouti=A/a" is: every
- * token in it follows the start of the string, '-' or ';', which are deliberately NOT in the excluded set.
- * (The treatment's Open about a longer word is answered this way; the building session may tighten it after
- * reading real saved text.)
+ * <p>Anchored: the token must not be preceded by a letter, digit or '_', so "xhorsegenetics:" is not touched. It IS
+ * rewritten after '.', '-', ';', '/', '=' or the start of a string, because real tokens sit there: translation keys
+ * ("item.horsegenetics.whistle", "block.horsegenetics.stall_sign", "advancements.horsegenetics.x") and genotype codes
+ * ("horsegenetics.extension=E/e-horsegenetics.agouti=A/a"). Found by the converter's own self-test, 2026-10-04: an
+ * earlier draft excluded '.' and so left every translation key behind. A Java class name such as
+ * "com.example.horsegenetics.Thing" would also be rewritten, but class names are not stored in worlds or packs (the
+ * source rename handles them separately, with tools/rename/apply.mjs). The building session may tighten this after
+ * reading real saved text.
  */
 final class Rewriter {
     private final Pattern pattern;
@@ -24,7 +26,7 @@ final class Rewriter {
     long count;
 
     Rewriter(String oldNs, String newNs) {
-        this.pattern = Pattern.compile("(?<![A-Za-z0-9_./])" + Pattern.quote(oldNs) + "(?=[:.])");
+        this.pattern = Pattern.compile("(?<![A-Za-z0-9_])" + Pattern.quote(oldNs) + "(?=[:.])");
         this.replacement = Matcher.quoteReplacement(newNs);
     }
 

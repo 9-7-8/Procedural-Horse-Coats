@@ -42,3 +42,11 @@ background that you'll collide with"; "the rename machinery. If it's easier to d
 - Recommendation recorded in tools/rename/README.txt: keep the rename and the four-jar split separate, rename first (different gates, different release kinds).
 - A hook blocked one command because the runbook text quoted a forbidden process-stop command; the text was reworded. No process was stopped.
 - NOT RUN: the converter's self-test, every node script (syntax-checked only), any Gradle build. Open: the new Java package and the config folder name.
+
+LATER STILL (2026-10-04): converter self-test run (owner chose "compile it and run the self-test in a temp folder only")
+- Compiled with javac into the scratchpad and ran `--self-test`: first run passed; after adding LZ4-framed and external (.mcc) chunks, a dir pack and a zip pack it
+  FAILED once, which found a real bug: the rewrite rule excluded a token after '.', so translation keys (item.horsegenetics.whistle) were left behind. Fixed in
+  Rewriter (rule now excludes only letters, digits and '_' before the token); self-test passes (12 checks). Nothing in the repo's build was touched; no real world.
+- Owner on backup: "If you're not touching the original, then you don't need to [back up]." The converter keeps its decided design (new folder, original
+  untouched and proven byte-identical); no backup step was added.
+- Owner asked whether the new Java package should simply be ixoras_horses; the answer is pending (the config value stays TODO until confirmed).
