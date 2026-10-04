@@ -39,6 +39,10 @@ STEPS
 8. The owner's last play session is on disk: neoforge-26.1.2/run/logs/latest.log, with
    debug.log beside it. Read it rather than asking. A run that crossed midnight
    continues from <date>-1.log.gz, so read both.
+9. A death or a stuck mob at known coordinates is a question about the terrain there,
+   and a soak's or test's world is still on disk (run-soak*/world, run/saves/...).
+   Read its blocks with `python tools/world-blocks.py <world> slice Z X0 X1 Y0 Y1`
+   rather than guess from the log: #30's "lava cave" was a sea and a whirlpool.
 
 DONE WHEN
 ---------

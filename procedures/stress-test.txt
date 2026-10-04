@@ -65,6 +65,9 @@ cost, horses, the turnover's counters), a `[soak] RESULT PASS|FAIL` verdict, the
 Run directory as above, but level-type=minecraft\:normal, and set `debug.tools = false` in
 <dir>/phc/server.toml after the first boot writes it. Use it after any change to wild
 spawning, the turnover, the top-up or the realm hand-off. About 11 minutes for six days.
+A run of 3 days or fewer always ends RESULT FAIL ("no wild horse ever moved on"): a wild
+horse lives 3 days. A short run still answers other questions (a cowboy, a death spot);
+give it a fresh -PsoakDir so the seed regenerates instead of loading the old world.
 
 SEE ALSO
 --------
