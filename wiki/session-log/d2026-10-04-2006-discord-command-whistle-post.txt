@@ -1,0 +1,36 @@
+2026-10-04 20:06 - Discord announcement for the command whistle (time is the end of the session)
+
+ASKED
+- "Write up a description of how the command whistle works, grab its image, and prepare a document in intake for the discord bot to post to tell everyone about this new
+  feature ... Write it in markdown, but use images please". Came of it: intake/discord-command-whistle/ (a five-message post, each under 2000 characters, and three images).
+- Owner, after testing: "I did test it in game, and you have to be sneak right clicking on the horse for it to work". Came of it: the post now says sneak + hold right-click;
+  GitHub issue 36 filed.
+
+DONE
+- intake/discord-command-whistle/Discord post - the command whistle.md; command_whistle.png (the real item texture, enlarged 8x with no smoothing), whistle_family.png (the five
+  whistles side by side), order_wheel_diagram.png (a DIAGRAM drawn for the post, not a screenshot: the wheel has not been seen by any session; the colours and slice order are
+  invented). One line added to intake/README.txt saying discord-*/ folders are not treatments.
+- Facts came from wiki/text/item-whistles.gameplay.txt, horse-care.gameplay.txt (bond tiers 31 and 61), the recipe and trade JSONs, and CommandWhistleClient/CommandWhistleItem.
+- Proof: only the facts above were read; no game, build or test run (cloud session). Message lengths counted by script (all under 1000 characters).
+- Issue: https://github.com/9-7-8/Procedural-Horse-Coats/issues/36 (open, label bug): plain hold-right-click on an aimed horse does not open the wheel.
+
+DECIDED (owner)
+- Post "sneak + right-click", matching her testing, and file a bug rather than hold the announcement.
+
+FOUND ON THE WAY
+- Code and wiki say plain hold-right-click opens a single-horse wheel and sneak opens the all-horses wheel; in play only sneak works. Which horses obeyed under sneak is unknown.
+  The wiki page item-whistles.html and the 0.5.043 release note still describe the plain click: update them when #36 is settled.
+- The wiki states none of the command whistle had been seen in a game before 0.5.043; the owner has now played it once.
+
+PROCEDURES
+None changed this half of the session (the earlier four-jar scoping changed process-intake and write-intake-document; see d2026-10-03-1830-scoping-four-jar-split.txt).
+Gap noticed, not changed: no procedure covers writing a Discord announcement for a release. It is likely to recur; worth a procedure (FORMAT.txt) if the owner wants it.
+
+NOT RUN / NOT CHECKED
+- No Gradle build (no Java, resource or Gradle file changed), no rebake. check-parity and check-links ran. Nothing in the post was checked in game except the sneak requirement.
+
+RELEASE
+Not offered (no player-facing code changed).
+
+PICK UP FIRST
+Fix issue 36 with /fix-bug, then update the wiki and the Discord post to match; the four-jar split still waits on the rename (see the 2026-10-03 18:30 log).
