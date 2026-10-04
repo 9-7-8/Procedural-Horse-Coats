@@ -136,6 +136,9 @@ STEPS
      #31's shape loads were about half the stall.
    - If the fix changes behaviour a wiki page describes, update that page's Gameplay or
      Coding tab in the same change.
+   - If the proof also answers a Verification-tab check, or the question a yard pen was
+     left standing for, run close-a-check for it in the same change: the check moves
+     to the Coding tab and the pen goes. Example: #25's gametest retired STALL SHAPES.
    - Everything you post on GitHub ends with the Claude Code attribution footer.
 
 7. End the session with end-session. The session log names the issue, the cause, the

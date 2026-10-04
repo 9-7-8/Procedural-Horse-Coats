@@ -1,0 +1,77 @@
+2026-10-04 16:10 (end time) - Fix #25: a slab floor and a one-block step are one stall
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Took #25 by fix-bug step 1. #35 and #36 are fixed and
+  only wait on checks. #33, #34 and #10 are cosmetic (level d). #37 is a test flake.
+  #25 is the oldest wrong-behaviour bug left (found-in-yard, level c), and its cause
+  was half-written in the issue. Result: fixed and closed.
+
+DONE
+----
+- a1a2bea9 "Fix #25: the top of a closed gate counted as stall floor".
+  What was wrong: StallDetector.standable read the air over a closed gate as floor one
+  step up. A gate's collision is 1.5 tall, so blocksMotion() is true. The floor walk
+  climbed the gate into the open yard, ran past MAX_COLUMNS, and only the wall-ring
+  search at the floor's own level (withinLowestRing) brought it back.
+  - A slab floor stands a level above that ring, so the ring search started above the
+    gate, and every level up to sign+3 was open over the gap: refused.
+  - A raised east column cuts the ring at gy+1 down to the low column: 2 of 4 tiles.
+  Fix: StallDetector.tallerThanABlock. A block whose collision shape rises above 1.0
+  (a fence, a wall or a closed gate) is never floor, so the walk stops at a gate the way
+  it already stopped at a fence top.
+  Proof: new gametest stall_shapes_bind_as_one_room (ModGameTests). It builds SLAB, STEP,
+  DROP, PLAIN-gate and FENCES stalls on a 25x25 platform at origin+40, reads each with
+  StallDetector.forSign, and requires exactly the floor tiles (DROP: not all of them).
+  - Without the fix: "SLAB refused, expected exactly its 2 floor tiles; STEP bound 2
+    tiles, expected exactly its 4 floor tiles", the yard's exact reading, with the
+    controls green.
+  - With the fix: runGameTest, "All 55 required tests passed".
+  Also ran :neoforge-26.1.2:build (green) and check-parity (OK).
+  The STALL SHAPES yard pen (DebugYardShelf, east half of row AX) had no open question
+  left, so it was removed. Row AX keeps RESEARCH SHELF.
+  wiki/item-stall-signs.html: the Coding tab gains #verified-gate-top and a line in the
+  rules list. The Verification tab drops the slab/step item and keeps the
+  roofed-stall-dismount check. #25 is CLOSED (by the commit), with a proof comment.
+
+DECIDED
+-------
+- The rule was made on collision height, not block identity (FenceBlock / WallBlock),
+  so modded fences and walls are covered too. Not the owner's call; recorded in the
+  StallDetector comment and on the stall-signs Coding tab.
+- The yard pen was retired once the gametest proved its last two checks
+  (close-a-check step 5). Not the owner's call.
+
+FOUND ON THE WAY
+----------------
+- The first version of the gametest used a 23x23 platform. The open floor around the
+  stalls then closed under MAX_COLUMNS (512) as a "room" of its own, so the controls
+  read 487 tiles where the yard reads a clean bind. It was widened to the full scratch
+  box (about 553 open tiles), and the constraint is noted in the test. Any future stall
+  gametest needs more than 512 open tiles round it.
+- #37's order-goal flakes did not appear in any of the three runGameTest runs.
+- No new issues filed.
+
+PROCEDURES
+----------
+- fix-bug.txt step 6: if the proof also answers a Verification-tab check or a yard pen's
+  question, run close-a-check in the same change. This session did that by judgement;
+  the procedure did not say so.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Full :common:test was not run; nothing in common/ changed.
+- Not seen in game: a player hanging a stall sign in a slab-floored or stepped stall.
+  The gametest makes the same forSign call StallSignItem makes, so this is not left as
+  a check.
+- Still open on item-stall-signs.html: dismounting inside a roofed stall, the
+  double-gate checklist tick, ownership refusals, and sign upkeep.
+
+RELEASE
+-------
+Not offered. One fix is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#37, the order-goal gametest flakes (the last thing keeping runGameTest unreliable):
+fix-bug.
