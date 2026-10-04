@@ -6,7 +6,6 @@ import com.example.horsegenetics.neoforge.item.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
@@ -18,8 +17,6 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
-
-import java.util.UUID;
 
 /**
  * <b>Holding use with the command whistle opens the wheel</b> instead of doing what
@@ -56,20 +53,21 @@ public final class CommandWhistleClient {
         if (player == null || mc.screen != null || !holdsWhistle(player)) {
             return;
         }
-        if (player.isSecondaryUseActive()) {
-            claim(event);
-            CommandWheelScreen.openForAll();
-            return;
+        boolean sneaking = player.isSecondaryUseActive();
+        Horse horse = sneaking ? null : aimedHorse(player);
+        HorseRecord record = horse == null ? null : ClientHorseRecordCache.get(horse.getId());
+        switch (HorseOrders.whistleUse(sneaking, record, player.getUUID())) {
+            case EVERY_HORSE -> {
+                claim(event);
+                CommandWheelScreen.openForAll();
+            }
+            case AIMED_HORSE -> {
+                claim(event);
+                CommandWheelScreen.openFor(horse, record.displayName());
+            }
+            case NOTHING -> {
+            }
         }
-        Horse horse = aimedOwnHorse(mc, player);
-        if (horse == null) {
-            return;
-        }
-        claim(event);
-        HorseRecord record = ClientHorseRecordCache.get(horse.getId());
-        String name = record != null ? record.displayName()
-                : horse.hasCustomName() ? horse.getCustomName().getString() : "Your horse";
-        CommandWheelScreen.openFor(horse, name);
     }
 
     private static void claim(InputEvent.InteractionKeyMappingTriggered event) {
@@ -82,8 +80,13 @@ public final class CommandWhistleClient {
                 || player.getItemInHand(InteractionHand.OFF_HAND).is(ModItems.COMMAND_WHISTLE.get());
     }
 
-    /** The horse of the player's own under the crosshair, out to the whistle's reach. */
-    private static Horse aimedOwnHorse(Minecraft mc, LocalPlayer player) {
+    /**
+     * The horse under the crosshair, out to the whistle's reach - anyone's. Whether it is
+     * the player's is {@link HorseOrders#whistleUse}'s question, asked of the synced record:
+     * this used to ask {@code getOwnerReference()}, which is always null on a client, so the
+     * plain hold opened nothing on any horse (issue #36).
+     */
+    private static Horse aimedHorse(LocalPlayer player) {
         double reach = HorseOrders.REACH_BLOCKS;
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getViewVector(1.0F);
@@ -94,17 +97,6 @@ public final class CommandWhistleClient {
         AABB box = player.getBoundingBox().expandTowards(look.scale(reach)).inflate(1.0);
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, box,
                 e -> e instanceof Horse && e.isAlive() && !e.isSpectator(), max);
-        if (hit == null || !(hit.getEntity() instanceof Horse horse)) {
-            return null;
-        }
-        return ownedBy(horse, player.getUUID()) ? horse : null;
-    }
-
-    private static boolean ownedBy(Entity entity, UUID player) {
-        if (!(entity instanceof Horse horse) || !horse.isTamed()) {
-            return false;
-        }
-        var owner = horse.getOwnerReference();
-        return owner != null && player.equals(owner.getUUID());
+        return hit != null && hit.getEntity() instanceof Horse horse ? horse : null;
     }
 }

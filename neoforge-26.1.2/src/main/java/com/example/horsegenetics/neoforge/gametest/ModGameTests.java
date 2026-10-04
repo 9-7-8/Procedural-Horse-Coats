@@ -2143,6 +2143,8 @@ public final class ModGameTests {
         register(event, environment, ORDER_CLEARS, 100);
         // Twenty-five ticks to be founded, then the gate is read once.
         register(event, environment, ORDER_COMBAT_GATE, 100);
+        // Founded at 25, then three owner-mirror passes, one every 40 ticks.
+        register(event, environment, WHISTLE_SEES_THE_OWNER, 300);
         // Founded at 25, then a combat scan once a second.
         register(event, environment, ORDER_HUNT_PICKS_A_MONSTER, 200);
         register(event, environment, ORDER_GUARD_HOLDS_ITS_REACH, 300);
@@ -2880,6 +2882,67 @@ public final class ModGameTests {
                 throw new GameTestAssertException(Component.literal("the fighting gate reached a non-combat order"), 0);
             }
             checked[0] = true;
+        });
+    }
+
+    /**
+     * <b>The whistle knows whose horse it is from the record</b> (issue #36). A client never
+     * has vanilla's owner, so the plain hold asks {@code HorseOrders.whistleUse} of the
+     * synced record; this proves the server keeps that record's owner true: it names the
+     * taming player, moves with a sale, and empties when the horse goes wild - and the rule
+     * answers each state as the wheel would. The press itself is an in-game check.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WHISTLE_SEES_THE_OWNER =
+            TEST_FUNCTIONS.register("whistle_sees_the_owner", () -> ModGameTests::whistleSeesTheOwner);
+
+    private static void whistleSeesTheOwner(GameTestHelper helper) {
+        keepTicking(helper);
+        var aimed = com.example.horsegenetics.common.care.HorseOrders.WhistleUse.AIMED_HORSE;
+        var nothing = com.example.horsegenetics.common.care.HorseOrders.WhistleUse.NOTHING;
+        net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.player.Player buyer = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, new BlockPos(2, 0, 2));
+        horse.setTamed(true);
+        horse.setOwner(owner);
+        int[] stage = {0};
+        helper.succeedWhen(() -> {
+            if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                throw new GameTestAssertException(Component.literal("the horse is not founded yet"), 0);
+            }
+            var record = com.example.horsegenetics.neoforge.server.HorseRecords.of(horse);
+            java.util.function.BiFunction<net.minecraft.world.entity.player.Player, Boolean,
+                    com.example.horsegenetics.common.care.HorseOrders.WhistleUse> use =
+                    (p, sneak) -> com.example.horsegenetics.common.care.HorseOrders.whistleUse(sneak, record, p.getUUID());
+            switch (stage[0]) {
+                case 0 -> {
+                    if (use.apply(owner, false) != aimed) {
+                        throw new GameTestAssertException(Component.literal(
+                                "the taming player's own horse opens no wheel: the record's owner is " + record.ownerId()), 0);
+                    }
+                    if (use.apply(buyer, false) != nothing) {
+                        throw new GameTestAssertException(Component.literal("a stranger's whistle opened the wheel on it"), 0);
+                    }
+                    horse.setOwner(buyer);
+                    stage[0] = 1;
+                    throw new GameTestAssertException(Component.literal("sold; waiting for the mirror"), 0);
+                }
+                case 1 -> {
+                    if (use.apply(buyer, false) != aimed || use.apply(owner, false) != nothing) {
+                        throw new GameTestAssertException(Component.literal(
+                                "the record has not followed the sale: its owner is " + record.ownerId()), 0);
+                    }
+                    horse.setTamed(false);
+                    stage[0] = 2;
+                    throw new GameTestAssertException(Component.literal("gone wild; waiting for the mirror"), 0);
+                }
+                default -> {
+                    if (record.ownerId().isPresent() || use.apply(buyer, false) != nothing) {
+                        throw new GameTestAssertException(Component.literal(
+                                "a horse gone wild still answers to " + record.ownerId()), 0);
+                    }
+                }
+            }
         });
     }
 

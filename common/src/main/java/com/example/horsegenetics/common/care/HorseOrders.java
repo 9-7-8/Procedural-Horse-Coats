@@ -8,11 +8,13 @@ import com.example.horsegenetics.common.genetics.genes.AggressionGene;
 import com.example.horsegenetics.common.genetics.genes.MagicFighterGene;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
+import com.example.horsegenetics.common.horse.HorseRecord;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * <b>The rules and the wording of the command whistle</b>: which order a horse may take,
@@ -318,6 +320,33 @@ public final class HorseOrders {
             parts.add(e.getValue() + " " + e.getKey().summary());
         }
         return String.join("; ", parts) + ".";
+    }
+
+    /** What holding use with the command whistle opens. */
+    public enum WhistleUse {
+        /** Sneaking: the wheel for every horse of the player's in reach. */
+        EVERY_HORSE,
+        /** The wheel for the one aimed horse. */
+        AIMED_HORSE,
+        /** No wheel: the click goes on as it would without the whistle. */
+        NOTHING
+    }
+
+    /**
+     * What holding use with the whistle does, on the client. {@code aimed} is the synced
+     * record of the horse under the crosshair, or null for no horse or no record yet.
+     *
+     * <p><b>Ownership is the record's, never vanilla's</b> (issue #36). A client's
+     * {@code getOwnerReference()} is always null - vanilla syncs the tamed flag and not the
+     * owner - so a test against it refused every horse, and only the sneak-hold, which asks
+     * no owner, ever opened the wheel. {@link HorseRecord#ownedBy} reads the owner the
+     * server mirrors onto the record every two seconds; the server still decides.
+     */
+    public static WhistleUse whistleUse(boolean sneaking, HorseRecord aimed, UUID player) {
+        if (sneaking) {
+            return WhistleUse.EVERY_HORSE;
+        }
+        return aimed != null && aimed.ownedBy(player) ? WhistleUse.AIMED_HORSE : WhistleUse.NOTHING;
     }
 
     /** The item's tooltip, one line each. */

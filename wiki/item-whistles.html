@@ -598,6 +598,14 @@
         on the server has to be kept in step. The entity-interact events would not do: they fire after
         the packet has gone. The aimed horse is ray-cast out to 16 blocks and stopped at the first
         block.</li>
+    <li><strong>Whose horse it is, on the client, is the record&rsquo;s answer</strong>
+        (<code>HorseOrders.whistleUse</code>, issue #36, fixed 2026-10-04). The first build asked
+        vanilla&rsquo;s <code>getOwnerReference()</code>, which is always null on a client &mdash;
+        vanilla syncs the tamed flag and never the owner &mdash; so the plain hold opened nothing on any
+        horse, and only the sneak-hold, which asks no owner, worked. The rule now reads
+        <code>HorseRecord.ownedBy</code>, the owner the server mirrors onto the record every two seconds
+        (<code>HorseOwnerTrackingHandler</code>). So a horse tamed a moment ago may take up to two seconds
+        to answer the whistle, and a horse whose record has not reached the client opens nothing.</li>
     <li><strong>Picking on release</strong> (<code>client/CommandWheelScreen</code>) works two ways.
         Opening a screen calls <code>KeyMapping.releaseAll()</code>, so <code>keyUse.isDown()</code> is
         useless from then on. The screen gets the right button&rsquo;s <code>mouseReleased</code>, and
@@ -635,6 +643,10 @@
                 stands down.</li>
             <li><code>order_clears</code>: an order is dropped on a new owner, in another dimension, and
                 in stasis.</li>
+            <li><code>whistle_sees_the_owner</code> (#36): the record&rsquo;s owner names the taming
+                player, follows a sale and empties when the horse goes wild, and
+                <code>whistleUse</code> answers each state as the wheel would. With the owner mirror cut
+                out it fails on the first state.</li>
         </ul>
         The recall&rsquo;s clear needs a real <code>ServerPlayer</code>, so it is a play check.</li>
 </ul>
@@ -791,9 +803,10 @@
 <h3 id="command-verify">The command whistle (2026-10-03, NOT played)</h3>
 <p>The wheel is client input that no test can press. Try each of these:</p>
 <ol>
-    <li><strong>Hold</strong> right-click on your horse: the wheel opens, and the horse is
-        <strong>not mounted</strong> and its inventory does not open. <strong>Tap</strong> instead: no
-        wheel, nothing happens.</li>
+    <li><strong>Hold</strong> right-click on your horse, <strong>not sneaking</strong>: the wheel
+        opens with the horse&rsquo;s name on top, and the horse is <strong>not mounted</strong> and its
+        inventory does not open. <strong>Tap</strong> instead: no wheel, nothing happens. (On 0.5.043
+        only the sneak-hold opened it: issue #36, fixed after that release.)</li>
     <li>Release over each slice. Chat names the horse and what it does. Release in the middle: no
         message, no change.</li>
     <li>On a horse with bond under 31, every slice but Rejoin herd is grey and says &ldquo;Needs bond

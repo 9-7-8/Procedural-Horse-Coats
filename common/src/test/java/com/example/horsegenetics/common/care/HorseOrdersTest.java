@@ -3,15 +3,19 @@ package com.example.horsegenetics.common.care;
 import com.example.horsegenetics.common.care.HorseOrders.Refusal;
 import com.example.horsegenetics.common.care.HorseOrders.Leash;
 import com.example.horsegenetics.common.care.HorseOrders.Situation;
+import com.example.horsegenetics.common.care.HorseOrders.WhistleUse;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.horse.HorseRecord;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -274,5 +278,40 @@ class HorseOrdersTest {
     void theWheelHoldsEveryOrderOnce() {
         assertEquals(HorseOrder.values().length, HorseOrders.wheel().size());
         assertEquals(HorseOrders.wheel().size(), HorseOrders.wheel().stream().distinct().count());
+    }
+
+    private static final UUID ME = UUID.fromString("00000000-0000-0000-0000-00000000000a");
+    private static final UUID STRANGER = UUID.fromString("00000000-0000-0000-0000-00000000000b");
+
+    /** A horse's record as the client holds it: owned by {@code owner}, or by nobody. */
+    private static HorseRecord record(UUID owner) {
+        return new HorseRecord(UUID.randomUUID(), "Bramble", "Test", Optional.empty(), "EeAa", "",
+                Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), 0,
+                Optional.empty(), false, Optional.ofNullable(owner));
+    }
+
+    /**
+     * Issue #36: the plain hold on your own horse opened nothing, because the client asked
+     * vanilla's owner, which it never has. The record's owner is the client's answer.
+     */
+    @Test
+    void thePlainHoldOpensTheWheelOnYourOwnHorse() {
+        assertEquals(WhistleUse.AIMED_HORSE, HorseOrders.whistleUse(false, record(ME), ME));
+    }
+
+    @Test
+    void thePlainHoldLeavesEveryOtherHorseAlone() {
+        assertEquals(WhistleUse.NOTHING, HorseOrders.whistleUse(false, record(STRANGER), ME), "someone else's");
+        assertEquals(WhistleUse.NOTHING, HorseOrders.whistleUse(false, record(null), ME), "wild, or gone wild");
+        assertEquals(WhistleUse.NOTHING, HorseOrders.whistleUse(false, null, ME), "no horse aimed, or no record yet");
+        assertEquals(WhistleUse.NOTHING, HorseOrders.whistleUse(false, record(ME), null), "no player");
+    }
+
+    @Test
+    void theSneakHoldIsEveryHorseWhateverIsAimed() {
+        assertEquals(WhistleUse.EVERY_HORSE, HorseOrders.whistleUse(true, null, ME));
+        assertEquals(WhistleUse.EVERY_HORSE, HorseOrders.whistleUse(true, record(ME), ME),
+                "sneaking at your own horse still orders them all, as the tooltip says");
+        assertEquals(WhistleUse.EVERY_HORSE, HorseOrders.whistleUse(true, record(STRANGER), ME));
     }
 }
