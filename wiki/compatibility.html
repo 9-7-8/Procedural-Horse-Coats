@@ -1197,6 +1197,22 @@
     vanilla&rsquo;s bale is still in both tags. It was confirmed to fail, with that message,
     by emptying the tag &mdash; a tripwire nobody has watched trip is not a tripwire.
 </p>
+<p id="bales-reached">
+    <strong>A hungry horse walks to a plain hay bale and eats it, roofed or stacked</strong>
+    (2026-10-04, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>).
+    The yard found the opposite first: a mare spent ten minutes in a glass cell beside a
+    <code>minecraft:hay_block</code> and starved to 0. The tag was never at fault, since
+    yard horses under open sky ate bales the same hour. The cause was the path.
+    <code>GroundPathNavigation.createPath(BlockPos, int)</code> lifts a solid target to the
+    first non-solid block above it, so <code>HungerFoodGoal</code> was asking whether the
+    horse could <em>stand on</em> the bale. Under open sky it can jump on, so the answer is yes. Under that cell&rsquo;s
+    lid two blocks up, or with a second bale stacked on the first, it cannot, and the bale
+    was never food. The goal now paths through the <code>Set</code> overload, which has no
+    lift, to the block or the block above it (<code>HungerFoodGoal.pathTo</code>), for both
+    its reach test and its walk. Proof: the gametests
+    <code>hay_under_a_low_roof_is_eaten</code> (the yard&rsquo;s cell, block for block) and
+    <code>stacked_hay_is_eaten</code> both fail with the old call and pass with the new one.
+</p>
 <p>
     <strong>Unverified:</strong> the two mods have never been run together. The ids were read
     out of <code>baleofsugarcane-neoforge-1.0.0+26.1.2.jar</code> itself rather than guessed,
@@ -2285,14 +2301,6 @@
 
 <h4>With no second mod installed &mdash; do these first, they need nothing but the dev client</h4>
 <ul>
-    <li><strong>A hungry horse still walks to a plain hay bale and eats it.</strong> This is
-        the one that matters most and it is the <em>regression</em> check, not the feature:
-        grazing hay stopped being a hardcoded block and became a tag lookup, so if the tag
-        is wrong every horse silently stops eating hay everywhere. The gametest
-        <code>hay_is_still_a_bale</code> covers the tag itself; this covers the goal that
-        reads it. <em>Failed in the yard (2026-10-02):</em> a hungry mare spent ten minutes beside
-        a plain <code>minecraft:hay_block</code>, starved to 0, and never ate it &mdash;
-        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">issue #26</a>.</li>
     <li><strong>Hand a hay bale to a hurt tamed horse.</strong> It should heal, consume the
         bale and give bond exactly as before &mdash; vanilla's own bale is deliberately
         excluded from the new handler, so any change here is a bug.</li>

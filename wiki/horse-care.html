@@ -764,6 +764,20 @@
     the horse stands beside, or the grass block under its feet, and is two short of a crop on
     the far side of a fence.
 </p>
+<p id="beside-not-on">
+    <strong>&hellip;beside, not on top</strong> (2026-10-04,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>). The paragraph
+    above was only half true for nine days. The path was asked for with
+    <code>createPath(BlockPos, int)</code>, and <code>GroundPathNavigation</code> lifts a solid
+    target to the first non-solid block above it, so for a bale the question was really whether
+    the horse could stand on it. Under open sky it jumps on, so the answer was yes. Under a roof two blocks up, or
+    with bales stacked two high, it was no, and a yard mare starved beside one.
+    <code>HungerFoodGoal.pathTo</code> now uses the <code>Set</code> overload, which has no lift,
+    with the block and the block above it as targets, for both the reach test and the walk. The
+    fence arithmetic is unchanged: a crop is not solid, so it was never lifted. Gametests
+    <code>hay_under_a_low_roof_is_eaten</code> and <code>stacked_hay_is_eaten</code>; the
+    record is on <a href="compatibility.html#bales-reached">compatibility</a>.
+</p>
 <p>
     <strong>The check alone would have swapped pushing for starving.</strong>
     <code>CROP</code> outranks <code>GRASS</code>, so a horse in a grass pen beside a fenced farm

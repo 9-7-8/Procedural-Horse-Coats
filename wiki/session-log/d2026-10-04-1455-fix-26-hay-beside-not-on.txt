@@ -1,0 +1,93 @@
+2026-10-04 14:55 (start) - Fix #26: a horse could only reach a hay bale by standing on it
+
+ASKED
+-----
+- "/fix-bug" (no issue named). The procedure picked #26: a hungry yard horse starved beside
+  a plain hay bale. It ranks first because a horse that will not eat hay is the silent kind
+  of horse loss. #35, #36, #10 and #13 already carry fixes and only wait on checks. Fixed
+  and closed; see DONE.
+
+DONE
+----
+- 371b9546 Fix #26: a horse could only reach a hay bale by standing on top of it.
+  What was wrong:
+  - Not the hay_bales tag. In the same yard run (2 Oct, 04:12 onwards) dozens of horses
+    under open sky ate minecraft:hay_block.
+  - Not the GRAZING pen's reachability either. A fresh vanilla PathFinder reaches the bale
+    beside it with accuracy 1.
+  - The cause: HungerFoodGoal.reachable/tick called createPath(BlockPos, 1) and
+    moveTo(x, y, z, speed). Those go through GroundPathNavigation.findSurfacePosition,
+    which lifts a solid target to the first non-solid block above it. A diagnostic trace
+    printed the path target as the bale's y+1. So the goal was asking "can the horse stand
+    ON the bale?" Under open sky it can, by jumping. Under the pen's glass lid (two blocks
+    over the floor), or on a bale with another bale stacked on it, it cannot, so every
+    search ignored the bale.
+  The fix: HungerFoodGoal.pathTo(pos) calls createPath(Set.of(pos, pos.above()),
+  REACH_ACCURACY). The Set overload is not overridden, so nothing is lifted, and pos.above()
+  keeps "standing on it" valid for grass. The reach test and the pursuit's walk both use it.
+  Crops are not solid, so they were never lifted, and the fence behaviour is unchanged.
+  Proof:
+  - New gametests hay_under_a_low_roof_is_eaten (the yard's W1 cell rebuilt block for
+    block, vanilla-size wild-type horse, hunger 20) and stacked_hay_is_eaten (the same cell
+    open to the sky, two bales stacked).
+  - Both go red with HungerFoodGoal reverted (hunger 19, bale still there).
+  - Both go green with the fix. All 53 gametests passed.
+  - :neoforge-26.1.2:build green; check-parity OK.
+  Issue #26 is CLOSED, with a proof comment.
+- Docs:
+  - compatibility.html: the Verification-tab check "a hungry horse still walks to a plain
+    hay bale" is moved to the page body (#bales-reached).
+  - horse-care.html#beside-not-on corrects the reach paragraph, which said a manhattan-1
+    path reaches a bale the horse stands beside. It did not.
+  - api-notes.html#path-lifts-solid-targets records the GroundPathNavigation lift and the
+    north-west-corner node footprint.
+
+DECIDED
+-------
+- Target set {pos, pos.above()} rather than {pos} alone. Taken without the owner: it keeps
+  every case the old call reached (standing on a grass block, or on a lone bale under open
+  sky), so the fix only adds reach and takes none away.
+- The GRAZING pen (DebugYardDiet row AZ west) stays for now. Taken without the owner: it
+  holds three checks, and its hay check should now PASS in the real yard, which confirms
+  the gametest in a second place. run-tests removes it on that PASS.
+
+FOUND ON THE WAY
+----------------
+- #38 filed: stasis_tag_is_readable flakes (it reads stored hunger 99.94 against an exact
+  100). It went red in 4 of 8 gametest runs, including one with no production change.
+- order_guard_holds_its_reach went red once, as #37 already describes.
+- Mistake, put right: the first hypothesis was the wide-mob node footprint. A node is the
+  north-west corner of a 2x2, so only the east and south faces would count. The first
+  gametest (a corner bale, no roof) disproved it by passing. Lid/no-lid and narrow/wide
+  variants then isolated the roof, and a trace inside the goal showed the lifted target.
+  Only the measurement settled it.
+- The code commit's autostash hit a conflict in the generated wiki/search-index.js, which
+  upstream had also rebuilt. Resolved by taking one side, rebaking and dropping the stash.
+
+PROCEDURES
+----------
+- end-session.txt 3c: what to do when "Applying autostash resulted in conflicts" hits a
+  generated file. Rebake, never hand-merge, and drop the stash. This happened this session.
+- fix-bug: none needed. Its steps fitted as written; step 2's dating showed the bug was
+  never fixed.
+- No new routine found to be missing.
+
+NOT RUN / NOT CHECKED
+---------------------
+- :common:test was not run. common/ was not touched, so a full run would recheck only
+  untouched code.
+- Not seen in game: a horse in a real low-roofed stall, or at a stacked hay pile, walking
+  to the bale and eating it. The gametests drive the real goal on a headless server. The
+  yard's GRAZING pen is the in-world confirmation.
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered. This is one fix, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/fix-bug #31: pressing F6 on a server freezes everyone for about 3 seconds while the debug
+corridor builds. It is the next by fix-bug's ranking (players hit it on a released jar).
+Alternatively #38 and #37, the two gametest flakes that keep runGameTest red about half
+the time.

@@ -871,6 +871,29 @@ boolean operator = Commands.LEVEL_GAMEMASTERS.check(source.permissions());</code
     return false;
 }</code></pre>
 
+<h2 id="path-lifts-solid-targets"><code>createPath(BlockPos, int)</code> on a land mob paths to
+    the top of a solid block, not beside it</h2>
+
+<p>
+    <code>GroundPathNavigation</code> overrides <code>createPath(BlockPos, int)</code> (and the
+    <code>Entity</code> form, and <code>moveTo(x, y, z, speed)</code>, which calls it) with
+    <code>findSurfacePosition</code>. That lifts a solid target to the first non-solid block
+    above it. So asking for a path to a hay bale with accuracy 1 really asks whether the mob can
+    <strong>stand on top of it</strong>. Under open sky a horse can, so the bug hides. Under a
+    roof two blocks up, or with a second bale on the first, the path never counts as reached.
+    That starved a horse in the yard
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>,
+    <a href="horse-care.html#beside-not-on">horse care</a>).
+</p>
+<p>
+    <strong>The way round:</strong> the <code>createPath(Set&lt;BlockPos&gt;, int)</code> overload is not
+    overridden, so it has no lift. Pass the block (and the block above it if standing on it should
+    still count), then hand the result to <code>moveTo(Path, speed)</code>. Also: a path node is the
+    <em>north-west corner</em> of a wide mob&rsquo;s footprint (<code>WalkNodeEvaluator</code>
+    checks <code>x .. x + width - 1</code>), so manhattan distances from a node are measured from
+    that corner, not from the mob&rsquo;s middle. Read 2026-10-04 in the 26.1.2 sources.
+</p>
+
 <h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
 
 <p>

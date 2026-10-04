@@ -14,6 +14,7 @@ wiki/api-notes.html#deferred-submit-setupanim	all	A submitted model is drawn lat
 wiki/api-notes.html#interface-private-static	all	An interface’s private static method is unreachable, and vanilla hides real behaviour in them
 wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
 wiki/api-notes.html#onlyin-on-mod-classes	all	Do not put @OnlyIn on a class of your own
+wiki/api-notes.html#path-lifts-solid-targets	all	createPath(BlockPos, int) on a land mob paths to the top of a solid block, not beside it
 wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide which recipe runs
 wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
 wiki/api-notes.html#runtime-bake	all	A LayerDefinition can be baked at run time, outside the registration event
