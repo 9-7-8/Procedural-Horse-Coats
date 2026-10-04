@@ -1,0 +1,37 @@
+// STAGED, NOT COMPILED (.txt on purpose). Copy to common/src/test/java/<newPackage path>/common/genetics/LegacyPrefixTest.java
+// after apply.mjs and apply-alias.mjs, fix the package line, and run it with --tests '*LegacyPrefixTest'.
+// It pins the one promise of the alias: a gene key or genotype code written with the OLD namespace still resolves,
+// and nothing ever WRITES the old prefix.
+package REPLACE.WITH.NEW.PACKAGE.common.genetics;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+
+import org.junit.jupiter.api.Test;
+
+class LegacyPrefixTest {
+    @Test
+    void oldPrefixResolvesToTheSameGene() {
+        Gene modern = Genes.byKeyOrNull(Genes.NS + ".extension");
+        assertNotNull(modern);
+        assertSame(modern, Genes.byKeyOrNull("horsegenetics.extension"));
+        assertSame(modern, Genes.byKey("horsegenetics.extension"));
+    }
+
+    @Test
+    void anOldCodeParsesToTheSameGenotypeAndIsWrittenNew() {
+        String old = "horsegenetics.extension=E/e";
+        String code = Genotype.wildType().toCode();
+        Genotype parsed = Genotype.parse(old);  // adjust to the real parse entry point
+        assertFalse(parsed.toCode().contains("horsegenetics."), "the old prefix must never be written");
+        assertEquals(Genes.NS + ".extension", Genes.byKey("horsegenetics.extension").key());
+        assertNotNull(code);
+    }
+
+    @Test
+    void anUnknownKeyStillReturnsNull() {
+        assertEquals(null, Genes.byKeyOrNull("horsegenetics.not_a_gene"));
+    }
+}

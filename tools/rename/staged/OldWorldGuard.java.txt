@@ -1,0 +1,39 @@
+// STAGED, NOT COMPILED (.txt on purpose). The mod-side half of the rename: refuse to load a world that still carries
+// the old namespace, with a message that names the converter. Decided in the rename treatment: NO override.
+//
+// EVERYTHING BELOW IS UNVERIFIED against NeoForge 26.1.2 (hard rule 8). Do not copy it in until each is checked in the
+// SDK sources:
+//   U1  that ServerAboutToStartEvent fires BEFORE any level or chunk is read, on both a singleplayer open and a
+//       dedicated-server start. If a level has already been opened, move the check earlier or make it a LevelEvent.
+//   U2  how to refuse a load cleanly. Throwing from the handler ends the server with a crash report; on a client the
+//       player sees a crash screen. A friendlier "world can't be opened" screen may need a client-side hook
+//       (e.g. a screen shown before the world loads). Check what the SDK offers.
+//   U3  where the world root folder is: server.getWorldPath(LevelResource.ROOT) is the usual call; confirm the name.
+//   U4  the exact on-disk places the OLD namespace appears in 26.1.2 (data/<ns>/, dimensions/<ns>/, level.dat keys).
+//
+// Detection rule (Recommended in the treatment): the OLD folders or old keys are present, NEVER "the new ones are
+// absent" (a vanilla world with the mod newly added must still load).
+//
+// package <newPackage>.neoforge.server;
+//
+// @EventBusSubscriber   // game bus, server side
+// public final class OldWorldGuard {
+//     private static final String OLD = "horsegenetics";
+//
+//     @SubscribeEvent
+//     static void onAboutToStart(ServerAboutToStartEvent event) {
+//         Path root = event.getServer().getWorldPath(LevelResource.ROOT);
+//         boolean oldData = Files.isDirectory(root.resolve("data").resolve(OLD))
+//                 || Files.isDirectory(root.resolve("dimensions").resolve(OLD));
+//         // + a cheap check of level.dat for old keys, if U4 says they live there
+//         if (oldData && !Files.exists(root.resolve("converted-by-ixoras-converter.txt"))) {
+//             throw new IllegalStateException(
+//                     "This world was saved by the old Horse Genetics mod. Convert it first with the Ixora's Horse "
+//                     + "Overhaul world converter (see the mod page), then open the converted copy. Nothing was changed.");
+//         }
+//     }
+// }
+//
+// Test plan: a world folder with data/<OLD>/ present refuses with the message; a vanilla world loads; a converted world
+// (the converter writes converted-by-ixoras-converter.txt and renames the folders) loads. Gametest cannot cover the
+// refusal; boot a dedicated server on each fixture and grep the log.

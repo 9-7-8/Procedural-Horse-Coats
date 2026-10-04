@@ -1,0 +1,40 @@
+--- a/common/src/main/java/com/example/horsegenetics/common/genetics/Genes.java
++++ b/common/src/main/java/com/example/horsegenetics/common/genetics/Genes.java
+@@ -1075,8 +1075,22 @@
+         return coatInfluencing.contains(gene.key());
+     }
+ 
++    /**
++     * Genes saved before the rename carry the old namespace in their key ("horsegenetics.extension"). The old
++     * prefix is READ for the whole 0.6 series and never written (rename treatment, Decided); it goes when the
++     * next compat series starts. Pasted codes, saved designer links and drop-in files from before keep working.
++     */
++    private static final String LEGACY_PREFIX = "horsegenetics.";
++
++    private static String modernKey(String key) {
++        if (key != null && key.startsWith(LEGACY_PREFIX)) {
++            return NS + "." + key.substring(LEGACY_PREFIX.length());
++        }
++        return key;
++    }
++
+     public static Gene byKey(String geneKey) {
+-        Gene g = byKey.get(geneKey);
++        Gene g = byKey.get(modernKey(geneKey));
+         if (g == null) {
+             throw new IllegalArgumentException("no gene registered under " + geneKey);
+         }
+@@ -1089,11 +1103,11 @@
+      * error, so parsing can stay tolerant across a gene being added or removed.
+      */
+     public static Gene byKeyOrNull(String geneKey) {
+-        return byKey.get(geneKey);
++        return byKey.get(modernKey(geneKey));
+     }
+ 
+     public static Allele allele(String alleleKey) {
+-        Allele a = alleleByKey.get(alleleKey);
++        Allele a = alleleByKey.get(modernKey(alleleKey));
+         if (a == null) {
+             throw new IllegalArgumentException("no allele registered under " + alleleKey);
+         }

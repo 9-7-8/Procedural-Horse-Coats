@@ -34,3 +34,11 @@ Not offered (no player-facing code changed).
 
 PICK UP FIRST
 Fix issue 36 with /fix-bug, then update the wiki and the Discord post to match; the four-jar split still waits on the rename (see the 2026-10-03 18:30 log).
+
+LATER (same session, 2026-10-04): RENAME MACHINERY WRITTEN, NOT RUN (owner: "Write the machinery but don't run it yet, I have another mod fix working in the
+background that you'll collide with"; "the rename machinery. If it's easier to do the rename and the four jar split at once, let me know")
+- New files only: converter/ (the world converter, compiled once with javac into a scratch folder, never run) and tools/rename/ (plan, apply, check, alias script,
+  staged notes, runbook, README). settings.gradle.kts and every source file untouched. Note appended to the rename treatment.
+- Recommendation recorded in tools/rename/README.txt: keep the rename and the four-jar split separate, rename first (different gates, different release kinds).
+- A hook blocked one command because the runbook text quoted a forbidden process-stop command; the text was reworded. No process was stopped.
+- NOT RUN: the converter's self-test, every node script (syntax-checked only), any Gradle build. Open: the new Java package and the config folder name.

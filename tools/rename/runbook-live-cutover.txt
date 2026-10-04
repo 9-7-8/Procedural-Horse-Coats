@@ -1,0 +1,26 @@
+LIVE CUTOVER RUNBOOK - for the OWNER, written 2026-10-04, never run by a session.
+The live server (26.1.2-neoforge-server, players on it) is not ours to touch from a session (CLAUDE.md hard rule 12: processes
+are stopped only with tools/stop-dev-java.ps1; the live server is stopped by the owner, the way she normally does it, never
+by PID or by pattern). Do this when the converter has passed on a COPY and the new jar has passed its boots.
+
+BEFORE
+ 1. Tell the players the day and the length of the outage. Tell any outside testers on old tags before 0.6.0 ships.
+ 2. Have the new jar (0.6.0), the converter jar, and room on the disk: the world plus about a tenth again, twice
+    (the original, and the converted copy).
+STOP AND BACK UP
+ 3. Stop the server the way you normally do. Wait until it has fully exited and saved.
+ 4. Copy the whole world folder to a safe place (a dated backup). Do not convert the backup; keep it as is.
+CONVERT
+ 5. java -jar ixoras-converter.jar "<world>" --dry-run      read the report: counts by kind, renamed folders, no ERRORS.
+ 6. java -jar ixoras-converter.jar "<world>"                 it writes "<world> (converted)" beside it and a report file.
+    It must end with "original byte-identical: true" and "old tokens left in the output: 0". If it does not, STOP: the
+    original is untouched; keep the report.
+ 7. Packs: java -jar ixoras-converter.jar "<world>" --packs "<datapack or resource pack>" ...   answers y/n per pack; a
+    converted copy is written beside each, never over it. Swap them in by hand.
+START THE NEW JAR
+ 8. Put the converted folder where the server expects the world (give it the world's name; keep the original beside it under
+    another name). Replace the old jar with the 0.6.0 jar; move the config folder only if the mod does not do it itself.
+ 9. Start the server. In the log look for: "Done (", no "[genes] a saved horse carried" warning, no refusal message.
+10. Check by eye: a few horses (name, coat, pedigree), the realm, a stasis bank, a cart, a splice, a research paper.
+ROLL BACK
+11. If anything is wrong: stop the server, put the original world folder back, put the old jar back. Nothing was changed in it.
