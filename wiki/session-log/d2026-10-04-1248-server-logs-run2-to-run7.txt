@@ -1,0 +1,63 @@
+2026-10-04 12:48 (session end) - Server log review: exports 2026-10-03-run2 to -run7
+
+ASKED
+- "/whats-next". I read every queue and offered four options: fix #35 (recommended, the only
+  DAMAGE-urgency bug), review six server log exports, start the rename, or fix #31. There was
+  no release to offer: everything on main since v0.5.043 is docs and intake.
+- The owner picked "Review 6 server logs" (procedures/review-server-logs.txt). Done; see below.
+- "/end-session". This file is part of that.
+
+DONE
+- Reviewed the PCH export folders 2026-10-03-run2, -run3, -run4, -run5, -run6 and -run7.
+  Each was incremental (no watermark reset). Window: 3 Oct 10:00 to 23:49, every boot on
+  horsegenetics-0.5.043.jar. No new issue was needed. Evidence went on three open issues:
+  - #33 (false NOT ON ITS SHEET warnings): 16 more warnings on 0.5.043 from five herd
+    spawns (Haflinger Serpentine, Quarter Horse Rising Sun, Sorraia Tribal Claw Tc/Tc, Barb
+    Aurorae, Haflinger Picasso Pic/Pic). Still open, waiting on a fix.
+  - #13 (forced synchronous chunk loads): the first tally on 0.5.043. 80 Cupboard traces, 0
+    with a frame of ours, 3 Oct 18:53 to 4 Oct 12:43. The control on 2026-10-02-1.log.gz
+    reproduced the earlier 115 frames. Still open, collecting the tally.
+  - #35 (horses suffocating in blocks): suffocation_rescue.js is still loaded, and it logged
+    0 rescues from 3 Oct 18:53 to 4 Oct 12:43. 3 Oct 07:44 to 18:53 is not covered: those
+    raw logs have rotated away. Still open, and nothing on main addresses it.
+- The record of reviewed folders lives in local memory (pch-server-logs), so it is not in
+  git. It now lists all six folders.
+- Commits: the docs commit that carries this file and the procedure change. No code commit.
+
+DECIDED
+- Not filed, my calls: the EnderIO AccessDeniedException on conduit_network.dat at shutdown,
+  17:31 on 3 Oct. It is EnderIO's file in our realm dimension's folder, it happened once,
+  and it looks like Windows file locking. The magistufix version-drift warnings are the
+  operator's mod updates. One player remarked on a ladder beside an "empty" fence block on a
+  build; it is about the operator's build, and the mod has no ladder.
+- The owner picked the server log review over #35 (owner).
+
+FOUND ON THE WAY
+- My first chunk-load counter read zero on every log, the control included. The cause:
+  Cupboard puts a `java.lang.Exception: Chunk load debug` line between its WARN line and the
+  `at` frames, and the counter ended each trace at that line. I caught it because the control
+  failed, fixed the counter and re-ran it, and posted only the corrected counts. The trap and
+  the control are now in the procedure.
+- Chat: no mod bugs and no feature requests. The rest was about the operator's shop plugin.
+- Deaths: two, a spider and a player. No pattern.
+
+PROCEDURES
+- review-server-logs.txt, step 3: describes a trace's shape (the Exception line), requires a
+  control run before posting any zero (names the 2 Oct log and its 115 frames), and requires
+  each posted count to name the hours no raw log covers.
+- whats-next and end-session were followed as written. None needed for them.
+
+NOT RUN / NOT CHECKED
+- No code changed. The Gradle build was skipped (nothing it could move). check-parity: OK.
+- Full :common:test was not run and could not be moved by this session.
+- No Verification-tab anchors were added.
+- Whether any horse was rescued from a wall on 3 Oct between 07:44 and 18:53 can no longer be
+  checked.
+
+RELEASE
+- Not offered: main since v0.5.043 holds only docs and intake.
+
+PICK UP FIRST
+- /fix-bug on #35 (horses suffocating in blocks, DAMAGE urgency). After that, the rename
+  (intake/Rename to Ixora's Horse Overhaul) through /process-intake, which still comes before
+  the four-jar split.

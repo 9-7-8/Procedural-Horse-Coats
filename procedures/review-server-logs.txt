@@ -105,6 +105,15 @@ STEPS
    be gone once the server runs the release carrying the fix.
    Count only the logs from builds that carry the fix (each log names its jar near line
    178), and give the counts with their time range on the waiting issue.
+   A trace is the Cupboard line, then a `java.lang.Exception: Chunk load debug` line, then
+   the `at` frames. A counter that ends a trace at the first line that is not an `at`
+   frame stops at that Exception line and counts zero everywhere. So run every counter
+   on a CONTROL first, a log known to hold our frames (2026-10-02-1.log.gz holds 115:
+   60 DebugPenManager.fastSet, 54 sweepPlot, 1 DebugWorldWatch.start). Never post a zero
+   from a counter that has not reproduced the control.
+   Raw logs rotate within a day: prev-nightly.log only reaches back to the last restart,
+   and the dated .log.gz files do not cover every hour. Name the hours no log covers in
+   every count you post, so a zero is not read as covering them.
    The operator's scripts can HIDE a mod defect. suffocation_rescue.js pulls a nearly
    dead horse out of a wall and logs "[suffrescue] moved horse <uuid>". Each line is a
    death that did not happen, so it never reaches 04-equine-deaths.txt, and the exporter
