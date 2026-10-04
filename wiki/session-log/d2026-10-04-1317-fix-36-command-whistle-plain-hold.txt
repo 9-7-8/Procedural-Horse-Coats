@@ -1,0 +1,87 @@
+2026-10-04 13:17 (local time, at the end; the cloud session above it stamped 20:06 UTC,
+which is earlier) - Fix #36: the command whistle's plain hold opened nothing
+
+ASKED
+-----
+- "/fix-bug the issue with the command whistle, also test it more thoroughly"
+  -> took issue #36, the one the owner named. Fixed it, added a unit test and a gametest,
+  and mutated each one red. The issue is left open for the in-game press, which no test
+  can make.
+
+DONE
+----
+- c3400b5a  #36: the command whistle's plain hold opened nothing on any horse.
+  Cause: CommandWhistleClient.aimedOwnHorse asked horse.getOwnerReference(), which is
+  always null on a client. Vanilla syncs AbstractHorse's flags byte (isTamed) and never
+  its owner. So every aimed horse read as someone else's and the click went on to
+  vanilla. Only the sneak-hold, which checks no owner, opened the wheel. This matches the
+  owner's report on 0.5.043. It was not another handler (HorseInfoInteraction) taking the
+  click: that one needs an empty hand.
+  Fix: the decision moved to common/ as HorseOrders.whistleUse(sneaking, record, player)
+  -> WhistleUse {EVERY_HORSE, AIMED_HORSE, NOTHING}. It reads HorseRecord.ownedBy, the
+  owner HorseOwnerTrackingHandler mirrors onto the synced record every 40 ticks. The
+  client now ray-casts for any horse and asks the rule. The wheel's title is now always
+  the record's display name. A horse with no record yet opens nothing.
+  Proof:
+  - :common:test --tests '*HorseOrdersTest' green, with three new tests:
+    thePlainHoldOpensTheWheelOnYourOwnHorse, thePlainHoldLeavesEveryOtherHorseAlone and
+    theSneakHoldIsEveryHorseWhateverIsAimed. With the rule's AIMED branch cut out, the
+    first goes red.
+  - New gametest whistle_sees_the_owner (ModGameTests, registered at 300 ticks; 48 -> 49
+    registered). On a founded, tamed horse the record names the tamer, follows
+    setOwner(buyer), and empties on setTamed(false), and whistleUse answers each state.
+    :neoforge-26.1.2:runGameTest: "All 49 required tests passed". With
+    HorseOwnerTrackingHandler's setOwner line cut out it fails: "the taming player's own
+    horse opens no wheel: the record's owner is Optional.empty".
+  - :neoforge-26.1.2:build green; check-parity OK; check-designer-boots OK.
+  Issue #36: OPEN, commented with the commit, the proof and the in-game steps.
+- Docs: wiki/item-whistles.html Coding tab (#command-code: the ownership bullet and the
+  new gametest) and Verification item 1 (#command-verify: "not sneaking", the name on
+  top, and a note that 0.5.043 opened only on the sneak-hold). wiki/api-notes.html
+  #client-owner: the client-null owner trap.
+
+DECIDED
+-------
+- Fixed without asking (small, by fix-bug step 4): the client reads ownership from the
+  record, as HorseInfoScreen already does. Recorded on item-whistles.html#command-code.
+- Did not drive HorseOrdering.give/handle in a gametest: it needs a ServerPlayer, and
+  the only way to make one, makeMockServerPlayerInLevel, is deprecated for removal and
+  joins the shared gametest server's player list (see the whistled_lead_comes_back
+  comment). The server path was not the bug and checks real ownership.
+- Left intake/discord-command-whistle/Discord post - the command whistle.md as it is.
+  It tells players to sneak, which is the only way in on 0.5.043, but it reads as if the
+  sneak-hold orders only the aimed horse, when it orders every horse within 16 blocks.
+  It needs rewording when the release carrying c3400b5a goes out. This is in the #36
+  comment.
+
+FOUND ON THE WAY
+----------------
+- CommandWheelScreen.refusal works out the bond tier from its own thresholds
+  (81/61/31). They match HorseCareAttachment.behaviourTier today, but they are a second
+  copy. Left alone: out of scope, and not wrong.
+- A freshly tamed horse can take up to two seconds (one mirror pass) to answer the plain
+  hold. This is written on the Coding tab.
+- No new issues filed.
+
+PROCEDURES
+----------
+None needed. fix-bug, rebake (rows b and i, with web.wasm reverted as noise because web/
+cannot reach common.care), test-tiers (the two-edit gametest rule, N counted before and
+after) and end-session all fit as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. Only HorseOrders changed in common/, and
+  HorseOrdersTest covers it; a full run would add nothing specific to this change.
+- Not seen in game: the plain hold opening the wheel on your own horse, no mount and no
+  inventory, a tap doing nothing, a stranger's horse giving no wheel.
+  wiki/item-whistles.html#command-verify item 1.
+
+RELEASE
+-------
+Not offered: one fix is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+Get the owner's in-game check of #36 (hand-over-a-test: hold right-click on your own horse
+with the command whistle, not sneaking), then close #36 by close-a-check.
