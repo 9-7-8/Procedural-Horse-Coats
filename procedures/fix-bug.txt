@@ -92,6 +92,12 @@ STEPS
      the rule lives there, which should be most of the time. Otherwise use a gametest,
      or failing that, a yard pen that logs its own PASS or FAIL. If the bug can only be
      reproduced by hand, write the exact steps into the issue.
+   - A flaky test is reproduced by a tally, not one red run. First make each failure
+     message print the state it hinges on (the genome, the target, line of sight),
+     then run the suite in a loop logging only the failure lines (about 6 runs), and
+     let the messages name the cause before changing anything. Proof is the same loop
+     afterwards, with more runs than it took to see the flake. Example: #37, 4 red in 6
+     before and 7 green in 7 after.
    - Edit the smallest owning slice, and run the check straight away.
    - Shape:
      - The rule goes in common/, returning a typed result, never chat text.

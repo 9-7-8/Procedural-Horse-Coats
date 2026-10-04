@@ -240,7 +240,10 @@
             <li><code>RegisterGameTestsEvent.registerEnvironment</code> is a registry <em>put</em>, not a
                 get-or-create. Calling it once per test throws <code>Adding duplicate key</code> out of
                 <code>RegistryDataLoader</code> and ends the run with exit <code>-1</code> before a single test
-                executes. Register one environment and share it - it is also the batch key.</li>
+                executes. Register one environment and share it - it is also the batch key. A
+                <em>different</em> key is fine, and that is the one way to run a test alone: batches run one
+                after another, so a test whose environment nobody else has runs with no other test alive
+                (<code>ModGameTests.registerAlone</code>, #37).</li>
             <li><code>ResourceKey</code>'s accessor is <code>identifier()</code>, not <code>location()</code>, since
                 <code>ResourceLocation</code> is <code>Identifier</code> here.</li>
             <li><code>minecraft:empty</code> is a real shipped 1&times;1&times;1 template of one air block, so a test
@@ -264,6 +267,16 @@
                 well, for example the navigation&rsquo;s target, and break the code once to prove the test
                 can fail. Two NATURAL horse spawns close together can also share a wild herd, which held
                 a turnover test&rsquo;s horse in place (#32).</li>
+            <li><strong>A test that looks past its cell sees its neighbours.</strong> Tests sit six blocks
+                apart along x and seven along z, and <code>padding</code> moves nobody: it only widens
+                the helper&rsquo;s own bounds. A hunting horse looks sixteen blocks out, so it picked
+                other tests&rsquo; husks, and a guarding horse lost sight of its own husk behind a
+                neighbour&rsquo;s pen (#37). Such a test runs alone (<code>registerAlone</code>) and clears
+                the litter of finished tests round it first (<code>aloneOnClearGround</code>): their
+                entities, and every block at feet level and above that has no block entity.
+                Running alone is not enough without the clearing, because finished tests leave their
+                monsters and pens behind. And a random founding is no &ldquo;plain&rdquo; horse:
+                six in a hundred carry a gladiator copy, so write the genome a test depends on.</li>
             <li><code>makeMockPlayer</code> never joins the level: it is a bare
                 <code>new Player(level, profile)</code>, so <code>level.players()</code> does not see it.
                 Only the deprecated <code>makeMockServerPlayerInLevel</code> joins.</li>

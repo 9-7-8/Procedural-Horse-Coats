@@ -59,7 +59,9 @@ STEPS
        gametests depend on tick phase, and a moving failure is a flake to fix.
      - Writing one: the harness forces only the chunk a test's 1x1 structure stands
        in, so a horse a few blocks over may sit in a chunk that never ticks (no scan,
-       no founding) - ModGameTests.keepTicking forces the 3x3. The harness has no horse
+       no founding) - ModGameTests.keepTicking forces the 3x3. Tests sit six blocks apart,
+       so a test that looks further (a hunt, a guard, a walk) runs alone: registerAlone
+       plus aloneOnClearGround (#37). The harness has no horse
        realm level, and runs with doMobSpawning off, so no natural or top-up spawn fires.
        An attribute write (SCALE) reaches the hitbox only on the entity's NEXT tick:
        assert on getBbHeight(), never getScale(), or the test passes before it starts.

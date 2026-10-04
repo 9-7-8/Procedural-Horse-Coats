@@ -1,0 +1,80 @@
+2026-10-04 16:15 (start, local) - Fix #37: the order gametests' flake
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Took #37 (order-goal gametests flake on alternate runs).
+  The higher-ranked issues were already fixed and only waiting on a check: #35 (waits
+  on the live server's log), #36 and #10 (in-game checks). #33 and #34 are cosmetic,
+  which ranks last. #37 makes every runGameTest red, which hides real failures. Fixed
+  and closed.
+
+DONE
+----
+- 98671d04 "Fix #37: order gametests flaked on a random genome and on their
+  neighbours". Test-only (neoforge-26.1.2/.../gametest/ModGameTests.java). Two causes:
+  1. order_combat_gate's "plain" horse was whatever its founding rolled. MagicFighterGene
+     gives six founders in a hundred a gladiator copy, and HorseOrders.fighter then
+     rightly lets the horse fight. With the failure message printing the genome, both
+     failures were magic_fighter=Gld/n. New makePlain() writes Genotype.wildType(), the
+     way makeGuardian() writes Grd/Grd (both now go through refound()).
+  2. order_hunt_picks_a_monster, order_guard_holds_its_reach and order_stay_walks_back
+     reach past their 1x1 cell. StructureGridSpawner puts tests 6 blocks apart in x and
+     7 in z, and padding does not move them. The hunt test held a husk that was not its
+     own (twice). The guard test's husk was 4 blocks off, alive, with a healthy fighting
+     horse still under its order, but hasLineOfSight was false (a neighbour's build).
+     New registerAlone() gives each of the three an environment of its own. The
+     environment is the batch key, and GameTestRunner.runBatch runs the batches one
+     after another, so each runs alone. New aloneOnClearGround() discards the entities
+     round it (hunt radius + slack) and clears the blocks with no block entity in
+     x -4..6, y -2..2, z -8..6 before it spawns anything. y -2 is feet level, because
+     each test stands on a pedestal two blocks above the ground.
+  Proof:
+  - Diagnostic loop before the fix: 4 of 6 runGameTest runs had an order test red.
+  - After: 7 of 7 runs passed all 55. An eighth run had no order failure either: it
+    used the first cut of the clearing (y 0..3, which missed the eye line).
+  - Mutation: makePlain forced to Gld/n turns order_combat_gate red.
+  - :neoforge-26.1.2:build and check-parity green.
+  #37 closed by the commit, with a proof comment.
+
+DECIDED
+-------
+- Made without the owner: the stay test runs alone too. It never failed in this
+  session's diagnostic runs; its history ("8.9 away") and its own comments about
+  neighbours' horses put it in the same family. Recorded on #37.
+- Made without the owner: the alone tests do not tidy up their own husks and creeper
+  afterwards. The helper has no cleanup hook, and those leftovers are the ones the
+  tests always left.
+
+FOUND ON THE WAY
+----------------
+- #39 filed: hay_under_a_low_roof_is_eaten went red once in about 20 runs today, after
+  #26 closed. Probably neighbours too; unchecked.
+- Batch order varies between runs (the batches come out of a groupingBy map). The alone
+  batches sometimes run before the 50-test default batch. That is harmless: either way
+  nothing else is running.
+- The gametest server ticks unthrottled once there is little to do: a 60-tick test can
+  finish in 60 ms of wall time.
+- Mistake: the first clearing range (y 0..3) missed the eye line. The pedestal note on
+  api-notes said so. Corrected before the proof runs.
+
+PROCEDURES
+----------
+- fix-bug.txt step 5: a flaky test is reproduced by a tally with diagnostics in the
+  failure messages, and proven by a longer tally afterwards.
+- test-tiers.txt tier 2: a test that looks past its cell runs alone (registerAlone +
+  aloneOnClearGround).
+- wiki/api-notes.html: the registerEnvironment bullet now says a different key is how a
+  test runs alone. A new bullet covers a test looking past its cell.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run: nothing in common/ changed.
+- Nothing to see in game: the change is test-only. No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: one test-only fix.
+
+PICK UP FIRST
+-------------
+#39 (hay_under_a_low_roof_is_eaten gametest flake), by procedures/fix-bug.txt.
