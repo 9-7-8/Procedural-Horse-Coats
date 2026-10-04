@@ -1,0 +1,69 @@
+2026-10-04 15:49 (start) - Fix #38: stasis_tag_is_readable flaked, and its hunger check checked nothing
+
+ASKED
+-----
+- "/fix-bug" (no issue named). The procedure picked #38. No open issue is damage-level.
+  #35 and #36 carry fixes and only wait on checks (the live server's log, an in-game
+  whistle check). #33 and #34 are marked COSMETIC. #38 had its cause written in it, and
+  while open it left every runGameTest red about half the time, hiding real failures.
+  Fixed and closed; see DONE.
+
+DONE
+----
+- cda8b456 Fix #38: stasis_tag_is_readable compared a live horse's hunger to an exact 100.
+  What was wrong:
+  - The gametest snapshots its horse 10 ticks after spawn and compared the stored hunger
+    to exactly Hunger.FULL. HorseCareHandler's slow tick, phased by entity id, had
+    sometimes already drained about 0.06 by then (99.94 seen), so the test failed on
+    alternate runs.
+  - Found on the way, and worse: StasisCare.hunger (StasisCare.java:227-230) returns
+    Hunger.FULL for a tag it cannot read. So the FULL comparison could never have caught
+    a renamed hunger attachment, which is what this tripwire exists to catch.
+  The fix: the test writes STASIS_TRIPWIRE_HUNGER (80.0) with setData before snapshotting,
+  and expects 80 back. 80 is well above Hunger.STARVING, so the upkeep half still heals.
+  Proof:
+  - With the fix, stasis_tag_is_readable passed in 4 of 4 runGameTest runs (it failed in
+    4 of 8 before). Two runs were 54/54 green. The other two were red only on #37's
+    order-goal tests.
+  - Mutation: StasisCare.hunger pointed at the key "hungerMUTANT" makes the test fail
+    with "expected 80.0 and read 100.0". The old check would have passed that. Reverted.
+  - :neoforge-26.1.2:build green; check-parity OK (7163 checks).
+  Issue #38 is CLOSED, with a proof comment.
+- Docs, in the same commit: the horse-stasis.html Coding tab's row for the test says why
+  it stores 80 rather than full. Search index and wiki/text rebaked.
+
+DECIDED
+-------
+- Write a known, non-default hunger rather than compare against the live
+  getData(HUNGER). The issue offered both. Taken without the owner: only a value the
+  read's default cannot produce lets the check catch a renamed attachment. Recorded in
+  the test's comment and on the horse-stasis.html Coding tab.
+
+FOUND ON THE WAY
+----------------
+- #37 is now the only gametest flake. In this session's five runs, order_stay_walks_back,
+  order_combat_gate and order_guard_holds_its_reach between them went red in 3 runs (one
+  run had two red at once). The counts are on #37.
+- No new issues filed.
+
+PROCEDURES
+----------
+- None needed. fix-bug fitted as written. Step 2 (already fixed?) did not apply, since
+  the bug was filed today and the test was unchanged on main. end-session's steps fitted.
+  No new routine was found to be missing, and no procedure's steps were made untrue.
+
+NOT RUN / NOT CHECKED
+---------------------
+- :common:test was not run. common/ was not touched, so a full run would recheck only
+  untouched code.
+- Nothing needs the game: the change is to a gametest only.
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered. The change is to a test, not to anything players run.
+
+PICK UP FIRST
+-------------
+/fix-bug #37: the order-goal gametests (order_combat_gate, order_guard_holds_its_reach,
+order_stay_walks_back) are now the only thing keeping runGameTest red, on most runs.
