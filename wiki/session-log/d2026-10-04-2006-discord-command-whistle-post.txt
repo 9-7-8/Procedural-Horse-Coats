@@ -59,3 +59,11 @@ THOROUGH RENAME DECISION PASS (same session, owner: "What else is there left to 
 - Built: converter GUI (Swing, never seen), launchers, --options (options.txt, original kept as options.txt.before-ixoras); self-test extended and passes (15
   checks). apply.mjs gained the class-rename step; rename.config.json has no TODO left.
 - Still open: see the list at the end of the rename treatment (freeze date, testers, hosting slug, mods.toml metadata, report detail, log scripts).
+
+SECOND DECISION PASS (same session; owner: "Help me decide the rest of the open items using the question tool ... the rename AND modrinth and curseforge pages going forwards")
+- Two more question rounds (rename opens; platform setup) and a third to reconcile them after the owner said no platform pages until 1.0.0. Recorded in the rename treatment
+  ("SECOND DECISION PASS") and in a NEW treatment, intake/Distribution page and platform pages - implementation treatment.txt, sized in Sizing.txt.
+- Decided: freeze on "go"; testers told a week ahead and old releases kept with a note; authors "Ixora" and a generated logo; converter report counts only; no platform pages, accounts or
+  upload script until 1.0.0; a wiki page "Distribution" holds the plan; 0.6.0 is a GitHub pre-release until a week of play and the wheel and a converted world are confirmed; version
+  string 0.6.0; Patreon only, no Discord link.
+- Not built: the wiki page, the logo, any platform page. No code touched this part.

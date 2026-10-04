@@ -1,0 +1,101 @@
+Distribution page and platform pages (Modrinth, CurseForge) - implementation treatment
+
+Scoped with the owner (2026-10-04). Every "Decided" line is her call; "Recommended" lines are the scoping session's, not asked; "Open" lines are
+still to be settled, by whom is said on the line; "UNVERIFIED" lines are facts this file has not proved. Source of truth for what exists will be a
+NEW wiki page "Distribution" (this treatment writes it) plus wiki/releases.html and README.md. This file is retired (deleted, per /process-intake
+step 8) when the Distribution page exists and moves to its tabs; the 1.0.0 launch checklist then lives on that page's Roadmap tab.
+Release: rides with the rename (0.6.0) for the wiki page; the platform pages themselves wait for 1.0.0.
+
+1. THE REQUEST, AS GIVEN
+------------------------
+"Help me decide the rest of the open items using the question tool. This should address everything we need to do the rename AND to create modrinth
+and curseforge pages going forwards." Then, on timing: "The pages won't go out until we hit a 1.0.0 release, right now the rename just prepares
+everyone for that eventual release, and creates pages on the wiki that we'll maintain and add to to make the eventual release simpler."
+Read as: nothing is created on Modrinth or CurseForge now (no accounts, no draft projects, no uploads, no upload script). What is built now is the
+groundwork in the repo: one wiki page that records every decision and carries the 1.0.0 launch checklist, plus the metadata the rename needs.
+
+2. IN SCOPE, AND WHAT IS NOT
+----------------------------
+In: one new wiki page "Distribution" with Roadmap, Coding and Gameplay tabs (add-a-wiki-page); the page-copy drafts (Modrinth Markdown, CurseForge
+HTML/BBCode) inside it; the screenshot checklist; the decided settings; the "which jar do I download" guide; the Patreon link in README.md; the logo
+(a generated square icon, see Decisions); mods.toml metadata for the new brand (rename treatment).
+Out (re-askable): creating any account or project on either site; uploading any file; the upload script (waits for 1.0.0 preparation); a Discord link
+(the owner has none); a Ko-fi or GitHub Sponsors link (Patreon only for now); monetisation programmes on either site; uploading the old 0.5.x releases to
+the new pages (Recommended: never; the old ids differ and would confuse).
+
+3. WHAT ALREADY EXISTS
+----------------------
+- README.md (user-facing; links the wiki at 9-7-8.github.io/Procedural-Horse-Coats, which changes when the repo is renamed on 0.6.0 release day).
+- wiki/releases.html (release notes, the source for platform changelogs), wiki/licensing.html and THIRD_PARTY_NOTICES.md (credits for the cart code from
+  UsefulCarts / NiftyCarts / AstikorCarts, MIT), LICENSE (MIT, "Copyright (c) 2026 Ixora"), LICENSE-ART (CC BY-SA 4.0), procedures/release.txt (releases are
+  cut by hand locally; the jar cannot build in the cloud sandbox).
+- No logo exists (searched for logo/icon/banner files); no .github/workflows. Item art for the whistle family is in wiki/assets/item-art/.
+- A Discord announcement for the command whistle, with images, is in intake/discord-command-whistle/ (a pattern for later page art).
+
+4. THE PIECES
+-------------
+Piece 1 - The Distribution wiki page (S-M; ships with the rename)
+ What a player sees: a page that says which jar to download (today: one jar; after the four-jar split: Base + add-ons, or the all-in-one), and what each
+ requires and conflicts with; the maintainer tabs say how the 1.0.0 pages will be set up.
+ Gameplay tab ("Which jar do I download"): for 0.6.0, the all-in-one only, GitHub releases link; a short table-free list, updated when the split ships.
+ Coding tab (the settled facts, each with a date):
+  - Platforms: Modrinth and CurseForge, both, created at 1.0.0 preparation, not before (Decided). GitHub releases stay the source of every jar.
+  - Accounts: personal accounts named "Ixora" on both sites, two-factor on; a team/organisation only if someone co-authors (Decided). A session never sees a
+    password or token.
+  - Project layout: ONE project "Ixora's Horse Overhaul" (the all-in-one) at launch; when the four-jar split ships add three projects (Base, Breeding,
+    Equipment) with "requires Base" and "incompatible with the all-in-one" links. Slugs ixoras-horse-overhaul, ixoras-horse-overhaul-base, -breeding, -equipment
+    (Recommended names; the sites show whether a slug is free: UNVERIFIED).
+  - Page settings: NeoForge, Minecraft 26.1.2; categories Adventure, Mobs, Utility, Equipment; client and server required; licence MIT (code) and CC BY-SA 4.0 (art),
+    linked to the repo's LICENSE files; credits section naming the cart sources (Decided). UNVERIFIED how each site's licence field accepts a custom or compound
+    licence (Modrinth takes an SPDX id or a custom id with a URL; CurseForge picks from a list): check when creating the pages. Optional dependency: Jade.
+  - Links: issues and source = the renamed GitHub repo (ixoras-horse-overhaul); wiki = its GitHub Pages address; donations = https://www.patreon.com/cw/ProceduralMinecraftMods
+    (Decided; Patreon only. The owner cannot confirm whether the Patreon URL can be renamed: check the page settings); no Discord link (Decided).
+  - Version string 0.6.0 and file ixoras-horses-0.6.0.jar; later ixoras-horses-<part>-<version>.jar (Decided). 0.<compat>.<patch> as in procedures/release.txt.
+  - Release status: 0.6.0 is marked a GitHub PRE-RELEASE with this criterion in its note: it becomes a normal release after one week with no new crash reports AND the
+    command whistle wheel AND a converted world are confirmed in a real game (Decided).
+  - Publishing: by hand for the first release; a local upload script (tools/publish/, API tokens in a git-ignored file, a dry run) is written during 1.0.0 preparation,
+    not before (Decided; it replaces the earlier idea of writing it now). Cloud sessions cannot build the jar, so nothing publishes from CI.
+ Roadmap tab (the 1.0.0 launch checklist), in order:
+  1 Create the two accounts (name Ixora), enable two-factor. 2 Make the 512x512 icon and a banner (the generated icon from the rename is the start). 3 Take the
+  screenshots below. 4 Fill each project's description from the drafts on this page; set categories, licence, links, environment, loader and game version. 5 Create the
+  projects as DRAFTS and submit for review (both sites review new projects and files; allow days). 6 When approved, upload the jar as a BETA/release per the criterion
+  with the changelog from wiki/releases.html. 7 Write tools/publish/ from what the manual upload taught. 8 Announce (the Discord/other posts). 9 After the four-jar split,
+  repeat for Base, Breeding and Equipment with dependency links.
+ Screenshots to take in game (owner): a horse in several coats; the horse information screen (Genes tab); the command whistle wheel; a cart with a horse; the hay portal and
+  the horse realm; a stall with a sign; the horse browser (H); a breed spawn egg. UNVERIFIED which look best; the owner chooses.
+ Page-copy drafts: Modrinth description in Markdown, CurseForge description in HTML (its editor accepts HTML/BBCode-like markup: UNVERIFIED which tags), both starting from the README's
+  player-facing text, both ending with the credits, licence and links above. They are written when this piece is built.
+ Where the code lives: wiki only (wiki/distribution.html and wiki/text via the bakes), SECTIONS in wiki/pages.js, README.md (the Patreon line and the new addresses).
+ Data and saves: none. Config: none. Sync: none.
+ Tests: node wiki/tools/check-links.mjs; the bakes in procedures/rebake.txt for new pages (search index, agent text, verification and roadmap indexes).
+ Play checks: none (docs). Verification-tab items: the UNVERIFIED site-form facts above, to be closed when the pages are created.
+ Docs that change: README.md; wiki/releases.html (the 0.6.0 note links the page); procedures/release.txt (pre-release flag and the criterion).
+
+Piece 2 - The logo and metadata (S)
+ A generated 512x512 square icon (and a 128x128 copy for the in-game mod list) from existing item art: a horse-head whistle on a dark panel (Decided as a first version; the
+ owner may replace it). mods.toml gets authors "Ixora", displayURL/issueTrackerURL = the renamed repo, logoFile. Art is CC BY-SA (LICENSE-ART); log it in a USAGE note.
+ Lives in: neoforge-26.1.2/src/main/resources/ (logo.png) and wiki/assets. Not built here; part of the rename's mod-side work.
+
+5. DECISIONS (all above are the owner's unless marked Recommended)
+-------------------------------------------------------------------
+Walked Part 4: A (the ask) done; B fit with the mod: untouched philosophy; C how a player meets it: via the page and README; G config none; H saves none; I networking none;
+J compatibility: Jade optional dependency on the pages; L testing links; M release rides with the rename.
+
+6. UNVERIFIED
+-------------
+ 1 Slugs are free on both sites. 2 How each site's licence field handles MIT plus CC BY-SA. 3 CurseForge's description markup. 4 That a project can stay a draft with no files while
+ waiting for review (Modrinth needs a version to submit; CurseForge approves the project page first). 5 Whether the Patreon URL can be renamed. Check each when the pages are created.
+
+7. ORDER AND SIZE
+-----------------
+Piece 1 S-M, piece 2 S. Ships with the rename (they need the new repo name and the display name). Waits on the rename treatment; unblocks the 1.0.0 launch. Must not be built in the same
+session as the converter proof.
+
+8. RELEASE
+----------
+Rides with 0.6.0 (the rename's compat release).
+
+9. AFTER IT SHIPS
+-----------------
+rebake rows: wiki/pages.js SECTIONS (add-a-wiki-page), search index, agent text, verification and roadmap indexes, check-links. Page: wiki/distribution.html (new). The page's Roadmap tab is
+the single home for the platform plans.

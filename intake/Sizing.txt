@@ -253,3 +253,9 @@ Four-jar split - implementation treatment.txt (+ folder four-jar-split/)  sized 
 - Piece 2: Equipment add-on (gear, tack, carts, braid)            L  c  owner-free once P1 ships; owner-free; leatherworker/metalsmith trades included
 - Piece 3: Breeding add-on + four-jar release pipeline + marker   L  c  owner-free; needs 1 and 2; launch-time dependency messages
 Built? No (grep: no :common-base module, no Base jar, no extension registries).
+
+------------------------------------------------------------------------------
+Distribution page and platform pages - implementation treatment.txt    sized 2026-10-04
+- Piece 1: wiki page "Distribution" (Gameplay: which jar; Coding: settled facts; Roadmap: 1.0.0 checklist; copy drafts)   S-M  c  owner-free except screenshots; ships with the rename
+- Piece 2: generated logo (512 and 128) and mods.toml metadata                                                      S    c  owner-free; part of the rename's mod-side work
+Built? No (no wiki/distribution.html, no logo file).

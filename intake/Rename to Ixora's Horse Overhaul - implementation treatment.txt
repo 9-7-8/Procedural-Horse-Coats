@@ -254,3 +254,21 @@ STILL OPEN after that pass (nobody has decided these)
 - (building session) Everything UNVERIFIED in this file and in the converter's comments: where SavedData lives in 26.1.2, region compression
   types in use, the guard's hook and whether a refusal is possible, id-order or hash dependence in stored values, the window and launchers on
   a real screen and a real machine.
+
+SECOND DECISION PASS (owner, 2026-10-04; platform pages and the last rename opens)
+================================================================================
+Decided (owner, asked with the question tool):
+- Freeze: starts when the owner says "go", after her background fix has merged; before that sessions only write machinery on branches.
+- Testers: told in Discord a week before; every old 0.5.x release stays up, and the latest 0.5.x gets a note "renamed to Ixora's Horse Overhaul, see 0.6.0"; nothing deleted.
+- Metadata: authors "Ixora"; homepage/issue tracker = the renamed GitHub repo; logo = a generated square icon from existing item art (a horse-head whistle on a dark panel), replaceable later
+  (Distribution treatment, piece 2).
+- Converter report: counts only; progress line yes; no resume (re-run into a fresh folder).
+- Modrinth/CurseForge: NO pages, accounts, drafts, uploads or upload script until 1.0.0; the rename prepares for it and the groundwork is a wiki page "Distribution" (new treatment:
+  intake/Distribution page and platform pages - implementation treatment.txt). Details (accounts, layout, settings, links, Patreon, version string, pre-release flag) are there.
+- 0.6.0 is published on GitHub only, marked a PRE-RELEASE until one week passes with no new crash reports and the wheel and a converted world are confirmed in a real game.
+- Version string 0.6.0, file ixoras-horses-0.6.0.jar. Donations link: Patreon only. No Discord link.
+Still open after this pass:
+- (owner) The "go" for the freeze; the day the rename starts.
+- (owner, outside the repo) The live server's log-export scripts and any tool reading phc/ or the old ids need the same rename.
+- (owner) Whether the Patreon page URL can be renamed (check its settings).
+- (building session) All UNVERIFIED items listed above and in the converter; the refuse-to-load guard's feasibility is the one most worth checking first.
