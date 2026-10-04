@@ -216,6 +216,26 @@
     the <code>no_horse_stands_in_powder_snow</code> gametest).
 </p>
 
+<p id="water">
+    <strong>They keep out of the water, and a whirlpool gives them back.</strong> A
+    village can build out over the sea on a few blocks of fill, and a barn among it has
+    deep water a step from the door. On seed 20261002 a downward bubble column (magma on
+    the sea floor, forty blocks down) opens one block off the barn's edge. Whatever stepped
+    in was dragged onto the magma (&ldquo;discovered the floor was lava&rdquo;) or floated up
+    under the fill and drowned, and the hitch hired the next villager onto the same spot
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/30">#30</a>). So
+    <code>CowboyWaterSafety</code>, every ten ticks, for the cowboy and the horses still
+    carrying his brand: on dry land their water pathfinding malus is &minus;1, so no path
+    goes through water (in the water it is vanilla's again, so a horse shoved in can path
+    out); and one caught in a downward bubble column anyway is moved to the nearest dry
+    ground near its cowboy, or near his home for the man himself. That ground is solid, not
+    magma, within 4 blocks of the anchor's height, with no water within a block, in a
+    loaded chunk. Every rescue logs a <code>[whirlpool]</code> line. A sold, wild or
+    player's horse is left to the world. Held by the
+    <code>cowboy_stock_leaves_the_whirlpool</code> gametest; a 3-day soak of that seed
+    afterwards lost nobody at the barn, and rescued one horse that got in despite the malus.
+</p>
+
 <h3 id="herd">Their herd</h3>
 
 <ul>
