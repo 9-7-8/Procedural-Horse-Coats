@@ -1,0 +1,85 @@
+2026-10-04 15:25 (start, approximate) - #31: the F6 corridor's chunk loads, half of the stall fixed
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Took #31, "Pressing F6 on a server freezes everyone for ~3
+  seconds". It was the highest-ranked open bug with work left: players on a released jar
+  hit it, and the issue named the suspected cause. #35, #36 and #13 rank alongside it but
+  are already fixed and only wait on checks. Outcome: partly fixed, the rest labelled
+  needs-owner.
+
+DONE
+----
+- b4443360 "#31: the F6 corridor's bulk writes re-shaped neighbours in unloaded chunks".
+  What was wrong: DebugPenManager.fastSet wrote with setBlock flag 2, and its comment said
+  "skip neighbour updates". Flag 2 skips block updates but still runs
+  updateNeighbourShapes, which reads all six neighbours. On a chunk edge, one of them is
+  in an unloaded chunk, which then loads synchronously. This is the same mechanism as #13
+  in the realm. fastSet now writes 2 | 16. Every caller (the corridor, DebugTestYard,
+  DebugYardDiet, DebugYardLong) writes full blocks or air, so nothing needed the update.
+  The comment on fastSet flags the yards' glass cells and path cut as UNVERIFIED: a fence
+  beside a cleared cell keeps its arm.
+  Measured from the raw server log 2026-10-02-1.log.gz (the 16:25 burst): the operator
+  pressed F6 twice. Of the 115 loads:
+    - 59 were fastSet shape updates, in the first build (16:25:32.6 to 34.2);
+    - 1 was fastSet loading its own target chunk;
+    - 1 was DebugWorldWatch.start;
+    - 18 were sweepPlot, when the second F6 tore down the first plot;
+    - 36 were sweepPlot on leaving, at 16:25:50.
+  The first build took about 1.6 s. The rebuild into already-loaded chunks took about
+  0.8 s. So the shape loads were roughly half of that stall.
+  Proof: new gametest debug_corridor_loads_no_neighbour (ModGameTests, registered in both
+  places, 200 ticks). It writes a corridor column and a plank block through the real
+  DebugPenManager.fastSet on every edge cell of an untouched chunk, (4133, -3881), and
+  requires all four neighbours to still be unloaded. On flag 2 it failed ("loaded its
+  neighbour [4132, -3881]"); with the fix, runGameTest passes 54/54.
+  :neoforge-26.1.2:build green, check-parity OK.
+  Also in this commit: wiki/api-notes.html#setblock-flag-2 records the trap, which has
+  now cost #13 and #31.
+  Issue #31: open, needs-owner. Comment 5985270972 holds the table and three options for
+  the remaining ~0.8 s and the teardown loads: (1, recommended) spread the 30-pen
+  lookahead over ticks through ensureGeneratedAheadOfPlayer, after checking
+  DebugTestYard.build's dependence on corridor segments; (2) that, plus discarding
+  dead-plot entities on chunk load instead of sweepPlot forcing chunks; (3) leave it.
+
+DECIDED
+-------
+- 2 | 16 for every fastSet caller, rather than only the corridor's own writes (made
+  without the owner). The reason is in the fastSet javadoc.
+- Commit without a closing keyword, and put the remainder to the owner (made without
+  the owner). The issue's expected behaviour, "not stall everyone else", is not fully met.
+
+FOUND ON THE WAY
+----------------
+- order_stay_walks_back failed once on the run before the fix ("the stay order has not
+  steered it home yet on tick 0") and passed on the next run. Commented on #37, the
+  order-goal flake issue (comment 5985271972). No new issue.
+- wiki/session-log/d2026-10-04-2006-discord-command-whistle-post.txt is named 20:06,
+  which is later than local time now (15:45 -07:00), so it was probably named in UTC by
+  a cloud session. Left as it is: other pages may link to it by name.
+
+PROCEDURES
+----------
+- procedures/fix-bug.txt step 6: new case. When part of an issue is fixed and proven and
+  the rest is large, commit as "#N:", post the proof plus options, and add needs-owner.
+  Measure each cause's share first. Step 6 had covered only "closed" and "waiting on the
+  game", and this session fitted neither.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. common/ was not touched, so it cannot move.
+- Not seen in game: the corridor and the yards after the flag change. Nothing in them
+  should look different. A fence beside a yard cell cleared to air could keep an arm.
+- No Verification-tab anchors added. The open remainder is issue #31 (rule 9: bugs are
+  issues).
+- Live confirmation waits on the next release: review-server-logs should find no fastSet
+  frames in an F6 burst.
+
+RELEASE
+-------
+Not offered. This is one partial fix (release step 1).
+
+PICK UP FIRST
+-------------
+#25 (the stall detector refuses a slab-floored stall), by procedures/fix-bug.txt - unless
+the owner answers #31's options first.

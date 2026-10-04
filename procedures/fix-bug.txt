@@ -129,6 +129,11 @@ STEPS
      <commit>, waiting on <pen> / an in-game check: <what to look for>". run-tests
      closes it on the yard PASS. A fix that only the owner's eyes can confirm stays
      open for her.
+   - Part of the issue is fixed and proven, and the rest is large (step 4) -> commit as
+     "#N:", comment with the proof for the part and 2-4 options for the rest, and add
+     needs-owner. When an issue lists several causes, measure each one's share first
+     (a log timeline, a trace tally), so the comment says how much is left. Example:
+     #31's shape loads were about half the stall.
    - If the fix changes behaviour a wiki page describes, update that page's Gameplay or
      Coding tab in the same change.
    - Everything you post on GitHub ends with the Claude Code attribution footer.
