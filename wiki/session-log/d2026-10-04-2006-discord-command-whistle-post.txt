@@ -67,3 +67,15 @@ SECOND DECISION PASS (same session; owner: "Help me decide the rest of the open 
   upload script until 1.0.0; a wiki page "Distribution" holds the plan; 0.6.0 is a GitHub pre-release until a week of play and the wheel and a converted world are confirmed; version
   string 0.6.0; Patreon only, no Discord link.
 - Not built: the wiki page, the logo, any platform page. No code touched this part.
+
+END OF SESSION
+- PROCEDURES: none changed in this half (the earlier four-jar scoping changed process-intake and write-intake-document). Gaps noticed, not changed: (1) no procedure covers announcement posts
+  or the platform pages (the new Distribution treatment will; a procedure can follow once the pages exist); (2) end-session and write-intake-document say "push to main" but a cloud session
+  works on its designated branch; this session pushed the branch and merged to main only when the owner asked or ran /end-session; (3) a repo hook blocks any command whose TEXT contains a
+  forbidden process-stop word, even inside a document being written: the runbook had to be reworded.
+- NOT RUN: no Gradle build (no Java, resource or Gradle file in the game changed; converter/ is a separate module not in settings.gradle.kts); no rebake beyond the wiki bakes; no real world was
+  converted; the converter window, the launchers and every node rename script were never run (node scripts only syntax-checked). check-parity and check-links ran. A full :common:test would
+  still check everything; none of it was touched.
+- RELEASE: not offered (no player-facing game change).
+- PICK UP FIRST: the owner says "go" for the rename freeze after her background fix merges; then /process-intake on the rename treatment, starting with the converter proof on a copy of the live
+  world and the dev test world (converter/ self-test, then tools/rename/README.txt order). Check the refuse-to-load guard's feasibility first (see the treatment).
