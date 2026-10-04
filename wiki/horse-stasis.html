@@ -680,7 +680,8 @@
             <strong>record</strong> id and so answers for an animal with no entity.</td></tr>
     <tr><td><code>neoforge/&hellip;/gametest/ModGameTests.java</code></td>
         <td><code>stasis_tag_is_readable</code> &mdash; the tripwire for every NBT key
-            <code>StasisCare</code> reaches for, since all of them fail silently. It ends by
+            <code>StasisCare</code> reaches for, since all of them fail silently. It stores a
+            hunger of 80 rather than full, because an unreadable tag reads as full (#38). It ends by
             <strong>really releasing</strong> a horse whose tag <code>StasisCare</code> wrote to,
             which is the half no amount of tag-reading proves.</td></tr>
 </table>

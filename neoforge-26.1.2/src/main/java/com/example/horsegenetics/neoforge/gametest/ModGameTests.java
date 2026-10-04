@@ -3647,6 +3647,9 @@ public final class ModGameTests {
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_TAG_IS_READABLE =
             TEST_FUNCTIONS.register("stasis_tag_is_readable", () -> ModGameTests::stasisTagIsReadable);
 
+    /** Fed enough to buy healing, and not {@code Hunger.FULL}, which a failed read returns. */
+    private static final double STASIS_TRIPWIRE_HUNGER = 80.0;
+
     private static void stasisTagIsReadable(GameTestHelper helper) {
         net.minecraft.world.entity.animal.equine.Horse horse =
                 helper.spawn(net.minecraft.world.entity.EntityType.HORSE, net.minecraft.core.BlockPos.ZERO);
@@ -3666,7 +3669,7 @@ public final class ModGameTests {
         float max = horse.getMaxHealth();
         horse.setHealth(max / 2.0F);
 
-        // ASK FOR THE HUNGER, SO THERE IS ONE TO SAVE. A NeoForge attachment is
+        // WRITE A HUNGER, SO THERE IS ONE TO SAVE. A NeoForge attachment is
         // materialised on first access, and HorseCareHandler is the thing that
         // usually asks - on a slow tick phased by entity id, which by tick ten
         // may or may not have come round. Without this the horse is sometimes
@@ -3675,7 +3678,13 @@ public final class ModGameTests {
         // free), and the healing assertion below fails on one run in several
         // with nothing wrong with the bank. Every horse the bank ever really
         // meets has been ticked for far longer than ten ticks.
-        horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get());
+        //
+        // Not Hunger.FULL, for two reasons (#38). That same slow tick may have
+        // drained it a little already, so the stored value is not FULL on some
+        // runs. And StasisCare.hunger answers FULL for a tag it cannot read, so
+        // comparing against FULL could never catch the renamed attachment this
+        // check exists for. A value the default can't produce catches both.
+        horse.setData(com.example.horsegenetics.neoforge.data.ModAttachments.HUNGER.get(), STASIS_TRIPWIRE_HUNGER);
 
         com.example.horsegenetics.neoforge.data.StasisSnapshot snapshot =
                 com.example.horsegenetics.neoforge.server.HorseStasisHandler.snapshot(horse, "Tripwire");
@@ -3690,10 +3699,10 @@ public final class ModGameTests {
                             + " Check LivingEntity.TAG_ATTRIBUTES and the 'base' field in StasisCare."), 0);
         }
         double hunger = StasisCare.hunger(tag);
-        if (Math.abs(hunger - com.example.horsegenetics.common.care.Hunger.FULL) > 0.01) {
+        if (Math.abs(hunger - STASIS_TRIPWIRE_HUNGER) > 0.01) {
             throw new GameTestAssertException(Component.literal(
                     "the bank cannot read a stored horse's hunger: expected "
-                            + com.example.horsegenetics.common.care.Hunger.FULL + " and read " + hunger
+                            + STASIS_TRIPWIRE_HUNGER + " and read " + hunger
                             + ". Healing in a bank would be free, or would never happen."
                             + " Check the hunger attachment's id in StasisCare."), 0);
         }
