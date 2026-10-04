@@ -1862,6 +1862,38 @@ public final class ModGameTests {
         }
     }
 
+    /**
+     * Ground for a test that looks further than its own 1x1 cell (issue #37). Such a test
+     * is registered with {@link #registerAlone}, so it is the only test running - and what
+     * is left round it is the litter of tests that have finished: their horses and
+     * monsters, which a hunting horse sixteen blocks out will pick, and their pens and
+     * roofs, which cut its sight of the monster it was given. Both are cleared before the
+     * test spawns anything, which is safe only because nothing else is running.
+     */
+    private static void aloneOnClearGround(GameTestHelper helper) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        BlockPos o = helper.absolutePos(BlockPos.ZERO);
+        // Hunt monsters' default radius plus the leash's slack, round a spot two blocks out.
+        double reach = com.example.horsegenetics.common.care.HorseOrders.DEFAULT_HUNT_RADIUS
+                + com.example.horsegenetics.common.care.HorseOrders.LEASH_SLACK_BLOCKS + 4;
+        for (net.minecraft.world.entity.Entity e : level.getEntitiesOfClass(net.minecraft.world.entity.Entity.class,
+                new net.minecraft.world.phys.AABB(o).inflate(reach, 8, reach),
+                e -> !(e instanceof net.minecraft.world.entity.player.Player))) {
+            e.discard();
+        }
+        // The field the order tests use (x 0..2, z -6..2) and a horse's wander round it.
+        // The ground is two blocks below the origin (each test stands on a pedestal), so
+        // what is cleared is feet level, y -2, up past a horse's head. The floor under
+        // that is left alone, and so is every block with a block entity - this test's own
+        // test-instance block among them.
+        for (BlockPos p : BlockPos.betweenClosed(o.offset(-4, -2, -8), o.offset(6, 2, 6))) {
+            if (level.getBlockEntity(p) == null && !level.getBlockState(p).isAir()) {
+                level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
+    }
+
     /** Make a stamped horse four days old. */
     private static void age(net.minecraft.world.entity.animal.equine.Horse horse, ServerLevel level) {
         horse.getPersistentData().putLong(com.example.horsegenetics.neoforge.server.WildTurnover.BORN_KEY,
@@ -2130,7 +2162,8 @@ public final class ModGameTests {
         // not a get-or-create, so calling it per test throws "Adding duplicate key
         // ... horsegenetics:default" out of RegistryDataLoader and takes the whole
         // run down with exit -1 before a single test runs. The environment is also
-        // the batch key, so sharing one is what keeps them in a single batch.
+        // the batch key, so sharing one is what keeps them in a single batch - except
+        // the few that reach past their cell, which registerAlone gives a key each.
         Holder<TestEnvironmentDefinition<?>> environment =
                 event.registerEnvironment(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "default"),
                         new TestEnvironmentDefinition.AllOf(java.util.List.of()));
@@ -2211,7 +2244,7 @@ public final class ModGameTests {
         register(event, environment, UNDEAD_KEEP_VANILLA, 100);
         register(event, environment, UNDEAD_OFF_BY_DEFAULT, 100);
         register(event, environment, UNDEAD_TEST_COMMAND, 300);
-        register(event, environment, ORDER_STAY_WALKS_BACK, 300);
+        registerAlone(event, ORDER_STAY_WALKS_BACK, 300);
         register(event, environment, ORDER_YIELDS_TO_NEEDS, 100);
         register(event, environment, ORDER_CLEARS, 100);
         // Twenty-five ticks to be founded, then the gate is read once.
@@ -2221,8 +2254,8 @@ public final class ModGameTests {
         // Synchronous: one cross-world move, checked in the same tick.
         register(event, environment, TURNOUT_RELEASES_THE_HORSE_THAT_ARRIVED, 20);
         // Founded at 25, then a combat scan once a second.
-        register(event, environment, ORDER_HUNT_PICKS_A_MONSTER, 200);
-        register(event, environment, ORDER_GUARD_HOLDS_ITS_REACH, 300);
+        registerAlone(event, ORDER_HUNT_PICKS_A_MONSTER, 200);
+        registerAlone(event, ORDER_GUARD_HOLDS_ITS_REACH, 300);
         register(event, environment, ORDER_GRAZE_TETHER, 200);
         // Twenty-five ticks to be founded, then a scan (every thirty) to act on it.
         register(event, environment, WILD_HORSE_MOVES_ON, 200);
@@ -2771,7 +2804,7 @@ public final class ModGameTests {
     }
 
     private static void orderStayWalksBack(GameTestHelper helper) {
-        keepTicking(helper);
+        aloneOnClearGround(helper);
         net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         // Beside the structure, not on it: the harness stands each test on a one-block
         // pedestal (its test-instance block), and a horse ordered up there and pushed off
@@ -2908,8 +2941,21 @@ public final class ModGameTests {
     private static void makeGuardian(net.minecraft.world.entity.animal.equine.Horse horse) {
         var gene = com.example.horsegenetics.common.genetics.Genes.GUARDIAN;
         var grd = gene.alleles().stream().filter(a -> a.token().equals("Grd")).findFirst().orElseThrow();
-        var genotype = com.example.horsegenetics.common.genetics.Genotype.wildType()
-                .with(new com.example.horsegenetics.common.genetics.AllelePair(grd, grd));
+        refound(horse, com.example.horsegenetics.common.genetics.Genotype.wildType()
+                .with(new com.example.horsegenetics.common.genetics.AllelePair(grd, grd)));
+    }
+
+    /**
+     * A horse bred NOT to fight: the wild type at every locus. A founding roll is no
+     * plain horse - six in a hundred carry a gladiator copy, and the gate rightly lets
+     * it fight (issue #37: order_combat_gate's "plain" horse was Gld/n whenever it failed).
+     */
+    private static void makePlain(net.minecraft.world.entity.animal.equine.Horse horse) {
+        refound(horse, com.example.horsegenetics.common.genetics.Genotype.wildType());
+    }
+
+    private static void refound(net.minecraft.world.entity.animal.equine.Horse horse,
+                                com.example.horsegenetics.common.genetics.Genotype genotype) {
         com.example.horsegenetics.neoforge.server.HorseRecords.apply(horse,
                 com.example.horsegenetics.neoforge.server.HorseRecords.newFounder(horse,
                         new com.example.horsegenetics.neoforge.NeoRng(horse.getRandom()), genotype));
@@ -2937,6 +2983,7 @@ public final class ModGameTests {
                     || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(guardian)) {
                 throw new GameTestAssertException(Component.literal("the horses are not founded yet"), 0);
             }
+            makePlain(plain);
             makeGuardian(guardian);
             var nope = com.example.horsegenetics.common.care.HorseOrders.Refusal.NOT_A_FIGHTER;
             for (var order : java.util.List.of(com.example.horsegenetics.common.care.HorseOrder.HUNT_MONSTERS,
@@ -3099,7 +3146,7 @@ public final class ModGameTests {
             TEST_FUNCTIONS.register("order_hunt_picks_a_monster", () -> ModGameTests::orderHuntPicksAMonster);
 
     private static void orderHuntPicksAMonster(GameTestHelper helper) {
-        keepTicking(helper);
+        aloneOnClearGround(helper);
         net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         var horse = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.HUNT_MONSTERS,
                 new BlockPos(2, 0, 2));
@@ -3138,7 +3185,7 @@ public final class ModGameTests {
             TEST_FUNCTIONS.register("order_guard_holds_its_reach", () -> ModGameTests::orderGuardHoldsItsReach);
 
     private static void orderGuardHoldsItsReach(GameTestHelper helper) {
-        keepTicking(helper);
+        aloneOnClearGround(helper);
         if (com.example.horsegenetics.neoforge.ServerConfig.ordersGuardRadius() >= 8) {
             throw new GameTestAssertException(Component.literal("orders.guard_radius is "
                     + com.example.horsegenetics.neoforge.ServerConfig.ordersGuardRadius()
@@ -4166,6 +4213,23 @@ public final class ModGameTests {
                 }
             }
         }
+    }
+
+    /**
+     * A test in a batch of its own (issue #37). The environment is the batch key and the
+     * batches run one after another, so a test with an environment nobody else has runs
+     * with no other test alive - for a test that reaches past its cell (a hunting horse
+     * looks sixteen blocks out; the grid puts tests six apart), whose neighbours'
+     * monsters and pens otherwise answer for it. Pair it with {@link #aloneOnClearGround}.
+     * One key per test, so registerEnvironment's duplicate-key throw cannot happen.
+     */
+    private static void registerAlone(RegisterGameTestsEvent event,
+                                      DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> fn,
+                                      int maxTicks) {
+        Holder<TestEnvironmentDefinition<?>> alone = event.registerEnvironment(
+                Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "alone_" + fn.getKey().identifier().getPath()),
+                new TestEnvironmentDefinition.AllOf(java.util.List.of()));
+        register(event, alone, fn, maxTicks);
     }
 
     private static void register(RegisterGameTestsEvent event,
