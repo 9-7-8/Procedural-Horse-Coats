@@ -52,7 +52,7 @@ public final class EpigenomeReadout {
      * declares no schema or this horse has no stored genome.
      */
     public static List<String> lines(Gene gene, Genotype genotype, Epigenome epigenome) {
-        EpiSchema schema = gene.epiSchema();
+        EpiSchema schema = Epigenome.schemaOf(gene);
         if (epigenome == null || schema.isEmpty()) {
             return List.of();
         }

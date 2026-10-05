@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
@@ -204,8 +203,44 @@ public final class GeneticCoatTextureFactory {
     private static long bakeNanos;
     private static long slowestBakeNanos;
     private static long deferrals;
+    /** {@link GeneticHorseRenderer#extractRenderState} calls, bakes excluded (#205). */
+    private static long extracts;
+    private static long extractNanos;
+    private static long slowestExtractNanos;
+    /** Set by the render bench while it measures; every extract lands here as well. */
+    private static long @Nullable [] extractSamples;
+    private static int extractSampled;
 
     private GeneticCoatTextureFactory() {
+    }
+
+    /** Nanoseconds spent baking this session - read either side of a call to take a bake out of its time. */
+    static long bakeNanos() {
+        return bakeNanos;
+    }
+
+    /** One horse's render-state extraction, its bake (if any) already subtracted. */
+    static void noteExtract(long nanos) {
+        extracts++;
+        extractNanos += nanos;
+        slowestExtractNanos = Math.max(slowestExtractNanos, nanos);
+        if (extractSamples != null && extractSampled < extractSamples.length) {
+            extractSamples[extractSampled++] = nanos;
+        }
+    }
+
+    /** Start keeping every extraction time, up to {@code capacity} of them (the render bench). */
+    static void sampleExtracts(int capacity) {
+        extractSamples = new long[capacity];
+        extractSampled = 0;
+    }
+
+    /** The times kept since {@link #sampleExtracts}, in arrival order; stops keeping them. */
+    static long[] takeExtractSamples() {
+        long[] out = extractSamples == null ? new long[0]
+                : java.util.Arrays.copyOf(extractSamples, extractSampled);
+        extractSamples = null;
+        return out;
     }
 
     /** A horse's two textures for one frame: its coat, and its glow mask or {@code null}. */
@@ -218,16 +253,19 @@ public final class GeneticCoatTextureFactory {
      * does not, whatever already exists plus the {@linkplain #placeholder
      * stand-in} for whatever does not.
      *
-     * @param parts        body parts a {@code glow} effect lights outright
+     * <p>The lit body parts and both keys come memoised off {@code coat} (#205): this
+     * runs for every horse on every frame, and building them fresh walked the genome
+     * three times a call.
+     *
      * @param breedLabel   dev-build cosmetic only - the {@code [coat]} log line
      * @param mayStartBake {@code false} for a horse beyond the detail distance:
      *                     it may use a coat that exists, never cause a new one
      */
-    public static Resolved resolve(CoatData coat, boolean baby, @Nullable Set<Part> parts,
+    public static Resolved resolve(CoatData coat, boolean baby,
                                    @Nullable String breedLabel, boolean mayStartBake) {
-        Set<Part> wanted = parts == null ? Set.of() : parts;
-        String coatKey = coatKey(coat, baby);
-        String glowKey = glowKey(coatKey, wanted);
+        Set<Part> wanted = coat.glowParts();
+        String coatKey = coat.meshKey(baby);
+        String glowKey = coat.glowKey(baby);
         boolean haveCoat = LIVE_COATS.contains(coatKey);
         boolean haveGlow = LIVE_GLOWS.contains(glowKey);
 
@@ -275,7 +313,7 @@ public final class GeneticCoatTextureFactory {
      * again next frame.
      */
     public static Identifier getOrCreate(CoatData coat, boolean baby, @Nullable String breedLabel) {
-        String key = coatKey(coat, baby);
+        String key = coat.meshKey(baby);
         if (LIVE_COATS.contains(key) || mayBake()) {
             return CACHE.get(key, coatLoader(coat, baby, breedLabel));
         }
@@ -296,7 +334,7 @@ public final class GeneticCoatTextureFactory {
      * itself be something that waits.
      */
     private static Identifier placeholder(boolean baby) {
-        return CACHE.get(coatKey(CoatData.DEFAULT, baby), coatLoader(CoatData.DEFAULT, baby, null));
+        return CACHE.get(CoatData.DEFAULT.meshKey(baby), coatLoader(CoatData.DEFAULT, baby, null));
     }
 
     /**
@@ -328,19 +366,6 @@ public final class GeneticCoatTextureFactory {
             bakeNanos += took;
             slowestBakeNanos = Math.max(slowestBakeNanos, took);
         }
-    }
-
-    private static String coatKey(CoatData coat, boolean baby) {
-        return coat.textureKey() + (baby ? ":foal" : ":adult");
-    }
-
-    /** The gene-written half of a mask is a function of the texture key already, so only spec parts join it. */
-    private static String glowKey(String coatKey, Set<Part> parts) {
-        StringBuilder tag = new StringBuilder();
-        for (Part part : new TreeSet<>(parts)) {
-            tag.append(tag.isEmpty() ? "" : "+").append(part.name());
-        }
-        return coatKey + ":glow:" + tag;
     }
 
     private static TexelBudgetCache.Loader<String, Identifier> coatLoader(CoatData coat, boolean baby,
@@ -582,6 +607,14 @@ public final class GeneticCoatTextureFactory {
                         + "(budget {} ms per {} ms window)",
                 bakes, bakeNanos / 1_000_000L, String.format("%.1f", slowestBakeNanos / 1_000_000.0),
                 deferrals, ClientConfig.coatBakeBudgetMs(), WINDOW_MS);
+        // The per-frame cost of a horse already baked (#205): what a herd on
+        // screen costs every frame, apart from the bakes above.
+        HorseGenetics.LOGGER.info(
+                "horse render-state extraction: {} calls, {} ms in total, mean {} us, slowest {} us "
+                        + "(bakes excluded)",
+                extracts, extractNanos / 1_000_000L,
+                String.format("%.1f", extracts == 0 ? 0.0 : extractNanos / 1_000.0 / extracts),
+                String.format("%.1f", slowestExtractNanos / 1_000.0));
         CACHE.clear();
         EMISSIVE_CACHE.clear();
         KEY_BY_ID.clear();
@@ -592,6 +625,9 @@ public final class GeneticCoatTextureFactory {
         bakeNanos = 0L;
         slowestBakeNanos = 0L;
         deferrals = 0L;
+        extracts = 0L;
+        extractNanos = 0L;
+        slowestExtractNanos = 0L;
         adultTemplate = null;
         babyTemplate = null;
         lutSet = null;

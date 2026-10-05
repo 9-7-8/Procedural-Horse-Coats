@@ -73,7 +73,7 @@ public interface GeneEpigenetics {
      */
     static GeneEpigenetics forGene(Gene gene, Genotype genotype, Epigenome epigenome) {
         if (epigenome == null) {
-            EpiValues mid = gene.epiSchema().midpoint();
+            EpiValues mid = Epigenome.schemaOf(gene).midpoint();
             return new GeneEpigenetics() {
                 @Override public EpiValues expressed() { return mid; }
                 @Override public EpiValues copy(int slot) { return mid; }

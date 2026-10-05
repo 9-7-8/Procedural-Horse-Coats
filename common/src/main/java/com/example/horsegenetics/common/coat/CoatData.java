@@ -1,12 +1,20 @@
 package com.example.horsegenetics.common.coat;
 
+import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
+import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.CoatPhenotype;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.genetics.GrownParts;
+import com.example.horsegenetics.common.parts.AttachedPart;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The fully-resolved, ready-to-render description of one horse's coat: its
@@ -72,10 +80,93 @@ public final class CoatData {
      * grey epigenetics still do.
      */
     public String textureKey() {
-        return isDeterministic()
-                ? genotype().coatCode()
-                : genotype().coatCode() + "@"
-                        + Long.toUnsignedString(epigenome().visibleFingerprint(genotype()), 16);
+        String key = textureKey;
+        if (key == null) {
+            key = isDeterministic()
+                    ? genotype().coatCode()
+                    : genotype().coatCode() + "@"
+                            + Long.toUnsignedString(epigenome().visibleFingerprint(genotype()), 16);
+            textureKey = key;
+        }
+        return key;
+    }
+
+    // ------------------------------------------------------------------
+    // Memoised (#205). The renderer asks every one of these once per horse per
+    // frame, and each walks the whole genome to answer. A CoatData cannot change
+    // after it is built (Genotype and Epigenome hold final unmodifiable maps), so
+    // there is nothing to invalidate, and the client keeps one CoatData per horse
+    // across frames (ClientCoatCache) - which is what makes the memo pay.
+    // Unsynchronised on purpose, the way String.hashCode is: two threads racing
+    // compute equal values, and each value is immutable, so either write is fine.
+    // ------------------------------------------------------------------
+
+    private String textureKey;
+    private String adultKey;
+    private String foalKey;
+    private String adultGlowKey;
+    private String foalGlowKey;
+    private Set<Part> glowParts;
+    private List<AttachedPart> grownParts;
+
+    /**
+     * The coat texture's cache key for one mesh: {@link #textureKey()} plus which
+     * of the two skins it is painted on, because a foal's sheet is a different
+     * layout from an adult's.
+     */
+    public String meshKey(boolean baby) {
+        String key = baby ? foalKey : adultKey;
+        if (key == null) {
+            key = textureKey() + (baby ? ":foal" : ":adult");
+            if (baby) {
+                foalKey = key;
+            } else {
+                adultKey = key;
+            }
+        }
+        return key;
+    }
+
+    /**
+     * The glow mask's cache key for one mesh. The gene-painted half of a mask is a
+     * function of the texture key already, so only the {@link #glowParts() lit parts}
+     * join it, in a fixed order.
+     */
+    public String glowKey(boolean baby) {
+        String key = baby ? foalGlowKey : adultGlowKey;
+        if (key == null) {
+            StringBuilder tag = new StringBuilder();
+            for (Part part : new TreeSet<>(glowParts())) {
+                tag.append(tag.length() == 0 ? "" : "+").append(part.name());
+            }
+            key = meshKey(baby) + ":glow:" + tag;
+            if (baby) {
+                foalGlowKey = key;
+            } else {
+                adultGlowKey = key;
+            }
+        }
+        return key;
+    }
+
+    /** The body parts a {@code glow} effect lights outright - {@link CoatTextureComposer#glowParts}. */
+    public Set<Part> glowParts() {
+        Set<Part> parts = glowParts;
+        if (parts == null) {
+            parts = Collections.unmodifiableSet(CoatTextureComposer.glowParts(genotype()));
+            glowParts = parts;
+        }
+        return parts;
+    }
+
+    /** The parts this horse grows - {@link GrownParts#of}, already an immutable list. */
+    public List<AttachedPart> grownParts() {
+        List<AttachedPart> parts = grownParts;
+        if (parts == null) {
+            parts = GrownParts.of(genotype(), epigenome());
+            grownParts = parts;
+        }
+        return parts;
     }
 
     @Override

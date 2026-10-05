@@ -1,8 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.common.coat.CoatData;
-import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
-import com.example.horsegenetics.common.genetics.GrownParts;
 import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.client.model.animal.equine.EquineSaddleModel;
@@ -101,6 +99,18 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
 
     @Override
     public void extractRenderState(Horse horse, HorseRenderState renderState, float partialTick) {
+        // Timed for the world-exit summary (#205): the per-horse, per-frame cost
+        // is the one number that says whether the coat-key caches paid. A bake
+        // started inside this call is the bake budget's cost, not this method's,
+        // so it is taken back out.
+        long started = System.nanoTime();
+        long bakedBefore = GeneticCoatTextureFactory.bakeNanos();
+        extractTimed(horse, renderState, partialTick);
+        GeneticCoatTextureFactory.noteExtract(System.nanoTime() - started
+                - (GeneticCoatTextureFactory.bakeNanos() - bakedBefore));
+    }
+
+    private void extractTimed(Horse horse, HorseRenderState renderState, float partialTick) {
         super.extractRenderState(horse, renderState, partialTick);
         stretchGaitToSize(renderState);
         if (renderState instanceof GeneticHorseRenderState geneticState) {
@@ -112,7 +122,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                     ClientHorseRecordCache.get(horse.getId());
             geneticState.breedLabel = rec == null ? null : rec.lineage().displayName();
             GeneticCoatTextureFactory.Resolved textures = GeneticCoatTextureFactory.resolve(
-                    geneticState.coatData, renderState.isBaby, CoatTextureComposer.glowParts(geneticState.coatData.genotype()),
+                    geneticState.coatData, renderState.isBaby,
                     geneticState.breedLabel, withinDetailDistance(renderState));
             geneticState.coatId = textures.coat();
             geneticState.emissiveCoatId = textures.glow();
@@ -126,14 +136,13 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             // field rather than asking again, so that the coat, the glow, a
             // braid and the gear cannot disagree about how solid this horse is.
             geneticState.fadeAlpha = RiderFade.alphaFor(horse);
-            // The same discipline for grown parts, and for a second reason:
-            // resolving them walks the genotype and the epigenome, so asking per
-            // submit the way CutieMarkLayer does would pay that per frame for every
-            // horse in a pen. The config switches are resolved here too, so a
-            // disabled part costs one field test in the layer and not a config read
-            // per part.
-            geneticState.parts = GrownParts.of(
-                    geneticState.coatData.genotype(), geneticState.coatData.epigenome());
+            // The same discipline for grown parts: every layer reads the field.
+            // Resolving them walks the genotype and the epigenome, and that walk
+            // is memoised on the CoatData (#205), so it runs once per horse, not
+            // once per frame - the field alone only stopped it running per layer.
+            // The config switches are resolved here too, so a disabled part costs
+            // one field test in the layer and not a config read per part.
+            geneticState.parts = geneticState.coatData.grownParts();
             geneticState.drawParts = ClientConfig.parts()
                     && withinPartsDistance(renderState);
             geneticState.drawPartGlow = ClientConfig.partsGlow();
@@ -318,7 +327,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         }
         geneticState.coatData = coat;
         GeneticCoatTextureFactory.Resolved textures = GeneticCoatTextureFactory.resolve(
-                coat, geneticState.isBaby, CoatTextureComposer.glowParts(coat.genotype()),
+                coat, geneticState.isBaby,
                 geneticState.breedLabel, true);
         geneticState.coatId = textures.coat();
         geneticState.emissiveCoatId = textures.glow();
@@ -328,7 +337,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // without this would be a wall of hornless horses, which is a lie about what
         // the genome says and exactly the bug the coat ids were moved here to stop.
         // Nothing on a screen is far away, so the distance gate does not apply.
-        geneticState.parts = GrownParts.of(coat.genotype(), coat.epigenome());
+        geneticState.parts = coat.grownParts();
         geneticState.drawParts = ClientConfig.parts();
         geneticState.drawPartGlow = ClientConfig.partsGlow();
     }

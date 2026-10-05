@@ -351,7 +351,7 @@ public final class BreedFounder {
             if (gene == null) {
                 continue;
             }
-            EpiSchema schema = gene.epiSchema();
+            EpiSchema schema = Epigenome.schemaOf(gene);
             if (schema.isEmpty()) {
                 continue;
             }

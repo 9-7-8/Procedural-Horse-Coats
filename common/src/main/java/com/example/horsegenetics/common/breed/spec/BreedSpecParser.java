@@ -9,6 +9,7 @@ import com.example.horsegenetics.common.breed.SpawnGround;
 import com.example.horsegenetics.common.breed.SpawnTime;
 import com.example.horsegenetics.common.genetics.Allele;
 import com.example.horsegenetics.common.genetics.Gene;
+import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.epi.EpiSchema;
 import com.example.horsegenetics.common.genetics.epi.EpiValue;
@@ -562,7 +563,7 @@ public final class BreedSpecParser {
                         + " are driven by the breed's \"stats\" block");
                 continue;
             }
-            EpiSchema schema = gene.epiSchema();
+            EpiSchema schema = Epigenome.schemaOf(gene);
             Map<String, Object> values = asObject(e.getValue(), "bands." + key);
             for (Map.Entry<String, Object> v : values.entrySet()) {
                 String at = "bands." + key + "." + v.getKey();

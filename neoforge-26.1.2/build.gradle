@@ -49,6 +49,11 @@ neoForge {
             if (project.hasProperty('photoShoot')) {
                 systemProperty 'horsegenetics.photoShoot', 'true'
             }
+            // Dev-only render bench (#205, DebugRenderBenchClient): -PrenderBench=50 stages that many
+            // horses in view and logs one "[bench]" line of per-horse extraction cost and FPS.
+            if (project.hasProperty('renderBench')) {
+                systemProperty 'horsegenetics.renderBench', project.property('renderBench').toString()
+            }
         }
         server {
             server()

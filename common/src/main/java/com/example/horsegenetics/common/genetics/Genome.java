@@ -203,7 +203,7 @@ public record Genome(Genotype genotype, Epigenome epigenome) {
         // inherited-with-drift. Runs only over genes that actually store
         // something, and only after every allele above is locked.
         for (Gene g : Genes.codeOrder()) {
-            EpiSchema schema = g.epiSchema();
+            EpiSchema schema = Epigenome.schemaOf(g);
             if (schema.isEmpty()) {
                 continue;
             }

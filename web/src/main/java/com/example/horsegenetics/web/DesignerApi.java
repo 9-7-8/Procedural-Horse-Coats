@@ -1436,7 +1436,7 @@ public final class DesignerApi {
         if (g == null) {
             return j.endArr().toString();
         }
-        for (EpiValue v : g.epiSchema().values()) {
+        for (EpiValue v : Epigenome.schemaOf(g).values()) {
             j.obj()
                     .kv("name", v.name())
                     .kv("kind", v.kind().name().toLowerCase(java.util.Locale.ROOT))
@@ -1567,7 +1567,7 @@ public final class DesignerApi {
     public static String colourableJson() {
         Json j = new Json().arr();
         for (Gene g : Genes.codeOrder()) {
-            List<EpiValue> values = g.epiSchema().values();
+            List<EpiValue> values = Epigenome.schemaOf(g).values();
             java.util.Set<String> names = new java.util.HashSet<>();
             for (EpiValue v : values) {
                 names.add(v.name());

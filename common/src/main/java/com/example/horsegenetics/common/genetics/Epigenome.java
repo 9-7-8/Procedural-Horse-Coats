@@ -80,8 +80,26 @@ public final class Epigenome {
 
     /** Every gene that actually writes something on an allele copy. */
     private static boolean stores(Gene g) {
-        return !g.epiSchema().isEmpty();
+        return !schemaOf(g).isEmpty();
     }
+
+    /**
+     * <b>{@code gene}'s schema, built once.</b> Every {@link Gene#epiSchema()} builds a
+     * new one per call, and {@link #visibleFingerprint} asks for one per gene per frame
+     * for every horse on screen (#205). Read schemas through this, never the gene.
+     *
+     * <p>Keyed by the gene <i>instance</i>, not its key: a test that re-registers a JSON
+     * gene under the same key gets the new gene's schema, not the old one's
+     * ({@code Gene} leaves {@code equals} as identity). Safe to cache because every
+     * schema is a pure function of its gene - constants, or the gene's own final spec
+     * (all the overrides were read for #205). A schema that read a config would freeze
+     * at its first answer here. Bounded by the registry, which is frozen in game.
+     */
+    public static EpiSchema schemaOf(Gene gene) {
+        return SCHEMAS.computeIfAbsent(gene, Gene::epiSchema);
+    }
+
+    private static final Map<Gene, EpiSchema> SCHEMAS = new java.util.concurrent.ConcurrentHashMap<>();
 
     /**
      * The same question, publicly - {@link #with} only accepts a gene this
@@ -168,7 +186,7 @@ public final class Epigenome {
     }
 
     private static Copies founderCopies(Gene gene, Rng rng) {
-        EpiSchema schema = gene.epiSchema();
+        EpiSchema schema = schemaOf(gene);
         AlleleEpigenetics a = AlleleEpigenetics.founder(schema, rng);
         AlleleEpigenetics b = AlleleEpigenetics.deconflict(a, AlleleEpigenetics.founder(schema, rng), rng);
         return new Copies(a, shareSeeds(gene, a, b));
@@ -260,7 +278,7 @@ public final class Epigenome {
         Map<String, String> fields = EpiCodec.fields(text);
         String p = fields.remove(PRIORITY_FIELD);
         int priority = p == null ? AlleleEpigenetics.MIN_PRIORITY : Integer.parseInt(p.trim());
-        return new AlleleEpigenetics(priority, EpiCodec.read(g.epiSchema(), fields, g.key()));
+        return new AlleleEpigenetics(priority, EpiCodec.read(schemaOf(g), fields, g.key()));
     }
 
     /**
@@ -374,7 +392,7 @@ public final class Epigenome {
         if (!copy.isEmpty()) {
             return copy;
         }
-        return AlleleEpigenetics.founder(g.epiSchema(), new SeededRng(g.key().hashCode() * 31L + slot));
+        return AlleleEpigenetics.founder(schemaOf(g), new SeededRng(g.key().hashCode() * 31L + slot));
     }
 
     // ------------------------------------------------------------------
@@ -441,10 +459,11 @@ public final class Epigenome {
         if (!copy.isEmpty()) {
             return copy.values();
         }
-        return MIDPOINTS.computeIfAbsent(gene.key(), k -> gene.epiSchema().midpoint());
+        return MIDPOINTS.computeIfAbsent(gene, g -> schemaOf(g).midpoint());
     }
 
-    private static final Map<String, EpiValues> MIDPOINTS =
+    /** By gene instance, like {@link #schemaOf}, so a re-registered gene reads its own midpoints. */
+    private static final Map<Gene, EpiValues> MIDPOINTS =
             new java.util.concurrent.ConcurrentHashMap<>();
 
     /**
