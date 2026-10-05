@@ -2769,6 +2769,26 @@ wiki/gene-tron.html#inheritance	gameplay	Crossing two of them
 wiki/gene-tron.html#layers	coding	What it paints
 wiki/gene-tron.html#outcomes	gameplay	What it can come out as
 wiki/gene-tron.html#verified	coding	Verified
+wiki/gene-tusk-colour.html#base	coding	One short subclass
+wiki/gene-tusk-colour.html#bone	gameplay	Bare bone
+wiki/gene-tusk-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-tusk-colour.html#colours	gameplay	The colours, and two-tone tusks
+wiki/gene-tusk-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-tusk-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tusk-colour.html#invented	science	Invented
+wiki/gene-tusks.html#alleles-later	coding	Why only Nar is declared
+wiki/gene-tusks.html#carrot	gameplay	Its gene carrot
+wiki/gene-tusks.html#dominant	gameplay	One copy, either sex
+wiki/gene-tusks.html#finding	gameplay	Finding one
+wiki/gene-tusks.html#health	gameplay	Is it good for the horse?
+wiki/gene-tusks.html#inheritance	gameplay	Crossing two of them
+wiki/gene-tusks.html#invented	science	Invented
+wiki/gene-tusks.html#numbers	coding	The numbers are generic
+wiki/gene-tusks.html#own-copy	coding	Each form reads its own copy
+wiki/gene-tusks.html#pattern	coding	Slice A of the tusks treatment
+wiki/gene-tusks.html#priority	coding	Why priority 334
+wiki/gene-tusks.html#what-varies	gameplay	What varies
+wiki/gene-tusks.html#where	gameplay	Where it sits
 wiki/gene-unicorn-horn.html#anchor	coding	The anchor, and the two models that do not agree
 wiki/gene-unicorn-horn.html#carrot	gameplay	Its gene carrot
 wiki/gene-unicorn-horn.html#deferred	coding	The deferred-submit trap, and why the model is typed on the part
@@ -3391,6 +3411,7 @@ wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
 wiki/model-parts.html#settings	gameplay	If they cost you frames
 wiki/model-parts.html#shape	coding	The shape of it: two sources, one renderer
 wiki/model-parts.html#sheet	coding	One greyscale sheet, and why its regions are featureless
+wiki/model-parts.html#snout	coding	The snout anchor, and a part that grows forward
 wiki/model-parts.html#spine-anchor	coding	The spine anchor
 wiki/model-parts.html#three-tiers	coding	The rule that keeps a herd cheap
 wiki/model-parts.html#translucent-regions	coding	See-through regions are data on the kind

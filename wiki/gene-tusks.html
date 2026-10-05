@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tusks &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Tusks</h1>
+
+<p class="lede">
+    One gene for the growths of the mouth and muzzle, with a form for each allele. Today it has
+    one form, the <strong>narwhal horn</strong>: one long spiral tusk growing straight forward out
+    of the front of the muzzle. Its length, thickness, twist and lift are written on the allele.
+    Its colour is a gene of its own, <a href="gene-tusk-colour.html">tusk colour</a>. Boar tusks
+    and sabre fangs are the next two forms (see the Roadmap tab).
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.tusks"></div>
+
+<h2 id="dominant">One copy, either sex</h2>
+
+<p>
+    Dominant: <code>Nar/n</code> and <code>Nar/Nar</code> both grow the horn, and a second copy
+    does not grow a second horn or a bigger one. It is <strong>not</strong> sex-limited: unlike the
+    antlers, no allele grows only on stallions. Foals grow none; the horn comes in when the horse
+    grows up, and stays.
+</p>
+
+<h2 id="where">Where it sits</h2>
+
+<p>
+    On the front of the nose, in the middle, pointing forward along the line of the face. It
+    moves with the head, so it dips when the horse grazes. It does not sit where a unicorn&rsquo;s
+    horn does, so one horse can grow both.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Very rare in the wild: about one horse in a thousand has a narwhal horn, and because one copy
+    is enough, every horse that carries the gene shows it. The skeleton horses can grow one in bare
+    bone, as one of their horn-like parts.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Length</strong>: from a <em>short</em> tusk just past the end of the face, through
+        <em>long</em>, to a <em>great</em> one longer than the horse&rsquo;s body is deep. Wild
+        horses are short to long; a line bred for length keeps growing it, up to the ceiling.</li>
+    <li><strong>Twist</strong>: a <em>spiral</em> or a <em>tight</em> spiral. A narwhal horn is
+        always straight; it never curves.</li>
+    <li><strong>Thickness</strong>.</li>
+    <li><strong>Lift</strong>: how far the point is raised above the line of the face.</li>
+</ul>
+
+<p>
+    Everything stacks: a horse can wear a narwhal horn, a unicorn horn, antlers and every body
+    part at once.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no ability, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.tusks"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.tusks</dd></div>
+    <div><dt>Class</dt><dd><code>TusksGene</code></dd></div>
+    <div><dt>Priority</dt><dd>334 (magical band), with its colour locus at 335; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong> (a <code>MAGIC_PARTS</code> override)</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Nar</span> <span class="allele wild">n</span>, dominant; <code>Tsk</code> and <code>Sab</code> come with slice B</dd></div>
+    <div><dt>Founders</dt><dd><code>Nar/n</code> at 0.1% (<code>WILD_NARWHAL_PERCENT</code>); no invisible carriers</dd></div>
+    <div><dt>Epigenome</dt><dd><code>length</code> (0&ndash;0.6, clamp 0&ndash;1), <code>girth</code> (0.85&ndash;1.15, clamp 0.7&ndash;1.6), <code>curve</code> (0&ndash;1), <code>style</code> (one of <code>STYLES</code>, six), <code>seed</code></dd></div>
+    <div><dt>Part</dt><dd><code>NARWHAL</code> at <code>SNOUT</code>; <code>HORN</code>, with <code>HORN_TIP</code> on the last two segments</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong>; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">Slice A of the tusks treatment</h2>
+
+<p>
+    The narwhal horn is the cheapest form, so it came first and proved the gene, the new anchor and
+    the colour locus. There is <strong>no new generator</strong>. <code>PartKind.NARWHAL</code> is
+    <code>HornGenerator</code> in its two twisted styles (<code>NARWHAL_STYLES</code>: spiral and
+    tight, never the bending smooth style) on its own ladder, <code>NarwhalSize</code>, from 10 to
+    30 model units, geometric, with the horn&rsquo;s sixteen size buckets. No new render path either:
+    the client change is the <a href="model-parts.html#snout">SNOUT anchor&rsquo;s case</a> in
+    <code>AttachedPartLayer.anchor</code>. One call in <code>GrownParts.of</code>, dressed by
+    <a href="gene-tusk-colour.html">its colour locus</a>; the granting locus is in
+    <code>GrownParts.shapes</code>&rsquo;s every-part baseline.
+</p>
+
+<h2 id="own-copy">Each form reads its own copy</h2>
+
+<p>
+    Every other part gene reads the <em>expressed</em> copy. This one reads the copy that
+    <em>carries the form</em>, through <code>TusksGene.copyFor</code>. That is for slice B: a
+    <code>Sab/Nar</code> horse will grow its fangs from the <code>Sab</code> copy&rsquo;s numbers and
+    its horn from the <code>Nar</code> copy&rsquo;s, so the two are bred apart though they share a
+    locus. Two copies of one form read the first copy (the antlers&rsquo; symmetric rule), not the
+    higher-priority one.
+</p>
+<p>
+    A copy follows its own allele because of <code>Epigenome</code>&rsquo;s alignment invariant:
+    <code>Copies.first()</code> belongs to <code>pair.first()</code>, and <code>Genome</code> keeps
+    them aligned when breeding. The treatment marked this unverified. <code>TusksGeneTest</code>
+    now breeds <code>Nar/n</code> with <code>n/n</code> both ways round and checks that every horned
+    foal&rsquo;s horn has its <code>Nar</code> copy&rsquo;s length, never the empty wild copy&rsquo;s.
+    A mutant that always read the second slot turned that test and the homozygote test red.
+</p>
+
+<h2 id="numbers">The numbers are generic</h2>
+
+<p>
+    Every copy carries the same five numbers whatever its form, and each form reads the ones it
+    uses. The narwhal horn reads four: <code>length</code> (its place on <code>NarwhalSize</code>),
+    <code>girth</code>, <code>curve</code> as a lift of up to <code>NARWHAL_LIFT</code> (0.45 rad)
+    above the head&rsquo;s axis, and <code>style % 2</code> as its twist. <code>style</code> is a
+    category of six so that each form&rsquo;s own count (two now, three for the tusks and fangs)
+    divides it: every style equally likely, and two forms on one horse independent. The
+    <code>seed</code> is for the fangs&rsquo; serration and the tusks&rsquo; hook. Both are fixed now,
+    so slice B changes no saved schema.
+</p>
+
+<h2 id="alleles-later">Why only Nar is declared</h2>
+
+<p>
+    A <code>Tsk</code> or <code>Sab</code> allele declared today would grow nothing, which is a
+    promise the game would not keep. Alleles are saved by token, and slice B appends them after
+    <code>n</code>. Appending never changes the canonical order of a pair that already exists, so no
+    saved horse&rsquo;s copies move to the other allele.
+</p>
+
+<h2 id="priority">Why priority 334</h2>
+
+<p>
+    The part loci fill 227&ndash;246, and 247 is the only slot left beside them. The next free run of
+    two was 334/335. The <code>MAGIC_PARTS</code> override files the pair with the parts whatever
+    band the number falls in, and nothing requires slots to be unique.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No horse grows tusks. The narwhal&rsquo;s tusk is a real thing: a single spiralled canine tooth
+    that grows forward through the upper lip, almost always on the left and almost always in males.
+    This horn takes the look and not the biology. It is centred on the muzzle, not offset to one
+    side (owner, tusks treatment), and mares grow it as often as stallions. It is fantasy and makes
+    no claim about any real gene. The forms combine (a horse with two different forms grows both)
+    because the parts already stack, so there is nothing to suppress.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The narwhal horn has been photographed standing still at wild lengths (2026-10-05); how far down it points, its length ceiling, grazing, the size gene, a foal, and head gear are still to be seen.</p>
+</div>
+
+<h3 id="open-narwhal-look">What a photo shoot showed, and the look</h3>
+<p>
+    <strong>2026-10-05, <code>-PphotoShoot</code>, four still frames</strong> of wild-length
+    founders: ivory, <code>Red/Blu</code>, black beside a white unicorn horn, and a bone horn on a
+    great valley skeleton. The horn roots in the middle of the front of the muzzle with no gap,
+    runs straight along the line of the face and tapers to a point. The two-tone horn is red at the
+    root fading to blue at the tip. Beside a unicorn horn the two never touch.
+</p>
+<p>
+    Two things for the owner to judge. Because the neck holds the head nose-down, a horn along the
+    face points <strong>well below level</strong>; the lift number raises it by up to 0.45 rad, and
+    a wider lift (or a fixed one) would change that. And the <strong>ceiling</strong>, a great horn
+    of 30 units, has not been seen: the treatment asks for it to read as a long tusk without the
+    horse looking like a unicorn on its face.
+</p>
+
+<h3 id="open-narwhal-motion">Grazing, the head, and the size gene</h3>
+<p>
+    A horse with a great narwhal horn while it walks, tosses its head and grazes. The horn rides the
+    head bone, so it should dip with the head; when the head is down to graze, say whether the horn
+    driving into the ground is acceptable. Then a tiny and a huge horse (the size gene): the horn
+    should scale with the head, through the pose scale already on the stack, as the page records
+    from reading the code.
+</p>
+
+<h3 id="open-narwhal-foal-gear">A foal, and head gear</h3>
+<p>
+    A foal with <code>Nar/n</code> should show no horn, and grow one when it grows up. A bridle
+    (and head armour, if any is worn) on a horse with a narwhal horn: the horn should not hide
+    inside the gear or float clear of the face.
+</p>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>Slice B (#161): boar tusks and sabre fangs, the gene&rsquo;s other two forms, each on a new pair of anchors with a new generator, and the mixed pairs that grow two forms at once.</p>
+</div>
+
+<h3 id="plan-slice-b">Boar tusks and sabre fangs</h3>
+<p>
+    Two alleles appended after <code>n</code>: <code>Tsk</code>, boar tusks, short and curved,
+    rising from the lower jaw at each side (anchors <code>JAW_RIGHT</code>/<code>JAW_LEFT</code>);
+    and <code>Sab</code>, sabre fangs, long flat blades hanging from the upper lip past the chin
+    (anchors <code>LIP_RIGHT</code>/<code>LIP_LEFT</code>). Each needs a generator of its own (a
+    tapering curved chain; a flat tapering blade), three styles each read as
+    <code>style % 3</code>, the <code>curve</code> number as the tusk&rsquo;s sweep or the fang&rsquo;s
+    lean, and the <code>seed</code> for the hook or the serration. The new expressions are the two
+    single forms and the three combinations (<code>Tsk+Sab</code>, <code>Tsk+Nar</code>,
+    <code>Sab+Nar</code>), each grown from its own copy, which this slice already does through
+    <code>copyFor</code>. The boar tusks and fangs are bone like the horn, so the skeleton breeds&rsquo;
+    count group would decide whether they carry those forms too.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

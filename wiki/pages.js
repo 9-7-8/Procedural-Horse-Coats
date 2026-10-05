@@ -302,6 +302,8 @@ window.HG.pages = {
                 { href: "gene-ram-horn-form.html", text: "Ram horn form", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-ram-horn-tip.html", text: "Ram horn tip", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-ram-horns.html", text: "Ram horns", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-tusk-colour.html", text: "Tusk colour", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-tusks.html", text: "Tusks", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-unicorn-horn.html", text: "Unicorn horn", kind: "magical", views: ["gameplay","coding","science"] }
             ]
         },

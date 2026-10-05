@@ -44,9 +44,11 @@ STEPS
    show whether a translucent part is see-through; put something with detail behind it.
    Grep every allele token before using it.
 2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
-3. Launch by launch-game step 5, with the task :neoforge-26.1.2:runClientTestWorld and
-   the extra argument -PphotoShoot. Use -WindowStyle Normal: a minimized window renders
-   nothing worth saving.
+3. Copy run/logs/latest.log and debug.log to the scratchpad first: they hold the owner's
+   last play session (CLAUDE.md: read it rather than asking), and the launch overwrites
+   them. Put them back after step 7. Then launch by launch-game step 5, with the task
+   :neoforge-26.1.2:runClientTestWorld and the extra argument -PphotoShoot. Use
+   -WindowStyle Normal: a minimized window renders nothing worth saving.
 4. Watch run/logs/latest.log for "[photo] staged", "[photo] saved", "[photo] done",
    /ERROR] and Exception. The shoot starts 400 ticks after login and takes about four
    seconds a shot.

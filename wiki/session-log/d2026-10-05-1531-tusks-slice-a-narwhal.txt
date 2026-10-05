@@ -1,0 +1,119 @@
+2026-10-05 15:31 (end) - #160: the tusks gene, slice A - the narwhal horn on a new SNOUT anchor
+
+ASKED
+-----
+- "/next-release" (work on the next release). The next release is v0.5.045 (milestone 42;
+  the newest tag is v0.5.044, whose milestone was already closed). Every open issue already
+  had a milestone. The milestone's four open bugs were all fixed and waiting on a check, so
+  each was skipped by next-release step 3, with its fix commit confirmed by git log:
+  #10 (5d0f1837, in-game check), #36 (c3400b5a, in-game check), #35 (8e477dbd, released in
+  0.5.044, live server's log), #31 (b0bab5a8, live server's log). #205, #206 and #152-#154
+  were closed. That left #160 (tusks slice A) as the first unit, built by process-intake.
+- The owner answered one question mid-build (below, DECIDED).
+
+DONE
+----
+- 02078e1f "Tusks gene, slice A: the narwhal horn on a new SNOUT anchor" (Refs #160).
+  What was missing: the tusks treatment (#159) asks for one gene with a form per allele, a
+  colour locus and a new muzzle anchor; slice A is the narwhal form.
+  - common/: TusksGene (horsegenetics.tusks, Nar and n, dominant, priority 334),
+    TuskColourGene (horsegenetics.tusk_colour on AbstractPartColourGene, 335),
+    PartAnchor.SNOUT, PartKind.NARWHAL (HornGenerator in SPIRAL/TIGHT via
+    HornGenerator.NARWHAL_STYLES / narwhalTwist), NarwhalSize (10-30 units, geometric),
+    AttachedPart.narwhal, GrownParts.of + shapes baseline, Genes, GeneFamily
+    (MAGIC_PARTS overrides), GeneDescriptions.
+  - TusksGene.copyFor: each form reads the copy that carries its allele, a homozygote its
+    first copy. The schema is generic (length, girth, curve, style category of 6, seed) so
+    slice B changes no saved schema.
+  - neoforge: AttachedPartLayer gains ADULT_SNOUT (0, -8.5, -6.5), FOAL_SNOUT, the SNOUT
+    case walking root -> head_parts -> head, and SNOUT_PITCH (a quarter-turn about +x after
+    the translate, so the part grows forward). No other client change: the hypothesis
+    "no new render path" held (PartModel, PartMeshes untouched).
+  - Breeds: great_valley_skeleton_horse and blackened_skeleton_horse take tusks Nar/Nar in
+    their horn count group and pin tusk_colour Bon/Bon (owner, this session).
+  Proof:
+  - TusksGeneTest (new, 9 tests). aFoalsHornFollowsItsNarCopyWhicheverParentGaveIt breeds
+    Nar/n x n/n with the sire, then the dam, carrying Nar; every horned foal's length is
+    its Nar copy's. A mutant making copyFor always read slot 1 turned that test and
+    aHomozygoteGrowsFromItsFirstCopy red; restored.
+  - Green by name: PartGeneratorTest, SaddleZoneTest, CoatBakeGoldenTest,
+    CoatPipelineGoldenTest, UndeadBreedsTest, BreedFilesTest, BreedFounderTest,
+    BreedClimateRuleTest, GeneDescriptionCoverageTest, WildTypeCopyTest, ResearchTopicTest,
+    CommonPortabilityTest, GeneFamily*, EditorRules*, BodyPlatesGeneTest,
+    UnicornHornGeneTest.
+  - Goldens: coat-bake-golden.txt gains 15 rows, all at the baseline hash; coat-golden.txt
+    changes only its keys (the hash column diffed equal).
+  - :neoforge-26.1.2:build green; check-parity OK (7163 checks); check-designer-boots OK.
+  - Seen in game: a -PphotoShoot run of four still frames (ivory; Red/Blu; Blk beside a
+    white unicorn horn; a bone horn on a great valley skeleton founder). Gallery for the
+    owner: https://claude.ai/artifact/HyiuJ6GfSE1m6VymPSMDqM (private).
+- Docs commit (this file's commit): wiki/gene-tusks.html and wiki/gene-tusk-colour.html
+  (gameplay, coding, science, verification; the tusks page also has a Roadmap tab for
+  slice B), model-parts.html (#snout, a gameplay paragraph, a bone-versions row, its
+  Roadmap lines), undead-horses.html, decisions.html, a roadmap-execution coverage row,
+  and the bakes: gene census, timeline, unverified genes, page spans, web.wasm,
+  verification and roadmap indexes, search index, agent text.
+- #160 closed by the docs commit (Closes #160). #161 (slice B) is edited to point at
+  wiki/gene-tusks.html#plan-slice-b.
+
+DECIDED
+-------
+- The skeleton breeds grow the narwhal horn in bone, in their horn count group (owner,
+  asked with the question tool when UndeadBreedsTest's standing rule clashed with the
+  treatment's "No breed is changed"). Recorded on decisions.html and model-parts.html's
+  bone-versions table.
+- Calls made without the owner (decisions.html, gene-tusks.html Coding tab):
+  - only Nar is declared; Tsk and Sab are appended after n in slice B (alleles are saved
+    by token, so appending moves no pair's copies);
+  - each form reads the copy carrying it; a homozygote reads its first copy (the
+    treatment's rule), not the higher-priority one;
+  - style is a category of 6 so 2 (narwhal) and 3 (tusks, fangs) both divide it;
+  - NarwhalSize 10 / 17 / 30 units; wild length 0-0.6 of the ladder;
+  - lift up to 0.45 rad above the head's axis, never below it;
+  - priority 334/335: 247 is the only free slot beside 227-246, so the next free run of
+    two;
+  - founders Nar/n at 0.1%, under the antlers' shares (the treatment: rarest form).
+
+FOUND ON THE WAY
+----------------
+- The owner's 14:50 run log (the previous session's yard) ended with CLOCKWORK FAIL lines:
+  CARROT CROP (two: "a seed plants only on farmland", "age 0 drops one seed"), CHEST LOOT
+  ("every research paper from a chest"), PACK LEADER ("two beats after the leader dies no
+  cow still paths to where it was"), and GRAZING INCONCLUSIVE. No open issue matched a
+  search. Left for run-tests, which files yard failures with their context; not filed
+  here.
+- Two pre-existing WARNs in every dev launch: "Recipe horsegenetics:stasis_chamber can't
+  be placed due to empty ingredients" and "test yard is NOT sound ... minecraft:jukebox".
+  Both were in the 14:50 log too; not this change.
+- Mistake: PartKind first named a TusksStyles class that does not exist; caught before
+  compiling, and the narwhal's styles moved onto HornGenerator.
+
+PROCEDURES
+----------
+- add-a-gene.txt, question dd: a treatment's "no breed is changed" does not answer the
+  skeleton-pool question; UndeadBreedsTest holds the standing rule, so ask.
+- add-a-gene.txt, step 6.2: a part that must face another way gets a fixed rotation after
+  the anchor's translate; read the vanilla model for which bone the place moves with.
+- photograph-horses.txt, step 3: copy latest.log and debug.log aside before the launch and
+  put them back after; the launch overwrites the owner's last play session.
+- next-release and process-intake: followed as written; no change needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every breed's own
+  *BreedTest beyond the ones named, BreedBandsReachTest, the editor and designer tests
+  that walk the whole registry, and every other gene's tests against the new registry
+  order.
+- Not seen in game: the great (30-unit) ceiling, grazing and head motion, the size gene, a
+  foal, a bridle or head armour, a chaos tusk. Verification anchors added:
+  gene-tusks.html#open-narwhal-look, #open-narwhal-motion, #open-narwhal-foal-gear;
+  gene-tusk-colour.html#open-tusk-colour-seen.
+
+RELEASE
+-------
+Not offered. #160's Release line is "rides with the parent (#159)", so it does not count
+toward the offer bar, and v0.5.045 still has open units.
+
+PICK UP FIRST
+-------------
+/next-release: v0.5.045's next unit is #47 (Procedure: compat-test), by process-intake.

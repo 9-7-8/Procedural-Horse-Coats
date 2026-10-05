@@ -94,7 +94,10 @@ STEPS
        2026-10-02): the alleles or bands that draw it as bare bone on a skeleton horse -
        bone-coloured, unlit, nothing soft (wings: the bones alone, no membrane). Ask what
        the bone version looks like, and whether the skeleton breeds' pools carry it (every
-       horn-like part is in their horn count group).
+       horn-like part is in their horn count group). A treatment's "no breed is changed"
+       does not answer this: UndeadBreedsTest.theHornKindsInTheGroupAreEveryHornLikePart
+       holds the standing rule that every horn-like part joins that pool, so ask (the
+       tusks session found the clash only when that test went red, 2026-10-05).
 
 2. Read the code. Hand open-ended sweeps to an Explore agent (look-it-up). Grep every
    class and file named below before relying on it. Path shorthands:
@@ -277,7 +280,11 @@ STEPS
       bone version through AbstractPartColourGene.boneOnly; model-parts.html#translucent-regions.
    2. A new place to grow: C/parts/PartAnchor.java, plus a case in
       N/client/AttachedPartLayer.anchor(...), with offsets for adults AND foals. Walk
-      from the model root (it has a scale and an offset).
+      from the model root (it has a scale and an offset). Every mesh grows up its own -y;
+      a part that must face another way (the narwhal horn, forward from SNOUT) is turned
+      by a fixed rotation AFTER the anchor's translate, before the per-horse tilt -
+      model-parts.html#snout. Read the vanilla model for which bone the place moves with:
+      the muzzle (upper_mouth) shares head's frame, and no jaw animates in 26.1.2.
    3. The generator: C/parts/<X>Generator.java, beside HornGenerator, AntlerGenerator
       and RamHornGenerator. It emits PartNodes parent-before-child. Add a size class
       (like AntlerSize), and cases in PartGenerators.build and in PartShape's
