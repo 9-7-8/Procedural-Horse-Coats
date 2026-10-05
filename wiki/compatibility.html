@@ -1929,6 +1929,20 @@
         and what was then verified.</li>
 </ul>
 
+<p id="compat-test-routine">
+    <strong>Re-run 2026-10-05, now a routine:</strong> <code>procedures/compat-test.txt</code>
+    (<code>/compat-test</code>) is the three-boot run, step by step. Writing it found that the
+    jar had rotted. The <a href="#generated">planks rule</a> (a gate is not a promise of a
+    plank) had been dropping the fake maple, because the jar shipped no
+    <code>maple_planks</code> item, so the run had been testing metals only and still looked
+    green. The jar now ships <code>maple_planks</code> and <code>stripped_maple_log</code>
+    item definitions. On a dedicated server, boot 1 found 1 wood and 5 metals and generated
+    63 files. Boot 2 said &ldquo;generated pack is current&rdquo; on the same fingerprint, and
+    boot 3, with the jar removed, said &ldquo;nothing to generate&rdquo; and wiped the folder.
+    The only errors were vanilla's TagLoader rejecting the fake jar's own <code>c:</code>
+    tags, which name items it never registers.
+</p>
+
 <p><strong>Not shown, and not to be written up as working:</strong></p>
 
 <ul>

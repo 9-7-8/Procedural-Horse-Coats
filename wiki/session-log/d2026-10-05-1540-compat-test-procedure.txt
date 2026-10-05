@@ -1,0 +1,79 @@
+2026-10-05 15:40 (end) - #47: the compat-test procedure, and the fake mod's wood restored
+
+ASKED
+-----
+- "/next-release" (work on the next release). The next release is v0.5.045 (milestone 42;
+  the newest tag is v0.5.044, whose milestone is closed). Every open issue already had a
+  milestone. The four open bugs were all fixed and waiting on a check, each confirmed by
+  git log and its last comment, so each was skipped by next-release step 3: #10
+  (5d0f1837, in-game), #36 (c3400b5a, in-game), #35 (8e477dbd, live server's log), #31
+  (b0bab5a8, live server's log). The planned features #205, #206, #152-#154 and #160 were
+  closed. That left #47 (Procedure: compat-test, size S, owner-free) as the first unit,
+  built by process-intake. #48 (measure-worldgen) follows.
+
+DONE
+----
+- b041fbce "Procedure: compat-test, and the fake mod's maple counts as a wood again"
+  (Closes #47).
+  - procedures/compat-test.txt (/compat-test), its INDEX.txt row, the
+    .claude/skills/compat-test wrapper, and the keyword memory. The routine: build the jar,
+    then three dev-server boots (generate / current / wipe), the compat-line and error-grep
+    checks, removing the jar, and restoring run/ logs, phc/ and config/.
+  - What was wrong: neoforge-26.1.2/tools/compat/build-test-mod.mjs predates the planks
+    rule (MaterialScan.confirmWoods drops a gate with no shipped <name>_planks item). The
+    fake maple shipped none, so a run would report 0 woods and test metals only, and still
+    look green. The jar now ships assets/compattest/items/maple_planks.json and
+    stripped_maple_log.json, so maple qualifies and gets the wagon too.
+  - survey-a-mod step 5 points at the new routine.
+  Proof (the routine run for real, on a dedicated dev server):
+  - Boot 1: "compat: 1 modded woods, 5 modded metals, 0 modded dyes, fingerprint
+    c169456cf7f3d748", then "generated 63 files for 1 woods and 5 metals". Every recipe is
+    skipped with a named warning (the jar registers nothing). Generated armours: tin, ruby,
+    ONE entro (the colliding pair), and hellforged (no ingot_ prefix). The only ERROR lines
+    were 5 minecraft/TagLoader "Couldn't load tag c:..." lines for the fake jar's own tags.
+  - Boot 2: "generated pack is current (c169456cf7f3d748)".
+  - Boot 3, jar removed: "0 modded woods, 0 modded metals", "nothing to generate",
+    run/phc/generated/ gone, error grep empty.
+  - Mutation: the original jar is the broken case. Its maple would be rejected, which the
+    code (confirmWoods) and MaterialScanTest.aGateWithNoPlanksItemIsNotAWood state; that
+    boot was not re-run.
+  - check-parity OK; check-links OK. No Gradle build: no Java, resource or Gradle file
+    changed (end-session step 2).
+- Docs commit (this file's commit): wiki/compatibility.html#compat-test-routine records
+  the re-run and the rot; search index and agent text rebaked.
+
+DECIDED
+-------
+- Fixing the fake jar inside this unit, not as a separate bug (call made without the
+  owner): the procedure cannot be written truthfully around a tool that no longer tests
+  woods. The fix is two item-definition files in the tool.
+- The procedure's step 7 sends a failed run to a GitHub issue and a pass to the
+  compatibility page (call made without the owner, following CLAUDE.md's routing).
+
+FOUND ON THE WAY
+----------------
+- The fake mod's rot, above. Fixed in b041fbce, no issue needed.
+- run/server.properties sets no server-port, so the dev server uses the default port. All
+  three boots reached Done regardless, beside the live server. Left alone.
+
+PROCEDURES
+----------
+- Added procedures/compat-test.txt (this unit).
+- Changed survey-a-mod.txt step 5, to name compat-test as the way to run a synthetic mod.
+- next-release and process-intake held as written. None needed beyond these.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No :common:test run (no common/ change; nothing it covers moved).
+- Nothing generated has been seen rendering (unchanged; compatibility.html
+  #unverified-generated). No real third-party mod run (open check 271, unchanged).
+- No Verification-tab anchors added: the run was automated and passed.
+
+RELEASE
+-------
+Not offered. v0.5.045 still has #48 open, plus four bugs waiting on checks.
+
+PICK UP FIRST
+-------------
+#48 (Procedure: measure-worldgen), the next unit of v0.5.045: /next-release, which hands it
+to process-intake.
