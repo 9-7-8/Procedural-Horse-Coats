@@ -41,6 +41,7 @@ public final class PartGenerators {
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornGenerator.generate(
                     shape.style(), shape.size(), shape.kind() == PartKind.DRAGON_HORN_LEFT);
             case SPINES -> DorsalSpineGenerator.generate(shape.style(), shape.size());
+            case SAIL -> SailGenerator.generate(shape.style(), shape.size());
         };
     }
 

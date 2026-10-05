@@ -93,9 +93,19 @@ public abstract class AbstractPartColourGene implements Gene {
      * @param chaosNoun the plural in "no two chaos ... match": "horns"
      * @param whiteNote what follows the white outcome's dash: "what nearly every unicorn has"
      * @param bearer    who it shows on: "a horse with a horn"
+     * @param split     how two colours divide the part, for a part they do not divide root
+     *                  to tip - "the membrane is one and the spines the other." - or
+     *                  {@code null} for the root-to-tip sentence every horn uses
      */
     public record Words(String idPrefix, String noun, boolean plural, String chaosNoun,
-                        String whiteNote, String bearer) {}
+                        String whiteNote, String bearer, String split) {
+
+        /** A part two colours divide root to tip - every part but the sail. */
+        public Words(String idPrefix, String noun, boolean plural, String chaosNoun,
+                     String whiteNote, String bearer) {
+            this(idPrefix, noun, plural, chaosNoun, whiteNote, bearer, null);
+        }
+    }
 
     /**
      * One allele's colour: its hue in turns, saturation and value, and how common
@@ -128,6 +138,9 @@ public abstract class AbstractPartColourGene implements Gene {
 
     /** The chaos allele's index - its copy's colour is {@link #CHAOS}, not its row. */
     private static final int CHAOS_INDEX = 11;
+
+    /** The bone allele's index - the bone version, when both copies carry it. */
+    private static final int BONE_INDEX = 12;
 
     private final String key;
     private final String name;
@@ -162,9 +175,11 @@ public abstract class AbstractPartColourGene implements Gene {
         alleles = Collections.unmodifiableList(as);
         solid = Collections.unmodifiableList(solids);
         twoTone = Expression.wildType(words.idPrefix() + "-two-tone", "Two-tone " + words.noun(),
-                "Two different colours: the " + words.noun() + (words.plural() ? " are" : " is")
+                "Two different colours: "
+                        + (words.split() != null ? words.split() + " "
+                        : "the " + words.noun() + (words.plural() ? " are" : " is")
                         + " one and " + (words.plural() ? "their tips" : "its tip")
-                        + " the other, fading between. "
+                        + " the other, fading between. ")
                         + "Which is the base is fixed by the pair - the one earlier in white, "
                         + "the rainbow, pink, black, grey, chaos." + shows);
         List<Expression> all = new ArrayList<>(solids);
@@ -232,6 +247,15 @@ public abstract class AbstractPartColourGene implements Gene {
         return pair.second().order() < pair.first().order()
                 ? new Tints(second, first)
                 : new Tints(first, second);
+    }
+
+    /**
+     * Is this the part's bone version - {@code Bon/Bon}? Colour alone says "bone" for most
+     * parts. A part with something soft on it also reads this, to leave the soft thing off:
+     * a bone sail is its bare rays with no membrane (owner, 2026-10-02, the bone-version rule).
+     */
+    public final boolean boneOnly(AllelePair pair) {
+        return pair.first().order() == BONE_INDEX && pair.second().order() == BONE_INDEX;
     }
 
     /** One copy's colour: its allele's, nudged by that copy's own numbers. */

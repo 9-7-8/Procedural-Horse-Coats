@@ -108,6 +108,28 @@ class SaddleZoneTest {
                 "the saddle zone is an int mask of spines");
     }
 
+    /**
+     * A sail that covers less of the back roots its spines nearer the withers, so the
+     * saddle covers spines further down the row: the zone at a span is the zone in the
+     * drawn positions, root times span.
+     */
+    @Test
+    void aShorterRowIsZonedWhereItIsDrawn() {
+        List<PartNode> sail = PartGenerators.build(new PartShape(PartKind.SAIL, 0, 0));
+        assertEquals(SaddleZone.groupsWithin(sail, FROM, TO), SaddleZone.groupsWithin(sail, FROM, TO, 1f));
+        float span = 0.6f;
+        int mask = SaddleZone.groupsWithin(sail, FROM, TO, span);
+        for (int i = 0; i < SailGenerator.MAX_SPINES; i++) {
+            float drawn = DorsalSpineGenerator.rootZ(i) * span;
+            assertEquals(drawn >= FROM && drawn <= TO, SaddleZone.hides(mask, i), "spine " + i + " drawn at z " + drawn);
+        }
+        assertTrue(31 - Integer.numberOfLeadingZeros(mask)
+                        > 31 - Integer.numberOfLeadingZeros(SaddleZone.groupsWithin(sail, FROM, TO)),
+                "a shorter row hides spines further back");
+        assertEquals(SaddleZone.groupsWithin(sail, FROM, TO), SaddleZone.groupsWithin(sail, FROM, TO, 0f),
+                "a span that is not positive is the full row");
+    }
+
     @Test
     void aMaskNamesOnlyTheGroupsItCanHold() {
         assertFalse(SaddleZone.hides(-1, SaddleZone.MASK_BITS), "a group past the mask is never hidden");

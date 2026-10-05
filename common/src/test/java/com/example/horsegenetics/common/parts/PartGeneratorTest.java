@@ -38,6 +38,12 @@ class PartGeneratorTest {
      */
     private static final float MIN_GIRTH = 0.5f;
 
+    /**
+     * Thinnest a flat box may be across {@code x}. A membrane is seen face on, so its
+     * thin edge is allowed under {@link #MIN_GIRTH}, not to nothing.
+     */
+    private static final float MIN_WIDTH = 0.25f;
+
     @Test
     void everyShapeBuildsWithParentsBeforeChildren() {
         for (PartShape shape : PartGenerators.allShapes()) {
@@ -56,6 +62,12 @@ class PartGeneratorTest {
                 assertTrue(node.len() > 0f, shape + " box " + i + " has no length");
                 assertTrue(node.girth() >= MIN_GIRTH,
                         shape + " box " + i + " is " + node.girth() + " units thick");
+                // A flat box - a membrane - may be thinner across x, never past this, and
+                // only a membrane is flat at all.
+                assertTrue(node.width() >= MIN_WIDTH && node.width() <= node.girth(),
+                        shape + " box " + i + " is " + node.width() + " units wide");
+                assertTrue(node.width() == node.girth() || node.tex() == PartSheet.MEMBRANE,
+                        shape + " box " + i + " is flat and is not a membrane");
                 assertTrue(node.t() >= 0f && node.t() <= 1f,
                         shape + " box " + i + " sits at t=" + node.t() + " along its parent");
                 assertTrue(node.tex() >= 0 && node.tex() < PartSheet.CAPACITY,

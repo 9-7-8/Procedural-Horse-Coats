@@ -222,11 +222,15 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             boolean perElement = part.kind().scalesPerElement();
             if (!perElement) {
                 poseStack.scale(part.girth(), part.stretch(), part.girth());
+            } else if (part.span() != 1f) {
+                // How much of the back a sail covers: the row drawn shorter along its own
+                // length, z, from the withers. Spacing and membrane panels shorten with it.
+                poseStack.scale(1f, 1f, part.span());
             }
 
             PartModel model = PartMeshes.get(part.shape());
             float shown = part.shown();
-            int hidden = underSaddle && part.kind().saddleZoned() ? model.saddleGroups() : 0;
+            int hidden = underSaddle && part.kind().saddleZoned() ? model.saddleGroups(part.span()) : 0;
             float along = perElement ? part.stretch() : 1f;
             float across = perElement ? part.girth() : 1f;
             // A grown part fades with the horse it grew on - a solid horn hanging in
@@ -243,21 +247,28 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             // case (two different colour alleles on a horse that is already one in
             // four hundred), so the common horn still costs one draw.
             //
-            // A crystal antler is two: the bone region see-through, the points
-            // solid - so the expensive blended pass draws the least it can.
+            // A see-through part is two: its kind's see-through regions blended, the
+            // rest solid - so the expensive blended pass draws the least it can. A
+            // crystal antler's bone shafts and solid points; a sail's membrane and solid
+            // spines. Which regions is the kind's data (PartKind.translucentRegions); the
+            // base colour goes see-through and the tip colour stays solid, so a two-tone
+            // sail is a membrane of one colour on spines of the other. At opacity 0 - a
+            // bone sail, bare rays - the blended pass is skipped altogether.
             boolean glow = part.emissive() && genetic.drawPartGlow;
             int glowRegions = part.kind().glowRegions();
             //
             // Every slice carries the saddle zone and the per-element scale, which are
             // nothing (0, 1, 1) for every part that is not a row along the back.
             if (part.translucent()) {
-                int shafts = PartSheet.bit(PartSheet.BONE);
+                int see = part.kind().translucentRegions();
+                if (part.opacity() > 0f) {
+                    submitSlice(submitNodeCollector, model,
+                            PartModel.Slice.regions(see, shown).perGroup(hidden, along, across), poseStack,
+                            genetic, lightCoords,
+                            RiderFade.fade(part.baseTint(), alpha * part.opacity()), true);
+                }
                 submitSlice(submitNodeCollector, model,
-                        PartModel.Slice.regions(shafts, shown).perGroup(hidden, along, across), poseStack,
-                        genetic, lightCoords,
-                        RiderFade.fade(part.baseTint(), alpha * AttachedPart.CRYSTAL_ALPHA), true);
-                submitSlice(submitNodeCollector, model,
-                        PartModel.Slice.regions(PartSheet.SOLID & ~shafts, shown).perGroup(hidden, along, across),
+                        PartModel.Slice.regions(PartSheet.SOLID & ~see, shown).perGroup(hidden, along, across),
                         poseStack, genetic, lightCoords, RiderFade.fade(part.tipTint(), alpha),
                         genetic.isFading());
             } else if (!part.twoTone()) {

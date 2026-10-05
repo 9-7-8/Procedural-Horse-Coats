@@ -113,7 +113,12 @@ class UndeadBreedsTest {
             java.util.Set<String> kinds = new java.util.HashSet<>();
             for (AttachedPart p : parts) {
                 assertFalse(p.emissive(), "a skeleton's horn glows");
-                assertFalse(p.translucent(), "a skeleton's antler is crystal");
+                if (p.kind() == PartKind.SAIL) {
+                    // The sail's bone version: bare rays, the membrane left off.
+                    assertEquals(0f, p.opacity(), "a skeleton's sail has skin");
+                } else {
+                    assertFalse(p.translucent(), "a skeleton's antler is crystal");
+                }
                 assertFalse(p.blooms(), "a skeleton's antler has leaves");
                 kinds.add(p.kind().label());
             }
@@ -132,6 +137,7 @@ class UndeadBreedsTest {
         assertEquals("Bon/Bon", g.genotype().pair(Genes.HORN_COLOUR).toTokens());
         assertEquals("Bon/Bon", g.genotype().pair(Genes.DRAGON_HORN_COLOUR).toTokens());
         assertEquals("Bon/Bon", g.genotype().pair(Genes.DORSAL_SPINE_COLOUR).toTokens());
+        assertEquals("Bon/Bon", g.genotype().pair(Genes.BACK_SAIL_COLOUR).toTokens());
     }
 
     private static final Breed BLACKENED = Breeds.get("blackened_skeleton_horse");
@@ -318,10 +324,10 @@ class UndeadBreedsTest {
         for (Breed.GroupLocus l : SKELETON.countGroups().get(0).loci()) {
             grouped.add(l.gene());
         }
-        // Every granting locus GrownParts knows - if a fifth horn-like part ships,
+        // Every granting locus GrownParts knows - if another horn-like part ships,
         // the owner's rule is that the skeleton's pool takes it too.
         assertEquals(java.util.Set.of(Genes.UNICORN_HORN.key(), Genes.ANTLERS.key(), Genes.RAM_HORNS.key(),
-                Genes.DRAGON_HORNS.key(), Genes.DORSAL_SPINES.key()), grouped);
-        assertEquals(PartKind.values().length, 8, "a new part kind: decide whether the skeleton grows it");
+                Genes.DRAGON_HORNS.key(), Genes.DORSAL_SPINES.key(), Genes.BACK_SAIL.key()), grouped);
+        assertEquals(PartKind.values().length, 9, "a new part kind: decide whether the skeleton grows it");
     }
 }

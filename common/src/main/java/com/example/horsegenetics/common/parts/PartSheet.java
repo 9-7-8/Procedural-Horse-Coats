@@ -80,6 +80,14 @@ public final class PartSheet {
      */
     public static final int HAIR = 7;
 
+    /**
+     * Membrane - the skin stretched between a back sail's spines. Fine veins running
+     * up the box's length over a smooth, pale ground. Opaque on the sheet, like every
+     * region; a sail draws it see-through by tint ({@code PartKind.translucentRegions}),
+     * so the same grain serves a membrane of any opacity.
+     */
+    public static final int MEMBRANE = 8;
+
     /** Every region, as a mask for {@link #bit} tests. */
     public static final int ALL = -1;
 

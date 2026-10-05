@@ -41,7 +41,7 @@ package com.example.horsegenetics.common.parts;
  * @param ry     rotation about y, radians - the roll, on an untipped segment
  * @param rz     rotation about z, radians - the lean
  * @param len    how far the box reaches up its own axis, model units
- * @param girth  the box's square cross-section, model units
+ * @param girth  the box's cross-section, model units - square unless {@code width} says otherwise
  * @param tex    which {@link PartSheet} region the box samples
  * @param group  which <b>countable element</b> this box belongs to - an antler's
  *               tines are groups {@code 0, 1, 2...} ordered base to tip, so "show
@@ -49,12 +49,22 @@ package com.example.horsegenetics.common.parts;
  *               for a box that is always drawn (a horn, an antler's beam). The
  *               first box of a group, the one whose parent is outside it, is the
  *               one the client hides or shrinks; the rest follow as its children.
+ * @param width  the box's extent across {@code x}, model units - {@link #girth} for
+ *               every square box. Only a flat box sets it: a sail's membrane is a
+ *               sheet, thin across the horse and {@code girth} long along it.
  */
 public record PartNode(int parent, float t, float ox, float oy, float oz,
-                       float rx, float ry, float rz, float len, float girth, int tex, int group) {
+                       float rx, float ry, float rz, float len, float girth, int tex, int group,
+                       float width) {
 
     /** {@link #group} of a box that is not part of any countable element. */
     public static final int NO_GROUP = -1;
+
+    /** A square box in a group - every box but a membrane's. */
+    public PartNode(int parent, float t, float ox, float oy, float oz,
+                    float rx, float ry, float rz, float len, float girth, int tex, int group) {
+        this(parent, t, ox, oy, oz, rx, ry, rz, len, girth, tex, group, girth);
+    }
 
     /** A box in no group - everything a horn is made of. */
     public PartNode(int parent, float t, float ox, float oy, float oz,

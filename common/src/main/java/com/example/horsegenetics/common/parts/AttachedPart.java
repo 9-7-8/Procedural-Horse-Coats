@@ -57,14 +57,20 @@ package com.example.horsegenetics.common.parts;
  * @param shown    how many of the mesh's countable elements show - an antler's
  *                 tines, base to tip. Four full ones and a fifth at 60% for
  *                 {@code 4.6}; {@link #ALL_ELEMENTS} for a part with no count
- * @param translucent the {@link PartSheet#BONE} region is drawn see-through and
- *                 the points stay opaque - a crystalline antler
+ * @param opacity  how opaque the regions its kind draws see-through
+ *                 ({@link PartKind#translucentRegions()}) are: {@link #OPAQUE} for a
+ *                 solid part, {@link #CRYSTAL_ALPHA} for a crystalline antler's shafts,
+ *                 a sail's own number for its membrane, and {@code 0} to draw those
+ *                 regions not at all - a bone sail, its bare rays with no skin
  * @param bloomTint the colour of the {@link PartSheet#BLOOM} clumps, or
  *                 {@link #NO_BLOOM} for a part that draws none
+ * @param span     scale along a row - how much of the back a sail covers from the
+ *                 withers - applied on the pose stack along the row's own length.
+ *                 {@code 1} for every other part
  */
 public record AttachedPart(PartShape shape, float stretch, float girth, float tilt,
                            int baseTint, int tipTint, boolean emissive,
-                           float shown, boolean translucent, int bloomTint) {
+                           float shown, float opacity, int bloomTint, float span) {
 
     /** What a part nobody has dressed wears: opaque white, so the sheet's grain shows as it is. */
     public static final int UNDYED = 0xFFFFFFFF;
@@ -81,6 +87,9 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
      */
     public static final float CRYSTAL_ALPHA = 0.55f;
 
+    /** {@link #opacity} of a part with nothing see-through. */
+    public static final float OPAQUE = 1f;
+
     /** How far a part may be scaled on any axis. A guard against a drifted number, not a design range. */
     private static final float MIN_SCALE = 0.2f;
     /** @see #MIN_SCALE */
@@ -95,12 +104,17 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
         if (!(shown >= 0f)) {          // also catches NaN
             shown = 0f;
         }
+        if (!(opacity >= 0f)) {        // also catches NaN
+            opacity = 0f;
+        }
+        opacity = Math.min(OPAQUE, opacity);
+        span = clampScale(span);
     }
 
     /** A part with nothing to count, nothing see-through and no bloom - every horn. */
     public AttachedPart(PartShape shape, float stretch, float girth, float tilt,
                         int baseTint, int tipTint, boolean emissive) {
-        this(shape, stretch, girth, tilt, baseTint, tipTint, emissive, ALL_ELEMENTS, false, NO_BLOOM);
+        this(shape, stretch, girth, tilt, baseTint, tipTint, emissive, ALL_ELEMENTS, OPAQUE, NO_BLOOM, 1f);
     }
 
     private static float clampScale(float v) {
@@ -147,7 +161,7 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
         // multiplies both axes; reach and girth are the non-uniform nudges on top.
         float grow = shape.stretchTo(size);
         return new AttachedPart(shape, (float) (grow * reach), (float) (grow * girth), 0f,
-                tint, tint, false, (float) tines, false, NO_BLOOM);
+                tint, tint, false, (float) tines, OPAQUE, NO_BLOOM, 1f);
     }
 
     /**
@@ -211,7 +225,29 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
         PartShape shape = PartShape.of(PartKind.SPINES, style, length);
         float grow = shape.stretchTo(length);
         return new AttachedPart(shape, grow, (float) (grow * girth), 0f, UNDYED, UNDYED, false,
-                (float) count, false, NO_BLOOM);
+                (float) count, OPAQUE, NO_BLOOM, 1f);
+    }
+
+    /**
+     * A back sail, from the numbers the back sail locus carries - white and dark until
+     * its colour locus dresses it. Like the spine row it scales per element, but only in
+     * height: {@link #stretch} is each spine's and its membrane's, and {@link #girth} is
+     * {@code 1}, because a membrane panel is as wide as the gap between two spines and a
+     * thicker spine would close it. Coverage is the {@link #span} along the row instead.
+     *
+     * @param form     a {@link SailGenerator} form
+     * @param curve    {@code [0,1]}: how strongly the profile arches
+     * @param length   position on the {@link SailSize} ladder - class is the mesh, the rest a stretch
+     * @param count    how many spines show, from the withers back; fractional grows the last one in
+     * @param coverage how far back the row reaches, as a share of the full row
+     * @param opacity  how opaque the membrane is
+     */
+    public static AttachedPart backSail(int form, double curve, double length, double count,
+                                        double coverage, double opacity) {
+        int style = SailGenerator.style(form, bucket(curve, SailGenerator.CURVES));
+        PartShape shape = PartShape.of(PartKind.SAIL, style, length);
+        return new AttachedPart(shape, shape.stretchTo(length), 1f, 0f, UNDYED, UNDYED, false,
+                (float) count, (float) opacity, NO_BLOOM, (float) coverage);
     }
 
     /** {@code x} in {@code [0,1]}, clamped, to one of {@code n} equal buckets. */
@@ -222,17 +258,31 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
 
     /** This part in other colours and light, its shape untouched. */
     public AttachedPart dressed(int base, int tip, boolean glows) {
-        return new AttachedPart(shape, stretch, girth, tilt, base, tip, glows, shown, translucent, bloomTint);
+        return new AttachedPart(shape, stretch, girth, tilt, base, tip, glows, shown, opacity, bloomTint, span);
     }
 
-    /** This part see-through or not, its shape untouched. */
+    /** This part's crystal shafts see-through or not, its shape untouched. */
     public AttachedPart crystalline(boolean see) {
-        return new AttachedPart(shape, stretch, girth, tilt, baseTint, tipTint, emissive, shown, see, bloomTint);
+        return seeThrough(see ? CRYSTAL_ALPHA : OPAQUE);
+    }
+
+    /** This part with its kind's see-through regions at {@code alpha}, its shape untouched. */
+    public AttachedPart seeThrough(float alpha) {
+        return new AttachedPart(shape, stretch, girth, tilt, baseTint, tipTint, emissive, shown, alpha, bloomTint, span);
     }
 
     /** This part with leaves of {@code tint} on it, or none for {@link #NO_BLOOM}. */
     public AttachedPart blooming(int tint) {
-        return new AttachedPart(shape, stretch, girth, tilt, baseTint, tipTint, emissive, shown, translucent, tint);
+        return new AttachedPart(shape, stretch, girth, tilt, baseTint, tipTint, emissive, shown, opacity, tint, span);
+    }
+
+    /**
+     * Is anything about this part see-through - does it draw its kind's
+     * {@link PartKind#translucentRegions()} in the blended pass, or (at {@code 0}) skip
+     * them? Never for a kind with no such regions, whatever its opacity says.
+     */
+    public boolean translucent() {
+        return opacity < OPAQUE && kind().translucentRegions() != 0;
     }
 
     /** Does this part draw its {@link PartSheet#BLOOM} clumps? */

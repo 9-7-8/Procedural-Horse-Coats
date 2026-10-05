@@ -103,11 +103,14 @@ public final class PartMeshes {
         for (int i = 0; i < nodes.size(); i++) {
             PartNode node = nodes.get(i);
             float half = node.girth() / 2f;
+            // x is the node's width: the girth for every square box, thinner for a
+            // flat one (a sail's membrane).
+            float halfWidth = node.width() / 2f;
             CubeListBuilder box = CubeListBuilder.create()
                     .texOffs(PartSheet.u(node.tex()),
                             PartSheet.v(node.tex()))
-                    .addBox(-half, -node.len(), -half,
-                            node.girth(), node.len(), node.girth(), CubeDeformation.NONE);
+                    .addBox(-halfWidth, -node.len(), -half,
+                            node.width(), node.len(), node.girth(), CubeDeformation.NONE);
 
             PartDefinition parent;
             float along;

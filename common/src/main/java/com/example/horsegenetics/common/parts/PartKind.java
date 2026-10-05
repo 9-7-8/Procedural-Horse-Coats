@@ -47,7 +47,14 @@ public enum PartKind {
      * part off the head. One kind for the whole row: it is centred, so there is no
      * side to mirror. Bone, with a polished point ({@link DorsalSpineGenerator}).
      */
-    SPINES(PartAnchor.SPINE, PartSheet.BONE);
+    SPINES(PartAnchor.SPINE, PartSheet.BONE),
+
+    /**
+     * A back sail - the back sail locus. The spine row's anchor and numbering, with a
+     * see-through membrane between the spines ({@link SailGenerator}). Centred, like
+     * the spines, so one kind.
+     */
+    SAIL(PartAnchor.SPINE, PartSheet.BONE);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -79,6 +86,8 @@ public enum PartKind {
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornGenerator.styles();
             // Form x taper.
             case SPINES -> DorsalSpineGenerator.styles();
+            // Form x curve.
+            case SAIL -> SailGenerator.styles();
         };
     }
 
@@ -94,6 +103,7 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornSize.classes();
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornSize.classes();
             case SPINES -> SpineSize.classes();
+            case SAIL -> SailSize.classes();
         };
     }
 
@@ -123,8 +133,27 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> PartSheet.SOLID;
             // Nor a dragon horn; the same answer.
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> PartSheet.SOLID;
-            // Nor the spines.
-            case SPINES -> PartSheet.SOLID;
+            // Nor the spines, nor a sail.
+            case SPINES, SAIL -> PartSheet.SOLID;
+        };
+    }
+
+    /**
+     * The sheet regions this kind draws see-through when the part asks for it
+     * ({@link AttachedPart#translucent()}). A crystalline antler's shafts are its
+     * bone, and its points stay solid. A sail's membrane is always see-through and its
+     * spines never are. {@code 0} for a kind that is never see-through.
+     *
+     * <p>This is data on the kind rather than a constant in the renderer, so a part with
+     * a see-through region of its own is a line here, not a second branch there. The
+     * blended pass draws only these regions, which is what keeps it cheap: on a sail
+     * it draws the membrane and nothing else.
+     */
+    public int translucentRegions() {
+        return switch (this) {
+            case ANTLER_RIGHT, ANTLER_LEFT -> PartSheet.bit(PartSheet.BONE);
+            case SAIL -> PartSheet.bit(PartSheet.MEMBRANE);
+            case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES -> 0;
         };
     }
 
@@ -134,7 +163,7 @@ public enum PartKind {
      * saddle zone are hidden and the rest stay ({@link SaddleZone}).
      */
     public boolean saddleZoned() {
-        return this == SPINES;
+        return this == SPINES || this == SAIL;
     }
 
     /**
@@ -144,7 +173,7 @@ public enum PartKind {
      * Every box of such a kind belongs to a group.
      */
     public boolean scalesPerElement() {
-        return this == SPINES;
+        return this == SPINES || this == SAIL;
     }
 
     /** Is this a dragon horn, of either side? */
@@ -174,6 +203,7 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> "Ram's horns";
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> "Dragon horns";
             case SPINES -> "Dorsal spines";
+            case SAIL -> "Back sail";
         };
     }
 }

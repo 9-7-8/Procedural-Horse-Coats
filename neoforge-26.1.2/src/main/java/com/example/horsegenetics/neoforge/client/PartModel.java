@@ -116,6 +116,8 @@ public final class PartModel extends Model<PartModel.Slice> {
     private final float[] along;
     /** @see #saddleGroups() */
     private final int saddleGroups;
+    /** The nodes the mesh was baked from - for a saddle zone at a span other than 1. */
+    private final List<PartNode> nodes;
 
     /**
      * @param segments     the mesh's boxes in generator order, so segment {@code i} is
@@ -135,6 +137,7 @@ public final class PartModel extends Model<PartModel.Slice> {
         this.regions = new int[n];
         this.along = alongOf(nodes);
         this.saddleGroups = saddleGroups;
+        this.nodes = List.copyOf(nodes);
         for (int i = 0; i < n; i++) {
             PartNode node = nodes.get(i);
             groups[i] = node.group();
@@ -231,5 +234,18 @@ public final class PartModel extends Model<PartModel.Slice> {
      */
     public int saddleGroups() {
         return saddleGroups;
+    }
+
+    /**
+     * The same for a row drawn {@code span} times its baked length - a sail that covers
+     * less of the back ({@link SaddleZone#groupsWithin(List, float, float, float)}). Only
+     * a saddled sail at a span other than 1 pays for the walk, which is a few dozen nodes.
+     */
+    public int saddleGroups(float span) {
+        if (saddleGroups == 0 || span == 1f) {
+            return saddleGroups;
+        }
+        return SaddleZone.groupsWithin(nodes,
+                AttachedPartLayer.SADDLE_ZONE_FROM, AttachedPartLayer.SADDLE_ZONE_TO, span);
     }
 }

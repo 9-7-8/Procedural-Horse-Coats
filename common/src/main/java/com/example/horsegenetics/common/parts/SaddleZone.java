@@ -67,6 +67,18 @@ public final class SaddleZone {
         return mask;
     }
 
+    /**
+     * The same for a row drawn {@code span} times its baked length along {@code z} - a
+     * sail that covers less of the back. Its elements then root nearer the anchor, so a
+     * different run of them is under the saddle. The zone is divided by the span, back
+     * into the mesh's own units, rather than every root multiplied. A span that is not a
+     * positive number is treated as {@code 1}.
+     */
+    public static int groupsWithin(List<PartNode> nodes, float from, float to, float span) {
+        float s = span > 0f ? span : 1f;
+        return groupsWithin(nodes, from / s, to / s);
+    }
+
     /** Is group {@code g} in {@code mask}? */
     public static boolean hides(int mask, int g) {
         return g >= 0 && g < MASK_BITS && (mask >>> g & 1) != 0;

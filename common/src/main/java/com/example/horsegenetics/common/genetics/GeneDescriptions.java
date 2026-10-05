@@ -528,6 +528,20 @@ public final class GeneDescriptions {
                             + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
                             + "Two different copies make every spine two-tone, one colour at the "
                             + "root and the other at the point."),
+            Map.entry("horsegenetics.back_sail",
+                    "A magical, recessive gene: Sail/Sail grows a sail along the back, a row "
+                            + "of spines with a see-through membrane between them. Tall, low or "
+                            + "scalloped, and its height, arch, reach along the back, spine count "
+                            + "and how see-through the membrane is, are epigenetic and inherited "
+                            + "with the allele. Mares and stallions alike; grown at maturity. A "
+                            + "saddle or rider hides the part under the saddle. Its colour is its "
+                            + "own gene."),
+            Map.entry("horsegenetics.back_sail_colour",
+                    "A magical, codominant gene that colours a back sail and does nothing to a "
+                            + "horse without one - the horn colour rule on a locus of its own. "
+                            + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
+                            + "Two different copies make the membrane one colour and the spines "
+                            + "the other. Bone on both copies is bare bone rays with no membrane."),
             Map.entry("horsegenetics.ram_horn_tip",
                     "A magical, recessive gene: Tip/Tip fades a ram's horns into a colour "
                             + "of their own toward the points. The colour is inherited. Molten "

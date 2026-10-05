@@ -51,6 +51,7 @@ const BLOOM = 4;
 const RAM_HORN = 5;
 const RAM_TIP = 6;
 const HAIR = 7;
+const MEMBRANE = 8;
 
 /** Deterministic integer hash to [0,1). Nothing here may use Math.random. */
 function hash(x, y, salt) {
@@ -147,6 +148,20 @@ function hair(u, v) {
   return 0.62 + strand + lock + fibre;
 }
 
+/**
+ * Membrane - the skin between a sail's spines. A sail's panels are flat boxes about
+ * half a texel across, so each one reads a sliver of this region and nothing across
+ * it: any grain in u would be lost, and all a panel can show is what runs along v.
+ * So it is pale and nearly smooth, a faint banding up the length and a fine mottle,
+ * and the see-through tint does the rest. It is the region a sail draws blended, so a
+ * flat light ground keeps the membrane's own colour clean.
+ */
+function membrane(u, v) {
+  const band = noise(u / 6.0, v / 2.5, 12, REGION) * 0.10;
+  const fine = noise(u * 1.2, v * 1.2, 13, REGION) * 0.06;
+  return 0.84 + band + fine;
+}
+
 const px = Buffer.alloc(SIZE * SIZE * 4);          // zeroed: an unused region is blank
 function paint(region, fn) {
   const ox = (region % ACROSS) * REGION;
@@ -172,12 +187,13 @@ paint(BLOOM, (u, v) => bloom(u, v));
 paint(RAM_HORN, (u, v) => ram(u, v, false));
 paint(RAM_TIP, (u, v) => ram(u, v, true));
 paint(HAIR, (u, v) => hair(u, v));
+paint(MEMBRANE, (u, v) => membrane(u, v));
 
 // The one thing worth asserting: every texel a box can reach is opaque. A part is
 // drawn through a cutout pipeline, which DISCARDS a fragment under an alpha of
 // 0.1 - so a region with a transparent corner is a horn with holes in it, and the
 // hole would appear only on the segment sizes that happen to reach that corner.
-const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM, RAM_HORN, RAM_TIP, HAIR];
+const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM, RAM_HORN, RAM_TIP, HAIR, MEMBRANE];
 for (const region of PAINTED) {
   const ox = (region % ACROSS) * REGION;
   const oy = Math.floor(region / ACROSS) * REGION;
