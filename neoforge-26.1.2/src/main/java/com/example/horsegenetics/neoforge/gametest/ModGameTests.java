@@ -3282,17 +3282,41 @@ public final class ModGameTests {
      * tick; 369 was the longest in 120 tries, more than the old 200-tick budget. The wait
      * comes out of the test's own budget, so a test using this needs room for it.
      * Spawn only after this passes, from inside the test's own wait.
+     *
+     * <p>The wait is wall-clock, not ticks (issue #150): what lags is the asynchronous
+     * entity-section load, about 100-200 ms cold, while GameTestServer.waitUntilNextTick
+     * never sleeps, so ticks run anywhere from 0.4 to 6 a millisecond - 1202 ticks went by
+     * in 207 ms once, and the test timed out with the holder already ENTITY_TICKING. So a
+     * tick spent waiting is paced to a real one: the budget then buys about a minute.
+     * Only alone tests call this, so the sleep slows no other test.
      */
+    private static final java.util.Map<BlockPos, long[]> FIELD_WAIT = new java.util.concurrent.ConcurrentHashMap<>();
+
     private static void fieldTicks(GameTestHelper helper) {
         BlockPos at = helper.absolutePos(BlockPos.ZERO);
+        long[] start = FIELD_WAIT.computeIfAbsent(at.immutable(),
+                k -> new long[] {helper.getLevel().getGameTime(), System.nanoTime(), 0});
+        long ticks = helper.getLevel().getGameTime() - start[0];
+        long ms = (System.nanoTime() - start[1]) / 1_000_000;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 var chunk = new net.minecraft.world.level.ChunkPos((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz);
                 if (!helper.getLevel().areEntitiesActuallyLoadedAndTicking(chunk)) {
+                    try {
+                        Thread.sleep(50); // one real tick (issue #150)
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                     throw new GameTestAssertException(Component.literal("waiting for the field's chunk " + chunk
-                            + " to tick before anything is spawned in it"), 0);
+                            + " to tick before anything is spawned in it [waited " + ticks + " ticks, " + ms
+                            + " ms; holder " + helper.getLevel().getChunkSource().getChunkDebugData(chunk)
+                                    .replaceAll("\u00a7.", "").replace('\n', ' ') + "]"), 0);
                 }
             }
+        }
+        if (start[2] == 0) {
+            start[2] = 1;
+            HorseGenetics.LOGGER.info("[gametest] field at {} ticking after {} ticks, {} ms", at, ticks, ms);
         }
     }
 
