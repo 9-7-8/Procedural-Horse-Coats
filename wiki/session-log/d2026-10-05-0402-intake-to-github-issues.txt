@@ -1,0 +1,127 @@
+2026-10-05 04:02 - Intake moves to GitHub issues: procedure, pilot, 105 issues' worth of units, procedures rewritten (time is the end of the session)
+
+This is the "NEXT SESSION" that d2026-10-05-0314-intake-stays-files.txt asked for. It ran on the
+branch claude/beautiful-ptolemy-3a5k63 (a cloud session), not on main: nothing here is merged.
+
+ASKED (owner, in order)
+- "I want to move everything from intake into github issues, so it's public facing (although
+  intake already was) and I can see a history of my labels, ideas, things that have been applied,
+  and issues with them. BEFORE you move anything, can you help me define this procedure, and
+  define how it changes other procedures?" Came of it: procedures/migrate-intake-to-issues.txt.
+- Four design answers by question tool (see DECIDED), then: "Survey how this will impract the other
+  procedures as well" -> a read of every procedure and tool that touches intake, with the gaps
+  the first draft missed.
+- "Probe the problems, and help me solve them using your question tool" -> four more answers.
+- "Okay, move the smallest piece into an issue as a test example" -> #42, then "That looks perfect".
+- "Move all of the small-scale things from intake into issues" -> the To do.txt bullets only
+  (the owner chose "A only" from three scopes) -> #43-#69.
+- "Do step 7, rewrite all of the procedures that read intake" -> done (below).
+- "Now do all the treatment files of 10kb or less into issues" -> #71-#91.
+- "All of the stuff that's about ports should have their own ports label, because those aren't
+  enhancements/features, they're ports, they're fundamentally different." -> label `port`.
+- "Is there any reason it would need to treat ports differently? Also, are there any small pieces
+  left we can move?" -> no (answer below); then "Ports and evidence first" -> #92-#105, and "Yes" to
+  a held-release case in process-intake step 9.
+- "There's nothing small enough left for us to do in this session, so just write everything
+  important down into the session log or the procedure, then end the session." -> this log and
+  the STATE section of the procedure.
+
+DONE (all on the branch; none merged to main)
+- 68e10016, 11329200, aa8fbc39: wrote and revised procedures/migrate-intake-to-issues.txt, its
+  INDEX.txt row and .claude/skills/migrate-intake-to-issues/SKILL.md.
+- c765ea10: pilot. To do.txt bullet "Breeding preview hint" -> issue #42 (idea + from-server).
+- 0cdc1a5d: all 26 other To do.txt bullets -> 27 issues #43-#69: #43 is a tracking parent for the
+  mythic-breed features, #52-#68 its sub-issues; #44/#45 are the cutie-mark and studbook
+  halves of one bullet; #46-#50 are the five procedure write-ups; #51 the dapple gene; #69 true
+  flight. To do.txt now holds its permanent first line and a link to the idea list; its
+  Sizing.txt block is gone.
+- 406ee37a: step 7. process-intake, write-intake-document, whats-next, review-server-logs,
+  report-bug, end-session, release, probe-a-scope, add-a-gene, add-an-item, fix-bug, run-tests,
+  INDEX.txt, show-procedures and five skill wrappers, intake/README.txt (rewritten) and
+  CLAUDE.md (one table row, rule 9) now read issues first. FILE / TRANSITIONAL clauses keep the
+  not-yet-moved files working; grep for those two words when the last file has moved.
+- 492ba1a3: six treatment files of 10 KB or less -> 21 issues #71-#91: Horse exits #71;
+  Bridle and saddle split #72 (#73-#75); Distribution page #76 (#77-#78); Port Fabric #79
+  (#80-#84); Port other loaders #85 (#86-#88); Port NeoForge latest #89 (#90-#91). Files, their
+  Sizing.txt blocks deleted; references in the Rename treatment and the survey repointed.
+- e883fb3d: label `port` on #79-#91 (enhancement removed); rule written into
+  write-intake-document, migrate-intake-to-issues, report-bug and CLAUDE.md.
+- 2c0af309: Port Bedrock #92 (#93-#97), Port Forge 1.12.2 #98 (#99-#103), the Port feasibility
+  survey #104 and the Session hand-off #105 (both `survey`). The port parents #79, #85, #89 now
+  cite #104. process-intake step 9 gained the "held until <release>" case.
+- Labels created (REST): idea, from-server, tracking, procedure, scoped, port, survey, in-progress,
+  size:S, size:M, size:L, impact:new, impact:finishes, impact:unblocks.
+- PROOF: every issue's body was compared with what was meant to be posted (blank-line runs
+  ignored), labels compared, no unresolved "#?" left, sub-issue counts read back from the API, and
+  for every full treatment the fenced text was byte-equal to its source file BEFORE the file was
+  deleted. Two defects were caught that way (below). No code, no wiki page and no test was
+  touched; no Java built.
+
+DECIDED
+- (owner) One issue per unit; a multi-piece treatment is a `tracking` parent plus a sub-issue
+  per piece. Treatment text lives in the issue, split over comments or further issues if needed.
+- (owner) Sizing.txt is replaced by labels (size:, impact:) plus the Depends on and Sized: lines.
+- (owner) A small label set may be added; report-bug's "never invent labels" is relaxed for it.
+- (owner) A session claims a unit with the in-progress label and a "picked, tier, why" comment;
+  full running commentary on the issue while building (over two comments); local sessions read
+  issues the way fix-bug does; a milestone per release; a pinned "Start here" issue.
+- (owner) To do.txt is never deleted: it ends as a redirect line. Each evidence file (gene audit,
+  biome assignments, port survey, session hand-off) is its own `survey` issue.
+- (owner) `Closes #N` on the commit that finishes a unit; `Refs #N` on every other commit.
+- (owner) Scope of the To do move: bullets only. Treatments of 10 KB or less next. Ports get
+  their own label and are not enhancements. Ports and evidence before the near-misses.
+- (owner) process-intake step 9 gets a "held until <release>" case.
+- (me, recommended, not asked) A `procedure` issue is a buildable unit while still an `idea`
+  (it is written from FORMAT.txt, not scoped). Parent issues carry `scoped` as well as
+  `tracking`; process-intake ignores `tracking`. A range size (M-L, S-L) takes the larger label.
+- Differences from the earlier plan in d2026-10-05-0314: the label `feature` became the
+  existing `enhancement`; `owner-needed` became the existing `needs-owner`; `scoped/building`
+  became `scoped` / `in-progress`. Projects boards are still not used (GraphQL).
+- Why `process-intake` needs nothing special for ports (owner's question): a port's constraints
+  are already carried by Depends on, needs-owner and the size label; the one real gap was the
+  "held until 1.0.0" Release case, now written. The `port` label is a filter for the owner.
+- Recorded in: procedures/migrate-intake-to-issues.txt (owner decisions, issue format, STATE,
+  METHOD) and CLAUDE.md rule 9. The 0314 note about Discussions stays in intake/README.txt.
+
+FOUND ON THE WAY
+- The host rewrites any URL containing the word "treatment" by wrapping it in backticks, which
+  breaks the link; a markdown link whose text ends in a backtick before "](" is mangled too. The
+  first batch of 21 issues was patched to link the intake folder at a commit instead. Written
+  into the procedure's METHOD section.
+- GitHub trims one blank line before the footer; comparisons ignore blank-line runs.
+- A first edit script silently applied only one of its replacements (a conditional made it use
+  the wrong list). Caught by diffing; redone cleanly.
+- The #46-#50 "Procedure:" ideas and the stale parts of the Session hand-off (#105) are left as
+  written. Forge piece 2 (#100): Sizing.txt said "No" for in-place-or-copy but the piece text
+  records a later owner decision; kept needs-owner and said so in the issue.
+- #70 (a gametest flake) is another session's; not touched.
+
+PROCEDURES (written or changed)
+- Written: migrate-intake-to-issues (one-off; retire when the migration is complete).
+- Changed to read issues: process-intake, write-intake-document, whats-next, review-server-logs,
+  report-bug, end-session, release (step 5 range audit adds closed issues; new step 8a
+  milestones), probe-a-scope; wording only: add-a-gene, add-an-item, fix-bug, run-tests, INDEX,
+  show-procedures, five skill wrappers.
+- end-session still says "work on main"; this session was told to use a branch, so the code was
+  not merged. No change made.
+
+NOT RUN / NOT CHECKED
+- No Java, no gametest, no bake of wiki/text beyond what end-session step 4g ran; a full
+  :common:test run would still check all of common/, which nothing here touched.
+- None of the rewritten procedures has been run against the new issues (no dry process-intake,
+  whats-next or write-intake-document yet). Local sessions' access to issues is assumed from
+  fix-bug, not tested.
+- Not yet created: the release milestones, the pinned "Start here" issue. The wiki prose links
+  to intake files and tools/rename's config and README are untouched, since their files still
+  exist. No Verification-tab anchors were added (nothing was built).
+
+RELEASE
+Not offered: docs and procedures only, no player-facing change.
+
+PICK UP FIRST
+Continue /migrate-intake-to-issues from its STATE section: the next band of treatment files
+(everything left in intake/ except the 88 KB Attached model parts and the four-jar folder
+fits one issue body), then the milestones and the pinned "Start here" issue; after the last
+file moves, delete the FILE/TRANSITIONAL clauses and Sizing.txt. Then, as the 0314 log said: the
+owner says "go" for the rename freeze after her background fix merges, then /process-intake on
+the rename treatment. Merge branch claude/beautiful-ptolemy-3a5k63 first.

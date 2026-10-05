@@ -139,6 +139,60 @@ STEPS
 8. Create and pin the "Start here" issue.
 9. Write the session log (write-session-log) with the map, then end-session.
 
+STATE (after the first round, 2026-10-05) AND WHAT IS LEFT
+----------------------------------------------------------
+Moved, verified and deleted from intake/ (old file -> issue; pieces are sub-issues):
+  To do.txt bullets            -> #42 (pilot), #43 mythic tracking parent with #52-#68,
+                                  #44-#51, #69; To do.txt is now a redirect line
+  Horse exits                  -> #71
+  Bridle and saddle split      -> #72 (#73-#75)
+  Distribution page            -> #76 (#77, #78)
+  Port - Fabric                -> #79 (#80-#84)      Port - other loaders -> #85 (#86-#88)
+  Port - NeoForge latest       -> #89 (#90, #91)     Port - Bedrock       -> #92 (#93-#97)
+  Port - Forge 1.12.2          -> #98 (#99-#103)
+  Port feasibility survey      -> #104 (survey)      Session hand-off     -> #105 (survey)
+Labels created so far: idea, from-server, tracking, procedure, scoped, port, survey,
+in-progress, size:S|M|L, impact:finishes|unblocks|new.
+Step 7 (rewriting the procedures that read intake) is DONE for the To-do and small-file
+state; its FILE/TRANSITIONAL clauses stay until the last file moves.
+NOT DONE YET: the release milestones (step 3, item 4), the pinned "Start here" issue
+(step 8), the remaining treatment files (about 25 in intake/, all over 10 KB, including
+the mythic, sheep, tail, head, body, feathering, trough and villager treatments, the
+Mythic gene audit and biome files, Rename, Four-jar split and its folder, and Attached
+model parts), the tools/rename config and README, the wiki prose links to intake files
+(breed-book, breeds, compatibility, coding-notes, known-gaps, magical-genes, model-parts,
+roadmap-execution and some gene pages), and the final deletion of Sizing.txt.
+An issue body or comment holds about 65,000 characters; every remaining file fits in one
+body except the 88 KB Attached model parts and the 102 KB four-jar folder, which need
+numbered comments. The 10 KB cutoff of the first round was caution, not a limit.
+
+METHOD THAT WORKED (and the traps)
+----------------------------------
+- Format for a multi-piece treatment: a parent labelled tracking + scoped (+ port for a
+  port) holding the whole text verbatim in a ```text fenced block, so its layout survives;
+  each piece a sub-issue (REST: POST /issues/{parent}/sub_issues with the child's issue
+  id, not its number) holding its own section verbatim, its labels and a Depends on line.
+  A treatment with one piece is one issue with no parent. A To do bullet is an `idea`
+  with the bullet quoted verbatim in a blockquote. Evidence and records are `survey`.
+  A piece's size/impact labels come from Sizing.txt; a range (M-L, S-L) takes the larger
+  size and the original range stays in the Sized: line. needs-owner follows Sizing's "No".
+- Two passes: create every issue (parents first, with placeholder cross-references),
+  then PATCH every body once all numbers exist. A reference to a later issue cannot
+  be known on the first pass.
+- Verify by comparing each issue with what was meant to be posted, ignoring runs of
+  blank lines (GitHub trims one before the footer), plus: no unresolved "#?", labels
+  equal, and the fenced text byte-equal to the source file. Do this before deleting.
+- THE HOST REWRITES ANY URL CONTAINING THE WORD "treatment" (it wraps it in backticks and
+  breaks the link). Link the intake folder at a commit
+  (.../tree/<sha>/intake) and name the file in plain text instead. A markdown link whose
+  text ends in a backtick followed by "](" is mangled too: leave backticks out of link text.
+- The built-in gh client here posts REST only (gh api -X POST ... --input -). The
+  mcp__github__issue_write tool works too. Pace writes at about 2 seconds each.
+- Deleting a file also means: delete its Sizing.txt block, and change any surviving
+  intake file that names it to name the issue instead (only that reference; the text is
+  otherwise left as written).
+- Commits for this migration say `Refs #N`, never `Closes`: they move work, they build none.
+
 DONE WHEN
 ---------
 Every unit and evidence file is an issue, verified; the files are retired; the
