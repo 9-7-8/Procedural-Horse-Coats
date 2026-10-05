@@ -1,0 +1,111 @@
+2026-10-05 13:00 (start, local) - #152 dorsal spines: the first body part, the spine anchor and the saddle zone
+
+ASKED
+-----
+- "/next-release" (work on the next release). The next release is v0.5.045, the lowest
+  open milestone above the newest tag v0.5.044. Every open issue already had a
+  milestone. Its four open bugs were each fixed and waiting on a named check, so they
+  were skipped: #10 and #36 on an in-game look, #35 and #31 on the live server's log.
+  #205 and #206 were closed. That made the first unit #152 (body parts slice A), built
+  by process-intake. It is closed.
+
+DONE
+----
+- 90b5f7f2 (code): the dorsal spines gene, horsegenetics.dorsal_spines (dominant, Dsp,
+  priority 241), and its colour locus, horsegenetics.dorsal_spine_colour (242, an
+  AbstractPartColourGene subclass). Also:
+  - PartAnchor.SPINE, the first anchor off the head. AttachedPartLayer walks
+    root -> body to body-local (0, -7.6, -11), the withers.
+  - PartKind.SPINES, DorsalSpineGenerator (MAX_SPINES cones, 3 forms x 3 tapers) and
+    SpineSize (4 classes).
+  - SaddleZone in common/: the gate (a drawn saddle or a rider) and a group mask, baked
+    once per mesh in PartMeshes and carried per submit in PartModel.Slice.hidden.
+  - Per-element scaling: PartKind.scalesPerElement, Slice.stretch/girth, applied to each
+    group's first box in setupAnim. Without it a whole-part pose scale across a row
+    stretches the row's length too.
+  - Both skeleton breeds carry the spines in their "horns" count group, with spine
+    colour Bon/Bon.
+  Proof: SaddleZoneTest and DorsalSpinesGeneTest (new; SaddleZone was mutated twice, the
+  gate and the range, and the dominance once, and each mutant went red),
+  PartGeneratorTest, DragonHornsGeneTest, GrownParts*, UndeadBreedsTest, BreedFilesTest,
+  BreedFounderTest, BreedClimateRuleTest, EditorRules*, GeneFamily*,
+  GeneDescriptionCoverageTest, CommonPortabilityTest, ResearchTopicTest,
+  CoatBakeGoldenTest and CoatPipelineGoldenTest, all green by name. The bake golden
+  gained only baseline-hash rows, and no pipeline hash moved.
+  :neoforge-26.1.2:build green, check-parity OK, designer boots OK.
+- Docs commit (this one): new pages gene-dorsal-spines.html and
+  gene-dorsal-spine-colour.html, each with a Verification tab. model-parts.html gains a
+  Gameplay paragraph, a Coding section #body-parts (#spine-anchor, #saddle-zone,
+  #row-scale), a bone-versions row, its Roadmap rewritten for the three remaining body
+  slices, and its draw-order check updated. undead-horses.html lists the fifth horn-like
+  part. decisions.html links the calls below. The gene-row bakes, the designer wasm and
+  every index were rebaked. Issue #152 closes with this push; #153, #154 and #155 now open
+  by pointing at #body-parts.
+
+DECIDED
+-------
+- (owner) The skeleton breeds carry the spines in the horn count group, in bone
+  (Bon/Bon). The counts weights were not changed, so the other four parts roll a
+  little less often. Recorded at model-parts.html#bone-versions.
+- (owner) A two-tone row is two-tone on each spine, base to tip, not along the row.
+  Recorded at gene-dorsal-spine-colour.html#colours.
+- (without the owner) A row scales each element about its own root. The treatment did
+  not foresee that the pose-stack scale would stretch a row lengthwise.
+  model-parts.html#row-scale.
+- (without the owner) The saddle zone is the vanilla saddle box with a one-unit margin
+  each side. That hides spines 1-8 of 11 and keeps one at the withers and two over the
+  croup. model-parts.html#saddle-zone.
+- (without the owner) The count shows from the withers back, the antler tine rule.
+  Founders: Dsp/n at 0.3%. Count is wild 5..11, never under 1. The row is 15 units long.
+  All of these are first values for the dev yard to judge.
+- (treatment) Gate: a drawn saddle or ridden, so a phantom saddle with no rider shows
+  the whole row. "Ridden" is EquineRenderState.isRidden (vanilla:
+  entity.isVehicle()), read from the 26.1.2 sources.
+
+FOUND ON THE WAY
+----------------
+- The saddle pad (HorseTackSlot.SADDLE_PAD) is a tack slot that no render layer draws,
+  so it cannot overlap the zone today. Noted on model-parts.html#saddle-zone; this is
+  not a bug.
+- Mistakes put right:
+  - The generator's girth floor (0.4) was under PartGeneratorTest's 0.5. Raised it.
+  - A missing GeneDescriptions entry showed up as a blank description in the gene
+    test. Added one for each gene.
+  - Several PowerShell [IO.File] edits silently did nothing, for two reasons. Relative
+    paths resolve against the process directory, which a Bash `cd` had moved.
+    Multi-line here-strings carry CRLF, and these files are LF. Every edit was
+    re-checked by grep and redone.
+- The code push's autostash conflicted on wiki/search-index.js. It was resolved by
+  end-session 3c: HEAD's copy, then a rebake, then the stash dropped.
+
+PROCEDURES
+----------
+- add-a-gene.txt, step 6.1: a part that lies along the body also answers saddleZoned()
+  and scalesPerElement(), which points at model-parts.html#body-parts. Nothing said so,
+  and slices B-D will need it.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other gene's
+  tests against the two new registry entries (registry-wide walks: census, research
+  topics beyond ResearchTopicTest, the designer/editor sweeps), and the gametests.
+- Nothing has been seen in game. The new Verification anchors:
+  - gene-dorsal-spines.html#open-spines-placement
+  - gene-dorsal-spines.html#open-spines-saddle (includes the two-horses-in-one-frame
+    deferred-submit check)
+  - gene-dorsal-spines.html#open-spines-scale
+  - gene-dorsal-spines.html#open-spines-armour
+  - gene-dorsal-spine-colour.html#open-spine-colour-fade
+  model-parts.html#open-parts-draw-order was updated.
+- No server boot: no startup or config change.
+
+RELEASE
+-------
+Not offered. v0.5.045 still has open units, and next-release offers a release only when
+its milestone is finished.
+
+PICK UP FIRST
+-------------
+/next-release: the next unit on v0.5.045 is #153 (body parts slice B, the back sail),
+through process-intake. Or hand the spines over with hand-over-a-test first; the saddle
+zone is the thing most likely to be wrong.

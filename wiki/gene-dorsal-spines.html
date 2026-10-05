@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dorsal spines &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Dorsal spines</h1>
+
+<p class="lede">
+    One copy and the horse grows a row of spines along the top of its back, from the
+    withers to the croup. Whether they are all one height, fall away toward the tail or
+    alternate tall and short, and how tall, thick, sharp and many they are, is written on
+    the allele. Their colour is a gene of its own,
+    <a href="gene-dorsal-spine-colour.html">dorsal spine colour</a>. The first of the body
+    parts, and the first grown part that is not on the head.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.dorsal_spines"></div>
+
+<h2 id="dominant">One copy, either sex</h2>
+
+<p>
+    Dominant: <code>Dsp/n</code> and <code>Dsp/Dsp</code> both grow the row, so a horse
+    with spines shows them and a horse without carries none. A spined horse bred to a plain
+    one gives spined foals about half the time. It is <strong>not</strong> sex-limited.
+    Foals grow none; the row comes in when the horse grows up, and stays.
+</p>
+
+<h2 id="saddle">Under a saddle</h2>
+
+<p>
+    The row runs through where a saddle and a rider sit. A bare horse nobody is riding
+    shows all of it. Put a saddle on, or get on, and the spines under the saddle are hidden;
+    the ones at the withers and over the croup stay. A horse steered bare at the top bond
+    has no saddle to draw, but its rider still hides the middle of the row.
+</p>
+
+<h2 id="finding">Finding them</h2>
+
+<p>
+    Rare in the wild: about three horses in a thousand have a row. Every one of them shows
+    it, so there are no hidden carriers to find. The skeleton horses can grow a row of bare
+    bone, as one of their horn-like parts.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Form</strong>: <em>uniform</em> (every spine one height), <em>graduated</em>
+        (tallest at the withers, under half that at the croup) or <em>alternating</em> (tall
+        and short in turn).</li>
+    <li><strong>Height</strong>: four classes, <em>low</em> to <em>towering</em>. Low to tall
+        in the wild, and a line bred for height reaches towering and stops.</li>
+    <li><strong>Count</strong>: how many spines there are, from the withers back. From about
+        half a row to a full one in the wild; a line bred down can wear a short crest at the
+        withers.</li>
+    <li><strong>Taper</strong>: blunt pegs to sharp needles.</li>
+    <li><strong>Girth</strong>: thicker or thinner.</li>
+</ul>
+
+<p>
+    Everything stacks: a horse can wear spines and every head part at once.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no attack, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.dorsal_spines"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.dorsal_spines</dd></div>
+    <div><dt>Class</dt><dd><code>DorsalSpinesGene</code></dd></div>
+    <div><dt>Priority</dt><dd>241 (magical band), with its colour locus at 242; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Dsp</span> <span class="allele wild">n</span>, dominant</dd></div>
+    <div><dt>Founders</dt><dd><code>Dsp/n</code> at 0.3%, the rest <code>n/n</code> (<code>WILD_SPINES_PERCENT</code>); no wild homozygote and no hidden carrier</dd></div>
+    <div><dt>Epigenome</dt><dd><code>length</code> (0&ndash;0.7, clamp 0&ndash;1), <code>girth</code> (0.80&ndash;1.25), <code>count</code> (5 to <code>DorsalSpineGenerator.MAX_SPINES</code>, never under 1), <code>form</code> (one of three), <code>taper</code> (0&ndash;1)</dd></div>
+    <div><dt>Part</dt><dd><code>SPINES</code> at the <code>SPINE</code> anchor, sheet <code>BONE</code> and <code>BONE_TIP</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong>; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">Slice A of the body parts</h2>
+
+<p>
+    The first of the four body parts (<a href="model-parts.html">model parts</a>), built to
+    settle three things the sail, plates and crystals reuse: the first anchor off the head,
+    the saddle zone and its gate, and a row whose elements scale on their own. Like the
+    dragon horns, it adds no layer, render-state field or config key. It is one kind
+    (<code>SPINES</code>, centred, so nothing to mirror), <code>DorsalSpineGenerator</code> and
+    <code>SpineSize</code>, and one line in <code>GrownParts.of</code> dressed by
+    <a href="gene-dorsal-spine-colour.html">its colour locus</a>. The granting locus is in
+    <code>GrownParts.shapes</code>&rsquo;s every-part baseline.
+</p>
+
+<h2 id="numbers">The epigenome, by cost</h2>
+
+<ul>
+    <li><code>length</code>: the class is the mesh&rsquo;s size bucket (four; a taller spine is
+        more boxes), the remainder a stretch.</li>
+    <li><code>form</code> and <code>taper</code>: baked,
+        <code>DorsalSpineGenerator.style(form, taper)</code>, three forms by three taper buckets.</li>
+    <li><code>count</code>: shown out of the most baked, front to back, the antler&rsquo;s tine
+        rule: the mesh always holds <code>MAX_SPINES</code>, and a fraction grows the next one in.</li>
+    <li><code>girth</code>: a draw-time scale across each spine.</li>
+</ul>
+
+<p>
+    <code>length</code> and <code>girth</code> scale each spine about its own root, not the row on
+    the pose stack. Across a row, a whole-part scale would also stretch the row lengthwise past the
+    croup. See <a href="model-parts.html#row-scale">model parts</a>.
+</p>
+
+<h2 id="anchor">The spine anchor and the saddle zone</h2>
+
+<p>
+    Body-local, on the adult: <code>(0, -7.6, -11)</code>. That is the withers, where the neck&rsquo;s
+    back edge and the mane meet the top of the body box, and the row runs fifteen units back from
+    there. The saddle covers body <code>z -9.5..0.5</code>, read from vanilla&rsquo;s
+    <code>EquineSaddleModel</code>. A spine rooted within a unit of it is hidden while a saddle is
+    drawn or the horse is ridden, which leaves about one spine at the withers and two over the
+    croup. How the zone works: <a href="model-parts.html#saddle-zone">model parts</a>.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No horse has dorsal spines. The look borrows from animals that do have them: the bony
+    neural spines of a <em>Dimetrodon</em> or a <em>Spinosaurus</em>, and the keratin crest of an
+    iguana. This is fantasy and makes no claim about any real gene. Dominant on purpose (owner,
+    2026-10-02): the spines are the simple body part, one you can see on any horse that carries
+    it, unlike the rare recessive sail planned beside it.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>No dorsal spine row has been seen in a running game: where the spine anchor puts the row, the saddle zone, and each spine scaling on its own are all read from the vanilla boxes and unchecked.</p>
+</div>
+
+<h3 id="open-spines-placement">Where the row sits on the back</h3>
+<p>
+    The spine anchor was placed from the vanilla body, neck and mane boxes, not by eye. Spawn a
+    <code>Dsp/n</code> adult and look from the side: the first spine should stand just behind the
+    mane at the withers, and the last a little short of where the tail leaves the croup. The roots
+    should sit on the back with no gap and not sink into it. Check every form at low and towering
+    height while the horse walks, grazes (the neck swings down past the first spine) and rears (the
+    body bone tilts, and the row should tilt with it).
+</p>
+
+<h3 id="open-spines-saddle">The saddle zone</h3>
+<p>
+    On the same horse, check four states: bare (the whole row), saddled (the middle hidden, about
+    one spine left at the withers and two over the croup, none poking through the saddle), ridden
+    with a saddle, and ridden bare at the top bond (phantom saddle; the middle hidden though no
+    saddle is drawn). Then two spined horses side by side, one saddled and one not, in the same
+    frame. Each should keep its own row, which is the deferred-submit check.
+</p>
+
+<h3 id="open-spines-scale">Each spine scales on its own</h3>
+<p>
+    Two horses with the same form and size class, one at the lowest <code>girth</code> and one at
+    the highest, should have rows the same length with thicker spines on the second. If the
+    thick row is also longer, the per-element scale is not being applied. Then a tiny and a huge
+    horse: the row should scale with the body, because the size gene works through the pose
+    stack. That claim comes from reading the code.
+</p>
+
+<h3 id="open-spines-armour">Under horse armour</h3>
+<p>
+    Body armour is vanilla&rsquo;s whole-horse bake, drawn after the parts. Look at what a
+    tall row does under each armour: it is expected to poke through. Decide with the owner what
+    an armoured spined horse should look like once it has been seen.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

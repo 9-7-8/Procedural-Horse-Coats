@@ -264,7 +264,10 @@ STEPS
    1. C/parts/PartKind.java: add values, one per side. Never mirror with a negative
       scale: it turns culled boxes inside out. Add cases in styles(), sizeBuckets(),
       showsOnFoal(), glowRegions() and any helper predicates.
-      PartGeneratorTest.everyKindIsCompletelyDeclared checks them.
+      PartGeneratorTest.everyKindIsCompletelyDeclared checks them. A part that lies
+      along the body also answers saddleZoned() (a saddle or rider hides the elements
+      under the saddle) and scalesPerElement() (a row: each element scales about its
+      own root, so every box must be in a group); wiki/model-parts.html#body-parts.
    2. A new place to grow: C/parts/PartAnchor.java, plus a case in
       N/client/AttachedPartLayer.anchor(...), with offsets for adults AND foals. Walk
       from the model root (it has a scale and an offset).

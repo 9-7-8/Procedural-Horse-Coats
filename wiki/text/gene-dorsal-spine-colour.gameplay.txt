@@ -1,0 +1,5 @@
+Dorsal spine colour
+(Magical gene / codominant / colours the dorsal spines, paints nothing)
+What colour a horse’s dorsal spines are. The same colours and rules as horn colour (white, the rainbow, pink, black, grey or chaos, and two different copies make a two-tone part), on a locus of its own. On a horse without spines it does nothing.
+
+Crossing two of them The colours, and two-tone rows Exactly the horn colour table . Two copies of one colour give a row of that colour. Two different ones make every spine two-tone: the earlier colour in that list at its root and the other at its point, fading between (owner, 2026-10-05). The row does not fade from withers to croup. Every copy carries a little shade of its own, so no two red rows are quite the same red. Bare bone A Bon copy is ivory bone. No wild horse carries it; the skeleton horses do, so a skeleton’s spines are bare bone like its other horn-like parts. Is it good for the horse? It does nothing to the horse at all. It is only the colour of the spines. Its gene carrot

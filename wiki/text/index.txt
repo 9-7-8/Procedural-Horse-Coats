@@ -780,6 +780,24 @@ wiki/gene-dorsal-shield.html#finding	gameplay	Finding one
 wiki/gene-dorsal-shield.html#inheritance	gameplay	Crossing two of them
 wiki/gene-dorsal-shield.html#layers	coding	What it paints
 wiki/gene-dorsal-shield.html#outcomes	gameplay	What it can come out as
+wiki/gene-dorsal-spine-colour.html#base	coding	One short subclass
+wiki/gene-dorsal-spine-colour.html#bone	gameplay	Bare bone
+wiki/gene-dorsal-spine-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-dorsal-spine-colour.html#colours	gameplay	The colours, and two-tone rows
+wiki/gene-dorsal-spine-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-dorsal-spine-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dorsal-spine-colour.html#invented	science	Invented
+wiki/gene-dorsal-spines.html#anchor	coding	The spine anchor and the saddle zone
+wiki/gene-dorsal-spines.html#carrot	gameplay	Its gene carrot
+wiki/gene-dorsal-spines.html#dominant	gameplay	One copy, either sex
+wiki/gene-dorsal-spines.html#finding	gameplay	Finding them
+wiki/gene-dorsal-spines.html#health	gameplay	Is it good for the horse?
+wiki/gene-dorsal-spines.html#inheritance	gameplay	Crossing two of them
+wiki/gene-dorsal-spines.html#invented	science	Invented
+wiki/gene-dorsal-spines.html#numbers	coding	The epigenome, by cost
+wiki/gene-dorsal-spines.html#pattern	coding	Slice A of the body parts
+wiki/gene-dorsal-spines.html#saddle	gameplay	Under a saddle
+wiki/gene-dorsal-spines.html#what-varies	gameplay	What varies
 wiki/gene-dorsal-wing.html#about	coding	Why it is built this way
 wiki/gene-dorsal-wing.html#carrot	gameplay	Its gene carrot
 wiki/gene-dorsal-wing.html#file	coding	The file
@@ -3322,15 +3340,19 @@ wiki/licensing.html#scope	gameplay	Which files are which
 wiki/licensing.html#third-party	gameplay	Pieces that are not ours
 wiki/model-parts.html#adding	coding	Adding another part
 wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
+wiki/model-parts.html#body-parts	coding	The body parts: an anchor off the head, a saddle zone, a row
 wiki/model-parts.html#bone-versions	coding	Every part with bone in it has a bone version
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
 wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
+wiki/model-parts.html#row-scale	coding	A row scales each element on its own
 wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time
+wiki/model-parts.html#saddle-zone	coding	The saddle zone
 wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
 wiki/model-parts.html#settings	gameplay	If they cost you frames
 wiki/model-parts.html#shape	coding	The shape of it: two sources, one renderer
 wiki/model-parts.html#sheet	coding	One greyscale sheet, and why its regions are featureless
+wiki/model-parts.html#spine-anchor	coding	The spine anchor
 wiki/model-parts.html#three-tiers	coding	The rule that keeps a herd cheap
 wiki/model-parts.html#what-you-see	gameplay	What a player sees
 wiki/paint-order.html#exception	coding	The one gene the order does not describe
