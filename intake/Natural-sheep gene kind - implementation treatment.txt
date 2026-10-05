@@ -13,8 +13,8 @@ It is the groundwork for, and is pointed at by:
   "Sheep coat genes - implementation treatment.txt"
   "Sheep horns and body genes - implementation treatment.txt"
   "Sheep disorders - implementation treatment.txt"
-It sits beside "Mythical rams - implementation treatment.txt" (which owns sheep-build.html) and "Mythical deer -
-implementation treatment.txt" (which owns deer-build.html). THIS file builds the kind; it builds no sheep gene.
+It sits beside "Mythical rams - implementation treatment.txt" (which owns sheep-build.html) and issue #106 (Mythical deer;
+which owns deer-build.html). THIS file builds the kind; it builds no sheep gene.
 
 
 1. The request, as given

@@ -8,7 +8,7 @@ wiki/breed-format.html. This file is retired (deleted, per START HERE step 3) as
 those pages' Gameplay and Coding tabs.
 Release: rides the next release (Recommended: the owner chose the same rule for every other set; not asked for this one).
 Applies when each piece ships; none cuts its own.
-It sits beside "Mythical deer" (which builds the mane-and-tail shape gene these need), "Mythical equids" (which builds the
+It sits beside "Mythical deer" (issue #106; which builds the mane-and-tail shape gene these need), "Mythical equids" (which builds the
 head-colour gene Meandash needs) and the other mythic files. Rules: public domain only, no talking. Meandash's human-form tales are
 excluded, as the table says.
 

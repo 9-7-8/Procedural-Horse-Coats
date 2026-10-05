@@ -7,7 +7,7 @@ exists is wiki/gene-ram-horns.html, wiki/gene-ram-horn-form.html, wiki/model-par
 wiki/breed-format.html and wiki/curly-coat.html (the plan-page precedent). This file is retired (deleted, per
 START HERE step 3) as each piece ships and moves onto those pages' Gameplay and Coding tabs.
 Release: rides the next release (Decided). Applies when each piece ships; none cuts its own.
-It sits beside "Mythical deer - implementation treatment.txt" and shares two of its pieces (the mane-and-tail
+It sits beside issue #106 (Mythical deer) and shares two of its pieces (the mane-and-tail
 shape gene and the hoof colour gene); it follows the audit's two rules: public domain only, no talking.
 
 

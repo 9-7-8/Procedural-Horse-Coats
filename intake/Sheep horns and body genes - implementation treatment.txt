@@ -10,7 +10,7 @@ those pages' Gameplay and Coding tabs.
 Release: rides the next release after the kind ships (see section 8).
 LOWEST POSSIBLE PRIORITY (owner). WAITS ON "Natural-sheep gene kind - implementation treatment.txt".
 Siblings: "Sheep coat genes - implementation treatment.txt", "Sheep disorders - implementation treatment.txt".
-Shares body-space groundwork with "Mythical rams", "Mythical deer" and "Mythical goats" (the sheep-build, deer-build
+Shares body-space groundwork with "Mythical rams", "Mythical deer" (issue #106) and "Mythical goats" (the sheep-build, deer-build
 and goat-build plan pages). THIS file builds no build gene and no new part; it says where the quantitative sheep
 traits would plug in.
 
