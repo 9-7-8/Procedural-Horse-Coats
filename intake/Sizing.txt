@@ -14,15 +14,6 @@ foundation others wait on. Impact: a finishes shipped work, b unblocks units, c 
 or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on that date.
 
 ------------------------------------------------------------------------------
-To do.txt                                                         sized 2026-10-02
-- Cutie-mark pool bias / four studbook kinds                     M  c  owner answered 2026-10-02 (bias: gene+breed, breed wins; performance = stat minimums)
-- Procedure write-ups (compat-test, measure-worldgen,
-  add-a-wood-family, answer-a-tester)                            S each, owner-free
-- Natural dapple gene (Balius wants one)                         M  c  near-owner: add-a-gene asks its design calls
-- Mythic features still to SCOPE (wings, forced riding, tails,
-  immortality call, fire breath, extra legs/heads, ...)          -  -  No: each needs write-intake-document first
-
-------------------------------------------------------------------------------
 Attached model parts.txt   (PLAN ONLY)                            sized 2026-10-02
 STALE for stages 0-3: the spike, the registry/layer, the first gene and the head batch have
 shipped (AttachedPartLayer, PartAnchor, PartKind, GrownParts; horn, antlers, ram's and dragon
