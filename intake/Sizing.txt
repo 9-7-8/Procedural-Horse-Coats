@@ -104,25 +104,6 @@ Mythic breeds - gene audit.txt   (AN AUDIT, NOT A SPEC)               sized 2026
 Built? No.
 
 ------------------------------------------------------------------------------
-Mythical antlered beasts - implementation treatment.txt              sized 2026-10-02
-- Piece 1: five breeds (Tarandrus, Leucrocotta first; ...)       S each c  No: creates breeds
-Built? No.
-
-------------------------------------------------------------------------------
-Mythical goats - implementation treatment.txt                        sized 2026-10-02
-- Piece 1: scimitar ram-horn shape (Sci)                         S-M b owner-free; never with rams' P1
-- Piece 2a-2c: the goat breeds                                   S each c  No: creates breeds; P1 (+deer P1-2)
-- Piece 3: goat-build.html plan page                             S  b  No: "one locus or separate loci" Open
-Built? No.
-
-------------------------------------------------------------------------------
-Mythical rams - implementation treatment.txt                         sized 2026-10-02
-- Piece 1: horizontal-twist ram-horn shape (Hzt)                 S-M b owner-free; never with goats' P1
-- Piece 2a/2b: the ram breeds                                    S each c  No: creates breeds
-- Piece 3: sheep-build.html plan page                            S  b  No: build-gene shape Open
-Built? No.
-
-------------------------------------------------------------------------------
 Natural-sheep gene kind - implementation treatment.txt  (LOWEST PRIORITY, owner)  sized 2026-10-02
 - Piece 1: the kind exists                                       L  b  owner-free; the sheep files wait on it
 - Piece 2: kind in GeneFamily, RandomizeMode, editors, wiki      M  b  No: creator offering Open; P1

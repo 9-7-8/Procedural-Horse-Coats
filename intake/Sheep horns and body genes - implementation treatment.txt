@@ -10,7 +10,7 @@ those pages' Gameplay and Coding tabs.
 Release: rides the next release after the kind ships (see section 8).
 LOWEST POSSIBLE PRIORITY (owner). WAITS ON "Natural-sheep gene kind - implementation treatment.txt".
 Siblings: "Sheep coat genes - implementation treatment.txt", "Sheep disorders - implementation treatment.txt".
-Shares body-space groundwork with "Mythical rams", "Mythical deer" (issue #106) and "Mythical goats" (the sheep-build, deer-build
+Shares body-space groundwork with "Mythical rams" (issue #124), "Mythical deer" (issue #106) and "Mythical goats" (issue #129; the sheep-build, deer-build
 and goat-build plan pages). THIS file builds no build gene and no new part; it says where the quantitative sheep
 traits would plug in.
 
@@ -52,7 +52,7 @@ Not in scope (all re-askable)
     (from the rams treatment; re-read the code). Both horn genes are MAGICAL (isNatural() false) today.
     The wiki says Rh/Rhm are "that difference as two alleles" - the sheep sex-difference - and "does not borrow its
     name" (gene-ram-horns.html#real-sheep, science tab).
-    NOTE: the Mythical goats and rams treatments both append a shape to this same list; whichever ships first
+    NOTE: the Mythical goats (#129) and rams (#124) treatments both append a shape to this same list; whichever ships first
     takes the next slot (see them).
 3b. Four-horned (Fhn) and scurred (Scr) already exist as horn forms. They are not HOXD1 polyceraty and not RXFP2
     scurs - they are magical shape alleles. Polyceraty, horned-at-all and scurred must be "separate variables"
@@ -68,8 +68,8 @@ Not in scope (all re-askable)
     UNVERIFIED (read the pair class and the breeding code). Callipyge needs it.
 3f. Sex handling: the sex gene (horsegenetics.sex) and EditorRules.enforceSexLinkage; Rhm is the existing
     "stallion only" precedent for a sex-influenced horn.
-3g. The three build plans: sheep-build.html is created by "Mythical rams" Piece 3, deer-build.html by "Mythical
-    deer" Piece 5, goat-build.html by the goats. All are Roadmap-only pages and none exists yet.
+3g. The three build plans: sheep-build.html is created by "Mythical rams" Piece 3 (#128), deer-build.html by "Mythical
+    deer" Piece 5 (#113), goat-build.html by the goats (#134). All are Roadmap-only pages and none exists yet.
 Looks built but is not
   - Any body-proportion system (leg length, chest depth, rump width, face profile). Body space exists
     (HorseSkinGeometry, the vanilla model tables) but there is no build gene.
