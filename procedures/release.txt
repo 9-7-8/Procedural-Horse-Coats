@@ -4,8 +4,10 @@ SAY        : "ship a release", "cut a release", "push a release", "release it",
              "new version", "tag it", "is it worth a release"
 RUNS       : local only (the jar cannot build in the cloud sandbox)
 TAKES      : a substantial batch of unreleased work on main, and the owner's yes
-LEAVES     : every code test green, README.md brought up to date, a tag, a GitHub release
-             with the jar, and the same note on wiki/releases.html
+LEAVES     : every code test green, README.md brought up to date, photos of every new part
+             committed under release-photos/v<new>/, a tag, a GitHub release with the jar
+             and those photos in its note, the same note on wiki/releases.html, and a
+             Discord post with the photos
 ==============================================================================
 
 WHEN TO USE
@@ -133,6 +135,35 @@ STEPS
    - links resolve (check-links.mjs covers wiki pages; look at the GitHub ones by eye).
    Commit it with the version bump (step 4) so the tag points at a README that is true.
 
+5c. Photograph the new parts, BEFORE the build and the tag (owner, 2026-10-05: ship every
+   release with photos of all the new parts, in the GitHub note and in the Discord post).
+   a. List every NEW PART in the range that has a look: a gene or coat, a grown part, a
+      breed, an item, a block, a screen. Use the step 5 audit as the checklist. Each gets at
+      least one photo; a part that only changes behaviour has nothing to photograph and is
+      named as "no photo" in the summary, not silently skipped.
+   b. Run photograph-horses for horses and parts. Give a breed its own founder shot. For
+      an item, block or screen, take an in-game screenshot the same way (DebugPhotoShoot
+      has no item stage: extend it, or screenshot by hand with the owner's world closed
+      per launch-game). Name files plainly: <subject>.png, e.g. back-sail.png.
+   c. Look at every picture with Read. Retake any that is empty, mis-framed, or hides the
+      part. A diagram is never a photo: if a part cannot be photographed yet, say so in the
+      note, do not draw one in its place.
+   d. Copy the keepers from run/screenshots/ into release-photos/v<new>/ (one NEW folder
+      per release; never reuse or overwrite an old one). Keep each file under about 1 MB:
+      downscale a larger one (never crop). Commit the folder with the version bump (step 4)
+      and push main BEFORE the release is created, so the note's image links resolve.
+   e. In the GitHub note (step 5), embed each photo under its subject with
+      ![<what it shows>](https://raw.githubusercontent.com/9-7-8/Procedural-Horse-Coats/main/release-photos/v<new>/<file>.png)
+      Use the main path, not the tag path: the note is written before the tag exists.
+      A short caption under each says what to look at.
+   f. Write the Discord post as a file beside the photos,
+      release-photos/v<new>/discord-post.md, in the format of the earlier posts (see
+      intake/discord-command-whistle/): a "FOR THE DISCORD BOT" header, messages each under
+      2000 characters, an "ATTACH: <file>" line per photo (Discord cannot show inline
+      markdown images), Discord markdown only, no tables, and the release link. The bot or
+      the owner posts it. A session cannot post to Discord: hand the owner the file and say
+      so in the summary.
+
 6. Build the jar from a CLEAN tree whose HEAD is the commit you will tag:
    `./gradlew :neoforge-26.1.2:build`. Open the jar to confirm its version and the new
    classes.
@@ -156,7 +187,9 @@ STEPS
    ask for an isLatest field: it does not exist, and the whole call fails. A pushed tag
    is not a release, because testers download from the release page.
 
-9. Put the same note on wiki/releases.html as a new <h2 id="v0-5-0xx"> section. Then
+9. Put the same note on wiki/releases.html as a new <h2 id="v0-5-0xx"> section, with the
+   same photos (the same raw.githubusercontent links, or a relative path if the wiki ships
+   them). Then
    run build-search-index.mjs, bake-agent-text.mjs and check-links.mjs, and commit and
    push.
 
@@ -172,6 +205,9 @@ and the summary says which; or:
 - `gh release view` lists the jar;
 - the wiki note matches the GitHub note;
 - README.md was reviewed against the range and is in the tagged commit;
+- release-photos/v<new>/ holds a photo of every new part with a look, was pushed before
+  the release was created, and the GitHub note, wiki note and Discord post all show them;
+- release-photos/v<new>/discord-post.md exists and the owner has it;
 - main and the tag are pushed, and the tree is clean.
 
 NEVER
@@ -184,6 +220,9 @@ NEVER
   saves loading, and never without confirming with the owner.
 - Never reuse a version number, or reissue one with different bytes.
 - Never skip the release set: the full suite runs before every release.
+- Never publish a release note whose image links do not resolve: push the photos first.
+- Never put a diagram or mock-up in a note as if it were a photo.
+- Never commit photos from run/ to anything but release-photos/v<new>/.
 - Never tag with a README that is out of date: it is the first thing a new player reads.
 - Never stop at a pushed tag.
 - Never write the note from memory instead of the tag range.
@@ -192,6 +231,6 @@ NEVER
 
 SEE ALSO
 --------
-README.md (step 5b); test-tiers (the release set); launch-game (the server boot); end-session; fix-bug;
+README.md (step 5b); photograph-horses (step 5c); test-tiers (the release set); launch-game (the server boot); end-session; fix-bug;
 process-intake; wiki/releases.html (the numbering and saves notes); CLAUDE.md hard
 rule 10.

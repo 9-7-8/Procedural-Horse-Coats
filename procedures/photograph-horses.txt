@@ -75,7 +75,8 @@ NEVER
 - Never close a client the owner is playing in to take pictures.
 - Never call a part verified because it looks right in a screenshot: placement in motion,
   foals and other gear are Verification-tab checks of their own.
-- Never commit the screenshots: run/ is not tracked.
+- Never commit the screenshots: run/ is not tracked. The one exception is a release: release
+  step 5c copies the keepers into release-photos/v<new>/.
 
 SEE ALSO
 --------
