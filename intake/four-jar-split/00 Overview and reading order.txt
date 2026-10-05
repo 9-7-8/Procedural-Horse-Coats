@@ -82,7 +82,7 @@ add-ons need; Equipment is the most self-contained add-on (carts already plug in
 bridge); Breeding is the largest and goes last, when the plug-in contract has been proven twice.
 
 DEPENDENCY ON OTHER WORK (owner): this split lands AFTER the rename to Ixora's Horse Overhaul
-(intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt). The four ids above use
+(GitHub issue #142, label `rename`). The four ids above use
 the new brand. Do not build both at once; do not start piece 1 until the converter exists.
 
 5. IN SCOPE, AND WHAT IS NOT

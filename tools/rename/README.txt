@@ -5,7 +5,7 @@ machine, so NOTHING was executed against the repo, a real world or the Gradle bu
 with plain javac into a scratch folder and its --self-test (synthetic world, temp folder) PASSED on 2026-10-04 after one
 fix it found (translation keys such as item.horsegenetics.x were being left behind). The node scripts were only
 syntax-checked (node --check). No existing file in the repo was edited: settings.gradle.kts, neoforge.mods.toml and
-every source file are as they were. Treatment: intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt.
+every source file are as they were. Plan: GitHub issue #142 (the rename, label `rename`; pieces #143-#145).
 
 WHAT IS HERE
   converter/                          the standalone world converter (a new Gradle module, NOT yet in settings.gradle.kts)
