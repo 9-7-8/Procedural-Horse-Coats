@@ -30,7 +30,7 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 | A gap, unchecked assumption, or open follow-up | the owning page's **Verification tab** |
 | Something to go look at in-game | a **Verification tab on that thing's own page** |
 | Work not started yet | a **Roadmap tab on that thing's own page** |
-| A feature wanted, in the build queue | a **GitHub issue** (`enhancement`; `idea` until scoped, then `scoped`) |
+| A feature wanted, in the build queue | a **GitHub issue** (`enhancement`, or `port` for a port; `idea` until scoped, then `scoped`) |
 | A design call - made, or still open | `wiki/decisions.html` |
 | An API quirk of this SDK | `wiki/api-notes.html` |
 | **A derived number** (gene counts, catalogue sizes, test counts) | the code that computes it |

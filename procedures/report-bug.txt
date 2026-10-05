@@ -83,7 +83,7 @@ STEPS
      end the issue with 2-4 fix options, your recommendation first. An issue without
      this label is picked up by the next run-tests or fix-bug run.
    - Never found-in-yard: that label is the yard's own. Never invent new labels. The
-     feature-queue labels (idea, scoped, tracking, survey, procedure, from-server,
+     feature-queue labels (idea, scoped, tracking, survey, procedure, port, from-server,
      in-progress, size:*, impact:*) belong to the feature procedures, not to a bug.
    - Urgency goes in the body's first line, as one of:
        DAMAGE   - a crash, a lost horse or item, a save that will not load;

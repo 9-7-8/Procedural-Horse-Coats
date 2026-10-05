@@ -55,7 +55,9 @@ Body, in this order:
 End with the attribution footer.
 Labels:
   existing   enhancement (means feature), needs-owner, wontfix
-  new        idea (unscoped), scoped (a treatment written, buildable), tracking,
+  new        port (a port of the mod to another loader, Minecraft version or platform;
+             it replaces enhancement on a port, which is not a feature),
+             idea (unscoped), scoped (a treatment written, buildable), tracking,
              survey, from-server, procedure,
              in-progress, size:S size:M size:L,
              impact:finishes impact:unblocks impact:new

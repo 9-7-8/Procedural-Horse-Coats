@@ -142,8 +142,9 @@ PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS
 
 PART 3 - THE ISSUE: TITLE, HEADER AND SECTIONS
 ==============================================
-Title: the feature's name; a piece reads "<Name> - piece N: <what>". Labels: enhancement,
-scoped (not idea), size and impact per piece, needs-owner when an Open line is hers.
+Title: the feature's name; a piece reads "<Name> - piece N: <what>". Labels: enhancement
+(a PORT of the mod to another loader, Minecraft version or platform gets `port` instead,
+never both), scoped (not idea), size and impact per piece, needs-owner when an Open line is hers.
 The body starts with these lines, then the header paragraph, then the sections below
 (markdown is fine: this is an issue, not a procedure file):
 
