@@ -3,7 +3,9 @@ package com.example.horsegenetics.neoforge.client;
 import com.example.horsegenetics.common.parts.AttachedPart;
 import com.example.horsegenetics.common.parts.PartAnchor;
 import com.example.horsegenetics.common.parts.PartSheet;
+import com.example.horsegenetics.common.parts.SaddleZone;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.animal.equine.HorseModel;
@@ -114,6 +116,49 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     private static final float[] FOAL_NAPE = {2.6f, -2.95f, 1.8f};
 
     /**
+     * Where a row along the back roots on the <b>adult</b> body, in body-local model
+     * units - the first anchor off the head. Read from the 26.1.2 sources, not seen:
+     * the {@code body} box is {@code (-5,-8,-17)} sized {@code (10,10,22)} on a pivot of
+     * {@code (0,11,5)} (and {@code HdHorseModel.createHdBodyMesh} copies it exactly), so
+     * its top is {@code y -8} and it runs {@code z -17..5}. The neck's back edge and the
+     * mane meet that top at about {@code z -10..-12} with the head at rest, so
+     * {@code z -11} is the withers; {@code y -7.6} is under half a unit inside the top,
+     * so a raked spine shows no gap at its root. The row runs back along {@code +z}
+     * from here ({@code DorsalSpineGenerator.ROW_LENGTH}).
+     */
+    private static final float[] ADULT_SPINE = {0f, -7.6f, -11.0f};
+
+    /**
+     * The same on the foal. Never drawn - a foal wears no body part
+     * ({@code PartKind.showsOnFoal}) - and the adult's value rather than a throw,
+     * because the switch below must answer for every anchor on both models.
+     */
+    private static final float[] FOAL_SPINE = ADULT_SPINE;
+
+    /**
+     * The saddle, along the body, in body-local units. Vanilla's
+     * {@code EquineSaddleModel.createSaddleLayer} hangs it on {@code body} as a box
+     * {@code (-5,-8,-9)} sized {@code (10,9,9)} inflated by {@code 0.5}, so it covers
+     * {@code z -9.5..0.5}. Read from the 26.1.2 sources, not seen. The saddle pad
+     * ({@code HorseTackSlot.SADDLE_PAD}) is a slot nothing draws yet, so it cannot
+     * reach past this today.
+     */
+    private static final float SADDLE_FRONT = -9.5f;
+    /** @see #SADDLE_FRONT */
+    private static final float SADDLE_BACK = 0.5f;
+    /**
+     * How far either side of the saddle a spine's root still counts as under it: a
+     * spine is a unit or two thick and rakes back, so one rooted just clear of the
+     * pommel would still stand in the rider's lap. A first value, not a tuned one.
+     */
+    private static final float SADDLE_MARGIN = 1.0f;
+
+    /** The saddle zone along a {@code SPINE} part, in the anchor's own units - what {@code PartMeshes} asks. */
+    static final float SADDLE_ZONE_FROM = SADDLE_FRONT - SADDLE_MARGIN - ADULT_SPINE[2];
+    /** @see #SADDLE_ZONE_FROM */
+    static final float SADDLE_ZONE_TO = SADDLE_BACK + SADDLE_MARGIN - ADULT_SPINE[2];
+
+    /**
      * How large a foal's horn is against the horn it will grow into.
      *
      * <p>A foal wears its own horn rather than nothing (owner's call) because a horn
@@ -145,6 +190,12 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             return;
         }
         float alpha = genetic.fadeAlpha;
+        // A saddle that is DRAWN, or a rider: a phantom saddle is present and not
+        // drawn, and its rider still sits on the back. isRidden is vanilla's own
+        // (AbstractHorseRenderer: entity.isVehicle()).
+        boolean saddleDrawn = state.saddle != null && !state.saddle.isEmpty()
+                && !state.saddle.has(ModDataComponents.PHANTOM_SADDLE.get());
+        boolean underSaddle = SaddleZone.covers(saddleDrawn, state.isRidden);
         for (AttachedPart part : genetic.parts) {
             // A foal grows no antlers, ram's horns or dragon horns - they come with
             // maturity (PartKind.showsOnFoal) - but wears its half-size horn.
@@ -165,10 +216,19 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             // long horn on a strong lean would come out as a squashed parallelogram.
             // Nothing would log, and a nub would look fine.
             poseStack.mulPose(Axis.XP.rotation(part.tilt()));
-            poseStack.scale(part.girth(), part.stretch(), part.girth());
+            // A row along the back scales each element about its own root instead -
+            // across a row, this scale would stretch it lengthwise too. That goes
+            // through the slice, applied in setupAnim like the count.
+            boolean perElement = part.kind().scalesPerElement();
+            if (!perElement) {
+                poseStack.scale(part.girth(), part.stretch(), part.girth());
+            }
 
             PartModel model = PartMeshes.get(part.shape());
             float shown = part.shown();
+            int hidden = underSaddle && part.kind().saddleZoned() ? model.saddleGroups() : 0;
+            float along = perElement ? part.stretch() : 1f;
+            float across = perElement ? part.girth() : 1f;
             // A grown part fades with the horse it grew on - a solid horn hanging in
             // the air over a see-through horse would read as a bug. RiderFade.fade
             // keeps the colour and moves only the alpha, and the render type has to
@@ -187,41 +247,51 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
             // solid - so the expensive blended pass draws the least it can.
             boolean glow = part.emissive() && genetic.drawPartGlow;
             int glowRegions = part.kind().glowRegions();
+            //
+            // Every slice carries the saddle zone and the per-element scale, which are
+            // nothing (0, 1, 1) for every part that is not a row along the back.
             if (part.translucent()) {
                 int shafts = PartSheet.bit(PartSheet.BONE);
-                submitSlice(submitNodeCollector, model, PartModel.Slice.regions(shafts, shown), poseStack,
+                submitSlice(submitNodeCollector, model,
+                        PartModel.Slice.regions(shafts, shown).perGroup(hidden, along, across), poseStack,
                         genetic, lightCoords,
                         RiderFade.fade(part.baseTint(), alpha * AttachedPart.CRYSTAL_ALPHA), true);
                 submitSlice(submitNodeCollector, model,
-                        PartModel.Slice.regions(PartSheet.SOLID & ~shafts, shown), poseStack,
-                        genetic, lightCoords, RiderFade.fade(part.tipTint(), alpha), genetic.isFading());
+                        PartModel.Slice.regions(PartSheet.SOLID & ~shafts, shown).perGroup(hidden, along, across),
+                        poseStack, genetic, lightCoords, RiderFade.fade(part.tipTint(), alpha),
+                        genetic.isFading());
             } else if (!part.twoTone()) {
-                submitSlice(submitNodeCollector, model, PartModel.Slice.regions(PartSheet.SOLID, shown),
+                submitSlice(submitNodeCollector, model,
+                        PartModel.Slice.regions(PartSheet.SOLID, shown).perGroup(hidden, along, across),
                         poseStack, genetic, lightCoords, RiderFade.fade(part.baseTint(), alpha),
                         genetic.isFading());
             } else {
                 int n = model.segmentCount();
                 for (int i = 0; i < n; i++) {
-                    float along = model.along(i);
-                    int tint = RiderFade.fade(part.tintAt(along), alpha);
-                    submitSlice(submitNodeCollector, model, PartModel.Slice.segment(i, shown), poseStack,
+                    int tint = RiderFade.fade(part.tintAt(model.along(i)), alpha);
+                    submitSlice(submitNodeCollector, model,
+                            PartModel.Slice.segment(i, shown).perGroup(hidden, along, across), poseStack,
                             genetic, lightCoords, tint, genetic.isFading());
                     if (glow) {
-                        submitGlow(submitNodeCollector, model, new PartModel.Slice(i, shown, glowRegions),
+                        submitGlow(submitNodeCollector, model,
+                                new PartModel.Slice(i, shown, glowRegions).perGroup(hidden, along, across),
                                 poseStack, genetic, tint);
                     }
                 }
             }
             if (glow && !part.twoTone()) {
-                submitGlow(submitNodeCollector, model, PartModel.Slice.regions(glowRegions, shown),
+                submitGlow(submitNodeCollector, model,
+                        PartModel.Slice.regions(glowRegions, shown).perGroup(hidden, along, across),
                         poseStack, genetic, RiderFade.fade(part.tipTint(), alpha));
             }
             // Leaves are their own colour and their own pass, over boxes every antler
             // mesh already carries and only a blooming horse ever draws.
             if (part.blooms()) {
                 submitSlice(submitNodeCollector, model,
-                        PartModel.Slice.regions(PartSheet.bit(PartSheet.BLOOM), shown), poseStack,
-                        genetic, lightCoords, RiderFade.fade(part.bloomTint(), alpha), genetic.isFading());
+                        PartModel.Slice.regions(PartSheet.bit(PartSheet.BLOOM), shown)
+                                .perGroup(hidden, along, across),
+                        poseStack, genetic, lightCoords, RiderFade.fade(part.bloomTint(), alpha),
+                        genetic.isFading());
             }
             poseStack.popPose();
         }
@@ -319,6 +389,14 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
                 float[] base = baby ? FOAL_NAPE : ADULT_NAPE;
                 float side = anchor == PartAnchor.NAPE_LEFT ? 1f : -1f;
                 yield new float[] {side * base[0], base[1], base[2]};
+            }
+            case SPINE -> {
+                // The first anchor off the head: body is the root's child, and its own
+                // pose is the rear (body.xRot in AbstractEquineModel.setupAnim). Never
+                // a child added to body in createHdBodyMesh - that moves the mesh the
+                // HD coat UVs are baked against.
+                root.getChild("body").translateAndRotate(poseStack);
+                yield baby ? FOAL_SPINE : ADULT_SPINE;
             }
         };
 

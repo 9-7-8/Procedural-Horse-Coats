@@ -94,6 +94,7 @@ public record PartShape(PartKind kind, int style, int size) {
             case ANTLER_RIGHT, ANTLER_LEFT -> AntlerSize.lengthFor(position);
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornSize.lengthFor(position);
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornSize.lengthFor(position);
+            case SPINES -> SpineSize.lengthFor(position);
         };
     }
 

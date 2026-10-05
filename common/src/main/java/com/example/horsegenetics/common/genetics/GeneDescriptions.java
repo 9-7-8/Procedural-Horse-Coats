@@ -515,6 +515,19 @@ public final class GeneDescriptions {
                             + "White, the seven rainbow colours, pink, black, grey, and chaos. Two "
                             + "different copies make a two-tone pair, one colour at the root and "
                             + "the other at the tips."),
+            Map.entry("horsegenetics.dorsal_spines",
+                    "A magical, dominant gene: one Dsp copy grows a row of spines along the "
+                            + "back, from the withers to the croup. Uniform, graduated or "
+                            + "alternating, and their height, thickness, taper and count, are "
+                            + "epigenetic and inherited with the allele. Mares and stallions "
+                            + "alike; grown at maturity. A saddle or rider hides the ones under "
+                            + "the saddle. Their colour is its own gene."),
+            Map.entry("horsegenetics.dorsal_spine_colour",
+                    "A magical, codominant gene that colours dorsal spines and does nothing to "
+                            + "a horse without them - the horn colour rule on a locus of its own. "
+                            + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
+                            + "Two different copies make every spine two-tone, one colour at the "
+                            + "root and the other at the point."),
             Map.entry("horsegenetics.ram_horn_tip",
                     "A magical, recessive gene: Tip/Tip fades a ram's horns into a colour "
                             + "of their own toward the points. The colour is inherited. Molten "

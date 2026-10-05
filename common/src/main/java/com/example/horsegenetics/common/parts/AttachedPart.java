@@ -43,7 +43,9 @@ package com.example.horsegenetics.common.parts;
  *
  * @param shape    which baked mesh
  * @param stretch  scale along the part's own axis, so its length is exactly what
- *                 the epigenome asked for rather than its bucket's nominal length
+ *                 the epigenome asked for rather than its bucket's nominal length -
+ *                 along each element's own axis instead, for a kind that
+ *                 {@link PartKind#scalesPerElement() scales per element}
  * @param girth    scale across the part's axis - a slender horn or a stout one
  * @param tilt     radians the whole part leans forward from the anchor's own up
  * @param baseTint opaque ARGB multiplied into the greyscale sheet at the root
@@ -189,6 +191,27 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
         // horn is a bigger one, not a thinner one - and girth the nudge on top.
         float grow = shape.stretchTo(length);
         return new AttachedPart(shape, grow, (float) (grow * girth), 0f, UNDYED, UNDYED, false);
+    }
+
+    /**
+     * A row of dorsal spines, from the numbers the dorsal spines locus carries - white
+     * and dark until its colour locus dresses it. The kind scales per element
+     * ({@link PartKind#scalesPerElement()}), so {@link #stretch} and {@link #girth}
+     * are each spine's height and thickness, applied about its own root, and the
+     * row's length along the back never changes.
+     *
+     * @param form   a {@link DorsalSpineGenerator} form
+     * @param taper  {@code [0,1]}: how sharply each spine narrows to its point
+     * @param length position on the {@link SpineSize} ladder - class is the mesh, the rest a stretch
+     * @param count  how many spines show, from the withers back; fractional grows the last one in
+     * @param girth  extra thickness on top of the height
+     */
+    public static AttachedPart dorsalSpines(int form, double taper, double length, double count, double girth) {
+        int style = DorsalSpineGenerator.style(form, bucket(taper, DorsalSpineGenerator.TAPERS));
+        PartShape shape = PartShape.of(PartKind.SPINES, style, length);
+        float grow = shape.stretchTo(length);
+        return new AttachedPart(shape, grow, (float) (grow * girth), 0f, UNDYED, UNDYED, false,
+                (float) count, false, NO_BLOOM);
     }
 
     /** {@code x} in {@code [0,1]}, clamped, to one of {@code n} equal buckets. */

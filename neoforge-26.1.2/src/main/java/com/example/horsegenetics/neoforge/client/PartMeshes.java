@@ -4,6 +4,7 @@ import com.example.horsegenetics.common.parts.PartGenerators;
 import com.example.horsegenetics.common.parts.PartNode;
 import com.example.horsegenetics.common.parts.PartShape;
 import com.example.horsegenetics.common.parts.PartSheet;
+import com.example.horsegenetics.common.parts.SaddleZone;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -135,6 +136,11 @@ public final class PartMeshes {
             PartNode node = nodes.get(i);
             parts[i] = (node.isRoot() ? baked : parts[node.parent()]).getChild("n" + i);
         }
-        return new PartModel(baked, List.of(parts), nodes);
+        // A back part's saddle zone is a property of the mesh - which of its rooted
+        // elements lie under the saddle - so it is worked out here, once.
+        int saddleGroups = shape.kind().saddleZoned()
+                ? SaddleZone.groupsWithin(nodes, AttachedPartLayer.SADDLE_ZONE_FROM, AttachedPartLayer.SADDLE_ZONE_TO)
+                : 0;
+        return new PartModel(baked, List.of(parts), nodes, saddleGroups);
     }
 }

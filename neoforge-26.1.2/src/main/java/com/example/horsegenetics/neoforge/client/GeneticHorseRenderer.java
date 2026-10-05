@@ -58,9 +58,10 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // overlay, so it must not be drawn between a coat pass and the pass that
         // corrects it; and it goes before the armour and saddle layers because those
         // are vanilla's bakes of the whole horse and a part is a small thing sitting
-        // proud of it. Nothing on the head competes with the tack today, which is
-        // why this is cheap to revisit when a saddle pad or a set of dorsal spines
-        // makes it matter.
+        // proud of it. The dorsal spines were the part that could have made the
+        // order matter, and it still holds: the layer hides the spines under a drawn
+        // saddle or a rider (SaddleZone), so the saddle never has to be drawn over
+        // one. A saddle pad, when something draws it, is the next case to check.
         this.addLayer(new AttachedPartLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(

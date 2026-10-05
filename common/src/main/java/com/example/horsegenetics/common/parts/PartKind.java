@@ -40,7 +40,14 @@ public enum PartKind {
     DRAGON_HORN_RIGHT(PartAnchor.NAPE_RIGHT, PartSheet.HORN),
 
     /** The left-hand dragon horn. A pair is symmetric: both sides ask for the same style. */
-    DRAGON_HORN_LEFT(PartAnchor.NAPE_LEFT, PartSheet.HORN);
+    DRAGON_HORN_LEFT(PartAnchor.NAPE_LEFT, PartSheet.HORN),
+
+    /**
+     * A row of dorsal spines along the back - the dorsal spines locus, and the first
+     * part off the head. One kind for the whole row: it is centred, so there is no
+     * side to mirror. Bone, with a polished point ({@link DorsalSpineGenerator}).
+     */
+    SPINES(PartAnchor.SPINE, PartSheet.BONE);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -70,6 +77,8 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornGenerator.FORMS * RamHornGenerator.CURLS;
             // Form x sweep x splay - every way a dragon horn points is baked.
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornGenerator.styles();
+            // Form x taper.
+            case SPINES -> DorsalSpineGenerator.styles();
         };
     }
 
@@ -84,6 +93,7 @@ public enum PartKind {
             case ANTLER_RIGHT, ANTLER_LEFT -> AntlerSize.classes();
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> RamHornSize.classes();
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornSize.classes();
+            case SPINES -> SpineSize.classes();
         };
     }
 
@@ -93,7 +103,8 @@ public enum PartKind {
      * the biology: antlers grow from pedicles that do not exist at birth - and no ram's
      * horns either, which come in with the rack's rule rather than the unicorn's.
      * Dragon horns are a hard part and come with maturity too (owner, 2026-10-01:
-     * foals wear the soft parts only).
+     * foals wear the soft parts only). So do the body parts: they are hard parts,
+     * and a foal's back is tiny (body-parts treatment).
      */
     public boolean showsOnFoal() {
         return this == HORN;
@@ -112,7 +123,28 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> PartSheet.SOLID;
             // Nor a dragon horn; the same answer.
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> PartSheet.SOLID;
+            // Nor the spines.
+            case SPINES -> PartSheet.SOLID;
         };
+    }
+
+    /**
+     * Does a saddle hide some of this part? A part that runs along the spine passes
+     * under the saddle and the rider; while either is there, its elements inside the
+     * saddle zone are hidden and the rest stay ({@link SaddleZone}).
+     */
+    public boolean saddleZoned() {
+        return this == SPINES;
+    }
+
+    /**
+     * Is this part a row of elements, each scaled about its own root, rather than one
+     * thing scaled as a whole? A row lies along the body, so a whole-part scale across
+     * it would also stretch the row lengthwise - see {@link DorsalSpineGenerator}.
+     * Every box of such a kind belongs to a group.
+     */
+    public boolean scalesPerElement() {
+        return this == SPINES;
     }
 
     /** Is this a dragon horn, of either side? */
@@ -141,6 +173,7 @@ public enum PartKind {
             case ANTLER_RIGHT, ANTLER_LEFT -> "Antlers";
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> "Ram's horns";
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> "Dragon horns";
+            case SPINES -> "Dorsal spines";
         };
     }
 }

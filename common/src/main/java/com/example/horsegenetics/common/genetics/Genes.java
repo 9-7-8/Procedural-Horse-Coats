@@ -138,6 +138,8 @@ import com.example.horsegenetics.common.genetics.genes.RamHornFormGene;
 import com.example.horsegenetics.common.genetics.genes.RamHornTipGene;
 import com.example.horsegenetics.common.genetics.genes.DragonHornsGene;
 import com.example.horsegenetics.common.genetics.genes.DragonHornColourGene;
+import com.example.horsegenetics.common.genetics.genes.DorsalSpineColourGene;
+import com.example.horsegenetics.common.genetics.genes.DorsalSpinesGene;
 import com.example.horsegenetics.common.genetics.genes.RamHornsGene;
 import com.example.horsegenetics.common.genetics.genes.HornColourGene;
 import com.example.horsegenetics.common.genetics.genes.HornDustGene;
@@ -602,6 +604,10 @@ public final class Genes {
     public static final DragonHornsGene DRAGON_HORNS = new DragonHornsGene();
     /** Dragon horn colour - codominant, the horn colour rule; silent without dragon horns. */
     public static final DragonHornColourGene DRAGON_HORN_COLOUR = new DragonHornColourGene();
+    /** Dorsal spines - dominant; a row along the back, the first body part. Length, girth, count, form, taper on the copy. */
+    public static final DorsalSpinesGene DORSAL_SPINES = new DorsalSpinesGene();
+    /** Dorsal spine colour - codominant, the horn colour rule; silent without dorsal spines. */
+    public static final DorsalSpineColourGene DORSAL_SPINE_COLOUR = new DorsalSpineColourGene();
     /** Skeleton - recessive; two copies and the horse is its own bones (vanilla's skeleton sheet). Undead. */
     public static final SkeletonGene SKELETON = new SkeletonGene();
     /** Zombie - recessive; two copies and the horse is dead flesh (vanilla's zombie sheet). Undead. */
@@ -733,7 +739,7 @@ public final class Genes {
             HORN_COLOUR, HORN_GLOW, HORN_DUST,
             ANTLERS, ANTLER_FORM, ANTLER_GLOW, ANTLER_CRYSTAL, ANTLER_BLOOM,
             RAM_HORNS, RAM_HORN_FORM, RAM_HORN_TIP,
-            DRAGON_HORNS, DRAGON_HORN_COLOUR, SKELETON, ZOMBIE,
+            DRAGON_HORNS, DRAGON_HORN_COLOUR, DORSAL_SPINES, DORSAL_SPINE_COLOUR, SKELETON, ZOMBIE,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

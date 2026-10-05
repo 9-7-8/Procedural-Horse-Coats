@@ -42,10 +42,19 @@ public enum PartAnchor {
     NAPE_RIGHT,
 
     /** The same on the other side, model {@code +x}. */
-    NAPE_LEFT
+    NAPE_LEFT,
+
+    /**
+     * The midline of the top of the back at the <b>withers</b>, just behind where
+     * the neck and mane meet it. The first anchor off the head: it rides the body
+     * bone, so the body's own animation (rearing) carries it as the head carries the
+     * horn. A part here runs back along {@code +z} toward the croup - the dorsal
+     * spines now, and the sail and crystals the body-parts treatment plans.
+     */
+    SPINE
 
     // The next anchors, named here only so the shape of the enum is obvious and
-    // NOT declared until something draws them: SPINE (along the back, for
-    // crystals and dorsal spines), WITHERS_PAIR (wings), HOOF_x4 (feathering,
-    // shoes). Each is one row in the client's offset table and one entry here.
+    // NOT declared until something draws them: BODY_RIGHT / BODY_LEFT (plates),
+    // WITHERS_PAIR (wings), HOOF_x4 (feathering, shoes). Each is one row in the
+    // client's offset table and one entry here.
 }

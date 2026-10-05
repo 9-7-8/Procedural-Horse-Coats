@@ -81,6 +81,9 @@
     ],
     "horsegenetics.dragon_horn_colour": [
       { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.dorsal_spine_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
     ]
   },
   "count_groups": [
@@ -91,7 +94,8 @@
         "horsegenetics.unicorn_horn": "Horn/Horn",
         "horsegenetics.antlers": "Ant/Ant",
         "horsegenetics.ram_horns": "Rh/Rh",
-        "horsegenetics.dragon_horns": "Drg/Drg"
+        "horsegenetics.dragon_horns": "Drg/Drg",
+        "horsegenetics.dorsal_spines": "Dsp/Dsp"
       }
     }
   ],

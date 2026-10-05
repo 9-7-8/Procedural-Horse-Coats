@@ -371,6 +371,9 @@ public enum GeneFamily {
         // The head parts: each granting locus with its own colour locus beside it.
         MAGICAL_OVERRIDES.put("horsegenetics.dragon_horns", MAGIC_PARTS);
         MAGICAL_OVERRIDES.put("horsegenetics.dragon_horn_colour", MAGIC_PARTS);
+        // The body parts, the same way.
+        MAGICAL_OVERRIDES.put("horsegenetics.dorsal_spines", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.dorsal_spine_colour", MAGIC_PARTS);
 
         // The sex locus paints nothing and is not a disorder. The editors keep
         // it off their lists entirely - the Sex button owns it - but it is a

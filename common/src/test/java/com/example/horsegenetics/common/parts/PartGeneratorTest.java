@@ -62,7 +62,13 @@ class PartGeneratorTest {
                         shape + " box " + i + " samples region " + node.tex()
                                 + ", which is off the sheet");
             }
-            assertEquals(1, roots, shape + " has " + roots + " roots; a part is one tree");
+            // A part is one tree - except a row along the back, which is one tree per
+            // element, each rooted on the anchor at its own place along the row
+            // (SaddleZoneTest holds that every element is exactly one chain).
+            int trees = shape.kind().scalesPerElement()
+                    ? (int) PartGenerators.build(shape).stream().map(PartNode::group).distinct().count()
+                    : 1;
+            assertEquals(trees, roots, shape + " has " + roots + " roots; a part is " + trees + " tree(s)");
         }
     }
 
