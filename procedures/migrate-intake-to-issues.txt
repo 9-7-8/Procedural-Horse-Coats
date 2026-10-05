@@ -139,8 +139,8 @@ STEPS
 8. Create and pin the "Start here" issue.
 9. Write the session log (write-session-log) with the map, then end-session.
 
-STATE (after the first round, 2026-10-05) AND WHAT IS LEFT
-----------------------------------------------------------
+STATE (after the second round, 2026-10-05) AND WHAT IS LEFT
+-----------------------------------------------------------
 Moved, verified and deleted from intake/ (old file -> issue; pieces are sub-issues):
   To do.txt bullets            -> #42 (pilot), #43 mythic tracking parent with #52-#68,
                                   #44-#51, #69; To do.txt is now a redirect line
@@ -150,21 +150,39 @@ Moved, verified and deleted from intake/ (old file -> issue; pieces are sub-issu
   Port - Fabric                -> #79 (#80-#84)      Port - other loaders -> #85 (#86-#88)
   Port - NeoForge latest       -> #89 (#90, #91)     Port - Bedrock       -> #92 (#93-#97)
   Port - Forge 1.12.2          -> #98 (#99-#103)
-  Port feasibility survey      -> #104 (survey)      Session hand-off     -> #105 (survey)
-Labels created so far: idea, from-server, tracking, procedure, scoped, port, survey,
-in-progress, size:S|M|L, impact:finishes|unblocks|new.
-Step 7 (rewriting the procedures that read intake) is DONE for the To-do and small-file
-state; its FILE/TRANSITIONAL clauses stay until the last file moves.
-NOT DONE YET: the release milestones (step 3, item 4), the pinned "Start here" issue
-(step 8), the remaining treatment files (about 25 in intake/, all over 10 KB, including
-the mythic, sheep, tail, head, body, feathering, trough and villager treatments, the
-Mythic gene audit and biome files, Rename, Four-jar split and its folder, and Attached
-model parts), the tools/rename config and README, the wiki prose links to intake files
-(breed-book, breeds, compatibility, coding-notes, known-gaps, magical-genes, model-parts,
-roadmap-execution and some gene pages), and the final deletion of Sizing.txt.
+  Port feasibility survey      -> #104 (survey)      Session hand-off -> #105 (survey)
+  Mythical deer                -> #106 (#107 mane-and-tail, #108 hoof colour, #109 nine-colour
+                                  coat, #110 crown cross, #111 breeds 4a, #112 breeds 4b,
+                                  #113 deer-build plan page)
+  Mythical equids              -> #114 (#115 head colour, #116 Tri horn, #117 Zebra, #118 wild ass)
+  Mythical reindeer            -> #120 (#121 Meandash, #122 White reindeer, #123 the eight)
+  Mythical rams                -> #124 (#125 Hzt, #126 four breeds, #127 Khnum, #128 sheep-build)
+  Mythical goats               -> #129 (#130 Sci, #131 2a, #132 2b, #133 2c, #134 goat-build)
+  Mythical antlered beasts     -> #135 (one issue)
+  Mythic breeds - gene audit   -> #136 (survey)      Mythic breeds - biome assignments -> #137 (survey)
+  (#119 is not part of this migration.) Two Sizing units of the audit and biome files were
+  recorded in the survey bodies only, not made issues: the READY-now breeds (about 40, L),
+  biome/spawn_time/commonness for 59 entries (S), and a breed "names" list field (S-M).
+Labels created: idea, from-server, tracking, procedure, scoped, port, survey, in-progress,
+size:S|M|L, impact:finishes|unblocks|new. Step 7 is DONE for the state of the files that
+remain; its FILE/TRANSITIONAL clauses stay until the last file moves.
+STILL IN intake/ (17 treatment files, the rest of Sizing.txt, and their folders):
+  Attached model parts (88 KB, needs numbered comments) and attached-parts-draft/,
+  Body parts, Head parts, Tail gene, Tufted lion tail, Tusks gene, Feathering,
+  Daily realm horse, Horse shoes, Troughs and salt licks, Villagers in every village,
+  Natural-sheep gene kind, Sheep coat genes, Sheep disorders, Sheep horns and body genes,
+  Rename to Ixora's Horse Overhaul, Four-jar split (entry file plus four-jar-split/, 102 KB,
+  needs numbered comments). discord-command-whistle/, potential-assets/ and tools/ are not units.
+NOT DONE YET: the release milestones (step 3, item 4), the pinned "Start here" issue (step 8;
+pinning needs GraphQL, so a cloud session creates the issue and the owner pins it), the tools/rename
+config and README, the remaining wiki prose links to intake files (breeds, compatibility,
+coding-notes, known-gaps, magical-genes, model-parts, roadmap-execution and some gene pages;
+breed-book is done), and the final deletion of Sizing.txt.
 An issue body or comment holds about 65,000 characters; every remaining file fits in one
-body except the 88 KB Attached model parts and the 102 KB four-jar folder, which need
-numbered comments. The 10 KB cutoff of the first round was caution, not a limit.
+body except Attached model parts and the four-jar folder.
+Pattern used for the Mythical files, to reuse: group a piece's breeds by what each needs, give
+every sub-issue the whole piece section with a "Scope of this issue" line, and take the owner's
+yes on the table first.
 
 METHOD THAT WORKED (and the traps)
 ----------------------------------

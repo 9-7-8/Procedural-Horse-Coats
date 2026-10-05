@@ -1,0 +1,47 @@
+2026-10-05 12:00 - Intake to issues, second round: the Mythical group and its two evidence files (time is the end of the session)
+
+Continues d2026-10-05-0402-intake-to-github-issues.txt. Ran on branch claude/beautiful-ptolemy-3a5k63
+(a cloud session); nothing here is merged to main.
+
+ASKED (owner, in order)
+- "/migrate-intake-to-issues pick the next smallest item you can move now" -> Mythical reindeer was the
+  smallest file; the owner chose "Move Mythical deer first" because reindeer depends on it.
+- "Continue" -> Mythical equids. "Do this next" -> Mythical reindeer. Then Mythical antlered beasts,
+  goats and rams, then the gene audit and biome assignments as survey issues.
+- "Update and clean up any loose ends, and tell me if anything else needs to move for this to be clean."
+
+DONE (all on the branch)
+- #106-#113 Mythical deer (parent + 7). #114-#118 Mythical equids (parent + 4). #120-#123 Mythical
+  reindeer (parent + 3). #124-#128 Mythical rams (parent + 4). #129-#134 Mythical goats (parent + 5).
+  #135 Mythical antlered beasts (one issue). #136 gene audit and #137 biome assignments (survey).
+  (#119 is an unrelated bug.) Files and their Sizing.txt blocks deleted; references in surviving
+  intake files repointed; wiki/breed-book.html links #136 and #137 and the search index, agent text
+  and link check were rebaked.
+- Cross links: #106 and #114 name #120/#121/#129 where they say what they unblock; reindeer depends on
+  #107 and #115; Khnum #127 on #125; goats 2a-2c on #130, 2c also on #107 and #108; Yale in #135
+  after #125.
+- PROOF: for every parent and piece the fenced text was byte-equal to its source before deletion;
+  labels, sub-issue counts and the absence of placeholders were read back from the API.
+
+DECIDED
+- (owner) Deer first, then each file in turn; the owner approved each table before issues were made.
+- (me, not asked) Piece 4 of the deer (six breeds, the file calls them "first six" and "remaining") was
+  split as: 4a White Stag (no cross), Ruru, Ceryneian Hind (dark hooves); 4b Artemis's deer, Nine-Colored
+  Deer, Marica plus the hoof and cross upgrades. Reindeer 1a-1c and goats 2a-2c follow the files' own
+  groups; rams 2a/2b split off Khnum because it needs the new horn shape.
+
+FOUND
+- The deer file's "first six breeds" for 4a contradicts its six breeds in total. Regroup if wrong.
+- The Mythic audit and biome Sizing blocks named three units (about 40 ready breeds, 59-entry biome
+  assignment, a breed "names" field) that are recorded in the survey bodies but are not issues yet.
+
+PROCEDURES CHANGED
+- procedures/migrate-intake-to-issues.txt: STATE section now holds the old path -> issue map through
+  #137, the 17 files still in intake/, and what is not done.
+
+NOT RUN
+- No code, no Java, no tests; no milestones created; no "Start here" issue; Sizing.txt not deleted.
+
+PICK UP FIRST
+- The 17 remaining files (list in the procedure's STATE), then milestones, "Start here" (the owner pins
+  it: pinning needs GraphQL), tools/rename config, remaining wiki links, Sizing.txt.
