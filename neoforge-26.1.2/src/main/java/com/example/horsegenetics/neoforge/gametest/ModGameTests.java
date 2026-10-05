@@ -2828,7 +2828,19 @@ public final class ModGameTests {
             }
         });
         boolean[] headedHome = {false};
+        boolean[] plain = {false};
         helper.succeedWhen(() -> {
+            // A plain horse, once founded (issue #40): a founding roll that hunts horses
+            // (Ade/Ade, Aae/Aae, ...) takes any horse within sixteen blocks, and a fight
+            // out-ranks Stay by design - so it never stood long enough, or never came
+            // home. What is under test is the walk-back, not the temper.
+            if (!plain[0]) {
+                if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                    throw new GameTestAssertException(Component.literal("the horse is not founded yet"), 0);
+                }
+                makePlain(horse);
+                plain[0] = true;
+            }
             // Judged only once the order has been in force a while: a gametest horse can
             // stand frozen for a hundred ticks or so after it is spawned (seen in the
             // logs).
@@ -2838,7 +2850,23 @@ public final class ModGameTests {
             // with the walk-back cut out it still wandered 1.6 blocks back once.
             headedHome[0] |= anchor.equals(horse.getNavigation().getTargetPos());
             if (!longEnough || !headedHome[0]) {
-                throw new GameTestAssertException(Component.literal("the stay order has not steered it home yet"), 0);
+                double hx = horse.getX() - (anchor.getX() + 0.5);
+                double hz = horse.getZ() - (anchor.getZ() + 0.5);
+                String goals = horse.goalSelector.getAvailableGoals().stream().filter(w -> w.isRunning())
+                        .map(w -> w.getPriority() + ":" + w.getGoal().getClass().getSimpleName())
+                        .collect(java.util.stream.Collectors.joining(","));
+                var nav = horse.getNavigation();
+                throw new GameTestAssertException(Component.literal("the stay order has not steered it home yet"
+                        + " [stayTicks " + stayTicks[0] + ", headedHome " + headedHome[0]
+                        + ", target " + nav.getTargetPos() + ", anchor " + anchor
+                        + ", at " + horse.blockPosition() + String.format(" (%.2f across, dy %.2f)",
+                                Math.sqrt(hx * hx + hz * hz), horse.getY() - anchor.getY())
+                        + ", onGround " + horse.onGround() + ", navDone " + nav.isDone()
+                        + ", path " + (nav.getPath() == null ? "none" : nav.getPath().getTarget()
+                                + " " + nav.getPath().getNextNodeIndex() + "/" + nav.getPath().getNodeCount())
+                        + ", order " + horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get())
+                        + ", vehicle " + horse.isVehicle() + ", leashed " + horse.isLeashed()
+                        + ", running [" + goals + "], age " + horse.tickCount + "]"), 0);
             }
             double dx = horse.getX() - (anchor.getX() + 0.5);
             double dz = horse.getZ() - (anchor.getZ() + 0.5);

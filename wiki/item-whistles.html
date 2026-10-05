@@ -638,7 +638,12 @@
             <li><code>order_stay_walks_back</code>: a stayed horse moved three blocks is steered back to
                 its spot. It checks the navigation&rsquo;s target, not only the distance, because the
                 neighbouring tests&rsquo; horses pull it about. With the walk-back cut out, the horse
-                still drifted home once.</li>
+                still drifted home once. Its horse is re-founded as the wild type once founded
+                (#40, 2026-10-04): a founding roll that hunts horses (<code>Ade/Ade</code>,
+                <code>Aae/Aae</code>) goes for any horse within sixteen blocks, and the fight out-ranks
+                Stay by design, so about one run in thirty it never stood still long enough. A forced
+                <code>Aae/Aae</code> roll with a horse overhead failed 100 of 100 copies before and
+                passed 100 of 100 after.</li>
             <li><code>order_yields_to_needs</code>: the order goals sit below every need, and bond-follow
                 stands down.</li>
             <li><code>order_clears</code>: an order is dropped on a new owner, in another dimension, and
