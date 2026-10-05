@@ -174,7 +174,9 @@ Last round (2026-10-05): the final 14 treatment files became #151-#194 (see
 wiki/session-log/d2026-10-05-1330-intake-last-files-to-issues.txt for the map); files and
 Sizing.txt retired (kept at commit 706bb6c6); FILE/TRANSITIONAL clauses deleted; "Start here" is #195.
 intake/ now holds README.txt, To do.txt, tools/, potential-assets/ and discord-command-whistle/.
-NOT DONE YET: the release milestones (step 3, item 4) and the owner pinning #195 (pinning needs GraphQL).
+Milestones done 2026-10-05: one per tag, v0.5.005 to v0.5.043 (#1-#40, closed), plus v0.5.044 (#41, open, the next release).
+NOT DONE YET: the owner pinning #195 (pinning needs GraphQL), and assigning milestones to the closed issues
+(each to the release that carries it; the owner reads "what each release built" from this).
 When both are done, retire this procedure, its INDEX row and its skill wrapper.
 An issue body or comment holds about 65,000 characters; every remaining file fits in one
 body except the four-jar folder.
