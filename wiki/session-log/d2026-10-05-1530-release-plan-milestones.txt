@@ -1,0 +1,34 @@
+2026-10-05 15:30 - Release plan: milestones assigned to every scheduled issue (time is the end of the session)
+
+ASKED
+- "So you're probably gonna have to change the release numbers. Assign releases into the future. 44 is going out tonight and it's just including a bunch of bug fixes. Try to evenly distribute the
+  amount of work that goes into each release ... the absolute very last thing we do should be the rename and then the jar split. Everything else comes before those."
+
+DONE
+- Read the 156 open issues (REST: gh api), weighted the size labels S=1, M=2, L=5, and scheduled 74 pieces (scoped features, sized ideas, the four procedures, the Distribution pieces) into 15 releases
+  v0.5.045 to v0.5.059 of 10 or 11 points each. Dependencies hold (checked by script: no piece before something it depends on); three assumed dependencies added (worn side needs horse shoes, reindeer
+  breeds need the breed hook, crystals need the back sail). Priorities first: grown parts in v0.5.045-047, owner-free before needs-owner, families mixed.
+- Created milestones v0.5.045-v0.5.059 (each with its list and the owner calls due), v0.6.0 (rename: #142-#145), v0.6.1-v0.6.3 (four-jar split pieces #147-#149) and v1.0.0 (the 26 port issues).
+  Assigned 125 issues, no failures; tracking parents got the milestone of their last piece. Filed #196 "Release plan" (documentation) with the whole table; commented on #77 and #78 that they no longer ride
+  with the rename. Unscoped ideas and open bugs have no milestone.
+- Proof: re-listed the milestones after the run (open counts per milestone match; tracking parents add 1-2 each). No game or wiki code changed.
+
+DECIDED (owner)
+- Ports are after the rename and the split, under v1.0.0 (not in this plan). Release size about 10 points (about 15 releases). Balance by points, mix families, finish her priorities first.
+- Recommended, not asked: weights S=1 M=2 L=5; the three dependency assumptions; the Distribution page and logo in v0.5.059 instead of the rename release; each of the split's three pieces in its own
+  patch release (v0.6.1-v0.6.3).
+
+FOUND ON THE WAY
+- Tracking #43 (Mythic breeds: features still to scope) and its children have no scheduled pieces: all ideas, unsized. v0.5.044 already has an open milestone (#41) with no issues assigned.
+
+PROCEDURES
+None changed. The release procedure already says a closing unit gets its release's milestone; the plan only pre-assigns them.
+
+NOT RUN / NOT CHECKED
+- No build, no game; the three dependency assumptions are unverified against the code. The plan was not re-derived after the last merge (issues opened after #196 are unscheduled).
+
+RELEASE
+v0.5.044 goes out tonight as bug fixes only (the owner's call).
+
+PICK UP FIRST
+/process-intake takes the next piece of milestone v0.5.045 (#152 dorsal spine anchor first).
