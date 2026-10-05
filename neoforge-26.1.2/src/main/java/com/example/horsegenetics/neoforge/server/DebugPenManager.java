@@ -5,6 +5,7 @@ import com.example.horsegenetics.common.breed.Breeds;
 import com.example.horsegenetics.common.genetics.CoatCheckPlan;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genotype;
+import com.example.horsegenetics.common.realm.CorridorPacing;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.NeoRng;
@@ -290,7 +291,11 @@ public final class DebugPenManager {
         Plot plot = new Plot(originX, PLOT_BASE_Y, returnDim, returnPos.immutable());
         PLOTS.put(player.getUUID(), plot);
 
-        ensureBuiltUpToIndex(debug, plot, LOOKAHEAD_PENS);
+        // Only the segments the yard reaches: the rest of the lookahead is built
+        // one segment per player tick by ensureGeneratedAheadOfPlayer (#31 -
+        // building all thirty in this one tick stalled a live server for 0.8 s).
+        ensureBuiltUpToIndex(debug, plot,
+                CorridorPacing.entryTarget(DebugTestYard.EAST_DX, PERIOD, LAST_SEGMENT_INDEX));
         // After the corridor, because the yard's path is cut THROUGH the wall
         // the corridor lays down. Once per plot: the geometry is fixed, so a
         // plot rebuilt on a recycled X gets the same yard in the same place.
@@ -316,7 +321,12 @@ public final class DebugPenManager {
         }
     }
 
-    /** Called each player tick while they're in the debug dimension: build ahead of them. */
+    /**
+     * Called each player tick while they're in the debug dimension: build ahead
+     * of them, at most {@link CorridorPacing#SEGMENTS_PER_TICK} segments a tick,
+     * so a fresh plot fills in over about a second and a half rather than in
+     * the tick the player arrives (#31).
+     */
     public static void ensureGeneratedAheadOfPlayer(ServerPlayer player) {
         Plot plot = PLOTS.get(player.getUUID());
         if (plot == null || !(player.level() instanceof ServerLevel debug)) {
@@ -324,7 +334,8 @@ public final class DebugPenManager {
         }
         int localX = player.getBlockX() - plot.originX;
         int neededIndex = Math.floorDiv(Math.max(localX, 0), PERIOD) + LOOKAHEAD_PENS;
-        ensureBuiltUpToIndex(debug, plot, neededIndex);
+        ensureBuiltUpToIndex(debug, plot,
+                CorridorPacing.tickTarget(plot.highestIndex, neededIndex, LAST_SEGMENT_INDEX));
     }
 
     /** The plot whose corridor spans this world X, or {@code null}. */
