@@ -1,0 +1,67 @@
+2026-10-05 12:16 (end) - Scoping the top lag issue (#199) into v0.5.045
+
+ASKED
+-----
+- "scope and add to the next release the highest priority lag issue from issues"
+  -> #199 (ranked 1 of the four top causes by the lag audit, #197) was scoped by
+  procedures/write-intake-document.txt into a tracking parent with two pieces, #205
+  and #206. Both are on milestone v0.5.045.
+
+DONE
+----
+No code was touched. Only GitHub issues changed, apart from this log.
+- #199 rewritten as the scoped treatment. Labels: idea -> scoped + tracking; milestone
+  Backlog -> v0.5.045; renamed "Lag: every visible horse rebuilds its coat key every
+  frame (client)". It holds the code map (read at e4ec8a23), the decisions, the
+  implications sweep and the UNVERIFIED list.
+- #205 (new, enhancement, scoped, size:S, impact:finishes, v0.5.045) - piece 1: memoise
+  textureKey / glow parts / grown parts on the immutable CoatData, keep one EpiSchema per
+  Gene instance, and put an extractRenderState frame-time line on the world-exit summary
+  in GeneticCoatTextureFactory.clear().
+- #206 (new, enhancement, scoped, size:M, impact:finishes, v0.5.045, depends on #205) -
+  piece 2: the screens (info screen traits(), transfer-deed renderer, family tree,
+  spawn editor, My Horses, browser filter) derive on change instead of per frame.
+- Both are linked as sub-issues of #199. Milestone v0.5.045's description is now 13
+  points with #205 and #206 leading "the plan" after the bugs, and release-plan issue
+  #196 is updated to match.
+- A decision-round comment was posted on #199.
+
+DECIDED
+-------
+- Split into two pieces, and put BOTH in v0.5.045, taking it from 10 to 13 points (owner).
+- Piece 1 proves itself with a dev frame-time line in the log, as well as tests (owner).
+- Each piece counts toward the release it lands in (owner).
+- No saved data changes, so no migration is needed (scoping session; the caches are
+  in memory only).
+- Made without asking, marked Recommended on the issues: cache on CoatData with lazy
+  fields; key the EpiSchema cache by Gene instance (it survives Genes.clearLoaded in
+  tests); the frame-time line is always on; #205/#206 go first in v0.5.045's plan.
+
+FOUND ON THE WAY
+----------------
+- An audit correction, recorded on #199: BreedLineage.displayName() is a cheap switch,
+  not the per-frame "parse" the audit described.
+- Confirmed: TransferDeed.genome() is a full Genome.parse every time a deed is drawn,
+  and HorseInfoScreen.traits() re-resolves HorseTraits on each of 5+ calls per frame.
+- The comment in GeneticHorseRenderer.extractRenderState says grown parts are resolved
+  "once only". That is once per frame, not cached. #205 fixes the comment.
+
+PROCEDURES
+----------
+None changed.
+
+NOT RUN / NOT CHECKED
+---------------------
+No tests and no builds were run, because nothing was built. The audit's per-frame cost
+figure is still unmeasured; #205's frame-time line is the first measurement. The purity
+of all 72 epiSchema() overrides, and the family tree / spawn editor / My Horses /
+browser claims, are UNVERIFIED on the issues.
+
+RELEASE
+-------
+Not offered. Nothing shipped.
+
+PICK UP FIRST
+-------------
+/next-release: v0.5.045's bugs first, then #205 (process-intake), taking the "before"
+frame-time number on the parent commit.
