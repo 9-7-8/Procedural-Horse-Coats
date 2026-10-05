@@ -1,0 +1,67 @@
+2026-10-04 21:20 (start, local, approximate) - Fix #33: the founder log flagged a magical herd's own pair as off-sheet
+
+ASKED
+-----
+- "/fix-bug" with "do one of the cosmetic bugs". The bug,tuning list (minus needs-owner)
+  held #119, #36, #35, #34, #33, #10, and no unlabelled issue. #10 (like #35 and #36,
+  per the previous log) already has its fix in and only waits on an in-game check. Of
+  the two cosmetic issues with work left, #33 and #34, took #33: its cause was written
+  in the issue, it is the older one, and its rule lives in common/, so a unit test can
+  hold it. #34 carries an open question (sort and search by which name). Fixed and closed.
+
+DONE
+----
+- 4de4cc97 "Fix #33: the founder log no longer flags a magical herd's own pair as
+  off-sheet". Files: common/.../breed/BreedFounder.java (a new overload
+  offSheet(Breed, Genotype, MagicalVariant)), neoforge-26.1.2/.../server/BreedFounderLog.java
+  (founder takes the variant, and the 3-argument form passes null), HerdManager.java:168
+  (passes the herd's variant), and MagicalVariantTest (the new test). Also web.wasm,
+  rebuilt because common/ code changed.
+  Cause: HerdManager logs each member after BreedFounder.roll has stamped the herd's
+  magical pair onto it, and offSheet checked that finished genotype against the bare
+  breed sheet. So every member of every magical herd warned NOT ON ITS SHEET. On the
+  live server's 3 Oct exports these were the only mod WARN lines. This is the same false
+  alarm as #12 (4899f7d2, stables), on the herd path.
+  Fix: the overload leaves out only the herd's exact gene and pair. The same gene in
+  another pair, or any other stray gene from the roll, still warns.
+  Proof: MagicalVariantTest.theHerdsOwnPairIsNotOffSheet runs 200 Friesian magical-herd
+  members, each with its own variant. Each must be clean when the variant is passed and,
+  as a control, flagged without it. It was red against a stub with the old behaviour,
+  green with the fix, and red again with the exemption commented out. StableSpawnTest is
+  green, :neoforge-26.1.2:build is green, check-parity is OK and check-designer-boots is
+  OK. Issue #33 is closed with a proof comment.
+
+DECIDED
+-------
+- Exempt the herd's pair in offSheet, rather than logging the roll before the pair goes
+  on. Of the two options the issue named, this one needs no pre-stamp genotype from
+  BreedFounder.roll. Made without the owner, as a small fix. Recorded in the commit and
+  on #33.
+- No wiki page describes the founder log, so no tab was updated. #12 updated none either.
+
+FOUND ON THE WAY
+----------------
+None.
+
+PROCEDURES
+----------
+None needed. fix-bug, rebake and end-session all fit as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. Only MagicalVariantTest and StableSpawnTest
+  ran. A full run would also check every other BreedFounder caller's test (BreedFounderTest,
+  the breed tests), which this change does not touch: the 2-argument offSheet is
+  unchanged.
+- Not seen on a server. The live server gets it with the next release, and its log
+  exports will then show whether the warnings stop. No Verification anchor was added:
+  the test answers the question.
+
+RELEASE
+-------
+Not offered. One fix is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#119 (wild_pack_founds_one_herd gametest flake, found-in-yard) by /fix-bug. If the
+owner again asks for a cosmetic one, #34 (H browser shows registered names).

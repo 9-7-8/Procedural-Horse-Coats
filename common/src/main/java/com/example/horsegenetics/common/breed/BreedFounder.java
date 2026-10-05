@@ -101,6 +101,19 @@ public final class BreedFounder {
         return out;
     }
 
+    /**
+     * {@link #offSheet(Breed, Genotype)} for a member of a <b>magical herd</b>: the herd's own pair is the herd's spec,
+     * not a founder bug, so it is left out (issue #33). Only that exact pair - the same gene in any other pair is still
+     * a stray. {@code herd} may be null, for an ordinary founder.
+     */
+    public static List<Gene> offSheet(Breed breed, Genotype genotype, MagicalVariant herd) {
+        List<Gene> out = offSheet(breed, genotype);
+        if (herd != null && genotype.pair(herd.gene()).equals(herd.pair())) {
+            out.remove(herd.gene());
+        }
+        return out;
+    }
+
     /** {@link #roll(Breed, Rng)} with the sex locus forced - the herd systems need a stallion or a mare. */
     public static Genome roll(Breed breed, Rng rng, Sex sex) {
         Genome g = roll(breed, rng);

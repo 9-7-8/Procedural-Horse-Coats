@@ -1849,7 +1849,8 @@ public final class ModGameTests {
      * Force-load the 3x3 chunks round a wild test. The harness forces only the
      * chunk its 1x1 structure stands in, and a horse a few blocks over can be in a
      * neighbour that never ticks - so no scan, no founding, no placement. The
-     * harness unforces every forced chunk when the batch ends.
+     * harness unforces every forced chunk when the batch ends. Forcing takes effect
+     * some ticks later, not at once: {@link #fieldTicks} waits for it (issue #70).
      */
     private static void keepTicking(GameTestHelper helper) {
         BlockPos at = helper.absolutePos(BlockPos.ZERO);
@@ -2253,9 +2254,11 @@ public final class ModGameTests {
         register(event, environment, WHISTLE_SEES_THE_OWNER, 300);
         // Synchronous: one cross-world move, checked in the same tick.
         register(event, environment, TURNOUT_RELEASES_THE_HORSE_THAT_ARRIVED, 20);
-        // Founded at 25, then a combat scan once a second.
-        registerAlone(event, ORDER_HUNT_PICKS_A_MONSTER, 200);
-        registerAlone(event, ORDER_GUARD_HOLDS_ITS_REACH, 300);
+        // Founded at 25, then a combat scan once a second - after the wait for the
+        // field's forced chunks to tick (issue #70: up to 369 ticks seen in 120 tries,
+        // most of them one), so a thousand ticks on top of what the test itself needs.
+        registerAlone(event, ORDER_HUNT_PICKS_A_MONSTER, 1200);
+        registerAlone(event, ORDER_GUARD_HOLDS_ITS_REACH, 1300);
         register(event, environment, ORDER_GRAZE_TETHER, 200);
         // Twenty-five ticks to be founded, then a scan (every thirty) to act on it.
         register(event, environment, WILD_HORSE_MOVES_ON, 200);
@@ -3174,32 +3177,100 @@ public final class ModGameTests {
             TEST_FUNCTIONS.register("order_hunt_picks_a_monster", () -> ModGameTests::orderHuntPicksAMonster);
 
     private static void orderHuntPicksAMonster(GameTestHelper helper) {
-        aloneOnClearGround(helper);
+        keepTicking(helper);
         net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
-        var horse = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.HUNT_MONSTERS,
-                new BlockPos(2, 0, 2));
-        var creeper = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, new BlockPos(2, 0, 0));
-        creeper.setNoAi(true);
+        net.minecraft.world.entity.animal.equine.Horse[] horse = {null};
+        net.minecraft.world.entity.LivingEntity[] creeper = {null};
         net.minecraft.world.entity.LivingEntity[] husk = {null};
+        String[] founded = {null};
         helper.succeedWhen(() -> {
+            if (horse[0] == null) {
+                fieldTicks(helper);
+                aloneOnClearGround(helper);
+                horse[0] = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.HUNT_MONSTERS,
+                        new BlockPos(2, 0, 2));
+                creeper[0] = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, new BlockPos(2, 0, 0));
+                ((net.minecraft.world.entity.Mob) creeper[0]).setNoAi(true);
+            }
             // Made a guardian only once founded: a founding afterwards would roll a new genome.
-            if (husk[0] == null && com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
-                makeGuardian(horse);
+            if (husk[0] == null && com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse[0])) {
+                founded[0] = "founded at age " + horse[0].tickCount;
+                makeGuardian(horse[0]);
                 husk[0] = helper.spawn(net.minecraft.world.entity.EntityType.HUSK, new BlockPos(2, 0, -2));
                 ((net.minecraft.world.entity.Mob) husk[0]).setNoAi(true);
                 // NOT invulnerable: Mob.getTarget() answers null for a target the horse cannot
                 // attack, so an invulnerable husk is picked and never held. It is checked the
                 // tick it is picked, well before four kicks could kill it.
             }
-            var t = horse.getTarget();
-            if (t == creeper) {
+            var t = horse[0].getTarget();
+            if (t == creeper[0]) {
                 helper.fail("a hunting horse went for a creeper");
             }
             if (husk[0] == null || t != husk[0]) {
                 throw new GameTestAssertException(Component.literal("the hunting horse has not picked the husk (target "
-                        + (t == null ? "none" : t.getName().getString()) + ")"), 0);
+                        + (t == null ? "none" : t.getName().getString()) + ") " + huntState(horse[0], husk[0], founded[0])), 0);
             }
         });
+    }
+
+    /**
+     * Throws until every chunk {@link #keepTicking} forced ticks its entities (issue #70).
+     * Forcing is a ticket, and a ticket takes effect some ticks later; the harness waits
+     * only for the structure's own chunk, and a test's 1x1 structure is one chunk while
+     * its field is often two. A horse spawned into a neighbour that is not ticking yet
+     * stands frozen - never founded, never scanning - until it does. Mostly that is one
+     * tick; 369 was the longest in 120 tries, more than the old 200-tick budget. The wait
+     * comes out of the test's own budget, so a test using this needs room for it.
+     * Spawn only after this passes, from inside the test's own wait.
+     */
+    private static void fieldTicks(GameTestHelper helper) {
+        BlockPos at = helper.absolutePos(BlockPos.ZERO);
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                var chunk = new net.minecraft.world.level.ChunkPos((at.getX() >> 4) + dx, (at.getZ() >> 4) + dz);
+                if (!helper.getLevel().areEntitiesActuallyLoadedAndTicking(chunk)) {
+                    throw new GameTestAssertException(Component.literal("waiting for the field's chunk " + chunk
+                            + " to tick before anything is spawned in it"), 0);
+                }
+            }
+        }
+    }
+
+    /** What OrderCombatGoal's pick hinges on, for a hunt test's failure message (issue #70). */
+    private static String huntState(net.minecraft.world.entity.animal.equine.Horse horse,
+                                    net.minecraft.world.entity.LivingEntity quarry, String founded) {
+        var record = com.example.horsegenetics.neoforge.server.HorseRecords.of(horse);
+        var order = com.example.horsegenetics.neoforge.server.HorseOrdering.current(horse);
+        String goals = horse.goalSelector.getAvailableGoals().stream().filter(w -> w.isRunning())
+                .map(w -> w.getPriority() + ":" + w.getGoal().getClass().getSimpleName())
+                .collect(java.util.stream.Collectors.joining(","));
+        String targets = horse.targetSelector.getAvailableGoals().stream().filter(w -> w.isRunning())
+                .map(w -> w.getPriority() + ":" + w.getGoal().getClass().getSimpleName())
+                .collect(java.util.stream.Collectors.joining(","));
+        StringBuilder s = new StringBuilder("[").append(founded == null ? "not founded" : founded)
+                .append("; removed=").append(horse.getRemovalReason())
+                .append(" chunk ticking now=").append(((ServerLevel) horse.level()).areEntitiesActuallyLoadedAndTicking(horse.chunkPosition()))
+                .append(" level holds it=").append(horse.level().getEntity(horse.getId()) == horse)
+                .append(" fighter=").append(com.example.horsegenetics.neoforge.server.HorseOrdering.fighter(record))
+                .append(" hp ").append(horse.getHealth()).append("/").append(horse.getMaxHealth())
+                .append(" order ").append(order.order()).append(" anchor ").append(order.anchor())
+                .append(" horse at ").append(horse.blockPosition())
+                .append(" tick ").append(horse.tickCount).append(" id ").append(horse.getId())
+                .append(" tamed=").append(horse.isTamed()).append(" vehicle=").append(horse.isVehicle())
+                .append(" leashed=").append(horse.isLeashed())
+                .append(" goals ").append(goals).append(" targets ").append(targets);
+        if (quarry == null) {
+            s.append("; no husk spawned");
+        } else {
+            s.append("; husk at ").append(quarry.blockPosition()).append(" alive=").append(quarry.isAlive())
+                    .append(" removed=").append(quarry.isRemoved())
+                    .append(" sight=").append(horse.hasLineOfSight(quarry))
+                    .append(" canAttack=").append(horse.canAttack(quarry))
+                    .append(" hostile=").append(com.example.horsegenetics.neoforge.server.MobGroups.isHostile(quarry))
+                    .append(" passified=").append(com.example.horsegenetics.neoforge.server.Passification.suppresses(horse, quarry))
+                    .append(" d=").append(String.format("%.1f", Math.sqrt(horse.distanceToSqr(quarry))));
+        }
+        return s.append("]").toString();
     }
 
     /**
@@ -3213,28 +3284,35 @@ public final class ModGameTests {
             TEST_FUNCTIONS.register("order_guard_holds_its_reach", () -> ModGameTests::orderGuardHoldsItsReach);
 
     private static void orderGuardHoldsItsReach(GameTestHelper helper) {
-        aloneOnClearGround(helper);
+        keepTicking(helper);
         if (com.example.horsegenetics.neoforge.ServerConfig.ordersGuardRadius() >= 8) {
             throw new GameTestAssertException(Component.literal("orders.guard_radius is "
                     + com.example.horsegenetics.neoforge.ServerConfig.ordersGuardRadius()
                     + " in this run's server config, so the far husk is inside it - set it below 8"), 0);
         }
         net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
-        var horse = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.GUARD_HERE,
-                new BlockPos(2, 0, 2));
-        var creeper = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, new BlockPos(2, 0, 0));
-        creeper.setNoAi(true);
+        net.minecraft.world.entity.animal.equine.Horse[] guard = {null};
+        net.minecraft.world.entity.LivingEntity[] creeper = {null};
         net.minecraft.world.entity.LivingEntity[] far = {null};
         net.minecraft.world.entity.LivingEntity[] near = {null};
         int[] since = {0};
         helper.succeedWhen(() -> {
+            if (guard[0] == null) {
+                fieldTicks(helper); // issue #70
+                aloneOnClearGround(helper);
+                guard[0] = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.GUARD_HERE,
+                        new BlockPos(2, 0, 2));
+                creeper[0] = helper.spawn(net.minecraft.world.entity.EntityType.CREEPER, new BlockPos(2, 0, 0));
+                ((net.minecraft.world.entity.Mob) creeper[0]).setNoAi(true);
+            }
+            var horse = guard[0];
             if (far[0] == null && com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
                 makeGuardian(horse);
                 far[0] = helper.spawn(net.minecraft.world.entity.EntityType.HUSK, new BlockPos(2, 0, -6));
                 ((net.minecraft.world.entity.Mob) far[0]).setNoAi(true);
             }
             var t = horse.getTarget();
-            if (t == creeper) {
+            if (t == creeper[0]) {
                 helper.fail("a guarding horse went for a creeper");
             }
             if (far[0] != null && t == far[0]) {

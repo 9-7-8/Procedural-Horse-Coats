@@ -165,7 +165,7 @@ public final class HerdManager {
         MagicalVariant magic = lead == null ? null : MagicalVariant.roll(breed, Breeds.spawnSettings().magical(),
                 new SeededRng(lead.getMostSignificantBits() ^ lead.getLeastSignificantBits(), "magical-herd")).orElse(null);
         Genome genome = BreedFounder.roll(breed, rng, sex, magic);
-        BreedFounderLog.founder(breed, genome.genotype(), magic == null ? "wild herd" : "magical wild herd");
+        BreedFounderLog.founder(breed, genome.genotype(), magic == null ? "wild herd" : "magical wild herd", magic);
         String token = breed == Breeds.FERAL_MIXED
                 ? BreedLineage.FERAL.toToken()
                 : magic != null ? BreedLineage.magical(breed.id()).toToken()

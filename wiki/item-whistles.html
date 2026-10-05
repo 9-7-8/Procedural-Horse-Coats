@@ -725,7 +725,13 @@
         four blocks off, not a creeper two blocks off. It is a guardian because a guardian starts
         nothing by itself, so the target can only be the order&rsquo;s. With the tag check removed
         it went for the creeper. Both wait for the horse to be founded before giving it genes,
-        because a founding afterwards rolls a new genome.</li>
+        because a founding afterwards rolls a new genome. The hunt test, and
+        <code>order_guard_holds_its_reach</code>, also wait before spawning anything until the
+        chunks round the field tick (issue #70). A horse that landed one chunk over from the
+        test&rsquo;s own chunk could stand frozen, never founded, for longer than the old
+        200-tick budget, because a forced chunk starts ticking some ticks after it is forced
+        (up to 369 in 120 tries). Their budgets are 1200 and 1300 ticks to leave room for
+        that wait.</li>
 </ul>
 
 <h3 id="places-code">Graze nearby, Guard here and Go home (Piece 2, 2026-10-03)</h3>

@@ -68,6 +68,25 @@ class MagicalVariantTest {
         }
     }
 
+    /**
+     * Issue #33. The founder log checks a magical herd's member against its breed's sheet, and the herd's one pair is
+     * the herd's spec, not a founder bug - so it is exempt, and a member must log clean. The control proves the pair
+     * really is off the sheet, which is what the log used to report; the exemption holds only for the herd's own pair.
+     */
+    @Test
+    void theHerdsOwnPairIsNotOffSheet() {
+        int checked = 0;
+        for (long seed = 0; seed < 200; seed++) {
+            MagicalVariant v = MagicalVariant.pick(friesian(), new SeededRng(seed, "magical-herd")).orElseThrow();
+            Genome g = BreedFounder.roll(friesian(), new SeededRng(seed), seed % 2 == 0 ? Sex.MALE : Sex.FEMALE, v);
+            String what = "seed " + seed + ": " + v.gene().key() + "=" + v.pair().toTokens();
+            assertEquals(java.util.List.of(), BreedFounder.offSheet(friesian(), g.genotype(), v), what);
+            assertTrue(BreedFounder.offSheet(friesian(), g.genotype()).contains(v.gene()), what + " is on the sheet");
+            checked++;
+        }
+        assertEquals(200, checked);
+    }
+
     @Test
     void theChanceAndTheSwitchAreHonoured() {
         int magical = 0;

@@ -12,6 +12,7 @@ wiki/api-notes.html#createpath-is-not-a-probe	all	createPath is not a clean prob
 wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
 wiki/api-notes.html#cutout-no-blend	all	A cutout pipeline ignores your alpha, so a tint cannot fade anything
 wiki/api-notes.html#deferred-submit-setupanim	all	A submitted model is drawn later, and setupAnim runs then — not at the submit
+wiki/api-notes.html#forced-chunk-ticks-later	all	A forced chunk starts ticking some ticks later, and a gametest waits only for its own structure’s chunks
 wiki/api-notes.html#interface-private-static	all	An interface’s private static method is unreachable, and vanilla hides real behaviour in them
 wiki/api-notes.html#item-capability	all	Item handlers: there is no IItemHandler any more
 wiki/api-notes.html#onlyin-on-mod-classes	all	Do not put @OnlyIn on a class of your own

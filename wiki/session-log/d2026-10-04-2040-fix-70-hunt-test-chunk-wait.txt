@@ -1,0 +1,87 @@
+2026-10-04 20:40 (start, local, approximate) - Fix #70: the hunt gametest's horse spawned into a chunk not yet ticking
+
+ASKED
+-----
+- "/fix-bug" with "(i did just add a bunch of non-bug items to issues, make sure you grab
+  a bug)". The bug,tuning list (minus needs-owner) held #70, #36, #35, #34, #33, #10, and
+  no unlabelled issue. #35, #36 and #10 already have their fixes in and only wait on a
+  check. #33 and #34 are cosmetic, which ranks last. Took #70 (found-in-yard, level c),
+  the last session's PICK UP FIRST. Fixed and closed.
+
+DONE
+----
+- 32d29fd1 "Fix #70: order_hunt_picks_a_monster spawned its horse into chunks not yet
+  ticking". neoforge-26.1.2/.../gametest/ModGameTests.java (orderHuntPicksAMonster,
+  orderGuardHoldsItsReach, new fieldTicks and huntState, keepTicking javadoc, the two
+  budgets in onRegisterGameTests), plus wiki/item-whistles.html's gametest list.
+  Cause: the horse never ticked. The new failure message showed tick 0 at the 200-tick
+  timeout, no goals running, never founded, so the husk was never spawned ("target
+  none"). In every failure the horse stood one chunk over from the test's own chunk.
+  keepTicking forces the 3x3 chunks, but a forced ticket takes effect some ticks later.
+  The harness waits only for the 1x1 structure's own chunk, and that wait does not count
+  against maxTicks (GameTestInfo.tick, areEntitiesActuallyLoadedAndTicking; padding does
+  not widen it). A neighbour chunk's wait came out of the test's budget. The issue's two
+  leads (refound resetting state, late founding) were wrong.
+  Fix: the hunt and guard tests spawn nothing until all nine forced chunks tick
+  (fieldTicks, called inside succeedWhen), and their budgets went from 200 and 300 to
+  1200 and 1300. The hunt failure message prints the founded age, the removal reason,
+  chunk ticking, fighter, hp, order and anchor, goals, and the husk's sight, canAttack,
+  hostile, passified and distance.
+  Proof (temporary copies, each in its own batch by registerAlone, all deleted before
+  the commit):
+  - 40 copies in the test's own layout x 6 runs: 2 red in about 246 cells, both with
+    the horse in the neighbour chunk.
+  - Forced: 40 copies with the horse always one chunk over (x shifted to local 1 of the
+    next chunk). Stock code: 7 red in 120. Six still had the chunk not ticking at the
+    timeout; in the seventh it started ticking only about 10 ticks before the timeout.
+  - The wait at the old 200 budget: 2 red in 160, failing inside the wait itself.
+  - A 2400 budget with the wait's length logged: 120 of 120 green; waits from 1 tick
+    (most) up to 369.
+  - The final 1200 budget: 120 of 120 green (longest wait 250).
+  - Copies removed: :neoforge-26.1.2:build green, two plain runGameTest runs 55 of 55,
+    check-parity OK.
+  #70 closed by the commit, with a proof comment.
+
+DECIDED
+-------
+- Made without the owner: the fix is in the tests, not the game. Nothing a player runs
+  forces chunks or spawns into them this way.
+- Made without the owner: kept both the wait and the bigger budget. The budget alone
+  would pass, because the horse starts ticking once its chunk does. The wait keeps the
+  ground-clearing and the spawns off chunks that aren't ticking yet, and makes a slow
+  chunk fail with a message that says so. Recorded on #70 and item-whistles.html.
+- Made without the owner: order_stay_walks_back left alone. It has the same shape on a
+  300-tick budget, and its own comment ("a gametest horse can stand frozen for a hundred
+  ticks or so after it is spawned") is this cause. Named on #70 for the next time it
+  flakes.
+
+FOUND ON THE WAY
+----------------
+- #119 filed: wild_pack_founds_one_herd went red once ("a pack member is gone") in about
+  15 runs. Its message prints no state.
+- A copy registered as a plain method reference crashed mod loading ("Adding duplicate
+  value ... to registry"): every copy was the same lambda object. Fixed by capturing the
+  index. Now in fix-bug.txt.
+- The first diagnostic printed the whole genetic code (several KB per failure line). It
+  was trimmed before the commit.
+
+PROCEDURES
+----------
+- fix-bug.txt step 5: copy mechanics (a capturing lambda per copy; registerAlone copies
+  each get a batch), and measuring a timing failure by raising the copies' budget and
+  logging the tick each one reaches the hang (#70's 1 to 369).
+- wiki/api-notes.html#forced-chunk-ticks-later: new entry. A forced chunk starts ticking
+  later, and a gametest waits only for its structure's chunks.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run: nothing in common/ changed.
+- Nothing to see in game: only gametests changed. No Verification-tab anchor added.
+
+RELEASE
+-------
+Not offered: a test-only fix, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#119 (wild_pack_founds_one_herd gametest flake), by procedures/fix-bug.txt.

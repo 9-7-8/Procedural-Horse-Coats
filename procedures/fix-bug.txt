@@ -110,6 +110,14 @@ STEPS
      the genome, place the intruder) for a red/green that is not a matter of chance.
      Example: #40, 734 random cells green; then a forced Aae/Aae roll with a horse
      overhead failed 100 of 100 before the fix and passed 100 of 100 after.
+     Copy mechanics: register each copy as a lambda that captures its index
+     (`final int n = i; () -> h -> { if (n >= 0) test(h); }`). A plain method
+     reference is one shared object, and the registry refuses it as a duplicate, so the
+     game crashes at load. A test registered alone (registerAlone) gets one batch per
+     copy, so its copies never meet.
+     If the failure is timing, not chance, raising the copies' budget measures it: log the
+     tick each copy reaches the step that hangs, and choose the new budget from that
+     distribution. Example: #70, a forced chunk's wait of 1 to 369 ticks.
    - Edit the smallest owning slice, and run the check straight away.
    - Shape:
      - The rule goes in common/, returning a typed result, never chat text.
