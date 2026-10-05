@@ -62,7 +62,8 @@ Labels:
 Size and impact keep process-intake's definitions (a finishes shipped work, b unblocks,
 c new). report-bug's "never invent labels" is relaxed for exactly this set.
 Lifecycle: idea -> scoped -> in-progress -> closed as completed with a comment giving
-the commit, the release tag and the wiki anchor, and the release's milestone. Already built when found: closed the same
+the commit, the release tag and the wiki anchor, and the release's milestone. Already
+built when found: closed the same
 way. Dropped: closed not_planned with wontfix. Edit bodies; never delete comments.
 Files an issue still points at (potential-assets, *-draft/, tools/) are linked by
 commit-SHA permalink, so the link survives later deletion.
@@ -131,7 +132,8 @@ STEPS
 DONE WHEN
 ---------
 Every unit and evidence file is an issue, verified; the files are retired; the
-procedures above read issues; the Start here issue is pinned; the rebake rows are green. Report the map, the counts by
+procedures above read issues; the Start here issue is pinned; the rebake rows are green.
+Report the map, the counts by
 label, and anything left in intake/ and why. Then retire this procedure file.
 
 NEVER
