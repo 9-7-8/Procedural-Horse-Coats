@@ -1,0 +1,49 @@
+2026-10-05 04:44 - Intake to issues, fourth round: Rename to Ixora's Horse Overhaul (time is the end of the session)
+
+ASKED
+- "/migrate-intake-to-issues: let's tackle the jar rename-- it should get its own label". Done:
+  the rename treatment became issues #142-#145 under a new label, rename; the file was retired.
+- (owner, via the question tool) approved the plan "as shown"; then approved retiring the file.
+
+DONE
+- Refs #142-#145, commit 4afeb2da on branch claude/beautiful-ptolemy-3a5k63 (not main). Before
+  it, origin/main was merged into the branch (237ebfde); the only conflict was the top of
+  wiki/session-log.html, resolved by keeping both sets of entries.
+- New label rename (colour d93f0b). #142 parent (rename, tracking, scoped, needs-owner) holds
+  the whole 21,008-character file verbatim in one ```text block. Sub-issues: #143 piece 1 the
+  converter (size:L, impact:unblocks); #144 piece 2 the mod side (size:L, impact:unblocks,
+  depends on #143); #145 piece 3 the proof and cutover (size:M, impact:unblocks, needs-owner,
+  depends on #143, #144). Sizes and impacts were chosen by this session: Sizing.txt never
+  sized this file.
+- Proof (before deleting): each issue's fenced text equals its source lines byte for byte;
+  labels and sub-issue links read back through the API; no "#?" left; footers present.
+- Retired: intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt (kept at
+  commit 237ebfde). tools/rename/README.txt and intake/four-jar-split/00 Overview... now
+  name #142; its path left rename.config.json. The migration procedure's state section carries
+  the map and says 15 files remain.
+- Old path -> issue map: intake/Rename to Ixora's Horse Overhaul - implementation treatment.txt
+  -> #142 (#143, #144, #145).
+
+DECIDED
+- Structure: parent plus three pieces, label rename (owner, via the question tool).
+- Sizes, impacts and the needs-owner flags on #142 and #145: this session, unapproved in detail.
+
+FOUND ON THE WAY
+- Bugs filed: none. The pilot step was skipped because the owner approved the table first.
+- The branch had diverged from main (fix commits for #33 and #70); merged, not rebased.
+
+PROCEDURES
+- procedures/migrate-intake-to-issues.txt: state and map updated. It should also list the
+  rename label among the created labels; not edited further.
+
+NOT RUN / NOT CHECKED
+- No Gradle build (only intake/, tools/rename and procedures/ changed). check-parity passed
+  (7163 checks). The full :common:test suite was not run and checks nothing here.
+- No Verification tabs or wiki prose touched. Milestones and the Start here issue still not done.
+
+RELEASE
+- Not offered: this session moved text and built nothing.
+
+PICK UP FIRST
+- Move the next intake file to issues, the Four-jar split (102 KB, needs numbered comments;
+  link #142 as its dependency), by procedures/migrate-intake-to-issues.txt.
