@@ -1,9 +1,9 @@
 Port feasibility survey (NOT a unit: nothing is built from this file)
 
 Surveyed 2026-10-03 for the owner. Five ports, each scoped as its own treatment:
-  1. Port - NeoForge latest - implementation treatment.txt
-  2. Port - Fabric 26.1.2 - implementation treatment.txt
-  3. Port - other loaders 26.1.2 - implementation treatment.txt
+  1. Port - NeoForge latest (now GitHub issue #89)
+  2. Port - Fabric 26.1.2 (now GitHub issue #79)
+  3. Port - other loaders 26.1.2 (now GitHub issue #85)
   4. Port - Bedrock - implementation treatment.txt
   5. Port - Forge 1.12.2 - implementation treatment.txt
 This file is the shared evidence and the comparison. The treatments point back here and do

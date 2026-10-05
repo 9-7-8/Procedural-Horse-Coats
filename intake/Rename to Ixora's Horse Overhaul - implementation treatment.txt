@@ -263,8 +263,8 @@ Decided (owner, asked with the question tool):
 - Metadata: authors "Ixora"; homepage/issue tracker = the renamed GitHub repo; logo = a generated square icon from existing item art (a horse-head whistle on a dark panel), replaceable later
   (Distribution treatment, piece 2).
 - Converter report: counts only; progress line yes; no resume (re-run into a fresh folder).
-- Modrinth/CurseForge: NO pages, accounts, drafts, uploads or upload script until 1.0.0; the rename prepares for it and the groundwork is a wiki page "Distribution" (new treatment:
-  intake/Distribution page and platform pages - implementation treatment.txt). Details (accounts, layout, settings, links, Patreon, version string, pre-release flag) are there.
+- Modrinth/CurseForge: NO pages, accounts, drafts, uploads or upload script until 1.0.0; the rename prepares for it and the groundwork is a wiki page "Distribution" (new treatment, now
+  GitHub issue #76). Details (accounts, layout, settings, links, Patreon, version string, pre-release flag) are there.
 - 0.6.0 is published on GitHub only, marked a PRE-RELEASE until one week passes with no new crash reports and the wheel and a converted world are confirmed in a real game.
 - Version string 0.6.0, file ixoras-horses-0.6.0.jar. Donations link: Patreon only. No Discord link.
 Still open after this pass:

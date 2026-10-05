@@ -52,13 +52,6 @@ Head parts - implementation treatment.txt                         sized 2026-10-
 Built? No.
 
 ------------------------------------------------------------------------------
-Bridle and saddle split - implementation treatment.txt            sized 2026-10-02
-- Piece 1: vanilla saddle relabelled bridle, Headstall, migration  M  b  owner-free; verify vanilla riding first
-- Piece 2: passenger-only below tier 3, server switch, herd walk   M  b  owner-free; needs 1
-- Piece 3: mod saddle, tiers, ridden-only speed/jump, bags         L  c  Open: numbers, trade for it; needs 2
-Built? No.
-
-------------------------------------------------------------------------------
 Tusks gene - implementation treatment.txt                         sized 2026-10-02
 - Slice A: TusksGene + colour gene, SNOUT anchor, narwhal horn   M  c  owner-free; no breed changed
 - Slice B: boar tusks, sabre fangs; JAW_/LIP_ anchors            M  c  owner-free; needs A
@@ -76,11 +69,6 @@ Daily realm horse - implementation treatment.txt                  sized 2026-10-
   ticking with no players, breed weighting - recommends Feral Mixed 1 in 4 -, non-WILD breeds,
   placement, NBT tag, soft cap)
 Built? No.
-
-------------------------------------------------------------------------------
-Horse exits and free send home - implementation treatment.txt     sized 2026-10-02
-- Piece 1: Exits tab on the H menu, ledger, log call sites       M  c  owner-free
-Piece 2 (Send home free) shipped 2026-10-02. Built? Piece 1 no.
 
 ------------------------------------------------------------------------------
 Horse shoes.txt                                                   sized 2026-10-02
@@ -197,28 +185,6 @@ Port feasibility survey.txt   (NOT A UNIT: evidence for the five Port treatments
 All five ports ship only after 1.0.0 (owner, 2026-10-03). Recommended order: Fabric, NeoForge latest, Forge 1.12.2 (after its go/no-go), Bedrock (after its spike).
 
 ------------------------------------------------------------------------------
-Port - NeoForge latest - implementation treatment.txt             sized 2026-10-03
-- Piece 1: build and boot on latest NeoForge (version-by-version)   M-L a  No: which version is "latest" and keep 26.1.2? Waits on 26.3 leaving beta
-- Piece 2: rendering and mixin repairs                              S-L a  owner-free; with piece 1
-Built? No (everything is pinned to 26.1.2).
-
-------------------------------------------------------------------------------
-Port - Fabric 26.1.2 - implementation treatment.txt               sized 2026-10-03
-- Piece 1: shared seam (extract 334 vanilla-only files + data)      L  b  No: module style, one jar or two
-- Piece 2: Fabric boots and registers                               M  c  needs piece 1
-- Piece 3: events (273 handlers)                                    L  c  needs piece 2
-- Piece 4: client                                                   M-L c needs piece 2
-- Piece 5: compat and distribution                                  S  c  No: which compat hooks
-Built? No (no Fabric code exists).
-
-------------------------------------------------------------------------------
-Port - other loaders 26.1.2 - implementation treatment.txt        sized 2026-10-03
-- Piece 1: Quilt boot test of the Fabric jar                        S  c  owner-free; needs Fabric piece 2
-- Piece 2: MinecraftForge 26.1.2 module (optional)                  M  c  No: build at all?
-- Piece 3: written verdict on the rest                              S  c  owner-free
-Built? No.
-
-------------------------------------------------------------------------------
 Port - Bedrock - implementation treatment.txt                     sized 2026-10-03
 - Piece 1: one-day spike (five questions; local-only)               S  b  owner-free to run, owner must OK installing the client
 - Piece 2: genetics core as generated JS (:bedrock-js)              L  b  owner-free; needs piece 1
@@ -245,8 +211,3 @@ Four-jar split - implementation treatment.txt (+ folder four-jar-split/)  sized 
 - Piece 3: Breeding add-on + four-jar release pipeline + marker   L  c  owner-free; needs 1 and 2; launch-time dependency messages
 Built? No (grep: no :common-base module, no Base jar, no extension registries).
 
-------------------------------------------------------------------------------
-Distribution page and platform pages - implementation treatment.txt    sized 2026-10-04
-- Piece 1: wiki page "Distribution" (Gameplay: which jar; Coding: settled facts; Roadmap: 1.0.0 checklist; copy drafts)   S-M  c  owner-free except screenshots; ships with the rename
-- Piece 2: generated logo (512 and 128) and mods.toml metadata                                                      S    c  owner-free; part of the rename's mod-side work
-Built? No (no wiki/distribution.html, no logo file).
