@@ -103,9 +103,7 @@ public class CartWorld extends SavedData {
     }
 
     public Optional<Entity> getCurrentlyPulling(AbstractDrawnEntity drawn) {
-        OptionalInt id = pulling.keySet().intStream()
-                .filter(pullID -> pulling.get(pullID) == drawn.getUUID())
-                .findFirst();
+        OptionalInt id = CartPulls.pullerOf(pulling, drawn.getUUID());
         if (id.isEmpty()) return Optional.empty();
         return Optional.ofNullable(drawn.level().getEntity(id.getAsInt()));
     }
