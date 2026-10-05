@@ -1,0 +1,48 @@
+2026-10-05 04:48 - Intake to issues, fifth round: the Four-jar split (time is the end of the session)
+
+ASKED
+- "/migrate-intake-to-issues: let's move all the separating jars into issues. Give them their own
+  label as well". Done: the four-jar split became issues #146-#149 under a new label, four-jar.
+- (owner, via the question tool) approved the plan "Approve, label four-jar" (parent plus three
+  pieces; shared files folded into parent comments).
+
+DONE
+- Refs #146-#149, commit ecb0d4b6 on branch claude/beautiful-ptolemy-3a5k63 (not main).
+- New label four-jar (colour 0e8a16). #146 parent (enhancement, tracking, scoped) holds the entry
+  file and file 00 in its body and numbered comments 2/5 file 01 decision log, 3/5 file 02
+  considered and rejected, 4/5 file 03 code map, 5/5 files 07 and 08. Sub-issues: #147 piece 1
+  Base (size:L, impact:unblocks, depends on #142), #148 piece 2 Equipment (size:L, impact:new,
+  depends on #147), #149 piece 3 Breeding and release (size:L, impact:new, depends on #147, #148).
+  Sizes from Sizing.txt (P1 was "L+", taken as L).
+- Proof (before deleting): every fenced block equals its source file byte for byte (entry, 00,
+  01, 02, 03, 07, 08, 04, 05, 06); labels, parent link and Depends on lines read back through
+  the API; no "#?" left.
+- Retired: the entry file and intake/four-jar-split/ (kept at commit c051ee6f); the Sizing.txt
+  block; the two paths in tools/rename/rename.config.json. #142's body now links #146.
+- Old path -> issue map: intake/Four-jar split - implementation treatment.txt and
+  intake/four-jar-split/ -> #146 (#147, #148, #149).
+
+DECIDED
+- Structure and label four-jar (owner, via the question tool).
+- No pilot issue: the owner approved the table first; calls on size and impact came from Sizing.txt.
+
+FOUND ON THE WAY
+- Bugs filed: none. tools/rename/README.txt still names "four-jar-split treatments" in prose;
+  left as is.
+
+PROCEDURES
+- procedures/migrate-intake-to-issues.txt: state, map and file count (14 remain) updated.
+- procedures/write-intake-document.txt: the four-jar example now names #146-#149.
+- procedures/process-intake.txt still uses intake/four-jar-split/ as an example folder; generic, left.
+
+NOT RUN / NOT CHECKED
+- No Gradle build (only intake/, tools/rename and procedures/ changed). check-parity passed
+  (7163 checks). The full :common:test suite checks nothing here.
+- No Verification tabs touched. Milestones and the Start here issue are still not done.
+
+RELEASE
+- Not offered: this session moved text and built nothing.
+
+PICK UP FIRST
+- Move the next intake file to issues (14 treatment files remain, then milestones and the Start
+  here issue), by procedures/migrate-intake-to-issues.txt.
