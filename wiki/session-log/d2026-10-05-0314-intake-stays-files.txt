@@ -8,6 +8,8 @@ ASKED
 DONE
 - Checked: `gh api graphql` through the cloud session's proxy fails ("GitHub GraphQL is not available through this session's GitHub proxy"); the GitHub tools loaded here have no discussion
   tools; the REST API has no Discussions routes. So a cloud session cannot read or write Discussions.
+- Later in the session the owner asked whether any route to Discussions existed (answer: not directly; /graphql is blocked for Claude Code sessions by platform policy; an Actions bridge or local sessions
+  with gh would work) and then chose to use Issues instead, to be designed next session. Nothing built.
 - Wrote the decision and the reasons at the end of intake/README.txt, where a future session proposing it would look. No code, no wiki page, no procedure changed.
 
 DECIDED (owner)
@@ -26,4 +28,8 @@ RELEASE
 Not offered (no player-facing change).
 
 PICK UP FIRST
-Unchanged: the owner says "go" for the rename freeze after her background fix merges, then /process-intake on the rename treatment (see d2026-10-04-2006-discord-command-whistle-post.txt).
+NEXT SESSION (owner, 2026-10-05): move intake from intake/ files to GitHub ISSUES. Design first (no migration yet): label `feature` for features beside `bug` and `tuning`; one issue per feature
+with the entry file as the body and the decision log / rejected options as comments; each build piece a sub-issue with size-S/M/L and `owner-needed` labels (replaces Sizing.txt);
+status labels scoped/building, closed when shipped with a link to the wiki page; images stay in the repo; a filtered link `is:issue label:feature` in the READMEs; Projects v2 boards are
+GraphQL-only so they are NOT used. Then migrate ONE treatment as a test, then the rest, and change write-intake-document, process-intake, whats-next and probe-a-scope. This replaces the
+"Discussions" idea (GraphQL blocked for cloud sessions; an Actions bridge was described and not chosen) and supersedes the README note until it ships. Then, as before: the owner says "go" for the rename freeze after her background fix merges, then /process-intake on the rename treatment (see d2026-10-04-2006-discord-command-whistle-post.txt).
