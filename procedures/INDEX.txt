@@ -13,6 +13,9 @@ Command                  Runs    Say (any of)                         What it le
 -----------------------  ------  -----------------------------------  ---------------------------------
 /whats-next              either  "what's next", "what should we do    2-4 options with a recommendation,
                                  next", "where are we"                 then the picked work started
+/next-release            local   "work on the next release", "next    every open issue on a milestone; ONE
+                                 release", "work the milestone"        unit of the next release built, or
+                                                                      the release offered
 /end-session             local   "end the session", "wrap up",        code + docs pushed as two commits,
                                  "we're done for today"               nothing left running
 /write-session-log       either  "write the session log", "log this   one NEW timestamped log file, every
@@ -77,6 +80,8 @@ How they fit together
                     -> GitHub issue (bug | tuning) -> fix-bug -> end-session
   needs her eyes -> hand-over-a-test -> launch-game
   any change     -> rebake -> test-tiers (lowest tier that proves it)
+  the plan       -> next-release: next milestone -> bugs (fix-bug), then its features
+                    (process-intake) -> milestone empty -> release offered
   shipping       -> release: offer -> owner decides -> the release set -> tag + jar + note
 
 Routines that might become procedures next

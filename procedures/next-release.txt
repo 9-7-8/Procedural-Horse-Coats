@@ -1,0 +1,132 @@
+PROCEDURE  : Work on the next release
+COMMAND    : /next-release
+SAY        : "work on the next release", "let's work on the next release",
+             "next release", "work the milestone"
+RUNS       : local (the unit it hands to builds and runs tests); the housekeeping in
+             steps 1-2 can run anywhere issues can be edited
+TAKES      : release milestones on GitHub (one per release, planned in the pinned
+             release-plan issue), and a `Backlog` milestone for unscheduled issues
+LEAVES     : every open issue on a milestone; ONE unit of the next release built and
+             closed (by fix-bug or process-intake), or the release offered
+==============================================================================
+
+WHEN TO USE
+-----------
+Use this to move the release plan forward: it finds the release that is next, tidies
+its milestone, and builds the next unit in it. It is a picker in front of two other
+routines. A bug is built by fix-bug, a feature or procedure issue by process-intake, and
+this file only decides WHICH one and keeps the milestones true.
+One run builds ONE unit, as both of those routines require. The owner clears context
+and says the words again for the next one.
+Not for: a bug the owner names by number (fix-bug directly), scoping an idea
+(write-intake-document), or cutting a release by itself (release).
+
+BEFORE YOU START
+----------------
+1. `git pull --ff-only origin main`; cloud routines push to main too.
+2. Read the release-plan issue: the open `documentation` issue titled "Release plan"
+   (`gh issue list --state open --label documentation`). It holds the method (point
+   weights, dependency rules, the owner's priorities) and the order of every release.
+   Read "Start here: how the issue queue works" beside it for the labels.
+3. List the milestones with their counts:
+     gh api "repos/<owner>/<repo>/milestones?state=all&per_page=100" \
+       --jq '.[] | "\(.number) \(.title) \(.state) open=\(.open_issues) closed=\(.closed_issues)"'
+   `gh repo view --json nameWithOwner` gives <owner>/<repo>.
+
+STEPS
+-----
+1. Find the next release.
+   a. The last release is the newest tag: `git tag --sort=-v:refname | head -1`.
+   b. The next release is the OPEN milestone with the lowest version above that tag
+      that still has open issues. `Backlog` is never a release.
+   c. If the last tag's own milestone is still open, it was missed at release time:
+      assign it every issue closed between the previous tag and that tag (dates from
+      `git log -1 --format=%cI <tag>`) that has no milestone, then close it, as
+      release step 8a says.
+
+2. Every open issue has a milestone (owner).
+   `gh issue list --state open --limit 300 --json number,title,labels,milestone`
+   and look for a null milestone:
+   - a `bug` or `tuning` issue -> the next release's milestone (a bug rides the next
+     release), and add it to that milestone's description under "Bugs first";
+   - an `idea`, `survey`, or the two queue documents -> `Backlog`;
+   - a `scoped` issue with a size label -> a release, by the plan's method: after
+     everything it depends on, in the first release with room (about 10 points,
+     S=1 M=2 L=5). Add it to that milestone's description and to the release-plan
+     issue's list in the same edit.
+   Moving an issue between milestones edits BOTH milestone descriptions and the
+   release-plan issue, so the three never disagree.
+
+3. List the next release's units, in this order (owner):
+   a. its open `bug` and `tuning` issues, ranked by fix-bug step 1 (damage, then
+      players on a released jar, then yard-only, then cosmetic);
+   b. then the rest in the order the milestone's description lists them.
+   Skip: `tracking` parents (never built directly; close one by hand when its last
+   sub-issue closes), anything labelled `in-progress` (another session has it), and
+   anything whose `Depends on:` names an issue that is still open.
+   An issue with `needs-owner` stays in the list. Before choosing it, put its open
+   calls to the owner with the question tool, 2-4 options each with the
+   recommendation first. If she answers, remove needs-owner and continue. If not,
+   skip it.
+   Re-check the order with `Depends on:` lines. The milestone list can be wrong, and
+   the dependency wins.
+
+4. Pick the first unit left and say in one line what it is, why it is first, and what
+   comes after it.
+   - None left, because every issue on the milestone is closed or only tracking
+     parents remain -> step 6.
+   - Every remaining unit is blocked on the owner or on another session -> say which
+     and why, and stop.
+
+5. Build it by its own routine. Read that file in full and follow it from its step 1,
+   with this unit as the owner's named pick:
+   - `bug` / `tuning`              -> procedures/fix-bug.txt
+   - `procedure` (an idea or not)  -> procedures/process-intake.txt, which writes it
+                                      by procedures/FORMAT.txt
+   - `scoped` feature/enhancement  -> procedures/process-intake.txt
+   - `idea` that is not a procedure -> it is not buildable. Scope it first with
+     procedures/write-intake-document.txt; that is this run's unit. Re-size it and
+     re-place it by step 2.
+   That routine claims, builds, closes and ends the session. When closing the issue,
+   leave it on this milestone. If the unit turned out bigger and its remainder was
+   split off, put the remainder on the NEXT release's milestone (the plan says the
+   next release absorbs what slips), and edit both descriptions.
+
+6. The milestone is finished, or only blocked units remain on it.
+   Finished -> the release bar is met (owner). Read procedures/release.txt and OFFER
+   the release with the question tool. Releasing is still her call. On a yes, follow
+   that file. It closes the milestone at step 8a.
+   Only blocked units remain -> ask once whether to move them to the next milestone
+   and offer the release without them, or wait.
+
+7. If anything moved, update the release-plan issue: its per-release list, and a line
+   saying what slipped and why. Renumbering milestones is allowed when a bug-fix
+   release lands in between (the plan says so). Never re-plan the owner's ordering
+   rules or priorities themselves without asking.
+
+DONE WHEN
+---------
+- No open issue is without a milestone, and the last tag's milestone is closed.
+- One unit of the next release is closed (or fixed and waiting on a named check), by
+  its own routine, which also ended the session. Or the release has been offered.
+- You have reported: the next release, the unit built, what is left on its milestone
+  (bugs first, then features), and any owner call the next unit will need, so she can
+  answer it before the next run.
+
+NEVER
+-----
+- Never build a unit from a later milestone while the next one has a buildable unit.
+  The plan's order is the owner's.
+- Never build a feature before an open bug on the same milestone (owner, 2026-10-05).
+- Never build two units in one run. The routines this hands to forbid it.
+- Never cut a release without her yes. Finishing a milestone earns an OFFER.
+- Never move an issue between milestones without editing both descriptions and the
+  release-plan issue. Three copies that disagree is how the plan rots.
+- Never name a closed milestone in `gh issue edit --milestone`, because it fails with
+  "not found". Use `gh api -X PATCH repos/<owner>/<repo>/issues/<n> -F milestone=<number>`.
+
+SEE ALSO
+--------
+fix-bug; process-intake; write-intake-document; release (step 8a: the milestone);
+whats-next (the wider survey, when the owner wants options rather than the plan's next
+step); procedures/FORMAT.txt.
