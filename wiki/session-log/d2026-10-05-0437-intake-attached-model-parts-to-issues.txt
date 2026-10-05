@@ -1,0 +1,56 @@
+2026-10-05 04:37 - Intake to issues, third round: Attached model parts (time is the end of the session)
+
+ASKED
+- "/migrate-intake-to-issues: Attached model parts (88 KB) and its draft folder." Done: the
+  file became issues #138-#141 and the file and its draft folder were retired.
+- (owner, via the question tool) approved the table as written; later approved retiring the files.
+- "Is there anything else we should do which fits cleanly within this session?" I offered the
+  release milestones, the Start here issue and the session log.
+- (owner) "Don't do any of that, I'll decide on a release schedule for everything AFTER it's all
+  in issues. We'll retcon it. Just end the session." So milestones and Start here were NOT done.
+
+DONE
+- Refs #138-#141, commit 8835f1ea on branch claude/beautiful-ptolemy-3a5k63 (not main).
+- #138 tracking+scoped+enhancement parent: header, then the whole 88,127-character treatment
+  verbatim in ```text blocks - body = sections 1-11, comment "Treatment 2/3" = section 12,
+  comment "Treatment 3/3" = sections 13-14. Its body says stages 0-3 shipped (Sizing.txt had
+  marked them STALE), so they have no sub-issues.
+- Sub-issues of #138: #139 stage 4 breed hook (size:L, impact:unblocks, needs-owner);
+  #140 stage 5 worn side (size:M, impact:finishes; depends on Horse shoes, still a file, named
+  in plain text); #141 stage 6 wings (size:L, impact:new, needs-owner).
+- Proof (before deleting): the three parts rejoined equal the source ignoring blank-line runs;
+  each sub-issue's fenced text equals its stage lines; labels and the sub-issue links checked
+  through the API; no "#?" left; every body ends with the attribution footer.
+- Retired in one commit: intake/Attached model parts.txt, intake/attached-parts-draft/ (kept
+  at commit 5f5199ae, which #138 links by permalink), its block in intake/Sizing.txt.
+  "Body parts - implementation treatment.txt" now names #138. The migration procedure's
+  state section carries the map (old file -> issues).
+- Old path -> issue map: intake/Attached model parts.txt -> #138 (#139, #140, #141);
+  intake/attached-parts-draft/ -> linked from #138 at 5f5199ae.
+
+DECIDED
+- Table approved as written, including no sub-issues for shipped stages (owner).
+- Release milestones and the pinned Start here issue are deferred; the owner will set the
+  release schedule after everything is in issues and "retcon" it (owner). Recorded here and
+  still listed as NOT DONE in procedures/migrate-intake-to-issues.txt.
+
+FOUND ON THE WAY
+- Bugs filed: none. The pilot step was skipped because the owner had approved the whole
+  table first; the parent and all three sub-issues were created in one pass.
+
+PROCEDURES
+- procedures/migrate-intake-to-issues.txt: state section updated (map, 16 files left). It
+  should also say the milestones are the owner's to decide after the migration; not edited
+  further this session.
+
+NOT RUN / NOT CHECKED
+- No Gradle build (a cloud session that touched only intake/ and procedures/). check-parity
+  passed (7163 checks). The full :common:test suite was not run and checks nothing here.
+- No wiki Verification tabs touched. No wiki prose changed.
+
+RELEASE
+- Not offered: this session moved text and built nothing.
+
+PICK UP FIRST
+- Move the next intake file to issues, the Four-jar split (102 KB, needs numbered comments),
+  by procedures/migrate-intake-to-issues.txt (/migrate-intake-to-issues).
