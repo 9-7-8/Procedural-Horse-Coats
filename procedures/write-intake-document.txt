@@ -20,11 +20,6 @@ kind: use report-bug.
 First search the open issues for the feature. If an `idea` issue already holds it
 (many wants arrive that way, from the server or from the owner), scope THAT issue:
 edit its body and swap `idea` for `scoped`. Never open a second issue beside it.
-TRANSITIONAL (delete when migrate-intake-to-issues is done): treatments written before
-the move are still files in intake/. Never write a new one as a file; scope it as an
-issue. Editing an existing file treatment (probe-a-scope, an owner's answers) stays
-in the file until that file is migrated.
-
 The bar: a treatment is finished when the building session needs the owner for
 NOTHING except what is marked Open, and every Open line truly could not be settled
 now. The antlers, the breed climate rule and the Chaos allele each shipped in one

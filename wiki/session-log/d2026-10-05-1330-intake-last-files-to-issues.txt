@@ -1,0 +1,57 @@
+2026-10-05 13:30 - Intake to issues, last round: the final 14 treatment files (time is the end of the session)
+
+Continues d2026-10-05-0448-intake-four-jar-to-issues.txt. Ran on branch claude/beautiful-ptolemy-3a5k63
+(a cloud session); nothing here is merged to main.
+
+ASKED (owner, in order)
+- "/migrate-intake-to-issues" (no unit named): the remaining 14 files were taken in one round.
+- Approve the table: "Approve, skip the pilot" (the format was already proven by earlier rounds).
+- Retire the files and Sizing.txt: "Retire now".
+
+DONE
+- 14 parents or single issues and 35 sub-issues, #151-#194, created, linked and labelled by script
+  (pieces got the whole piece section, each parent the whole file in a text block).
+- Old path -> issue map (parent; pieces are sub-issues):
+  Body parts -> #151 (#152 slice A spine, #153 B sail, #154 C plates, #155 D crystals)
+  Head parts -> #156 (#157 slice B, #158 slice C)
+  Tusks gene -> #159 (#160 slice A, #161 slice B)
+  Feathering -> #162       Daily realm horse -> #163       Horse shoes -> #164
+  Troughs and salt licks -> #165 (#166 piece 1, #167 piece 2, #168 3a, #169 3b, #170 3c)
+  Villagers in every village -> #171 (#172 piece 1, #173 piece 2)
+  Tail gene -> #174        Tufted lion tail -> #175 (#176 P1, #177 P2, #178 P3 optional, needs-owner)
+  Natural-sheep gene kind -> #179 (#180 P1, #181 P2, #182 P3)
+  Sheep coat genes -> #183 (#184, #185, #186)   Sheep disorders -> #187 (#188, #189, #190)
+  Sheep horns and body genes -> #191 (#192, #193, #194)
+  Dependencies: lion tail #175 on Tail gene #174; sheep issues on the kind #179 (#180/#181).
+- Proof before deleting: every fenced block read back equals its source file (ignoring runs of blank
+  lines); labels equal the plan; every sub-issue's parent is set; no unresolved placeholder.
+- Retired: the 14 files and intake/Sizing.txt (kept at commit 706bb6c6). Sizing.txt's block for a
+  "Wild horse turnover" file was stale (no such file existed) and went with it.
+- #195 "Start here: how the issue queue works" created. PINNING IT NEEDS GRAPHQL: the owner pins it.
+- Every FILE and TRANSITIONAL clause is deleted from process-intake, write-intake-document and
+  whats-next; intake/README.txt, tools/rename/README.txt and wiki/roadmap-execution.html say issues.
+  Rebaked wiki/text, the search index, check-links and check-roadmap-execution: green.
+
+DECIDED
+- Sizes and impact came from Sizing.txt; a range (S-M, M-L) took the larger size, the range stays in
+  the Sized: line. "Owner: Yes/No" in Sizing became owner-free / needs-owner (the needs-owner label
+  on the sheep pieces and the optional whipping tail).
+
+FOUND ON THE WAY
+- Bugs filed: none. A sub-issue gets the whole piece section and a "Scope" line; shared sections
+  (decisions, tests, rebake) live on the parent only.
+
+PROCEDURES
+- process-intake, write-intake-document, whats-next: file clauses removed.
+- migrate-intake-to-issues: still to retire (see below).
+
+NOT RUN / NOT CHECKED
+- No Gradle build or tests (only intake/, procedures/ and wiki prose changed).
+- The release milestones were not created; the owner pins #195.
+
+RELEASE
+- Not offered: this session moved text and built nothing.
+
+PICK UP FIRST
+- Create the release milestones and assign closed units; the owner pins #195; then retire
+  procedures/migrate-intake-to-issues.txt and its slash wrapper.

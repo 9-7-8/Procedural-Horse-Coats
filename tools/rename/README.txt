@@ -25,8 +25,7 @@ WHAT IS HERE
   converter/launchers/                Convert Worlds.bat and convert-worlds.sh (double-click launchers; Java search UNVERIFIED)
 
 THE ORDER (matches the treatment: converter first, it gates everything)
- 0. Settled (owner, 2026-10-04): newPackage ixoras_horses, configFolder.new ixoras_horses, class renames, intake/ rewritten except the
-    rename and four-jar-split treatments. No TODO is left in rename.config.json. The freeze (nothing else lands on main) starts first.
+ 0. Settled (owner, 2026-10-04): newPackage ixoras_horses, configFolder.new ixoras_horses, class renames, intake/ rewritten. No TODO is left in rename.config.json. The freeze (nothing else lands on main) starts first.
  1. Turn the converter on:  add  include(":converter")  to settings.gradle.kts.
     ./gradlew :converter:jar      then      java -jar converter/build/libs/ixoras-converter.jar --self-test
     The self-test builds a synthetic world, converts it, checks zero old tokens, a byte-identical original and a no-op

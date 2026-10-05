@@ -1,6 +1,6 @@
-intake/ - what is left of the feature queue, plus its tools and art
+intake/ - the owner's tools and art; the feature queue itself is GitHub issues
 
-THE FEATURE QUEUE IS NOW GITHUB ISSUES (migrate-intake-to-issues, in progress).
+THE FEATURE QUEUE IS NOW GITHUB ISSUES (migrate-intake-to-issues, done).
 - A wanted feature is an issue labelled enhancement: `idea` until write-intake-document
   scopes it, then `scoped`. Size is size:S|M|L, impact is impact:finishes|unblocks|new,
   the owner's calls are needs-owner, a unit being built is in-progress, a big treatment
@@ -10,19 +10,12 @@ THE FEATURE QUEUE IS NOW GITHUB ISSUES (migrate-intake-to-issues, in progress).
 - A BUG never goes in the feature queue: procedures/report-bug.txt, procedures/fix-bug.txt.
 - To do.txt is the owner's old inbox, now a redirect to the issue list. Never delete it.
 
-STILL FILES HERE (not yet migrated; the migration moves them, then deletes them)
-- *implementation treatment.txt and a few evidence files: the units not yet issues.
-  process-intake and whats-next still read them (their lines marked FILE).
-- Sizing.txt: the size, impact and owner calls of those files, dated, kept by
-  process-intake. An index, not a unit. Goes with the last file.
-
 STAYS HERE
 - tools/: scripts add-a-gene calls (founders.py, fit-svg.mjs, coverage.mjs). Their paths
   are cited in gene files, so the folder keeps its name.
 - potential-assets/: art for any session to use; its README.txt says how to log a use.
 - discord-*/ folders hold announcement posts and their images for the Discord bot; they
   are not treatments or units.
-- *-draft/ folders retire with the treatment that uses them.
 
 Every procedure: procedures/INDEX.txt.
 

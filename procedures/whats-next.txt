@@ -39,8 +39,6 @@ STEPS
       many; they are not units until scoped, but a bare count shows the backlog.
       Page the search, 5-10 at a time. Claimed units (in-progress) are being built by
       another session: mention them, never offer them.
-      FILE (transitional): units still in intake/, scored from intake/Sizing.txt,
-      re-sizing only what changed since its date.
    d. WAITING ON HER EYES: wiki/verification.html, the newest entries and the oldest
       ones. Also anything a yard pen could answer without her (run-tests).
    e. THE SERVER: unreviewed PCH log export folders (review-server-logs; the local
@@ -61,15 +59,14 @@ STEPS
    e. Work that needs her answers. Gather its questions so one round unblocks it.
       If she says she is free to answer ("something that needs me"), run a QUESTION
       SWEEP instead of one unit: take the open issues labelled `needs-owner` and
-      `scoped` or `idea` (FILE: intake/Sizing.txt's "No"/"near-owner" rows), read each
+      `scoped` or `idea`, read each
       one's Open lines, and ask them in rounds of up to 4 (the treatment's own
       recommendation first). Record each answer where its builder looks: an
       "OWNER'S ANSWERS, <date>" block at the top of the issue body (it overrides the
       Open lines) and a comment saying so, the plan section on its wiki page with a
       decisions.html pointer, and the labels (remove needs-owner when the last Open line
       is answered). Write an answer that differs from the recommendation exactly as she
-      gave it. FILE: the same block goes at the top of the treatment, and the Sizing.txt
-      owner column is updated.
+      gave it.
    f. The big ones: Tier 3 feature units, foundations, long Roadmap items.
    g. Visual-only checks come last, always.
    Never offer two options that are really one. Never offer work whose prerequisite has
