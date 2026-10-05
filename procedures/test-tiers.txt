@@ -50,7 +50,9 @@ STEPS
      - CoatBakeGoldenTest and CoatPipelineGoldenTest, when anything that paints moved.
    - A new or changed test is mutated once: break the code, watch it go red, revert.
    - The NeoForge module's own unit tests, if they touched it:
-     `./gradlew :neoforge-26.1.2:test`.
+     `./gradlew :neoforge-26.1.2:test`. That classpath carries no Minecraft, so a
+     NeoForge-only rule is tested by pulling it into a Minecraft-free class beside its
+     caller (RiderFade.ramp, CartPulls.pullerOf), never by loading the MC class itself.
 
    TIER 2 - about a minute, when the change needs the game to prove it:
    - `./gradlew :neoforge-26.1.2:runGameTest`, the headless gametests. Use it when a

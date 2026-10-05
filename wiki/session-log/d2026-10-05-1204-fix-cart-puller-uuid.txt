@@ -1,0 +1,56 @@
+2026-10-05 12:04 - #198: the cart puller lookup compared UUIDs by reference (time is the end of
+the session, local; the lag-audit log above it says 20:00 but its commit landed before this one)
+
+ASKED
+- "/next-release". Came of it: v0.5.045 is the next release (v0.5.044 is the newest tag and its
+  milestone is closed). No open issue lacked a milestone. Of its bugs, #10, #36, #35 and #31 are
+  fixed and each waits on a named check (an in-game look, or the live server's log), so they were
+  skipped by next-release step 3. #198 was the only buildable unit, so it went to fix-bug.
+
+DONE
+- Milestone v0.5.045's description now lists #198 under "Bugs first" (it sat on the milestone
+  without being in the list).
+- ee0a6629 "Fix #198": CartWorld.getCurrentlyPulling found a cart's puller with `==` on UUIDs.
+  That matched only while the map held the cart's own UUID object; after a save and load the
+  map's UUIDs are built by the codec (equal, separate objects), so the lookup was always empty.
+  Callers hit: CoachmanMovePayload, CartLocalPlayerMixin (coachman input), ReaperCartEntity
+  (harvest). The lookup moved to the new Minecraft-free CartPulls.pullerOf, comparing with
+  equals.
+  Proof: CartPullsTest (neoforge-26.1.2/src/test), stored and asked UUIDs built separately: red
+  with `==` (1 of 2 failed, "a cart reloaded from disk lost its puller"), green with equals
+  (2 of 2). :neoforge-26.1.2:build green; check-parity OK.
+  Issue #198: closed by the commit, proof comment posted, still on milestone v0.5.045.
+
+DECIDED
+- Picked #198 by next-release step 3 (no owner call needed; the issue prescribed the fix).
+- Tested the rule through a Minecraft-free helper in the NeoForge module rather than moving it to
+  common/: carts are all NeoForge-side derived code, and the lookup is one loop. Made without
+  the owner; recorded here only (nothing on a page describes this lookup).
+
+FOUND ON THE WAY
+- A mistake, put right: the first PATCH of the milestone description from PowerShell flattened
+  it onto one line (a captured `gh` output is an array, and "$d" joins it with spaces). It was
+  rewritten from a here-string via `--input` within a minute. Now a NEVER line in
+  procedures/next-release.txt.
+- No new bugs filed.
+
+PROCEDURES
+- procedures/next-release.txt: NEVER line on PATCHing milestone descriptions from PowerShell
+  (use a JSON file and --input).
+- procedures/test-tiers.txt: the NeoForge unit-test classpath has no Minecraft; test a
+  NeoForge-only rule by pulling it into a Minecraft-free class (RiderFade.ramp,
+  CartPulls.pullerOf).
+
+NOT RUN / NOT CHECKED
+- The full :common:test suite was not run (common/ did not change; it would check nothing new).
+- runGameTest was not run: the change is a pure lookup with no handler, payload or registry path.
+- Not seen in game: a coachman's movement or a reaper cart harvesting after a world reload. No
+  Verification-tab anchor added; the unit test answers the runtime question.
+
+RELEASE
+- Not offered: one fix is below release step 1's bar.
+
+PICK UP FIRST
+- /next-release: v0.5.045 has no buildable bug left (#10, #36, #35, #31 wait on checks), so its
+  next unit is #152 Body parts - slice A, the SPINE anchor and the dorsal spine row, by
+  procedures/process-intake.txt.

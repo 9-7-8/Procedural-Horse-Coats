@@ -126,6 +126,10 @@ NEVER
   release-plan issue. Three copies that disagree is how the plan rots.
 - Never name a closed milestone in `gh issue edit --milestone`, because it fails with
   "not found". Use `gh api -X PATCH repos/<owner>/<repo>/issues/<n> -F milestone=<number>`.
+- Never PATCH a milestone description from a PowerShell variable holding `gh` output:
+  the captured lines are an array, and `-f description="$d"` joins them with spaces,
+  flattening the list into one line. Write `@{description=$d}` (a here-string) to a JSON
+  file and send it with `gh api -X PATCH .../milestones/<n> --input <file>`.
 
 SEE ALSO
 --------
