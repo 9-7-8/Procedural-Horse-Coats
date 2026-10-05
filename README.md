@@ -66,7 +66,9 @@ every horse you own, a gene database that fills in as you learn, recipes, breeds
 breeding preview and a log of what has happened to your stable.
 
 **Call and carry your horses.** Whistles call the horses you own nearby, or - with
-an ender whistle bound to one horse - one horse from anywhere. Tickets send a horse to
+an ender whistle bound to one horse - one horse from anywhere. A command whistle gives a horse a standing order - stay,
+follow, graze nearby, go home, or, for a horse bred to fight, hunt monsters, guard a spot
+or defend you. Tickets send a horse to
 its stall. Stasis chambers store a horse cheaply, and a stasis bank holds many and can
 even breed a pair for you. Double gates, showjumping fences and stall signs
 are there for building a yard.
