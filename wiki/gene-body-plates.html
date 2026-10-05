@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Body plates &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Body plates</h1>
+
+<p class="lede">
+    One copy and the horse grows overlapping plates of bone over its shoulders and its hips,
+    stepped down the flank like the lames of a suit of armour, the same on both sides. Whether
+    they are smooth, ridged or spiked, and how big, how many, how tightly lapped and how flared
+    they are, is written on the allele. Their colour is a gene of its own,
+    <a href="gene-body-plate-colour.html">body plate colour</a>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.body_plates"></div>
+
+<h2 id="dominant">One copy, either sex</h2>
+
+<p>
+    Dominant: <code>Plt/n</code> and <code>Plt/Plt</code> both grow plates, so a plated horse bred to
+    a plain one gives a plated foal at least half the time. It is <strong>not</strong> sex-limited.
+    Foals grow none; the plates come in when the horse grows up, and stay.
+</p>
+
+<h2 id="where">Where they sit</h2>
+
+<p>
+    Two clusters on each side: one over the shoulder, just behind the chest, and one over the hip.
+    The top plate sits just under the line of the back, and each one below it laps over the
+    next. The saddle sits between the two clusters, so a saddle or a rider hides none of them.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Rare in the wild: about three horses in a thousand have plates, and because one copy is
+    enough, every horse that carries the gene shows it. The skeleton horses can grow them in bare
+    bone, as one of their horn-like parts.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Form</strong>: <em>smooth</em> (plain plates with a rim along the bottom),
+        <em>ridged</em> (a raised rib along the middle of each) or <em>spiked</em> (a spike standing
+        out from each).</li>
+    <li><strong>Size</strong>: three classes, <em>small</em>, <em>broad</em> and <em>massive</em>.
+        Small to broad in the wild; a line bred for size reaches massive and stops.</li>
+    <li><strong>Count</strong>: how many plates each cluster has, from the top down, three to five
+        in the wild. A line can be bred down to a single plate per cluster.</li>
+    <li><strong>Overlap</strong>: how far each plate laps the one below it.</li>
+    <li><strong>Spikiness</strong>: how far the plates flare out from the body, and how tall the rib
+        or how long the spike stands.</li>
+</ul>
+
+<p>
+    Everything stacks: a horse can wear plates, a row of dorsal spines, a sail and every head part
+    at once.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no armour value, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.body_plates"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.body_plates</dd></div>
+    <div><dt>Class</dt><dd><code>BodyPlatesGene</code></dd></div>
+    <div><dt>Priority</dt><dd>245 (magical band), with its colour locus at 246; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Plt</span> <span class="allele wild">n</span>, dominant</dd></div>
+    <div><dt>Founders</dt><dd><code>Plt/n</code> at 0.3% (<code>WILD_PLATES_PERCENT</code>), the dorsal spines&rsquo; share; no invisible carriers</dd></div>
+    <div><dt>Epigenome</dt><dd><code>size</code> (0&ndash;0.7, clamp 0&ndash;1), <code>count</code> (3 to <code>PlateGenerator.MAX_PLATES</code>, never under 1), <code>form</code> (one of three), <code>overlap</code> (0&ndash;1), <code>spikiness</code> (0&ndash;1)</dd></div>
+    <div><dt>Part</dt><dd><code>PLATES_RIGHT</code> / <code>PLATES_LEFT</code> at <code>BODY_RIGHT</code> / <code>BODY_LEFT</code>; slabs on <code>BONE</code>, edges on <code>BONE_TIP</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong>; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">Slice C of the body parts</h2>
+
+<p>
+    The third body part (<a href="model-parts.html#body-parts">model parts</a>), and the one that
+    brought the <a href="model-parts.html#plates">flank anchors</a> and a mesh of two rows. No new
+    render path: the only client change is the anchor&rsquo;s case in
+    <code>AttachedPartLayer.anchor</code>. It is two kinds (one per side), <code>PlateGenerator</code>
+    and <code>PlateSize</code>, and one line in <code>GrownParts.of</code> dressed by
+    <a href="gene-body-plate-colour.html">its colour locus</a>. The granting locus is in
+    <code>GrownParts.shapes</code>&rsquo;s every-part baseline.
+</p>
+
+<h2 id="mesh">The mesh: slabs that hang and lap</h2>
+
+<p>
+    A slab is a flat box (<code>PartNode.width</code>, thin across the horse) turned half round
+    <code>z</code>, so it hangs from its top edge, and leaned out at the bottom by the flare. Slab
+    <code>j</code> starts <code>j &times; drop</code> below the top, still flush with the body, so
+    the one above stands proud of it. <code>drop</code> is a share of the slab&rsquo;s height set by
+    the overlap bucket, and is stepped closer for a big slab that would otherwise reach past
+    <code>ROOM</code> (nine units down the flank). Every slab carries a lip along its bottom
+    edge, and a ridged slab adds a rib along its middle; both are bars turned a quarter round
+    <code>x</code> to run along the body. A spiked slab adds a spike of two boxes standing straight
+    out. All of them hang straight off the slab, which is what makes them the tip colour
+    (<a href="gene-body-plate-colour.html#base">see the colour page</a>). A slab sinks a tenth of a
+    unit into the body so its top shows no gap.
+</p>
+<p>
+    Slab <code>j</code> of the shoulder and slab <code>j</code> of the hip are both group
+    <code>j</code>, numbered top down (owner, 2026-10-05), so the count shows the top
+    <code>k</code> of each cluster and grows the next one in on both.
+    <code>BodyPlatesGeneTest</code> holds that numbering, the mirroring and the colour shape.
+</p>
+
+<h2 id="numbers">The epigenome, by cost</h2>
+
+<ul>
+    <li><code>size</code>: the class is the mesh&rsquo;s size bucket (three; where the slabs step
+        down the flank), the remainder a uniform per-element grow, so stretch and girth are equal.</li>
+    <li><code>form</code>, <code>overlap</code> and <code>spikiness</code>: baked,
+        <code>PlateGenerator.style(form, overlap, spikiness)</code>, three of each.</li>
+    <li><code>count</code>: shown out of the most baked, per cluster, the antler&rsquo;s tine rule.</li>
+</ul>
+
+<p>
+    There is no separate <code>girth</code>: the treatment lists size, count, overlap and spikiness,
+    and every number on the copy has to reach the part.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No horse grows armour. The look borrows from the animals that do: the bony osteoderms in the
+    skin of crocodiles and armadillos, the overlapping scutes of a pangolin, and the plated hide
+    of an ankylosaur, arranged here like the lames of a pauldron over the shoulder and a tasset
+    over the hip. This is fantasy and makes no claim about any real gene. It is dominant (the
+    treatment&rsquo;s call), so like the dorsal spines it shows on every carrier, and the sail is the
+    body part you have to breed for.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The plates have been photographed standing still, on both flanks and in every form; how they sit in motion, against a saddle&rsquo;s flaps and barding, at massive size, and whether their small, tightly stacked look is the one wanted are still open.</p>
+</div>
+
+<h3 id="open-plates-look">What a photo shoot showed, and the look</h3>
+<p>
+    <strong>2026-10-05, <code>-PphotoShoot</code>, eight still frames</strong> of wild-sized
+    founders, re-rolled for a count of four or more. Both clusters sit on the outside of the flank,
+    over the shoulder and the hip, in the top half of the side and clear of where the saddle goes.
+    From behind, the spikes and lips stand out from <em>both</em> flanks, so the mirroring and the
+    outward direction are right. <code>Red/Blu</code> and <code>Grn/Yel</code> horses wear the
+    earlier colour on the slab and the other on its lip and rib. Bone plates are ivory beside a bone
+    dorsal row. Seen side-on, a spike points at the camera and reads end-on.
+</p>
+<p>
+    Two things for the owner to judge. At wild size the plates are <strong>small and tightly
+    stacked</strong>, a narrow column of four or five bars at each end of the body rather than broad
+    pauldrons. And on a ridged slab the rib and lip cover most of the outer face, so a two-tone
+    plate reads mostly as its <em>edge</em> colour with the base colour in thin rims. Wider slabs,
+    a wilder size range, or a thinner rib would each change that. None of it is a bug.
+</p>
+
+<h3 id="open-plates-motion">In motion, and massive</h3>
+<p>
+    Each form at small and at massive size, from the side and from behind, while the horse walks,
+    grazes and rears. The plates should ride the body with no gap opening at their tops and no slab
+    sinking into the body. A massive hip cluster reaches nearest the saddle and the croup: no slab
+    should hang past the back of the body or below the belly.
+</p>
+
+<h3 id="open-plates-tack">Against a saddle, barding and a rider</h3>
+<p>
+    The treatment&rsquo;s open look, decided once it has been seen and not before. Put a saddle, then
+    horse armour, on a horse with massive plates. Today the clusters stand clear of the vanilla
+    saddle box, nothing hides them, and body armour is drawn over whatever stands proud. Say whether
+    the armoured horse should hide its plates, show them through, or neither.
+</p>
+
+<h3 id="open-plates-count">Two counts in one frame</h3>
+<p>
+    Two plated horses side by side with different counts (one and five per cluster). Each should
+    show its own count at both shoulder and hip; a horse wearing the other&rsquo;s count is the
+    deferred-submit trap.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

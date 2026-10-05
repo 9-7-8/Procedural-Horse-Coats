@@ -1,0 +1,142 @@
+2026-10-05 14:59 (end, local) - #154 body plates: shoulder and hip plates, the flank anchors
+
+ASKED
+-----
+- "/next-release" (work on the next release). The next release is v0.5.045, the lowest
+  open milestone above the newest tag v0.5.044, whose own milestone is closed. Every
+  open issue already had a milestone. The milestone's four open bugs were each fixed and
+  waiting on a named check, so they were skipped: #10 and #36 on an in-game look, #35
+  and #31 on the live server's log. #205, #206, #152 and #153 were closed. That made the
+  next unit #154 (body parts slice C, shoulder and hip plates), built by process-intake,
+  Tier 2 (M, owner-free, its dependency #152 shipped). It is closed.
+- Owner answers, asked up front with the question tool before any code:
+  "Yes, bare bone (Recommended)" - the skeleton breeds grow the plates in bone;
+  "Top down (Recommended)" - the count grows from the slab nearest the spine down;
+  "Edge and feature (Recommended)" - two-tone is the slab in the base colour, its lip,
+  rib or spike in the tip colour.
+
+DONE
+----
+- e9173871 (code): the body plates gene, horsegenetics.body_plates (dominant, Plt,
+  priority 245, Plt/n founders at 0.3%), and its colour locus,
+  horsegenetics.body_plate_colour (246, an AbstractPartColourGene subclass with a split
+  sentence). Also:
+  - PartAnchor.BODY_RIGHT / BODY_LEFT, the flanks, body-local (+-5, -7.2, -6), with a
+    case in AttachedPartLayer.anchor that walks root -> body. Read from the 26.1.2 body
+    box. That case is the only client change: PartModel and PartMeshes are untouched,
+    which was the hypothesis written on the issue before the code.
+  - PartKind.PLATES_RIGHT / LEFT (BONE; scalesPerElement, not saddleZoned; plates()).
+    PlateGenerator: one mesh per side holding a shoulder cluster (anchor z -7.5) and a
+    hip cluster (+9.2), both clear of the vanilla saddle. Slabs are flat BONE boxes hung
+    from their top edge (rz half a turn plus a flare), stepped down by a drop that is
+    capped so a cluster never reaches more than ROOM (9 units) down the flank. Every
+    slab has a BONE_TIP lip; ridged adds a rib, spiked a two-box spike. 3 forms x 3
+    overlap x 3 spikiness styles, 3 PlateSize classes.
+  - Slab j of both clusters is group j, top down, so the count is per cluster through
+    PartModel's existing rule (it acts on every box whose parent is outside its group,
+    which is both roots). The edge boxes all hang straight off the slab, so
+    PartModel.along puts the slab at 0 (base colour) and each edge box at 1 (tip).
+  - AttachedPart.plates; GrownParts.of dresses both sides with one pair of tints; the
+    locus is in GrownParts.shapes's every-part baseline. Genes, GeneFamily
+    (MAGIC_PARTS), GeneDescriptions.
+  - Both skeleton breeds: body_plates Plt/Plt in the horns count group,
+    body_plate_colour Bon/Bon (owner, this session).
+  Proof: BodyPlatesGeneTest (new, 13 tests). PartGeneratorTest now allows a slab to be
+  flat and counts two trees per element for a plate kind; SaddleZoneTest's numbering
+  check is limited to the saddle-zoned rows; UndeadBreedsTest covers the seventh
+  horn-like part and Bon/Bon. A mutant hanging the spike's point off its base box (the
+  first draft, which would have drawn the spike base half one colour) turned two tests
+  red. Green by name: BodyPlatesGeneTest, PartGeneratorTest, SaddleZoneTest,
+  UndeadBreedsTest, DorsalSpinesGeneTest, BackSailGeneTest, GrownParts*,
+  GeneDescriptionCoverageTest, GeneFamily*, CommonPortabilityTest, AntlersGeneTest,
+  DragonHornsGeneTest, UnicornHornGeneTest, RamHornsGeneTest, HornColour*,
+  BreedFilesTest (after bakeBreedFiles), BreedFounderTest, BreedClimateRuleTest,
+  *BreedsTest, EditorRules*, ResearchTopicTest, GenotypeTest, HornGenesTest,
+  DesignerApi*, *Census*, CoatBakeGoldenTest, CoatPipelineGoldenTest. The coat-bake
+  golden gained 15 rows at the baseline hash; the pipeline golden changed only in its
+  keys (0 of 1092 hashes moved). :neoforge-26.1.2:build green, check-parity OK,
+  designer boots OK.
+- Seen in game, still frames only: one photo-shoot run (-PphotoShoot, 8 shots: left
+  flank side-on, from behind, close, two-tone, bone with bone dorsal spines). Both
+  clusters sit outside the flank, over the shoulder and hip, clear of the saddle; from
+  behind the lips and spikes stand out from both flanks; Red/Blu and Grn/Yel put the
+  earlier colour on the slab and the other on its lip and rib; bone plates are ivory.
+  No ERROR or exception in the log. The shot-list edit (and a temporary REAR/ABOVE
+  camera) was reverted; DebugPhotoShoot.java is unchanged in git.
+- Docs commit (this one): new pages gene-body-plates.html and
+  gene-body-plate-colour.html, each with a Verification tab. model-parts.html gains a
+  Gameplay paragraph, Coding section #plates, the flat-box sentence, a bone-versions
+  row, and its Roadmap down to the crystals. undead-horses.html and decisions.html
+  updated. Rebaked: breed files and breeds.json, web.wasm, gene bundle, icons, gene wiki
+  spans, marking facts, gene census, timeline, unverified-genes.txt,
+  verification/roadmap indexes, search index, agent text. Issue #154 closes with this
+  push.
+
+DECIDED
+-------
+- (owner) The skeleton breeds carry the plates in their horns count group, in bone
+  (body_plate_colour Bon/Bon). model-parts.html#bone-versions, decisions.html.
+- (owner) The count grows top down: a low count is the top slab of each cluster.
+  gene-body-plates.html#mesh.
+- (owner) Two-tone: slab = base colour; lip, rib and spike = tip colour.
+  gene-body-plate-colour.html#base.
+- (without the owner) One mesh per side holding both clusters; a group per step with a
+  root in each cluster. model-parts.html#plates.
+- (without the owner) No saddle zone: the clusters are placed clear of the saddle box,
+  and the treatment's armoured case is left to be decided once seen.
+- (without the owner) Slabs on BONE with edges on BONE_TIP (the treatment allowed HORN or
+  BONE); no new sheet region.
+- (without the owner) No girth number: the treatment lists size, count, overlap and
+  spikiness only, and size is a uniform grow. Spikiness drives the flare on every form
+  and the rib or spike size, so it reaches every horse.
+- (without the owner) Key and name: horsegenetics.body_plates, "Body plates" (#155's
+  body already named that key); founders at the dorsal spines' 0.3%, every carrier
+  showing (dominant). First values for every range, for the yard to judge.
+
+FOUND ON THE WAY
+----------------
+- At wild size the plates are small and tightly stacked, a column of four or five bars
+  at each end of the body rather than broad pauldrons; on a ridged two-tone plate the rib
+  and lip cover most of the outer face, so it reads as mostly its edge colour. Not bugs;
+  owner look-calls, written on gene-body-plates.html#open-plates-look and
+  gene-body-plate-colour.html#open-plate-colour-split.
+- Seen side-on, a spike points at the camera and reads end-on; the rear camera showed
+  them. photograph-horses.txt now says so.
+- Mistakes put right: the first slab thickness and embed (0.3 and 0.15) centred the
+  smallest slab exactly on the body wall, half inside it; the mirroring test caught it
+  and slabs are now at least 0.4 thick and sunk 0.1. A PowerShell Select-String with
+  \" in its pattern ended the string early and redirected to an empty file named "Back"
+  in the repo root; it was deleted before any commit.
+
+PROCEDURES
+----------
+- photograph-horses.txt step 1: a part standing out from the flank comes out end-on in a
+  side camera; add one behind the horse.
+- add-a-gene.txt step 6.1: two rows in one mesh share group numbers, so a group may have
+  more than one root; tell PartGeneratorTest's tree count.
+- No new procedure needed: every routine this session ran already existed
+  (next-release, process-intake, add-a-gene, photograph-horses, launch-game, rebake,
+  end-session).
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other gene's
+  registry-wide walks against the two new entries, and the gametests (none touched).
+- No server boot: no startup or config change.
+- New Verification anchors: gene-body-plates.html#open-plates-look (the small, stacked
+  look, owner's call), #open-plates-motion (walking, rearing, massive size),
+  #open-plates-tack (saddle flaps, barding, rider - the treatment's open look),
+  #open-plates-count (two counts in one frame); gene-body-plate-colour.html
+  #open-plate-colour-split (spiked two-tone close up).
+
+RELEASE
+-------
+Not offered. v0.5.045 still has open units (#160, #47, #48), and next-release offers a
+release only when its milestone is finished.
+
+PICK UP FIRST
+-------------
+/next-release: the next unit on v0.5.045 is #160 (tusks gene slice A: the gene, its
+colour gene, the SNOUT anchor and the narwhal horn), through process-intake. Or show the
+owner the plate photos first (neoforge-26.1.2/run/screenshots/photo-0*-plates-*.png);
+the small look may change the size range.

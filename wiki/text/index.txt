@@ -544,6 +544,24 @@ wiki/gene-bloodstained.html#finding	gameplay	Finding one
 wiki/gene-bloodstained.html#inheritance	gameplay	Crossing two of them
 wiki/gene-bloodstained.html#layers	coding	What it paints
 wiki/gene-bloodstained.html#outcomes	gameplay	What it can come out as
+wiki/gene-body-plate-colour.html#base	coding	One short subclass, and the edge as the tip
+wiki/gene-body-plate-colour.html#bone	gameplay	Bare bone
+wiki/gene-body-plate-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-body-plate-colour.html#colours	gameplay	The colours, and two-tone plates
+wiki/gene-body-plate-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-body-plate-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-body-plate-colour.html#invented	science	Invented
+wiki/gene-body-plates.html#carrot	gameplay	Its gene carrot
+wiki/gene-body-plates.html#dominant	gameplay	One copy, either sex
+wiki/gene-body-plates.html#finding	gameplay	Finding one
+wiki/gene-body-plates.html#health	gameplay	Is it good for the horse?
+wiki/gene-body-plates.html#inheritance	gameplay	Crossing two of them
+wiki/gene-body-plates.html#invented	science	Invented
+wiki/gene-body-plates.html#mesh	coding	The mesh: slabs that hang and lap
+wiki/gene-body-plates.html#numbers	coding	The epigenome, by cost
+wiki/gene-body-plates.html#pattern	coding	Slice C of the body parts
+wiki/gene-body-plates.html#what-varies	gameplay	What varies
+wiki/gene-body-plates.html#where	gameplay	Where they sit
 wiki/gene-body-size.html#carrot	gameplay	Its gene carrot
 wiki/gene-body-size.html#clamp	coding	Past the natural clamp, on purpose
 wiki/gene-body-size.html#codominant	coding	The percentages add
@@ -3364,6 +3382,7 @@ wiki/model-parts.html#bone-versions	coding	Every part with bone in it has a bone
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
 wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
+wiki/model-parts.html#plates	coding	Two rows to a mesh, and the flank anchors
 wiki/model-parts.html#row-scale	coding	A row scales each element on its own
 wiki/model-parts.html#row-span	coding	A row can be drawn shorter: span
 wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time

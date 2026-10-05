@@ -1,0 +1,5 @@
+Body plate colour
+(Magical gene / codominant / colours the body plates, paints nothing)
+What colour a horse’s shoulder and hip plates are. The same colours and rules as horn colour (white, the rainbow, pink, black, grey or chaos), on a locus of its own. Two different copies give every plate an edge in the second colour. On a horse without plates it does nothing.
+
+Invented Horses have no plates, so neither is their colour real. The two-tone edge echoes the pale rims and keels on the scutes of crocodiles and armadillos. It is a separate locus from every other part’s because the owner chose one colour gene per part; a shared one would force every part on a horse to match.

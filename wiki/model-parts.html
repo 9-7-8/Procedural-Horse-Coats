@@ -101,7 +101,17 @@
     height, arch, reach, spine count and how see-through the skin is are on the allele. Its
     colour is <a href="gene-back-sail-colour.html">a gene of its own</a>: two different copies
     make the membrane one colour and the spines the other. A saddle hides the part under it, as
-    with the spines. Every part stacks: one horse can wear all six.
+    with the spines.
+</p>
+
+<p>
+    And <a href="gene-body-plates.html">shoulder and hip plates</a>: one copy of a rare dominant
+    grows overlapping plates of bone over the shoulders and the hips, stepped down the flank like
+    armour, the same on both sides. They are smooth, ridged or spiked, and their size, how many
+    each cluster has, how far they overlap and how far they flare are on the allele. Their colour
+    is <a href="gene-body-plate-colour.html">a gene of its own</a>: two different copies give
+    every plate an edge in the second colour. They sit in front of and behind the saddle, so a
+    saddle hides none of them. Every part stacks: one horse can wear all seven.
 </p>
 
 <p>
@@ -530,7 +540,34 @@
 <p>
     A membrane is the first <strong>flat box</strong>: <code>PartNode.width</code> is its extent
     across <code>x</code>, and is the girth for every square box. <code>PartGeneratorTest</code> holds
-    that only a <code>MEMBRANE</code> box is flat, and no thinner than a quarter unit.
+    that only a <code>MEMBRANE</code> box or a plate&rsquo;s slab (<a href="#plates">below</a>) is
+    flat, and nothing is thinner than a quarter unit.
+</p>
+
+<h3 id="plates">Two rows to a mesh, and the flank anchors</h3>
+<p>
+    Shipped with the <a href="gene-body-plates.html">shoulder and hip plates</a>, 2026-10-05.
+    <code>PartAnchor.BODY_RIGHT</code> and <code>BODY_LEFT</code> are the flanks: body-local
+    <code>(&plusmn;5, -7.2, -6)</code>, the side wall under a unit below the line of the back and
+    halfway along it. Their case in <code>AttachedPartLayer.anchor</code> walks root &rarr;
+    <code>body</code>, as <code>SPINE</code> does, so the plates rear with the body. Read from the
+    26.1.2 body box, not seen. Like the antlers they are two kinds, one per side, mirrored box for
+    box with <code>ox</code> and <code>rz</code> negated, never with a negative scale.
+</p>
+<p>
+    A side is two rows in one mesh: a cluster 7.5 units forward of the anchor (the shoulder,
+    body <code>z</code> -13.5) and one 9.2 back (the hip, <code>z</code> 3.2), both clear of the
+    saddle&rsquo;s <code>z</code> -9.5..0.5. So the kind is not <code>saddleZoned</code>; where a
+    saddle flap or barding meets them is the treatment&rsquo;s open look, decided once seen. It does
+    <code>scalesPerElement</code>, because a whole-part scale would pull the two clusters apart
+    along the body. Slab <code>j</code> of the shoulder and slab <code>j</code> of the hip are both
+    group <code>j</code>, so the count is per cluster with no new machinery: the groups are numbered
+    top down, and <code>PartModel</code>&rsquo;s count and per-group scale already act on
+    <em>every</em> box whose parent is outside its group, which is both roots. A group with two roots
+    is the one new shape, and <code>PartGeneratorTest</code> counts two trees per element for a plate
+    kind. A slab is the second kind of flat box: a sheet of <code>BONE</code> hung from its top
+    edge (<code>rz</code> of half a turn plus the flare), so a per-element scale grows it down the
+    flank and never up over the back.
 </p>
 
 <h3 id="row-span">A row can be drawn shorter: span</h3>
@@ -564,6 +601,7 @@
 <tr><td><a href="gene-dragon-horns.html">Dragon horns</a></td><td><code>Bon/Bon</code> on <a href="gene-dragon-horn-colour.html">dragon horn colour</a></td><td>in the horn count group</td></tr>
 <tr><td><a href="gene-dorsal-spines.html">Dorsal spines</a></td><td><code>Bon/Bon</code> on <a href="gene-dorsal-spine-colour.html">dorsal spine colour</a></td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td><a href="gene-back-sail.html">Back sail</a></td><td><code>Bon/Bon</code> on <a href="gene-back-sail-colour.html">back sail colour</a>: bone rays, and the membrane left off (opacity 0)</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
+<tr><td><a href="gene-body-plates.html">Shoulder and hip plates</a></td><td><code>Bon/Bon</code> on <a href="gene-body-plate-colour.html">body plate colour</a>; all bone, so nothing is left off</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td>Wings (not built)</td><td>the bones alone, no membrane</td><td>to ask when the wing part is built</td></tr>
 </tbody>
 </table>
@@ -631,17 +669,16 @@
     <li><strong>The rest of the body parts.</strong> The dorsal spines shipped as slice A and
         settled the <a href="#spine-anchor">spine anchor</a>, the <a href="#saddle-zone">saddle
         zone</a> and the <a href="#row-scale">per-element scale</a>. The back sail shipped as slice
-        B and made <a href="#translucent-regions">see-through regions data on the kind</a>. Two
-        slices are left, each with its own colour locus:
-        <strong>shoulder and hip plates</strong> (dominant; new <code>BODY_RIGHT</code> /
-        <code>LEFT</code> anchors, two clusters per side), then <strong>crystalline
+        B and made <a href="#translucent-regions">see-through regions data on the kind</a>, and the
+        shoulder and hip plates shipped as slice C with the <a href="#plates">flank anchors</a>. One
+        slice is left, with its own colour locus: <strong>crystalline
         growths</strong> along the spine (dominant; seeded clusters through the sail&rsquo;s
         translucent path). Crystal geometry is easy (crossed prisms read as eight-sided), and the
         render type is known: <a href="gene-antler-crystal.html">crystal antlers</a> already draw
         their shafts through <code>entityTranslucent</code> and their points solid, by region. If
         that reads muddy, opaque emissive crystals are still a good look. A
         <code>parts.translucent</code> setting joins the config block if a translucent pass is
-        measured to cost. Scoped in GitHub issue #151 (sub-issues #154, #155).</li>
+        measured to cost. Scoped in GitHub issue #151 (sub-issue #155).</li>
     <li><strong>Hoof feathering.</strong> Four anchors at once, and the first part that should
         take its colour from the horse&rsquo;s own coat texture rather than a tint &mdash; a
         sampled mane patch comes out the right colour on every horse, the way real feathering

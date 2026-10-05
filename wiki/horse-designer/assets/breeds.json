@@ -1511,6 +1511,9 @@
     "horsegenetics.back_sail_colour": [
       { "pair": "Bon/Bon", "weight": 100 }
     ],
+    "horsegenetics.body_plate_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
+    ],
     "horsegenetics.extension": [
       { "pair": "E/E", "weight": 100 }
     ],
@@ -1540,7 +1543,8 @@
         "horsegenetics.ram_horns": "Rh/Rh",
         "horsegenetics.dragon_horns": "Drg/Drg",
         "horsegenetics.dorsal_spines": "Dsp/Dsp",
-        "horsegenetics.back_sail": "Sail/Sail"
+        "horsegenetics.back_sail": "Sail/Sail",
+        "horsegenetics.body_plates": "Plt/Plt"
       }
     }
   ],
@@ -4366,6 +4370,9 @@
     ],
     "horsegenetics.back_sail_colour": [
       { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.body_plate_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
     ]
   },
   "count_groups": [
@@ -4378,7 +4385,8 @@
         "horsegenetics.ram_horns": "Rh/Rh",
         "horsegenetics.dragon_horns": "Drg/Drg",
         "horsegenetics.dorsal_spines": "Dsp/Dsp",
-        "horsegenetics.back_sail": "Sail/Sail"
+        "horsegenetics.back_sail": "Sail/Sail",
+        "horsegenetics.body_plates": "Plt/Plt"
       }
     }
   ],

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Body plate colour &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> codominant <span class="sep">/</span> colours the body plates, paints nothing</p>
+
+<h1>Body plate colour</h1>
+
+<p class="lede">
+    What colour a horse&rsquo;s <a href="gene-body-plates.html">shoulder and hip plates</a> are.
+    The same colours and rules as <a href="gene-horn-colour.html">horn colour</a> (white, the
+    rainbow, pink, black, grey or chaos), on a locus of its own. Two different copies give every
+    plate an edge in the second colour. On a horse without plates it does nothing.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.body_plate_colour"></div>
+
+<h2 id="colours">The colours, and two-tone plates</h2>
+
+<p>
+    Exactly the <a href="gene-horn-colour.html#colours">horn colour table</a>. Two copies of one
+    colour make every plate that colour, both sides of the horse alike. Two different ones make
+    each <strong>plate</strong> one colour and its <strong>edge</strong> the other: the lip along
+    its bottom, and the rib or the spike on a ridged or spiked plate. The plate takes whichever
+    colour comes earlier in the list, so <code>Red/Blu</code> is red plates edged in blue, either
+    way round. Every copy carries a little shade of its own, so no two red-plated horses are quite
+    the same red.
+</p>
+
+<h2 id="bone">Bare bone</h2>
+
+<p>
+    Two <code>Bon</code> copies are the plates&rsquo; bone version: bare ivory bone, the way a
+    skeleton&rsquo;s plates would be. No wild horse carries <code>Bon</code>; the skeleton horses
+    do, so a skeleton that grows plates grows them in bone. Plates are all bone, so unlike a back
+    sail nothing is left off.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all. It is only the colour of the plates.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.body_plate_colour"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.body_plate_colour</dd></div>
+    <div><dt>Class</dt><dd><code>BodyPlateColourGene extends AbstractPartColourGene</code></dd></div>
+    <div><dt>Priority</dt><dd>246 (magical band), beside <a href="gene-body-plates.html">body plates</a> at 245</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha Bon, in base-before-tip order; <code>Bon</code> (bone, no wild share) is the skeleton horses&rsquo;</dd></div>
+    <div><dt>Outcomes</dt><dd><code>body-plates-white</code> &hellip; <code>body-plates-chaos</code>, plus <code>body-plates-two-tone</code>; all wild types</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="base">One short subclass, and the edge as the tip</h2>
+
+<p>
+    A key, a name, a priority and the words its outcomes are written in. Everything else is
+    <code>AbstractPartColourGene</code>&rsquo;s. Its <code>Words</code> carry a <code>split</code>
+    sentence (&ldquo;each plate is one, the base, and its edge, rib or spike the other&rdquo;),
+    because the shared root-to-tip wording does not describe a plate. <code>GrownParts.of</code>
+    puts one pair of tints on both sides.
+</p>
+<p>
+    The split costs no new machinery. A two-tone part is drawn one box at a time, each in
+    <code>tintAt(PartModel.along(i))</code>, and <code>along</code> is a box&rsquo;s depth over the
+    depth of its branch. A slab is a root with children, so it sits at 0 and takes the base colour.
+    The lip, rib and both spike boxes all hang straight off the slab with nothing below them, so
+    they sit at 1 and take the tip colour. That is why a spike&rsquo;s point hangs off the slab
+    rather than off the spike&rsquo;s base: chained, the base would sit at 0.5 and be drawn half
+    one colour and half the other. <code>BodyPlatesGeneTest.theSlabIsTheBaseAndItsEdgeTheTip</code>
+    holds the shape, and a mutant that chained the spike turned it red (owner, 2026-10-05: edge and
+    feature in the tip colour).
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    Horses have no plates, so neither is their colour real. The two-tone edge echoes the pale rims
+    and keels on the scutes of crocodiles and armadillos. It is a separate locus from every other
+    part&rsquo;s because the owner chose one colour gene per part; a shared one would force every
+    part on a horse to match.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The plate-and-edge split is unit-tested and was seen in still frames (2026-10-05); whether a two-tone ridged plate should read as mostly its edge colour, as it does, is still open.</p>
+</div>
+
+<h3 id="open-plate-colour-split">The plate in one colour, its edge in the other</h3>
+<p>
+    Still frames (2026-10-05) showed <code>Red/Blu</code> and <code>Grn/Yel</code> ridged plates as
+    designed: the earlier colour on the slab, the other on its lip and rib. On a ridged slab the
+    rib and lip cover most of the outer face, so the plate reads mostly as its edge colour, with
+    the base colour in thin rims. Whether that is wanted, or the rib should be thinner, is the
+    owner&rsquo;s call. Still to see: a spiked two-tone horse close up from behind, where the
+    spike should be the edge colour all the way along, with no blend partway up.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>
