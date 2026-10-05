@@ -28,6 +28,17 @@ OWNER DECISIONS (settled)
 - Each evidence file (gene audit, biome assignments, port survey, session hand-off) is
   its own survey issue, linked from the issues that cite it.
 - A commit that finishes a unit says `Closes #N`. Every other commit says `Refs #N`.
+- Claiming: a session building a unit sets the in-progress label and comments "picked,
+  tier, why" before any code. Closing removes it. An abandoned run leaves it, visible,
+  for the owner to clear.
+- Commentary: a build run comments on its issue as it goes (picked, hypothesis, what
+  shipped, what is left, the closing comment). Questions for the owner still go through
+  the question tool, not the issue. (Owner chose full commentary over two comments.)
+- Milestones: one per release. Closing a unit assigns the milestone of the release that
+  carries it, which is how the owner reads "what each release built".
+- A pinned "Start here" issue explains the labels and the lifecycle to testers.
+- Local sessions reach issues the way fix-bug does. process-intake's first step reads
+  one issue and, if it cannot, stops and says so; it never falls back to files.
 
 THE ISSUE FORMAT
 ----------------
@@ -46,11 +57,12 @@ Labels:
   existing   enhancement (means feature), needs-owner, wontfix
   new        idea (unscoped), scoped (a treatment written, buildable), tracking,
              survey, from-server, procedure,
-             size:S size:M size:L, impact:finishes impact:unblocks impact:new
+             in-progress, size:S size:M size:L,
+             impact:finishes impact:unblocks impact:new
 Size and impact keep process-intake's definitions (a finishes shipped work, b unblocks,
 c new). report-bug's "never invent labels" is relaxed for exactly this set.
-Lifecycle: idea -> scoped -> built -> closed as completed with a comment giving the
-commit, the release tag and the wiki anchor. Already built when found: closed the same
+Lifecycle: idea -> scoped -> in-progress -> closed as completed with a comment giving
+the commit, the release tag and the wiki anchor, and the release's milestone. Already built when found: closed the same
 way. Dropped: closed not_planned with wontfix. Edit bodies; never delete comments.
 Files an issue still points at (potential-assets, *-draft/, tools/) are linked by
 commit-SHA permalink, so the link survives later deletion.
@@ -62,6 +74,7 @@ BEFORE YOU START
 2. Load the mcp__github__ issue tools (ToolSearch) if absent. Confirm
    `mcp__github__sub_issue_write` and `list_issues` work with one read.
 3. Create the new labels with the colours of the existing ones as a guide.
+4. Create the release milestones for the tags that exist, and the next one.
 
 STEPS
 -----
@@ -101,12 +114,24 @@ STEPS
      line to hold the 300-line budget), and the INDEX row for this procedure.
    - the Sizing freshness test and wiki/tools/check-roadmap-execution.mjs, then every
      wiki page that links an intake file; run procedures/rebake.txt for them.
-8. Write the session log (write-session-log) with the map, then end-session.
+   - show-procedures (its "not written yet" list moves to procedure issues).
+   - tools/rename: rename.config.json and its README name intake treatment files and
+     intake/four-jar-split/. Drop those paths; the issues keep the old names on purpose.
+   - wiki prose that links an intake file (breed-book, breeds, compatibility,
+     coding-notes, known-gaps, magical-genes, model-parts, roadmap-execution and the
+     gene pages that cite one): each link becomes an issue link. Session logs are
+     history and stay as they are.
+   - intake/tools/ keeps its name: add-a-gene and about twenty-five gene files cite it.
+   - There is no Sizing freshness test in code; it is a rule in process-intake and
+     write-intake-document, and goes with them.
+   - Every query paginates (5-10 at a time) and filters by label.
+8. Create and pin the "Start here" issue.
+9. Write the session log (write-session-log) with the map, then end-session.
 
 DONE WHEN
 ---------
 Every unit and evidence file is an issue, verified; the files are retired; the
-procedures above read issues; the rebake rows are green. Report the map, the counts by
+procedures above read issues; the Start here issue is pinned; the rebake rows are green. Report the map, the counts by
 label, and anything left in intake/ and why. Then retire this procedure file.
 
 NEVER
@@ -120,6 +145,8 @@ NEVER
   names a tracking parent: it would close early.
 - Never delete To do.txt (her rule), or touch her untracked files in intake/.
 - Never post without the attribution footer.
+- Never leave a claimed unit unmarked: set in-progress before code, so two sessions
+  cannot build the same one.
 
 SEE ALSO
 --------
