@@ -152,6 +152,30 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     private static final float[] FOAL_FLANK = ADULT_FLANK;
 
     /**
+     * Where a narwhal horn roots on the <b>adult</b> muzzle, in head-local units. Read
+     * from the 26.1.2 sources, not seen: {@code upper_mouth} is a {@code PartPose.ZERO}
+     * child of {@code head_parts}, as {@code head} is, so the head bone's frame is the
+     * muzzle's too, and vanilla animates no jaw ({@code AbstractEquineModel.setupAnim}
+     * moves only {@code head_parts}) - the horn cannot be left behind by a mouth that
+     * moves. The muzzle box is {@code x -2..2, y -11..-6, z -7..-2}, front {@code -z};
+     * so {@code y -8.5} is the middle of its front face and {@code z -6.5} half a unit
+     * inside it, enough that the horn shows no gap at its root.
+     */
+    private static final float[] ADULT_SNOUT = {0f, -8.5f, -6.5f};
+
+    /** The same on the foal. Never drawn - a foal grows no narwhal horn - as {@link #FOAL_SPINE}. */
+    private static final float[] FOAL_SNOUT = ADULT_SNOUT;
+
+    /**
+     * How far a part at {@link PartAnchor#SNOUT} is turned before it is drawn, about x.
+     * Every part mesh grows up its own {@code -y}; a quarter-turn about {@code +x} takes
+     * {@code -y} to {@code -z}, forward along the head's own axis - which, with the neck's
+     * rest pitch, points a little below level. The per-horse tilt is applied after this,
+     * so a negative tilt lifts the point.
+     */
+    private static final float SNOUT_PITCH = (float) (Math.PI / 2);
+
+    /**
      * The saddle, along the body, in body-local units. Vanilla's
      * {@code EquineSaddleModel.createSaddleLayer} hangs it on {@code body} as a box
      * {@code (-5,-8,-9)} sized {@code (10,9,9)} inflated by {@code 0.5}, so it covers
@@ -432,9 +456,21 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
                 float side = anchor == PartAnchor.BODY_LEFT ? 1f : -1f;
                 yield new float[] {side * base[0], base[1], base[2]};
             }
+            case SNOUT -> {
+                // The head bone, so a narwhal horn grazes and tosses with the head; the
+                // muzzle is the same frame (see ADULT_SNOUT).
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                yield baby ? FOAL_SNOUT : ADULT_SNOUT;
+            }
         };
 
         poseStack.translate(at[0] * UNIT, at[1] * UNIT, at[2] * UNIT);
+        // After the translate, so the root moves and only the part turns: forward, not up.
+        if (anchor == PartAnchor.SNOUT) {
+            poseStack.mulPose(Axis.XP.rotation(SNOUT_PITCH));
+        }
         if (baby) {
             poseStack.scale(FOAL_SCALE, FOAL_SCALE, FOAL_SCALE);
         }

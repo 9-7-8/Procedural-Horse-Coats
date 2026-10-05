@@ -44,6 +44,9 @@ public final class PartGenerators {
             case SAIL -> SailGenerator.generate(shape.style(), shape.size());
             case PLATES_RIGHT, PLATES_LEFT -> PlateGenerator.generate(
                     shape.style(), shape.size(), shape.kind() == PartKind.PLATES_LEFT);
+            // The unicorn horn's chain on the narwhal's own ladder: no new generator.
+            case NARWHAL -> HornGenerator.generate(shape.nominalLength(),
+                    HornGenerator.narwhalTwist(shape.style()));
         };
     }
 

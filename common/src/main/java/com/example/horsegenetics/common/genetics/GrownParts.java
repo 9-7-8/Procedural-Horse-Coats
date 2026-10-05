@@ -55,7 +55,7 @@ public final class GrownParts {
         if (genotype == null) {
             return List.of();
         }
-        // Seven granting loci. Each answers empty for nearly every horse, and the
+        // Eight granting loci. Each answers empty for nearly every horse, and the
         // list is only built when one of them says otherwise - so the common "no
         // parts" answer still allocates nothing.
         Optional<AttachedPart> horn = Genes.UNICORN_HORN.hornFor(genotype, epigenome);
@@ -67,8 +67,9 @@ public final class GrownParts {
         Optional<AttachedPart> spines = Genes.DORSAL_SPINES.spinesFor(genotype, epigenome);
         Optional<AttachedPart> sail = Genes.BACK_SAIL.sailFor(genotype, epigenome);
         Optional<List<AttachedPart>> plates = Genes.BODY_PLATES.platesFor(genotype, epigenome);
+        List<AttachedPart> tusks = Genes.TUSKS.partsFor(genotype, epigenome);
         if (horn.isEmpty() && rack.isEmpty() && rams.isEmpty() && dragon.isEmpty() && spines.isEmpty()
-                && sail.isEmpty() && plates.isEmpty()) {
+                && sail.isEmpty() && plates.isEmpty() && tusks.isEmpty()) {
             return List.of();
         }
         List<AttachedPart> out = new ArrayList<>(10);
@@ -115,6 +116,14 @@ public final class GrownParts {
                 out.add(side.dressed(tints.base(), tints.tip(), false));
             }
         });
+        if (!tusks.isEmpty()) {
+            // One colour locus for every form the tusks locus grows (tusks treatment), the
+            // horn's rule root to tip. A tusk is a tooth: Bon/Bon is simply bone-coloured.
+            AbstractPartColourGene.Tints tints = Genes.TUSK_COLOUR.tintsFor(genotype, epigenome);
+            for (AttachedPart tusk : tusks) {
+                out.add(tusk.dressed(tints.base(), tints.tip(), false));
+            }
+        }
         return List.copyOf(out);
     }
 
@@ -191,8 +200,8 @@ public final class GrownParts {
      * <p>The second half is what counts the loci that only dress a part: horn
      * colour and horn glow do nothing to a hornless horse, so asked only of a wild
      * one they would look invisible. The baseline with "every part" is a horse
-     * with a horn, a rack of antlers, ram's horns, dragon horns, dorsal spines, a back sail and
-     * body plates; a further granting
+     * with a horn, a rack of antlers, ram's horns, dragon horns, dorsal spines, a back sail,
+     * body plates and a narwhal horn; a further granting
      * locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way
@@ -212,7 +221,8 @@ public final class GrownParts {
                 .with(new AllelePair(Genes.DRAGON_HORNS.Drg, Genes.DRAGON_HORNS.Drg))
                 .with(new AllelePair(Genes.DORSAL_SPINES.Dsp, Genes.DORSAL_SPINES.Dsp))
                 .with(new AllelePair(Genes.BACK_SAIL.Sail, Genes.BACK_SAIL.Sail))
-                .with(new AllelePair(Genes.BODY_PLATES.Plt, Genes.BODY_PLATES.Plt));
+                .with(new AllelePair(Genes.BODY_PLATES.Plt, Genes.BODY_PLATES.Plt))
+                .with(new AllelePair(Genes.TUSKS.Nar, Genes.TUSKS.Nar));
         List<AttachedPart> dressed = of(everyPart, epi);
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
             if (!of(wild.with(pair), epi).isEmpty()

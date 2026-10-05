@@ -64,7 +64,15 @@ public enum PartKind {
     PLATES_RIGHT(PartAnchor.BODY_RIGHT, PartSheet.BONE),
 
     /** The left side's plates. A horse's two sides always ask for the same style. */
-    PLATES_LEFT(PartAnchor.BODY_LEFT, PartSheet.BONE);
+    PLATES_LEFT(PartAnchor.BODY_LEFT, PartSheet.BONE),
+
+    /**
+     * A narwhal horn - the tusks locus's {@code Nar} form. One long spiral tusk from
+     * the front of the muzzle, pointing forward. It is the unicorn horn's generator
+     * in its two twisted styles on a longer ladder ({@link NarwhalSize}), so a straight
+     * tapered spiral of ivory, tip and all. Centred, so one kind.
+     */
+    NARWHAL(PartAnchor.SNOUT, PartSheet.HORN);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -100,6 +108,8 @@ public enum PartKind {
             case SAIL -> SailGenerator.styles();
             // Form x overlap x spikiness.
             case PLATES_RIGHT, PLATES_LEFT -> PlateGenerator.styles();
+            // The horn's two twisted styles; the narwhal never bends (HornGenerator).
+            case NARWHAL -> HornGenerator.NARWHAL_STYLES;
         };
     }
 
@@ -117,6 +127,8 @@ public enum PartKind {
             case SPINES -> SpineSize.classes();
             case SAIL -> SailSize.classes();
             case PLATES_RIGHT, PLATES_LEFT -> PlateSize.classes();
+            // The horn's fine steps: a segment count, not a class.
+            case NARWHAL -> PartShape.SIZE_BUCKETS;
         };
     }
 
@@ -127,7 +139,8 @@ public enum PartKind {
      * horns either, which come in with the rack's rule rather than the unicorn's.
      * Dragon horns are a hard part and come with maturity too (owner, 2026-10-01:
      * foals wear the soft parts only). So do the body parts: they are hard parts,
-     * and a foal's back is tiny (body-parts treatment).
+     * and a foal's back is tiny (body-parts treatment). So is the narwhal horn: the
+     * unicorn horn is the only hard part a foal wears (tusks treatment).
      */
     public boolean showsOnFoal() {
         return this == HORN;
@@ -146,8 +159,8 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> PartSheet.SOLID;
             // Nor a dragon horn; the same answer.
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> PartSheet.SOLID;
-            // Nor the spines, nor a sail, nor the plates.
-            case SPINES, SAIL, PLATES_RIGHT, PLATES_LEFT -> PartSheet.SOLID;
+            // Nor the spines, nor a sail, nor the plates, nor a narwhal horn.
+            case SPINES, SAIL, PLATES_RIGHT, PLATES_LEFT, NARWHAL -> PartSheet.SOLID;
         };
     }
 
@@ -167,7 +180,7 @@ public enum PartKind {
             case ANTLER_RIGHT, ANTLER_LEFT -> PartSheet.bit(PartSheet.BONE);
             case SAIL -> PartSheet.bit(PartSheet.MEMBRANE);
             case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES,
-                 PLATES_RIGHT, PLATES_LEFT -> 0;
+                 PLATES_RIGHT, PLATES_LEFT, NARWHAL -> 0;
         };
     }
 
@@ -226,6 +239,7 @@ public enum PartKind {
             case SPINES -> "Dorsal spines";
             case SAIL -> "Back sail";
             case PLATES_RIGHT, PLATES_LEFT -> "Shoulder and hip plates";
+            case NARWHAL -> "Narwhal horn";
         };
     }
 }

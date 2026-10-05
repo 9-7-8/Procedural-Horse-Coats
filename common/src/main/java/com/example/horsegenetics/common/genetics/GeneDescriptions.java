@@ -555,6 +555,18 @@ public final class GeneDescriptions {
                             + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
                             + "Two different copies make every plate one colour and its edge, rib "
                             + "or spike the other."),
+            Map.entry("horsegenetics.tusks",
+                    "A magical, dominant gene with a form per allele. One Nar copy grows a "
+                            + "narwhal horn: one long spiral tusk straight forward out of the "
+                            + "front of the muzzle. Its length, thickness, twist and lift are "
+                            + "epigenetic and inherited with the copy. Mares and stallions "
+                            + "alike; grown at maturity. Their colour is its own gene."),
+            Map.entry("horsegenetics.tusk_colour",
+                    "A magical, codominant gene that colours tusks and does nothing to a "
+                            + "horse without them - the horn colour rule on a locus of its own, "
+                            + "one for every form. White (ivory), the seven rainbow colours, "
+                            + "pink, black, grey, bone and chaos. Two different copies make a "
+                            + "tusk two-tone from root to tip."),
             Map.entry("horsegenetics.ram_horn_tip",
                     "A magical, recessive gene: Tip/Tip fades a ram's horns into a colour "
                             + "of their own toward the points. The colour is inherited. Molten "

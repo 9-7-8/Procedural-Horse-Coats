@@ -140,6 +140,22 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
     }
 
     /**
+     * A narwhal horn from the numbers the tusks locus's {@code Nar} copy carries - the
+     * horn's shape and rules on the {@link NarwhalSize} ladder, white and dark until
+     * the tusk colour locus dresses it.
+     *
+     * @param length position on the {@link NarwhalSize} ladder, {@code [0,1]}
+     * @param girth  cross-section multiplier
+     * @param tilt   radians off the head's own axis; negative lifts the point
+     * @param twist  {@code 0..}{@link HornGenerator#NARWHAL_STYLES}{@code -1}: spiral or tight
+     */
+    public static AttachedPart narwhal(double length, double girth, double tilt, int twist) {
+        PartShape shape = PartShape.of(PartKind.NARWHAL, twist, length);
+        return new AttachedPart(shape, shape.stretchTo(length), (float) girth, (float) tilt,
+                UNDYED, UNDYED, false);
+    }
+
+    /**
      * One antler of a rack, from the numbers the antlers locus carries - bone
      * coloured by {@code tint}, unlit, solid and bare until other loci dress it.
      *

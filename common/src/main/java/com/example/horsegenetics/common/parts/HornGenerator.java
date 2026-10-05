@@ -47,6 +47,19 @@ public final class HornGenerator {
     public static final int STYLES = 4;
 
     /**
+     * How many of those a <b>narwhal horn</b> grows in: the two twisted ones that read
+     * as a tusk, {@link #SPIRAL} and {@link #TIGHT} (tusks treatment). Never
+     * {@link #SMOOTH} - the only style that bends, and a narwhal's tusk is straight -
+     * nor {@link #LOOSE}, whose quarter-turn over a long tusk reads as no twist at all.
+     */
+    public static final int NARWHAL_STYLES = 2;
+
+    /** A narwhal horn's style index, {@code 0..}{@link #NARWHAL_STYLES}{@code -1}, as the style this builds. */
+    public static int narwhalTwist(int narwhalStyle) {
+        return narwhalStyle <= 0 ? SPIRAL : TIGHT;
+    }
+
+    /**
      * Roll added per segment, in degrees, by style.
      *
      * <p>{@link #TIGHT} stops at 34 rather than going further because a square

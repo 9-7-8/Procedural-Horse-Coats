@@ -90,6 +90,9 @@
     ],
     "horsegenetics.body_plate_colour": [
       { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.tusk_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
     ]
   },
   "count_groups": [
@@ -103,7 +106,8 @@
         "horsegenetics.dragon_horns": "Drg/Drg",
         "horsegenetics.dorsal_spines": "Dsp/Dsp",
         "horsegenetics.back_sail": "Sail/Sail",
-        "horsegenetics.body_plates": "Plt/Plt"
+        "horsegenetics.body_plates": "Plt/Plt",
+        "horsegenetics.tusks": "Nar/Nar"
       }
     }
   ],
