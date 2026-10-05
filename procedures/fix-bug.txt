@@ -40,7 +40,12 @@ STEPS
 -----
 1. Pick one.
    If the owner named an issue, take it, even if it carries needs-owner: naming it is
-   her answer. Read her latest comment on it first. Otherwise rank, highest first:
+   her answer. Read her latest comment on it first. If she names it by its symptom,
+   find it by the symptom (the number she gives may be wrong) and say which you took.
+   If it turns out to be a scoped enhancement or a tracking parent rather than a bug,
+   build its open piece here, but close it the way process-intake does (shipped, with
+   the play check on the page's Verification tab), not by step 6's bug rule (#206).
+   Otherwise rank, highest first:
    a. Damage: a crash, a lost horse or item, a save that no longer loads (rule 10).
    b. Wrong behaviour players hit on a released jar: testers, the owner's server.
    c. Wrong behaviour found only in the yard (found-in-yard).

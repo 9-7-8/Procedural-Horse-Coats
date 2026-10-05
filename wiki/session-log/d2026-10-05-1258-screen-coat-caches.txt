@@ -1,0 +1,84 @@
+2026-10-05 12:58 (end) - #206: horse screens stop re-parsing a genome every frame; #199 closed
+
+ASKED
+-----
+- "/fix-bug I think it's #119, but it's whatever bug is about regenerating the coats every
+  frame". #119 was a closed gametest flake. The symptom is #199 (tracking, enhancement),
+  whose piece 1 #205 had already shipped in 6c8ca98c (unreleased). Asked with the
+  question tool which part to do; the owner answered "Build #199", meaning its remaining
+  piece, #206.
+
+DONE
+----
+- 8027a3ca - #206, piece 2 of #199. Six client sites that draw a horse off the entity
+  path rebuilt their genome or body on every frame. Re-read at 72f069da before changing:
+  - TransferDeedRenderer.extractArgument, FamilyTreeScreen.coatFor and
+    HorseInfoScreen.coatOf (portraits, Offspring foals) ran Genome.parse per frame. They
+    now call ClientHorseCoats.ofCodes, backed by the new common/coat/CoatCodeCache: an
+    LRU of 64 built on TexelBudgetCache with cost 1. It returns the same CoatData for
+    the same codes, so #205's memoised keys apply. Cleared on disconnect with the rest
+    of ClientHorseCoats.
+  - HorseInfoScreen.traits() did a full HorseTraits.resolve from several call sites
+    per frame. The genome is final, so it now resolves once.
+  - CustomHorseSpawnScreen.genotype() rebuilt every pair and forced the eyes several
+    times a frame, then toCode()d both halves to decide whether the preview moved. It
+    is now memoised against an int[] snapshot of the rows' added/a/b (the row list is
+    built once, in the constructor), the sex, and the epigenome's identity (immutable,
+    only replaced). The preview coat, the body (previewTraits) and
+    HorseAbilities.activeFor key on those instances. The three `previewKey = ""`
+    resets became `previewCoat = null`.
+  - HorseBrowserScreen.drawQueryBuilder ran HorseQuery.filter over the roster per frame
+    for the Query tab's count. It is now kept against the query, the roster version and
+    which roster.
+  - My Horses needed nothing: each row reads a held CoatData (ClientHorseCoats.get).
+  Proof: CoatCodeCacheTest (new, 4 tests): same instance for the same codes, equal to a
+  fresh parse; the bound holds at 4 over 50 inserts; clear forgets. Making coatOf parse
+  on every call turned 2 of 4 red. CoatDataTest, TexelBudgetCacheTest and
+  CommonPortabilityTest are green. :neoforge-26.1.2:build, check-parity (7163 checks)
+  and check-designer-boots are green.
+  The screens have no bench and none was planned, so no frame time was measured for
+  them.
+  #206 closed with that proof. #199 closed as both pieces have shipped. Both ride
+  v0.5.045.
+- Docs: wiki/pipeline.html Coding tab #per-frame-screens; Verification tab
+  #per-frame-screens-1005 and its summary sentence; verification, search and agent-text
+  bakes.
+
+DECIDED
+-------
+- Build #206 in full as this fix-bug run (owner: "Build #199").
+- Close #206 the way #205 and process-intake close a scoped piece (shipped, with the
+  check on the Verification tab), not by fix-bug's "leave open until the game proves
+  it". Made without the owner; recorded on #206 and in procedures/fix-bug.txt step 1.
+- Compare the spawn editor's inputs rather than adding a dirty flag, so no click
+  handler can miss setting one. Made without the owner; on the pipeline page.
+- No mirror in web/HorseEditor: this is a cache, not a rule (hard rule 5). The scoping
+  recommended this; a comment on CustomHorseSpawnScreen says so.
+
+FOUND ON THE WAY
+----------------
+- The owner's issue number (#119) was wrong; it was found by its symptom.
+- I wrote some edits with Python in text mode, which writes LF. Git normalised them and
+  the diffs are minimal (checked with --stat). Nothing to fix.
+
+PROCEDURES
+----------
+- procedures/fix-bug.txt step 1: an issue named by symptom is found by the symptom. A
+  named issue that turns out to be a scoped enhancement or tracking parent is built
+  here but closed the way process-intake closes one.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite (not run). The new class is used only by client screens,
+  and the tests above cover it.
+- Nobody has opened the changed screens in game: wiki/pipeline.html#per-frame-screens-1005
+  (spawn preview follows every edit; portraits and deeds show their own horse; the
+  Query count follows the query). #per-frame-keys-1005 from #205 is still open too.
+
+RELEASE
+-------
+Not offered. One enhancement piece does not meet release step 1's bar.
+
+PICK UP FIRST
+-------------
+/next-release: the next unit on milestone v0.5.045 now that #199 is done.

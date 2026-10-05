@@ -3367,6 +3367,7 @@ wiki/pipeline.html#golden	all	The golden test
 wiki/pipeline.html#near-black	all	Transparency and near black
 wiki/pipeline.html#overlay	all	Phase 6 — the overlay
 wiki/pipeline.html#per-frame-keys	all	What a baked horse costs per frame: the memoised keys
+wiki/pipeline.html#per-frame-screens	all	The screens: derive on change, never per frame
 wiki/pipeline.html#phase2	all	Phase 2 — resolve through the gradient
 wiki/pipeline.html#shadow-pass	all	The shadow pass — nothing phase 3 paints is true black
 wiki/pipeline.html#topline	all	How high white climbs: the topline reference

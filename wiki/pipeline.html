@@ -845,6 +845,45 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
     too.
 </p>
 
+<h3 id="per-frame-screens">The screens: derive on change, never per frame</h3>
+
+<p>
+    The memo above pays only for a caller that <em>keeps</em> its <code>CoatData</code>. Six places
+    that draw a horse off the entity path did not (#206), and from 2026-10-05 each derives on
+    change instead:
+</p>
+<ul>
+    <li><strong>The transfer deed, the family tree and the info screen's portraits</strong> hold
+        only a horse's saved codes, and ran <code>Genome.parse</code> on every frame they drew
+        them. They now ask <code>ClientHorseCoats.ofCodes</code>, a
+        <code>CoatCodeCache</code> (<code>common/</code>): codes in, the same <code>CoatData</code>
+        out, an LRU of 64 built on <code>TexelBudgetCache</code> with a cost of one. A code that
+        will not parse throws and is not cached, as before. It is dropped on disconnect with the
+        rest of <code>ClientHorseCoats</code>.</li>
+    <li><strong>The info screen's body</strong> (<code>traits()</code>) was a full
+        <code>HorseTraits.resolve</code> from several call sites a frame. The screen's genotype and
+        epigenome are final, so it resolves once.</li>
+    <li><strong>The spawn-egg editor</strong> rebuilt its genotype several times a frame and
+        printed it to a code string to see whether the preview had moved. <code>genotype()</code>
+        is now memoised against the rows' <code>added</code>/<code>a</code>/<code>b</code>, the sex,
+        and the epigenome's identity (it is immutable and only ever replaced). Comparing the
+        inputs, rather than a dirty flag, means no click handler can forget to set one. The
+        preview coat, its body and the active abilities key on the memoised instances. A cache,
+        not a rule, so <code>web/HorseEditor</code> needed no mirror (hard rule 5).</li>
+    <li><strong>The browser's Query tab</strong> ran <code>HorseQuery.filter</code> over the
+        whole roster each frame for its live match count. The count is now kept against the
+        query, the roster's version and which roster. The tables and the breeding pickers were
+        already cached this way.</li>
+    <li><strong>My Horses</strong> needed nothing: its rows already hold one <code>CoatData</code>
+        per horse (<code>ClientHorseCoats.get</code>). What a row costs is drawing a model, which
+        is rendering, not re-parsing.</li>
+</ul>
+<p>
+    <code>CoatCodeCacheTest</code> pins the cache (same codes, same instance; a bound that holds;
+    clear forgets). The screens have no unit harness, so they wait on a person:
+    <a href="#per-frame-screens-1005">the check</a>.
+</p>
+
 <div class="note danger">
     <span class="label">CoatTextureId &mdash; do not go back to lower-casing</span>
     <p>
@@ -1269,7 +1308,7 @@ double snipSize  = epi.get(SNIP_SIZE);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The <strong>coat-key caches</strong> cut a horse's per-frame cost about 85-fold on the bench but have not been played beside a real herd. A fix for <strong>every GUI drawing the same black horse</strong> is in and unseen, so family tree, foal preview, browser and spawn screen all want opening on a deep pedigree &mdash; and <code>coats.bakeBudgetMs</code> has still never been measured with a person actually rendering, which no yard run can supply.</p>
+    <p>The <strong>coat-key caches</strong> cut a horse's per-frame cost about 85-fold on the bench but have not been played beside a real herd, and the <strong>screens that stopped re-parsing</strong> want opening to show nothing went stale. A fix for <strong>every GUI drawing the same black horse</strong> is in and unseen, so family tree, foal preview, browser and spawn screen all want opening on a deep pedigree &mdash; and <code>coats.bakeBudgetMs</code> has still never been measured with a person actually rendering, which no yard run can supply.</p>
 </div>
 
 <h3 id="per-frame-keys-1005">Herds cost less per frame: the coat-key caches (2026-10-05, NOT played)</h3>
@@ -1287,6 +1326,24 @@ double snipSize  = epi.get(SNIP_SIZE);</code></pre>
     <li><strong>Visual, and therefore last:</strong> every coat, glow and horn looks the way it
         did before. The golden tests say the keys did not move, so a wrong coat here would be
         a horse wearing another horse's coat, not a new colour.</li>
+</ul>
+
+<h3 id="per-frame-screens-1005">Screens stop re-parsing every frame (2026-10-05, NOT played)</h3>
+
+<p>
+    <a href="#per-frame-screens">The screens</a> now derive on change. The risk is a value that
+    no longer updates, so this is a check for staleness more than for speed:
+</p>
+<ul>
+    <li><strong>Spawn-egg editor:</strong> change an allele, add and remove a gene, flip the sex,
+        reroll the epigenome, paste a horse, Clear, Randomize. The preview coat, its size and any
+        particles follow every one at once.</li>
+    <li><strong>Info screen, family tree, Offspring tab</strong> on a magical horse with a deep
+        pedigree: every portrait wears its own coat, and the Body numbers match the horse.</li>
+    <li><strong>A transfer deed</strong> in hand and in an item frame shows its horse, and a
+        different deed shows a different horse.</li>
+    <li><strong>The browser's Query tab:</strong> the match count follows each edit to the query,
+        and moves when a horse joins or leaves the stable.</li>
 </ul>
 
 <h3 id="gui-coats-0918">Every horse in every GUI was the same black horse (2026-09-18, NOT played)</h3>
