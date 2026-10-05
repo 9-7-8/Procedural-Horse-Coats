@@ -191,6 +191,14 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
         if (--searchCooldown > 0) {
             return false;
         }
+        // A horse that cannot plan a path right now - in the air, which a horse just
+        // spawned or founded is for a tick or two - gets a null from every createPath,
+        // and reachable() would take that for a fence and ignore the bale it is standing
+        // five blocks from for IGNORE_TICKS (#39). Ask again next tick instead. The test
+        // is GroundPathNavigation.canUpdatePath's own.
+        if (!horse.onGround() && !horse.isInLiquid() && !horse.isPassenger()) {
+            return false;
+        }
         searchCooldown = SEARCH_INTERVAL;
         if (!(horse.level() instanceof ServerLevel level) || !free()) {
             return false;
@@ -463,12 +471,37 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
      * it - all a grass block ever needed - still counts.
      */
     private @Nullable Path pathTo(BlockPos pos) {
-        return horse.getNavigation().createPath(Set.of(pos, pos.above()), REACH_ACCURACY);
+        Set<BlockPos> targets = Set.of(pos, pos.above());
+        return ownPath(horse.getNavigation().createPath(targets, REACH_ACCURACY), targets,
+                () -> horse.getNavigation().createPath(targets, REACH_ACCURACY));
     }
 
     private boolean reachable(Entity target) {
-        Path path = horse.getNavigation().createPath(target, REACH_ACCURACY);
+        Set<BlockPos> targets = Set.of(target.blockPosition());
+        Path path = ownPath(horse.getNavigation().createPath(target, REACH_ACCURACY), targets,
+                () -> horse.getNavigation().createPath(target, REACH_ACCURACY));
         return path != null && path.canReach();
+    }
+
+    /**
+     * <b>A path to what was asked for, not the one the horse is already on</b> (#39).
+     * {@code PathNavigation.createPath} hands back the navigation's <i>current</i> path,
+     * unplanned, whenever that path is unfinished and the navigation's last target is one
+     * of those asked for - and every {@code createPath} records its target, a probe nobody
+     * follows included. So a horse strolling toward the top of a wall, asked about a bale
+     * it had probed before, got the stroll's dead end back: {@code canReach} false, and the
+     * bale ignored for {@link #IGNORE_TICKS}. About one horse in thirty starved beside its
+     * bale in the hay gametests. A path whose target is not one of ours is that cached
+     * one, so the navigation is stopped and the question asked again; a hungry horse with
+     * a meal to plan has no stroll worth keeping.
+     */
+    private @Nullable Path ownPath(@Nullable Path path, Set<BlockPos> targets,
+                                   java.util.function.Supplier<Path> again) {
+        if (path == null || targets.contains(path.getTarget())) {
+            return path;
+        }
+        horse.getNavigation().stop();
+        return again.get();
     }
 
     /**

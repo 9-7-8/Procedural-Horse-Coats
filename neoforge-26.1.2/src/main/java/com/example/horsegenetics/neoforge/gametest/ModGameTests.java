@@ -3659,8 +3659,9 @@ public final class ModGameTests {
                 throw new GameTestAssertException(Component.literal("a hungry horse has not eaten the "
                         + (stacked ? "stacked bales" : "bale under a two-block roof") + " in its cell (hunger "
                         + Math.round(horse.getData(hunger)) + ", bale " + (level.getBlockState(bale).is(Blocks.HAY_BLOCK)
-                        ? "still there" : "gone") + ") - HungerFoodGoal is asking whether it can stand on the"
-                        + " bale, not beside it"), 0);
+                        ? "still there" : "gone") + ", horse at " + horse.blockPosition().subtract(bale).toShortString()
+                        + " from it) - HungerFoodGoal is asking whether it can stand on the bale, not beside it"
+                        + " (#26), or took a null or cached createPath for unreachable (#39)"), 0);
             }
             for (int x = -2; x <= 2; x++) {
                 for (int z = -2; z <= 8; z++) {
