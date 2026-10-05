@@ -1,0 +1,65 @@
+2026-10-05 10:55 (start, approximate) - #150: the gametest field wait was wall-clock, budgeted in ticks
+
+ASKED
+-----
+- "/next-release" (procedures/next-release.txt). The next release is v0.5.045 (milestone
+  42); every open issue already had a milestone. Of its five bugs, #10, #36, #35 and #31
+  are fixed and waiting on a check (skipped by step 3), so the unit was #150, handed to
+  procedures/fix-bug.txt. Closed.
+
+DONE
+----
+- 70027499 "Fix #150: gametest field wait was budgeted in ticks but bounded by
+  wall-clock". Issue #150: closed, still on v0.5.045.
+  Wrong: ModGameTests.fieldTicks (the wait, issue #70, for the 3x3 chunks keepTicking
+  forces round an alone test) threw until every chunk's entities ticked, inside a tick
+  budget chosen from #70's 1-369-tick distribution. What lags is the asynchronous
+  entity-section load, ~100-370 ms of real time. GameTestServer.waitUntilNextTick never
+  sleeps (read in the patched 26.1.2 sources), so gametest ticks run at 0.4-6 per ms;
+  the instrumented failure waited 1202 ticks in 207 ms with the holder already at ticket
+  level 31, FULL, ENTITY_TICKING.
+  Fix: fieldTicks sleeps 50 ms on each tick it is still waiting, pacing the wait to real
+  ticks; the budgets (1200/1300) then cover about a minute. Only the three alone tests
+  call it (order_hunt_picks_a_monster, order_guard_holds_its_reach,
+  wild_pack_founds_one_herd), so no other test slows. The failure message now prints
+  ticks, ms and ChunkMap.getChunkDebugData; a success logs "[gametest] field at ...
+  ticking after N ticks, M ms".
+  Proof: runGameTest loop. Before (instrumented, no sleep): 1 red in 6 - the red was
+  wild_pack_founds_one_herd, the same wait - with slow waits of 202 and 266 ticks.
+  After: 8 of 8 green (55/55 each), all 24 field waits 1-7 ticks, 51-371 ms. The before
+  tally doubles as the mutation run. :neoforge-26.1.2:build and check-parity green.
+
+DECIDED
+-------
+- Pace the waiting ticks rather than raise the tick budget again, or force synchronous
+  chunk loads: the holder was already ENTITY_TICKING, so a sync getChunk would not have
+  waited for the entity load that actually lagged. Made without the owner (a test-only
+  harness fix); recorded on issue #150 and in procedures/test-tiers.txt.
+
+FOUND ON THE WAY
+----------------
+- #150's own test never went red in 14 runs; its sibling did. The issue's lead ("first
+  batch on a fresh server") was half right: the slow waits are the cold first alone
+  batches, but the cause is wall-clock, not ticket timing.
+
+PROCEDURES
+----------
+- test-tiers.txt: gametest ticks are unpaced; a wait on asynchronous work is wall-clock
+  and must be paced, never budgeted in ticks (#150).
+- fix-bug.txt step 5: log ms beside ticks when tallying a timing flake; #70's
+  tick-distribution budget still flaked.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite (common/ untouched; it would check nothing this moved).
+- Nothing in game; no Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: v0.5.045 still has its plan pieces open (#152, #153, #154, #160, #47, #48),
+and four bugs wait on checks.
+
+PICK UP FIRST
+-------------
+/next-release (procedures/next-release.txt): v0.5.045's next unit is #152, Body parts
+slice A - the SPINE anchor and the dorsal spine row, via process-intake.

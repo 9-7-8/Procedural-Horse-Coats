@@ -118,6 +118,9 @@ STEPS
      If the failure is timing, not chance, raising the copies' budget measures it: log the
      tick each copy reaches the step that hangs, and choose the new budget from that
      distribution. Example: #70, a forced chunk's wait of 1 to 369 ticks.
+     Log the milliseconds beside the ticks: gametest ticks are unpaced, so a wait on
+     asynchronous work (a chunk or entity load) is wall-clock, and a tick budget chosen
+     from #70's distribution still flaked. Pace the waiting ticks instead (#150).
    - Edit the smallest owning slice, and run the check straight away.
    - Shape:
      - The rule goes in common/, returning a typed result, never chat text.
