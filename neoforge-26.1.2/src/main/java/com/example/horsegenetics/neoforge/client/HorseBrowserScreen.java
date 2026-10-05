@@ -4079,7 +4079,8 @@ public final class HorseBrowserScreen extends Screen {
             }
             return;
         }
-        StringBuilder head = new StringBuilder(row.displayName());
+        // The one place both names are written: registered, then the barn name.
+        StringBuilder head = new StringBuilder(row.registeredName());
         if (!row.barnName().isEmpty()) {
             head.append(" (\"").append(row.barnName()).append("\")");
         }

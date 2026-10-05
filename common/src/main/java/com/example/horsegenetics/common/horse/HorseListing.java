@@ -137,8 +137,19 @@ public record HorseListing(
         return sex == Sex.MALE && !gelded;
     }
 
-    /** {@code "Amber Duskrunner"}, the way the horse is written down. */
+    /**
+     * What the horse is called on screen: the barn name if it has one, otherwise
+     * {@link #registeredName()} - the same rule as {@link HorseRecord#displayName()}.
+     * Every table, picker and heading over a listing draws this, so it must not
+     * be the registered name, or one horse goes by two names depending on the
+     * screen (#34).
+     */
     public String displayName() {
+        return barnName.isBlank() ? registeredName() : barnName;
+    }
+
+    /** {@code "Amber Duskrunner"} - the generated name, whatever the barn calls it. */
+    public String registeredName() {
         return (firstName + " " + lastName).trim();
     }
 
