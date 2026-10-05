@@ -55,7 +55,9 @@ STEPS
    b. Anything in common/ or web/
       RUN    :web:bakeDesignerAssets, then node wiki/tools/check-designer-boots.mjs.
              TeaVM compiles only the reachable graph, so the task goes green and the
-             page comes up blank.
+             page comes up blank. A common/ class nothing under web/src reaches (grep
+             it for the class and its callers) cannot move the wasm: skip the bake,
+             whose output step 5 would revert, but still run check-designer-boots.
       COMMIT wiki/horse-designer/wasm/web.wasm (see step 5: it is not reproducible)
 
    c. Any breed, or BreedSpecWriter

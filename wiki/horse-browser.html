@@ -172,6 +172,18 @@
 
 <section class="tab-panel" data-tab="coding">
 
+<h2 id="barn-name-shown">A barn name is the name shown (2026-10-04, #34)</h2>
+
+<p>
+    Every row, picker and heading in the browser draws <code>HorseListing.displayName()</code>,
+    which now returns the barn name when one is set, the way <code>HorseRecord.displayName()</code>
+    always had &mdash; before, My horses, the breeding preview and the Realm roster showed the
+    registered name while the information screen showed the barn name. The footer writes
+    both, registered first; the Name sort follows the name shown; <code>name:</code> and
+    <code>name LIKE</code> match either. The rule is on
+    <a href="breeding.html#barn-name">breeding.html, barn name</a>.
+</p>
+
 <h2 id="send-home-free-built">Send home is free, and can be priced (2026-10-02)</h2>
 
 <p>
