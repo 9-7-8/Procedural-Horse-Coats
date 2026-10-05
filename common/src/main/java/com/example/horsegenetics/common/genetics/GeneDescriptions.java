@@ -542,6 +542,19 @@ public final class GeneDescriptions {
                             + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
                             + "Two different copies make the membrane one colour and the spines "
                             + "the other. Bone on both copies is bare bone rays with no membrane."),
+            Map.entry("horsegenetics.body_plates",
+                    "A magical, dominant gene: one Plt copy grows overlapping plates of bone "
+                            + "over the shoulders and the hips, stepped down the flank like "
+                            + "armour. Smooth, ridged or spiked, and their size, how many each "
+                            + "cluster has, how far they overlap and how far they flare, are "
+                            + "epigenetic and inherited with the allele. Mares and stallions "
+                            + "alike; grown at maturity. Their colour is its own gene."),
+            Map.entry("horsegenetics.body_plate_colour",
+                    "A magical, codominant gene that colours body plates and does nothing to "
+                            + "a horse without them - the horn colour rule on a locus of its own. "
+                            + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
+                            + "Two different copies make every plate one colour and its edge, rib "
+                            + "or spike the other."),
             Map.entry("horsegenetics.ram_horn_tip",
                     "A magical, recessive gene: Tip/Tip fades a ram's horns into a colour "
                             + "of their own toward the points. The colour is inherited. Molten "

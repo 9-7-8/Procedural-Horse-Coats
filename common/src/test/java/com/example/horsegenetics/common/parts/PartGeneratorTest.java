@@ -62,23 +62,27 @@ class PartGeneratorTest {
                 assertTrue(node.len() > 0f, shape + " box " + i + " has no length");
                 assertTrue(node.girth() >= MIN_GIRTH,
                         shape + " box " + i + " is " + node.girth() + " units thick");
-                // A flat box - a membrane - may be thinner across x, never past this, and
-                // only a membrane is flat at all.
+                // A flat box - a membrane, or a plate's slab - may be thinner across x,
+                // never past this, and nothing else is flat at all.
                 assertTrue(node.width() >= MIN_WIDTH && node.width() <= node.girth(),
                         shape + " box " + i + " is " + node.width() + " units wide");
-                assertTrue(node.width() == node.girth() || node.tex() == PartSheet.MEMBRANE,
-                        shape + " box " + i + " is flat and is not a membrane");
+                assertTrue(node.width() == node.girth() || node.tex() == PartSheet.MEMBRANE
+                                || (shape.kind().plates() && node.isRoot()),
+                        shape + " box " + i + " is flat and is neither a membrane nor a slab");
                 assertTrue(node.t() >= 0f && node.t() <= 1f,
                         shape + " box " + i + " sits at t=" + node.t() + " along its parent");
                 assertTrue(node.tex() >= 0 && node.tex() < PartSheet.CAPACITY,
                         shape + " box " + i + " samples region " + node.tex()
                                 + ", which is off the sheet");
             }
-            // A part is one tree - except a row along the back, which is one tree per
+            // A part is one tree - except a row along the body, which is one tree per
             // element, each rooted on the anchor at its own place along the row
-            // (SaddleZoneTest holds that every element is exactly one chain).
+            // (SaddleZoneTest holds that every element is exactly one chain), and a side
+            // of plates, which is two rows - the shoulder's and the hip's - sharing their
+            // numbers, so two trees per element (BodyPlatesGeneTest holds the pairing).
+            int perElement = shape.kind().plates() ? 2 : 1;
             int trees = shape.kind().scalesPerElement()
-                    ? (int) PartGenerators.build(shape).stream().map(PartNode::group).distinct().count()
+                    ? perElement * (int) nodes.stream().map(PartNode::group).distinct().count()
                     : 1;
             assertEquals(trees, roots, shape + " has " + roots + " roots; a part is " + trees + " tree(s)");
         }

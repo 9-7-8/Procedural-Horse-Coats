@@ -250,6 +250,32 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
                 (float) count, (float) opacity, NO_BLOOM, (float) coverage);
     }
 
+    /**
+     * One side's shoulder and hip plates, from the numbers the body plates locus
+     * carries - white and dark until its colour locus dresses it. The kind scales per
+     * element ({@link PartKind#scalesPerElement()}): {@link #stretch} is each slab's
+     * height down the flank and {@link #girth} its length and thickness, both about the
+     * slab's own top edge, so the clusters stay where they are on the body. Size is a
+     * uniform grow, as a dragon horn's is - a bigger plate, not a taller thinner one.
+     *
+     * @param left      the left side rather than the right
+     * @param form      a {@link PlateGenerator} form
+     * @param overlap   {@code [0,1]}: how far each slab laps the one below
+     * @param spikiness {@code [0,1]}: how far the slabs flare, and how big a rib or spike
+     * @param size      position on the {@link PlateSize} ladder - class is the mesh, the rest a stretch
+     * @param count     slabs per cluster, from the top down; fractional grows the next one in
+     */
+    public static AttachedPart plates(boolean left, int form, double overlap, double spikiness,
+                                      double size, double count) {
+        PartKind kind = left ? PartKind.PLATES_LEFT : PartKind.PLATES_RIGHT;
+        int style = PlateGenerator.style(form, bucket(overlap, PlateGenerator.OVERLAPS),
+                bucket(spikiness, PlateGenerator.SPIKES));
+        PartShape shape = PartShape.of(kind, style, size);
+        float grow = shape.stretchTo(size);
+        return new AttachedPart(shape, grow, grow, 0f, UNDYED, UNDYED, false,
+                (float) count, OPAQUE, NO_BLOOM, 1f);
+    }
+
     /** {@code x} in {@code [0,1]}, clamped, to one of {@code n} equal buckets. */
     private static int bucket(double x, int n) {
         double c = x < 0.0 ? 0.0 : (x > 1.0 ? 1.0 : x);

@@ -138,6 +138,7 @@ class UndeadBreedsTest {
         assertEquals("Bon/Bon", g.genotype().pair(Genes.DRAGON_HORN_COLOUR).toTokens());
         assertEquals("Bon/Bon", g.genotype().pair(Genes.DORSAL_SPINE_COLOUR).toTokens());
         assertEquals("Bon/Bon", g.genotype().pair(Genes.BACK_SAIL_COLOUR).toTokens());
+        assertEquals("Bon/Bon", g.genotype().pair(Genes.BODY_PLATE_COLOUR).toTokens());
     }
 
     private static final Breed BLACKENED = Breeds.get("blackened_skeleton_horse");
@@ -327,7 +328,8 @@ class UndeadBreedsTest {
         // Every granting locus GrownParts knows - if another horn-like part ships,
         // the owner's rule is that the skeleton's pool takes it too.
         assertEquals(java.util.Set.of(Genes.UNICORN_HORN.key(), Genes.ANTLERS.key(), Genes.RAM_HORNS.key(),
-                Genes.DRAGON_HORNS.key(), Genes.DORSAL_SPINES.key(), Genes.BACK_SAIL.key()), grouped);
-        assertEquals(PartKind.values().length, 9, "a new part kind: decide whether the skeleton grows it");
+                Genes.DRAGON_HORNS.key(), Genes.DORSAL_SPINES.key(), Genes.BACK_SAIL.key(),
+                Genes.BODY_PLATES.key()), grouped);
+        assertEquals(PartKind.values().length, 11, "a new part kind: decide whether the skeleton grows it");
     }
 }

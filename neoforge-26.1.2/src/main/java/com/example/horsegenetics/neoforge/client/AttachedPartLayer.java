@@ -136,6 +136,22 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     private static final float[] FOAL_SPINE = ADULT_SPINE;
 
     /**
+     * Where the <b>left</b> flank's plates root on the adult body, in body-local units;
+     * the right is the same with {@code x} negated. Read from the 26.1.2 sources, not
+     * seen: the {@code body} box runs {@code x -5..5}, {@code y -8..2}, {@code z -17..5},
+     * so {@code x 5} is the side wall, {@code y -7.2} under a unit below the line of the
+     * back (clear of a dorsal row's roots), and {@code z -6} halfway along. The plate mesh
+     * puts its shoulder cluster 7.5 units forward of here ({@code z -13.5}) and its hip
+     * cluster 9.2 back ({@code z 3.2}), so both stand clear of the saddle's
+     * {@code z -9.5..0.5} ({@link #SADDLE_FRONT}). Where a flap or barding meets them is
+     * the treatment's open look, not engineered ahead of being seen.
+     */
+    private static final float[] ADULT_FLANK = {5.0f, -7.2f, -6.0f};
+
+    /** The same on the foal. Never drawn - a foal wears no body part - as {@link #FOAL_SPINE}. */
+    private static final float[] FOAL_FLANK = ADULT_FLANK;
+
+    /**
      * The saddle, along the body, in body-local units. Vanilla's
      * {@code EquineSaddleModel.createSaddleLayer} hangs it on {@code body} as a box
      * {@code (-5,-8,-9)} sized {@code (10,9,9)} inflated by {@code 0.5}, so it covers
@@ -408,6 +424,13 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
                 // HD coat UVs are baked against.
                 root.getChild("body").translateAndRotate(poseStack);
                 yield baby ? FOAL_SPINE : ADULT_SPINE;
+            }
+            case BODY_RIGHT, BODY_LEFT -> {
+                // The body bone again, so the plates rear with it as the spines do.
+                root.getChild("body").translateAndRotate(poseStack);
+                float[] base = baby ? FOAL_FLANK : ADULT_FLANK;
+                float side = anchor == PartAnchor.BODY_LEFT ? 1f : -1f;
+                yield new float[] {side * base[0], base[1], base[2]};
             }
         };
 

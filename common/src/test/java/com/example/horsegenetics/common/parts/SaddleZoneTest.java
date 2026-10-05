@@ -81,7 +81,9 @@ class SaddleZoneTest {
     @Test
     void everySpineIsOneNumberedChainFrontToBack() {
         for (PartShape shape : PartGenerators.allShapes()) {
-            if (!shape.kind().scalesPerElement()) {
+            // The rows along the back. The plates scale per element too, but run down the
+            // flank in two clusters, and BodyPlatesGeneTest holds their numbering.
+            if (!shape.kind().saddleZoned()) {
                 continue;
             }
             List<PartNode> nodes = PartGenerators.build(shape);

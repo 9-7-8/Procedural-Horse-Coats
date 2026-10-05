@@ -96,6 +96,7 @@ public record PartShape(PartKind kind, int style, int size) {
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornSize.lengthFor(position);
             case SPINES -> SpineSize.lengthFor(position);
             case SAIL -> SailSize.lengthFor(position);
+            case PLATES_RIGHT, PLATES_LEFT -> PlateSize.lengthFor(position);
         };
     }
 

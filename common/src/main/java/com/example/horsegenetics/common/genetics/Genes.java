@@ -140,6 +140,8 @@ import com.example.horsegenetics.common.genetics.genes.DragonHornsGene;
 import com.example.horsegenetics.common.genetics.genes.DragonHornColourGene;
 import com.example.horsegenetics.common.genetics.genes.BackSailColourGene;
 import com.example.horsegenetics.common.genetics.genes.BackSailGene;
+import com.example.horsegenetics.common.genetics.genes.BodyPlateColourGene;
+import com.example.horsegenetics.common.genetics.genes.BodyPlatesGene;
 import com.example.horsegenetics.common.genetics.genes.DorsalSpineColourGene;
 import com.example.horsegenetics.common.genetics.genes.DorsalSpinesGene;
 import com.example.horsegenetics.common.genetics.genes.RamHornsGene;
@@ -614,6 +616,10 @@ public final class Genes {
     public static final BackSailGene BACK_SAIL = new BackSailGene();
     /** Back sail colour - codominant, the horn colour rule; membrane the base, spines the tip. Silent without a sail. */
     public static final BackSailColourGene BACK_SAIL_COLOUR = new BackSailColourGene();
+    /** Body plates - dominant; slabs over the shoulders and hips, one mesh per side. Size, count, form, overlap, spikiness on the copy. */
+    public static final BodyPlatesGene BODY_PLATES = new BodyPlatesGene();
+    /** Body plate colour - codominant, the horn colour rule; slab the base, edge the tip. Silent without plates. */
+    public static final BodyPlateColourGene BODY_PLATE_COLOUR = new BodyPlateColourGene();
     /** Skeleton - recessive; two copies and the horse is its own bones (vanilla's skeleton sheet). Undead. */
     public static final SkeletonGene SKELETON = new SkeletonGene();
     /** Zombie - recessive; two copies and the horse is dead flesh (vanilla's zombie sheet). Undead. */
@@ -746,7 +752,7 @@ public final class Genes {
             ANTLERS, ANTLER_FORM, ANTLER_GLOW, ANTLER_CRYSTAL, ANTLER_BLOOM,
             RAM_HORNS, RAM_HORN_FORM, RAM_HORN_TIP,
             DRAGON_HORNS, DRAGON_HORN_COLOUR, DORSAL_SPINES, DORSAL_SPINE_COLOUR,
-            BACK_SAIL, BACK_SAIL_COLOUR, SKELETON, ZOMBIE,
+            BACK_SAIL, BACK_SAIL_COLOUR, BODY_PLATES, BODY_PLATE_COLOUR, SKELETON, ZOMBIE,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,
             ACAN, B4GALT7, PLOD1, RAPGEF5, ST14, SHOX, MET,

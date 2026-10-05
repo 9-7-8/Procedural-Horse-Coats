@@ -54,7 +54,17 @@ public enum PartKind {
      * see-through membrane between the spines ({@link SailGenerator}). Centred, like
      * the spines, so one kind.
      */
-    SAIL(PartAnchor.SPINE, PartSheet.BONE);
+    SAIL(PartAnchor.SPINE, PartSheet.BONE),
+
+    /**
+     * The right side's shoulder and hip plates - the body plates locus. Both clusters
+     * are one mesh per side ({@link PlateGenerator}): bone slabs hung down the flank,
+     * their edges, ribs and spikes polished.
+     */
+    PLATES_RIGHT(PartAnchor.BODY_RIGHT, PartSheet.BONE),
+
+    /** The left side's plates. A horse's two sides always ask for the same style. */
+    PLATES_LEFT(PartAnchor.BODY_LEFT, PartSheet.BONE);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -88,6 +98,8 @@ public enum PartKind {
             case SPINES -> DorsalSpineGenerator.styles();
             // Form x curve.
             case SAIL -> SailGenerator.styles();
+            // Form x overlap x spikiness.
+            case PLATES_RIGHT, PLATES_LEFT -> PlateGenerator.styles();
         };
     }
 
@@ -104,6 +116,7 @@ public enum PartKind {
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> DragonHornSize.classes();
             case SPINES -> SpineSize.classes();
             case SAIL -> SailSize.classes();
+            case PLATES_RIGHT, PLATES_LEFT -> PlateSize.classes();
         };
     }
 
@@ -133,8 +146,8 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> PartSheet.SOLID;
             // Nor a dragon horn; the same answer.
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> PartSheet.SOLID;
-            // Nor the spines, nor a sail.
-            case SPINES, SAIL -> PartSheet.SOLID;
+            // Nor the spines, nor a sail, nor the plates.
+            case SPINES, SAIL, PLATES_RIGHT, PLATES_LEFT -> PartSheet.SOLID;
         };
     }
 
@@ -153,7 +166,8 @@ public enum PartKind {
         return switch (this) {
             case ANTLER_RIGHT, ANTLER_LEFT -> PartSheet.bit(PartSheet.BONE);
             case SAIL -> PartSheet.bit(PartSheet.MEMBRANE);
-            case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES -> 0;
+            case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES,
+                 PLATES_RIGHT, PLATES_LEFT -> 0;
         };
     }
 
@@ -170,10 +184,17 @@ public enum PartKind {
      * Is this part a row of elements, each scaled about its own root, rather than one
      * thing scaled as a whole? A row lies along the body, so a whole-part scale across
      * it would also stretch the row lengthwise - see {@link DorsalSpineGenerator}.
-     * Every box of such a kind belongs to a group.
+     * Every box of such a kind belongs to a group. The plates are rows down the flank,
+     * two clusters to a mesh, so a whole-part scale would also pull the shoulder and
+     * hip clusters apart along the body.
      */
     public boolean scalesPerElement() {
-        return this == SPINES || this == SAIL;
+        return this == SPINES || this == SAIL || plates();
+    }
+
+    /** Is this a side of shoulder and hip plates? */
+    public boolean plates() {
+        return this == PLATES_RIGHT || this == PLATES_LEFT;
     }
 
     /** Is this a dragon horn, of either side? */
@@ -204,6 +225,7 @@ public enum PartKind {
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> "Dragon horns";
             case SPINES -> "Dorsal spines";
             case SAIL -> "Back sail";
+            case PLATES_RIGHT, PLATES_LEFT -> "Shoulder and hip plates";
         };
     }
 }

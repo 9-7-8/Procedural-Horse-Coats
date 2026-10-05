@@ -51,10 +51,21 @@ public enum PartAnchor {
      * horn. A part here runs back along {@code +z} toward the croup - the dorsal
      * spines now, and the sail and crystals the body-parts treatment plans.
      */
-    SPINE
+    SPINE,
+
+    /**
+     * The <b>right</b> flank, model {@code -x}: the side of the body just under the
+     * line of the back, halfway along it. It rides the body bone, as {@link #SPINE}
+     * does. A part here hangs down the flank and runs along {@code z} both ways from
+     * it - the shoulder and hip plates, a cluster each side of the saddle.
+     */
+    BODY_RIGHT,
+
+    /** The same on the other side, model {@code +x}. */
+    BODY_LEFT
 
     // The next anchors, named here only so the shape of the enum is obvious and
-    // NOT declared until something draws them: BODY_RIGHT / BODY_LEFT (plates),
-    // WITHERS_PAIR (wings), HOOF_x4 (feathering, shoes). Each is one row in the
-    // client's offset table and one entry here.
+    // NOT declared until something draws them: WITHERS_PAIR (wings), HOOF_x4
+    // (feathering, shoes). Each is one row in the client's offset table and one
+    // entry here.
 }
