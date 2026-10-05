@@ -225,6 +225,9 @@ STEPS
    - "patch on the last piece", and this is not the last piece -> does not count yet;
    - "rides with <other>" -> does not count; it goes out with that one;
    - "compat bump" -> the release procedure confirms it with the owner before cutting;
+   - "held until <release>" (the ports are "held until 1.0.0") -> does not count toward
+     the offer bar until that release; it is built and closed normally, and the release
+     it names carries it;
    - no Release: line (an older treatment) -> counts as one feature.
 
 10. Write the session log by procedures/write-session-log.txt (a new timestamped file;
