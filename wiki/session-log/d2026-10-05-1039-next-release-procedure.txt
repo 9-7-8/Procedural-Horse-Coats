@@ -1,0 +1,103 @@
+2026-10-05 10:39 (end, local PDT) - Every issue on a milestone; the next-release procedure; #31's lookahead
+
+ASKED
+-----
+"Look through the issues, let's work on the next release. The issues should all be
+tagged with what release they're for. Then create a procedure for "working on the next
+release""
+- Every open issue now has a milestone (below).
+- procedures/next-release.txt was written, and this session ran it once. It built #31.
+Questions put to the owner, with the question tool:
+- Where do the untagged issues go? "Bugs next, rest Backlog".
+- Order inside a release? "Bugs first, then plan".
+- What happens when a milestone empties? "Offer the release".
+- What should this run do? "Build the first unit".
+- #31's remaining stall? "Spread the lookahead" (option 1 on the issue).
+
+DONE
+----
+1. Milestones (GitHub only, no commit).
+   - A new milestone, `Backlog`, holds the unscoped ideas, surveys and the two queue
+     documents: #42, #43, #46, #52-#69, #105, #136, #137, #195, #196.
+   - The open bugs #10, #31, #35, #36 and #150 went on v0.5.045. Its description now
+     lists them under "Bugs first" ahead of the plan.
+   - v0.5.044's milestone was still open and empty: release step 8a had not been run
+     for it. It now holds the 13 issues closed between the v0.5.043 and v0.5.044 tags
+     (#13 #25 #26 #29 #30 #33 #34 #37 #38 #39 #40 #70 #119), and it is closed. #32 went
+     on v0.5.043.
+   - #196, the release plan, now says every open issue has a milestone, and names the
+     new procedure.
+   - Check: `gh issue list --state open` returns no issue without a milestone.
+2. 536911ad: procedures/next-release.txt, its INDEX.txt row and its .claude/skills
+   wrapper.
+3. b0bab5a8 (Refs #31): F6 corridor pacing.
+   - Problem: entering the corridor built 30 pen segments and their horses in one
+     tick. That is the half of #31's live-server stall that b4443360 did not fix.
+   - Fix: DebugPenManager.enter now builds only the segments the test yard overlaps
+     (0-4). After that, ensureGeneratedAheadOfPlayer builds at most one segment per
+     player tick until the corridor is 30 segments ahead again. The rule is the new
+     common/realm/CorridorPacing.
+   - Proof:
+     - CorridorPacingTest, 4 tests, green. With the per-tick cap removed it fails
+       (expected 5, was 30).
+     - runGameTest: all 55 required tests passed.
+     - The neoforge build, check-parity and check-designer-boots are green.
+   - Issue state: #31 is open, labelled neither needs-owner nor in-progress, and
+     waiting on the live server's log after the next release.
+   - wiki/horse-dimension.html: the corridor bullet and the LOOKAHEAD_PENS row now
+     describe the pacing.
+
+DECIDED
+-------
+Owner calls, each from the question tool (above):
+- Untagged bugs go to the next release, and everything unscheduled goes to Backlog.
+  Recorded on #196 and in procedures/next-release.txt.
+- Bugs come first, then the milestone's plan order. Recorded in the procedure.
+- A finished milestone means the release is offered. Recorded in the procedure.
+- #31 option 1. Recorded on #31.
+Calls made without the owner:
+- Entry builds through the yard's east edge (DebugTestYard.EAST_DX), not just
+  segment 0. Those segments therefore stand before the yard is built, exactly as
+  before.
+- A segment per tick is the rate. A segment takes about 26 ms at the live server's
+  measured 0.8 s for 31.
+- #35 and #36 are skipped as units, because their fixes are in and each waits only
+  on a check. The procedure now says so.
+
+FOUND ON THE WAY
+----------------
+- `gh issue edit --milestone <title>` cannot name a closed milestone ("not found").
+  The procedure's NEVER section gives the gh api form instead.
+- The local clock was behind the times in earlier 2026-10-05 log names. They look like
+  UTC; this file uses local time.
+No new bugs were filed.
+
+PROCEDURES
+----------
+- New: procedures/next-release.txt (/next-release). It decides which unit comes next
+  and keeps the milestones true; fix-bug or process-intake builds the unit.
+- next-release itself was amended during its first run: a bug whose fix is in and
+  that waits only on a check is not a unit.
+- INDEX.txt: a new row, and a "the plan" line in "How they fit together".
+- The local keyword memory has the new SAY words.
+Other procedures were reviewed against this session and needed no change. release
+step 8a was right; it simply had not been run for v0.5.044.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Full :common:test was not run. It would still check every other common/ class; this
+  session added one class and its test, and changed nothing else in common/.
+- Nobody has pressed F6 since b0bab5a8. In game, the corridor should fill in from the
+  yard outward over about a second and a half. On the server, an F6 entry should show
+  no fastSet frames and a smaller "Can't keep up" or none. #31 holds this check.
+- No Verification tab was added, because bug checks live on the issue.
+
+RELEASE
+-------
+None offered. v0.5.045 still has its four feature pieces and two procedures open.
+
+PICK UP FIRST
+-------------
+/next-release. On v0.5.045 the next bug by fix-bug's ranking is #150 (a yard-only
+gametest flake), then #10 (cosmetic, with its fix written in the issue). After those
+comes #152, the SPINE anchor.

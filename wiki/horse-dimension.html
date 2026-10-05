@@ -373,8 +373,13 @@
         from the road wall and <strong>sunk one block</strong> so their tops are flush with
         the grass: a full water cauldron and a hay block. At full height they were a step
         the horses hopped the wall from.</li>
-    <li>Pens repeat every 7 blocks; 30 are built ahead of the player and more are laid down
-        as you walk (<code>DebugPenTickHandler</code>).</li>
+    <li>Pens repeat every 7 blocks, and the corridor is kept 30 segments ahead of the player
+        (<code>DebugPenTickHandler</code>). Entering builds only the segments the test yard
+        reaches; each player tick after that adds at most one more, so a fresh plot fills in
+        over about a second and a half instead of in the tick you arrive. Building all thirty
+        at once stalled a live server for most of a second
+        (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">issue #31</a>;
+        the pacing rule is <code>common/realm/CorridorPacing</code>).</li>
 </ul>
 
 <h3 id="constants">The constants, by name</h3>
@@ -398,7 +403,7 @@
 <tr><td><code>GRAVEL_STRIP_Z</code></td><td>&plusmn;24</td><td>Gravel, with a glowstone line floating directly above at <code>baseY + 10</code>.</td></tr>
 <tr><td><code>WALL_PLANK_Z</code></td><td>&plusmn;25</td><td>A <em>single</em> oak-plank wall, <code>baseY</code> to <code>baseY + 9</code>.</td></tr>
 <tr><td><code>WALL_BEDROCK_Z</code></td><td>&plusmn;26</td><td>The bedrock core, <code>baseY - 3</code> to <code>baseY + 9</code>. Past it: open void.</td></tr>
-<tr><td><code>LOOKAHEAD_PENS</code></td><td>30</td><td>Built up front; the rest are laid as the player walks.</td></tr>
+<tr><td><code>LOOKAHEAD_PENS</code></td><td>30</td><td>How far ahead of the player the corridor is kept, built one segment a tick (<code>CorridorPacing</code>).</td></tr>
 <tr><td><code>HERD_RADIUS</code> equivalent&nbsp;&mdash; n/a here</td><td>&mdash;</td><td>The corridor has no herds; wild herd formation is <a href="breeds.html">a breeds concern</a>.</td></tr>
 </tbody>
 </table>

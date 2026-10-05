@@ -62,8 +62,10 @@ STEPS
       players on a released jar, then yard-only, then cosmetic);
    b. then the rest in the order the milestone's description lists them.
    Skip: `tracking` parents (never built directly; close one by hand when its last
-   sub-issue closes), anything labelled `in-progress` (another session has it), and
-   anything whose `Depends on:` names an issue that is still open.
+   sub-issue closes), anything labelled `in-progress` (another session has it), a
+   bug whose fix is already in and whose last comment says it waits on a check (an
+   in-game look, a yard pen, the server's log: it stays on the milestone and closes
+   when the check passes), and anything whose `Depends on:` names an issue that is still open.
    An issue with `needs-owner` stays in the list. Before choosing it, put its open
    calls to the owner with the question tool, 2-4 options each with the
    recommendation first. If she answers, remove needs-owner and continue. If not,
