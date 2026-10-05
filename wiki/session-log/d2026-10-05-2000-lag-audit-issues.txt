@@ -1,0 +1,31 @@
+2026-10-05 20:00 - The lag audit filed as GitHub issues (time is the end of the session)
+
+ASKED
+- "Turn all four top causes into github issues for me, with all the information you found". I did not know which causes; asked. The owner then said: "Just write everything up, from 'Top causes, ranked by
+  likely player impact' onwards, into issues". The text was another session's lag, RAM and main-thread audit (found in that session's transcript under ~/.claude/projects, read-only).
+- "So all of this is in the issues? All of this information?" Came of it: a line-by-line check of the pasted text against the live issue bodies.
+
+DONE
+- Filed 8 issues: #197 tracking parent (the audit's opening verbatim, suggested order, sub-issue list), #199-#202 the four top causes, #203 the smaller items, #204 dormancy (needs-owner), #198 the likely
+  UUID `==` bug in CartWorld.getCurrentlyPulling (label bug, milestone v0.5.045). Others are enhancement + idea in the Backlog milestone; sub-issues linked to #197. Duplicates checked first: none.
+- Verified: every substantive line of the audit appears in the bodies (script check). Reworded one reference ("#24" would have auto-linked to this repo's issue 24; in the audit it meant an earlier audit's item).
+- No repo file changed except this log.
+
+DECIDED (owner)
+- All of it goes in as issues, not just the four causes. No sizes, no scoping yet.
+
+FOUND ON THE WAY
+- Nothing was profiled or run: the audit's figures are estimates and its line references were not re-read; each issue says so. Open measurements stay in the issues (EpigenomeSizeTest.reportsTheCodeSize; the 2 MiB NBT
+  quota is unverified; the client has no profiling harness).
+
+PROCEDURES
+None changed.
+
+NOT RUN / NOT CHECKED
+- No build, no game, no bake beyond check-links; docs only.
+
+RELEASE
+Not offered.
+
+PICK UP FIRST
+Unchanged: /next-release on v0.5.045 (issue 196 has the plan). The audit proposed scoping items 1 and 2 (coat key and EpiSchema cache; the per-horse facts cache) first.
