@@ -123,11 +123,6 @@ Mythical rams - implementation treatment.txt                         sized 2026-
 Built? No.
 
 ------------------------------------------------------------------------------
-Mythical reindeer - implementation treatment.txt                     sized 2026-10-02
-- Pieces 1a-1c: the reindeer breeds                              S each c  No: creates breeds; deer P1 (+equids P1)
-Built? No.
-
-------------------------------------------------------------------------------
 Natural-sheep gene kind - implementation treatment.txt  (LOWEST PRIORITY, owner)  sized 2026-10-02
 - Piece 1: the kind exists                                       L  b  owner-free; the sheep files wait on it
 - Piece 2: kind in GeneFamily, RandomizeMode, editors, wiki      M  b  No: creator offering Open; P1
