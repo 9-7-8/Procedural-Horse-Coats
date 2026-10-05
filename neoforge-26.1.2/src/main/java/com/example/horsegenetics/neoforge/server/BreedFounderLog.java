@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.server;
 import com.example.horsegenetics.common.breed.Breed;
 import com.example.horsegenetics.common.breed.BreedFounder;
 import com.example.horsegenetics.common.breed.Breeds;
+import com.example.horsegenetics.common.breed.MagicalVariant;
 import com.example.horsegenetics.common.genetics.AllelePair;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
@@ -28,7 +29,7 @@ import java.util.List;
  * <p>Every server-side founder path calls it: breed eggs
  * ({@link HorseRecords#newFounder(net.minecraft.world.entity.animal.equine.Horse,
  * com.example.horsegenetics.common.Rng, Breed)}), wild herds, the cowboy's
- * string and generated stables - a stable logs its founder as rolled, before
+ * string and generated stables - a magical herd's member is checked without its herd's one pair, and a stable logs its founder as rolled, before
  * the magic the stable adds on purpose ({@code StableSpawn.Rolled#founder}).
  * The custom spawn egg does not - its genome is
  * whatever the player built, so an unlisted gene there is not a bug.
@@ -40,6 +41,14 @@ public final class BreedFounderLog {
     }
 
     public static void founder(Breed breed, Genotype genotype, String source) {
+        founder(breed, genotype, source, null);
+    }
+
+    /**
+     * A member of a magical herd: the herd's one pair is the herd's spec, not a founder bug, so it is not
+     * reported as off the sheet (issue #33). {@code herd} may be null.
+     */
+    public static void founder(Breed breed, Genotype genotype, String source, MagicalVariant herd) {
         if (breed == null || breed == Breeds.FERAL_MIXED) {
             return;
         }
@@ -57,7 +66,7 @@ public final class BreedFounderLog {
         }
         // The stray rule is common/'s, so a test can hold it (issue #12).
         List<String> stray = new ArrayList<>();
-        for (Gene gene : BreedFounder.offSheet(breed, genotype)) {
+        for (Gene gene : BreedFounder.offSheet(breed, genotype, herd)) {
             stray.add(shown(gene, genotype));
         }
         HorseGenetics.LOGGER.info("[breed-health] {} founder ({}): {} | sheet lists: {}",
