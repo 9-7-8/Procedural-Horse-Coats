@@ -94,7 +94,10 @@ through. They are not optional and are not satisfied by doing them once.
 7. FINISH CLEANLY. Create or update the issue(s) (Part 3), set their labels (`scoped`,
    size:S|M|L and impact:finishes|unblocks|new per piece, `needs-owner` if any Open line
    is the owner's, `tracking` on a parent), put `Sized: <today>` and `Depends on:` in
-   each body, run the self-check (Part 6), and write the session log by
+   each body, put every new or rescoped issue on a milestone (`idea` -> `scoped` moves
+   it off Backlog) by next-release step 2: the milestone, its description and the
+   release-plan issue in the same edit, unless the owner names the release herself,
+   run the self-check (Part 6), and write the session log by
    procedures/write-session-log.txt (a new timestamped file; d2026-09-29-scoping-troughs.txt
    is an older example), which is the only thing committed. In it, say that no code was
    touched, list the issue numbers, and make PICK UP FIRST what the building session

@@ -48,7 +48,16 @@ FOUND ON THE WAY
 
 PROCEDURES
 ----------
-None changed.
+- write-intake-document.txt, Part 1 rule 7: it never said to put the scoped issues on a
+  milestone, though every open issue must have one (next-release step 2). It now does,
+  naming the three places that change together: the milestone, its description and the
+  release-plan issue (#196).
+- A miss, noted honestly: this session did not read wiki/text/philosophy.txt and
+  decisions.txt before scoping, as the procedure asks. That carried little risk here,
+  because a pure cache bends no design call, but the next scoping session should not
+  skip it.
+- end-session: the Gradle build was skipped, because no Java, resource or Gradle file
+  changed. check-parity was run and passed.
 
 NOT RUN / NOT CHECKED
 ---------------------
