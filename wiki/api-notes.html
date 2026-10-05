@@ -935,6 +935,25 @@ boolean operator = Commands.LEVEL_GAMEMASTERS.check(source.permissions());</code
     <a href="horse-care.html#probe-not-cached">horse care</a>). Read 2026-10-04 in the 26.1.2 sources.
 </p>
 
+<h2 id="forced-chunk-ticks-later">A forced chunk starts ticking some ticks later, and a gametest
+    waits only for its own structure&rsquo;s chunks</h2>
+
+<p>
+    <code>ServerLevel.setChunkForced</code> adds a ticket. The chunk only starts ticking its
+    entities some ticks later, once the ticket and the chunk's entity load have been processed.
+    An entity added before that is in the level but stands frozen: <code>tickCount</code> stays 0
+    and no goal runs. Measured in the gametest server: one tick in most tries, 369 at most in 120.
+    Before a test starts, <code>GameTestInfo.tick</code> waits for
+    <code>areEntitiesActuallyLoadedAndTicking</code> over the <em>structure's</em> chunks only
+    (padding does not widen it), and that wait does not count against <code>maxTicks</code>. For a
+    1x1 test that is one chunk, so a mob spawned a couple of blocks over can land in a neighbour
+    that is not ticking yet, and the wait then comes out of the test's budget. Check
+    <code>level.areEntitiesActuallyLoadedAndTicking(chunk)</code> before spawning there, and give
+    the test a budget with room for the wait (<code>ModGameTests.fieldTicks</code>,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/70">#70</a>). Read 2026-10-04
+    in the 26.1.2 sources.
+</p>
+
 <h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
 
 <p>
