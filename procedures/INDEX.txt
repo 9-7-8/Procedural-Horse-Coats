@@ -59,6 +59,9 @@ Command                  Runs    Say (any of)                         What it le
                                                                       baked and tested
 /survey-a-mod            local   "survey this mod", "compat with"     the jar's real contents, and
                                                                       options
+/compat-test             local   "compat test", "test the compat      three boots with the fake mod
+                                 layer", "boot with the fake mod"     (generate / current / wipe), run/
+                                                                      restored, the result written up
 /review-server-logs      local   "check the server logs", "review     new export folders reviewed once;
                                  the PCH logs"                        bugs -> issues, wants -> ideas
 /add-a-wiki-page         either  "add a wiki page", "new page"        one page in pages.js, true tabs

@@ -48,7 +48,8 @@ STEPS
    Check each against wiki/philosophy.html#utility-not-decoration. Horses only; utility,
    not decoration; vanilla left intact.
 5. To test real compatibility, build a synthetic mod. The modded-material layer does
-   nothing without another mod present, so fake one rather than assume.
+   nothing without another mod present, so fake one rather than assume: add the shape
+   to the fake jar and run procedures/compat-test.txt.
 6. Record the answer on wiki/compatibility.html (the survey section), never in
    CLAUDE.md. An agreed feature goes through write-intake-document.
 

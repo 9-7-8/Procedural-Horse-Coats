@@ -23,6 +23,8 @@
 // WHAT IT SHOULD PRODUCE
 // ----------------------
 //   horsegenetics:compattest_maple_double_fence_gate   from the maple gate
+//   a compattest_maple jump, and a compattest_maple cart of every kind
+//                                                      (the wagon too: a stripped log ships)
 //   horsegenetics:tin_horse_armor                      grey-white, from c:ingots/tin
 //   horsegenetics:ruby_horse_armor                     red, from c:gems/ruby
 //   horsegenetics:entro_horse_armor                    ONE, from a colliding pair
@@ -170,6 +172,14 @@ const entries = [
     JSON.stringify({ parent: "minecraft:block/template_fence_gate",
       textures: { texture: `${MOD_ID}:block/maple_planks` } }, null, 2)],
   [`assets/${MOD_ID}/textures/block/maple_planks.png`, png(16, [0xC8, 0x8E, 0x5A])],
+  // A gate is not a promise of a plank (MaterialScan.confirmWoods): without a
+  // shipped maple_planks item the scan drops maple, and this jar silently
+  // stopped testing woods at all. The stripped log is what the wagon spends;
+  // with it, maple gets all six carts rather than five.
+  [`assets/${MOD_ID}/items/maple_planks.json`,
+    JSON.stringify({ model: { type: "minecraft:model", model: `${MOD_ID}:block/maple_planks` } }, null, 2)],
+  [`assets/${MOD_ID}/items/stripped_maple_log.json`,
+    JSON.stringify({ model: { type: "minecraft:model", model: `${MOD_ID}:block/stripped_maple_log` } }, null, 2)],
 
   // --- two metals ---------------------------------------------------------
   ["data/c/tags/item/ingots/tin.json",

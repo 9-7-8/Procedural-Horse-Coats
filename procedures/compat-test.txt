@@ -1,0 +1,113 @@
+PROCEDURE  : Compat test with the synthetic mod
+COMMAND    : /compat-test
+SAY        : "compat test", "test the compat layer", "test modded materials",
+             "boot with the fake mod"
+RUNS       : local (it boots a dev server three times)
+TAKES      : a change to the modded-material layer (compat/MaterialScan, ModdedMaterials,
+             GeneratedPack and the Generated* emitters, ModdedArmour, JumpWoods, CartWood),
+             or a release that wants it re-proved; no dev client running
+LEAVES     : the three fingerprint states proved on a dedicated server, the fake mod
+             removed, the owner's run/ files restored, the result written up
+==============================================================================
+
+WHEN TO USE
+-----------
+The modded-material layer reads other mods' jars for woods, metals and dyes, and writes
+gates, jumps, carts and horse armour for what it finds, into run/phc/generated/. With no
+other mod installed it correctly does nothing, and doing nothing correctly looks exactly
+like being broken. So it is tested against a fake mod:
+`neoforge-26.1.2/tools/compat/build-test-mod.mjs` writes a jar with no Java in it, one
+wood (maple) and metals in the shapes that have broken it before.
+Use this after any change to how materials are scanned, named or emitted, and before a
+release that touched them.
+Not for: a real third-party mod (survey-a-mod reads its jar; nothing here replaces
+running beside the real thing), or anything that needs to be SEEN rendering (a modded
+gate or a tinted armour: that is an in-game look, hand-over-a-test).
+
+BEFORE YOU START
+----------------
+1. Read the script's header in full: its "WHAT IT SHOULD PRODUCE" list is the expected
+   result of step 3. If you changed what the scan accepts, update the jar FIRST. The scan
+   rules move, and a jar that stops qualifying gives a green run that tests nothing (in
+   October 2026 the planks rule silently dropped the fake maple, and only the metals were
+   still being tested).
+2. Read wiki/compatibility.html#unverified-generated: what has and has not been proved.
+3. Read procedures/launch-game.txt step 8: the server boot this routine runs three times.
+
+STEPS
+-----
+1. Make sure no dev client holds run/: `pwsh -File tools/stop-dev-java.ps1 -WhatIf`. A
+   "WOULD STOP" with fml.modFolders is the owner's game. Ask before closing it
+   (launch-game). The live server always shows LEFT ALONE, and you must leave it alone.
+
+2. Copy aside run/logs/latest.log, run/logs/debug.log, run/phc/ and run/config/ into
+   the scratchpad. Three boots overwrite the owner's last play session.
+
+3. Boot 1, NEW mod list: generates.
+   a. `node neoforge-26.1.2/tools/compat/build-test-mod.mjs` (it writes
+      run/mods/compattest.jar).
+   b. `./gradlew --stop`, then runServer detached in launch-game step 5's Start-Process
+      form, with stdout redirected to its own file per boot (e.g.
+      $env:TEMP\phc-compat1.log). Poll that file for "Done (" or "BUILD FAILED". Never
+      pipe gradle (test-tiers).
+   c. Grep it for `compat:` and check:
+      - "compat: N modded woods, M modded metals, ..., fingerprint F" with N at least 1.
+        Zero woods means the jar no longer qualifies: stop and fix the jar.
+      - "compat: generated K files for N woods and M metals (F)".
+      - one "...never registers it" / "...uncraftable" warning per recipe. That is
+        CORRECT: the jar registers no items, so every recipe must be skipped, by name,
+        and never fail to parse. A "Couldn't parse" naming horsegenetics is the bug.
+   d. Check the files under run/phc/generated/ against the script's list: one
+      entro_horse_armor (the colliding pair), hellforged_horse_armor (no ingot_ prefix),
+      tin and ruby, and the maple double gate.
+   e. Grep the log for '/ERROR\]|Couldn.t parse'. Expect only minecraft/TagLoader
+      "Couldn't load tag c:..." lines for the jar's own c: tags. They name items the
+      jar never registers, so they belong to the fake mod and are not ours. Triage
+      anything else.
+   f. Stop it with `pwsh -File tools/stop-dev-java.ps1` (-WhatIf first).
+
+4. Boot 2, SAME mod list: short-circuits. Relaunch as 3b with a new log file. Expect
+   "compat: generated pack is current (F)" with boot 1's fingerprint, and no
+   "generated K files" line. Stop it.
+
+5. Boot 3, mod REMOVED: wipes.
+   `node neoforge-26.1.2/tools/compat/build-test-mod.mjs --remove`, relaunch, and
+   expect "compat: 0 modded woods, 0 modded metals" and "compat: nothing to generate".
+   run/phc/generated/ must be gone, and the error grep must come back empty. Stop it.
+
+6. Restore what step 2 copied aside (logs, phc/, config/), and delete any config file
+   the boots generated. Run `stop-dev-java.ps1 -WhatIf` once more: nothing of ours
+   should be left running.
+
+7. Write it up. A pass or a new finding goes on wiki/compatibility.html (the
+   #unverified-generated section), with the date and the fingerprint lines. A failure
+   is a GitHub issue (report-bug's shape), and never just a note. Then rebake the wiki
+   text (rebake).
+
+DONE WHEN
+---------
+- All three boots reached "Done (", and each showed its state (generated / current /
+  nothing to generate) with matching fingerprints in 1 and 2.
+- The error grep held only the fake mod's own tag errors, and nothing of ours.
+- compattest.jar is removed, run/ is restored, and no dev Java is running.
+Report to the owner: the three fingerprint lines, the file and warning counts, and
+anything new in the error grep.
+
+NEVER
+-----
+- Never leave compattest.jar in run/mods. The owner's next dev client would load it and
+  show a maple gate in her creative menu.
+- Never call a run green with zero woods or zero metals. That is the jar no longer
+  qualifying, not the layer working.
+- Never "fix" the uncraftable warnings by registering items in the fake mod. The skip
+  path is what this jar proves; a parse error is the failure it guards against.
+- Never stop the boots any way but tools/stop-dev-java.ps1. The live server shares the
+  command line shape (CLAUDE.md rule 12).
+- Never claim real-mod compatibility from this run. A jar written to be found proves
+  the mechanism, not the mods.
+
+SEE ALSO
+--------
+launch-game (step 8, the server boot); survey-a-mod; test-tiers; rebake; report-bug;
+wiki/compatibility.html (#generated, #unverified-generated); MaterialScanTest, the unit
+tests of the same scan rules.
