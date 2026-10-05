@@ -1,0 +1,71 @@
+2026-10-05 15:46 (end time) - #48: the measure-worldgen procedure
+
+ASKED
+-----
+- "/next-release" (work on the next release). The next release is v0.5.045 (the last
+  tag is v0.5.044, and its milestone is closed). Every open issue already had a
+  milestone. Its four open bugs (#10, #31, #35, #36) all have a fix commit and a last
+  comment naming the check they wait on, so they were skipped. The one buildable unit
+  left was #48, built by process-intake.
+
+DONE
+----
+- ba5af7c2 Procedure: measure-worldgen (Closes #48). New procedures/measure-worldgen.txt,
+  its INDEX.txt row, and the /measure-worldgen wrapper in .claude/skills/. The routine
+  existed only as a memory. A worldgen rate ("how often does the homestead win a
+  village slot", "how uneven is the ground under a stable") is a method call, because
+  Structure.generate runs the whole jigsaw placement without a world. The procedure
+  runs the census gametests (worldgen/HomesteadCensus, worldgen/StableSiteCensus, or a
+  new census in their shape) on fixed seeds 1..N. It runs them first on the old code
+  (git stash or a worktree), which is the control, then on the change, and compares the
+  two [census] lines before anything is claimed.
+  Proof: `./gradlew :neoforge-26.1.2:runGameTest` with PHC_CENSUS_SEEDS=3,
+  PHC_CENSUS_VILLAGES=4, PHC_STABLE_SEEDS=3 and PHC_STABLE_SITES=3 set in PowerShell.
+  Both [census] lines reported 3 seeds, so the environment reaches the gametest server.
+  The homestead was in 12 of 12 plains villages. The stable control had 27 sites; 17
+  were kept, worst spread 9. "All 55 required tests passed". check-parity OK.
+  Issue #48: closed by the commit, stays on v0.5.045.
+- Docs commit: wiki/villagers.html#measured and wiki/stables.html#level-ground-measured
+  each point at the procedure. Search index and wiki/text/ rebaked, and check-links OK.
+
+DECIDED
+-------
+- Calls made without the owner: the procedure covers both existing censuses rather
+  than the homestead alone. It treats StableSiteCensus's built-in control (the wrapped
+  vanilla jigsaw) as the control, with no second run. It says a gametest floor is moved
+  only by asking the owner. Recorded in the procedure itself.
+
+FOUND ON THE WAY
+----------------
+- The gametest run config fixes `--tests horsegenetics:*`, so a census always runs the
+  whole gametest suite (about a minute more). That was left alone, and the procedure
+  says so.
+- In PowerShell, a `gh api --jq` filter with escaped double quotes fails to parse; the
+  Bash tool ran it. Not worth a procedure change.
+
+PROCEDURES
+----------
+- Added: procedures/measure-worldgen.txt (/measure-worldgen), plus its keyword memory
+  row.
+- Reviewed against this session, with nothing to change: next-release (its skip rule
+  for bugs waiting on a check worked as written), process-intake and end-session.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No Java changed, so the Gradle build was skipped (end-session step 2). A full
+  :common:test run would check nothing this session touched.
+- The procedure's control runs (step 2: git stash, or a worktree for a committed change)
+  have not been run end to end. Only the environment overrides and the log read were.
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+v0.5.045's milestone now has only bugs that are fixed and waiting on a check. With
+next-release step 6 and the batch on main (body parts slices A-C, tusks slice A, the
+coat-key lag fixes, compat-test, this procedure, and the #31, #150 and #198 fixes),
+the release is offered to the owner after this log is written.
+
+PICK UP FIRST
+-------------
+The owner's answer to the v0.5.045 release offer (procedures/release.txt on a yes),
+then /next-release for v0.5.046, which starts with #155 (crystal growths).
