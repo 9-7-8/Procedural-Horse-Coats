@@ -2072,37 +2072,40 @@ public final class ModGameTests {
      * <b>A top-up pack is stamped and founds as one herd.</b> The pack is placed by
      * the top-up's own code, so this is what its natural spawn from server code
      * does: every member stamped through BreedSpawnHandler, and, once founded, all
-     * of them following one lead.
+     * of them following one lead - one of their own.
+     *
+     * <p>Alone, on ground cleared of horses (issue #119). Founding joins any wild herd
+     * within {@link com.example.horsegenetics.neoforge.server.HerdManager#HERD_RADIUS}
+     * of a pack member, and the tests sit six blocks apart: in the shared batch the pack
+     * was founded into one herd with the other wild tests' horses, a neighbour then aged
+     * its own horse four days, and WildTurnover sent the whole herd on by its lead's
+     * stamp ("moved on after 0.0 days").
      */
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WILD_PACK_FOUNDS_ONE_HERD =
             TEST_FUNCTIONS.register("wild_pack_founds_one_herd", () -> ModGameTests::wildPackFoundsOneHerd);
 
     private static void wildPackFoundsOneHerd(GameTestHelper helper) {
         keepTicking(helper);
-        helper.runAfterDelay(2L, () -> spawnTestPack(helper));
-    }
-
-    private static void spawnTestPack(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        BlockPos origin = helper.absolutePos(BlockPos.ZERO);
-        BlockPos spot = com.example.horsegenetics.neoforge.server.WildTopUp.groundAt(level, origin.getX(), origin.getZ());
-        java.util.List<net.minecraft.world.entity.animal.equine.Horse> pack =
-                com.example.horsegenetics.neoforge.server.WildTopUp.spawnPack(level, spot, 4, level.getRandom());
-        if (pack.size() < 2) {
-            throw new GameTestAssertException(Component.literal(
-                    "the top-up placed " + pack.size() + " of a pack of 4 at " + spot.toShortString()), 0);
-        }
-        for (net.minecraft.world.entity.animal.equine.Horse h : pack) {
-            if (!com.example.horsegenetics.neoforge.server.WildTurnover.stamped(h)) {
-                throw new GameTestAssertException(Component.literal("a top-up horse carries no wild_born stamp"), 0);
-            }
-        }
-        java.util.List<UUID> ids = pack.stream().map(net.minecraft.world.entity.Entity::getUUID).toList();
+        java.util.Map<UUID, net.minecraft.world.entity.animal.equine.Horse> pack = new java.util.LinkedHashMap<>();
+        String[] refused = {null};
         helper.succeedWhen(() -> {
+            if (refused[0] != null) {
+                throw new GameTestAssertException(Component.literal(refused[0]), 0);
+            }
+            if (pack.isEmpty()) {
+                fieldTicks(helper); // issue #70: the members are placed only where entities tick
+                clearHerdReach(helper);
+                refused[0] = spawnTestPack(helper, pack);
+                if (refused[0] != null) {
+                    throw new GameTestAssertException(Component.literal(refused[0]), 0);
+                }
+            }
             java.util.Set<UUID> leads = new java.util.HashSet<>();
-            for (UUID id : ids) {
-                if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse h)) {
-                    throw new GameTestAssertException(Component.literal("a pack member is gone"), 0);
+            for (var member : pack.entrySet()) {
+                if (!(level.getEntity(member.getKey()) instanceof net.minecraft.world.entity.animal.equine.Horse h)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "a pack member is gone: " + goneState(level, member.getValue())), 0);
                 }
                 var care = h.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get());
                 if (!care.inWildHerd()) {
@@ -2114,7 +2117,62 @@ public final class ModGameTests {
                 throw new GameTestAssertException(Component.literal(
                         "one top-up pack founded " + leads.size() + " herds"), 0);
             }
+            UUID lead = leads.iterator().next();
+            if (!pack.containsKey(lead)) {
+                throw new GameTestAssertException(Component.literal(
+                        "the pack joined a herd led by a horse from outside it: " + lead), 0);
+            }
         });
+    }
+
+    /**
+     * Place the pack into {@code pack}; a message if the top-up refused it, else null.
+     * Every member is stamped through BreedSpawnHandler.
+     */
+    private static String spawnTestPack(GameTestHelper helper,
+                                        java.util.Map<UUID, net.minecraft.world.entity.animal.equine.Horse> pack) {
+        ServerLevel level = helper.getLevel();
+        BlockPos origin = helper.absolutePos(BlockPos.ZERO);
+        BlockPos spot = com.example.horsegenetics.neoforge.server.WildTopUp.groundAt(level, origin.getX(), origin.getZ());
+        java.util.List<net.minecraft.world.entity.animal.equine.Horse> placed =
+                com.example.horsegenetics.neoforge.server.WildTopUp.spawnPack(level, spot, 4, level.getRandom());
+        for (net.minecraft.world.entity.animal.equine.Horse h : placed) {
+            pack.put(h.getUUID(), h);
+        }
+        if (placed.size() < 2) {
+            return "the top-up placed " + placed.size() + " of a pack of 4 at " + spot.toShortString();
+        }
+        for (net.minecraft.world.entity.animal.equine.Horse h : placed) {
+            if (!com.example.horsegenetics.neoforge.server.WildTurnover.stamped(h)) {
+                return "a top-up horse carries no wild_born stamp";
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Discard every horse a pack member's founding could reach (issue #119): the herd
+     * radius, plus the pack's own spread and a margin for wander. Leftovers of earlier
+     * batches would otherwise be joined, and their clock taken with them.
+     */
+    private static void clearHerdReach(GameTestHelper helper) {
+        double reach = com.example.horsegenetics.neoforge.server.HerdManager.HERD_RADIUS + 16;
+        for (net.minecraft.world.entity.animal.equine.Horse h : helper.getLevel().getEntitiesOfClass(
+                net.minecraft.world.entity.animal.equine.Horse.class,
+                new net.minecraft.world.phys.AABB(helper.absolutePos(BlockPos.ZERO)).inflate(reach, 16, reach))) {
+            h.discard();
+        }
+    }
+
+    /** Why a horse the level no longer finds is gone, for a failure message (issue #119). */
+    private static String goneState(ServerLevel level, net.minecraft.world.entity.animal.equine.Horse h) {
+        var care = h.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get());
+        return h.getUUID() + " removed " + h.getRemovalReason() + " at " + h.blockPosition().toShortString()
+                + ", chunk ticking " + level.isPositionEntityTicking(h.blockPosition())
+                + ", herd " + care.herd().map(UUID::toString).orElse("none")
+                + ", born " + h.getPersistentData().getLongOr(
+                        com.example.horsegenetics.neoforge.server.WildTurnover.BORN_KEY, -1L)
+                + " (now " + level.getGameTime() + ")";
     }
 
     /** <b>A cell is rolled once a day:</b> the second pass on the same day does nothing and spawns nothing. */
@@ -2265,8 +2323,10 @@ public final class ModGameTests {
         register(event, environment, WILD_TOUCHED_HORSE_GOES_TO_THE_REALM, 200);
         register(event, environment, WILD_TAMED_HORSE_STAYS, 200);
         register(event, environment, WILD_OLD_HORSE_IS_STAMPED, 200);
-        // A pack placed at once, then about twenty ticks for the founder to run.
-        register(event, environment, WILD_PACK_FOUNDS_ONE_HERD, 200);
+        // Alone (issue #119), so no other test's horse is in the herd's reach. The wait
+        // for the field's forced chunks (issue #70: up to 369 ticks), then a pack placed
+        // at once and about twenty ticks for the founder to run.
+        registerAlone(event, WILD_PACK_FOUNDS_ONE_HERD, 1200);
         // Two synchronous passes over one cell.
         register(event, environment, WILD_CELL_ROLLS_ONCE_A_DAY, 100);
     }
