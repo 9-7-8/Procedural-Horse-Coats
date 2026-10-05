@@ -35,7 +35,7 @@ In scope:
 Not in scope (all re-askable):
 - Any tail other than the lion (fish, blade, club, dragon): each is its own later treatment that appends
   an allele and names its rank. The fish tail also needs "hide the hind half", a separate capability
-  (intake/Mythic breeds - gene audit.txt gap 7); not built here.
+  (GitHub issue #136, the mythic breeds gene audit, gap 7); not built here.
 - A tail colour change: TailColorGene stays a separate locus and keeps painting the hair.
 - Two tails on one horse, by any route (Decided: never).
 - Breeds that carry a tail (design-a-breed, a separate task), and the whipping chain (lion treatment piece 3).

@@ -91,19 +91,6 @@ Villagers in every village - implementation treatment.txt         sized 2026-10-
 Built? No.
 
 ------------------------------------------------------------------------------
-Mythic breeds - biome assignments.txt   (A PROPOSAL)                  sized 2026-10-02
-- One unit: biome/spawn_time/commonness for 59 entries          S  a  owner answered 2026-10-02 (wild+egg;
-  plain horses one breed, sun teams one breed); rides with each breed as it ships
-- NEW: a breed "names" list field (format change; the two merged breeds need it)   S-M b  owner-free
-Built? No.
-
-------------------------------------------------------------------------------
-Mythic breeds - gene audit.txt   (AN AUDIT, NOT A SPEC)               sized 2026-10-02
-- One unit: the READY-now mythic breeds (~40, no engineering)   L  c  No: creates breeds; "named
-  individuals versus breeds" undecided; needs biome assignments
-Built? No.
-
-------------------------------------------------------------------------------
 Natural-sheep gene kind - implementation treatment.txt  (LOWEST PRIORITY, owner)  sized 2026-10-02
 - Piece 1: the kind exists                                       L  b  owner-free; the sheep files wait on it
 - Piece 2: kind in GeneFamily, RandomizeMode, editors, wiki      M  b  No: creator offering Open; P1
