@@ -1,0 +1,83 @@
+2026-10-04 19:50 (start, local, approximate) - Fix #40: the stay gametest's aggressive roll
+
+ASKED
+-----
+- "/fix-bug" (no issue named). Took #40 (order_stay_walks_back flakes about 1 run in
+  30), the last session's PICK UP FIRST. It ranks level c (found by tests). #35, #36 and
+  #10 were already fixed and only waiting on a check. #33 and #34 are cosmetic, which
+  ranks last. Fixed and closed.
+
+DONE
+----
+- 33cd06ba "Fix #40: order_stay_walks_back failed whenever its founding roll hunted
+  horses". neoforge-26.1.2/.../gametest/ModGameTests.java (orderStayWalksBack), plus a
+  line on wiki/item-whistles.html's gametest list.
+  Cause: the test's horse is founded with a random genome (a lone Feral Mixed on its
+  first tick, HorseFoundingTickHandler). An aggression pair aimed at horses (Ade/Ade,
+  Aae/Aae, ...) makes it target any horse within AggressionGene.RADIUS (16).
+  HorseMeleeGoal (3) out-ranks OrderStayGoal (4) by design, so the horse was off
+  fighting and stay ticks stopped at about 20, short of the 60 the test needs. The
+  issue's lead (another goal's probe overwriting getTargetPos) was wrong: headedHome was
+  already true by tick 9-10 in every reproduction. aloneOnClearGround clears entities
+  in inflate(reach, 8, reach), only 8 blocks up and down. #39's tally built its hay
+  copies at their own heights, which fits, but the original failure printed no state,
+  so its intruder is inferred.
+  Fix: the test re-founds its horse as the wild type once it is founded (makePlain, as
+  #37 did for order_combat_gate). The failure message now prints the stay ticks,
+  headedHome, the target, the anchor, the distance, the path, the order and the running
+  goals.
+  Proof (temporary copies registered alone, all deleted before the commit):
+  - 15 copies x 8 runs, then 100 copies x 6 runs, random rolls: 0 failures in 734 cells.
+    Every copy passed at tick 61 of 300, reaching its spot by tick 9-10.
+  - 30 no-AI horses placed 11-14 blocks off: 3 failures in 200 cells. 30 floating
+    12 blocks over the field, before the clearing: 1 in 300. Every failure was Ade/Ade
+    with 3:HorseMeleeGoal running.
+  - Deterministic: 100 copies with a forced Aae/Aae roll (refound before the first tick)
+    and one horse 10 blocks overhead. Stock test: 100 of 100 red, with the issue's
+    message. With the fix: 100 of 100 green. This red-before-green is the mutation.
+  - Copies removed: 3 plain runGameTest runs, order_stay_walks_back green in all 3
+    (run 3 was red on order_hunt_picks_a_monster, now #70). :neoforge-26.1.2:build and
+    check-parity green.
+  #40 closed by the commit, with a proof comment.
+
+DECIDED
+-------
+- Made without the owner: the fix is in the test, not the game. An aggressive horse
+  under Stay fighting any horse within 16 blocks is the documented design
+  (OrderStayGoal's javadoc: fighting pre-empts, then the horse walks back). Recorded on
+  #40 and on item-whistles.html's gametest list.
+- Made without the owner: aloneOnClearGround's 8-block vertical reach was left alone. The
+  plain horse makes this test independent of it. The hunt and guard tests re-found
+  their horse as a guardian anyway. Named on #40 and #70.
+
+FOUND ON THE WAY
+----------------
+- #70 filed: order_hunt_picks_a_monster went red twice in 15 runs ("has not picked the
+  husk (target none)"). The first came before any fix code existed, the second on
+  33cd06ba, so it is not this diff. Its message prints no state.
+- The copies' own artefact again: order_guard_holds_its_reach "the horse is not founded
+  yet" once, while 15 copies were registered. Excluded, as fix-bug.txt says.
+- A Python rewrite of ModGameTests.java converted it to LF partway. Converted back to
+  CRLF before the commit; the diff is only the change.
+- The fix commit's rebase conflicted on wiki/search-index.js (upstream d6c061cb and
+  b802e47c). Resolved by rebaking, not by hand.
+
+PROCEDURES
+----------
+- fix-bug.txt step 5: copies that stay green do not prove a flake gone, because they may
+  lack the failing run's condition. Name what differed, add it, then force the
+  suspected cause for a red/green that is not a matter of chance (#40's 100/100). The
+  copy method alone gave 734 green cells here.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run: nothing in common/ changed.
+- Nothing to see in game: only a gametest changed. No Verification-tab anchor added.
+
+RELEASE
+-------
+Not offered: a test-only fix, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#70 (order_hunt_picks_a_monster gametest flake), by procedures/fix-bug.txt.

@@ -104,6 +104,12 @@ STEPS
      match the bug: 30 extra horses swamp the founding budget, and the "not founded" or
      "no record" failures that follow belong to the copies. Delete the copies before
      committing. Example: #39, 5 runs in 8 red before and 320 cells green after.
+     Copies that stay green do not prove the bug gone: they may lack the condition the
+     failing run had. Name what differed (other tests' leftovers, extra horses, a
+     founding roll) and add it to the copies. Once a cause is suspected, force it (set
+     the genome, place the intruder) for a red/green that is not a matter of chance.
+     Example: #40, 734 random cells green; then a forced Aae/Aae roll with a horse
+     overhead failed 100 of 100 before the fix and passed 100 of 100 after.
    - Edit the smallest owning slice, and run the check straight away.
    - Shape:
      - The rule goes in common/, returning a typed result, never chat text.
