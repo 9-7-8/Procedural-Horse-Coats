@@ -450,6 +450,25 @@ wiki/gene-b4galt7.html#performance	science	Speed, jumping and the carrier questi
 wiki/gene-b4galt7.html#real-inheritance	science	Inheritance in a real population
 wiki/gene-b4galt7.html#settled	science	What is settled, and what is not
 wiki/gene-b4galt7.html#what-is-drawn	gameplay	What is drawn, and what is not
+wiki/gene-back-sail-colour.html#base	coding	One short subclass, and a split instead of a fade
+wiki/gene-back-sail-colour.html#bone	gameplay	Bare bone
+wiki/gene-back-sail-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-back-sail-colour.html#colours	gameplay	The colours, and two-tone sails
+wiki/gene-back-sail-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-back-sail-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-back-sail-colour.html#invented	science	Invented
+wiki/gene-back-sail.html#carrot	gameplay	Its gene carrot
+wiki/gene-back-sail.html#colour-mapping	coding	How its colour lands
+wiki/gene-back-sail.html#finding	gameplay	Finding one
+wiki/gene-back-sail.html#health	gameplay	Is it good for the horse?
+wiki/gene-back-sail.html#inheritance	gameplay	Crossing two of them
+wiki/gene-back-sail.html#invented	science	Invented
+wiki/gene-back-sail.html#mesh	coding	The mesh: spines with panels between
+wiki/gene-back-sail.html#numbers	coding	The epigenome, by cost
+wiki/gene-back-sail.html#pattern	coding	Slice B of the body parts
+wiki/gene-back-sail.html#recessive	gameplay	Two copies, either sex
+wiki/gene-back-sail.html#saddle	gameplay	Under a saddle
+wiki/gene-back-sail.html#what-varies	gameplay	What varies
 wiki/gene-banded-socks.html#about	coding	Why it is built this way
 wiki/gene-banded-socks.html#carrot	gameplay	Its gene carrot
 wiki/gene-banded-socks.html#file	coding	The file
@@ -3346,6 +3365,7 @@ wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
 wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
 wiki/model-parts.html#row-scale	coding	A row scales each element on its own
+wiki/model-parts.html#row-span	coding	A row can be drawn shorter: span
 wiki/model-parts.html#runtime-bake	coding	Meshes are baked at run time
 wiki/model-parts.html#saddle-zone	coding	The saddle zone
 wiki/model-parts.html#scaling	coding	What the genetic size locus does to a part
@@ -3354,6 +3374,7 @@ wiki/model-parts.html#shape	coding	The shape of it: two sources, one renderer
 wiki/model-parts.html#sheet	coding	One greyscale sheet, and why its regions are featureless
 wiki/model-parts.html#spine-anchor	coding	The spine anchor
 wiki/model-parts.html#three-tiers	coding	The rule that keeps a herd cheap
+wiki/model-parts.html#translucent-regions	coding	See-through regions are data on the kind
 wiki/model-parts.html#what-you-see	gameplay	What a player sees
 wiki/paint-order.html#exception	coding	The one gene the order does not describe
 wiki/paint-order.html#icons	coding	Where the pictures come from

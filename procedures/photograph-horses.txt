@@ -34,7 +34,12 @@ STEPS
    applies): "|+key=a/b" stamps a pair onto the roll, "|key=a/b" re-rolls until it is
    there. Stamp anything rare - re-rolling for a 1-in-640 founder outran the camera and
    saved an empty stage. Framing.WIDE shows the whole horse, Framing.FOAL a whole foal. The camera frames head and shoulders; a long
-   unicorn horn still leaves the top of the frame. Grep every allele token before using it.
+   unicorn horn still leaves the top of the frame. WIDE looks nearly down the horse's
+   length from the front, so a part along the back (spines, a sail) comes out end-on: give
+   stage() a side camera for one (the back sail session, 2026-10-05, put it 2-4 blocks due
+   north or south of the horse). A still frame against the sky or the white stage cannot
+   show whether a translucent part is see-through; put something with detail behind it.
+   Grep every allele token before using it.
 2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
 3. Launch by launch-game step 5, with the task :neoforge-26.1.2:runClientTestWorld and
    the extra argument -PphotoShoot. Use -WindowStyle Normal: a minimized window renders

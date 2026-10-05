@@ -91,8 +91,17 @@
     from the withers to the croup. They are uniform, graduated or alternating, and as tall, thick,
     sharp and many as the allele says. Mares and stallions grow them alike, foals never. Their
     colour is <a href="gene-dorsal-spine-colour.html">a gene of its own</a>. A saddle or a rider
-    hides the spines under the saddle and leaves the rest. Every part stacks: one horse can wear
-    all five.
+    hides the spines under the saddle and leaves the rest.
+</p>
+
+<p>
+    And a <a href="gene-back-sail.html">back sail</a>: two copies of a rare recessive grow spines
+    along the back with a see-through membrane between them. A tall sail peaks over the middle of
+    the back, a low one runs the whole length, and a scalloped one sags between its spines. Its
+    height, arch, reach, spine count and how see-through the skin is are on the allele. Its
+    colour is <a href="gene-back-sail-colour.html">a gene of its own</a>: two different copies
+    make the membrane one colour and the spines the other. A saddle hides the part under it, as
+    with the spines. Every part stacks: one horse can wear all six.
 </p>
 
 <p>
@@ -503,6 +512,37 @@
     for that kind alone.
 </p>
 
+<h3 id="translucent-regions">See-through regions are data on the kind</h3>
+<p>
+    Shipped with the <a href="gene-back-sail.html">back sail</a>, 2026-10-05. A see-through part
+    is drawn in two passes split by sheet region: the regions
+    <code>PartKind.translucentRegions()</code> names go through <code>entityTranslucent</code> at the
+    part&rsquo;s <code>AttachedPart.opacity</code> (times the horse&rsquo;s fade), and the rest of
+    <code>PartSheet.SOLID</code> is drawn solid. The base colour takes the see-through pass, the tip
+    colour the solid one. A crystal antler names <code>BONE</code>, so its shafts are glass and its
+    points solid, as before. A sail names <code>MEMBRANE</code>, the new sheet region, so the
+    blended pass draws its skin and nothing else. Opacity <code>CRYSTAL_ALPHA</code> is a crystal
+    antler, the copy&rsquo;s number is a sail, and <code>0</code> skips the blended pass entirely: a
+    bone sail is its bare rays. A kind with no see-through region is never
+    <code>translucent()</code>, whatever its opacity says. The renderer no longer names a region,
+    so the crystal growths are one more case in that switch.
+</p>
+<p>
+    A membrane is the first <strong>flat box</strong>: <code>PartNode.width</code> is its extent
+    across <code>x</code>, and is the girth for every square box. <code>PartGeneratorTest</code> holds
+    that only a <code>MEMBRANE</code> box is flat, and no thinner than a quarter unit.
+</p>
+
+<h3 id="row-span">A row can be drawn shorter: span</h3>
+<p>
+    <code>AttachedPart.span</code> is a scale along a row, on the pose stack along its own
+    <code>z</code>, from the anchor. The sail&rsquo;s <code>coverage</code> number drives it, and it is
+    1 for every other part. A shorter row roots its elements nearer the withers, so a different run
+    of them is under the saddle. <code>PartModel.saddleGroups(span)</code> asks
+    <code>SaddleZone.groupsWithin(nodes, from, to, span)</code>, which divides the zone by the span
+    rather than moving the mesh. The baked mask still serves every horse at span 1.
+</p>
+
 <h2 id="bone-versions">Every part with bone in it has a bone version</h2>
 <p>
     <strong>The owner&rsquo;s rule (2026-10-02):</strong> a grown part that realistically has
@@ -523,6 +563,7 @@
 <tr><td><a href="gene-ram-horns.html">Ram&rsquo;s horns</a></td><td><code>shade</code> below 0, the bone end no wild horse rolls; tip <code>n/n</code></td><td>in the horn count group</td></tr>
 <tr><td><a href="gene-dragon-horns.html">Dragon horns</a></td><td><code>Bon/Bon</code> on <a href="gene-dragon-horn-colour.html">dragon horn colour</a></td><td>in the horn count group</td></tr>
 <tr><td><a href="gene-dorsal-spines.html">Dorsal spines</a></td><td><code>Bon/Bon</code> on <a href="gene-dorsal-spine-colour.html">dorsal spine colour</a></td><td>in the horn count group (owner, 2026-10-05)</td></tr>
+<tr><td><a href="gene-back-sail.html">Back sail</a></td><td><code>Bon/Bon</code> on <a href="gene-back-sail-colour.html">back sail colour</a>: bone rays, and the membrane left off (opacity 0)</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td>Wings (not built)</td><td>the bones alone, no membrane</td><td>to ask when the wing part is built</td></tr>
 </tbody>
 </table>
@@ -589,10 +630,9 @@
         slice ships.</li>
     <li><strong>The rest of the body parts.</strong> The dorsal spines shipped as slice A and
         settled the <a href="#spine-anchor">spine anchor</a>, the <a href="#saddle-zone">saddle
-        zone</a> and the <a href="#row-scale">per-element scale</a>. Three slices are left, each
-        with its own colour locus: a <strong>back sail</strong> (rare recessive; spines with a
-        translucent membrane between them, which makes the translucent region data on the kind,
-        <code>PartKind.translucentRegions()</code>, and adds a membrane region to the sheet),
+        zone</a> and the <a href="#row-scale">per-element scale</a>. The back sail shipped as slice
+        B and made <a href="#translucent-regions">see-through regions data on the kind</a>. Two
+        slices are left, each with its own colour locus:
         <strong>shoulder and hip plates</strong> (dominant; new <code>BODY_RIGHT</code> /
         <code>LEFT</code> anchors, two clusters per side), then <strong>crystalline
         growths</strong> along the spine (dominant; seeded clusters through the sail&rsquo;s
@@ -601,7 +641,7 @@
         their shafts through <code>entityTranslucent</code> and their points solid, by region. If
         that reads muddy, opaque emissive crystals are still a good look. A
         <code>parts.translucent</code> setting joins the config block if a translucent pass is
-        measured to cost. Scoped in GitHub issue #151 (sub-issues #153, #154, #155).</li>
+        measured to cost. Scoped in GitHub issue #151 (sub-issues #154, #155).</li>
     <li><strong>Hoof feathering.</strong> Four anchors at once, and the first part that should
         take its colour from the horse&rsquo;s own coat texture rather than a tint &mdash; a
         sampled mane patch comes out the right colour on every horse, the way real feathering
@@ -815,7 +855,10 @@
     or a rider are hidden, so the saddle should never be drawn over one. Body armour has no zone
     and is drawn over whatever stands proud. Check a horned horse and a spined horse with body
     armour and a saddle on. The spine states are listed on
-    <a href="gene-dorsal-spines.html#open-spines-saddle">the spines&rsquo; tab</a>. Treat the
+    <a href="gene-dorsal-spines.html#open-spines-saddle">the spines&rsquo; tab</a>. The back sail
+    is the first large blended part, drawn through <code>entityTranslucent</code> at the same
+    submit order as a crystal antler&rsquo;s shafts. How it sorts against the coat, armour and other
+    horses is <a href="gene-back-sail.html#open-sail-sorting">its own check</a>. Treat the
     first drawn saddle pad as a reason to re-test, not to assume.
 </p>
 

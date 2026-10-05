@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back sail &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> recessive <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Back sail</h1>
+
+<p class="lede">
+    Two copies and the horse grows a sail along its back: a row of spines from the withers to
+    the croup, with a see-through membrane stretched between them. Whether it peaks over the
+    middle of the back, runs low the whole length or sags in scallops, and how tall, arched,
+    long and see-through it is, is written on the allele. Its colour is a gene of its own,
+    <a href="gene-back-sail-colour.html">back sail colour</a>. The one big, rare body part,
+    and the first grown part you can see through.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.back_sail"></div>
+
+<h2 id="recessive">Two copies, either sex</h2>
+
+<p>
+    Recessive: only <code>Sail/Sail</code> grows a sail. <code>Sail/n</code> is a carrier and
+    looks like any other horse. Two carriers bred together give a sailed foal about one time in
+    four, and two sailed horses always do. It is <strong>not</strong> sex-limited. Foals grow
+    none; the sail comes in when the horse grows up, and stays.
+</p>
+
+<h2 id="saddle">Under a saddle</h2>
+
+<p>
+    The sail runs through where a saddle and a rider sit. A bare horse nobody is riding shows
+    all of it. Put a saddle on, or get on, and the spines under the saddle are hidden, each
+    taking the membrane in front of it, so what stays is a sail over the withers and another
+    over the croup. A horse steered bare at the top bond has no saddle to draw, but its rider
+    still hides the middle. A short sail that covers only the front of the back can vanish
+    under a saddle almost entirely.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Rare in the wild: about one horse in four hundred has a sail, and about one in ten carries
+    a hidden copy. The skeleton horses can grow one as bare bone rays with no skin, as one of
+    their horn-like parts.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Form</strong>: <em>tall</em> (highest over the middle of the back, like a
+        <em>Spinosaurus</em>), <em>low</em> (a ridge fin the full length, under half as tall) or
+        <em>scalloped</em> (the tall outline, with the membrane sagging in an arch between each
+        pair of spines).</li>
+    <li><strong>Height</strong>: four classes, <em>low</em> to <em>towering</em>, the tallest near a
+        block high. Low to tall in the wild, and a line bred for height reaches towering and stops.</li>
+    <li><strong>Arch</strong>: how far the ends fall below the peak, from a gentle dome to a sharp crest.</li>
+    <li><strong>Reach</strong>: how far back along the back it runs, from two-thirds of the way to
+        the croup to all of it.</li>
+    <li><strong>Count</strong>: how many spines there are, from the withers back. Over half a row to a
+        full one in the wild.</li>
+    <li><strong>Membrane</strong>: how see-through the skin is, from faint to nearly solid. It never
+        goes fully solid or fully clear.</li>
+</ul>
+
+<p>
+    Everything stacks: a horse can wear a sail, a row of dorsal spines and every head part at once.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no attack, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.back_sail"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.back_sail</dd></div>
+    <div><dt>Class</dt><dd><code>BackSailGene</code></dd></div>
+    <div><dt>Priority</dt><dd>243 (magical band), with its colour locus at 244; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele rec">Sail</span> <span class="allele wild">n</span>, recessive</dd></div>
+    <div><dt>Founders</dt><dd>Hardy&ndash;Weinberg at 0.05 per allele (<code>WILD_SAIL_FREQUENCY</code>), the unicorn&rsquo;s and the dragon horns&rsquo; figure</dd></div>
+    <div><dt>Epigenome</dt><dd><code>length</code> (0&ndash;0.7, clamp 0&ndash;1), <code>count</code> (6 to <code>SailGenerator.MAX_SPINES</code>, never under 1), <code>coverage</code> (0.65&ndash;1, clamp 0.35&ndash;1), <code>curve</code> (0&ndash;1), <code>opacity</code> (0.35&ndash;0.70, clamp <code>MIN_OPACITY</code>&ndash;<code>MAX_OPACITY</code>), <code>form</code> (one of three)</dd></div>
+    <div><dt>Part</dt><dd><code>SAIL</code> at the <code>SPINE</code> anchor; spines on <code>BONE</code> and <code>BONE_TIP</code>, membrane on <code>MEMBRANE</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong>; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">Slice B of the body parts</h2>
+
+<p>
+    The second body part (<a href="model-parts.html#body-parts">model parts</a>), and the one that
+    made translucency data on the kind instead of a constant in the renderer
+    (<a href="model-parts.html#translucent-regions">translucent regions</a>). Like the spines, it adds
+    no layer, render-state field or config key. It is one kind (<code>SAIL</code>, centred),
+    <code>SailGenerator</code> and <code>SailSize</code>, and one line in <code>GrownParts.of</code>
+    dressed by <a href="gene-back-sail-colour.html">its colour locus</a>. The granting locus is in
+    <code>GrownParts.shapes</code>&rsquo;s every-part baseline.
+</p>
+
+<h2 id="mesh">The mesh: spines with panels between</h2>
+
+<p>
+    <code>SailGenerator</code> stands its spines in the dorsal row&rsquo;s places
+    (<code>DorsalSpineGenerator.rootZ</code>), so a sail and a spine row number their elements the
+    same way. Each spine is its own root chain in its own group, upright. Unlike a dorsal spine, a
+    fin ray does not rake, because a panel is built in the frame of one spine and has to meet the
+    next. The membrane between spine <code>i&nbsp;-&nbsp;1</code> and spine <code>i</code> is
+    <code>COLUMNS</code> flat boxes (<code>PartNode.width</code>, thin across the horse) hung off
+    spine <code>i</code>&rsquo;s root, in group <code>i</code>. Spine 0 has none. That one choice is
+    why the count and the saddle zone need nothing new: hiding a spine hides the panel in front of
+    it, so no panel is ever left with nothing at its back edge, and the spine&rsquo;s height scale
+    reaches its panel because the panel is its child. A column stands as tall as a straight edge
+    from tip to tip would be over it, less a sine sag on the scalloped form.
+</p>
+
+<h2 id="numbers">The epigenome, by cost</h2>
+
+<ul>
+    <li><code>length</code>: the class is the mesh&rsquo;s size bucket (four; a taller sail is more
+        boxes per spine), the remainder a per-element height stretch.</li>
+    <li><code>form</code> and <code>curve</code>: baked, <code>SailGenerator.style(form, curve)</code>,
+        three forms by three curve buckets. The curve is the arch of the outline.</li>
+    <li><code>count</code>: shown out of the most baked, front to back, the antler&rsquo;s tine rule.</li>
+    <li><code>coverage</code>: <code>AttachedPart.span</code>, a pose-stack scale along the row
+        (<a href="model-parts.html#row-span">row span</a>). The saddle zone is recomputed for it.</li>
+    <li><code>opacity</code>: <code>AttachedPart.opacity</code>, the membrane pass&rsquo;s alpha, times
+        the horse&rsquo;s own fade.</li>
+</ul>
+
+<p>
+    There is no <code>girth</code>. The per-element scale across a spine would scale its panel&rsquo;s
+    width too, and open or close the gap to the next spine. So <code>backSail</code> passes girth 1,
+    and the spines are as thick as their class bakes them.
+</p>
+
+<h2 id="colour-mapping">How its colour lands</h2>
+
+<p>
+    The colour locus&rsquo;s base colour is the membrane and its tip colour the spines: the
+    see-through region takes the base, as a crystal antler&rsquo;s shafts do, and the solid regions
+    the tip. The bone version is <code>Bon/Bon</code> on that locus. <code>GrownParts.of</code> then sets
+    the opacity to 0, and the layer skips the membrane pass, which leaves bare bone rays. One bone
+    copy is only a colour and keeps its membrane
+    (<code>AbstractPartColourGene.boneOnly</code>).
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No horse has a sail. The look borrows from the animals that do: the skin-covered neural spines
+    of <em>Dimetrodon</em>, <em>Edaphosaurus</em> and <em>Spinosaurus</em>, whose purpose is still
+    argued over (heat exchange, display, or a hump), and the webbed dorsal fin of a sailfish. This
+    is fantasy and makes no claim about any real gene. It is recessive and rare on purpose (owner,
+    2026-10-02), so that the sail is the body part you have to breed for. The dorsal spines beside
+    it are dominant and show on every carrier.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The sail has only been photographed standing still: whether its membrane really reads as see-through and sorts right against the coat, armour and other horses, how it sits in motion, the saddle zone at a short reach, and whether its comb-of-rods look is the one wanted are all still open.</p>
+</div>
+
+<h3 id="open-sail-sorting">The membrane against everything else that blends</h3>
+<p>
+    The sail is the first large flat translucent part. It is drawn through
+    <code>entityTranslucent</code> at submit order 1, like a crystal antler&rsquo;s shafts. No-one
+    has seen how that sorts against a fading horse&rsquo;s coat passes, horse armour, a second
+    sailed horse behind the first, water and particles. Look from the side and from behind
+    (through both faces of the membrane) and from above a ridden horse while the rider looks
+    down. Each panel should show the horse and the world through it, with no flicker, no panel
+    vanishing behind another, and no black or white fringe. If a large membrane sorts wrongly,
+    the treatment&rsquo;s fallback is an opaque &ldquo;solid fin&rdquo; style. Report it to the
+    owner rather than ship it.
+</p>
+<p>
+    <strong>What a photo shoot showed (2026-10-05, <code>-PphotoShoot</code>, still frames
+    only).</strong> In 20 shots of 9 sails, from all four sides, close up and from above: no
+    flicker, no missing panel and no fringe; the panels meet their spines; a two-tone
+    <code>Red/Blu</code> sail is blue spines with red between them; the bone sail is bare rays.
+    Two things it did <em>not</em> settle. First, against the dark horizon and the white stage a
+    membrane at its wild opacity was hard to tell from a solid one, so &ldquo;see-through&rdquo;
+    is still unobserved: look at one in front of something with detail (trees, another horse).
+    Second, at a horse&rsquo;s size the sail reads as a <strong>comb of rods</strong> rather than a
+    smooth sheet, because the tapered spines and the stepped membrane columns both show. Whether
+    that is the look wanted, or the spines should be thinner and the membrane reach their tips,
+    is the owner&rsquo;s call once she has seen it.
+</p>
+
+<h3 id="open-sail-placement">Where the sail sits</h3>
+<p>
+    Each form at low and towering height, from the side, while the horse walks, grazes and rears.
+    The first spine should stand just behind the mane, the membrane should meet both spines of
+    every panel with no gap at the back, and the bottom edge should sit on the back without
+    sinking in. A scalloped panel should sag visibly between its spines.
+</p>
+
+<h3 id="open-sail-saddle">The saddle zone and a short reach</h3>
+<p>
+    The four states the dorsal spines need (<a href="gene-dorsal-spines.html#open-spines-saddle">bare,
+    saddled, ridden, phantom</a>), plus a sail at low <code>coverage</code>. Its spines root nearer
+    the withers and more of it should go under the saddle, recomputed for the drawn positions. No
+    membrane should show through or above the saddle, and none should be left hanging free at the
+    edge of the zone.
+</p>
+
+<h3 id="open-sail-bone">The bone sail</h3>
+<p>
+    A <code>Sail/Sail</code> horse with <code>back_sail_colour Bon/Bon</code>, and a skeleton-breed
+    founder that rolled a sail. Each should be bare ivory rays with no membrane at all, not even a
+    faint one.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

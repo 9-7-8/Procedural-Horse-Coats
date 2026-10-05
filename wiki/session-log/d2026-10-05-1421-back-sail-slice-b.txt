@@ -1,0 +1,125 @@
+2026-10-05 14:21 (end, local) - #153 back sail: the see-through body part, translucent regions as data
+
+ASKED
+-----
+- "/next-release" (work on the next release). The next release is v0.5.045, the lowest
+  open milestone above the newest tag v0.5.044, whose own milestone is closed. Every
+  open issue already had a milestone. The milestone's four open bugs were each fixed and
+  waiting on a named check, so they were skipped: #10 and #36 on an in-game look, #35
+  and #31 on the live server's log. #205, #206 and #152 were closed. That made the first
+  unit #153 (body parts slice B, the back sail), built by process-intake, Tier 2 (M,
+  owner-free, its dependency #152 shipped). It is closed.
+- Owner answer, asked with the question tool when UndeadBreedsTest's tripwire fired:
+  "Yes, bare rays (Recommended)" - the skeleton breeds grow the sail in bone.
+
+DONE
+----
+- 8420659b (code): the back sail gene, horsegenetics.back_sail (recessive, Sail,
+  priority 243, Hardy-Weinberg at 0.05 per allele), and its colour locus,
+  horsegenetics.back_sail_colour (244, an AbstractPartColourGene subclass). Also:
+  - PartKind.SAIL on the SPINE anchor, SailGenerator (11 upright fin-ray spines in the
+    dorsal row's places, DorsalSpineGenerator.rootZ, plus 3 flat membrane columns in
+    front of each spine but the first, hung off that spine's root in its group) and
+    SailSize (4 classes, 3 to 14 units). 3 forms (tall, low, scalloped) x 3 curve
+    buckets. Each panel belonging to the spine behind it is why the count and the
+    saddle zone needed nothing new.
+  - PartKind.translucentRegions(): the see-through region set is data on the kind
+    (antlers BONE, sail MEMBRANE). AttachedPartLayer no longer names PartSheet.BONE.
+  - AttachedPart: the crystal boolean is now `opacity` (CRYSTAL_ALPHA for a crystal
+    antler, the copy's number for a membrane, 0 = skip the blended pass), and a `span`
+    (a scale along a row, the sail's coverage). crystalline(), translucent() keep their
+    meaning; seeThrough(alpha) is new.
+  - PartNode.width: the first flat box. PartMeshes builds x from it.
+  - PartSheet.MEMBRANE (region 8), painted by bake-part-sheet.mjs; part_sheet.png rebaked.
+  - SaddleZone.groupsWithin(nodes, from, to, span) and PartModel.saddleGroups(span): a
+    shorter row is zoned where it is drawn.
+  - AbstractPartColourGene.boneOnly(pair) and an optional Words.split sentence (the
+    sail's two-tone outcome says "the membrane is one, the base, and the spines the
+    other", not "its tip"). GrownParts.of dresses the sail: base = membrane, tip =
+    spines, Bon/Bon = opacity 0 (bare rays).
+  - Both skeleton breeds: back_sail Sail/Sail in the horns count group, back_sail_colour
+    Bon/Bon (owner, this session).
+  Proof: BackSailGeneTest (new, 10 tests), SaddleZoneTest (+ the span case),
+  PartGeneratorTest (+ only a MEMBRANE box is flat, never under 0.25), UndeadBreedsTest
+  (the sixth horn-like part, the bare sail), and green by name: DorsalSpinesGeneTest,
+  AntlersGeneTest, GrownParts*, DragonHornsGeneTest, UnicornHornGeneTest,
+  RamHornsGeneTest, HornColour*, BreedFilesTest, BreedFounderTest, BreedClimateRuleTest,
+  *BreedsTest, EditorRules*, GeneFamily*, GeneDescriptionCoverageTest,
+  CommonPortabilityTest, ResearchTopicTest, GenotypeTest, HornGenesTest, DesignerApi*,
+  *Census*, CoatBakeGoldenTest, CoatPipelineGoldenTest. Two mutants each turned a test
+  red: the bone version keeping its membrane (BackSailGeneTest) and SaddleZone ignoring
+  the span (SaddleZoneTest). The coat-bake golden gained 15 baseline-hash rows only; the
+  coat-pipeline golden changed only by the two new loci in its keys (stripped, every line
+  matches). :neoforge-26.1.2:build green, check-parity OK, designer boots OK.
+- Seen in game, still frames only: three photo-shoot runs (-PphotoShoot, 20 shots of 9
+  sails, side, behind, close and above). No flicker, missing panel or fringe; panels meet
+  their spines; Red/Blu is blue spines with red between; the bone sail is bare rays; a
+  saddled sail keeps a tuft at the withers and one behind the cantle. The shot list edit
+  was reverted (DebugPhotoShoot.java is unchanged in git).
+- Docs commit (this one): new pages gene-back-sail.html and gene-back-sail-colour.html,
+  each with a Verification tab. model-parts.html gains a Gameplay paragraph, Coding
+  sections #translucent-regions and #row-span, a bone-versions row, its Roadmap down to
+  two body slices, and its draw-order check. undead-horses.html and decisions.html
+  updated. Rebaked: breeds.json, web.wasm, gene census, gene wiki spans, timeline,
+  unverified-genes.txt, verification/roadmap indexes, search index, agent text. Issue
+  #153 closes with this push.
+
+DECIDED
+-------
+- (owner) The skeleton breeds carry the sail in their horns count group, as bare rays
+  (back_sail_colour Bon/Bon). model-parts.html#bone-versions, decisions.html.
+- (without the owner) Each membrane panel belongs to the spine BEHIND it, so a hidden or
+  uncounted spine takes its panel; spine 0 has none. gene-back-sail.html#mesh.
+- (without the owner) Fin rays stand upright (no rake), so a panel built in one spine's
+  frame meets the next. gene-back-sail.html#mesh.
+- (without the owner) No girth number: a per-element girth scale would also scale the
+  panel's width and open the gap. gene-back-sail.html#numbers.
+- (without the owner) Coverage is a pose-stack span along the row, and the saddle mask is
+  recomputed for it. model-parts.html#row-span.
+- (without the owner) Curvature is bucketed into the mesh as the arch of the outline;
+  opacity is clamped 0.20..0.85 (never solid, never invisible); first values for every
+  range, for the dev yard to judge.
+- (treatment, Recommended) Base colour = membrane, tip = spines; founders at the
+  unicorn's allele frequency (Hardy-Weinberg, so carriers exist - the dragon horns' and
+  unicorn's precedent, not the particle genes' expressing-only rule).
+
+FOUND ON THE WAY
+----------------
+- The photo shoot's Framing.WIDE looks nearly down the horse's length from the front,
+  so a back part comes out end-on. A temporary orbit camera fixed it for this run;
+  photograph-horses.txt now says so.
+- At a horse's size the sail reads as a comb of rods rather than a smooth sheet (the
+  tapered spines and stepped membrane columns both show). Not a bug; an owner look-call,
+  written on gene-back-sail.html#open-sail-sorting.
+- Mistakes put right: a Node patch script carried a stray junk line and threw before
+  writing anything (rerun clean); the first golden diff looked total because the working
+  copies are CRLF (diff --strip-trailing-cr showed the truth).
+- No python on this machine; scripted edits used node.
+
+PROCEDURES
+----------
+- add-a-gene.txt step 6.1: a part with a see-through region answers translucentRegions()
+  and sets AttachedPart.opacity; a soft region's bone version leaves it off via boneOnly.
+- photograph-horses.txt step 1: WIDE is end-on for a back part, give stage() a side
+  camera; a still frame against the sky cannot show translucency.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other gene's
+  registry-wide walks against the two new entries, and the gametests (none touched).
+- No server boot: no startup or config change.
+- New Verification anchors: gene-back-sail.html#open-sail-sorting (whether the membrane
+  is really see-through and how it sorts; the comb look), #open-sail-placement,
+  #open-sail-saddle (short reach), #open-sail-bone; gene-back-sail-colour.html
+  #open-sail-colour-split. model-parts.html#open-parts-draw-order points at the sorting check.
+
+RELEASE
+-------
+Not offered. v0.5.045 still has open units (#154, #160, #47, #48), and next-release
+offers a release only when its milestone is finished.
+
+PICK UP FIRST
+-------------
+/next-release: the next unit on v0.5.045 is #154 (body parts slice C, shoulder and hip
+plates), through process-intake. Or show the owner the sail photos first; the comb look
+may change the sail before the crystals (#155) reuse its translucent path.
