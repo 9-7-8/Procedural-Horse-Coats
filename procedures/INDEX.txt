@@ -62,6 +62,9 @@ Command                  Runs    Say (any of)                         What it le
 /compat-test             local   "compat test", "test the compat      three boots with the fake mod
                                  layer", "boot with the fake mod"     (generate / current / wipe), run/
                                                                       restored, the result written up
+/measure-worldgen        local   "measure worldgen", "how often does  a control and a change measured on
+                                 it generate", "census the villages"  the same seeds, written up on the
+                                                                      structure's page
 /review-server-logs      local   "check the server logs", "review     new export folders reviewed once;
                                  the PCH logs"                        bugs -> issues, wants -> ideas
 /add-a-wiki-page         either  "add a wiki page", "new page"        one page in pages.js, true tabs

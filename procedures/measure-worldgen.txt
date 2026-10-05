@@ -1,0 +1,140 @@
+PROCEDURE  : Measure worldgen
+COMMAND    : /measure-worldgen
+SAY        : "measure worldgen", "how often does it generate", "did the worldgen change
+             help", "census the villages", "census the stables"
+RUNS       : local (it runs the headless gametest server)
+TAKES      : a question of the form "how often does the generator do X", or a change to a
+             structure, a pool or a placement rule that claims to have helped
+LEAVES     : the same seeds measured before and after (the control and the change), the
+             two [census] lines side by side, written up on the structure's own page
+==============================================================================
+
+WHEN TO USE
+-----------
+Worldgen questions keep getting written down as "nothing automated can answer this, it
+needs a fresh world and a walk". That is usually wrong. `Structure.generate(...)` IS
+the generator: it runs the whole jigsaw placement, every bounding-box test included,
+and returns the finished piece list without touching a world. So "how often does the
+homestead win its village slot" or "how uneven is the ground under a stable" is a
+method call over as many seeds as you like, in about a minute.
+Use this before claiming a worldgen change helped, and whenever a Verification tab says
+a generation rate is unknown. The rule is: measure a CONTROL on the same seeds first.
+An absolute number alone reads as a triumph or a disaster; only the before-and-after
+says what the change did (the homestead was feared rare; measured, it was in 93.2% of
+plains villages before the change and 98.9% after).
+Not for: whether a structure LOOKS right where it landed, whether its villagers claim
+their posts, or whether the terrain around it is pleasant. The placement cannot see
+those; they are an in-game look (hand-over-a-test). Not for worldgen cost per tick
+either (stress-test).
+
+BEFORE YOU START
+----------------
+1. Read the two census classes in neoforge-26.1.2/.../neoforge/worldgen/:
+   - HomesteadCensus: plains villages, and whether the cowboy's barn won a slot, with
+     the street connector it used. Gametest `homestead_still_generates`. Size from
+     PHC_CENSUS_SEEDS and PHC_CENSUS_VILLAGES.
+   - StableSiteCensus: the generated stables, the ground spread under each. It carries
+     its own control (the wrapped vanilla jigsaw, LevelJigsawStructure.jigsaw()) in the
+     same run. Gametest `stables_stand_on_level_ground`. Size from PHC_STABLE_SEEDS and
+     PHC_STABLE_SITES.
+   Each gametest's javadoc in gametest/ModGameTests says what its floor guards against.
+   The defaults are small so the suite stays quick, not so the number means anything.
+2. Read the structure's own page for its last measurement and the seeds it used:
+   wiki/villagers.html#measured (the homestead) and
+   wiki/stables.html#level-ground-measured (the stables).
+   Re-use the same seed count, so the new line can be compared with the old one.
+3. `pwsh -File tools/stop-dev-java.ps1 -WhatIf`. The gametest server runs in its own
+   folder (run-gametest/), so the owner's client does not block it. A build does,
+   though: never rebuild under her running game (launch-game).
+
+STEPS
+-----
+1. Decide what is being measured.
+   - A question one census already answers -> use it, go to step 2.
+   - A structure or question with no census -> write one first, in worldgen/, copied
+     from the nearer of the two. Keep their shape:
+       a. Seeds are 1..N, never random, so two runs are comparable.
+       b. Build the generator per seed (NoiseBasedChunkGenerator, RandomState,
+          ChunkGeneratorStructureState.createForNormal), ask the placement for the
+          structure's chunks, call structure.generate(...) on each, skip !isValid().
+       c. Identify your piece by identity (the pool's element objects), not by
+          matching template-id strings.
+       d. Return a record with a line() that prints one diffable line.
+     Then add its gametest in ModGameTests: a LOOSE floor (a guard against falling off
+     a cliff, never a pin on today's rate), fromEnv(...) overrides for its size, and a
+     `[census]` log line. A new gametest is two edits (test-tiers, tier 2): the
+     TEST_FUNCTIONS.register line and the register(event, ...) line. Count the "All N
+     required tests passed" before and after.
+
+2. Measure the control: the code BEFORE the change, at the size you chose.
+   - For StableSiteCensus the control is already in the same line (the "control ...
+     stable(s)" half). One run gives both; skip to step 4 unless the change is to the
+     control itself.
+   - Otherwise check out the old state. Your own uncommitted change: `git stash`. A
+     committed change: `git worktree add` the parent commit in the scratchpad and run
+     there, so your tree is not disturbed.
+   Run it, in PowerShell, with the size in the environment and the output in a file:
+     $env:PHC_CENSUS_SEEDS='40'; $env:PHC_CENSUS_VILLAGES='8'
+     ./gradlew :neoforge-26.1.2:runGameTest *> "$env:TEMP\phc-census-control.log"
+   Never pipe gradle into tail or Select-Object (test-tiers): it masks the exit code.
+   The whole gametest suite runs; that is about a minute plus the census.
+
+3. Read the control line from that tree's run-gametest/logs/latest.log:
+     Select-String -Pattern '\[census\]' `
+       -Path neoforge-26.1.2/run-gametest/logs/latest.log
+   Check the seed count in the line is the one you asked for. If it shows the default,
+   the environment never reached the server and the run measured nothing you wanted.
+   Copy the line out now: the next run overwrites that log.
+
+4. Measure the change: restore it (`git stash pop`, or back to your own tree), and run
+   step 2's command again with THE SAME environment values and a new output file. Read
+   its line the same way.
+
+5. Compare the two lines, field by field. Name what moved and by how much. Also name
+   what did not move but should have: for the homestead that is the connector split,
+   since a connector that never wins bought nothing. A difference of a few villages in a
+   few hundred is noise unless it holds at twice the seeds; double them and run both
+   again before claiming it.
+
+6. Write it up on the structure's own page, in the section that holds the last
+   measurement (villagers.html#measured, stables.html#level-ground-measured, or the
+   new structure's page): the date, the seeds and sample size, the control line, the
+   change line, and what it means in one sentence. If a Verification-tab check asked this question, close it
+   (close-a-check). A regression is a GitHub issue (report-bug's shape). If the floor
+   in the gametest is now far from the measured rate, say so, but move it only by
+   asking: a floor is the owner's tolerance, not a fitted number.
+   Then rebake the wiki text (rebake).
+
+7. Clean up: `git worktree remove` anything step 2 added, and check `git stash list` is
+   back to what it was.
+
+DONE WHEN
+---------
+- A control line and a change line exist for the same seeds and the same sample size,
+  each showing the seed count that was asked for.
+- The gametest suite passed in the change run (or its failure is an issue).
+- The result is on the structure's own page with its date and sample size.
+Report to the owner: the two lines, the difference, and whether it held at double the
+seeds if it was close.
+
+NEVER
+-----
+- Never claim a worldgen change helped from one number. Without the control on the same
+  seeds, the premise may be false (the homestead was never rare).
+- Never use random seeds. Two runs on different seeds cannot be compared.
+- Never pin a gametest to the measured rate. Pinned worldgen numbers get edited, not
+  read, the first time somebody moves a wall; keep the floor loose.
+- Never write "needs a fresh world and a walk" for a rate before checking whether
+  Structure.generate answers it. The walk is only for what the placement cannot see.
+- Never trust a census line whose seed count is the default when you set a bigger one.
+  The environment did not arrive.
+- Never run the control by editing your change out by hand. Use stash or a worktree, so
+  the control is exactly the old code.
+
+SEE ALSO
+--------
+test-tiers (tier 2, the gametest notes); launch-game (never build under her client);
+close-a-check; report-bug; rebake; stress-test (cost, not frequency);
+wiki/villagers.html#measured; wiki/stables.html#level-ground-measured;
+worldgen/BarnPoolInjector (why the homestead has three connectors);
+worldgen/LevelJigsawStructure (the stable's control).
