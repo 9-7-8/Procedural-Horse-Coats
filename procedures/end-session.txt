@@ -62,7 +62,7 @@ STEPS
       - Was something done this session that is likely to be done again the same way,
         and has no procedure? -> write one by procedures/FORMAT.txt ("ADDING ONE": the
         file, its INDEX.txt row, the .claude/skills wrapper, the keyword memory). If it
-        is too big to write now, file a GitHub issue labelled enhancement, procedure and
+        is too big to write now, file a GitHub issue labelled procedure and
         idea (#46 to #50 are the model), with a size: label.
       - Does a change made this session (a new file, a renamed tool, a new rule) make
         another procedure's steps untrue? -> fix it. Grep procedures/ for the name.

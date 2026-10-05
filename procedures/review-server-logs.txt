@@ -73,7 +73,7 @@ STEPS
    d. Player wants and friction: 02-player-chat.txt. Players describe wants and
       annoyances in passing, and these are filed nowhere else. Sort each real one
       (owner's rule):
-      - A NEW FEATURE -> a GitHub issue labelled enhancement, idea and from-server (#42,
+      - A NEW FEATURE -> a GitHub issue labelled feature (or enhancement, if it improves something already there), idea and from-server (#42,
         #69 are the model): the ask in a sentence, the Release/Open/Depends on/Owning
         page/Sized/Source lines, then your paraphrase of what the player
         wanted (never their words or name). Search open

@@ -11,7 +11,7 @@ WHEN TO USE
 -----------
 Use this to take one bug on deliberately, from anyone: a tester, the test yard, or the
 owner. Every bug is a GitHub issue (CLAUDE.md hard rule 9). Bugs are never feature issues
-(enhancement, idea, scoped), which hold new features only, and never on a Verification tab, which holds checks on
+(feature, enhancement, idea, scoped), which hold features and improvements only, and never on a Verification tab, which holds checks on
 things nobody has seen yet. The labels:
   bug            - every defect;
   tuning         - a balance or tuning request; this procedure takes those too;

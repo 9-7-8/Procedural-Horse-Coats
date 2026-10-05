@@ -47,7 +47,7 @@ STEPS
 
 2. Make sure it is a bug.
    - A new feature -> it is not a bug. Search the open `idea` and `scoped` issues for it:
-     comment on a match, otherwise offer to file an `idea` issue (enhancement + idea,
+     comment on a match, otherwise offer to file an `idea` issue (feature or enhancement + idea,
      from-server if a player raised it; #42 is the model) and tell them it becomes a
      scoped feature through write-intake-document. Then stop.
    - A tuning request or design disagreement ("too rare", "too hard", "I don't like
@@ -58,7 +58,7 @@ STEPS
 
 3. Check it is not already reported, or already fixed.
    - Search open AND closed issues for the symptom, the item or gene, and the class.
-     Include enhancement issues: a "bug" can be a feature that was never built.
+     Include feature and enhancement issues: a "bug" can be a feature that was never built.
      - An open match -> add a comment there with the new evidence, the version and the
        reporter. Do not open a duplicate.
      - A closed match -> read how it was closed. If the reporter's version is newer

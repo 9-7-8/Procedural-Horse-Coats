@@ -30,7 +30,7 @@ If no, it goes in the wiki and gets a pointer here at most. In particular:
 | A gap, unchecked assumption, or open follow-up | the owning page's **Verification tab** |
 | Something to go look at in-game | a **Verification tab on that thing's own page** |
 | Work not started yet | a **Roadmap tab on that thing's own page** |
-| A feature wanted, in the build queue | a **GitHub issue** (`enhancement`, or `port` for a port; `idea` until scoped, then `scoped`) |
+| A feature wanted, in the build queue | a **GitHub issue** (`feature` for something genuinely new, `enhancement` for an improvement to something already in the game, or `port` for a port; `idea` until scoped, then `scoped`) |
 | A design call - made, or still open | `wiki/decisions.html` |
 | An API quirk of this SDK | `wiki/api-notes.html` |
 | **A derived number** (gene counts, catalogue sizes, test counts) | the code that computes it |
@@ -123,7 +123,7 @@ file under `wiki/session-log/` from its index; those files are not baked.
 8. **Flag genuinely unverified API usage in a comment**, the way the existing
    code does. More useful to the next session than silent confidence.
 9. **Every open check is written on the page for the thing, never on `wiki/verification.html`.**
-   (Owner, absolute.) **Bugs are GitHub issues instead** (`bug`, or `tuning`), and so are features and ideas (`enhancement`). A check goes on
+   (Owner, absolute.) **Bugs are GitHub issues instead** (`bug`, or `tuning`), and so are features (`feature`), improvements (`enhancement`) and ideas. A check goes on
    the page's **Verification tab**, a plan on its **Roadmap tab**, each opening with one
    summary sentence. `verification.html` and `roadmap.html` are generated from those tabs
    and never hand-written; `known-gaps.html` only redirects old anchors. A plan whose

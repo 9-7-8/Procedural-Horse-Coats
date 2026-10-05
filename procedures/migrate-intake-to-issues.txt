@@ -54,7 +54,8 @@ Body, in this order:
   then the treatment text, verbatim
 End with the attribution footer.
 Labels:
-  existing   enhancement (means feature), needs-owner, wontfix
+  existing   enhancement (an improvement to something already in the game; since 2026-10-05 a genuinely new
+             thing carries `feature` instead), needs-owner, wontfix
   new        port (a port of the mod to another loader, Minecraft version or platform;
              it replaces enhancement on a port, which is not a feature),
              idea (unscoped), scoped (a treatment written, buildable), tracking,

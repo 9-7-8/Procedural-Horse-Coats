@@ -1,0 +1,31 @@
+2026-10-05 17:00 - A `feature` label, separate from `enhancement` (time is the end of the session)
+
+ASKED
+- "Can we also change it so genuinely new features have a different label from tuning/enhancements to existing features?"
+
+DONE
+- Created the label `feature` (a genuinely new gene, breed, item, block, system, screen or part) and redefined `enhancement` (an improvement to something already in the game); `tuning`
+  stays for numbers and balance. Re-labelled the 117 issues that carried `enhancement`: 91 became `feature`, 12 stayed `enhancement` (#42, #44, #45, #66, #74, #78, #139, #140, #172, #173, #192 and the
+  villager parent #171), 9 lost it (the five `procedure` ones and the rename and four-jar issues, which keep their own labels), and 5 became `documentation` (#76, #77 and the Roadmap-only plan
+  pages #113, #128, #134). Tracking parents took `feature` unless all their pieces are enhancements.
+- Updated CLAUDE.md (the queue row and hard rule 9), the procedures that name the label (end-session, fix-bug, migrate-intake-to-issues, report-bug, review-server-logs, write-intake-document)
+  and the "Start here" issue #195. process-intake and whats-next select by `scoped`, so they needed no change.
+
+DECIDED
+- Recommended, not asked: the line between the two. The 12 enhancements are my reading (for example: a hitch for two or four horses extends the existing carts; the villager spawning issues extend
+  the existing villagers; the worn side finishes the existing parts). The owner may flip any of them with one label edit.
+
+FOUND ON THE WAY
+- GitHub's default `enhancement` label said "New feature or request"; its description now says otherwise.
+
+PROCEDURES
+Edited as listed above (label wording only).
+
+NOT RUN / NOT CHECKED
+- No build, no game; no wiki page changed beyond the session log.
+
+RELEASE
+Not offered (no player-facing change).
+
+PICK UP FIRST
+Unchanged: /process-intake on milestone v0.5.045 (see issue 196).
