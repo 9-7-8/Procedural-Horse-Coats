@@ -1,0 +1,69 @@
+2026-10-04 21:40 (start, approximate) - Fix #34: the H browser shows the barn name
+
+ASKED
+-----
+- "/fix-bug #34" - fix issue #34, a horse's registered name shown instead of its barn
+  name in the H browser (My horses, breeding preview, realm roster). Done; closed.
+
+DONE
+----
+- 59aa9480 "Fix #34: the H browser showed a horse's registered name over its barn name".
+  Cause: HorseListing (common/.../horse/HorseListing.java), the row type every H-browser
+  table, picker and heading draws, had its own displayName() returning "first last" and
+  ignoring its barnName field, while HorseRecord.displayName() applies the documented
+  rule (barn name if set). So My horses, the breeding preview's pickers and its
+  "dam x sire" heading, the Realm roster (ClientRealmRoster builds listings) and the
+  stasis bank (StasisBrowseRow reads listing.displayName()) used the registered name,
+  and the information screen and family tree used the barn name.
+  Fix: HorseListing.displayName() applies the record's rule; new registeredName() is the
+  generated name alone. HorseQuery: name: and name LIKE match either name, so a horse is
+  still found by its registered name; barn: is unchanged; the NAME sort follows the shown
+  name. HorseBrowserScreen's footer heading now writes registeredName() then ("barn"),
+  the one place both appear.
+  Proof: HorseQueryTest.aBarnNameIsTheNameShownAndTheRegisteredNameStillFindsIt - red on
+  the old displayName() (assertion at line 85), green after; red again with the name:
+  half reverted on purpose (mutation), restored. HorseQueryTest, QueryExprTest,
+  StasisBrowseTest, HorseRecordTest green. :neoforge-26.1.2:build green, check-parity OK,
+  check-designer-boots OK.
+  Issue #34: closed by the commit, proof comment posted.
+- Docs: wiki/breeding.html coding tab "E. Barn name" (now id="barn-name") gained the #34
+  paragraph; wiki/horse-browser.html coding tab gained #barn-name-shown.
+
+DECIDED
+-------
+- The footer keeps both names (registered first, then the barn name in quotes), as the
+  issue left open. Made without the owner; recorded on wiki/horse-browser.html#barn-name-shown.
+- name: and name LIKE match either name; NAME sort follows the shown name. Made without
+  the owner, as the issue suggested; recorded on wiki/breeding.html#barn-name.
+
+FOUND ON THE WAY
+----------------
+- wiki/session-log/ already holds d2026-10-05-0314-intake-stays-files.txt, dated after
+  this session's local date (2026-10-04 21:57 at writing). Not this session's file; left
+  alone. Probably a cloud routine writing in another time zone.
+- No new issues filed.
+
+PROCEDURES
+----------
+- procedures/rebake.txt row b: a common/ class nothing in web/src reaches cannot move the
+  wasm, so skip :web:bakeDesignerAssets (step 5 would revert its output) but still run
+  check-designer-boots. This session hit exactly that (HorseListing / HorseQuery are not
+  reachable from web/).
+- fix-bug and end-session needed no change.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run; it would additionally check every other test
+  class, none of which reads HorseListing.displayName() except those run above.
+- Not seen in game: the H browser's rows, pickers, heading, realm roster and the stasis
+  bank showing a barn name. The rule is unit-tested; the screens just draw the string.
+  No Verification-tab anchor added.
+- :web:bakeDesignerAssets skipped (unreachable classes; see PROCEDURES).
+
+RELEASE
+-------
+Not offered: one fix is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+The next open bug by fix-bug's ranking - run /fix-bug.

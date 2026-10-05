@@ -70,6 +70,34 @@ class HorseQueryTest {
         assertEquals(List.of("Amber"), names(HorseQuery.filter(stable(), "chestnut")));
     }
 
+    /**
+     * #34: a barn name is what the horse is called everywhere it is shown - the
+     * table, the breeding pickers and the realm roster all read
+     * {@link HorseListing#displayName()} - so the table sorts by it too; but
+     * the registered name is still the horse's, and {@code name:} finds it by
+     * either.
+     */
+    @Test
+    void aBarnNameIsTheNameShownAndTheRegisteredNameStillFindsIt() {
+        HorseListing renamed = HorseListing.of(ID, "Amber", "Testcase", "Zephyr", "Arabian", 3,
+                chestnut(), true, true, 40, false, true, "overworld", "owner", "", true, false);
+        HorseListing plain = row("Boyd", "Shire", bay(), true, 1, 90);
+        assertEquals("Zephyr", renamed.displayName());
+        assertEquals("Amber Testcase", renamed.registeredName());
+        assertEquals("Boyd Testcase", plain.displayName());
+
+        List<HorseListing> rows = new ArrayList<>(List.of(renamed, plain));
+        rows.sort(HorseQuery.comparator(HorseQuery.Sort.NAME, false));
+        assertEquals(List.of("Boyd", "Amber"), names(rows));
+
+        assertEquals(List.of("Amber"), names(HorseQuery.filter(rows, "name:zephyr")));
+        assertEquals(List.of("Amber"), names(HorseQuery.filter(rows, "name:amber")));
+        assertEquals(List.of("Amber"), names(HorseQuery.filter(rows, "barn:zephyr")));
+        assertEquals(List.of(), names(HorseQuery.filter(rows, "barn:amber")));
+        assertEquals(List.of("Amber"), names(HorseQuery.filter(rows, "name LIKE 'Zeph%'")));
+        assertEquals(List.of("Amber"), names(HorseQuery.filter(rows, "name LIKE 'Amb%'")));
+    }
+
     @Test
     void flagsReadSexAndAgeTogether() {
         assertEquals(List.of("Amber"), names(HorseQuery.filter(stable(), "mare")));

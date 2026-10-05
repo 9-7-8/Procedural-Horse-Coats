@@ -221,6 +221,10 @@ public final class HorseQuery {
                              String column, String op, String value) {
         String key = column.toLowerCase(Locale.ROOT);
         if ("LIKE".equals(op)) {
+            if ("name".equals(key)) {
+                // Either name, as name: does (#34).
+                return QueryExpr.like(row.displayName(), value) || QueryExpr.like(row.registeredName(), value);
+            }
             return QueryExpr.like(textOf(row, key, haystack), value);
         }
         char symbol = op.isEmpty() ? '=' : op.charAt(0);
@@ -387,7 +391,9 @@ public final class HorseQuery {
     private static boolean keyed(HorseListing row, String key, char op, boolean orEqual, String value) {
         switch (key) {
             case "name":
-                return contains(row.displayName(), value);
+                // Either name: the barn name is what is shown, the registered name
+                // is still the horse's (#34).
+                return contains(row.displayName(), value) || contains(row.registeredName(), value);
             case "barn":
                 return contains(row.barnName(), value);
             case "breed":

@@ -67,6 +67,7 @@ wiki/breed-format.html#strain-stats	all	A strain that scores its own stats
 wiki/breed-format.html#studbook-kinds	all	Studbook kinds: decided, not yet in the format
 wiki/breed-format.html#where	all	Where a breed may come from
 wiki/breeding.html#H	coding	H. Client sync, the information screen, family tree
+wiki/breeding.html#barn-name	coding	E. Barn name
 wiki/breeding.html#breeding-debug	coding	Every draw, written down (dev builds)
 wiki/breeding.html#drift	coding	Genetic drift
 wiki/breeding.html#family-overview	coding	The family overview — every horse at once
@@ -2914,6 +2915,7 @@ wiki/horse-body.html#resolve	all	One walk, one record
 wiki/horse-body.html#severity-stays-flat	all	Severity stays flat (owner, 2026-10-01)
 wiki/horse-body.html#units	all	What those numbers are in metres
 wiki/horse-body.html#verified	all	Verified
+wiki/horse-browser.html#barn-name-shown	coding	A barn name is the name shown (2026-10-04, #34)
 wiki/horse-browser.html#log	gameplay	The Log tab — what has been happening to your horses
 wiki/horse-browser.html#log-bounds	gameplay	How much it keeps
 wiki/horse-browser.html#log-classes	coding	Where it lives

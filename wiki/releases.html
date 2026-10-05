@@ -86,6 +86,66 @@
     </p>
 </div>
 
+<h2 id="v0-5-044">0.5.044 &mdash; hay within reach, the whistle&rsquo;s plain hold, and horses out of walls</h2>
+
+<p>
+    A patch release of fixes, most of them for problems found on a live server. Hungry horses find their hay. The command whistle&rsquo;s plain hold now works. Horses no longer end up stuck in walls. Turnout tickets now release the right horse across dimensions, and the cowboy&rsquo;s stock stays out of the water. Nothing is new to craft, and no settings changed.
+</p>
+
+<h3 id="v0-5-044-food">Horses and their food</h3>
+<ul>
+    <li><strong>A hay bale can be eaten from beside it.</strong> Before, a hungry horse could only reach a bale by climbing on top of it. A bale under a low roof, or one stacked on another, was out of reach. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/26">#26</a>)</li>
+    <li><strong>A hungry horse no longer gives up on food it can reach.</strong> One bad pathfinding answer, such as a horse just spawned and still in the air, made it treat nearby food as unreachable. The horse could then starve beside its bale. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/39">#39</a>)</li>
+</ul>
+
+<h3 id="v0-5-044-whistle">The command whistle</h3>
+<ul>
+    <li><strong>Hold right-click on a horse you own, without sneaking, to open the order wheel.</strong> The 0.5.043 notes promised this, but only the sneak-hold worked. Sneak and hold still orders every horse of yours within 16 blocks. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/36">#36</a>)</li>
+</ul>
+
+<h3 id="v0-5-044-blocks">Horses stuck in blocks</h3>
+<ul>
+    <li><strong>A horse that grows is moved to the nearest clear spot.</strong> A horse can grow in three ways: its breed&rsquo;s real size is applied after it spawns, a world reloads, or a foal grows up. Each could leave it inside the blocks around it, where it suffocated. Horses already stuck in a wall are freed the next time their chunk loads. Each move writes a <code>[clearance]</code> line to the server log. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/35">#35</a>)</li>
+</ul>
+
+<h3 id="v0-5-044-tickets">Tickets, braids and stalls</h3>
+<ul>
+    <li><strong>A turnout ticket into another dimension releases the horse that arrives.</strong> It used to release the copy left behind instead, so the horse that arrived kept its owner. Its saddle is no longer duplicated either. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/29">#29</a>)</li>
+    <li><strong>A rescuing braid that sends a horse to a stall in another dimension is now used up</strong>, as it is in the same dimension. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/29">#29</a>)</li>
+    <li><strong>Stall signs work in stalls with a slab floor or a one-block step.</strong> The top of a closed gate no longer counts as stall floor. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/25">#25</a>)</li>
+</ul>
+
+<h3 id="v0-5-044-cowboy">The cowboy</h3>
+<ul>
+    <li><strong>The cowboy and his unsold horses keep off water.</strong> If one is caught in a downward bubble column, it is pulled out. A seaside village barn had one off its edge that kept drowning his stock. Each rescue writes a <code>[whirlpool]</code> line to the server log. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/30">#30</a>)</li>
+</ul>
+
+<h3 id="v0-5-044-browser">The H menu</h3>
+<ul>
+    <li><strong>The horse browser shows a horse&rsquo;s barn name.</strong> This covers My horses, the breeding preview, the realm roster and the stasis bank. They used to show the registered name. Searching by the registered name still finds the horse. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/34">#34</a>)</li>
+</ul>
+
+<h3 id="v0-5-044-server-owners">For server owners</h3>
+<ul>
+    <li>Magical wild herds no longer write false &ldquo;NOT ON ITS SHEET&rdquo; warnings to the server log. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/33">#33</a>)</li>
+    <li>Pressing F6 on a server with debug tools turned on loads fewer chunks, so the freeze is about half as long. It is not gone yet. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a>)</li>
+</ul>
+
+<h3 id="v0-5-044-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Nothing needs migrating.</strong> No saved format, setting, default or breed frequency changed.</li>
+    <li>Horses already stuck inside blocks are moved out when their chunk loads (see above).</li>
+    <li>Cowboy stock standing in a downward bubble column is moved out of it.</li>
+</ul>
+
+<h3 id="v0-5-044-not-played-yet">Not played yet / known rough edges</h3>
+<p>
+    Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/36">#36</a> and <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/35">#35</a> are fixed in this release, and stay open until they are confirmed in a game. Also open: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a> (F6 corridor freeze, shorter but not gone) and <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a> (stasis bank: the saved-searches arrow shows on the Chambers tab).
+</p>
+<p>
+    The hay, stall, ticket and whistle fixes are covered by automated in-game tests. The rescue from walls and the cowboy&rsquo;s water safety have not been watched on a real server yet. What still needs looking at is on <a href="verification.html">the verification index</a>.
+</p>
+
 <h2 id="v0-5-043">0.5.043 &mdash; the command whistle</h2>
 
 <p>

@@ -61,7 +61,9 @@ STEPS
        in, so a horse a few blocks over may sit in a chunk that never ticks (no scan,
        no founding) - ModGameTests.keepTicking forces the 3x3. Tests sit six blocks apart,
        so a test that looks further (a hunt, a guard, a walk) runs alone: registerAlone
-       plus aloneOnClearGround (#37). The harness has no horse
+       plus aloneOnClearGround (#37). Herd founding reaches 32 blocks and joins whatever
+       wild herd it finds there, neighbours' horses included, so a wild-pack test runs
+       alone too, with the horses in reach cleared (#119). The harness has no horse
        realm level, and runs with doMobSpawning off, so no natural or top-up spawn fires.
        An attribute write (SCALE) reaches the hitbox only on the entity's NEXT tick:
        assert on getBbHeight(), never getScale(), or the test passes before it starts.
@@ -96,10 +98,10 @@ STEPS
      "could" move it. Say in the summary which tests a full run would still need to
      check, and why.
    - The slowest classes, measured on the last full run (the release procedure fills
-     this in). 2026-10-03, for 0.5.042, 21m 50s wall clock: CoatTextureIdTest 273s,
-     RimehartBreedTest 143s, CoatTextureComposerTest 117s, UndeadBreedsTest 112s,
-     ReproRulesTest 70s, DeadLayerTest 59s, GreenwoodBreedTest 57s, GenotypeCatalogTest
-     50s, ArcaneStockTest 41s, RamHornBreedsTest 40s. Those ten are about two thirds of
+     this in). 2026-10-04, for 0.5.044, 21m 33s wall clock: CoatTextureIdTest 271s,
+     RimehartBreedTest 143s, CoatTextureComposerTest 117s, UndeadBreedsTest 113s,
+     ReproRulesTest 71s, DeadLayerTest 58s, GreenwoodBreedTest 56s, GenotypeCatalogTest
+     49s, RamHornBreedsTest 39s, ArcaneStockTest 37s. Those ten are about two thirds of
      the run; a change that
      touches none of them is cheap to prove by name.
    - Its full run has found that checks had drifted from the code, not mod bugs, so

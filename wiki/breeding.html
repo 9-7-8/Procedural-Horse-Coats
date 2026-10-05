@@ -933,7 +933,7 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     and already inverted the order &mdash; this screen was the one left on the old one.
 </p>
 
-<h3>E. Barn name</h3>
+<h3 id="barn-name">E. Barn name</h3>
 
 <p>
     A free-form display override, editable from the horse inventory screen (an edit box
@@ -978,6 +978,20 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     Worth generalising: <strong>any client-side &ldquo;is this horse mine&rdquo; test
     has to read the record, never the entity.</strong> The one other caller,
     <code>WhistleItem.ownedBy</code>, is server-side and correct as written.
+</p>
+
+<p>
+    <strong>The browser follows the same rule (#34, 2026-10-04).</strong> The H browser's
+    rows are <code>HorseListing</code>s, not records, and <code>HorseListing.displayName()</code>
+    had its own copy of the name that left the barn name out &mdash; so My horses, the
+    breeding preview's pickers and heading, the Realm roster and the stasis bank all
+    showed the registered name while the information screen and family tree showed the
+    barn name. It now applies the record's rule; <code>registeredName()</code> is the
+    generated name on its own. The Name column sorts by the name shown, the footer is
+    the one place both are written (<em>registered (&ldquo;barn&rdquo;)</em>), and
+    <code>name:</code> / <code>name LIKE</code> match either, so a horse can still be
+    found by the name it was registered under. Pinned by
+    <code>HorseQueryTest.aBarnNameIsTheNameShownAndTheRegisteredNameStillFindsIt</code>.
 </p>
 
 <p>
