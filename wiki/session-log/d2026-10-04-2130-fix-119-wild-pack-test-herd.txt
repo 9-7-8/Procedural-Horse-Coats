@@ -1,0 +1,55 @@
+2026-10-04 21:30 - Fix #119: the wild-pack gametest was founded into its neighbours' herd (time is the start, approximate)
+
+ASKED
+- "/fix-bug" (no issue named). Came of it: #119 taken and closed; #150 filed.
+  Of the open bug issues, #35, #36 and #10 already had fixes in and only wait on checks, so
+  the issues with work left were #119 (found-in-yard) and #34 (cosmetic). Step 1's ranking puts
+  found-in-yard above cosmetic.
+
+DONE
+- f0663e4a "Fix #119: the wild-pack gametest was founded into its neighbours' herd".
+  What was wrong: wild_pack_founds_one_herd ran in the shared default batch, six blocks from
+  the other wild tests. Founding (HerdManager.herdedMemberOfClump / freshClump) joins any
+  wild herd within HERD_RADIUS (32) of a pack member. WildTurnover judges a follower by its
+  lead's stamp (leadStamp). When a neighbour test aged its own horse four days and that
+  horse led the joint herd, the whole pack was sent on. The failing run's log
+  (run-gametest/logs/2026-10-04-7.log.gz) shows "Feisty Titus ... moved on after 4.0 days",
+  then four pack members "moved on after 0.0 days", then the failure.
+  Fix (test only): the test runs alone (registerAlone, 1200 ticks), waits for its forced
+  chunks (fieldTicks, #70), discards every Horse within HERD_RADIUS+16 before placing the
+  pack (clearHerdReach), and asserts the herd's lead is one of the pack. A gone member's
+  message prints its removal reason, position, chunk-ticking state, herd and stamp
+  (goneState).
+  Proof: forced cause = a temporary aged wild-herd lead 10 blocks off at tick 0. With the
+  clearing disabled the test was red ("removed DISCARDED ... chunk ticking true, herd <the
+  intruder>"); with it, all 55 gametests passed. After the intruder was removed, the real
+  suite ran 6 times: this test was green 6/6. Issue #119 is CLOSED, with the proof comment.
+
+DECIDED
+- (without the owner) Fix the test's isolation, not the game: the herd join and the lead's
+  clock are game rules that may be intended. The question is written on wiki/breeds.html
+  #turnover-1002, item 7, as an open call for the owner.
+
+FOUND ON THE WAY
+- #150 filed (bug, found-in-yard): order_guard_holds_its_reach went red once in 6 runs. Its
+  forced chunk never ticked within the whole 1300-tick budget, in the first batch of the
+  run. Not touched by this diff; not fixed (one issue per run).
+- The same herd join exists in the live game: a top-up pack placed near a third-day herd
+  joins it and leaves with it. Written as an open call on wiki/breeds.html#turnover-1002.
+
+PROCEDURES
+- procedures/test-tiers.txt: the gametest-writing note now says herd founding reaches 32
+  blocks and a wild-pack test therefore runs alone with horses in reach cleared (#119).
+- fix-bug and end-session were followed as written; nothing in them was wrong.
+
+NOT RUN / NOT CHECKED
+- The full :common:test suite was not run; no common/ code changed.
+- Nothing in game; nothing player-facing changed.
+- Verification anchor added: wiki/breeds.html#turnover-1002 item 7 (open call).
+
+RELEASE
+Not offered (test-only fix).
+
+PICK UP FIRST
+/fix-bug: #150 (order_guard_holds_its_reach chunk wait in the first batch) is now the top
+found-in-yard bug, ahead of #34 (cosmetic barn names in the H browser).

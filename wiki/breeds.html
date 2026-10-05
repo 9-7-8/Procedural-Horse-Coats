@@ -1338,6 +1338,13 @@
         near each. A tame horse left in a field for a week is still there.</li>
     <li><strong>The feel.</strong> Is three days too quick, and does a herd's arrival ever read as a pop-in? Both are
         config, not code: <code>wild.despawn_days</code>, and the view test in <code>WildTopUp.outOfSight</code>.</li>
+    <li><strong>A fresh pack beside an old herd (open call, 2026-10-04).</strong> Founding joins any wild herd within
+        32 blocks of a pack member (<code>HerdManager.herdedMemberOfClump</code>), and <code>WildTurnover</code>
+        judges a follower by its lead&rsquo;s stamp. So a top-up pack placed near a herd on its third day joins it and
+        leaves with it, &ldquo;moved on after 0.0 days&rdquo;. Issue #119 found this in the gametests, where a
+        neighbour&rsquo;s aged horse took a fresh pack with it. Whether that is right in a world - a herd leaves
+        together - or the top-up should keep its distance from an old herd, is the owner&rsquo;s call. Where to look:
+        a <code>[Wild] ... moved on after 0.0 days</code> line in a real log means it happened.</li>
 </ol>
 
 <h3 id="climate-rule-1001">The climate rule moved nine breeds (2026-10-01, NOT played)</h3>
