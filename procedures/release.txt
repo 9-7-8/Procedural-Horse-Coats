@@ -146,11 +146,20 @@ STEPS
       has no item stage: extend it, or screenshot by hand with the owner's world closed
       per launch-game). Name files plainly: <subject>.png, e.g. back-sail.png.
    c. Look at every picture with Read. Retake any that is empty, mis-framed, or hides the
-      part. A diagram is never a photo: if a part cannot be photographed yet, say so in the
+      part. Then CROP each one to the part that matters (owner, 2026-10-05: full-widescreen
+      shots leave a lot of empty space at the sides). Crop to the subject's bounding box
+      plus a modest margin - the whole horse, the whole part, the whole item - never so
+      tight that the part's edge, a horn tip or a translucent fringe is cut. Prefer a
+      portrait or squarish frame over widescreen. First try moving the camera in
+      (stage()); crop only what that leaves. Crop a copy, never the file in run/. Find the
+      box by detecting where the picture differs from the stage background, or by eye;
+      do it with Pillow (a wheel sits in the repo root) or any image tool. Look at each
+      cropped result with Read before it goes in. Do not scale a crop up past its
+      native pixels. A diagram is never a photo: if a part cannot be photographed yet, say so in the
       note, do not draw one in its place.
    d. Copy the keepers from run/screenshots/ into release-photos/v<new>/ (one NEW folder
       per release; never reuse or overwrite an old one). Keep each file under about 1 MB:
-      downscale a larger one (never crop). Commit the folder with the version bump (step 4)
+      downscale a larger one. Commit the folder with the version bump (step 4)
       and push main BEFORE the release is created, so the note's image links resolve.
    e. In the GitHub note (step 5), embed each photo under its subject with
       ![<what it shows>](https://raw.githubusercontent.com/9-7-8/Procedural-Horse-Coats/main/release-photos/v<new>/<file>.png)

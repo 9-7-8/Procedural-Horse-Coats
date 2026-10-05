@@ -53,6 +53,7 @@ STEPS
    artifact with the shots embedded as data URIs (artifact-design first), and give the
    link. The owner often reads it on a phone:
    - Show the whole frame. Do not crop or zoom in CSS; move the camera instead (stage()).
+     (Release photos are different: release step 5c crops saved copies to the subject.)
    - Give every grid that holds a picture grid-template-columns: minmax(0, 1fr), or the
      picture's natural 854px width forces the column wider than the screen.
    - After any scripted edit to the page's CSS, count its { and } before publishing. An
