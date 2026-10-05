@@ -8,7 +8,7 @@ wiki/breeds.html, wiki/breed-format.html and wiki/curly-coat.html. This file is 
 step 3) as each piece ships and moves onto those pages' Gameplay and Coding tabs.
 Release: rides the next release (Decided). Applies when each piece ships; none cuts its own.
 It sits beside "Mythical goats - implementation treatment.txt" (which appends the scimitar shape to the same gene
-and builds goat-build.html), "Mythical equids - implementation treatment.txt" and "Mythical antlered beasts -
+and builds goat-build.html), issue #114 (Mythical equids) and "Mythical antlered beasts -
 implementation treatment.txt". Rules carried from the audit: public domain only, no talking.
 
 

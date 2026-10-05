@@ -8,7 +8,7 @@ wiki/breed-format.html. This file is retired (deleted, per START HERE step 3) as
 those pages' Gameplay and Coding tabs.
 Release: rides the next release (Recommended: the owner chose the same rule for every other set; not asked for this one).
 Applies when each piece ships; none cuts its own.
-It sits beside "Mythical deer" (issue #106; which builds the mane-and-tail shape gene these need), "Mythical equids" (which builds the
+It sits beside "Mythical deer" (issue #106; which builds the mane-and-tail shape gene these need), "Mythical equids" (issue #114; which builds the
 head-colour gene Meandash needs) and the other mythic files. Rules: public domain only, no talking. Meandash's human-form tales are
 excluded, as the table says.
 
@@ -95,7 +95,7 @@ What the player sees: a giant white sky stag with a black head and golden antler
 Piece 2 - Head colour (edit to another treatment)
 -------------------------------------------------
 Decided: the equids treatment's Piece 1 is a head-colour gene with Red and Black alleles, not a red-only gene. This treatment builds nothing
- for it; it only needs Black pinned. The change is recorded in "Mythical equids - implementation treatment.txt". None here for code,
+ for it; it only needs Black pinned. The change is recorded in issue #114 (Mythical equids). None here for code,
  tests, config, saves or docs: they are that file's.
 
 

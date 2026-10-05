@@ -7,7 +7,7 @@ exists is wiki/gene-antlers.html, wiki/gene-unicorn-horn.html, wiki/gene-ram-hor
 wiki/breeds.html and wiki/breed-format.html. This file is retired (deleted, per START HERE step 3) as each piece ships
 and moves onto those pages' Gameplay and Coding tabs.
 Release: rides the next release (Decided). Applies when each piece ships; none cuts its own.
-It sits beside "Mythical deer" (issue #106), "Mythical goats", "Mythical rams" and "Mythical equids". Rules: public domain only, no talking.
+It sits beside "Mythical deer" (issue #106), "Mythical goats", "Mythical rams" and "Mythical equids" (issue #114). Rules: public domain only, no talking.
 Named "antlered beasts" because most of them wear a horn or rack; the zebra is in the equids file, and the Allocamelus is out.
 
 
