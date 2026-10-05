@@ -1,0 +1,31 @@
+2026-10-05 21:30 - Agile gap analysis and an issue for a GitHub Projects Kanban board (time is the end of the session)
+
+ASKED
+- "What would we need to change about our issues tab to make it agile-compliant?" Came of it: an answer (what already maps to agile practice; seven changes; what to leave out).
+- "Just write up a new issue, which describes how to move to github projects from the cl for gh ... though you're right about kanban being more sensible than timeframes". Came of it: issue #207.
+
+DONE
+- Answer: the queue already has a prioritised backlog (idea/scoped, the release plan #196), relative sizing (size: labels), epics and stories (tracking parents with sub-issues), a work-in-progress marker and
+  milestones as increments. Suggested: written definitions of ready and done in #195; acceptance criteria and a player-value line via issue forms; no L piece enters a milestone unsplit; a real work-in-progress
+  limit; spike and tech-debt labels; a retro comment per milestone with points shipped (velocity). Left out: fixed sprints, Projects as the source of truth, more documentation.
+- Filed #207 "Move the issue queue onto a GitHub Projects Kanban board (set up with the gh CLI)": columns mapped from the labels, Size and Points fields, five views, setup steps with gh project commands (all
+  UNVERIFIED: none was run), three ways to keep the board in step with the labels, the Kanban policies to publish in #195, acceptance criteria and risks. Labels enhancement, scoped, size:M; Backlog milestone.
+- No repo file changed except this log.
+
+DECIDED (owner)
+- Kanban rather than timeboxed sprints. A board is wanted; the setup is a local-session job (Projects v2 is GraphQL-only; cloud sessions cannot use it).
+
+FOUND ON THE WAY
+- The seven suggested process changes (definitions, forms, split-L rule, WIP limit, spike/tech-debt labels, retros) were offered and NOT implemented; #207 only covers the board and the policies that go with it.
+
+PROCEDURES
+None changed.
+
+NOT RUN / NOT CHECKED
+- No gh project command was run; no build, no game, no bake beyond check-links; docs only.
+
+RELEASE
+Not offered (no player-facing change).
+
+PICK UP FIRST
+/next-release on v0.5.045 (see issue 196); #207 waits for a local session with the project scope.
