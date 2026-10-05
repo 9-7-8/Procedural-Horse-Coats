@@ -2,8 +2,8 @@ PROCEDURE  : Add an item
 COMMAND    : /add-an-item
 SAY        : "add an item", "make an item", "new item", "an item that ...", "add a tool for"
 RUNS       : local (art bakes, recipes, a server boot, gametests)
-TAKES      : the owner's idea for something a player holds, or an intake treatment
-             that describes one
+TAKES      : the owner's idea for something a player holds, or a scoped feature issue
+             (or an intake treatment file) that describes one
 LEAVES     : one registered item with its model, art, name, recipe, behaviour, tests,
              wiki page and bakes, pushed
 ==============================================================================

@@ -8,8 +8,8 @@ Read `procedures/INDEX.txt` and show the owner:
 1. The table of procedures: command, where it runs, the words that start it, and what it
    leaves. Keep it as a table.
 2. "How they fit together", as it is written there.
-3. The candidate routines that are not written yet, one line each. They are queued in
-   `intake/To do.txt`, under "Routines to write up as procedures".
+3. The candidate routines that are not written yet, one line each. They are open GitHub
+   issues labelled `procedure` (search the open issues).
 
 Then check the folder against the index: list `procedures/*.txt` and `.claude/skills/*/`.
 Report any procedure file missing from the index, any index row with no file, and any

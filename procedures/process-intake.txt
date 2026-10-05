@@ -3,16 +3,20 @@ COMMAND    : /process-intake
 SAY        : "process intake", "pick something from intake", "do the next intake item",
              "implement something from intake"
 RUNS       : local (it builds and runs tests)
-TAKES      : implementation treatments waiting in intake/
-LEAVES     : ONE unit built, written up on the wiki, deleted from intake/, pushed;
-             the session ended
+TAKES      : feature issues labelled scoped (an implementation treatment each)
+LEAVES     : ONE unit built, written up on the wiki, its issue closed with evidence,
+             pushed; the session ended
 ==============================================================================
 
 WHEN TO USE
 -----------
-Use this to build the next new feature. intake/ holds new features only, as
-implementation treatments written by write-intake-document. Bugs are GitHub issues
-and go through fix-bug instead.
+Use this to build the next new feature. New features are GitHub issues: an `idea`
+until write-intake-document scopes it, then `scoped` (the treatment is the issue's body
+and comments). Bugs are GitHub issues too and go through fix-bug instead.
+TRANSITIONAL (delete when migrate-intake-to-issues is done): a treatment not yet moved
+is still a file in intake/ ("<name> - implementation treatment.txt", sized in
+intake/Sizing.txt). Where this procedure says "issue", such a file is the same thing,
+and the old file rules apply to it: see the lines marked FILE below.
 
 One run builds ONE unit. Never start a second one in the same conversation. The owner
 clears context and runs this again for the next one, because the next unit's classes,
@@ -20,31 +24,55 @@ pages and tests have nothing to do with this one's. The one exception is hers to
 pieces of ONE treatment that share a screen and a test class may be one run if she says
 so when asked (step 5). Then they are one commit and one session log.
 
-This file is the routine, not the queue. Read what is in intake/ fresh every run.
+This file is the routine, not the queue. Read the issue list fresh every run.
 
 BEFORE YOU START
 ----------------
-1. `git pull --ff-only origin main`. intake/To do.txt is edited on github.com, so the
-   local copy is routinely stale, and cloud routines push to main too.
-   If the owner names a unit and it is not in intake/, look at the unmerged cloud
-   branches (`git fetch origin`, then `git diff --stat main...origin/claude/<name> --
-   intake/`): a cloud scoping session leaves its treatment on its own branch. Merge
-   that branch first (it carries only intake/, procedures and docs), and say so.
-2. `git status --short`. Untracked files in intake/ are the owner queuing material:
-   commit around them, and never flag, add or delete them.
+1. `git pull --ff-only origin main`; cloud routines push to main too.
+   Read one issue first (mcp__github__issue_read, or the local way fix-bug reads
+   them). If issues cannot be read, stop and say so: never fall back to files for a
+   unit that is an issue.
+   If the owner names a unit by number, read that issue. If she names one that is not
+   an issue, it is a FILE treatment (FILE, transitional): look in intake/, and then at
+   the unmerged cloud branches (`git fetch origin`, then `git diff --stat
+   main...origin/claude/<name> -- intake/`), merge that branch first and say so.
+2. `git status --short`. Untracked files in intake/ are the owner queuing material
+   (FILE, transitional): commit around them, and never flag, add or delete them.
 3. Run `node wiki/tools/check-roadmap-execution.mjs`.
 4. Search the way look-it-up describes, for the whole run.
 
 STEPS
 -----
 1. List the units.
-   A unit is the smallest thing that ships alone, not a file:
-   - each bullet in To do.txt. Its first line is permanent: never delete it, never
-     count it;
+   A unit is the smallest thing that ships alone: one open issue.
+   - Query: open issues labelled `scoped`, and separately those labelled `procedure`,
+     not `in-progress`, paginated 5-10 at a time (mcp__github__search_issues, e.g.
+     `is:issue is:open label:scoped -label:in-progress`, then the same with
+     `label:procedure`). Read the header lines of each body (Release, Open, Depends
+     on, Owning page, Sized), never the whole treatment.
+   - Size and impact are labels (size:S|M|L, impact:finishes|unblocks|new). Owner calls
+     are the needs-owner label or an Open: line. Dependencies are the Depends on line.
+   - A piece of a multi-piece treatment is a sub-issue of a `tracking` parent. A
+     tracking parent is not a unit; its sub-issues are. An issue labelled
+     `procedure` is a unit even while it is an `idea` (it is written by
+     procedures/FORMAT.txt, not scoped). Every other `idea` is not a unit: scoping it is
+     write-intake-document, not this. `survey` issues are evidence, never units.
+   - A unit edited since its Sized: date (the issue's timeline shows it), or never
+     sized, is re-sized: read its header and its "What already exists" section, then
+     rewrite the labels and the Sized: line. If more than a handful need it, hand it
+     to an Explore agent.
+   FILE (transitional): intake/ still holds treatments not yet moved. A unit there is
+   the smallest thing that ships alone, as before:
    - each piece, slice or tier a treatment names. A treatment that names no split is
      one unit;
    - a treatment marked PLAN ONLY with stages unchecked is a unit only at its first
      stage.
+   Start from intake/Sizing.txt: it holds every file unit's size, impact, owner calls
+   and dependencies, dated per treatment. A block stands while
+   `git log --since=<its date>T00:00 -- "intake/<file>"` is empty (a bare date counts
+   from the current time of day and misses same-day edits); re-size only the
+   treatments changed since, and new ones, and rewrite their blocks. Commit Sizing.txt
+   with the run's docs, never untracked.
    These are not units, so leave them alone:
    - intake/README.txt and intake/Sizing.txt;
    - potential-assets/. Use anything in it freely for the unit you are building:
@@ -56,30 +84,25 @@ STEPS
      be written across several files in such a folder (owner, 2026-10-03); the "*implementation
      treatment.txt" entry file in intake/ is the unit, the folder holds its pieces, and its Sizing
      block is the entry file's.
-   Start from intake/Sizing.txt: it holds every unit's size, impact, owner calls and
-   dependencies, dated per treatment. A block stands while
-   `git log --since=<its date>T00:00 -- "intake/<file>"` is empty (a bare date counts
-   from the current time of day and misses same-day edits); re-size only the
-   treatments changed since, and new ones, and rewrite their blocks. To size a
-   treatment, read its header, its "What already exists" section and any "Order and
-   size" section, not the whole file. If more than a handful need sizing, hand it to
-   an Explore agent. Commit Sizing.txt with the run's docs, never as an untracked file.
+   To size a file treatment, read its header, its "What already exists" section and any
+   "Order and size" section, not the whole file.
 
 2. Throw out what is already done.
    For each unit you might pick, grep wiki/session-log/ and wiki/text/ for its
    keywords, and look for its classes in the code. Date the unit before deleting it.
-   Get the date it was written (`git log --date=short -S 'phrase' -- intake/`) and the
-   date the matching work landed. A unit written after that work asks for more than was
+   Get the date it was written (the issue's created and last-edited dates; FILE:
+   `git log --date=short -S 'phrase' -- intake/`) and the date the matching work landed. A unit written after that work asks for more than was
    built, so it is still open.
    Also grep for the MECHANISM, not only the treatment's own words: a treatment can
    miss code already doing half of it under another name (the realm breeding pause was
    already HorseRealmRepro's offset clock, 2026-10-02). Then the unit is only the
    remainder, and any clash with what was built is an owner question for step 5.
-   If a unit is already done, delete its text (step 8) and say so in the session log.
-   That deletion is not this run's unit: carry on and pick one.
+   If a unit is already done, close it as in step 8 (completed, with the commit that
+   did it) and say so in the session log. That closing is not this run's unit: carry on
+   and pick one.
 
 3. Score every remaining unit, as a table in your reply:
-   - SIZE: S, M or L.
+   - SIZE: S, M or L (the size: label; FILE: the Sizing.txt row).
        S = one screen or class, one test class, a few regenerate rows.
        M = one session: a new gene or system slice, several bakes.
        L = the treatment says it takes several sessions, or other units are waiting
@@ -111,15 +134,19 @@ STEPS
             slice only. If it is not on a wiki Roadmap tab yet, routing it there is
             part of the unit.
    Break ties by: unblocks the most units, then fewest regenerated artefacts, then
-   oldest in `git log -- intake/`.
-   Say in one line what you picked, its tier, and why the runner-up lost. Then carry
-   on without waiting, unless step 5 asks something.
+   oldest issue by creation date (FILE: oldest in `git log -- intake/`).
+   Say in one line what you picked, its tier, and why the runner-up lost. Then claim
+   it: add the in-progress label to the issue and comment "picked, tier, why" (the same
+   line), before any code. Carry on without waiting, unless step 5 asks something.
+   FILE: there is no claim; nothing else can pick a file unit.
 
 5. Ask once, up front, or not at all.
    If the pick has owner calls, ask all of them in one question-tool round before any
    code: 2-4 concrete options each, with the treatment's Recommended line first. If she
    does not answer, or her answers open new questions, drop to the best Tier 2 unit and
-   leave this one's questions written into its treatment.
+   comment the unanswered questions on its issue, add needs-owner, release the claim
+   (remove in-progress), and say so.
+   FILE: leave this one's questions written into its treatment.
    Anything you decide without her goes in the session log under "Calls made without
    the owner", and on wiki/decisions.html if it is a design call.
 
@@ -141,11 +168,18 @@ STEPS
      anything saved that the unit changes ships with its migration, and with a test
      that loads the old shape. If the spawn-egg screen or the designer is involved,
      change both (rule 5).
+   - Comment on the issue as you go (full commentary, owner's choice): the hypothesis
+     and its check, the check's result, what shipped, what is left. Questions for the
+     owner still go through the question tool, never into the issue. Every commit says
+     `Refs #N`, except the one that finishes the unit, which says `Closes #N`. Never put
+     `Closes` on a commit that finishes only a piece of a unit, or one that names a
+     tracking parent.
    - Run tests by name only (--tests '*XTest'), never the full suite. Break the new
      test on purpose once, to prove it can fail.
    - Run every rebake row the change touched.
    - If the unit turns out bigger than its score, ship the part that stands alone and
-     put the rest back in the treatment as its next piece. Do not widen the run.
+     put the rest back as its next piece (edit the issue body, or open a new sub-issue
+     under the same parent; FILE: the treatment). Do not widen the run.
    - A plan-only unit (Roadmap lines or a Roadmap-only page) has no test to break. Its
      hypothesis is that the plan is not written anywhere yet: grep wiki/*.html for its
      key words (wiki/text/ bakes no Roadmap tab). Grep the code for every fact a plan
@@ -158,22 +192,36 @@ STEPS
      whole write-up: nothing moves to Gameplay or Coding.
    - If the subject has no page, write one.
 
-8. Retire it from intake/.
-   Delete the shipped unit's text from every intake file that mentions it. Leave no
-   "done" marker and no strike-through: a shipped unit still sitting here is a second
-   description competing with the wiki.
+8. Close it on evidence.
+   Close the unit's issue as completed, never delete anything: the closed issue is the
+   record, and its edit history and comments are the history the owner reads.
+   - The finishing commit's `Closes #N` closes it on push to main. A cloud session on a
+     branch closes it when the branch merges.
+   - Remove the in-progress label. Comment the closing evidence: the commit, the
+     release tag (or "unreleased, carried by the next tag"), the wiki anchor it now
+     lives on, and what is newly waiting on a Verification tab. Assign the milestone of
+     the release that carries it, if that milestone exists.
+   - A piece of a multi-piece treatment -> close that sub-issue only. Closing the last
+     sub-issue: close the tracking parent by hand, with a comment listing the pieces.
+   - Not the last piece, and later pieces refer to it -> edit their bodies to point at
+     the wiki anchor where it now lives.
+   - An already-done unit found in step 2 is closed the same way, citing the commit.
+   - Leave no strike-through or "done" edit in the body: the label and state say it.
+   FILE (transitional): for a treatment still in intake/, retire it as before. Delete
+   the shipped unit's text from every intake file that mentions it, with no "done"
+   marker, since a shipped unit still sitting there is a second description competing
+   with the wiki.
    - The last piece of a treatment -> delete the whole file, plus any *-draft/ folder
      or multi-file treatment folder only it used (a shipped piece's own file in such a folder is
      deleted with that piece). Grep intake/ for that folder's name first.
    - Not the last piece -> delete that piece's section. If the remaining pieces refer
      to it, leave a one-line pointer to where it now lives on the wiki.
-   - A To do.txt bullet -> delete it, and its heading if the heading is now empty.
    - Every case -> delete the unit's row in intake/Sizing.txt (its block, for a whole
      treatment). An already-done unit found in step 2 goes the same way.
 
 9. End the session with end-session. A finished feature counts toward release step 1's
-   bar; it does not cut a release by itself, and the owner decides. The treatment's
-   Release: line refines what counts:
+   bar; it does not cut a release by itself, and the owner decides. The issue's
+   Release: line (FILE: the treatment's) refines what counts:
    - "patch on the last piece", and this is not the last piece -> does not count yet;
    - "rides with <other>" -> does not count; it goes out with that one;
    - "compat bump" -> the release procedure confirms it with the owner before cutting;
@@ -182,7 +230,8 @@ STEPS
 10. Write the session log by procedures/write-session-log.txt (a new timestamped file;
     end-session step 4b runs it). Under its sections, make sure it has:
     - the owner's request, quoted;
-    - Done: the unit, the commit, what is green, and which treatment text was retired;
+    - Done: the unit (issue number), the commit, what is green, and the issue closed
+      (FILE: which treatment text was retired);
     - Calls made without the owner;
     - Found on the way;
     - Tests run by name, and what a full :common:test run would still check;
@@ -190,7 +239,7 @@ STEPS
 
 DONE WHEN
 ---------
-The unit is pushed, written up and retired, the session has ended cleanly, and you
+The unit is pushed, written up and its issue closed, the session has ended cleanly, and you
 have reported:
 1. what shipped, and its tier;
 2. what is newly waiting in wiki/verification.html;
@@ -205,6 +254,9 @@ NEVER
 - Never pick anything that needs the owner's live server.
 - Never design a breed without her (design-a-breed).
 - Never treat an UNVERIFIED line as true because the treatment sounds confident.
+- Never start code before the in-progress label and the "picked" comment are on the
+  issue: that is the only thing keeping a second session off the same unit.
+- Never delete an issue, a comment or a label's history to retire a unit: close it.
 
 SEE ALSO
 --------

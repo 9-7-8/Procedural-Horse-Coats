@@ -113,7 +113,7 @@ NEVER
 - Never poll a long pen with sleep. Say when it should answer.
 - Never close a check on an INCONCLUSIVE or silent pen.
 - Never leave needs-owner off a bug that needs her.
-- Never put a bug on a Verification tab or in intake/ (hard rule 9).
+- Never put a bug on a Verification tab or in a feature issue (hard rule 9).
 - Never launch a hidden, unfocused client without pauseOnLostFocus:false (launch-game).
 
 SEE ALSO

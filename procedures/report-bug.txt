@@ -46,7 +46,10 @@ STEPS
    Write "unknown" for anything they do not know. Never guess.
 
 2. Make sure it is a bug.
-   - A new feature -> tell them it goes through write-intake-document, and stop.
+   - A new feature -> it is not a bug. Search the open `idea` and `scoped` issues for it:
+     comment on a match, otherwise offer to file an `idea` issue (enhancement + idea,
+     from-server if a player raised it; #42 is the model) and tell them it becomes a
+     scoped feature through write-intake-document. Then stop.
    - A tuning request or design disagreement ("too rare", "too hard", "I don't like
      how...") -> file it with the tuning label instead of bug, plus needs-owner when it
      is a balance call.
@@ -55,6 +58,7 @@ STEPS
 
 3. Check it is not already reported, or already fixed.
    - Search open AND closed issues for the symptom, the item or gene, and the class.
+     Include enhancement issues: a "bug" can be a feature that was never built.
      - An open match -> add a comment there with the new evidence, the version and the
        reporter. Do not open a duplicate.
      - A closed match -> read how it was closed. If the reporter's version is newer
@@ -78,7 +82,9 @@ STEPS
      one reasonable fix, or a design, balance or philosophy question. When you add it,
      end the issue with 2-4 fix options, your recommendation first. An issue without
      this label is picked up by the next run-tests or fix-bug run.
-   - Never found-in-yard: that label is the yard's own. Never invent new labels.
+   - Never found-in-yard: that label is the yard's own. Never invent new labels. The
+     feature-queue labels (idea, scoped, tracking, survey, procedure, from-server,
+     in-progress, size:*, impact:*) belong to the feature procedures, not to a bug.
    - Urgency goes in the body's first line, as one of:
        DAMAGE   - a crash, a lost horse or item, a save that will not load;
        PLAYERS  - wrong behaviour on a released jar;

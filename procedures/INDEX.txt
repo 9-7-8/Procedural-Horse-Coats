@@ -17,10 +17,10 @@ Command                  Runs    Say (any of)                         What it le
                                  "we're done for today"               nothing left running
 /write-session-log       either  "write the session log", "log this   one NEW timestamped log file, every
                                  session" (end-session runs it)       section filled, top of the index
-/process-intake          local   "process intake", "pick something    ONE intake feature built and
-                                 from intake", "next intake item"     retired, session ended
-/write-intake-document   either  "scope a feature", "write an intake  one treatment in intake/, every
-                                 document", "add a feature request"   design call asked
+/process-intake          local   "process intake", "pick something    ONE scoped feature issue built
+                                 from intake", "next intake item"     and closed, session ended
+/write-intake-document   either  "scope a feature", "write an intake  one scoped issue (the treatment),
+                                 document", "add a feature request"   every design call asked
 /migrate-intake-to-issues either "migrate intake", "move intake to   every intake unit as a labelled issue,
                                  issues"                              files retired (one-off)
 /probe-a-scope           either  "probe this scope", "what's          the one treatment in progress
@@ -57,7 +57,7 @@ Command                  Runs    Say (any of)                         What it le
 /survey-a-mod            local   "survey this mod", "compat with"     the jar's real contents, and
                                                                       options
 /review-server-logs      local   "check the server logs", "review     new export folders reviewed once;
-                                 the PCH logs"                        bugs -> issues, wants -> To do
+                                 the PCH logs"                        bugs -> issues, wants -> ideas
 /add-a-wiki-page         either  "add a wiki page", "new page"        one page in pages.js, true tabs
                                                                       and footer, indexes rebaked
 /use-an-art-pack         local   "use the art packs", "find art for"  art copied and transformed, with
@@ -71,7 +71,8 @@ Command                  Runs    Say (any of)                         What it le
 
 How they fit together
 ---------------------
-  feature wanted -> write-intake-document -> intake/ treatment -> process-intake -> end-session
+  feature wanted -> idea issue -> write-intake-document -> scoped issue -> process-intake
+                    -> end-session  (files in intake/ are the not-yet-migrated remainder)
   bug or tuning  -> report-bug (cloud), run-tests (yard) or review-server-logs (server)
                     -> GitHub issue (bug | tuning) -> fix-bug -> end-session
   needs her eyes -> hand-over-a-test -> launch-game
@@ -80,5 +81,5 @@ How they fit together
 
 Routines that might become procedures next
 ------------------------------------------
-They are queued in intake/To do.txt, under "Routines to write up as procedures". When one
-is written, by FORMAT.txt, its bullet is deleted there and its row added above.
+They are open GitHub issues labelled `procedure`. When one is written, by FORMAT.txt, its
+issue is closed with the commit and its row added above.

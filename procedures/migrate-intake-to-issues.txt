@@ -96,7 +96,15 @@ STEPS
 6. Retire (owner's yes first). One commit deletes the migrated files and Sizing.txt,
    leaves To do.txt as one line pointing at the issue list, and lists the issue numbers
    in the message with `Refs`. The session log carries the old path -> issue map.
-7. Rewrite what reads intake. Each of these keeps its own steps; only the source changes:
+7. Rewrite what reads intake. Each of these keeps its own steps; only the source changes.
+   DONE once the To do bullets moved: process-intake, write-intake-document,
+   whats-next, review-server-logs, report-bug, end-session, release, probe-a-scope,
+   add-a-gene, add-an-item, fix-bug, run-tests, INDEX.txt, show-procedures, the
+   skill wrappers, intake/README.txt and CLAUDE.md. They read issues first and keep
+   clauses marked FILE or TRANSITIONAL for treatments not yet moved. When the last
+   file has moved: delete every FILE and TRANSITIONAL clause (grep for both words in
+   procedures/), then do the items below that are not yet ticked by that sentence
+   (tools/rename, the wiki prose links, Sizing.txt, the rebake).
    - process-intake: steps 1-3 query issues (label scoped, size, impact, needs-owner)
      instead of files and Sizing.txt; step 8 becomes close-with-evidence; the pull and
      untracked-file preamble goes.

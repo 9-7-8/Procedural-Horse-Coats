@@ -5,7 +5,7 @@ SAY        : "check the server logs", "review the PCH logs", "read the server lo
 RUNS       : local only (the exports are on the owner's machine)
 TAKES      : the dated export folders written by the server's log exporter
 LEAVES     : every new folder reviewed once; bugs and tuning requests filed as GitHub
-             issues; new-feature wants noted in intake/To do.txt; a report; the
+             issues; new-feature wants filed as idea issues; a report; the
              reviewed-folders record updated
 ==============================================================================
 
@@ -15,7 +15,7 @@ When the owner asks for the server's logs to be checked. Players on her server m
 mod in ways no dev run does. These exports are the only record of what broke for them,
 what they asked for in passing, and how their horses actually die.
 This procedure says where to look and what counts as new. Recording what you find
-follows the existing procedures: bugs through report-bug, and features into intake/.
+follows the existing procedures: bugs through report-bug, and features as `idea` issues.
 
 BEFORE YOU START
 ----------------
@@ -73,9 +73,12 @@ STEPS
    d. Player wants and friction: 02-player-chat.txt. Players describe wants and
       annoyances in passing, and these are filed nowhere else. Sort each real one
       (owner's rule):
-      - A NEW FEATURE -> a short bullet in intake/To do.txt, under a heading "From the
-        server (unscoped)". It becomes a feature only through write-intake-document,
-        with the owner.
+      - A NEW FEATURE -> a GitHub issue labelled enhancement, idea and from-server (#42,
+        #69 are the model): the ask in a sentence, the Release/Open/Depends on/Owning
+        page/Sized/Source lines, then your paraphrase of what the player
+        wanted (never their words or name). Search open
+        issues first and comment on a match instead of opening a second. It becomes a
+        scoped feature only through write-intake-document, with the owner.
       - A BUG ("X is broken", "Y doesn't work") -> a GitHub issue labelled bug, as in
         step 2c.
       - A TUNING REQUEST ("too rare", "too slow", "dies too easily") -> a GitHub issue
@@ -128,12 +131,13 @@ STEPS
    log, not from an export. A frame of ours that the fix never named is a new issue
    (#31 came this way), not a reason to keep the old one open.
 
-4. Commit and push any change to intake/To do.txt.
+4. Nothing to commit: issues are the output. (Update the reviewed-folders record in local
+   memory as before.)
 
 5. Report to the owner:
    - which folders were reviewed, and the window and builds they cover;
    - the bug and tuning issues filed or commented on, as links;
-   - the new-feature wants added to To do.txt;
+   - the new-feature wants filed as idea issues, as links;
    - the death patterns, and where each one went;
    - the operator-script errors (for whoever runs the server);
    - anything you could not tell from these logs.
@@ -141,7 +145,7 @@ STEPS
 DONE WHEN
 ---------
 Every new folder has been reviewed and added to the record, each finding sits in its
-place (an issue, To do.txt, or the report), and the report is given.
+place (an issue or the report), and the report is given.
 
 NEVER
 -----

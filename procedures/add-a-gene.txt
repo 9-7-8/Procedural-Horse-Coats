@@ -2,7 +2,7 @@ PROCEDURE  : Add a gene
 COMMAND    : /add-a-gene
 SAY        : "add a gene", "make a gene", "new gene", "a gene that ...", "add an allele"
 RUNS       : local (it bakes, tests and rebuilds the designer's wasm)
-TAKES      : the owner's idea for a gene, or an intake treatment that describes one
+TAKES      : the owner's idea for a gene, or a scoped feature issue that describes one
 LEAVES     : one registered gene with its tests, goldens, page, bakes and wasm, pushed
 ==============================================================================
 
@@ -18,7 +18,8 @@ and they are built differently:
 A gene that is two kinds at once (a horn that glows and grants an aura) is built as
 each kind in turn: the part first, then the ability.
 The long reference is wiki/making-a-gene.html. Its tabs are named in the steps below.
-If an intake treatment already describes the gene, use process-intake: it builds a
+If a scoped feature issue (or, transitionally, an intake treatment file) already
+describes the gene, use process-intake: it builds a
 unit, then calls back into this procedure for the gene work.
 A new BREED to carry the gene is a separate design: see design-a-breed.
 

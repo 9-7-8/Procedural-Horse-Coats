@@ -35,13 +35,14 @@ STEPS
 3. Commit and push the code.
    a. Read `git status --short` first. If build or run output shows up, a .gitignore
       pattern is wrong: fix the pattern, never `git add` around it.
-   b. Untracked files in intake/ are the owner queuing material. Commit around them.
+   b. Untracked files in intake/ are the owner queuing material (transitional: some
+      treatments are still files there). Commit around them.
    c. Work on main; do not branch. Cloud routines also push to main, so commit, THEN
       `git pull --rebase --autostash origin main`, then push. The tree is still dirty
       here whenever docs were written before this step (process-intake and fix-bug write
       them first), and a plain `--rebase` then refuses to run at all. A pull can still
-      abort when upstream touched a file you edited (intake/To do.txt is the usual
-      one), print that on a line a `| Select -Last 1` hides, and leave HEAD behind:
+      abort when upstream touched a file you edited (a wiki page or a treatment file
+      is the usual one), print that on a line a `| Select -Last 1` hides, and leave HEAD behind:
       the push is then rejected. Read the whole pull output.
       "Applying autostash resulted in conflicts" means the commit rebased and the docs
       did not come back cleanly. When the conflict is a GENERATED file (search-index.js,
@@ -61,8 +62,8 @@ STEPS
       - Was something done this session that is likely to be done again the same way,
         and has no procedure? -> write one by procedures/FORMAT.txt ("ADDING ONE": the
         file, its INDEX.txt row, the .claude/skills wrapper, the keyword memory). If it
-        is too big to write now, add a bullet under "Routines to write up as
-        procedures" in intake/To do.txt.
+        is too big to write now, file a GitHub issue labelled enhancement, procedure and
+        idea (#46 to #50 are the model), with a size: label.
       - Does a change made this session (a new file, a renamed tool, a new rule) make
         another procedure's steps untrue? -> fix it. Grep procedures/ for the name.
       List what changed, for the session log. "None needed" is a valid answer, but only

@@ -51,7 +51,7 @@ STEPS
    Crash and stuck-player fixes batch like the rest. The one exception is a replacement
    for a release that is itself broken: it goes at once, without asking, and its note
    says "replaces <version>".
-   Docs, intake planning, test-yard or debug-only work (debug tools are off in a real
+   Docs, issue scoping, test-yard or debug-only work (debug tools are off in a real
    jar) and unfinished features do not count toward the bar.
    To offer: one AskUserQuestion naming what has piled up since the last tag, with
    "not yet" as an option. Cut only on a yes. On "not yet" or "hold" ("before you cut,
@@ -99,6 +99,10 @@ STEPS
      git diff v<prev>..HEAD -- '*Config*.java' | grep -E '^\+.*(define|comment)'
    Hand the session-log read for the date range to a subagent, and have it mark each
    item player-facing or dev-only.
+   Also list the feature and bug issues closed since the previous tag (search closed
+   issues by date, or the release milestone) and cross-check them against the log: a
+   closed feature with no commit in the range, or a commit with no issue, is a gap
+   to read before you write the note.
    - Cut everything dev-only. debug.tools is off in a real jar.
    - A commit subject can describe code that does not exist. Run `git show --stat` on
      every commit you mention.
@@ -142,6 +146,10 @@ STEPS
      gh release create v<new> <jar> --title "<title>" --notes-file <note>
    Check the tagged commit with `git rev-list -n 1 v<new>`. `git rev-parse` returns
    the tag object, not the commit.
+
+8a. Milestone. Create the milestone v<new> if it does not exist, assign it to every
+   issue closed since the previous tag that has no milestone (features and bugs), and
+   close it. This is what the owner reads as "what each release built".
 
 8. Verify that the jar is downloadable: `gh release view v<new> --json assets`. Do not
    ask for an isLatest field: it does not exist, and the whole call fails. A pushed tag

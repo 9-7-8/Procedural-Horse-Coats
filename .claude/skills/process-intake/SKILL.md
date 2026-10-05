@@ -1,6 +1,6 @@
 ---
 name: process-intake
-description: Take ONE new-feature unit out of intake/, build it, retire it and end the session. Ranks small+high-impact first, then owner-free work, then the big ones. Use when the owner says "process intake", "pick something from intake", "do the next intake item".
+description: Take ONE scoped new-feature issue, claim it, build it, close it on evidence and end the session. Ranks small+high-impact first, then owner-free work, then the big ones. Use when the owner says "process intake", "pick something from intake", "do the next intake item".
 ---
 
 Read `procedures/process-intake.txt` in full, then follow it exactly.

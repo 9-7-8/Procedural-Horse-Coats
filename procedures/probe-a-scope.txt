@@ -3,7 +3,8 @@ COMMAND    : /probe-a-scope
 SAY        : "probe this scope", "probe the treatment", "what's unverified here",
              "poke holes in this", "what are we missing"
 RUNS       : either (it only reads code and edits the one treatment being scoped)
-TAKES      : the ONE implementation treatment currently being written in intake/
+TAKES      : the ONE implementation treatment currently being written, as a GitHub issue
+             (or, transitionally, a file in intake/)
 LEAVES     : that treatment with every vague point, risk and hidden decision either
              settled by the owner, marked Recommended, or marked Open
 ==============================================================================
@@ -13,17 +14,18 @@ WHEN TO USE
 Run it on the treatment you are in the middle of scoping, once its first draft exists
 and before it is called finished. It looks for what the draft leaves unsaid: unverified
 claims, vague wording, quiet decisions and problems nobody has met yet.
-It applies to THAT ONE treatment only. Never sweep other files in intake/ or the whole
-folder; they belong to other scopes. If it is not clear which treatment is in progress
+It applies to THAT ONE treatment only. Never sweep other issues or other files in
+intake/; they belong to other scopes. If it is not clear which treatment is in progress
 (more than one was edited this session, or none), ask which one, with the question tool.
 Not for writing a treatment from nothing (use write-intake-document), and not for a
 bug (use report-bug).
 
 BEFORE YOU START
 ----------------
-Read the treatment in full. Read wiki/text/philosophy.txt and wiki/text/decisions.txt,
+Read the treatment in full (the issue body and every comment on it; for a tracking
+parent, its sub-issues too). Read wiki/text/philosophy.txt and wiki/text/decisions.txt,
 and the wiki/text/ page of every system the treatment names. Reading is required;
-changing code, wiki or any other intake file is not allowed.
+changing code, wiki or any other issue or intake file is not allowed.
 
 STEPS
 -----
@@ -55,7 +57,10 @@ STEPS
 4. Write the results into the treatment (the owner's answers as "Decided", your own
    picks as "Recommended", what neither can settle as "Open", each unproven fact as
    "UNVERIFIED"). Correct anything in it you found to be wrong, and tell the owner.
-5. Commit and push the treatment on the working branch, if the session is committing.
+   For an issue: edit the body, keep the old text in the issue's edit history, and
+   add one comment summarising the round (what was asked, what changed).
+5. A file treatment (transitional): commit and push it on the working branch, if the
+   session is committing. An issue needs no commit.
 
 DONE WHEN
 ---------
@@ -74,7 +79,7 @@ NEVER
 - Never turn a guess into "Decided". Only the owner's answer earns it.
 - Never ask something the code or wiki answers. It wastes her time and hides what you
   did not read.
-- Never change code, wiki or other intake files. This is scoping.
+- Never change code, wiki, other issues or other intake files. This is scoping.
 
 SEE ALSO
 --------

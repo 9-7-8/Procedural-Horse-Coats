@@ -2,19 +2,28 @@ PROCEDURE  : Write an intake document
 COMMAND    : /write-intake-document
 SAY        : "write an intake document", "scope a feature", "add a feature request",
              "make a treatment", "intake this"
-RUNS       : either (it only reads code and writes one file in intake/)
-TAKES      : a new feature the owner wants, in her words
-LEAVES     : one implementation treatment in intake/, every design call settled or
+RUNS       : either (it reads code and writes GitHub issues; nothing is committed)
+TAKES      : a new feature the owner wants, in her words (or an `idea` issue)
+LEAVES     : one scoped GitHub issue holding the implementation treatment (a tracking
+             parent with sub-issues for a big one), every design call settled or
              marked Open, ready for process-intake
 ==============================================================================
 
 WHEN TO USE
 -----------
-Anyone adding a new feature request to intake/ follows this: a person working with an
-AI session, or the AI session itself. The result is an IMPLEMENTATION TREATMENT, one
-.txt file in intake/ that process-intake can build from without asking anything the
+Anyone adding a new feature request follows this: a person working with an AI session,
+or the AI session itself. The result is an IMPLEMENTATION TREATMENT, held as a GitHub
+issue labelled `scoped` that process-intake can build from without asking anything the
 treatment should already have answered.
-Intake is for NEW FEATURES ONLY. A bug is a GitHub issue: use report-bug.
+The feature queue is for NEW FEATURES ONLY. A bug is a GitHub issue of a different
+kind: use report-bug.
+First search the open issues for the feature. If an `idea` issue already holds it
+(many wants arrive that way, from the server or from the owner), scope THAT issue:
+edit its body and swap `idea` for `scoped`. Never open a second issue beside it.
+TRANSITIONAL (delete when migrate-intake-to-issues is done): treatments written before
+the move are still files in intake/. Never write a new one as a file; scope it as an
+issue. Editing an existing file treatment (probe-a-scope, an owner's answers) stays
+in the file until that file is migrated.
 
 The bar: a treatment is finished when the building session needs the owner for
 NOTHING except what is marked Open, and every Open line truly could not be settled
@@ -23,8 +32,9 @@ session because their treatments had already made every call.
 
 BEFORE YOU START
 ----------------
-Scoping touches intake/ and nothing else: no code, no wiki, no assets. Reading the
-code is required; changing it is not allowed. Read wiki/text/philosophy.txt and
+Scoping touches issues and nothing else: no code, no wiki, no assets. Reading the
+code is required; changing it is not allowed. Load the mcp__github__ issue tools
+(ToolSearch) first if they are not loaded. Read wiki/text/philosophy.txt and
 wiki/text/decisions.txt first.
 
 STEPS
@@ -86,19 +96,22 @@ through. They are not optional and are not satisfied by doing them once.
    one, settle every part of it with her before writing it down. That means name,
    coat, gene pool and weights, biomes, size, stats and rarity.
 
-7. FINISH CLEANLY. Save the file in intake/, add its block to intake/Sizing.txt (one
-   row per piece, from section 7, dated today; a rewritten treatment replaces its
-   block), run the self-check (Part 6), commit and push both to main, and write the session log by procedures/write-session-log.txt (a
-   new timestamped file; d2026-09-29-scoping-troughs.txt is an older example). In it, say
-   that no code was touched, and make PICK UP FIRST what the building session starts on.
+7. FINISH CLEANLY. Create or update the issue(s) (Part 3), set their labels (`scoped`,
+   size:S|M|L and impact:finishes|unblocks|new per piece, `needs-owner` if any Open line
+   is the owner's, `tracking` on a parent), put `Sized: <today>` and `Depends on:` in
+   each body, run the self-check (Part 6), and write the session log by
+   procedures/write-session-log.txt (a new timestamped file; d2026-09-29-scoping-troughs.txt
+   is an older example), which is the only thing committed. In it, say that no code was
+   touched, list the issue numbers, and make PICK UP FIRST what the building session
+   starts on. Post as you go (full commentary): a comment on the issue per decision round.
 
 
 PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS
 ========================================
-- ONE FEATURE PER FILE. It is one ask from the owner, as she would name it.
-  Related asks that share no code are separate files. Asks that share machinery
-  (the head parts, body parts, tusks and feathering) are separate files that point
-  at each other. Each one says which of them builds the shared piece.
+- ONE FEATURE PER ISSUE. It is one ask from the owner, as she would name it.
+  Related asks that share no code are separate issues. Asks that share machinery
+  (the head parts, body parts, tusks and feathering) are separate issues that point
+  at each other with Depends on. Each one says which of them builds the shared piece.
 - SPLIT IT INTO PIECES. A piece:
   - ships alone, in one session;
   - leaves the game in a working state;
@@ -110,11 +123,16 @@ PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS
 - SAY WHAT IS OUT. An "In scope / not in scope" list stops the building session from
   growing the feature. Anything the owner chose to leave for later is listed here,
   marked re-askable.
-- A BIG TREATMENT MAY BE SEVERAL FILES. Keep the "<Feature> - implementation treatment.txt" entry
-  file in intake/ (header, Release line, one-sentence ask, a file list, the order) and put the
-  rest in a folder beside it: overview, decision log, a "considered and rejected" file, a code
-  map, one file per piece, cross-cutting rules, unverified/open. intake/four-jar-split/ is the
-  example. The entry file is the unit for Sizing.txt.
+- A BIG TREATMENT IS A PARENT AND PIECES. A GitHub issue body holds about 65,000
+  characters and a comment the same. Make a `tracking` parent issue (header, Release
+  line, one-sentence ask, the list of pieces, the order) and put the shared sections
+  in numbered comments on it ("Treatment 2/4"): overview, decision log, "considered and
+  rejected", code map, cross-cutting rules, unverified/open, each under 60,000
+  characters. Each piece is a sub-issue carrying its own section, its labels and its
+  Depends on. The pieces are the units; the parent is not. A feature that fits one body
+  is one issue with no parent. The four-jar split (the nine files in
+  intake/four-jar-split/, until migrated) is the example. Link a file you cite in the
+  repo by commit-SHA permalink, so the link survives later deletion.
 - NO CODE IN THE TREATMENT. Name classes, fields and files freely. Sketch a signature
   if it settles a design call. Never write the implementation: the building session
   reads the real code anyway, and pasted code goes stale before it is used.
@@ -122,21 +140,30 @@ PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS
   treatment says to extend that, not to build a second path beside it.
 
 
-PART 3 - THE FILE: NAME, HEADER AND SECTIONS
-============================================
-File name:  "<Feature name> - implementation treatment.txt"
+PART 3 - THE ISSUE: TITLE, HEADER AND SECTIONS
+==============================================
+Title: the feature's name; a piece reads "<Name> - piece N: <what>". Labels: enhancement,
+scoped (not idea), size and impact per piece, needs-owner when an Open line is hers.
+The body starts with these lines, then the header paragraph, then the sections below
+(markdown is fine: this is an issue, not a procedure file):
 
-Header paragraph (copy this shape):
+    <one-sentence ask>
 
-    <Feature name> - implementation treatment
+    **Release:** <patch per piece | patch on the last piece | rides with <other> | compat bump>
+    **Open:** <the owner's calls, if any>
+    **Depends on:** #N, #N (or none)
+    **Owning page:** <wiki page(s)>
+    **Sized:** <today>
 
     Scoped with the owner. Every "Decided" line below is her call; "Recommended" lines
     are the scoping session's, not asked; "Open" lines are still to be settled, by
-    whom is said on the line; "UNVERIFIED" lines are facts this file has not proved
+    whom is said on the line; "UNVERIFIED" lines are facts this issue has not proved
     and the building session must check first. Source of truth for what exists is
-    <wiki page(s)>. This file is retired (deleted, per /process-intake step 8) as each piece
+    <wiki page(s)>. This issue is closed (process-intake step 8) as each piece
     ships and moves onto <wiki page(s)>'s Gameplay and Coding tabs.
-    Release: <patch per piece | patch on the last piece | rides with <other> | compat bump>.
+
+End the body with the attribution footer (`---` then `_Generated by [Claude
+Code](https://claude.ai/code)_`).
 
 Sections, in this order. Every one is required. If a section truly has nothing in it,
 write "None" and one line saying why.
@@ -185,7 +212,12 @@ write "None" and one line saying why.
 
 7. Order and size
    - The piece order, and why.
-   - A size for each piece: S, M or L (the scale is at the top of intake/Sizing.txt).
+   - A size for each piece, as its size: label. S = one screen or class, one test class,
+     a few regenerate rows. M = one session: a new gene or system slice, several bakes.
+     L = the treatment says it takes several sessions, or other units wait on it as a
+     foundation (a new part kind, a shared base class, a sheet region, a structure bake,
+     an entity type). And its impact: finishes shipped work, unblocks other units, or
+     new content.
    - What other treatments it waits on or unblocks.
    - What must NOT be done in the same session as what.
 
@@ -338,8 +370,9 @@ Put them in the treatment as Decided handling, Open questions or play checks.
 DONE WHEN
 ---------
 The treatment is committed and pushed, and every box below is ticked:
-[ ] The file name ends "- implementation treatment.txt". The header names the source-of-
-    truth pages and has a Release line.
+[ ] The issue is labelled scoped (not idea) with a size and impact per piece, and its
+    header names the source-of-truth pages and has a Release line, a Depends on line
+    and a Sized date.
 [ ] The owner's request is quoted.
 [ ] Every Decided line was actually asked. Nothing guessed is marked Decided.
 [ ] Every Open line says who settles it: the owner, or the building session.
@@ -350,16 +383,18 @@ The treatment is committed and pushed, and every box below is ticked:
 [ ] Each piece ships alone, has tests and play checks, and names the docs it changes.
 [ ] Order and size are written, including what this waits on and what it unblocks.
 [ ] No implementation code is pasted in.
-[ ] Only intake/ changed, apart from the session log entry.
+[ ] Only issues changed, apart from the session log entry. No new file in intake/.
 
 NEVER
 -----
 - Never mark a guess "Decided". If the owner was not asked, the line is
   "Recommended"; if neither of you can decide yet, it is "Open".
 - Never write code, wiki or asset changes while scoping.
-- Never put a bug in intake/.
+- Never put a bug in a feature issue, and never file a feature as a bug.
 - Never design a breed without the owner (design-a-breed).
 - Never paste implementation code into a treatment. It is stale before it is used.
+- Never open a second issue for a feature an `idea` issue already holds.
+- Never write a new treatment as a file in intake/.
 
 SEE ALSO
 --------

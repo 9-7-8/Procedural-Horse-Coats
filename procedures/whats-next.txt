@@ -11,15 +11,16 @@ LEAVES     : 2-4 concrete next pieces of work in front of the owner, each with i
 WHEN TO USE
 -----------
 At the start of a session, or whenever the owner asks what to do next. Every queue in the
-project lives in a different place: intake/, GitHub issues, Verification tabs, Roadmap
-tabs, the server's log exports, unreleased work on main. This procedure reads them all
+project lives in a different place: GitHub issues (bugs, tuning, features, ideas),
+Verification tabs, Roadmap tabs, the server's log exports, unreleased work on main. This procedure reads them all
 once and turns them into a short choice. It recommends; it does not decide.
 If the owner has already named the work, skip this and run that work's procedure.
 
 BEFORE YOU START
 ----------------
 1. `git pull --ff-only origin main`. Then `git status --short`: untracked files in intake/
-   are the owner's queued material.
+   are the owner's queued material (transitional: until the migration finishes, some
+   treatments are still files there).
 2. Search the way look-it-up describes. Read summaries and headers, never whole pages.
    The point is a quick, wide look.
 
@@ -32,9 +33,14 @@ STEPS
       `gh issue list --state open --search "label:bug,tuning -label:needs-owner"`, plus
       the needs-owner ones, which are waiting on her answers. Note the urgency line of
       each.
-   c. INTAKE: the units in intake/, scored as process-intake steps 1-4 score them
-      (size, impact, owner, dependencies) - read intake/Sizing.txt rather than every
-      treatment, re-sizing only what changed since its date. Count intake/To do.txt bullets too.
+   c. FEATURES: open issues labelled `scoped` (the units), scored as process-intake
+      steps 1-4 score them from their labels (size:, impact:, needs-owner) and the
+      Depends on line, never the whole body. Count the `idea` issues too, and say how
+      many; they are not units until scoped, but a bare count shows the backlog.
+      Page the search, 5-10 at a time. Claimed units (in-progress) are being built by
+      another session: mention them, never offer them.
+      FILE (transitional): units still in intake/, scored from intake/Sizing.txt,
+      re-sizing only what changed since its date.
    d. WAITING ON HER EYES: wiki/verification.html, the newest entries and the oldest
       ones. Also anything a yard pen could answer without her (run-tests).
    e. THE SERVER: unreviewed PCH log export folders (review-server-logs; the local
@@ -51,17 +57,20 @@ STEPS
       - small bugs (fix-bug);
       - pens that can close checks (run-tests);
       - unreviewed server logs (review-server-logs);
-      - Tier 1 or Tier 2 intake units (process-intake).
+      - Tier 1 or Tier 2 feature units (process-intake).
    e. Work that needs her answers. Gather its questions so one round unblocks it.
       If she says she is free to answer ("something that needs me"), run a QUESTION
-      SWEEP instead of one unit: take intake/Sizing.txt's "No"/"near-owner" rows, grep
-      each treatment for its Open lines, and ask them in rounds of up to 4 (the
-      treatment's own recommendation first). Record each answer where its builder looks:
-      an "OWNER'S ANSWERS, <date>" block at the top of the treatment (it overrides the
-      Open lines), the plan section on its wiki page with a decisions.html pointer, and
-      the Sizing.txt owner column. Write an answer that differs from the recommendation
-      exactly as she gave it.
-   f. The big ones: Tier 3 intake units, foundations, long Roadmap items.
+      SWEEP instead of one unit: take the open issues labelled `needs-owner` and
+      `scoped` or `idea` (FILE: intake/Sizing.txt's "No"/"near-owner" rows), read each
+      one's Open lines, and ask them in rounds of up to 4 (the treatment's own
+      recommendation first). Record each answer where its builder looks: an
+      "OWNER'S ANSWERS, <date>" block at the top of the issue body (it overrides the
+      Open lines) and a comment saying so, the plan section on its wiki page with a
+      decisions.html pointer, and the labels (remove needs-owner when the last Open line
+      is answered). Write an answer that differs from the recommendation exactly as she
+      gave it. FILE: the same block goes at the top of the treatment, and the Sizing.txt
+      owner column is updated.
+   f. The big ones: Tier 3 feature units, foundations, long Roadmap items.
    g. Visual-only checks come last, always.
    Never offer two options that are really one. Never offer work whose prerequisite has
    not shipped. Never bundle two pieces of work in one option when their procedure
@@ -91,6 +100,7 @@ NEVER
 - Never start work before the owner picks, unless she has said to just get on with it.
   In that case take the recommendation, and say so.
 - Never read whole pages or every issue body to build the list.
+- Never offer a unit another session has claimed (in-progress).
 - Never recommend a visual check above work that can be wrong without anyone seeing it.
 - Never offer a release below release step 1's bar.
 

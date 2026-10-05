@@ -1,6 +1,6 @@
 ---
 name: review-server-logs
-description: Review the live server's dated PCH log exports that have not been reviewed yet - bugs to GitHub issues, player wants to intake/To do.txt, death patterns and operator-script errors to the report. Read only. Use when the owner says "check the server logs", "review the PCH logs", "read the server logs".
+description: Review the live server's dated PCH log exports that have not been reviewed yet - bugs to GitHub issues, player wants to idea issues, death patterns and operator-script errors to the report. Read only. Use when the owner says "check the server logs", "review the PCH logs", "read the server logs".
 ---
 
 Read `procedures/review-server-logs.txt` in full, then follow it exactly.
