@@ -1,0 +1,106 @@
+2026-10-05 12:49 (end) - /next-release: #35 found already fixed; #205 coat-key caches built
+
+ASKED
+-----
+- "/next-release" (the next-release procedure). Next release: v0.5.045. Every open issue
+  already had a milestone. The four bugs on it all turned out to have fixes in, so the
+  unit was #205, the first item in the plan's order. It is built and closed.
+
+DONE
+----
+- #35 (horses suffocating in blocks), no code. It looked like the only unfixed bug on
+  v0.5.045, and it is DAMAGE, so it ranked first. It is not unfixed. 8e477dbd
+  (HorseClearance, 2026-10-04) fixed it and shipped in v0.5.044, but the release session
+  never commented on the issue, so it read as open work. A comment now names the fix and
+  the release, and the issue waits on the live server's log. New evidence from the raw
+  server logs (read only):
+  - four more [suffrescue] rescues on 4 Oct, 13:00-17:19, all on 0.5.043, before the
+    fix, with full UUIDs;
+  - zero rescues and zero [clearance] lines on 0.5.044 so far, but that covers only
+    about 80 minutes (4 Oct 23:01-23:59, 5 Oct 12:00-12:23);
+  - the 21 Sep 20:28 deaths (Clapped Zion, Reckless Epic, Slow Dawn) were inside
+    tm_u_stable's box, 18-60 s after "[Stables] filled ... with 10 horse(s)".
+    StablePopulator places at scale 1, then grows the horse;
+  - no other wall death since 18 Sep lies in any logged stable box. The matcher was
+    checked against the 21 Sep case.
+  The comment also lists the fix's remaining gaps: a 3-block search, a horse left in
+  place when its body collides but its eyes are clear, Horse only, and the lycanthropy
+  pre-check on a scale-1 box. Those come from an Explore agent's map of every placement
+  path.
+- 6c8ca98c, #205: coat-key caches (closed). The problem: extractRenderState, called for
+  every horse on every frame, rebuilt the coat key from scratch. coatCode,
+  isDeterministic and visibleFingerprint each walked the registry, and the fingerprint
+  built a new EpiSchema per gene. It also re-ran HorseAbilities.activeFor and
+  GrownParts.of and sorted a TreeSet for the glow key. What changed:
+  - CoatData memoises textureKey/meshKey/glowKey/glowParts/grownParts. The key format
+    moved there from GeneticCoatTextureFactory, byte-identical;
+  - Epigenome.schemaOf(gene) is a per-instance schema cache, and every reader goes
+    through it, DesignerApi included. MIDPOINTS is keyed by instance;
+  - the world-exit summary has a "horse render-state extraction:" line;
+  - there is a dev render bench (DebugRenderBench + DebugRenderBenchClient,
+    -PrenderBench=N on runClientTestWorld).
+  Proof:
+  - bench, same seeds, about 70 horses in view, 600 ticks: mean 196.6 -> 2.3 us,
+    p50 201.8 -> 1.9, p95 320.1 -> 3.8, 11,946 -> 141 ms of the 30 s window. FPS was 29
+    both times, the client's inactivityFpsLimit afk cap. The "before" was taken on this
+    tree with the timing and bench in, before the caches;
+  - CoatDataTest (9) and the new EpiSchemaCacheTest (3) are green. Both were broken on
+    purpose (one shared mesh-key field; a key-string cache): 3 failures;
+  - EpigenomeTest, CoatTextureIdTest, CoatBakeGoldenTest, CoatPipelineGoldenTest and
+    CommonPortabilityTest are green;
+  - :neoforge-26.1.2:build is green, check-parity OK, :web:bakeDesignerAssets +
+    check-designer-boots OK.
+  The UNVERIFIED lines are resolved: all 72 epiSchema() overrides are pure, and TeaVM
+  compiles the change.
+
+DECIDED
+-------
+Calls made without the owner:
+- #35 is "fixed, waiting on a check", not a unit (procedure rule). Recorded on #35.
+- #205 shipped as one commit, not instrumentation-then-caches. Recorded in the commit
+  and on #205.
+- The memo's key format moved into CoatData. Recorded at wiki/pipeline.html#per-frame-keys.
+- MIDPOINTS re-keyed by gene instance, beyond the treatment, for the same staleness
+  reason. Recorded there too.
+- The bench is a dev tool, kept and documented in the pipeline page's Dev tools table.
+
+FOUND ON THE WAY
+----------------
+- The release session for 0.5.044 left #35 and its fix unlinked on the issue.
+  next-release now checks git log before calling a bug unfixed.
+- FPS cannot show a render win on the dev client: inactivityFpsLimit:"afk".
+- The bench counts yard horses below the stage as well as its own 50. The "per horse"
+  figure in its line is therefore approximate; the mean is not affected.
+- Mistake made and fixed: the first glow test used the glow gene, which paints emissive
+  layers rather than declaring a glow effect, so glowParts() was empty. It now uses
+  suntouched.
+- No new bug filed.
+
+PROCEDURES
+----------
+- next-release.txt step 3: a bug with no "waiting on" comment gets
+  `git log --grep '#N'` before it counts as unfixed; a found fix gets its comment.
+- stress-test.txt: points at the client render bench, and warns that the afk FPS cap
+  makes the FPS figure useless.
+- No new procedure needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- A full :common:test run was not made. It would still check every other class that
+  reads epigenetics through schemaOf (breeding, BreedFounder, the spec parser and the
+  readouts). Their schemas are equal by EpiSchemaCacheTest, so a change in behaviour
+  is not expected.
+- Gametests were not run.
+- Not seen in a played game: wiki/pipeline.html#per-frame-keys-1005 (the
+  extraction line beside a real herd, and coats looking unchanged).
+- #35: waits on several days of the live log on 0.5.044+ (review-server-logs).
+
+RELEASE
+-------
+Not offered. v0.5.045 still has #206, the body-part slices and two procedure issues
+open.
+
+PICK UP FIRST
+-------------
+- /next-release: the next unit is #206 (coat-key rebuild piece 2, the screens; size M,
+  no owner calls), by process-intake.

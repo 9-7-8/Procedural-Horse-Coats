@@ -12,6 +12,11 @@ WHEN TO USE
 When the owner asks how expensive horses are, after a change to anything that runs per horse
 per tick (an EntityTickEvent handler, a horse goal, a mixin on horse tick or travel), or
 before and after a performance fix. Not for "does it work": that is test-tiers or the yard.
+This measures the SERVER. For what horses cost the client per frame, use the render
+bench: `runClientTestWorld -PrenderBench=50` (launch-game step 5, -WindowStyle Normal),
+which logs one "[bench]" line of per-horse extractRenderState time. Run it on both
+commits, and compare the mean, not the FPS. run/options.txt has inactivityFpsLimit:"afk",
+which caps an untouched client at about 30 FPS. (#205: 196.6 to 2.3 us at 29 FPS both.)
 
 BEFORE YOU START
 ----------------

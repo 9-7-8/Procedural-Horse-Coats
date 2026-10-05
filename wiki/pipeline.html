@@ -789,6 +789,62 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
     <code>[Founding]</code> line says so, at most every five seconds.
 </p>
 
+<h3 id="per-frame-keys">What a baked horse costs per frame: the memoised keys</h3>
+
+<p>
+    A bake is paid once. Everything else in <code>GeneticHorseRenderer.extractRenderState</code>
+    is paid <strong>every frame, for every horse on screen</strong>. Until 2026-10-05 (#205)
+    that included rebuilding the horse's whole cache key: <code>textureKey()</code> walks the
+    gene registry for <code>coatCode()</code>, again for <code>isDeterministic()</code>, and again for
+    <code>visibleFingerprint</code>, which asked each gene for a freshly built
+    <code>EpiSchema</code>. The renderer also re-ran <code>HorseAbilities.activeFor</code> for
+    the glow parts and <code>GrownParts.of</code> for the horns, and sorted the glow parts into a
+    new <code>TreeSet</code> for the mask's key.
+</p>
+
+<p>Now none of that is repeated:</p>
+<ul>
+    <li><strong><code>CoatData</code> memoises</strong> <code>textureKey()</code>, the two mesh keys
+        (<code>meshKey(baby)</code>: <code>:adult</code> / <code>:foal</code>), the two glow-mask keys
+        (<code>glowKey(baby)</code>), <code>glowParts()</code> and <code>grownParts()</code>. A
+        <code>CoatData</code> cannot change once built, so nothing is ever invalidated. The client
+        keeps one per horse across frames (<code>ClientCoatCache</code>), so each horse pays the walk
+        once. The key <em>format</em> lives here too now, not in the factory, and is byte-identical
+        to before: the golden tests did not move.</li>
+    <li><strong><code>Epigenome.schemaOf(gene)</code></strong> builds each gene's schema once.
+        Every reader in <code>common/</code> and <code>DesignerApi</code> goes through it, never
+        <code>Gene.epiSchema()</code>. It is keyed by the gene <em>instance</em>, so a test that
+        re-registers a gene under the same key reads the new gene's schema. The midpoints an empty
+        copy reads (<code>Epigenome.readable</code>) are keyed the same way. This is safe because
+        every schema is a pure function of its gene. A schema that read a config would freeze at its
+        first answer, so a new override must not.</li>
+</ul>
+
+<p>
+    <strong>Measured</strong> with the render bench
+    (<code>runClientTestWorld -PrenderBench=50</code>, <code>DebugRenderBench</code>): 50 seeded
+    founders in view, plus the yard below, about 70 horses a frame, over 600 ticks.
+</p>
+<div class="table-wrap">
+<table>
+    <tr><th></th><th>Mean</th><th>p50</th><th>p95</th><th>In extraction, of 30&nbsp;s</th></tr>
+    <tr><td>Before</td><td>196.6&nbsp;&micro;s</td><td>201.8&nbsp;&micro;s</td><td>320.1&nbsp;&micro;s</td><td>11,946&nbsp;ms (about 14&nbsp;ms of every frame)</td></tr>
+    <tr><td>After</td><td>2.3&nbsp;&micro;s</td><td>1.9&nbsp;&micro;s</td><td>3.8&nbsp;&micro;s</td><td>141&nbsp;ms</td></tr>
+</table>
+</div>
+<p>
+    FPS read 29 in both runs. The test client's <code>inactivityFpsLimit</code> is
+    <code>afk</code>, which caps a client nobody touches at about 30, so the bench's FPS figure
+    cannot show this. The time per frame is the measure. The &ldquo;before&rdquo; was taken on the
+    same tree with the timing and the bench in, but no caches.
+</p>
+<p>
+    Every session's log now ends with a <code>horse render-state extraction:</code> line beside
+    <code>coat baking:</code>: calls, total, mean and slowest, with any bake taken back out. It is
+    always on, at two <code>nanoTime</code> reads a horse, so a tester's log answers the question
+    too.
+</p>
+
 <div class="note danger">
     <span class="label">CoatTextureId &mdash; do not go back to lower-casing</span>
     <p>
@@ -881,6 +937,7 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
 <tbody>
 <tr><th><code>./gradlew :common:bakeCoatSamples</code></th><td>Writes <code>build/coat-samples/*.png</code> and <code>*_foal.png</code>. No game launch.</td></tr>
 <tr><th><code>./gradlew :common:test</code></th><td>Pure Java, no Minecraft &mdash; the fastest loop when iterating on genetics or coats.</td></tr>
+<tr><th><code>./gradlew :neoforge-26.1.2:runClientTestWorld -PrenderBench=50</code></th><td>The render bench (<a href="#per-frame-keys">per-frame keys</a>). Stages that many seeded founders in view, lets them bake, then logs one <code>[bench]</code> line of per-horse extraction time and FPS. Run it on two commits and compare the lines. Set <code>inactivityFpsLimit</code> off in <code>run/options.txt</code> if the FPS figure matters.</td></tr>
 </tbody>
 </table>
 </div>
@@ -1212,8 +1269,25 @@ double snipSize  = epi.get(SNIP_SIZE);</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>A fix for <strong>every GUI drawing the same black horse</strong> is in and unseen, so family tree, foal preview, browser and spawn screen all want opening on a deep pedigree &mdash; and <code>coats.bakeBudgetMs</code> has still never been measured with a person actually rendering, which no yard run can supply.</p>
+    <p>The <strong>coat-key caches</strong> cut a horse's per-frame cost about 85-fold on the bench but have not been played beside a real herd. A fix for <strong>every GUI drawing the same black horse</strong> is in and unseen, so family tree, foal preview, browser and spawn screen all want opening on a deep pedigree &mdash; and <code>coats.bakeBudgetMs</code> has still never been measured with a person actually rendering, which no yard run can supply.</p>
 </div>
+
+<h3 id="per-frame-keys-1005">Herds cost less per frame: the coat-key caches (2026-10-05, NOT played)</h3>
+
+<p>
+    The bench measured the caches from a scripted view (<a href="#per-frame-keys">per-frame keys</a>);
+    nobody has played with them. Two things want a person:
+</p>
+<ul>
+    <li><strong>A real herd, from the log.</strong> Ride or fly up to a big wild herd, or stand
+        beside a full pen, for a minute, then leave the world. The
+        <code>horse render-state extraction:</code> line at world exit should read a mean in
+        tens of microseconds, not the 150&ndash;200&nbsp;&micro;s the bench measured before the
+        caches. F3's FPS should rise or hold.</li>
+    <li><strong>Visual, and therefore last:</strong> every coat, glow and horn looks the way it
+        did before. The golden tests say the keys did not move, so a wrong coat here would be
+        a horse wearing another horse's coat, not a new colour.</li>
+</ul>
 
 <h3 id="gui-coats-0918">Every horse in every GUI was the same black horse (2026-09-18, NOT played)</h3>
 

@@ -66,6 +66,10 @@ STEPS
    bug whose fix is already in and whose last comment says it waits on a check (an
    in-game look, a yard pen, the server's log: it stays on the milestone and closes
    when the check passes), and anything whose `Depends on:` names an issue that is still open.
+   A bug with no such comment is not therefore unfixed: run `git log --oneline --grep '#N'`
+   first. A fix commit with no "waiting on" comment (a release session shipped #35's that
+   way) gets the comment now, naming the commit, the tag that carries it and the check,
+   and is then skipped. Only a bug with no fix commit is a unit.
    An issue with `needs-owner` stays in the list. Before choosing it, put its open
    calls to the owner with the question tool, 2-4 options each with the
    recommendation first. If she answers, remove needs-owner and continue. If not,
