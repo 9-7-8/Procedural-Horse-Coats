@@ -8,6 +8,7 @@ wiki/ai-setup.html#settings	all	Your key
 wiki/ai-setup.html#what	all	What it does
 wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration, not its overrides
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
+wiki/api-notes.html#createpath-is-not-a-probe	all	createPath is not a clean probe: it can answer with the path the mob is already on, or with null
 wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
 wiki/api-notes.html#cutout-no-blend	all	A cutout pipeline ignores your alpha, so a tint cannot fade anything
 wiki/api-notes.html#deferred-submit-setupanim	all	A submitted model is drawn later, and setupAnim runs then — not at the submit

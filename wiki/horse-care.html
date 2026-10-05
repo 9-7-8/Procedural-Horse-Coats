@@ -778,6 +778,18 @@
     <code>hay_under_a_low_roof_is_eaten</code> and <code>stacked_hay_is_eaten</code>; the
     record is on <a href="compatibility.html#bales-reached">compatibility</a>.
 </p>
+<p id="probe-not-cached">
+    <strong>&hellip;and a failed question is not always a &ldquo;no&rdquo;</strong> (2026-10-04,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/39">#39</a>). A rejected
+    candidate is ignored for a minute, so one wrong &ldquo;unreachable&rdquo; starves a horse
+    beside its only bale. Vanilla gave two of them. A horse in the air for a tick, as a newly
+    founded one is, gets null from <code>createPath</code>. A horse already strolling gets the
+    stroll back, uncomputed, if it had asked about this bale before. <code>canUse</code> now
+    skips a search while the horse can't plan a path, and <code>HungerFoodGoal.ownPath</code>
+    stops the navigation and asks again when the answer is a path to somewhere else. About one
+    hay-gametest horse in thirty starved before. See
+    <a href="api-notes.html#createpath-is-not-a-probe">API notes</a>.
+</p>
 <p>
     <strong>The check alone would have swapped pushing for starving.</strong>
     <code>CROP</code> outranks <code>GRASS</code>, so a horse in a grass pen beside a fenced farm

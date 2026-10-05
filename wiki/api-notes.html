@@ -909,6 +909,32 @@ boolean operator = Commands.LEVEL_GAMEMASTERS.check(source.permissions());</code
     that corner, not from the mob&rsquo;s middle. Read 2026-10-04 in the 26.1.2 sources.
 </p>
 
+<h2 id="createpath-is-not-a-probe"><code>createPath</code> is not a clean probe: it can answer
+    with the path the mob is already on, or with null</h2>
+
+<p>
+    Calling <code>createPath</code> only to ask &ldquo;can it get there?&rdquo; has two traps,
+    both in <code>PathNavigation.createPath(Set, int, boolean, int, float)</code>:
+</p>
+<ul>
+    <li><strong>The cache.</strong> If the navigation's current path is unfinished and its
+        <code>targetPos</code> is one of the targets asked for, it returns that path without
+        planning. Every <code>createPath</code> sets <code>targetPos</code>, including a probe
+        nobody follows. So a mob that probed a bale earlier and is now on a stroll gets the
+        stroll back, aimed somewhere else and usually short. Check
+        <code>targets.contains(path.getTarget())</code>; if not, <code>stop()</code> the
+        navigation and ask again.</li>
+    <li><strong>Null when it cannot plan.</strong> <code>!canUpdatePath()</code> returns null,
+        and for <code>GroundPathNavigation</code> that means not on the ground, not in liquid and
+        not a passenger. A mob spawned this tick, or a moment airborne, gets null for a target
+        it can walk to. Don't read that null as &ldquo;unreachable&rdquo;; wait a tick.</li>
+</ul>
+<p>
+    Both starved a gametest horse beside its hay, about one cell in thirty
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/39">#39</a>,
+    <a href="horse-care.html#probe-not-cached">horse care</a>). Read 2026-10-04 in the 26.1.2 sources.
+</p>
+
 <h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
 
 <p>

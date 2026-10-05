@@ -98,6 +98,12 @@ STEPS
      let the messages name the cause before changing anything. Proof is the same loop
      afterwards, with more runs than it took to see the flake. Example: #37, 4 red in 6
      before and 7 green in 7 after.
+     A rarer flake (1 in 20 or worse) is too slow to tally one copy at a time. Register
+     temporary copies of the test (about 15, each built where no other copy reaches, e.g.
+     a different height) so that one run tries many times. Count only failures that
+     match the bug: 30 extra horses swamp the founding budget, and the "not founded" or
+     "no record" failures that follow belong to the copies. Delete the copies before
+     committing. Example: #39, 5 runs in 8 red before and 320 cells green after.
    - Edit the smallest owning slice, and run the check straight away.
    - Shape:
      - The rule goes in common/, returning a typed result, never chat text.

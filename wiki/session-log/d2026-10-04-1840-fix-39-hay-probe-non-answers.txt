@@ -1,0 +1,86 @@
+2026-10-04 18:40 (start, local, approximate) - Fix #39: the hay gametest's starved horse
+
+ASKED
+-----
+- "/fix-bug fix a bug, then tell me how many bugs are left that we can fix without
+  re-running the yard tests". Took #39 (hay_under_a_low_roof_is_eaten flakes about 1 run
+  in 20), which the last session's PICK UP FIRST named. #35, #36 and #10 were already
+  fixed and only waiting on a check (the live server's log, an in-game check, an in-game
+  check). #33 and #34 are cosmetic, which ranks last. #31 carries needs-owner. Fixed and
+  closed. The count is answered in the session summary.
+- "You have 3 running tests, how much longer should they take?" Answered: one loop of
+  about 70 s a run with 3 runs left, and two idle file watchers, stopped afterwards.
+
+DONE
+----
+- b56ded2c "Fix #39: a hungry horse took vanilla's non-answers for "unreachable" and
+  starved beside its bale". neoforge-26.1.2/.../server/HungerFoodGoal.java, plus a
+  clearer failure message in gametest/ModGameTests.java.
+  The goal ignores a rejected candidate for IGNORE_TICKS (1200), longer than the test's
+  400, so one wrong "unreachable" starves the horse. Vanilla gave two wrong ones, both in
+  PathNavigation.createPath (read in the 26.1.2 sources):
+  1. null when !canUpdatePath(), which for GroundPathNavigation means not on the ground.
+     A horse spawned or founded a tick ago is airborne for a tick or two. Roofed cell: the
+     bale was rejected one tick after founding, with the horse airborne just before.
+     canUse now skips the search on that same test and retries next tick.
+  2. the navigation's current path, unplanned, when it is unfinished and the last
+     recorded targetPos is one of the targets. Every createPath records its target,
+     probes included. Stacked cell: both bales rejected while a stroll toward the top of
+     a wall was running; the "path" was short, ended at the horse's feet and aimed at a
+     third block. New ownPath() stops the navigation and asks again when the answer's
+     target is not one of those asked for. reachable(Entity) goes through it too.
+  Proof:
+  - Diagnostics in the failure message (position, scale, running goals, horses near,
+    HungerFoodGoal's ignoredUntil by reflection, a per-tick path probe, airborne ticks),
+    and 15 temporary copies of each hay cell at their own heights, 32 cells a run.
+  - Before: 1 hay failure in the first 24 plain runs (stacked_hay_is_eaten, run 25);
+    then hunger-19 starvations in 5 of 8 diagnostic runs. No other horse came within 12
+    blocks of any failure, so it was not neighbours.
+  - Cache fix alone: 2 in 8 runs, both the airborne cause (one was the real
+    hay_under_a_low_roof_is_eaten). Both fixes: 0 in 10 runs, 320 cells.
+  - The copies removed: 3 plain runGameTest runs green. :neoforge-26.1.2:build and
+    check-parity green.
+  - The red-before-green is the mutation: same harness, fix absent.
+  #39 closed by the commit, with a proof comment.
+
+DECIDED
+-------
+- Made without the owner: a hungry horse that finds the navigation answering with
+  another goal's path stops that path (ownPath). It only happens when the horse is
+  about to plan a meal, so a stroll is all it costs. Recorded on #39 and on
+  horse-care.html#probe-not-cached.
+- Made without the owner: BondFollowGoal.ReachCheck probes createPath the same way and
+  may share both traps. Not changed (one issue per run); it is named in api-notes.
+
+FOUND ON THE WAY
+----------------
+- #40 filed: order_stay_walks_back went red once in 30 runs on stock code (run 26 of the
+  before tally). Its message prints no state. One lead: the test reads
+  getNavigation().getTargetPos(), which any probe overwrites.
+- The diagnostic copies produce their own failures: "hunger 100" / "not founded yet" /
+  stasis_tag_is_readable's "no record ten ticks in". 30 extra horses swamp the founding
+  budget. They never appeared in plain runs; excluded from the count, and written into
+  fix-bug.txt.
+- A mid-loop edit is compiled into the next run of a running loop (runs 26-30 of the
+  before tally picked up the diagnostics). Harmless here, and noted in the proof.
+
+PROCEDURES
+----------
+- fix-bug.txt step 5: a flake rarer than 1 in 20 is tallied with temporary copies of the
+  test, counting only failures that match, and the copies are deleted before the commit.
+  The 6-run tally the step gave could not see it.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run: nothing in common/ changed.
+- Nothing new to see in game: the fix is proven by the gametests. The live behaviour it
+  changes (a hungry horse no longer gives up on food it asked about at a bad moment) has
+  no Verification-tab anchor of its own.
+
+RELEASE
+-------
+Not offered: one fix since the last session's batch, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#40 (order_stay_walks_back gametest flake), by procedures/fix-bug.txt.
