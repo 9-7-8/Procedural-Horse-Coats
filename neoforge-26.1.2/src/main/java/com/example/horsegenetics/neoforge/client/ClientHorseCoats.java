@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.coat.CoatCodeCache;
 import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -38,7 +39,26 @@ public final class ClientHorseCoats {
     private static final Map<UUID, CoatData> COATS = new HashMap<>();
     private static final Set<UUID> ASKED = new HashSet<>();
 
+    /**
+     * Coats for horses known only by their saved codes - a transfer deed, a
+     * pedigree record, a foal on the Offspring tab. Parsing those every frame
+     * they are drawn was #206; a few dozen is far more than a player has on
+     * screen at once.
+     */
+    private static final CoatCodeCache BY_CODES = new CoatCodeCache(64);
+
     private ClientHorseCoats() {
+    }
+
+    /**
+     * The coat these codes describe, parsed once and then handed back as the
+     * same instance, so the keys {@link CoatData} memoises are built once too.
+     *
+     * @throws RuntimeException if the codes do not parse, exactly as
+     *         {@code Genome.parse} would; nothing is cached then
+     */
+    public static CoatData ofCodes(String geneticCode, String epigenomeCode) {
+        return BY_CODES.coatOf(geneticCode, epigenomeCode);
     }
 
     /** The coat, or {@code null} if it has not arrived (or never will). */
@@ -96,5 +116,6 @@ public final class ClientHorseCoats {
     public static void clear() {
         COATS.clear();
         ASKED.clear();
+        BY_CODES.clear();
     }
 }

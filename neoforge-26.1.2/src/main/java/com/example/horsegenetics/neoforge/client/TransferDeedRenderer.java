@@ -1,6 +1,5 @@
 package com.example.horsegenetics.neoforge.client;
 
-import com.example.horsegenetics.common.coat.CoatData;
 import com.example.horsegenetics.common.horse.TransferDeed;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
@@ -96,7 +95,10 @@ public class TransferDeedRenderer implements SpecialModelRenderer<Identifier> {
         if (deed == null) {
             return null;
         }
-        return GeneticCoatTextureFactory.getOrCreate(new CoatData(deed.genome()), false);
+        // Through the codes cache, not deed.genome(): this runs every frame the
+        // paper is in a hand, a slot or a frame, and a parse per frame was #206.
+        return GeneticCoatTextureFactory.getOrCreate(
+                ClientHorseCoats.ofCodes(deed.geneticCode(), deed.epigenomeCode()), false);
     }
 
     @Override

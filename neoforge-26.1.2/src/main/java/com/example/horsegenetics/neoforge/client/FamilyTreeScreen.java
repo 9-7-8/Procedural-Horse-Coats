@@ -754,7 +754,9 @@ public final class FamilyTreeScreen extends Screen {
             // record without one: inventing a plausible epigenome from the UUID
             // drew a horse that never existed, which is worse than a blank in a
             // pedigree - the whole job of this screen is to show what was there.
-            return r.hasGenome() ? new CoatData(r.genome()) : null;
+            // Through the codes cache: this is asked for every node on every
+            // frame, and a parse each time was #206.
+            return r.hasGenome() ? ClientHorseCoats.ofCodes(r.geneticCode(), r.epigenomeCode()) : null;
         } catch (RuntimeException e) {
             return null;
         }

@@ -236,6 +236,9 @@ public final class HorseInfoScreen extends Screen {
     private final Genotype genotype;
     private final @Nullable Epigenome epigenome;
 
+    /** {@link #traits()}, resolved on first use - see there. */
+    private @Nullable Traits traits;
+
     private Tab tab = lastTab;
     private float scroll = 0f;
     private float maxScroll = 0f;
@@ -1708,11 +1711,16 @@ public final class HorseInfoScreen extends Screen {
      * needs to see it either way.
      */
     private Traits traits() {
-        try {
-            return HorseTraits.resolve(genotype, epigenome, true);
-        } catch (RuntimeException unresolvable) {
-            return HorseTraits.baseline();
+        // Resolved once: the genotype and epigenome are final for the screen's
+        // life, and this is asked for from several places on every frame (#206).
+        if (traits == null) {
+            try {
+                traits = HorseTraits.resolve(genotype, epigenome, true);
+            } catch (RuntimeException unresolvable) {
+                traits = HorseTraits.baseline();
+            }
         }
+        return traits;
     }
 
     // ------------------------------------------------------------------
@@ -2069,7 +2077,9 @@ public final class HorseInfoScreen extends Screen {
      */
     private static @Nullable CoatData coatOf(HorseRecord horse) {
         try {
-            return horse.hasGenome() ? new CoatData(horse.genome()) : null;
+            // Through the codes cache: the portraits are drawn every frame (#206).
+            return horse.hasGenome()
+                    ? ClientHorseCoats.ofCodes(horse.geneticCode(), horse.epigenomeCode()) : null;
         } catch (RuntimeException unreadable) {
             return null;
         }

@@ -3683,6 +3683,12 @@ public final class HorseBrowserScreen extends Screen {
         return tab == Tab.REALM;
     }
 
+    /** The Query tab's match count, and what it was counted against - see {@link #drawQueryBuilder}. */
+    private int builderCount;
+    private int builderCountVersion = -1;
+    private boolean builderCountRealm;
+    private String builderCountQuery;
+
     /**
      * <b>The Query tab.</b> The builder owns its own rows and menus; this draws
      * a heading, hands it the space and the live match count, and turns its two
@@ -3696,11 +3702,19 @@ public final class HorseBrowserScreen extends Screen {
                         + "up in the stasis bank or at a cowboy's counter.",
                 l + 2, top, fsRight() - l - 4, LABEL);
 
-        // The count is live, over whichever roster the query would be used on.
+        // The count is live, over whichever roster the query would be used on -
+        // but counted only when the query or that roster moves, never per
+        // frame: a gene: term walks every locus of every horse (#206).
         String text = builder.query();
         List<HorseListing> against = rosterAll();
-        int matched = text.isEmpty() ? against.size()
-                : HorseQuery.filter(against, text).size();
+        if (builderCountVersion != rosterVersion() || builderCountRealm != showingRealm()
+                || !text.equals(builderCountQuery)) {
+            builderCount = text.isEmpty() ? against.size() : HorseQuery.filter(against, text).size();
+            builderCountVersion = rosterVersion();
+            builderCountRealm = showingRealm();
+            builderCountQuery = text;
+        }
+        int matched = builderCount;
 
         builder.draw(g, this.font, l + 2, top + 14, fsRight() - l - 4,
                 mouseX, mouseY, matched, against.size());

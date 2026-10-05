@@ -369,9 +369,37 @@ public final class CustomHorseSpawnScreen extends Screen {
 
     private Epigenome epigenome;
 
-    /** Cached preview, rebuilt only when the genome actually changes. */
+    /**
+     * <b>{@link #genotype()}, memoised (#206).</b> It was rebuilt - every row
+     * walked, every pair allocated, the eyes forced - several times a frame, and
+     * the preview then printed it to a code string to see whether it had moved.
+     * The inputs are the rows' {@code added}/{@code a}/{@code b} (the row list
+     * itself is built once, in the constructor), {@link #female}, and the
+     * epigenome, which is immutable and only ever replaced, so an identity
+     * check sees every change. Comparing the inputs rather than setting a dirty
+     * flag means no click handler can forget to: a missed flag is a stale
+     * preview, a compared input cannot be missed.
+     *
+     * <p>A cache, not a rule, so the designer twin ({@code web/HorseEditor})
+     * needs no mirror of it - hard rule 5 is about behaviour.
+     */
+    private Genotype genotypeMemo;
+    private boolean genotypeFemale;
+    private Epigenome genotypeEpigenome;
+    /** Three ints per row: added (0/1), a, b. Sized in the constructor. */
+    private int[] genotypeInputs = new int[0];
+
+    /**
+     * Cached preview, rebuilt only when the genome actually changes - which,
+     * with {@link #genotype()} memoised, is when either half is a new instance.
+     */
     private CoatData previewCoat;
-    private String previewKey = "";
+    private Genotype previewGenotype;
+    private Epigenome previewEpigenome;
+    private Traits previewTraitsMemo;
+    private java.util.List<HorseAbilities.Active> abilitiesMemo;
+    private Genotype abilitiesGenotype;
+    private Epigenome abilitiesEpigenome;
     private Horse previewHorse;
     private boolean previewHorseIsBaby;
 
@@ -409,6 +437,7 @@ public final class CustomHorseSpawnScreen extends Screen {
             rows.add(new Row(gene));
         }
         rows.sort(Comparator.comparing(r -> r.gene.name(), String.CASE_INSENSITIVE_ORDER));
+        genotypeInputs = new int[rows.size() * 3];
         familyChoices.addAll(GeneFamily.occupied());
         rebuildView();
         this.epigenome = rollEpigenome();
@@ -606,7 +635,7 @@ public final class CustomHorseSpawnScreen extends Screen {
             stamp(row, gt);
         }
         epigenome = next;
-        previewKey = "";
+        previewCoat = null;
     }
 
     /**
@@ -736,7 +765,7 @@ public final class CustomHorseSpawnScreen extends Screen {
             }
         }
         epigenome = fresh;
-        previewKey = "";
+        previewCoat = null;
     }
 
     private void toggleLock(Row row) {
@@ -1318,6 +1347,36 @@ public final class CustomHorseSpawnScreen extends Screen {
      * <p>The twin does the same thing in the same place - see the other file.
      */
     private Genotype genotype() {
+        if (genotypeMemo != null && female == genotypeFemale && epigenome == genotypeEpigenome
+                && rowsUnchanged()) {
+            return genotypeMemo;
+        }
+        genotypeMemo = buildGenotype();
+        genotypeFemale = female;
+        genotypeEpigenome = epigenome;
+        int i = 0;
+        for (Row row : rows) {
+            genotypeInputs[i++] = row.added ? 1 : 0;
+            genotypeInputs[i++] = row.a;
+            genotypeInputs[i++] = row.b;
+        }
+        return genotypeMemo;
+    }
+
+    /** Has any row's state moved since {@link #genotypeMemo} was built? No allocation. */
+    private boolean rowsUnchanged() {
+        int i = 0;
+        for (Row row : rows) {
+            if (genotypeInputs[i++] != (row.added ? 1 : 0)
+                    || genotypeInputs[i++] != row.a
+                    || genotypeInputs[i++] != row.b) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private Genotype buildGenotype() {
         List<AllelePair> pairs = new ArrayList<>();
         for (Row row : rows) {
             if (!row.added) {
@@ -1409,7 +1468,7 @@ public final class CustomHorseSpawnScreen extends Screen {
         } else {
             epigenome = rollEpigenome();
         }
-        previewKey = "";
+        previewCoat = null;
         if (droppedEpigenome) {
             say("Pasted the horse, but its epigenome did not parse - "
                     + "this one has a fresh set, so the coat will differ wherever a gene "
@@ -1473,24 +1532,45 @@ public final class CustomHorseSpawnScreen extends Screen {
     private static final double PREVIEW_SCALE_CAP = 2.5;
 
     /**
-     * The body the current genome resolves to. Cheap enough for a frame - it is
-     * one walk of the gene list - and it has to be re-resolved rather than
-     * cached against the coat key, because the epigenome moves the size without
-     * moving a single pixel of the coat.
+     * The body the current genome resolves to. Kept against the genome itself
+     * rather than the coat key, because the epigenome moves the size without
+     * moving a single pixel of the coat - and since {@link #genotype()} is
+     * memoised, "the genome moved" is a new instance of either half.
      */
     private Traits previewTraits() {
-        return HorseTraits.resolve(genotype(), epigenome, true);
+        Genotype genotype = genotype();
+        if (previewTraitsMemo == null || previewGenotype != genotype || previewEpigenome != epigenome) {
+            refreshPreview(genotype);
+        }
+        return previewTraitsMemo;
     }
 
     /** The coat the current genome makes, rebuilt only when the genome moves. */
     private CoatData previewCoat() {
         Genotype genotype = genotype();
-        String key = genotype.toCode() + '@' + epigenome.toCode();
-        if (previewCoat == null || !key.equals(previewKey)) {
-            previewCoat = new CoatData(genotype, epigenome);
-            previewKey = key;
+        if (previewCoat == null || previewGenotype != genotype || previewEpigenome != epigenome) {
+            refreshPreview(genotype);
         }
         return previewCoat;
+    }
+
+    /** The coat and the body together, so neither can lag the other. */
+    private void refreshPreview(Genotype genotype) {
+        previewCoat = new CoatData(genotype, epigenome);
+        previewTraitsMemo = HorseTraits.resolve(genotype, epigenome, true);
+        previewGenotype = genotype;
+        previewEpigenome = epigenome;
+    }
+
+    /** {@link HorseAbilities#activeFor} for the current genome, kept until it moves. */
+    private java.util.List<HorseAbilities.Active> activeAbilities() {
+        Genotype genotype = genotype();
+        if (abilitiesMemo == null || abilitiesGenotype != genotype || abilitiesEpigenome != epigenome) {
+            abilitiesMemo = HorseAbilities.activeFor(genotype, epigenome);
+            abilitiesGenotype = genotype;
+            abilitiesEpigenome = epigenome;
+        }
+        return abilitiesMemo;
     }
 
     private Horse previewHorse() {
@@ -1606,8 +1686,7 @@ public final class CustomHorseSpawnScreen extends Screen {
             return m.age >= m.life;
         });
 
-        java.util.List<HorseAbilities.Active> abilities =
-                HorseAbilities.activeFor(genotype(), epigenome);
+        java.util.List<HorseAbilities.Active> abilities = activeAbilities();
         boolean anyEmitter = false;
         for (HorseAbilities.Active a : abilities) {
             if (a.ability() instanceof GeneAbility.Emitter e && "particle".equals(e.kind())) {
