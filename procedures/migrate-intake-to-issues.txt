@@ -159,6 +159,10 @@ Moved, verified and deleted from intake/ (old file -> issue; pieces are sub-issu
   Mythical rams                -> #124 (#125 Hzt, #126 four breeds, #127 Khnum, #128 sheep-build)
   Mythical goats               -> #129 (#130 Sci, #131 2a, #132 2b, #133 2c, #134 goat-build)
   Mythical antlered beasts     -> #135 (one issue)
+  Attached model parts         -> #138 (tracking; text in the body and numbered comments 2/3, 3/3;
+                                  #139 stage 4 breed hook, #140 stage 5 worn side, #141 stage 6 wings;
+                                  stages 0-3 shipped, so no sub-issues; attached-parts-draft/ retired,
+                                  kept at commit 5f5199ae)
   Mythic breeds - gene audit   -> #136 (survey)      Mythic breeds - biome assignments -> #137 (survey)
   (#119 is not part of this migration.) Two Sizing units of the audit and biome files were
   recorded in the survey bodies only, not made issues: the READY-now breeds (about 40, L),
@@ -166,8 +170,7 @@ Moved, verified and deleted from intake/ (old file -> issue; pieces are sub-issu
 Labels created: idea, from-server, tracking, procedure, scoped, port, survey, in-progress,
 size:S|M|L, impact:finishes|unblocks|new. Step 7 is DONE for the state of the files that
 remain; its FILE/TRANSITIONAL clauses stay until the last file moves.
-STILL IN intake/ (17 treatment files, the rest of Sizing.txt, and their folders):
-  Attached model parts (88 KB, needs numbered comments) and attached-parts-draft/,
+STILL IN intake/ (16 treatment files, the rest of Sizing.txt, and their folders):
   Body parts, Head parts, Tail gene, Tufted lion tail, Tusks gene, Feathering,
   Daily realm horse, Horse shoes, Troughs and salt licks, Villagers in every village,
   Natural-sheep gene kind, Sheep coat genes, Sheep disorders, Sheep horns and body genes,
@@ -179,7 +182,7 @@ config and README, the remaining wiki prose links to intake files (breeds, compa
 coding-notes, known-gaps, magical-genes, model-parts, roadmap-execution and some gene pages;
 breed-book is done), and the final deletion of Sizing.txt.
 An issue body or comment holds about 65,000 characters; every remaining file fits in one
-body except Attached model parts and the four-jar folder.
+body except the four-jar folder.
 Pattern used for the Mythical files, to reuse: group a piece's breeds by what each needs, give
 every sub-issue the whole piece section with a "Scope of this issue" line, and take the owner's
 yes on the table first.

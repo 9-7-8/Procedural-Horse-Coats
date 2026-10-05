@@ -14,16 +14,6 @@ foundation others wait on. Impact: a finishes shipped work, b unblocks units, c 
 or touches wiki/philosophy.html. "Built?" is a grep of the code and wiki/text on that date.
 
 ------------------------------------------------------------------------------
-Attached model parts.txt   (PLAN ONLY)                            sized 2026-10-02
-STALE for stages 0-3: the spike, the registry/layer, the first gene and the head batch have
-shipped (AttachedPartLayer, PartAnchor, PartKind, GrownParts; horn, antlers, ram's and dragon
-horns). P6 (what the designer shows) shipped 2026-10-02. Trim those stages next time.
-- Stage 4, breed hook (breed format, BreedSpecWriter, bakes)     L  b  No: touches breeds; unblocks reindeer breeds
-- Stage 5, worn side (HorseShoeLayer -> AttachedPartLayer)       M  a  owner-free; needs Horse shoes
-- Stage 6, wings                                                 L  c  No: "what drives them; one texture or many"
-Owner words: grown parts "a HUGE win"; horn, dorsal spines and crystals high priority.
-
-------------------------------------------------------------------------------
 Body parts - implementation treatment.txt                         sized 2026-10-02
 - Slice A: SPINE anchor, saddle-zone mask, dorsal spine row      M  b  owner-free; foundation for B
 - Slice B: back sail + translucent regions                       M  c  owner-free; needs A

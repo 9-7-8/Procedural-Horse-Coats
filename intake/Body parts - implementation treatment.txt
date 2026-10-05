@@ -20,7 +20,7 @@ In scope, and what is not
 Decided: back sail, dorsal spine row, shoulder/hip plates, crystal growths.
 NOT in this file, left for later: wings, tails (tufted, blade, club), hoof feathering, fetlock claws,
 tusks. Wings are body-parented too but need their own poses and a flap story; they have a plan in
-"Attached model parts.txt" and are deliberately not started here.
+GitHub issue #138 (Attached model parts) and are deliberately not started here.
 
 What already exists, so the building session does not redo it
 ==============================================================
