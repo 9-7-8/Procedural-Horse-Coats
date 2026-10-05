@@ -1,0 +1,127 @@
+PROCEDURE  : Migrate intake to GitHub issues
+COMMAND    : /migrate-intake-to-issues
+SAY        : "migrate intake", "move intake to issues", "intake to github issues"
+RUNS       : either (it writes issues; the retire step is a commit, so run that part local)
+TAKES      : the owner's yes to the inventory table (step 2) and to retiring the files (step 6)
+LEAVES     : every intake unit as a labelled GitHub issue, the files retired, the
+             procedures rewritten to read issues; ONE-OFF, retire this file when done
+==============================================================================
+
+WHEN TO USE
+-----------
+Once. Features and ideas become GitHub issues, as bugs already are (CLAUDE.md hard rule
+9), so the queue is public and its labels, ideas and what was built stay as history.
+Not for filing one new feature after the move: that is write-intake-document.
+Not Discussions: they need GraphQL, which a cloud session cannot reach (the reasoning
+is in intake/README.txt until step 7 rewrites it). Issues work over REST and the
+mcp__github__ issue and sub-issue tools.
+
+OWNER DECISIONS (settled)
+-------------------------
+- One issue per unit. A unit is what process-intake step 1 counts: a To do.txt bullet,
+  or a piece/slice/tier of a treatment. A multi-piece treatment is a parent issue
+  labelled tracking, with each piece a sub-issue.
+- Treatment text lives in the issue: body first, then numbered comments ("Treatment
+  2/3"), each under 60,000 characters. A treatment may be split into more issues.
+- Sizing.txt is replaced by labels and a line in the body, and is deleted.
+- To do.txt is never deleted: it ends as a one-line redirect to the issue list.
+- Each evidence file (gene audit, biome assignments, port survey, session hand-off) is
+  its own survey issue, linked from the issues that cite it.
+- A commit that finishes a unit says `Closes #N`. Every other commit says `Refs #N`.
+
+THE ISSUE FORMAT
+----------------
+Title: the feature's name; a piece reads "<Name> - piece N: <what>".
+Body, in this order:
+  one-sentence ask
+  Release: patch on the last piece / rides with <issue> / compat bump
+  Open: owner calls, if any (the issue also gets needs-owner)
+  Depends on: #N, #N
+  Owning page: the wiki page
+  Sized: <date> (the date process-intake last sized it)
+  Source: To do bullet / server chat <date> / treatment <old path>
+  then the treatment text, verbatim
+End with the attribution footer.
+Labels:
+  existing   enhancement (means feature), needs-owner, wontfix
+  new        idea (unscoped), scoped (a treatment written, buildable), tracking,
+             survey, from-server, procedure,
+             size:S size:M size:L, impact:finishes impact:unblocks impact:new
+Size and impact keep process-intake's definitions (a finishes shipped work, b unblocks,
+c new). report-bug's "never invent labels" is relaxed for exactly this set.
+Lifecycle: idea -> scoped -> built -> closed as completed with a comment giving the
+commit, the release tag and the wiki anchor. Already built when found: closed the same
+way. Dropped: closed not_planned with wontfix. Edit bodies; never delete comments.
+Files an issue still points at (potential-assets, *-draft/, tools/) are linked by
+commit-SHA permalink, so the link survives later deletion.
+
+BEFORE YOU START
+----------------
+1. `git pull --ff-only origin main`; ask the owner to stop adding to To do.txt until
+   step 6. Untracked files in intake/ are hers: list them, do not migrate or delete them.
+2. Load the mcp__github__ issue tools (ToolSearch) if absent. Confirm
+   `mcp__github__sub_issue_write` and `list_issues` work with one read.
+3. Create the new labels with the colours of the existing ones as a guide.
+
+STEPS
+-----
+1. Inventory, writing nothing to GitHub.
+   List every unit by process-intake step 1's rules. These are not units: README.txt,
+   Sizing.txt, potential-assets/, *-draft/, tools/, discord-*/, and a folder named in
+   a treatment's entry file. Evidence files are survey issues.
+2. Show the owner a table: unit, source file, characters, issues and comments it
+   becomes, labels, depends-on. She approves it, or edits it. Nothing is created before.
+3. Pilot one small unit. Show her the issue and adjust the format.
+4. Create the rest in dependency order, so each `Depends on #N` exists first. Parents
+   before pieces. Copy text verbatim; carry size, impact and the sized date over from
+   Sizing.txt; set scoped on treatments and idea on bullets. Keep a map of old path ->
+   issue number. Pace the writes: a burst notifies every watcher and can trip GitHub's
+   secondary rate limit, so batch and pause on a 403/429.
+5. Verify. Per unit: characters in the issue equal the source, the sub-issue link and
+   labels are set, every Depends on resolves. Report mismatches; fix before step 6.
+6. Retire (owner's yes first). One commit deletes the migrated files and Sizing.txt,
+   leaves To do.txt as one line pointing at the issue list, and lists the issue numbers
+   in the message with `Refs`. The session log carries the old path -> issue map.
+7. Rewrite what reads intake. Each of these keeps its own steps; only the source changes:
+   - process-intake: steps 1-3 query issues (label scoped, size, impact, needs-owner)
+     instead of files and Sizing.txt; step 8 becomes close-with-evidence; the pull and
+     untracked-file preamble goes.
+   - write-intake-document: output is an issue (and sub-issues), not a file; step 7
+     sets size and impact labels; the "only intake/ changed" check goes.
+   - whats-next: the intake sweep reads issues by label.
+   - review-server-logs: a player want becomes an idea + from-server issue; the
+     To do commit and push goes.
+   - report-bug: a new feature goes to an issue; duplicate search covers enhancement.
+   - end-session: drop the intake notes; "Routines to write up" becomes procedure issues
+     (also INDEX.txt and show-procedures).
+   - release: the note's range audit adds feature issues closed since the last tag.
+   - add-a-gene, add-an-item, design-a-breed, probe-a-scope (comments on the issue),
+     survey-a-mod: "intake treatment" becomes "feature issue".
+   - intake/README.txt, CLAUDE.md hard rule 9 and its "Do NOT put here" table (delete a
+     line to hold the 300-line budget), and the INDEX row for this procedure.
+   - the Sizing freshness test and wiki/tools/check-roadmap-execution.mjs, then every
+     wiki page that links an intake file; run procedures/rebake.txt for them.
+8. Write the session log (write-session-log) with the map, then end-session.
+
+DONE WHEN
+---------
+Every unit and evidence file is an issue, verified; the files are retired; the
+procedures above read issues; the rebake rows are green. Report the map, the counts by
+label, and anything left in intake/ and why. Then retire this procedure file.
+
+NEVER
+-----
+- Never create an issue before the owner approved the table (step 2): a public issue
+  is seen and notified at once.
+- Never rewrite a treatment while moving it: verbatim, so the text stays the one she
+  scoped. Changes come later, as edits to the issue.
+- Never delete a file before step 5 passes: it is the only copy until then.
+- Never put `Closes #N` on a commit that finishes only part of a unit, or one that
+  names a tracking parent: it would close early.
+- Never delete To do.txt (her rule), or touch her untracked files in intake/.
+- Never post without the attribution footer.
+
+SEE ALSO
+--------
+process-intake; write-intake-document; report-bug; whats-next; end-session; release;
+CLAUDE.md hard rules 9 and 11; intake/README.txt.
