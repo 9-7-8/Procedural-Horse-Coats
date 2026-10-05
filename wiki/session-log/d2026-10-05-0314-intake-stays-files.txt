@@ -1,0 +1,29 @@
+2026-10-05 03:14 - Intake stays files, not GitHub Discussions (time is the end of the session)
+
+ASKED
+- "Would it be possible to use the github discussions on the repo that I just set up as the new intake folder, instead of that intake folder?" Came of it: an answer and a recorded
+  decision. The owner first chose "move everything", then, when asked to settle the design, said: "Just write this up as not a good idea -- since the cloud session can't interact with it,
+  there's no point I don't think."
+
+DONE
+- Checked: `gh api graphql` through the cloud session's proxy fails ("GitHub GraphQL is not available through this session's GitHub proxy"); the GitHub tools loaded here have no discussion
+  tools; the REST API has no Discussions routes. So a cloud session cannot read or write Discussions.
+- Wrote the decision and the reasons at the end of intake/README.txt, where a future session proposing it would look. No code, no wiki page, no procedure changed.
+
+DECIDED (owner)
+- Intake stays as files in intake/. Not moving it into Discussions. Recorded in intake/README.txt.
+
+FOUND ON THE WAY
+- Nothing filed. The alternatives offered and not taken (a GitHub Action mirror of discussions into the repo; a hybrid with ideas in Discussions) are in the README note.
+
+PROCEDURES
+None changed.
+
+NOT RUN / NOT CHECKED
+- No build, no bake beyond check-links; docs only. Whether a GitHub Action could mirror discussions was never tested.
+
+RELEASE
+Not offered (no player-facing change).
+
+PICK UP FIRST
+Unchanged: the owner says "go" for the rename freeze after her background fix merges, then /process-intake on the rename treatment (see d2026-10-04-2006-discord-command-whistle-post.txt).
