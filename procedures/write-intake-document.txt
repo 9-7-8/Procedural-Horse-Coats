@@ -130,8 +130,7 @@ PART 2 - SCOPE: WHAT ONE DOCUMENT COVERS
   rejected", code map, cross-cutting rules, unverified/open, each under 60,000
   characters. Each piece is a sub-issue carrying its own section, its labels and its
   Depends on. The pieces are the units; the parent is not. A feature that fits one body
-  is one issue with no parent. The four-jar split (the nine files in
-  intake/four-jar-split/, until migrated) is the example. Link a file you cite in the
+  is one issue with no parent. The four-jar split (#146 with pieces #147-#149) is the example. Link a file you cite in the
   repo by commit-SHA permalink, so the link survives later deletion.
 - NO CODE IN THE TREATMENT. Name classes, fields and files freely. Sketch a signature
   if it settles a design call. Never write the implementation: the building session

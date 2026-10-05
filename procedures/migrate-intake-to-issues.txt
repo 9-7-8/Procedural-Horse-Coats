@@ -170,12 +170,11 @@ Moved, verified and deleted from intake/ (old file -> issue; pieces are sub-issu
 Labels created: idea, from-server, tracking, procedure, scoped, port, survey, in-progress,
 size:S|M|L, impact:finishes|unblocks|new. Step 7 is DONE for the state of the files that
 remain; its FILE/TRANSITIONAL clauses stay until the last file moves.
-STILL IN intake/ (15 treatment files, the rest of Sizing.txt, and their folders):
+STILL IN intake/ (14 treatment files, the rest of Sizing.txt, and their folders):
   Body parts, Head parts, Tail gene, Tufted lion tail, Tusks gene, Feathering,
   Daily realm horse, Horse shoes, Troughs and salt licks, Villagers in every village,
   Natural-sheep gene kind, Sheep coat genes, Sheep disorders, Sheep horns and body genes,
-  Four-jar split (entry file plus four-jar-split/, 102 KB,
-  needs numbered comments). discord-command-whistle/, potential-assets/ and tools/ are not units.
+discord-command-whistle/, potential-assets/ and tools/ are not units.
 NOT DONE YET: the release milestones (step 3, item 4), the pinned "Start here" issue (step 8;
 pinning needs GraphQL, so a cloud session creates the issue and the owner pins it), the tools/rename
 config and README, the remaining wiki prose links to intake files (breeds, compatibility,
@@ -184,7 +183,8 @@ breed-book is done), and the final deletion of Sizing.txt.
 An issue body or comment holds about 65,000 characters; every remaining file fits in one
 body except the four-jar folder.
 Rename to Ixora's Horse Overhaul -> #142 (tracking, label `rename`) with #143 converter, #144 mod side,
-  #145 proof and cutover (third round; file retired, kept at commit 237ebfde). The four-jar split waits on it.
+  #145 proof and cutover (third round; file retired, kept at commit 237ebfde). The four-jar split is #146 (tracking, label `four-jar`; comments 2/5-5/5 hold files 01, 02, 03, 07+08;
+  pieces #147 Base, #148 Equipment, #149 Breeding and release; files retired, kept at commit c051ee6f).
 Pattern used for the Mythical files, to reuse: group a piece's breeds by what each needs, give
 every sub-issue the whole piece section with a "Scope of this issue" line, and take the owner's
 yes on the table first.

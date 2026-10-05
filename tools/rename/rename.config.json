@@ -42,12 +42,10 @@
     "tools/rename/",
     "converter/",
     "LICENSES/",
-    "intake/Four-jar split - implementation treatment.txt",
-    "intake/four-jar-split/",
     "intake/potential-assets/",
     "intake/discord-command-whistle/"
   ],
-  "_excludeNote": "wiki/text is generated (re-bake it). The rename and four-jar-split treatments describe the change itself and keep both names. Decided (owner): the REST of intake/ is rewritten with the same script, so queued treatments match the renamed tree. The Discord post for the command whistle is kept (it is a dated announcement).",
+  "_excludeNote": "wiki/text is generated (re-bake it). Decided (owner): the REST of intake/ is rewritten with the same script, so queued treatments match the renamed tree. The Discord post for the command whistle is kept (it is a dated announcement).",
   "textExtensions": [
     "java",
     "json",

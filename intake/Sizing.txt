@@ -113,13 +113,3 @@ Built? No.
 Wild horse turnover - implementation treatment.txt                sized 2026-10-02
 - One unit: 3-day wild lifetime (touched horses to the realm), cell top-up (<5 per 8x8-chunk cell)   L  c  owner-free; no Open needs the owner
 Built? No (no wild despawn, cell ledger or spawn stamp exists).
-
-------------------------------------------------------------------------------
-Four-jar split - implementation treatment.txt (+ folder four-jar-split/)  sized 2026-10-03
-- Piece 1: Base (framework + all QOL + hunger/healing + sex rule
-  + plain wild herds + slim record + extension points + common/
-  split in three + Base size gate)                                L+ b  Owner: No; waits on the rename; unblocks 2-3 and every port
-- Piece 2: Equipment add-on (gear, tack, carts, braid)            L  c  owner-free once P1 ships; owner-free; leatherworker/metalsmith trades included
-- Piece 3: Breeding add-on + four-jar release pipeline + marker   L  c  owner-free; needs 1 and 2; launch-time dependency messages
-Built? No (grep: no :common-base module, no Base jar, no extension registries).
-
