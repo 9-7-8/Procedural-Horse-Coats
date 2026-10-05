@@ -34,5 +34,4 @@ Mythic breeds - features still to SCOPE (one write-intake-document treatment eac
 - Not scoping, just building: the breeds the audit marks READY and READY-minus-a-design-call go through design-a-breed, one session per small group, using the biome file.
 
 From the server (unscoped):
-- Breeding preview: a player read it as missing genes. By default it hides every locus both parents settle the same way (BreedingPreview.groups, "Only what varies"), and the toggle went unnoticed. Say so on the pane: a count of the hidden loci, or a line naming the toggle. (Server chat, 2 Oct.)
 - True flight: a player kept diving when they looked down while riding forward. Pitch steers by design (HorseFlightRiddenMixin, like the happy ghast). The want is a way to fly level while looking around, such as a level-flight toggle, or pitch steering only while a key is held. (Server chat, 2 Oct.)
