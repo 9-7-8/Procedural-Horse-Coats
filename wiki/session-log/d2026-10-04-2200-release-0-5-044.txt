@@ -1,0 +1,88 @@
+2026-10-04 22:00 (start, approximate) - Release 0.5.044
+
+ASKED
+-----
+- "/release" (the owner ran the release procedure). Came of it: 0.5.044 cut, tagged and
+  published with its jar; note on wiki/releases.html#v0-5-044.
+- "/end-session". Came of it: this log, one procedure fix, the docs commit.
+
+DONE
+----
+- b7d2ddda  Release 0.5.044: mod_version 0.5.043 -> 0.5.044 in gradle.properties.
+  README.md's "Call and carry your horses" paragraph now names the command whistle (it
+  shipped in 0.5.043 but the README rewrite, 95c1e60e, never mentioned it). The
+  slowest-class list in procedures/test-tiers.txt tier 3 re-measured (same ten classes,
+  21m 33s wall clock).
+  Proof (the whole release set, all green, real exit codes read from log files):
+  - tier-0 node checks: check-links, check-roadmap-execution, check-gene-tabs,
+    check-breed-heights, check-recipes, check-block-models, check-duplicate-item-art,
+    check-progress-tasks, check-parity (7163 checks / 60 cases) - all exit 0;
+  - full :common:test - 1581 tests, 0 failed, exit 0, 21m 33s;
+  - :neoforge-26.1.2:test - exit 0 (up to date from its last green run);
+  - :neoforge-26.1.2:runGameTest - "All 55 required tests passed", exit 0;
+  - browser checks: check-designer-boots, check-creator-steps, check-path-canvas,
+    check-colour-control, check-glow-control, check-glow-render, check-ai - all exit 0;
+  - runServer boot to "Done (0.362s)"; grep for /ERROR] found none; /WARN] hits were
+    vanilla command ambiguity, offline mode, the stasis_chamber empty-ingredients line,
+    and "is not correct. Correcting" for phc/server.toml and phc/breed-spawning.toml.
+    run/logs, run/phc and run/config were copied aside before the boot and put back after.
+  - jar opened: neoforge.mods.toml says 0.5.044; HorseClearance and CowboyWaterSafety
+    classes present.
+  Tag v0.5.044 -> b7d2ddda (git rev-list -n 1). GitHub release "0.5.044 - hay within
+  reach, the whistle's plain hold, and horses out of walls" lists
+  horsegenetics-0.5.044.jar (7215934 bytes).
+- a6b823d7  Docs: the same note on wiki/releases.html as <h2 id="v0-5-044">; search
+  index rebuilt, agent text baked, check-links OK.
+- The note was audited from the whole range v0.5.043..b7d2ddda (54 commits; a subagent
+  read all 23 session logs in it and ran git show --stat on each Fix commit). Player-
+  facing: #26, #39 (hay), #36 (whistle plain hold), #35 (horses out of blocks), #29
+  (turnout ticket and braid across dimensions), #25 (stall floors), #30 (cowboy water
+  safety), #34 (barn name in the H browser); server-log-only: #33, #31. Dev-only and left
+  out: test fixes #37 #38 #40 #70 #119, the rename/world converter (converter/ is not in
+  settings.gradle.kts, nothing ships), intake scoping, log reviews. No lang, recipe or
+  config changes in the range.
+
+DECIDED
+-------
+- Patch bump, not compat: no saved format changed (by procedure, no owner question
+  needed). Recorded in the note's "What this does to a world you already have".
+- Release title chosen without the owner: "hay within reach, the whistle's plain hold,
+  and horses out of walls".
+- The 0.5.043 note was left as written: it already described the plain hold as the way
+  to open the wheel, which 0.5.044 makes true. The 0.5.044 note says so.
+
+FOUND ON THE WAY
+----------------
+- The boot's "breed-spawning.toml is not correct. Correcting" fired in a release that
+  added no config keys: run/phc/'s copy predates keys added earlier. Harmless; release
+  step 3 now says so.
+- intake/discord-command-whistle/ tells players to sneak + right-click. That still works
+  but orders every horse within 16 blocks; the owner may want the post to mention the
+  plain hold too. Left for her (it is her post).
+- The 0.5.043 jar in neoforge-26.1.2/build/libs/ was rebuilt locally at 21:56 on 10-04 by
+  an earlier session; the published 0.5.043 asset is untouched. Nothing done.
+
+PROCEDURES
+----------
+- procedures/release.txt step 3: the known-harmless "is not correct. Correcting" warning
+  now covers any phc/ settings file whose run/phc/ copy is stale, not only server.toml
+  when a release adds keys.
+- procedures/test-tiers.txt tier 3: slowest classes re-measured for 0.5.044 (release
+  step 3 asks for it).
+- Asked all three end-session 4a questions; no new procedure needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite DID run (release). Nothing left unrun in the release set.
+- Not seen in game: #35 (the clearance rescue of horses in walls) and #30 (cowboy water
+  safety) on a real server; #36's plain hold by a player. #35 and #36 stay open until
+  confirmed. No Verification-tab anchors added this session (the fix sessions added them).
+
+RELEASE
+-------
+- The owner asked for it (/release); 0.5.044 cut and published.
+
+PICK UP FIRST
+-------------
+- Confirm #35 and #36 on the live server once it runs 0.5.044 (review-server-logs for
+  [clearance] and [whirlpool] lines), else the next open bug via fix-bug.

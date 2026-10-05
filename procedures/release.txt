@@ -77,9 +77,10 @@ STEPS
    :neoforge-26.1.2:test, :neoforge-26.1.2:runGameTest, every headless browser check,
    and a server boot to "Done (" run and grepped exactly as launch-game step 8 says
    (copy the owner's logs and configs aside first; grep the level markers, not a bare
-   ERROR). Two warnings there are known and harmless: "server.toml is not correct.
-   Correcting" when a release adds config keys, and the stasis_chamber recipe's "empty
-   ingredients" (a custom recipe type). A red result blocks the release until it is
+   ERROR). Two warnings there are known and harmless: "<file>.toml is not correct.
+   Correcting" for any phc/ settings file (server.toml, breed-spawning.toml) whose copy
+   in run/phc/ predates keys added since - it fires even in a release that adds none -
+   and the stasis_chamber recipe's "empty ingredients" (a custom recipe type). A red result blocks the release until it is
    fixed or the owner waives it.
    Ask what a PLAYER hits that this machine does not: a brand-new world, a survival
    inventory, a horse in view, a client that never saw the previous format.
