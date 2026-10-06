@@ -210,8 +210,10 @@ public final class HorseRealmSize extends SavedData {
      *
      * <p>The position is written every time regardless, because it costs a map
      * put and being wrong about it costs a claim. {@link #setDirty} is only
-     * raised for a genuinely new resident or a real move, so a field of
-     * stationary horses does not re-save the whole census every scan.
+     * raised for a genuinely new resident or a move into another chunk (#202):
+     * a grazing herd moves a block most scans, and a block was enough to re-save
+     * the whole census every autosave. The claim that reads it only wants the
+     * chunk, and the exact block is still saved with the next real change.
      */
     public boolean note(UUID horse, BlockPos at) {
         BlockPos was = horses.put(horse, at);
@@ -219,7 +221,7 @@ public final class HorseRealmSize extends SavedData {
             setDirty();
             return true;
         }
-        if (!was.equals(at)) {
+        if ((was.getX() >> 4) != (at.getX() >> 4) || (was.getZ() >> 4) != (at.getZ() >> 4)) {
             setDirty();
         }
         return false;

@@ -126,7 +126,9 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<HorseCooldownsAttachment>> HORSE_COOLDOWNS =
             ATTACHMENT_TYPES.register("horse_cooldowns", () -> AttachmentType
                     .builder(() -> HorseCooldownsAttachment.DEFAULT)
-                    .serialize(HorseCooldownsAttachment.MAP_CODEC)
+                    // Only a horse with a stamp writes one (#202), as LYCAN_SHIFT does: the empty default is
+                    // what a missing attachment reads as, and every horse that was ever hurt saved one.
+                    .serialize(HorseCooldownsAttachment.MAP_CODEC, c -> !c.lastByKey().isEmpty())
                     .copyOnDeath()
                     .build());
 
@@ -147,7 +149,8 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<CowboyBrand>> COWBOY_BRAND =
             ATTACHMENT_TYPES.register("cowboy_brand", () -> AttachmentType
                     .builder(() -> CowboyBrand.NONE)
-                    .serialize(CowboyBrand.MAP_CODEC)
+                    // Only a branded horse writes one (#202); the care scan read it off nearly every horse.
+                    .serialize(CowboyBrand.MAP_CODEC, CowboyBrand::isBranded)
                     .sync(CowboyBrand.STREAM_CODEC)
                     .build());
 
@@ -159,7 +162,9 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<PassificationAttachment>> PASSIFICATION =
             ATTACHMENT_TYPES.register("passification", () -> AttachmentType
                     .builder(() -> PassificationAttachment.DEFAULT)
-                    .serialize(PassificationAttachment.MAP_CODEC)
+                    // Only a horse with something remembered writes one (#202); targeting read it off every horse.
+                    .serialize(PassificationAttachment.MAP_CODEC, a -> !a.until().isEmpty()
+                            || !a.lastCalm().isEmpty() || !a.progress().isEmpty())
                     .copyOnDeath()
                     .build());
 
@@ -200,7 +205,7 @@ public final class ModAttachments {
     public static final Supplier<AttachmentType<HorseGear>> HORSE_GEAR =
             ATTACHMENT_TYPES.register("horse_gear", () -> AttachmentType
                     .builder(() -> HorseGear.EMPTY)
-                    .serialize(HorseGear.MAP_CODEC)
+                    .serialize(HorseGear.MAP_CODEC, g -> !g.isEmpty()) // only a dressed horse writes one (#202)
                     .sync(HorseGear.STREAM_CODEC)
                     .copyOnDeath()
                     .build());

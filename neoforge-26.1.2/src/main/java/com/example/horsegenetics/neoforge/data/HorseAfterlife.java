@@ -283,6 +283,9 @@ public final class HorseAfterlife extends SavedData {
      *
      * @return how many were dropped
      */
+    /** How much counted owner time may pass between saves forced by the count alone - five minutes. */
+    private static final int DIRTY_EVERY_TICKS = 6000;
+
     public int spend(UUID owner, int ticks, int graceTicks) {
         int dropped = 0;
         boolean changed = false;
@@ -292,13 +295,21 @@ public final class HorseAfterlife extends SavedData {
             if (!entry.getValue().owner().equals(owner)) {
                 continue;
             }
-            Wake charged = entry.getValue().plusTicks(ticks);
-            changed = true;
+            Wake before = entry.getValue();
+            Wake charged = before.plusTicks(ticks);
             if (charged.expired(graceTicks)) {
                 walk.remove();
                 dropped++;
+                changed = true;
             } else {
                 entry.setValue(charged);
+                // NOT EVERY SWEEP (#202). This marked the store dirty every ten seconds for anyone online with a
+                // kept horse, so every autosave rewrote every kept horse's whole tag. The count still moves in
+                // memory, and is saved with whatever else dirties the store, or once it crosses a five-minute
+                // mark: a crash loses at most five minutes of counted time.
+                if (before.ownerTicks() / DIRTY_EVERY_TICKS != charged.ownerTicks() / DIRTY_EVERY_TICKS) {
+                    changed = true;
+                }
             }
         }
         if (changed) {

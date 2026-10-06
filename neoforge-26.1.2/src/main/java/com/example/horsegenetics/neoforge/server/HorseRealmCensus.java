@@ -91,6 +91,22 @@ public final class HorseRealmCensus {
         }
     }
 
+    /**
+     * A horse that dies in the realm leaves the census (#202). It never ticks again, so the scan above could
+     * never forget it: the dead were kept for ever and the field grew to make room for them.
+     */
+    @SubscribeEvent
+    static void onDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof AbstractHorse horse) || !(horse.level() instanceof ServerLevel level)
+                || !HorseRealm.isRealm(level)) {
+            return;
+        }
+        MinecraftServer server = level.getServer();
+        if (server != null && HorseRealmSize.get(server).forget(horse.getUUID())) {
+            RealmRoster.left(server, horse.getUUID());
+        }
+    }
+
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();

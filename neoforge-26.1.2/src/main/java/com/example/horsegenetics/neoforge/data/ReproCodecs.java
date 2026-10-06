@@ -37,9 +37,13 @@ public final class ReproCodecs {
             Codec.STRING.optionalFieldOf("sire_first", "").forGetter(Embryo::sireFirstName),
             Codec.STRING.optionalFieldOf("sire_last", "").forGetter(Embryo::sireLastName),
             Codec.INT.optionalFieldOf("sire_generation", 0).forGetter(Embryo::sireGeneration),
-            SAMPLE.fieldOf("sire").forGetter(Embryo::sire),
+            // READ, NEVER WRITTEN (owner, 2026-10-06, #202): the sire's genome was saved into every embryo. An
+            // older save's copy is still read; a newer save has none, and birth looks the sire up by sire_id.
+            // An older jar cannot read a pregnancy this one saved - the owner's accepted cost.
+            SAMPLE.optionalFieldOf("sire").forGetter(e -> java.util.Optional.empty()),
             Codec.STRING.optionalFieldOf("bred_by", "").forGetter(Embryo::bredBy)
-    ).apply(i, Embryo::new));
+    ).apply(i, (genome, breed, lost, sireId, first, last, gen, sire, bredBy) ->
+            new Embryo(genome, breed, lost, sireId, first, last, gen, sire.orElse(null), bredBy)));
 
     private static final Codec<Pregnancy> PREGNANCY = RecordCodecBuilder.create(i -> i.group(
             EMBRYO.listOf().fieldOf("embryos").forGetter(Pregnancy::embryos),

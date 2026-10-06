@@ -246,7 +246,7 @@ public final class UndeadHorseConverter {
             rider.startRiding(horse, true, true);
         }
         PacketDistributor.sendToPlayersTrackingEntity(horse,
-                CoatSyncPayload.of(horse.getId(), new CoatData(HorseRecords.of(horse).genome())));
+                CoatSyncPayload.of(horse.getId(), HorseRecords.of(horse)));
         PacketDistributor.sendToPlayersTrackingEntity(horse,
                 new HorseCareSyncPayload(horse.getId(), care.bond(), care.inHerd()));
         DebugAnnounce.log("Undead", "a vanilla " + pool + " horse at " + horse.blockPosition().toShortString()

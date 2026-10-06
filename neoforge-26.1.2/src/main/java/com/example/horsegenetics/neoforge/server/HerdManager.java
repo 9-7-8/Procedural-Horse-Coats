@@ -181,7 +181,7 @@ public final class HerdManager {
         HorseRecords.apply(horse, record);
         HorseRecords.applyTraitsToEntity(horse, record, true);
         PacketDistributor.sendToPlayersTrackingEntity(horse,
-                CoatSyncPayload.of(horse.getId(), new CoatData(record.genome())));
+                CoatSyncPayload.of(horse.getId(), record));
 
         if (lead != null) {
             HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get())

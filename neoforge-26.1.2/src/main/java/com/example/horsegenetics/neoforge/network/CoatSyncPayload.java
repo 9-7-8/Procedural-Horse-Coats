@@ -37,6 +37,15 @@ public record CoatSyncPayload(int entityId, String genotypeCode, String epigenom
         return new CoatSyncPayload(entityId, coatData.genome().genotypeCode(), coatData.genome().epigenomeCode());
     }
 
+    /**
+     * Straight from the record's strings (#202). Building it through {@code new CoatData(record.genome())} parsed
+     * both codes on the server only to write them back out; the client's {@link Genome#parse} aligns the
+     * epigenome to the genotype either way, so the coat it builds is the same.
+     */
+    public static CoatSyncPayload of(int entityId, com.example.horsegenetics.common.horse.HorseRecord record) {
+        return new CoatSyncPayload(entityId, record.geneticCode(), record.epigenomeCode());
+    }
+
     public CoatData coatData() {
         return new CoatData(Genome.parse(genotypeCode, epigenomeCode));
     }

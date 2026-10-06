@@ -147,24 +147,29 @@ public final class HorseGeneticsEventHandler {
         // gene weights / health.mode changed). Only clamp HP down, never heal.
         HorseRecords.applyTraitsToEntity(horse, record, false);
 
-        syncToTrackers(horse, new CoatData(record.genome()));
+        PacketDistributor.sendToPlayersTrackingEntity(horse, CoatSyncPayload.of(horse.getId(), record));
     }
 
 
-    /** Re-send coat + record data whenever a player starts tracking a horse (e.g. walks into range). */
+    /**
+     * Re-send record (or coat) + care data whenever a player starts tracking a horse (e.g. walks into range).
+     *
+     * <p><b>One genome, not two</b> (#202). This sent the coat payload and the record payload, and the record
+     * already carries both codes - so every horse coming into view crossed the network twice over, after a
+     * server-side parse and re-serialise for the coat. The client now builds the coat from the record
+     * ({@code ModNetworking}); the coat payload is only for a horse with a genome and no record yet.
+     */
     @SubscribeEvent
     static void onStartTracking(PlayerEvent.StartTracking event) {
         if (!(event.getTarget() instanceof Horse horse)) return;
         ServerPlayer player = (ServerPlayer) event.getEntity();
 
         HorseRecord record = HorseRecords.of(horse);
-        if (record.hasGenome()) {
-            PacketDistributor.sendToPlayer(player,
-                    CoatSyncPayload.of(horse.getId(), new CoatData(record.genome())));
-        }
         if (HorseRecords.hasRealRecord(horse)) {
             PacketDistributor.sendToPlayer(player,
-                    new com.example.horsegenetics.neoforge.network.HorseRecordSyncPayload(horse.getId(), HorseRecords.of(horse)));
+                    new com.example.horsegenetics.neoforge.network.HorseRecordSyncPayload(horse.getId(), record));
+        } else if (record.hasGenome()) {
+            PacketDistributor.sendToPlayer(player, CoatSyncPayload.of(horse.getId(), record));
         }
         com.example.horsegenetics.neoforge.data.HorseCareAttachment care =
                 horse.getData(ModAttachments.HORSE_CARE.get());
@@ -173,10 +178,6 @@ public final class HorseGeneticsEventHandler {
                     new com.example.horsegenetics.neoforge.network.HorseCareSyncPayload(
                             horse.getId(), care.bond(), care.inHerd()));
         }
-    }
-
-    private static void syncToTrackers(Horse horse, CoatData coatData) {
-        PacketDistributor.sendToPlayersTrackingEntity(horse, CoatSyncPayload.of(horse.getId(), coatData));
     }
 
     private HorseGeneticsEventHandler() {

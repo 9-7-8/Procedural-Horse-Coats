@@ -59,14 +59,20 @@ public final class HorseRecordCodecs {
 
     /**
      * For custom packets. Encodes the record as NBT over the wire - heavier
-     * than a hand-built {@code StreamCodec.composite} but these only travel on
-     * horse-tracking start and when the family-tree screen is open, so it's
-     * not worth the fuss.
+     * than a hand-built {@code StreamCodec.composite}. They travel on
+     * horse-tracking start, on any record change, and in the family-tree and
+     * offspring answers.
      */
     public static final StreamCodec<ByteBuf, HorseRecord> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
+    /**
+     * <b>One NBT tag per record, not one for the list</b> (#202). {@code fromCodec} reads against the 2 MiB NBT
+     * quota ({@code NbtAccounter.defaultQuota}, checked in the 26.1.2 sources), and a string counts about twice
+     * its length. As one tag, a generation of 24 descendants with long epigenomes came to roughly that limit -
+     * and a decode over it disconnects the client. Per record, each has the whole quota to itself.
+     */
     public static final StreamCodec<ByteBuf, java.util.List<HorseRecord>> LIST_STREAM_CODEC =
-            ByteBufCodecs.fromCodec(CODEC.listOf());
+            STREAM_CODEC.apply(ByteBufCodecs.list());
 
     private HorseRecordCodecs() {
     }

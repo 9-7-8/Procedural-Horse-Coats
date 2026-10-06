@@ -28,6 +28,7 @@ import net.minecraft.world.entity.animal.equine.Horse;
  *
  * @see CartDraft the model itself, and the reasoning behind its shape
  */
+@net.neoforged.fml.common.EventBusSubscriber
 public final class HorseDraft {
 
     private HorseDraft() {
@@ -102,16 +103,49 @@ public final class HorseDraft {
      * Add to this animal's lifetime haulage, in metres. Server side; a no-op for
      * anything that is not one of this mod's horses.
      *
-     * <p>Called once per cart tick with a fraction of a metre, so it is written
-     * back on every call rather than batched - the attachment is a single
-     * double and the sync is a byte codec, which is cheaper than the
-     * bookkeeping a batch would need.
+     * <p>Called once per cart tick with a fraction of a metre. <b>Batched</b>
+     * since #202: the attachment is synced, and {@code setData} sends it to every
+     * player tracking the horse, so writing it back on every call was a packet per
+     * tick per hauling horse - for a number the screen shows in whole metres.
+     * The fraction collects here and is written once it reaches
+     * {@link #FLUSH_METRES}. A horse that unloads mid-haul can lose up to that much:
+     * UNVERIFIED that the leave event below runs before the chunk's entities are saved -
+     * read as after, so it is a best effort, and four metres is the bound either way.
      */
     public static void addHauled(final Entity entity, final double metres) {
         if (metres <= 0.0 || !(entity instanceof Horse horse) || horse.level().isClientSide()) {
             return;
         }
-        horse.setData(ModAttachments.CART_METRES.get(), hauled(horse) + metres);
+        double pending = PENDING.merge(horse.getUUID(), metres, Double::sum);
+        if (pending >= FLUSH_METRES) {
+            flush(horse);
+        }
+    }
+
+    /** Metres collected before the tally is written - about a second of a trotting team. */
+    private static final double FLUSH_METRES = 4.0;
+
+    /** Hauled metres not yet written to the attachment, by horse. Server side only. */
+    private static final java.util.Map<java.util.UUID, Double> PENDING = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static void flush(final Horse horse) {
+        Double pending = PENDING.remove(horse.getUUID());
+        if (pending != null && pending > 0.0) {
+            horse.setData(ModAttachments.CART_METRES.get(), horse.getData(ModAttachments.CART_METRES.get()) + pending);
+        }
+    }
+
+    /** Whatever is still collecting goes onto the horse as it leaves (#202) - see {@link #addHauled}. */
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onEntityLeave(final net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof Horse horse) {
+            flush(horse);
+        }
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    static void onServerStopped(final net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        PENDING.clear();
     }
 
     /**
@@ -123,6 +157,8 @@ public final class HorseDraft {
         if (!(entity instanceof Horse horse)) {
             return 0.0;
         }
-        return horse.getData(ModAttachments.CART_METRES.get());
+        double written = horse.getData(ModAttachments.CART_METRES.get());
+        Double pending = horse.level().isClientSide() ? null : PENDING.get(horse.getUUID());
+        return pending == null ? written : written + pending;
     }
 }

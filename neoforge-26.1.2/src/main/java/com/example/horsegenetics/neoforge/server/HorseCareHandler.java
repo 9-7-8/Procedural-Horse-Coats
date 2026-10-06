@@ -86,6 +86,16 @@ public final class HorseCareHandler {
     private HorseCareHandler() {
     }
 
+    /**
+     * Is this horse a dealer's stock? Read without creating (#202): {@code getData} attached the empty brand to
+     * every horse the care scan asked about, and the attachment is synced - a packet to every tracker each time.
+     */
+    private static boolean branded(net.minecraft.world.entity.animal.equine.AbstractHorse horse) {
+        com.example.horsegenetics.neoforge.data.CowboyBrand brand =
+                horse.getExistingDataOrNull(ModAttachments.COWBOY_BRAND.get());
+        return brand != null && brand.isBranded();
+    }
+
     private static final int SCAN_INTERVAL = 30;
     private static final int HEAL_SCAN_RADIUS = 3;
     private static final int HERD_RADIUS = 10;
@@ -190,7 +200,7 @@ public final class HorseCareHandler {
         // --- herds: every horse that keeps its own herd ---
         // The wild-herd and branded test is updateHerd's own first line; asked here too, BEFORE the search, because
         // those horses - most horses in a world - threw the radius-10 result away unread (2026-10-02, stress audit).
-        if (!after.inWildHerd() && !horse.getData(ModAttachments.COWBOY_BRAND.get()).isBranded()) {
+        if (!after.inWildHerd() && !branded(horse)) {
             List<AbstractHorse> nearbyHorses = level.getEntitiesOfClass(AbstractHorse.class,
                     horse.getBoundingBox().inflate(HERD_RADIUS),
                     h -> h != horse && h.isAlive());
@@ -413,7 +423,7 @@ public final class HorseCareHandler {
         // exemption: their horses spread out to graze, which would run the
         // together-timer down to zero and quietly disband a herd they are standing
         // in the middle of.
-        if (care.inWildHerd() || horse.getData(ModAttachments.COWBOY_BRAND.get()).isBranded()) {
+        if (care.inWildHerd() || branded(horse)) {
             return care;
         }
         long together = care.togetherTicks();

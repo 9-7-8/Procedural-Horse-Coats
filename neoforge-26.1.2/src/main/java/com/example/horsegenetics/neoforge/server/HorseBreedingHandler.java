@@ -312,20 +312,43 @@ public final class HorseBreedingHandler {
     static void bornFromPregnancy(Horse child, Horse damHorse, HorseRecord damRecord, Embryo embryo, Rng rng) {
         boolean health = ServerConfig.healthGeneticsActive();
         Genome childGenome = embryo.foal();
-        Genome sire = embryo.sire().genome();
         var server = damHorse.level().getServer();
+        Genome sire = sireGenome(embryo, server);
         Player breeder = embryo.bredBy().isEmpty() || server == null
                 ? null : server.getPlayerList().getPlayerByName(embryo.bredBy());
+        Traits childTraits = HorseTraits.resolve(childGenome.genotype(), childGenome.epigenome(), health);
         populateFoal(child, damHorse, damRecord, childGenome, embryo.breedToken(), embryo.sireId(),
                 embryo.sireFirstName(), embryo.sireLastName(), embryo.sireGeneration(),
-                HorseTraits.resolve(sire.genotype(), sire.epigenome(), health),
-                HorseTraits.resolve(childGenome.genotype(), childGenome.epigenome(), health),
-                embryo.bredBy(), breeder, rng);
+                // No sire anywhere (a record forgotten by a debug tool): the foal's own body stands in, so
+                // the parent comparison reads "between" rather than inventing a stallion.
+                sire == null ? childTraits : HorseTraits.resolve(sire.genotype(), sire.epigenome(), health),
+                childTraits, embryo.bredBy(), breeder, rng);
         // The same roll reaches a foal born from a pregnancy, so the same tick does.
-        if (breeder != null && damRecord.hasGenome()
+        if (breeder != null && sire != null && damRecord.hasGenome()
                 && com.example.horsegenetics.common.genetics.Mutation.happened(
                         childGenome.genotype(), damRecord.genome().genotype(), sire.genotype())) {
             HorseProgress.complete(breeder, ProgressTask.BREED_MUTATION);
+        }
+    }
+
+    /**
+     * The sire's genome for a birth: the embryo's own copy while it has one (conceived since the mare was last
+     * loaded), else his record in the ancestry store (#202), else {@code null}.
+     */
+    private static @Nullable Genome sireGenome(Embryo embryo, @Nullable net.minecraft.server.MinecraftServer server) {
+        if (embryo.sire() != null) {
+            return embryo.sire().genome();
+        }
+        if (server == null) {
+            return null;
+        }
+        try {
+            return com.example.horsegenetics.neoforge.data.HorseAncestryData.get(server).lookup(embryo.sireId())
+                    .filter(HorseRecord::hasGenome)
+                    .map(HorseRecord::genome)
+                    .orElse(null);
+        } catch (RuntimeException unreadable) {
+            return null;
         }
     }
 

@@ -41,9 +41,64 @@ public final class ModNetworking {
 
     private static final int FAMILY_TREE_DEPTH = 3; // great-grandparents
 
+    /**
+     * <b>One answer a second per question per player</b> (#202). The roster, population, offspring, family-tree,
+     * realm-roster and log requests each walk a whole store, and nothing on the server stopped a client - or a
+     * modified one - asking every tick. A repeat of the SAME question inside the window is dropped: the client
+     * already has the answer from a moment ago. A different horse's tree or offspring is a different question.
+     */
+    private static final long REQUEST_WINDOW_TICKS = 20L;
+    private static final java.util.Map<java.util.UUID, java.util.Map<Object, Long>> LAST_ASKED = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private static boolean mayAnswer(ServerPlayer player, Object question) {
+        long now = player.level().getGameTime();
+        java.util.Map<Object, Long> mine = LAST_ASKED.computeIfAbsent(player.getUUID(), u -> new java.util.HashMap<>());
+        Long last = mine.get(question);
+        if (last != null && now - last < REQUEST_WINDOW_TICKS && now >= last) {
+            return false;
+        }
+        if (mine.size() > 64) {
+            mine.clear();
+        }
+        mine.put(question, now);
+        return true;
+    }
+
+    @SubscribeEvent
+    static void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        LAST_ASKED.remove(event.getEntity().getUUID());
+    }
+
+    /**
+     * A horse's record, and its coat from the record's own codes (#202) - tracking start no longer sends the coat
+     * separately. The coat is rebuilt only when the codes changed, so a rename or a new owner does not throw
+     * away the coat's memoised keys.
+     */
+    private static void acceptRecord(HorseRecordSyncPayload payload) {
+        com.example.horsegenetics.common.horse.HorseRecord record = payload.record();
+        com.example.horsegenetics.common.horse.HorseRecord before = ClientHorseRecordCache.get(payload.entityId());
+        ClientHorseRecordCache.put(payload.entityId(), record);
+        if (!record.hasGenome()) {
+            return;
+        }
+        boolean same = before != null && ClientCoatCache.get(payload.entityId()) != null
+                && before.geneticCode().equals(record.geneticCode())
+                && before.epigenomeCode().equals(record.epigenomeCode());
+        if (!same) {
+            try {
+                ClientCoatCache.put(payload.entityId(),
+                        new com.example.horsegenetics.common.coat.CoatData(record.genome()));
+            } catch (RuntimeException unreadable) {
+                // a code this build cannot read: no coat, as when the coat payload failed to parse
+            }
+        }
+    }
+
     @SubscribeEvent
     static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("1");
+        // "2" since #202: record lists went from one NBT tag to one per record, so a client and server on
+        // either side of that change would misread each other. A mismatch is refused at login instead.
+        PayloadRegistrar registrar = event.registrar("2");
 
         registrar.playToClient(
                 CoatSyncPayload.TYPE,
@@ -55,8 +110,7 @@ public final class ModNetworking {
         registrar.playToClient(
                 HorseRecordSyncPayload.TYPE,
                 HorseRecordSyncPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() ->
-                        ClientHorseRecordCache.put(payload.entityId(), payload.record()))
+                (payload, context) -> context.enqueueWork(() -> acceptRecord(payload))
         );
 
         // The F8 highlight's destination lines. Sent only to players who have
@@ -325,7 +379,7 @@ public final class ModNetworking {
                 HorseRosterRequestPayload.TYPE,
                 HorseRosterRequestPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
-                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                    if (context.player() instanceof ServerPlayer serverPlayer && mayAnswer(serverPlayer, "roster")) {
                         com.example.horsegenetics.neoforge.server.HorseRoster.sendTo(serverPlayer);
                     }
                 })
@@ -338,7 +392,7 @@ public final class ModNetworking {
                 RealmRosterRequestPayload.TYPE,
                 RealmRosterRequestPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
-                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                    if (context.player() instanceof ServerPlayer serverPlayer && mayAnswer(serverPlayer, "realm")) {
                         com.example.horsegenetics.neoforge.server.RealmRoster.sendTo(serverPlayer);
                     }
                 })
@@ -383,7 +437,7 @@ public final class ModNetworking {
                 HorseLogRequestPayload.TYPE,
                 HorseLogRequestPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> {
-                    if (context.player() instanceof ServerPlayer serverPlayer) {
+                    if (context.player() instanceof ServerPlayer serverPlayer && mayAnswer(serverPlayer, "log")) {
                         com.example.horsegenetics.neoforge.server.HorseLog.sendTo(serverPlayer);
                     }
                 })
@@ -863,7 +917,8 @@ public final class ModNetworking {
      */
     private static void handleOffspringRequest(OffspringRequestPayload payload,
                                                net.minecraft.world.entity.player.Player player) {
-        if (!(player instanceof ServerPlayer serverPlayer)) {
+        if (!(player instanceof ServerPlayer serverPlayer)
+                || !mayAnswer(serverPlayer, java.util.List.of("offspring", payload.rootId()))) {
             return;
         }
         MinecraftServer server = serverPlayer.level().getServer();
@@ -902,7 +957,7 @@ public final class ModNetworking {
      * button rather than something the screen asks for as you pan around.
      */
     private static void handlePopulationRequest(net.minecraft.world.entity.player.Player player) {
-        if (!(player instanceof ServerPlayer serverPlayer)) {
+        if (!(player instanceof ServerPlayer serverPlayer) || !mayAnswer(serverPlayer, "population")) {
             return;
         }
         MinecraftServer server = serverPlayer.level().getServer();
@@ -935,7 +990,8 @@ public final class ModNetworking {
     }
 
     private static void handleFamilyTreeRequest(FamilyTreeRequestPayload payload, net.minecraft.world.entity.player.Player player) {
-        if (!(player instanceof ServerPlayer serverPlayer)) {
+        if (!(player instanceof ServerPlayer serverPlayer)
+                || !mayAnswer(serverPlayer, java.util.List.of("tree", payload.rootId()))) {
             return;
         }
         MinecraftServer server = serverPlayer.level().getServer();

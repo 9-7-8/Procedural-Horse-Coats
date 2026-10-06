@@ -16,13 +16,19 @@ import java.util.UUID;
  * the record, and his whole {@link GenomeSample} for anything computed from his
  * body at birth (the parent-stats comparison). Owner's call, 2026-09-13.
  *
+ * <p><b>Except the sire's genome, once saved</b> (owner, 2026-10-06, lag audit #202). It was written into
+ * every embryo - twins carried it twice - and it is the bulk of a pregnant mare's saved data. It is still
+ * here from conception until the mare is next saved; after a reload {@code sire} is {@code null} and birth
+ * looks the sire up in the ancestry store by {@code sireId}. A stallion who has covered is never pruned
+ * from that store, so the lookup finds him whether he is unloaded, sold or dead.
+ *
  * @param genome      the foal's own genotype and epigenome
  * @param breedToken  its breed label, already combined (and marked spliced) at conception
  * @param lostEarly   drawn as a lethal-at-conception genotype: this embryo will be lost
  *                    in the first third of the pregnancy
  * @param sireId      the sire's entity id - the pedigree edge
  * @param sireGeneration the sire's generation, for the foal's own
- * @param sire        the sire's heritable material
+ * @param sire        the sire's heritable material, or {@code null} once the embryo has been saved and loaded
  * @param bredBy      the player who arranged the mating, or {@code ""}. Breeding credit
  *                    stays with them even if the mare is sold before birth.
  */
@@ -33,7 +39,6 @@ public record Embryo(GenomeSample genome, String breedToken, boolean lostEarly,
     public Embryo {
         Objects.requireNonNull(genome, "genome");
         Objects.requireNonNull(sireId, "sireId");
-        Objects.requireNonNull(sire, "sire");
         breedToken = breedToken == null ? "" : breedToken;
         sireFirstName = sireFirstName == null ? "" : sireFirstName;
         sireLastName = sireLastName == null ? "" : sireLastName;
