@@ -450,6 +450,25 @@ wiki/gene-b4galt7.html#performance	science	Speed, jumping and the carrier questi
 wiki/gene-b4galt7.html#real-inheritance	science	Inheritance in a real population
 wiki/gene-b4galt7.html#settled	science	What is settled, and what is not
 wiki/gene-b4galt7.html#what-is-drawn	gameplay	What is drawn, and what is not
+wiki/gene-back-crystal-colour.html#base	coding	One short subclass, the crystal antler’s split
+wiki/gene-back-crystal-colour.html#bone	gameplay	Bone
+wiki/gene-back-crystal-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-back-crystal-colour.html#colours	gameplay	The colours, and two-tone crystals
+wiki/gene-back-crystal-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-back-crystal-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-back-crystal-colour.html#invented	science	Invented
+wiki/gene-back-crystals.html#carrot	gameplay	Its gene carrot
+wiki/gene-back-crystals.html#dominant	gameplay	One copy, either sex
+wiki/gene-back-crystals.html#finding	gameplay	Finding one
+wiki/gene-back-crystals.html#health	gameplay	Is it good for the horse?
+wiki/gene-back-crystals.html#inheritance	gameplay	Crossing two of them
+wiki/gene-back-crystals.html#invented	science	Invented
+wiki/gene-back-crystals.html#mesh	coding	The mesh: one cluster, one tree
+wiki/gene-back-crystals.html#numbers	coding	The epigenome, by cost
+wiki/gene-back-crystals.html#pattern	coding	Slice D of the body parts
+wiki/gene-back-crystals.html#see-through	coding	See-through shafts, solid points
+wiki/gene-back-crystals.html#what-varies	gameplay	What varies
+wiki/gene-back-crystals.html#where	gameplay	Where they grow
 wiki/gene-back-sail-colour.html#base	coding	One short subclass, and a split instead of a fade
 wiki/gene-back-sail-colour.html#bone	gameplay	Bare bone
 wiki/gene-back-sail-colour.html#carrot	gameplay	Its gene carrot
@@ -3400,6 +3419,7 @@ wiki/model-parts.html#anchoring	coding	Anchoring, and the root transform
 wiki/model-parts.html#body-parts	coding	The body parts: an anchor off the head, a saddle zone, a row
 wiki/model-parts.html#bone-versions	coding	Every part with bone in it has a bone version
 wiki/model-parts.html#classes	coding	What each piece does
+wiki/model-parts.html#crystals	coding	Clusters as trees, and see-through prisms
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
 wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
 wiki/model-parts.html#plates	coding	Two rows to a mesh, and the flank anchors

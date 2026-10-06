@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal growth colour &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> codominant <span class="sep">/</span> colours the crystal growths, paints nothing</p>
+
+<h1>Crystal growth colour</h1>
+
+<p class="lede">
+    What colour a horse&rsquo;s <a href="gene-back-crystals.html">crystal growths</a> are. The same
+    colours and rules as <a href="gene-horn-colour.html">horn colour</a> (white, the rainbow, pink,
+    black, grey or chaos), on a locus of its own. Two different copies make the crystals one colour
+    and their points the other. On a horse without crystals it does nothing.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.back_crystal_colour"></div>
+
+<h2 id="colours">The colours, and two-tone crystals</h2>
+
+<p>
+    Exactly the <a href="gene-horn-colour.html#colours">horn colour table</a>. Two copies of one
+    colour make every crystal that colour, see-through, with solid points of the same colour. Two
+    different ones make the see-through <strong>crystal</strong> one colour and its solid
+    <strong>point</strong> the other. The crystal takes whichever colour comes earlier in the list,
+    so <code>Red/Blu</code> is red glass with blue points, either way round. Every copy carries a
+    little shade of its own, so no two ruby-crystalled horses are quite the same red.
+</p>
+
+<h2 id="bone">Bone</h2>
+
+<p>
+    Two <code>Bon</code> copies are simply bone-coloured crystal, still see-through. A crystal has
+    no bone in it, so unlike the other body parts there is no bare-bone version. No wild horse
+    carries <code>Bon</code>. The skeleton horses grow crystals in ordinary colours, with this
+    locus not pinned (owner, 2026-10-05).
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all. It is only the colour of the crystals.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.back_crystal_colour"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.back_crystal_colour</dd></div>
+    <div><dt>Class</dt><dd><code>BackCrystalColourGene extends AbstractPartColourGene</code></dd></div>
+    <div><dt>Priority</dt><dd>337 (magical band), beside <a href="gene-back-crystals.html">crystal growths</a> at 336</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha Bon, in base-before-tip order; <code>Bon</code> (bone, no wild share)</dd></div>
+    <div><dt>Outcomes</dt><dd><code>back-crystals-white</code> &hellip; <code>back-crystals-chaos</code>, plus <code>back-crystals-two-tone</code>; all wild types</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="base">One short subclass, the crystal antler&rsquo;s split</h2>
+
+<p>
+    A key, a name, a priority and the words its outcomes are written in. Everything else is
+    <code>AbstractPartColourGene</code>&rsquo;s. Its <code>Words</code> carry a <code>split</code>
+    sentence (&ldquo;the crystals are one, the base, and their points the other&rdquo;).
+    <code>partGrows</code> answers from the crystal locus, so the short form leaves the colour off
+    a horse without crystals.
+</p>
+<p>
+    The split costs no new machinery. A see-through part is drawn in two passes. The blended pass
+    draws its kind&rsquo;s see-through regions in the base tint, which for the crystals is the
+    <code>CRYSTAL</code> shafts. The solid pass draws everything else in the tip tint, which is the
+    <code>BONE_TIP</code> points. This is the same path the sail takes, with the membrane as the
+    base and the spines as the tip. <code>GrownParts.of</code> never calls <code>boneOnly</code> for
+    the crystals: there is nothing soft to leave off.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    Horses grow no crystals, so neither is their colour real. The table reads as gemstones (ruby,
+    citrine, emerald, sapphire, amethyst, rose quartz, smoky and black quartz), which is exactly
+    what the treatment asked of a crystal&rsquo;s colour gene. It is a separate locus from every
+    other part&rsquo;s because the owner chose one colour gene per part.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The crystal-and-point split is unit-tested but has never been seen: whether a two-tone horse shows see-through crystals in one colour with solid points in the other, and whether dark colours still read as see-through, are open.</p>
+</div>
+
+<h3 id="open-crystal-colour-split">The crystal in one colour, its point in the other</h3>
+<p>
+    A <code>Red/Blu</code> crystal horse close up: red see-through shafts, blue solid caps, the
+    same on every crystal. Then <code>Blk/Blk</code> and <code>Gry/Gry</code>: a dark tint at the
+    crystal&rsquo;s alpha may read as a solid smoked block rather than glass, and if it does, that
+    is a look for the owner to judge rather than a bug.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

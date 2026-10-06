@@ -396,9 +396,9 @@
 
 <p>
     <code>part_sheet.png</code> is 64&times;64, cut into a 4&times;4 grid of 16&times;16 regions,
-    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Eight regions are
+    baked by <code>node neoforge-26.1.2/tools/bake-part-sheet.mjs</code>. Ten regions are
     painted &mdash; horn and horn tip, antler bone and antler point, the bloom clumps, ram horn and
-    ram tip, and hair &mdash; and the rest are room for the parts that have not been written.
+    ram tip, hair, a sail&rsquo;s membrane, and crystal &mdash; and the rest are room for the parts that have not been written.
     The baker repeats every region id by value; <code>PartGeneratorTest.theSheetBakerAgreesWithPartSheet</code>
     reads it and fails if an id, a <code>paint()</code> call or a <code>PAINTED</code> entry
     disagrees with <code>PartSheet</code>.
@@ -543,7 +543,7 @@
     antler, the copy&rsquo;s number is a sail, and <code>0</code> skips the blended pass entirely: a
     bone sail is its bare rays. A kind with no see-through region is never
     <code>translucent()</code>, whatever its opacity says. The renderer no longer names a region,
-    so the crystal growths are one more case in that switch.
+    so the <a href="#crystals">crystal growths</a> were one more case in that switch and no change to it.
 </p>
 <p>
     A membrane is the first <strong>flat box</strong>: <code>PartNode.width</code> is its extent
@@ -576,6 +576,25 @@
     kind. A slab is the second kind of flat box: a sheet of <code>BONE</code> hung from its top
     edge (<code>rz</code> of half a turn plus the flare), so a per-element scale grows it down the
     flank and never up over the back.
+</p>
+
+<h3 id="crystals">Clusters as trees, and see-through prisms</h3>
+<p>
+    Shipped with the <a href="gene-back-crystals.html">crystal growths</a>, 2026-10-05, the last of
+    the four body parts, and the confirmation that the machinery was finished: no client change.
+    <code>PartKind.CRYSTALS</code> sits on <code>SPINE</code>, is <code>saddleZoned</code> and
+    <code>scalesPerElement</code>, and names the new <code>CRYSTAL</code> sheet region in
+    <code>translucentRegions()</code>; the rest is <code>CrystalGenerator</code>.
+</p>
+<p>
+    A cluster of three to seven crystals is <strong>one tree</strong>: its central crystal is the
+    root, upright, and the others hang off it at <code>t = 0</code>, leaning away from the midline.
+    So a cluster is one group with one root, the count and the saddle zone act on clusters as they
+    do on spines, and the per-element scale grows a whole cluster about its centre. A crystal is a
+    shaft, the same shaft rolled <code>&pi;/4</code> (two crossed squares read as an octagonal prism)
+    and a short solid cap on <code>BONE_TIP</code>. The seed picks one of eight arrangements, each a
+    fixed-length <code>SeededRng</code> walk, so spread and size never move where a crystal stands.
+    Six clusters, the ends pinned to the withers and croup, so a saddled horse keeps those two.
 </p>
 
 <h3 id="snout">The snout anchor, and a part that grows forward</h3>
@@ -632,6 +651,7 @@
 <tr><td><a href="gene-back-sail.html">Back sail</a></td><td><code>Bon/Bon</code> on <a href="gene-back-sail-colour.html">back sail colour</a>: bone rays, and the membrane left off (opacity 0)</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td><a href="gene-body-plates.html">Shoulder and hip plates</a></td><td><code>Bon/Bon</code> on <a href="gene-body-plate-colour.html">body plate colour</a>; all bone, so nothing is left off</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td><a href="gene-tusks.html">Narwhal horn</a></td><td><code>Bon/Bon</code> on <a href="gene-tusk-colour.html">tusk colour</a>; a tusk is a tooth, all hard</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
+<tr><td><a href="gene-back-crystals.html">Crystal growths</a></td><td>none: a crystal has no bone. <code>Bon/Bon</code> on <a href="gene-back-crystal-colour.html">crystal growth colour</a> is only a colour</td><td>in the horn count group, as ordinary crystals in any colour (owner, 2026-10-05)</td></tr>
 <tr><td>Wings (not built)</td><td>the bones alone, no membrane</td><td>to ask when the wing part is built</td></tr>
 </tbody>
 </table>
@@ -646,8 +666,7 @@
     <span class="label">What is still planned here</span>
     <p>
         The parts the built machinery has no generator for yet &mdash; the five head parts
-        after the dragon horns, the three body parts after the dorsal spines (back sail, shoulder and hip plates,
-        crystalline growths), then hoof feathering, tufted tails and wings,
+        after the dragon horns, then hoof feathering, tufted tails and wings,
         and the horns the antlered beasts of the bestiaries lack &mdash; plus the
         two hooks that would let something other than one gene ask for a part: a breed file, and
         the worn side, so a horse shoe draws through this layer rather than a bespoke one.
@@ -662,7 +681,8 @@
         &mdash; small models, head- or spine-parented, big visual payoff. The
         <a href="gene-unicorn-horn.html">unicorn horn</a> was the first of that batch and
         <a href="gene-antlers.html">antlers</a> the second; both have shipped, and so have
-        <a href="gene-dorsal-spines.html">dorsal spines</a> (2026-10-05).
+        <a href="gene-dorsal-spines.html">dorsal spines</a> and <a href="gene-back-crystals.html">crystal
+        growths</a> (2026-10-05).
         <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails, hoof
         feathering (already wanted by the draught breeds), tusks (the
         <a href="gene-tusks.html">narwhal horn</a> shipped 2026-10-05; boar tusks and sabre fangs
@@ -698,19 +718,10 @@
         soft parts on <code>HAIR</code> that foals wear too. Each with its own colour locus on
         <code>AbstractPartColourGene</code>. The treatment is in <code>intake/</code> until each
         slice ships.</li>
-    <li><strong>The rest of the body parts.</strong> The dorsal spines shipped as slice A and
-        settled the <a href="#spine-anchor">spine anchor</a>, the <a href="#saddle-zone">saddle
-        zone</a> and the <a href="#row-scale">per-element scale</a>. The back sail shipped as slice
-        B and made <a href="#translucent-regions">see-through regions data on the kind</a>, and the
-        shoulder and hip plates shipped as slice C with the <a href="#plates">flank anchors</a>. One
-        slice is left, with its own colour locus: <strong>crystalline
-        growths</strong> along the spine (dominant; seeded clusters through the sail&rsquo;s
-        translucent path). Crystal geometry is easy (crossed prisms read as eight-sided), and the
-        render type is known: <a href="gene-antler-crystal.html">crystal antlers</a> already draw
-        their shafts through <code>entityTranslucent</code> and their points solid, by region. If
-        that reads muddy, opaque emissive crystals are still a good look. A
-        <code>parts.translucent</code> setting joins the config block if a translucent pass is
-        measured to cost. Scoped in GitHub issue #151 (sub-issue #155).</li>
+    <li><strong>A translucent setting, if it costs.</strong> Every body part has shipped. Three kinds
+        now draw a blended pass (crystal antlers, the sail, the crystal growths); a
+        <code>parts.translucent</code> setting joins the config block if one is measured to cost,
+        drawing them solid instead. Opaque crystals, emissive or not, would still be a good look.</li>
     <li><strong>Hoof feathering.</strong> Four anchors at once, and the first part that should
         take its colour from the horse&rsquo;s own coat texture rather than a tint &mdash; a
         sampled mane patch comes out the right colour on every horse, the way real feathering

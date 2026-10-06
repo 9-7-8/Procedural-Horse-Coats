@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crystal growths &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Crystal growths</h1>
+
+<p class="lede">
+    One copy and the horse grows clusters of crystals out of its back along the spine, from the
+    withers to the croup: see-through shafts with solid points, fanning out from the midline.
+    Where every crystal stands is the horse&rsquo;s own and is inherited whole. How big they are, how
+    many clusters there are and how far they fan are written on the allele. Their colour is a gene
+    of its own, <a href="gene-back-crystal-colour.html">crystal growth colour</a>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.back_crystals"></div>
+
+<h2 id="dominant">One copy, either sex</h2>
+
+<p>
+    Dominant: <code>Crg/n</code> and <code>Crg/Crg</code> both grow crystals, so a crystal-grown
+    horse bred to a plain one gives a crystal-grown foal at least half the time. It is
+    <strong>not</strong> sex-limited. Foals grow none; the crystals come in when the horse grows
+    up, and stay.
+</p>
+
+<h2 id="where">Where they grow</h2>
+
+<p>
+    Up to six clusters in a row along the top of the back, from the withers to the croup, each of
+    three to seven crystals: a tall one in the middle and shorter ones around it, leaning away from
+    the spine. A saddle or a rider hides the clusters under the saddle and leaves the ones at the
+    withers and the croup.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Rare in the wild: about three horses in a thousand grow crystals, and because one copy is
+    enough, every horse that carries the gene shows it. The skeleton horses can grow them too, as
+    one of their horn-like parts. A crystal has no bone in it, so on a skeleton they are ordinary
+    crystals in any colour.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Arrangement</strong>: where each crystal of each cluster stands, how many crystals a
+        cluster has and how long each is against its cluster&rsquo;s tallest. There are eight
+        arrangements. A foal inherits its parent&rsquo;s whole, and it only rarely changes in a line.</li>
+    <li><strong>Size</strong>: three classes, <em>small</em>, <em>large</em> and <em>great</em>.
+        Small to large in the wild; a line bred for size reaches great and stops.</li>
+    <li><strong>Count</strong>: how many clusters show, from the withers back, two to six in the
+        wild. A line can be bred down to a single cluster at the withers.</li>
+    <li><strong>Spread</strong>: how far the outer crystals of a cluster lean away from the spine,
+        from nearly upright to a wide fan.</li>
+</ul>
+
+<p>
+    Everything stacks: a horse can wear crystals, a sail, a row of dorsal spines, plates and every
+    head part at once. They do not glow. Nothing makes them glow yet.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no ability, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.back_crystals"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.back_crystals</dd></div>
+    <div><dt>Class</dt><dd><code>BackCrystalsGene</code></dd></div>
+    <div><dt>Priority</dt><dd>336 (magical band), with its colour locus at 337; only a code-order slot, the next free run after the tusks</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Crg</span> <span class="allele wild">n</span>, dominant</dd></div>
+    <div><dt>Founders</dt><dd><code>Crg/n</code> at 0.3% (<code>WILD_CRYSTALS_PERCENT</code>), the other dominant body parts&rsquo; share; no invisible carriers</dd></div>
+    <div><dt>Epigenome</dt><dd><code>seed</code> (the arrangement; never drifts), <code>size</code> (0&ndash;0.7, clamp 0&ndash;1), <code>count</code> (2 to <code>CrystalGenerator.MAX_CLUSTERS</code>, never under 1), <code>spread</code> (0&ndash;1)</dd></div>
+    <div><dt>Part</dt><dd><code>CRYSTALS</code> at <code>SPINE</code>; shafts on <code>CRYSTAL</code> (see-through), points on <code>BONE_TIP</code> (solid)</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong>; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">Slice D of the body parts</h2>
+
+<p>
+    The last body part (<a href="model-parts.html#body-parts">model parts</a>), and it needed no new
+    render path. It reuses the spine row&rsquo;s anchor, count and
+    <a href="model-parts.html#body-parts">saddle zone</a>, and the sail&rsquo;s
+    <a href="model-parts.html#translucent-regions">see-through regions</a>. The client is unchanged:
+    a new kind with <code>translucentRegions()</code> naming the new <code>CRYSTAL</code> sheet
+    region is all the renderer needs. It is one kind, <code>CrystalGenerator</code> and
+    <code>CrystalSize</code>, and one line in <code>GrownParts.of</code> dressed by
+    <a href="gene-back-crystal-colour.html">its colour locus</a>. The granting locus is in
+    <code>GrownParts.shapes</code>&rsquo;s every-part baseline.
+</p>
+
+<h2 id="mesh">The mesh: one cluster, one tree</h2>
+
+<p>
+    Each cluster&rsquo;s <strong>central crystal is the root</strong>, standing upright at the
+    cluster&rsquo;s place along the row. Every other crystal of the cluster hangs off that root at
+    <code>t = 0</code>, set out to the side and along the row, and leaned away from the midline by
+    <code>rz</code> (further out leans further). So a cluster is one group with one root. The count
+    hides it and the fractional grow shrinks it as a unit, the per-element scale grows it about its
+    own centre, and <code>PartGeneratorTest</code>&rsquo;s one-tree-per-element rule holds unchanged.
+    Because the root is upright, its children&rsquo;s offsets are in the body&rsquo;s own frame, and a
+    crystal set to the side neither sinks nor floats.
+</p>
+<p>
+    A crystal is three boxes. The first is a shaft. The second is the same shaft rolled
+    <code>&pi;/4</code> about its own axis, and the two crossed squares read as an octagonal prism.
+    The third is a short, narrower cap at the top, rolled <code>&pi;/8</code>. The shafts sample
+    <code>CRYSTAL</code>, the cap <code>BONE_TIP</code>. A roll is only ever on a box that does not
+    bend. The crystal antlers have no prism geometry of their own (they are the antler mesh drawn
+    see-through), so the prism is new here, despite what the treatment assumed.
+</p>
+<p>
+    The two end clusters sit exactly at the withers and the croup, and the inner four are jittered
+    along the row by their arrangement. So under a saddle the first and last always show and the
+    middle ones hide; the fifth cluster can fall either side of the saddle&rsquo;s back edge.
+    <code>BackCrystalsGeneTest</code> holds the numbering, the prism shape, the fan and the saddle.
+</p>
+
+<h2 id="numbers">The epigenome, by cost</h2>
+
+<ul>
+    <li><code>seed</code>: one of <code>CrystalGenerator.VARIANTS</code> arrangements, the
+        antler rack&rsquo;s rule (<code>EpiValue.seed</code>, never nudged by drift). Each
+        arrangement is one <code>SeededRng</code> walk with a fixed number of draws per cluster
+        and per crystal, so the spread and the size class change only angles and lengths, never
+        where anything stands.</li>
+    <li><code>spread</code>: baked, <code>CrystalGenerator.style(variant, spread)</code>, three
+        buckets; it scales every outer crystal&rsquo;s lean.</li>
+    <li><code>size</code>: the class is the mesh&rsquo;s size bucket (three; the crystals&rsquo;
+        lengths and thicknesses), the remainder a uniform per-element grow, so stretch and girth are
+        equal.</li>
+    <li><code>count</code>: shown out of the most baked, the antler&rsquo;s tine rule.</li>
+</ul>
+
+<h2 id="see-through">See-through shafts, solid points</h2>
+
+<p>
+    The part&rsquo;s <code>opacity</code> is <code>AttachedPart.CRYSTAL_ALPHA</code>, the crystal
+    antler&rsquo;s. It is not on the copy, because the treatment&rsquo;s four numbers do not include
+    it, and every number on the copy has to reach the part. The blended pass draws only the shafts
+    in the base colour, and the solid pass draws the caps in the tip colour. No glow:
+    <code>glowRegions()</code> answers <code>SOLID</code> as for every part nothing lights, which
+    is where a glow gene would go.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No animal grows crystals. The look borrows from geodes and quartz druses, clusters of
+    hexagonal points breaking out of rock. It is drawn as eight-sided prisms because two crossed
+    boxes is the cheapest prism the renderer has. This is fantasy and makes no claim about any real
+    gene. It is dominant (the treatment&rsquo;s call), so like the dorsal spines and the plates it
+    shows on every carrier, and the sail is the body part you have to breed for.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The crystals have never been seen in a game: whether they stand on the back without sinking or floating, read as see-through prisms with solid points, hide under a saddle, and look right at great size and in motion are all open.</p>
+</div>
+
+<h3 id="open-crystals-look">On the back, standing still</h3>
+<p>
+    A crystal-grown horse from the side, from above and from behind, at each spread. Every
+    crystal&rsquo;s base should sit in the top of the back with no gap, and none should sink below
+    the coat or float above it. The outer crystals should lean away from the spine, more at a wide
+    spread. Each crystal should read as an eight-sided prism with a solid point. Use a
+    <code>-PphotoShoot</code> list as the plates were.
+</p>
+
+<h3 id="open-crystals-see-through">See-through, and two-tone</h3>
+<p>
+    The shafts should be see-through in the base colour, with the coat visible through them, and
+    the points solid in the tip colour (<code>Red/Blu</code>: red glass, blue points). Several
+    crystals overlap in a cluster, so look for blended faces sorting wrongly: a far face drawn over
+    a near one. That is the same open question as the sail&rsquo;s
+    (<a href="gene-back-sail.html#open-sail-sorting">sail sorting</a>).
+</p>
+
+<h3 id="open-crystals-saddle">Under a saddle and a rider</h3>
+<p>
+    Saddle a horse with a full row of six clusters, then ride it. The middle clusters should vanish
+    and the ones at the withers and the croup stay; no crystal should poke up through the saddle or
+    the rider. Take the saddle off and the whole row comes back.
+</p>
+
+<h3 id="open-crystals-great">Great size, in motion, and two counts</h3>
+<p>
+    A great-sized horse walking, grazing and rearing: the clusters should ride the back, and none
+    should reach under a low ceiling&rsquo;s collision. Two crystal horses side by side with
+    different counts (one and six clusters) should each show their own; a horse wearing the
+    other&rsquo;s count is the deferred-submit trap.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

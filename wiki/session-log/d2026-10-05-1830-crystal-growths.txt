@@ -1,0 +1,102 @@
+2026-10-05 18:30 (end) - Crystal growths, slice D of the body parts (#155)
+
+ASKED
+-----
+- "/next-release" (procedures/next-release.txt). The next release is v0.5.046 (milestone
+  43); v0.5.045's milestone was already closed and every open issue had a milestone. Its
+  four bugs (#10, #31, #35, #36) are all fixed and waiting on checks, each with a comment
+  naming the commit and the check, so none was a unit. The first unit was #155, crystal
+  growths, built by procedures/process-intake.txt and add-a-gene.txt.
+- One question to the owner (add-a-gene dd): do the skeleton breeds grow crystals, and what
+  does Bon/Bon do? Answer: "Skeletons grow totally normal crystals."
+
+DONE
+----
+- 4757788d Crystal growths: clusters of see-through prisms along the back.
+  New: BackCrystalsGene (horsegenetics.back_crystals, dominant Crg, priority 336, 0.3%
+  Crg/n founders), BackCrystalColourGene (horsegenetics.back_crystal_colour, 337, on
+  AbstractPartColourGene, partGrows from the crystal locus), CrystalGenerator, CrystalSize,
+  PartKind.CRYSTALS (SPINE anchor, saddleZoned, scalesPerElement, translucentRegions =
+  CRYSTAL), PartSheet.CRYSTAL (region 9) painted by bake-part-sheet.mjs,
+  AttachedPart.crystals. GrownParts.of dresses it (base = see-through crystal, tip = solid
+  point) and the every-part baseline in shapes() carries Crg/Crg. Both skeleton breeds'
+  horn count groups gain back_crystals Crg/Crg.
+  Shape: a cluster of 3-7 crystals is ONE tree. The upright central crystal is the root and
+  the others hang off it at t=0, leaning outward. A crystal is a shaft, the shaft rolled
+  pi/4 (an octagonal prism), and a solid cap on BONE_TIP. The seed picks one of 8
+  arrangements; spread is a style bucket (3); size is 3 classes. Six clusters, the two ends
+  pinned to the withers and croup.
+  Hypothesis held: no client change. The neoforge build compiled with AttachedPartLayer,
+  PartModel and PartMeshes untouched.
+  Proof: BackCrystalsGeneTest (new, 14 tests), PartGeneratorTest, SaddleZoneTest,
+  UndeadBreedsTest, BackSailGeneTest, BodyPlatesGeneTest, TusksGeneTest,
+  GeneDescriptionCoverageTest, GeneCodeDisplayTest, PartColourGeneTest, BreedFilesTest,
+  BreedFounderTest, ShowcaseGenotypesTest, GenotypeCatalogTest and the other registry-wide
+  classes by name, both coat goldens: green. Two mutants (outer crystals leaning inward;
+  the gene made recessive) each turned BackCrystalsGeneTest red. The coat-bake golden
+  gains 15 rows at the baseline hash; no pipeline-golden hash moved. Designer boots,
+  parity OK, links OK.
+  Issue #155: closed by the docs commit. #151 (body parts tracking) closed by hand: all
+  four slices shipped.
+- Docs: wiki/gene-back-crystals.html and gene-back-crystal-colour.html (gameplay, coding,
+  science, verification), model-parts.html#crystals plus the sheet count, see-through
+  line, a bone-versions row and the Roadmap, undead-horses.html#skeleton-horns,
+  decisions.html. All the bakes in rebake rows a, b, c, g, h, i, k and x.
+
+DECIDED
+-------
+- (owner) The skeleton breeds grow crystal growths in their horn count group as ordinary
+  crystals: colour unpinned, see-through. A crystal has no bone version; Bon/Bon is only a
+  colour. Recorded on decisions.html and model-parts.html#bone-versions.
+- Without the owner, all recorded on decisions.html (the crystal growths line) and
+  gene-back-crystals.html's Coding tab:
+  - a cluster is one tree rooted at its upright central crystal;
+  - a crystal is two crossed shafts and a cap, the cap on BONE_TIP (no new tip region);
+  - opacity is CRYSTAL_ALPHA, not a number on the copy (the treatment lists four numbers);
+  - 8 arrangements x 3 spreads x 3 size classes; six clusters; the end clusters unjittered
+    so the saddle always leaves them;
+  - founders at the other dominant body parts' 0.3%;
+  - priorities 336/337, the next free run after the tusks (227-247 are full);
+  - name "Crystal growth colour" for the colour locus, so it is not confused with the
+    crystal antlers' gem.
+
+FOUND ON THE WAY
+----------------
+- The treatment says the crystals use "the same crossed prisms the existing crystal
+  antlers use". No such geometry exists: crystal antlers are the antler mesh drawn
+  see-through. The prism is new here; said on the issue and the gene page.
+- My own mistake: I first wrote the saddle zone as 0.5..13.5 in the anchor frame. It is
+  0.5..12.5, so the fifth cluster can fall either side of the saddle's back edge. The test
+  now asserts clusters 1-3 hidden, the ends shown, and the fifth hidden on some
+  arrangement.
+- SaddleZoneTest.everySpineIsOneNumberedChainFrontToBack assumed every saddle-zoned kind has
+  MAX_SPINES groups; the crystals are excluded there and hold their numbering in their own
+  test.
+
+PROCEDURES
+----------
+- add-a-gene.txt: question dd now says a part with no bone still gets the skeleton-pool
+  question, and that hornsFollowTheCountGroup then needs the kind's look allowed. Step 6.1
+  says SaddleZoneTest is written for the spine row's count, and that an element of several
+  boxes is one tree rooted on an upright box (model-parts.html#crystals).
+- next-release.txt and process-intake.txt worked as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every test class not named
+  above: the rest of the breed classes, the spec and creator parity classes, and the slow
+  population and census classes. Gametests were not run; nothing server-side changed.
+- Nobody has seen the crystals in a game, and no photo shoot was run. New Verification
+  anchors: gene-back-crystals.html#open-crystals-look, #open-crystals-see-through,
+  #open-crystals-saddle, #open-crystals-great; gene-back-crystal-colour.html
+  #open-crystal-colour-split.
+
+RELEASE
+-------
+Not offered. v0.5.046 still has four features left, and its four bugs wait on checks.
+
+PICK UP FIRST
+-------------
+/next-release: the next v0.5.046 unit is #161, boar tusks and sabre fangs (tusks slice B),
+by procedures/process-intake.txt. Photograph the crystals (procedures/photograph-horses.txt)
+when the owner next wants pictures.

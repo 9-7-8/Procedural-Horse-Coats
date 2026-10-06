@@ -292,6 +292,8 @@ window.HG.pages = {
                 { href: "gene-body-plate-colour.html", text: "Body plate colour", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-body-plates.html", text: "Body plates", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-antler-crystal.html", text: "Crystal antlers", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-back-crystal-colour.html", text: "Crystal growth colour", kind: "magical", views: ["gameplay","coding","science"] },
+                { href: "gene-back-crystals.html", text: "Crystal growths", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-dorsal-spine-colour.html", text: "Dorsal spine colour", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-dorsal-spines.html", text: "Dorsal spines", kind: "magical", views: ["gameplay","coding","science"] },
                 { href: "gene-dragon-horn-colour.html", text: "Dragon horn colour", kind: "magical", views: ["gameplay","coding","science"] },
