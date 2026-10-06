@@ -1,0 +1,56 @@
+2026-10-05 21:33 - Release photos: every release ships photos of its new parts (end time)
+
+Cloud session, branch claude/brave-fermi-ufva5r. Procedure-only work: no Java, resource or
+Gradle file touched, so the Gradle build was skipped; check-parity was run (OK).
+
+ASKED
+1. "one thing to add to our release procedure: we should ship it with photos taken using
+   our photo tool, of all the new parts. These photos should be in the release notes on
+   github and in the post to discord. You should upload the pictures themselves to a
+   folder on github-- probably a new folder per release."
+   -> release.txt step 5c added; photos live in release-photos/v<new>/.
+2. "Can you also make sure it crops the photos in to the most important parts? Sometimes
+   it takes them full widescreen, and there's a lot of empty space on either side"
+   -> step 5c.c now crops each photo to the subject; camera moved in first.
+3. /end-session.
+
+DONE
+- 02e05cd: procedures/release.txt step 5c (list new parts, photograph with
+  photograph-horses, look at each, copy keepers into release-photos/v<new>/, embed in the
+  GitHub note via raw.githubusercontent.com .../main/release-photos/v<new>/<file>.png,
+  write release-photos/v<new>/discord-post.md in the format of
+  intake/discord-command-whistle/), plus done-when and never lines, INDEX.txt row, and an
+  exception in photograph-horses.txt's "never commit screenshots".
+- f6b0d21: step 5c.c crops to the subject's bounding box plus margin (portrait or squarish
+  over widescreen, copy not original, never cutting a horn tip or translucent edge, no
+  upscaling); "never crop" wording removed; photograph-horses gallery note points at it.
+  Proof: none beyond reading the files; the procedure has not been run in a release.
+
+DECIDED
+- Photos folder is release-photos/v<new>/, one new folder per release (owner asked for a
+  folder per release; the name is the session's call). Recorded in release.txt 5c.
+- Note links use the main path, not the tag path, because the note is written before the
+  tag exists (session's call). Photos must be pushed before the release is created.
+- A session cannot post to Discord: it writes discord-post.md and hands it over.
+
+FOUND ON THE WAY
+- DebugPhotoShoot only stages horses; items, blocks and screens need it extended or a
+  by-hand screenshot. Noted in step 5c.b, not filed as an issue.
+- Cropping is by eye or background detection, not automated. A tools/ crop script was
+  offered to the owner, not built.
+
+PROCEDURES
+- release (step 5c, done-when, never, see-also), photograph-horses (two lines),
+  INDEX.txt (/release row). No other procedure needed changing.
+
+NOT RUN / NOT CHECKED
+- Step 5c has never been run in a real release. The full :common:test suite and the
+  Gradle build were not run (nothing they cover changed).
+- No Verification-tab anchors added.
+
+RELEASE
+- Not offered: nothing player-facing landed this session.
+
+PICK UP FIRST
+- Owner's call whether to build the item/block/screen photo stage in DebugPhotoShoot and
+  a crop script; otherwise whats-next.

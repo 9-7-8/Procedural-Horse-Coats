@@ -44,7 +44,7 @@ Command                  Runs    Say (any of)                         What it le
 /photograph-horses       local   "show me pictures", "photograph      photo-*.png per shot, described
                                  the horses"                          and shown to the owner
 /release                 local   "ship a release", "new version",     owner's decision; if yes, every
-                                 "is it worth a release"              code test green, jar + wiki note
+                                 "is it worth a release"              code test green, jar + photos + wiki note
 /rebake                  local   "rebake", "run the bakes",           every derived artefact current,
                                  "is anything stale"                  only real changes staged
 /test-tiers              local   "which tests should I run",          the cheapest proving tests run;

@@ -72,11 +72,15 @@ PROCEDURES
 ----------
 - Added: procedures/measure-worldgen.txt (/measure-worldgen), plus its keyword memory
   row.
-- release: new step 5a, photos. The owner pointed out that 0.5.045 shipped without
-  pictures of its four new parts. Five photo-shoot frames were added to the GitHub
-  release (assets, embedded under each bullet) and to wiki/releases.html#v0-5-045 (files
-  in wiki/assets/releases/). The step, DONE WHEN and NEVER now require one per visible
-  feature.
+- release: photos. 0.5.045 shipped without them because the owner's release-photos
+  procedure (step 5c, from a cloud session) sat unmerged on claude/brave-fermi-ufva5r.
+  A duplicate step 5a written here first was dropped. The branch was merged on the
+  owner's word ("You merge it please"). Per 5c, five photo-shoot frames, cropped to the
+  horse, are in release-photos/v0.5.045/ with discord-post.md. The GitHub note embeds them
+  by raw main links, and wiki/releases.html#v0-5-045 by relative path. The five image
+  assets uploaded earlier were deleted, and so was wiki/assets/releases/.
+- Found on the way: a cloud session's procedure change can sit on a claude/* branch
+  unseen. Nothing told this session the branch existed.
 - test-tiers: tier 3 is "about twenty minutes" (it said ten to fifteen; the owner asked
   why the run took so long), with this run's slowest classes. CLAUDE.md and end-session
   carried the same old figure and now say about twenty minutes.
