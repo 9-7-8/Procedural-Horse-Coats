@@ -82,13 +82,16 @@ STEPS
    - run BreedFilesTest, the breed's own *BreedTest (write one for a breed with a
      deliberate pool), BreedBandsReachTest and BreedClimateRuleTest, by name.
 
+6b. Pictures: photograph a few founders of the breed (a breed:<id> shot per strain, both
+    sexes, and a foal), by photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES", and show them before writing it up: a band
+    that reads wrong is cheaper to fix now.
 7. Write it up on wiki/breeds.html and wiki/breed-book.html, and record each call made
    without her in the breed's notes.
 
 DONE WHEN
 ---------
 She answered the design questions, the file loads (BreedFilesTest), its own test passes,
-the bakes are committed, and the wiki lists the breed.
+the bakes are committed, and the wiki lists the breed. She has seen its founders in pictures.
 
 NEVER
 -----

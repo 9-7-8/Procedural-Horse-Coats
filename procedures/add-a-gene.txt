@@ -382,6 +382,11 @@ STEPS
    after a data-only bake may be byte-noise: compare the two, and revert the wasm if
    nothing reachable changed.
 
+9b. Pictures: show the owner the gene, by photograph-horses.txt, "PICTURES FROM OTHER
+    PROCEDURES". A coat gene: bakeCoatSamples side views. An add-on: a photo shoot,
+    every form, two-tone and bone, with the framing its anchor needs. An ability: a
+    shot of whatever it shows (particles, a glow), or "no pictures".
+
 10. Finish with `./gradlew :neoforge-26.1.2:build`, then end-session. The gene rides the
     next release; release step 1 decides whether one is worth offering.
 
@@ -390,6 +395,7 @@ DONE WHEN
 - The gene is registered and baked, its tests and both goldens are green by name, and
   its page carries Gameplay, Coding, Science and Verification tabs.
 - The designer boots.
+- The owner has seen pictures of it (step 9b), unless nothing about it can be seen.
 - The build is green and everything is pushed.
 - The report says what was asked and answered, the calls made without the owner, what
   a full :common:test run would still check, and where to look first in game.

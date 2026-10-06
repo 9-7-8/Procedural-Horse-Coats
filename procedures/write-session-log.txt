@@ -53,6 +53,7 @@ STEPS
       - its commit hash;
       - what was wrong or missing, and why the change fixes it;
       - its proof: the tests run by name, the checks run, and what was seen in game;
+      - its pictures: which shots were taken and what each showed, or "no pictures";
       - the GitHub issue, if there is one, and its state now (closed, or open and
         waiting on what).
    d. DECIDED: every call made this session, and who made it. Mark the owner's answers

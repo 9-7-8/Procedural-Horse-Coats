@@ -118,6 +118,8 @@ DONE WHEN
 - You have reported: the next release, the unit built, what is left on its milestone
   (bugs first, then features), and any owner call the next unit will need, so she can
   answer it before the next run.
+- The unit's pictures have been shown, if its work can be seen (its own routine's
+  pictures step).
 
 NEVER
 -----

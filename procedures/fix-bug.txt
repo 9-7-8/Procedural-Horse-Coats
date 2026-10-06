@@ -175,6 +175,9 @@ STEPS
      to the Coding tab and the pen goes. Example: #25's gametest retired STALL SHAPES.
    - Everything you post on GitHub ends with the Claude Code attribution footer.
 
+6b. Pictures. A bug that shows (a look, a part, a screen, a page): show the owner the
+    broken look and the fixed one, the same picture before and after, by photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES".
+    A bug nobody can see says "no pictures" in the report.
 7. End the session with end-session. The session log names the issue, the cause, the
    fix commit, the proof (and whether the issue is closed or waiting), and any new
    issues filed along the way.
@@ -188,6 +191,7 @@ check it waits on, and the session has ended. Then report:
 1. the issue, and its state;
 2. the next issue by step 1's ranking;
 3. any issue you labelled needs-owner this run, with its question in one line.
+4. the before-and-after pictures for a visible bug (step 6b), or "no pictures".
 Then stop. Do not start that next issue.
 
 NEVER

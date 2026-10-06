@@ -49,6 +49,9 @@ STEPS
 
 5. End the hand-over message with a numbered list in chat: every step in order, and
    what a pass looks like for each. Visual checks go last.
+6. Pictures, where a check has a look: a picture of what a pass should look like, taken
+   by photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES" BEFORE the hand-over launch (it needs the client), so she
+   knows what she is looking for.
 
 DONE WHEN
 ---------

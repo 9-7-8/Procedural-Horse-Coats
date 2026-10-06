@@ -164,6 +164,8 @@ STEPS
     drift is a purple cube, or an item that will not craft, logging nothing. Family
     members are exempt from the wiki art bake (NOT_ON_A_PAGE).
 
+15b. Pictures: show the owner the item's art and, held, worn or placed, the item in game,
+    by photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES".
 16. Finish with `./gradlew :neoforge-26.1.2:build` and end-session. A new item rides the
     next release; release step 1 decides whether one is worth offering.
 
@@ -171,7 +173,7 @@ DONE WHEN
 ---------
 The item crafts or drops and does its job, and these are all green: the recipe check, the
 art check, the item-art bake, the progress check (if it has a task), its tests, and a
-clean server boot. Its page shows it, and everything is pushed.
+clean server boot. Its page shows it, and everything is pushed. The owner has seen pictures of it.
 
 NEVER
 -----

@@ -15,6 +15,29 @@ of genotypes on a stage in the sky. It does not test behaviour, animation or any
 that needs time; for those, build a yard pen (run-tests) or hand her a test
 (hand-over-a-test).
 
+PICTURES FROM OTHER PROCEDURES (owner, 2026-10-05)
+--------------------------------------------------
+Every procedure whose work can be SEEN ends by showing the owner pictures of it, if
+pictures are possible at all; FORMAT.txt makes this a rule, and each such procedure has a
+pictures step that points here. Pick the cheapest picture that shows the change:
+- A grown part, a breed's founders, a foal, a horse with gear: this procedure. Parts along
+  the back use Framing.SIDE; anything see-through or standing out from the back or flanks
+  also gets Framing.BACK. A shot's `want` predicate re-rolls until an epigenetic number is
+  where the picture needs it (a full row, a large size).
+- A coat (a coat gene, a colour, a marking): `:common:bakeCoatSamples`, side views in
+  common/build/coat-samples/, no client needed.
+- A wiki page, the horse designer, the gene creator or the breed designer: a headless
+  Chrome screenshot with wiki/tools/chrome.mjs (the breed designer over http, not file://).
+- An item, a block or other art: the PNG itself, and if it is held or placed, a shot here.
+- A bug that shows: a picture of the broken look before the fix and the same picture after.
+Look at every picture with Read before showing it, and say what it shows; send the files
+with SendUserFile (display render) or, where that is unavailable, the gallery artifact of
+step 6. A picture is never a pass (NEVER, below). Work nobody can see (a test, a measure,
+a log review, a config key) has no pictures: say "no pictures: nothing visible changed"
+rather than skipping silently. If pictures are possible but cannot be taken here (a cloud
+session, the owner's game is open and she has not said it may close), say so and name the
+shots a later local session should take.
+
 BEFORE YOU START
 ----------------
 1. Read launch-game. Its rules about her world, the log and closing a client all apply.
@@ -35,11 +58,14 @@ STEPS
    there. Stamp anything rare - re-rolling for a 1-in-640 founder outran the camera and
    saved an empty stage. Framing.WIDE shows the whole horse, Framing.FOAL a whole foal. The camera frames head and shoulders; a long
    unicorn horn still leaves the top of the frame. WIDE looks nearly down the horse's
-   length from the front, so a part along the back (spines, a sail) comes out end-on: give
-   stage() a side camera for one (the back sail session, 2026-10-05, put it 2-4 blocks due
-   north or south of the horse). A part standing OUT from the flank (the plates' spikes)
-   points at a side camera and comes out end-on too: add a camera behind the horse (east of
-   it, a block or two up), which shows both flanks at once (the plates session, 2026-10-05).
+   length from the front, so a part along the back (spines, a sail) comes out end-on: use
+   Framing.SIDE, square to the flank from the south. A part standing OUT from the back or
+   the flank (the plates' spikes, crystals) points at a side camera: use Framing.BACK,
+   behind and above, which shows both flanks and the coat behind the part. Both framings
+   are kept in stage(); a new one goes there too rather than in a throwaway edit.
+   Shot's last field, `want`, is a predicate on the rolled HorseRecord: record() re-rolls
+   (200 tries) until it holds, which is how a shot pins epigenetic numbers (the crystals
+   session, 2026-10-05: a full row at large size).
    A still frame against the sky or the white stage cannot
    show whether a translucent part is see-through; put something with detail behind it.
    Grep every allele token before using it.
@@ -69,7 +95,8 @@ STEPS
      equal means no sideways overflow.
 7. Close the client by launch-game steps 2 and 4: read the log, then
    tools/stop-dev-java.ps1 (-WhatIf first).
-8. Revert any SHOTS edit that only served this run, unless the owner wants it kept.
+8. Revert any SHOTS edit that only served this run, unless the owner wants it kept. Keep
+   a new framing or a stage() improvement: the next shoot needs it.
 
 DONE WHEN
 ---------

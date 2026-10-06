@@ -19,6 +19,11 @@ github.com. Put nothing in one that should not be public. That means no email
 addresses, machine names, hardware, tokens or trigger ids, and nothing about anyone's
 private life. Those stay in the local memory of the session that needs them.
 
+A procedure whose work can be SEEN (in game, on the wiki, in an app) has a pictures step
+before it reports: show the owner pictures of what changed, chosen by
+photograph-horses.txt's "PICTURES FROM OTHER PROCEDURES" (owner, 2026-10-05). A routine
+with nothing visible says so in its report instead.
+
 THE TEMPLATE
 ------------
 Copy this exactly. Keep the header keys in this order, padded to line up, and the

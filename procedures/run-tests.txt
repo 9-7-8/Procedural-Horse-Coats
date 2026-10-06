@@ -102,6 +102,8 @@ STEPS
    - the issues opened and closed, as links;
    - what is still running, and when it should answer;
    - a short numbered list of what only she can check, with visual checks last.
+   - pictures of anything a pen or a fix changed that can be seen, by
+     photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES", taken before the run's own launch or after it closes.
 
 DONE WHEN
 ---------

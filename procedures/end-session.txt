@@ -96,8 +96,13 @@ STEPS
    Leave the owner's own terminals alone. If a client is up that you did not launch,
    ask before closing it (see launch-game).
 
+8b. Pictures. If the session changed anything that can be seen and no routine has shown
+   it yet, show it now by photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES" (it
+   launches a client, so before step 8's stop, and only if the owner's game is not open).
+
 9. Stop, with a short summary. Say what shipped, what is newly waiting in
-   wiki/verification.html, which procedures step 4a changed or added, and the one thing
+   wiki/verification.html, the pictures shown (or "no pictures"), which procedures step
+   4a changed or added, and the one thing
    the next session should pick up first.
    If main now holds enough to OFFER a release by release step 1 (a substantial batch,
    never a handful of fixes), ask the owner with the question tool and cut it only on a

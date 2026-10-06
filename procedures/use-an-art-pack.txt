@@ -51,6 +51,8 @@ STEPS
    See the regenerate table in procedures/rebake.txt (rebake).
 5. Look at it in the game, or in the wiki preview, before calling it done
    (hand-over-a-test, if it needs the owner's eyes).
+6. Pictures: show the owner the art in place (the PNG, and in game or on the page where
+   it is used), by photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES".
 
 DONE WHEN
 ---------

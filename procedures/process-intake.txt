@@ -162,6 +162,11 @@ STEPS
      whole write-up: nothing moves to Gameplay or Coding.
    - If the subject has no page, write one.
 
+7b. Pictures. If the unit can be seen (a part, a gene, a breed, an item, a screen, a
+    page), show the owner pictures of it by photograph-horses.txt, "PICTURES FROM OTHER
+    PROCEDURES", and write what they showed on the Verification tab (a picture is
+    never a pass). A plan-only or invisible unit says "no pictures" in the report.
+
 8. Close it on evidence.
    Close the unit's issue as completed, never delete anything: the closed issue is the
    record, and its edit history and comments are the history the owner reads.
@@ -202,7 +207,7 @@ DONE WHEN
 The unit is pushed, written up and its issue closed, the session has ended cleanly, and you
 have reported:
 1. what shipped, and its tier;
-2. what is newly waiting in wiki/verification.html;
+2. what is newly waiting in wiki/verification.html, and the pictures from step 7b;
 3. the next unit by this ranking, with its tier and any owner question it will need,
    so she can answer it before the next run.
 Then stop. Do not start that next unit.

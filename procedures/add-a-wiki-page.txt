@@ -78,6 +78,9 @@ STEPS
 
 7. Commit and push straight away. The owner reads the live wiki.
 
+8. Pictures: a headless Chrome screenshot of the page (each tab that has a figure, a
+   table or an app), and one at phone width, by photograph-horses.txt, "PICTURES FROM OTHER PROCEDURES".
+
 DONE WHEN
 ---------
 The page is in pages.js with synced views, every bake and check above is green, at
