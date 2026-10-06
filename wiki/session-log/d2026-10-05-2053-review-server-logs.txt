@@ -1,0 +1,78 @@
+2026-10-05 20:53 (end time) - Server log review: five export folders, #35 still open on 0.5.044
+
+ASKED
+-----
+1. "/review-server-logs" - review the live server's unreviewed PCH log exports.
+   Came of it: five folders reviewed, nothing new filed, one comment on #35, report given.
+2. "Can you move all the logs you processed into an archive" - asked (question tool) how,
+   since the procedure and the live-server rule keep the server's folders read-only.
+   Owner chose: copy out as a zip, leave the originals; all 18 reviewed folders.
+   Came of it: one zip outside the server, path in the local memory pch-server-logs.
+3. "/end-session".
+
+DONE
+----
+- Server log review (no commit: issues are the output). Folders 2026-10-04, 2026-10-05,
+  2026-10-05-run2, -run3, -run4. All incremental, window 2026-10-03 23:50 to 2026-10-05
+  20:21. Builds 0.5.043, then 0.5.044 from 2026-10-04 23:02.
+  - #35 (horses suffocating in blocks): commented. On 0.5.044 the operator's rescue
+    script moved two horses (2026-10-05 16:30 and 18:14), and neither has a [clearance]
+    line, which HorseClearance.java:87 logs unconditionally. There are no [clearance]
+    lines at all on 0.5.044. By the issue's own rule, horses still reach walls some way
+    other than growing. Issue open; it needs the burial position, which the rescue line
+    does not log.
+  - #33 (false NOT ON ITS SHEET warnings): 13 more on 0.5.043 and 0 on 0.5.044, so the
+    fix holds live. Already closed; no comment.
+  - #13 (synchronous chunk loads): the control on 2026-10-02-1.log.gz found its 115
+    frames. In the new logs the only frames of ours are 6 at 2026-10-04 17:57, from
+    StallRecall -> TicketHandler.landingSpot / StallDetector, which #13 lists as loading
+    on purpose. 0.5.044 had 37 traces, 0 of ours. Closed; no comment.
+  - Proof: logs and code read; no tests (nothing in the repo changed).
+  - No pictures.
+- Archive: the 18 reviewed folders (2026-10-01 .. 2026-10-05-run4) zipped to
+  C:\Users\Isabel\PCH-logs-archive\PCH-logs-2026-10-01_to_2026-10-05-run4.zip. Checked:
+  144 entries, matching the 144 source files. Originals and .state.json untouched.
+
+DECIDED
+-------
+- Archive by copying out to a zip, never moving inside the server's folders; all
+  reviewed folders (owner). Recorded in procedures/review-server-logs.txt step 4 and in
+  the local memory pch-server-logs.
+- The waystone death of the horse "Spark Turner" (fell out of the world 2026-10-04
+  17:41, seconds after its rider used a waystone) was not filed: none of the mod's code
+  appears in that sequence and nothing like it has happened before (made without the
+  owner; offered to her as an issue in the report).
+
+FOUND ON THE WAY
+----------------
+- No bugs filed. Deaths in the window showed no repeating cause: two killed by mobs, one
+  "withered away" with no source in the log (the mod applies no wither), one killed next
+  to a newly arrived arcane dealer by an unidentified "Mountain Kiss" (the dealer later
+  left with all 10 horses, so this is not #17 coming back).
+- The [chaos] WARN about auroral:thrown_shimmer_spear is ChaosRoster skipping an entity
+  it cannot build, by design.
+- prev-nightly.log had already been overwritten, so the 2026-10-04 afternoon context came
+  from debug-2.log.gz. The procedure now says to look there.
+
+PROCEDURES
+----------
+- procedures/review-server-logs.txt: new archive step (owner's request); #13 named as
+  closed, with the sites that load chunks on purpose marked report-only; debug-*.log.gz
+  named as a source for a day prev-nightly.log has lost.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No Gradle build and no tests: no Java, resource or Gradle file changed. check-parity
+  run.
+- The full :common:test suite was not run (nothing in common/ changed).
+- 2026-10-05 00:00..12:00 has no surviving raw log, so rescue and chunk counts skip it.
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: this session changed no player-facing code.
+
+PICK UP FIRST
+-------------
+#35: horses still reach walls without growing on 0.5.044. Next server log review
+(review-server-logs) counts rescues and [clearance] lines after 2026-10-05 20:27.

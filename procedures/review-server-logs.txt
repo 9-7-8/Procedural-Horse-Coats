@@ -6,7 +6,7 @@ RUNS       : local only (the exports are on the owner's machine)
 TAKES      : the dated export folders written by the server's log exporter
 LEAVES     : every new folder reviewed once; bugs and tuning requests filed as GitHub
              issues; new-feature wants filed as idea issues; a report; the
-             reviewed-folders record updated
+             reviewed-folders record updated; a zip of the reviewed folders in the archive
 ==============================================================================
 
 WHEN TO USE
@@ -104,8 +104,11 @@ STEPS
    which logs "Trying to load chunk" with a stack trace each time something forces a
    synchronous chunk load. Tally the top frame of ours in each trace, over the plain
    logs AND the .log.gz ones (`zcat -f` reads both), and compare with any open issue
-   waiting on that tally. Issue #13 is one: its comment names the frames that should
-   be gone once the server runs the release carrying the fix.
+   waiting on that tally. Issue #13 was one; it is closed now, and its last comments
+   name the sites that load chunks on purpose (TicketHandler.landingSpot, the stall fill
+   under StallRecall, HorseRealm.safeReturn, arrival decoration, a glow light's old spot).
+   A frame of ours at one of those is expected: report it, do not file it. Any other
+   frame of ours is a new issue.
    Count only the logs from builds that carry the fix (each log names its jar near line
    178), and give the counts with their time range on the waiting issue.
    A trace is the Cupboard line, then a `java.lang.Exception: Chunk load debug` line, then
@@ -115,7 +118,9 @@ STEPS
    60 DebugPenManager.fastSet, 54 sweepPlot, 1 DebugWorldWatch.start). Never post a zero
    from a counter that has not reproduced the control.
    Raw logs rotate within a day: prev-nightly.log only reaches back to the last restart,
-   and the dated .log.gz files do not cover every hour. Name the hours no log covers in
+   and the dated .log.gz files do not cover every hour. Look for an export's events in
+   debug-*.log.gz too: they carry every INFO/WARN line as well, and they sometimes hold
+   a day that prev-nightly.log has already lost. Name the hours no log covers in
    every count you post, so a zero is not read as covering them.
    The operator's scripts can HIDE a mod defect. suffocation_rescue.js pulls a nearly
    dead horse out of a wall and logs "[suffrescue] moved horse <uuid>". Each line is a
@@ -133,6 +138,9 @@ STEPS
 
 4. Nothing to commit: issues are the output. (Update the reviewed-folders record in local
    memory as before.)
+   Archive the folders you just reviewed: zip copies of them into the archive folder the
+   memory names, outside the server, one zip per review. Leave the originals where
+   they are (owner, 2026-10-05).
 
 5. Report to the owner:
    - which folders were reviewed, and the window and builds they cover;
