@@ -1,5 +1,10 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.genetics.Allele;
+import com.example.horsegenetics.common.genetics.AllelePair;
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
+
 /**
  * <b>Tusk colour</b> ({@code horsegenetics.tusk_colour}) - a <b>magical, codominant</b>
  * locus that colours whatever the tusks locus grows and does nothing at all to a horse
@@ -26,5 +31,13 @@ public final class TuskColourGene extends AbstractPartColourGene {
     public TuskColourGene() {
         super(KEY, "Tusk colour", PRIORITY, new Words("tusks", "tusks", true,
                 "tusks", "ivory, what nearly every tusked horse has", "a horse with tusks"));
+    }
+
+    @Override
+    public boolean partGrows(Genotype genotype) {
+        // Every allele of the tusks locus but its baseline is a form that grows a part.
+        AllelePair pair = genotype.pair(Genes.TUSKS);
+        Allele none = Genes.TUSKS.defaultAllele();
+        return !pair.first().equals(none) || !pair.second().equals(none);
     }
 }

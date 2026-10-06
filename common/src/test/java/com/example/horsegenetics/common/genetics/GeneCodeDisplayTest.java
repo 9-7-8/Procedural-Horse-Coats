@@ -1,9 +1,12 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.genetics.genes.AbstractPartColourGene;
 import com.example.horsegenetics.common.testutil.Codes;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GeneCodeDisplayTest {
 
@@ -76,6 +79,43 @@ class GeneCodeDisplayTest {
     void theExampleFromTheDocComment() {
         assertEquals("EeAa nSW1 nCh CrCr",
                 sf("extension", "E/e", "agouti", "A/a", "champagne", "Ch/c", "mitf", "SW1/N", "matp", "Cr/Cr"));
+    }
+
+    /**
+     * A part's colour shows on nothing without the part, so the short form leaves it
+     * off (owner, 2026-10-05: the pen sign had outgrown its line). The full code still
+     * holds it.
+     */
+    @Test
+    void aPartColourIsListedOnlyOnAHorseThatGrowsThePart() {
+        assertEquals("EEaa", sf("dorsal_spine_colour", "Red/Red"));
+        String spined = sf("dorsal_spines", "Dsp/n", "dorsal_spine_colour", "Red/Red");
+        assertTrue(spined.contains("Dsp") && spined.contains("Red"), spined);
+
+        // A recessive part: a carrier grows nothing, so its colour stays off.
+        assertFalse(sf("back_sail", "Sail/n", "back_sail_colour", "Blu/Blu").contains("Blu"));
+        assertTrue(sf("back_sail", "Sail/Sail", "back_sail_colour", "Blu/Blu").contains("Blu"));
+
+        assertEquals("EEaa", sf("tusk_colour", "Blk/Blk"));
+        assertTrue(sf("tusks", "Nar/n", "tusk_colour", "Blk/Blk").contains("Blk"));
+    }
+
+    /** Every part-colour locus answers for its own part, never for another's. */
+    @Test
+    void everyPartColourLocusIsHiddenOnAPartlessHorse() {
+        Genotype wild = Genotype.wildType();
+        int colours = 0;
+        for (Gene gene : Genes.codeOrder()) {
+            if (gene instanceof AbstractPartColourGene colour) {
+                colours++;
+                assertFalse(colour.partGrows(wild), gene.key() + " says a wild horse grows its part");
+                for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
+                    assertEquals("EEaa", GeneCodeDisplay.shortForm(wild.with(pair)),
+                            gene.key() + " " + pair.toTokens() + " showed on a horse with no part");
+                }
+            }
+        }
+        assertTrue(colours > 0, "no part-colour loci found - the instanceof test is matching nothing");
     }
 
     @Test

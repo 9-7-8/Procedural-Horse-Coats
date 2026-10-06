@@ -1,5 +1,8 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
+
 /**
  * <b>Back sail colour</b> ({@code horsegenetics.back_sail_colour}) - a <b>magical,
  * codominant</b> locus that colours a horse's back sail and does nothing at all to a
@@ -26,5 +29,10 @@ public final class BackSailColourGene extends AbstractPartColourGene {
         super(KEY, "Back sail colour", PRIORITY, new Words("back-sail", "sail", false,
                 "sails", "what nearly every sailed horse has", "a horse with a back sail",
                 "the membrane is one, the base, and the spines the other."));
+    }
+
+    @Override
+    public boolean partGrows(Genotype genotype) {
+        return Genes.BACK_SAIL.shows(genotype.pair(Genes.BACK_SAIL));
     }
 }

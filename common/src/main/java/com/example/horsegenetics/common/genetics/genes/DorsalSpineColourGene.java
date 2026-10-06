@@ -1,5 +1,8 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
+
 /**
  * <b>Dorsal spine colour</b> ({@code horsegenetics.dorsal_spine_colour}) - a
  * <b>magical, codominant</b> locus that colours a horse's dorsal spines and does
@@ -24,5 +27,10 @@ public final class DorsalSpineColourGene extends AbstractPartColourGene {
     public DorsalSpineColourGene() {
         super(KEY, "Dorsal spine colour", PRIORITY, new Words("dorsal-spines", "dorsal spines", true,
                 "spine rows", "what nearly every spined horse has", "a horse with dorsal spines"));
+    }
+
+    @Override
+    public boolean partGrows(Genotype genotype) {
+        return Genes.DORSAL_SPINES.shows(genotype.pair(Genes.DORSAL_SPINES));
     }
 }

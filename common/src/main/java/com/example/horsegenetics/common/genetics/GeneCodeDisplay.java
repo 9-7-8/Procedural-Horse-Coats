@@ -1,5 +1,7 @@
 package com.example.horsegenetics.common.genetics;
 
+import com.example.horsegenetics.common.genetics.genes.AbstractPartColourGene;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,6 +141,12 @@ public final class GeneCodeDisplay {
             boolean secondBaseline = pair.second().equals(baseline);
             if (firstBaseline && secondBaseline) {
                 continue; // nothing but the population baseline - not worth showing
+            }
+            if (gene instanceof AbstractPartColourGene colour && !colour.partGrows(genotype)) {
+                // The colour of a part this horse does not grow shows on nothing. It is
+                // still in the full code and still inherited, but the short form is what
+                // a sign or a screen line has room for (owner, 2026-10-05).
+                continue;
             }
             if (gene.inheritance().sexLinked() && allBaseline(gene, pair, baseline)) {
                 // A hemizygous horse's spare slot holds the reserved placeholder,

@@ -282,4 +282,13 @@ public abstract class AbstractPartColourGene implements Gene {
     private static double clamp01(double x) {
         return x < 0.0 ? 0.0 : (x > 1.0 ? 1.0 : x);
     }
+
+    /**
+     * Does this horse grow the part this locus colours? Asked of the part's own locus,
+     * on the genotype alone. A colour locus does nothing to a horse without its part,
+     * so {@code GeneCodeDisplay.shortForm} leaves its token off such a horse rather
+     * than spend a sign's width on a colour nobody can see (owner, 2026-10-05). The
+     * alleles are still in the full code, and still inherited.
+     */
+    public abstract boolean partGrows(Genotype genotype);
 }

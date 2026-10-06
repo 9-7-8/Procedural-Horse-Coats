@@ -1,5 +1,8 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
+
 /**
  * <b>Dragon horn colour</b> ({@code horsegenetics.dragon_horn_colour}) - a
  * <b>magical, codominant</b> locus that colours a horse's dragon horns and does
@@ -23,5 +26,10 @@ public final class DragonHornColourGene extends AbstractPartColourGene {
     public DragonHornColourGene() {
         super(KEY, "Dragon horn colour", PRIORITY, new Words("dragon-horns", "dragon horns", true,
                 "dragon horns", "what nearly every dragon-horned horse has", "a horse with dragon horns"));
+    }
+
+    @Override
+    public boolean partGrows(Genotype genotype) {
+        return Genes.DRAGON_HORNS.shows(genotype.pair(Genes.DRAGON_HORNS));
     }
 }

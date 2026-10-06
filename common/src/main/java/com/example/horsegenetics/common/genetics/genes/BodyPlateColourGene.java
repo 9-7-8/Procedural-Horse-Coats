@@ -1,5 +1,8 @@
 package com.example.horsegenetics.common.genetics.genes;
 
+import com.example.horsegenetics.common.genetics.Genes;
+import com.example.horsegenetics.common.genetics.Genotype;
+
 /**
  * <b>Body plate colour</b> ({@code horsegenetics.body_plate_colour}) - a <b>magical,
  * codominant</b> locus that colours a horse's shoulder and hip plates and does nothing
@@ -25,5 +28,10 @@ public final class BodyPlateColourGene extends AbstractPartColourGene {
         super(KEY, "Body plate colour", PRIORITY, new Words("body-plates", "body plates", true,
                 "plates", "what nearly every plated horse has", "a horse with body plates",
                 "each plate is one, the base, and its edge, rib or spike the other."));
+    }
+
+    @Override
+    public boolean partGrows(Genotype genotype) {
+        return Genes.BODY_PLATES.shows(genotype.pair(Genes.BODY_PLATES));
     }
 }
