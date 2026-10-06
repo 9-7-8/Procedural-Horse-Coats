@@ -86,6 +86,59 @@
     </p>
 </div>
 
+<h2 id="v0-5-045">0.5.045 &mdash; spines, sails, plates and a narwhal horn, and less lag</h2>
+
+<p>
+    A feature release: horses can now grow four new body parts, and there is less lag with a crowd of horses in view. A rare wild horse may grow spines along its back, a see-through sail, bone plates over its shoulders and hips, or a narwhal&rsquo;s spiral horn from its muzzle. Each is a gene, passed to foals like the rest. The coat work that ran every frame now runs once per horse. Carts keep working after a reload. Nothing is new to craft, and no settings changed.
+</p>
+
+<h3 id="v0-5-045-parts">New body parts</h3>
+<ul>
+    <li><strong>Dorsal spines.</strong> A row of spines along the back. They are dominant, so one copy grows them, and they hide under a saddle or a rider. Their own colour gene decides what colour they are.</li>
+    <li><strong>The back sail.</strong> Spines along the back with a see-through membrane stretched between them. It is recessive, so two horses that look plain can have a foal that grows one. Its colour gene sets the membrane one colour and the spines another.</li>
+    <li><strong>Shoulder and hip plates.</strong> Overlapping plates over the shoulders and hips on both sides: smooth, ridged or spiked. They are dominant, and their colour gene sets the plate one colour and the edge another.</li>
+    <li><strong>The narwhal horn.</strong> A long spiral horn pointing forward from the front of the muzzle. It is the first form of a new tusks gene, and boar tusks and sabre fangs come later. It has its own colour gene.</li>
+</ul>
+<p>
+    All four are rare in wild horses. They are drawn by the same switch as horns and antlers, so <code>parts.enabled</code> and <code>parts.detailDistance</code> in the client settings cover them too.
+</p>
+
+<h3 id="v0-5-045-skeletons">Skeleton horses</h3>
+<ul>
+    <li><strong>The Great Valley and Blackened skeleton horses can grow all four parts, in bare bone.</strong> They roll them the same way they already roll horns and antlers.</li>
+</ul>
+
+<h3 id="v0-5-045-lag">Less lag</h3>
+<ul>
+    <li><strong>A horse in view no longer rebuilds its coat description every frame.</strong> It is worked out once and kept until the horse changes. With many horses on screen, this was most of the time the mod spent per frame. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/205">#205</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/199">#199</a>)</li>
+    <li><strong>The horse screens stop re-reading the genome every frame.</strong> This covers the info screen, the family tree, the transfer deed, the spawn editor and the browser&rsquo;s query count. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/206">#206</a>)</li>
+</ul>
+
+<h3 id="v0-5-045-short-code">The short genetic code</h3>
+<ul>
+    <li><strong>A part&rsquo;s colour is listed only on a horse that grows the part.</strong> The short code on the info screen, the spawn screen and horse papers used to list, say, a spine colour on a horse with no spines. It now leaves that out. The full code still holds those genes, and foals still inherit them.</li>
+</ul>
+
+<h3 id="v0-5-045-carts">Carts</h3>
+<ul>
+    <li><strong>A coachman&rsquo;s steering and a reaper cart&rsquo;s harvesting keep working after a world reload.</strong> The cart was failing to recognise the horse pulling it once the world reloaded. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/198">#198</a>)</li>
+</ul>
+
+<h3 id="v0-5-045-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Nothing needs migrating.</strong> No saved format, setting or default changed.</li>
+    <li><strong>Wild horses are a little different.</strong> The four new parts can now appear in newly spawned wild horses, rarely. In the two skeleton breeds, the new parts share the existing horn roll. Each horn type there is therefore a little less common than before.</li>
+    <li>Horses already in your world keep their genes. None of them grows a new part unless its genes already say so, and no horse in an existing world carries the new genes yet.</li>
+</ul>
+
+<h3 id="v0-5-045-not-played-yet">Not played yet / known rough edges</h3>
+<p>
+    Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/35">#35</a> and <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/36">#36</a> are fixed in earlier releases and stay open until they are confirmed in a game or in a server&rsquo;s log.
+</p>
+<p>
+    The four new parts have been photographed standing still, but nobody has watched them on a moving horse, under tack, on a foal, or in a played game. Their looks are first drafts: the sail can read as a comb of rods rather than a sheet, and the plates as small and stacked. How rare they are in the wild is a first value. The lag fixes are measured in tests, but nobody has checked them on screen yet. What still needs looking at is on <a href="verification.html">the verification index</a>.
+</p>
+
 <h2 id="v0-5-044">0.5.044 &mdash; hay within reach, the whistle&rsquo;s plain hold, and horses out of walls</h2>
 
 <p>

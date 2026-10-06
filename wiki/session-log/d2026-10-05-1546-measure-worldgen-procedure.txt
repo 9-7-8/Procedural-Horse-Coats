@@ -1,4 +1,4 @@
-2026-10-05 15:46 (end time) - #48: the measure-worldgen procedure
+2026-10-05 15:46 (time the first part ended) - #48: the measure-worldgen procedure, and release 0.5.045
 
 ASKED
 -----
@@ -28,8 +28,33 @@ DONE
 - Docs commit: wiki/villagers.html#measured and wiki/stables.html#level-ground-measured
   each point at the procedure. Search index and wiki/text/ rebaked, and check-links OK.
 
+- The owner said yes to the release offer ("Cut it, carry checks"): #10, #31, #35 and #36
+  moved to the v0.5.046 milestone, and both milestone descriptions and the release-plan
+  issue #196 were edited to match.
+- Release set: every tier-0 node check green. The full :common:test ran in 20m 47s with
+  1643 tests and 1 failure: ShowcaseGenotypesTest.everyDrawWrapsOntoTheSignWithoutLosingAnything,
+  where the F6 pen sign's widest last line reached 203 chars against a 200 cap, pushed
+  there by the four new parts' colour loci.
+- 6d9922bb, the owner's pick of three: GeneCodeDisplay.shortForm leaves off the colour of
+  a part the horse does not grow (new AbstractPartColourGene.partGrows, one per colour
+  locus). The two new GeneCodeDisplayTest tests went red with partGrows forced true.
+  ShowcaseGenotypesTest, GenotypeCatalogTest, PartColourGeneTest and both coat goldens are
+  green; :web:bakeDesignerAssets ran and check-designer-boots is OK. The full suite was
+  NOT re-run after this commit; only those classes were.
+- :neoforge-26.1.2:test green; runGameTest "All 55 required tests passed"; all seven
+  browser checks green; a dev server reached "Done (" with only the known stasis_chamber
+  warning and vanilla command/offline warnings. run/ logs, phc/ and config/ restored.
+- 115e2092 version 0.5.045 + README (the new parts in the magic list and parts.enabled).
+  Tagged v0.5.045, released on GitHub with horsegenetics-0.5.045.jar, milestone v0.5.045
+  closed (11 closed issues), note on wiki/releases.html#v0-5-045.
+
 DECIDED
 -------
+- (owner) Cut 0.5.045 and carry the four check-waiting bugs to v0.5.046. Recorded on
+  both milestones and issue #196.
+- (owner) Fix the sign overflow by hiding an absent part's colour in the short form,
+  rather than raising the test's cap or waiving it. Recorded in 6d9922bb and on
+  wiki/api-reference.html (GeneCodeDisplay).
 - Calls made without the owner: the procedure covers both existing censuses rather
   than the homestead alone. It treats StableSiteCensus's built-in control (the wrapped
   vanilla jigsaw) as the control, with no second run. It says a gametest floor is moved
@@ -47,25 +72,26 @@ PROCEDURES
 ----------
 - Added: procedures/measure-worldgen.txt (/measure-worldgen), plus its keyword memory
   row.
-- Reviewed against this session, with nothing to change: next-release (its skip rule
-  for bugs waiting on a check worked as written), process-intake and end-session.
+- test-tiers: tier 3 is "about twenty minutes" (it said ten to fifteen; the owner asked
+  why the run took so long), with this run's slowest classes. CLAUDE.md and end-session
+  carried the same old figure and now say about twenty minutes.
+- Reviewed against this session, with nothing else to change: next-release (its skip
+  rule for bugs waiting on a check worked as written), process-intake, release.
 
 NOT RUN / NOT CHECKED
 ---------------------
-- No Java changed, so the Gradle build was skipped (end-session step 2). A full
-  :common:test run would check nothing this session touched.
+- The full :common:test did not re-run after 6d9922bb. A re-run would check every
+  class that reads shortForm indirectly (screens and dumps are not under test).
 - The procedure's control runs (step 2: git stash, or a worktree for a committed change)
   have not been run end to end. Only the environment overrides and the log read were.
 - No Verification-tab anchors added.
 
 RELEASE
 -------
-v0.5.045's milestone now has only bugs that are fixed and waiting on a check. With
-next-release step 6 and the batch on main (body parts slices A-C, tusks slice A, the
-coat-key lag fixes, compat-test, this procedure, and the #31, #150 and #198 fixes),
-the release is offered to the owner after this log is written.
+Offered by next-release step 6. The owner said yes, and 0.5.045 shipped (see DONE).
 
 PICK UP FIRST
 -------------
-The owner's answer to the v0.5.045 release offer (procedures/release.txt on a yes),
-then /next-release for v0.5.046, which starts with #155 (crystal growths).
+/next-release for v0.5.046. Its four bugs all wait on checks, so the first unit is #155
+(crystal growths). The 14:50 yard run's unfiled failures (carrot crop, chest loot, pack
+leader, grazing) are for /run-tests.

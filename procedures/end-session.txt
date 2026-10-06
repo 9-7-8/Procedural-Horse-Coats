@@ -117,7 +117,7 @@ DONE WHEN
 
 NEVER
 -----
-- Never run the full :common:test suite as part of this. It takes ten minutes or more,
+- Never run the full :common:test suite as part of this. It takes about twenty minutes,
   and the owner will not wait. Name in the summary what a full run would still check.
 - Never commit a post-bake `git status` that only changed timestamps. `git diff` is
   the authority.

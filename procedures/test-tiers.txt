@@ -94,7 +94,7 @@ STEPS
    - A server boot to "Done (", with the log grepped for errors, when anything that runs
      at mod load changed (launch-game, step 8).
 
-   TIER 3 - ten to fifteen minutes or more. ONLY when it truly matters:
+   TIER 3 - about twenty minutes. ONLY when it truly matters:
    - The FULL :common:test suite (`./gradlew :common:test`, over a thousand tests). It
      walks exhaustive genotype spaces and bakes thousands of coats.
    - Run it ONLY:
@@ -104,10 +104,10 @@ STEPS
      "could" move it. Say in the summary which tests a full run would still need to
      check, and why.
    - The slowest classes, measured on the last full run (the release procedure fills
-     this in). 2026-10-04, for 0.5.044, 21m 33s wall clock: CoatTextureIdTest 271s,
-     RimehartBreedTest 143s, CoatTextureComposerTest 117s, UndeadBreedsTest 113s,
-     ReproRulesTest 71s, DeadLayerTest 58s, GreenwoodBreedTest 56s, GenotypeCatalogTest
-     49s, RamHornBreedsTest 39s, ArcaneStockTest 37s. Those ten are about two thirds of
+     this in). 2026-10-05, for 0.5.045, 20m 47s wall clock: CoatTextureIdTest 231s,
+     RimehartBreedTest 157s, UndeadBreedsTest 121s, CoatTextureComposerTest 117s,
+     GreenwoodBreedTest 61s, DeadLayerTest 59s, GenotypeCatalogTest 55s, ArcaneStockTest
+     41s. Those are about two thirds of
      the run; a change that
      touches none of them is cheap to prove by name.
    - Its full run has found that checks had drifted from the code, not mod bugs, so
