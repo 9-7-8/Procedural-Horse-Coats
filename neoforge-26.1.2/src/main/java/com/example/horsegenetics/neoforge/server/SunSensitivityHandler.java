@@ -100,19 +100,11 @@ public final class SunSensitivityHandler {
     }
 
     /**
-     * Does daylight burn this horse? Read off the genome every time; callers that
-     * ask every tick cache it themselves.
+     * Does daylight burn this horse? Parsed once per genome by {@link GenomeFacts}
+     * (#201), so it is cheap to ask every tick.
      */
     public static boolean isSensitive(Horse horse) {
-        if (!HorseRecords.hasRealRecord(horse)) {
-            return false;
-        }
-        try {
-            Genotype gt = Genotype.parse(HorseRecords.of(horse).geneticCode());
-            return Genes.SUN_SENSITIVITY.isSensitive(gt.pair(Genes.SUN_SENSITIVITY));
-        } catch (RuntimeException bad) {
-            return false;
-        }
+        return GenomeFacts.sunSensitive(horse);
     }
 
     /**

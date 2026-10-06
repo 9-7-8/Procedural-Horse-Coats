@@ -208,16 +208,7 @@ public final class HorseDietHandler {
      * parse. Same defensive shape as {@link GeneYieldHandler}.
      */
     public static HorseDiet dietOf(Horse horse) {
-        if (!HorseRecords.hasRealRecord(horse)) {
-            return HorseDiet.NORMAL;
-        }
-        HorseRecord record = HorseRecords.of(horse);
-        try {
-            return HorseDiet.resolve(Genotype.parse(record.geneticCode()),
-                    Epigenome.parse(record.epigenomeCode()));
-        } catch (RuntimeException bad) {
-            return HorseDiet.NORMAL;
-        }
+        return GenomeFacts.diet(horse); // one parse per genome, not per ask (#201)
     }
 
     private static void consume(PlayerInteractEvent.EntityInteract event) {

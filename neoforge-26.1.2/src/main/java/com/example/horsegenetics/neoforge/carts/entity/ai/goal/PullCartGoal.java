@@ -22,8 +22,24 @@ public final class PullCartGoal extends Goal {
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
+    /**
+     * The level's cart store, looked up once per level (#201). This goal is on every Mob in the world and
+     * {@code CartWorld.get} is a level lookup plus a saved-data lookup per call; the store does not change
+     * for the life of the level.
+     */
+    private net.minecraft.world.level.Level storeLevel;
+    private CartWorld store;
+
     @Override
     public boolean canUse() {
-        return CartWorld.get(this.mob.level()).isPulling(mob);
+        net.minecraft.world.level.Level level = this.mob.level();
+        if (level.isClientSide()) {
+            return CartWorld.get(level).isPulling(mob);
+        }
+        if (level != this.storeLevel || this.store == null) {
+            this.storeLevel = level;
+            this.store = CartWorld.get(level);
+        }
+        return !this.store.getPulling().isEmpty() && this.store.isPulling(mob);
     }
 }

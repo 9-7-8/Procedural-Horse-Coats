@@ -153,8 +153,6 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
     private final Horse horse;
     private final Map<Long, Long> ignoredUntil = new HashMap<>();
 
-    /** Resolved once, the first time the horse has a real record - see {@link #diet}. */
-    private @Nullable HorseDiet diet;
     private @Nullable ItemEntity item;
     private @Nullable BlockPos block;
     private @Nullable LivingEntity prey;
@@ -199,13 +197,38 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
         if (!horse.onGround() && !horse.isInLiquid() && !horse.isPassenger()) {
             return false;
         }
-        searchCooldown = SEARCH_INTERVAL;
+        // Back off after searches that found nothing (#201): the scan is 2,205 squares, and a
+        // hungry horse in a bare field ran it every SEARCH_INTERVAL for as long as it stood
+        // there. Each miss doubles the wait, to four times the interval (about 16 seconds); a
+        // find, or the horse having wandered off from where it last failed, resets it.
+        BlockPos here = horse.blockPosition();
+        if (failedAt != null && !failedAt.closerThan(here, BACKOFF_RESET_DISTANCE)) {
+            failedSearches = 0;
+        }
+        searchCooldown = SEARCH_INTERVAL << Math.min(failedSearches, MAX_BACKOFF_SHIFT);
         if (!(horse.level() instanceof ServerLevel level) || !free()) {
             return false;
         }
         HorseDiet d = diet();
-        return d != null && eatsAtAll(d) && search(level, d);
+        if (d == null || !eatsAtAll(d)) {
+            return false;
+        }
+        if (search(level, d)) {
+            failedSearches = 0;
+            failedAt = null;
+            return true;
+        }
+        failedSearches++;
+        failedAt = here;
+        return false;
     }
+
+    /** Doublings of the search interval after misses: 40, 80, then 160 calls at most. */
+    private static final int MAX_BACKOFF_SHIFT = 2;
+    /** Blocks the horse must move from its last failed search for the backoff to reset. */
+    private static final double BACKOFF_RESET_DISTANCE = 8.0;
+    private int failedSearches;
+    private @Nullable BlockPos failedAt;
 
     @Override
     public boolean canContinueToUse() {
@@ -304,12 +327,9 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
     // Finding food
     // ------------------------------------------------------------------
 
-    /** The diet, resolved once; null until the horse has a real record. */
+    /** The diet, null until the horse has a real record. Cached per genome by {@link GenomeFacts} (#201). */
     private @Nullable HorseDiet diet() {
-        if (diet == null && HorseRecords.hasRealRecord(horse)) {
-            diet = HorseDietHandler.dietOf(horse);
-        }
-        return diet;
+        return HorseRecords.hasRealRecord(horse) ? HorseDietHandler.dietOf(horse) : null;
     }
 
     private static boolean eatsAtAll(HorseDiet d) {

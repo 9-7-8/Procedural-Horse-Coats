@@ -266,17 +266,6 @@ public final class Passification {
      * than throwing.
      */
     static List<PassificationGene.Route> routesOf(Horse horse) {
-        HorseRecord record = HorseRecords.of(horse);
-        if (!record.hasName()) {
-            return List.of();
-        }
-        try {
-            Genotype genotype = Genotype.parse(record.geneticCode());
-            Epigenome epigenome = Epigenome.parse(record.epigenomeCode());
-            return Genes.PASSIFICATION.routesOf(genotype.pair(Genes.PASSIFICATION),
-                    GeneEpigenetics.forGene(Genes.PASSIFICATION, genotype, epigenome));
-        } catch (RuntimeException e) {
-            return List.of();
-        }
+        return GenomeFacts.passificationRoutes(horse); // one parse per genome, not per ask (#201)
     }
 }

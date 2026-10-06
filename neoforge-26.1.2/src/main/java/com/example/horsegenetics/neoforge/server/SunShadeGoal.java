@@ -74,21 +74,22 @@ public final class SunShadeGoal extends Goal {
     }
 
     /**
-     * Resolved once and kept - {@code canUse} runs every tick on every horse, and
-     * a genome parse per tick per horse is the cost {@code FoodTemptGoal} already
-     * learned to avoid. Lazy because the record is written a tick after join.
+     * {@code canUse} runs every other tick on every horse; the answer comes from
+     * {@link GenomeFacts}, one parse per genome (#201). It used to be a per-goal
+     * lazy parse, paid by every horse on its first tick after each load.
      */
-    private Boolean sensitive;
-
     private boolean sensitive() {
-        if (sensitive == null) {
-            if (!HorseRecords.hasRealRecord(horse)) {
-                return false;   // ask again next tick
-            }
-            sensitive = SunSensitivityHandler.isSensitive(horse);
-        }
-        return sensitive;
+        return SunSensitivityHandler.isSensitive(horse);
     }
+
+    /**
+     * Calls to sit out after a search that found nothing (#201). The search is
+     * 25 x 25 x 9 squares, and a burning horse with no cover in reach ran it on
+     * every {@code canUse} - every other tick - for as long as it stood there.
+     * Twenty calls is about two seconds: the horse has moved, or the light has.
+     */
+    private static final int FAILED_SEARCH_COOLDOWN = 20;
+    private int failedSearchCooldown;
 
     @Override
     public boolean canUse() {
@@ -98,11 +99,19 @@ public final class SunShadeGoal extends Goal {
         if (horse.isVehicle() || horse.isLeashed()) {
             return false;   // a ridden or tied horse is the rider's problem
         }
+        if (failedSearchCooldown > 0) {
+            failedSearchCooldown--;
+            return false;
+        }
         if (!SunSensitivityHandler.inSunlight(horse)) {
             return false;
         }
         shelter = findShelter();
-        return shelter != null;
+        if (shelter == null) {
+            failedSearchCooldown = FAILED_SEARCH_COOLDOWN;
+            return false;
+        }
+        return true;
     }
 
     /**

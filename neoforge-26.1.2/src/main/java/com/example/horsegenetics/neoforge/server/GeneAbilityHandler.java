@@ -151,7 +151,34 @@ public final class GeneAbilityHandler {
      * with identical alleles are not interchangeable here - caching on the
      * genotype alone would hand one horse another one's colours.
      */
-    private record Snapshot(String code, String epigenome, List<HorseAbilities.Active> abilities) {}
+    private static final class Snapshot {
+        final String code;
+        final String epigenome;
+        final List<HorseAbilities.Active> abilities;
+        /**
+         * Does anything in the list move an attribute (#201)? If not, {@link #clearAttributes} - two collections
+         * and fourteen {@code getModifiers()} copies - has nothing to keep, and only needs to run once per
+         * snapshot to take off whatever an earlier genome or build left on the horse.
+         */
+        final boolean touchesAttributes;
+        /** Set once that one sweep has run for a list that {@link #touchesAttributes does not touch attributes}. */
+        boolean swept;
+
+        Snapshot(String code, String epigenome, List<HorseAbilities.Active> abilities) {
+            this.code = code;
+            this.epigenome = epigenome;
+            this.abilities = abilities;
+            boolean touches = false;
+            for (HorseAbilities.Active a : abilities) {
+                if (a.ability() instanceof GeneAbility.AttributeMod
+                        || (a.ability() instanceof GeneAbility.Traversal t && "lava_swim".equals(t.flag()))) {
+                    touches = true;
+                    break;
+                }
+            }
+            this.touchesAttributes = touches;
+        }
+    }
 
     @SubscribeEvent
     static void onHorseTick(EntityTickEvent.Post event) {
@@ -169,7 +196,8 @@ public final class GeneAbilityHandler {
         if (!record.hasName()) {
             return; // record not assigned yet - onHorseJoin runs first
         }
-        List<HorseAbilities.Active> abilities = resolve(horse, record);
+        Snapshot snap = snapshot(horse, record);
+        List<HorseAbilities.Active> abilities = snap.abilities;
         if (abilities.isEmpty()) {
             return;
         }
@@ -268,7 +296,10 @@ public final class GeneAbilityHandler {
             layHoofprint(prints, horse, (ServerLevel) level, moving);
         }
         reconcileGlow(horse, (ServerLevel) level, record, abilities);
-        clearAttributes(horse, abilities, record);
+        if (snap.touchesAttributes || !snap.swept) {
+            clearAttributes(horse, abilities, record);
+            snap.swept = true;
+        }
     }
 
     // ------------------------------------------------------------------
@@ -1289,6 +1320,10 @@ public final class GeneAbilityHandler {
         if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Horse horse)) {
             return;
         }
+        // The ability list and world samples leave with the horse too (#200): they hold both codes, and the
+        // only eviction used to be a wholesale clear that made every loaded horse re-parse on one tick.
+        CACHE.remove(horse.getUUID());
+        WORLD_FLAGS.remove(horse.getUUID());
         BREATH_DEBT.remove(horse.getUUID());
         LAST_POS.remove(horse.getUUID());
         PRINTS.remove(horse.getUUID());
@@ -1296,6 +1331,23 @@ public final class GeneAbilityHandler {
         if (pos != null && event.getLevel() instanceof ServerLevel level) {
             PENDING_LIGHT_CLEARS.add(new PendingClear(level.dimension(), pos.immutable()));
         }
+    }
+
+    /**
+     * Per-horse state goes with the server (#200). In singleplayer these statics outlive the world, and the next
+     * world's horses would meet the last one's cooldowns and caches. The glow-light maps and the feed queue are
+     * left alone: they are how a light block or a pending feed gets finished, and clearing them is a separate
+     * question from lag.
+     */
+    @SubscribeEvent
+    static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        CACHE.clear();
+        WORLD_FLAGS.clear();
+        LAST_FIRED.clear();
+        BREATH_DEBT.clear();
+        LAST_POS.clear();
+        PRINTS.clear();
+        STOPPING.clear();
     }
 
     @SubscribeEvent
@@ -1931,11 +1983,28 @@ public final class GeneAbilityHandler {
     }
 
     private static List<HorseAbilities.Active> resolve(Horse horse, HorseRecord record) {
+        return snapshot(horse, record).abilities;
+    }
+
+    /**
+     * The cached list, re-derived only when a code changes. A content-equal hit is re-stored holding the record's
+     * own strings (#200): after a reload the record holds new String objects, and {@code equals} on two distinct
+     * 10-20 KB strings walked them on every tick for every horse. Once re-stored, the identity test answers.
+     */
+    private static Snapshot snapshot(Horse horse, HorseRecord record) {
         String code = record.geneticCode();
         String epigenomeCode = record.epigenomeCode();
         Snapshot snap = CACHE.get(horse.getUUID());
-        if (snap != null && snap.code().equals(code) && snap.epigenome().equals(epigenomeCode)) {
-            return snap.abilities();
+        if (snap != null) {
+            if (snap.code == code && snap.epigenome == epigenomeCode) {
+                return snap;
+            }
+            if (snap.code.equals(code) && snap.epigenome.equals(epigenomeCode)) {
+                Snapshot restrung = new Snapshot(code, epigenomeCode, snap.abilities);
+                restrung.swept = snap.swept;
+                CACHE.put(horse.getUUID(), restrung);
+                return restrung;
+            }
         }
         List<HorseAbilities.Active> list;
         try {
@@ -1943,11 +2012,12 @@ public final class GeneAbilityHandler {
         } catch (RuntimeException e) {
             list = List.of();
         }
-        if (CACHE.size() > 4096) {
-            CACHE.clear(); // dev-mod housekeeping; the list rebuilds on the next tick
+        if (CACHE.size() > 16384) {
+            CACHE.clear(); // a backstop only - entries leave with their horse (onEntityLeave)
         }
-        CACHE.put(horse.getUUID(), new Snapshot(code, epigenomeCode, list));
-        return list;
+        snap = new Snapshot(code, epigenomeCode, list);
+        CACHE.put(horse.getUUID(), snap);
+        return snap;
     }
 
     private static void warnUntranslated(String type, String geneKey) {
@@ -2253,23 +2323,35 @@ public final class GeneAbilityHandler {
     // Sound
     // ------------------------------------------------------------------
 
-    /** Last firing of a per-horse, per-gene cooldown - shared by sound, produce, bond and summon. */
-    private static final Map<String, Long> LAST_FIRED = new ConcurrentHashMap<>();
+    /**
+     * Last firing of a per-horse, per-gene cooldown - shared by sound, produce, bond and summon. Keyed by horse,
+     * then by (gene, what): it was one map keyed on {@code uuid + "/" + gene + "/" + what}, a string built every
+     * tick for every producing horse (#201). Deliberately NOT evicted when the horse unloads: a horse walking
+     * back and forth over a chunk edge would get a fresh cooldown each time. The cap is the eviction, as before.
+     */
+    private static final Map<UUID, Map<CooldownKey, Long>> LAST_FIRED = new ConcurrentHashMap<>();
+
+    private record CooldownKey(String geneKey, String what) {}
 
     private static boolean offCooldown(Horse horse, String geneKey, String what, int cooldownTicks) {
         if (cooldownTicks <= 0) {
             return true;
         }
-        String id = horse.getUUID() + "/" + geneKey + "/" + what;
+        Map<CooldownKey, Long> mine = LAST_FIRED.get(horse.getUUID());
+        if (mine == null) {
+            if (LAST_FIRED.size() > 4096) {
+                LAST_FIRED.clear();
+            }
+            mine = new HashMap<>(4);
+            LAST_FIRED.put(horse.getUUID(), mine);
+        }
+        CooldownKey id = new CooldownKey(geneKey, what);
         long now = horse.level().getGameTime();
-        Long last = LAST_FIRED.get(id);
+        Long last = mine.get(id);
         if (last != null && now - last < cooldownTicks) {
             return false;
         }
-        if (LAST_FIRED.size() > 8192) {
-            LAST_FIRED.clear();
-        }
-        LAST_FIRED.put(id, now);
+        mine.put(id, now);
         return true;
     }
 

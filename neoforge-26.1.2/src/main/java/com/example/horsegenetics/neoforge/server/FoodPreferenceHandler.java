@@ -106,19 +106,10 @@ public final class FoodPreferenceHandler {
      * The item this horse would rather have than anything, or {@code null}.
      *
      * <p>Reads the genotype off the record rather than an attachment, so it is
-     * correct for a horse the moment it is founded and needs no sync.
+     * correct for a horse the moment it is founded and needs no sync. Parsed
+     * once per genome by {@link GenomeFacts} (#201); several goals ask per search.
      */
     static String favouriteOf(Horse horse) {
-        HorseRecord record = HorseRecords.of(horse);
-        if (!record.hasName()) {
-            return null;
-        }
-        try {
-            Genotype genotype = Genotype.parse(record.geneticCode());
-            AllelePair pair = genotype.pair(Genes.FOOD_PREFERENCE);
-            return Genes.FOOD_PREFERENCE.favouriteOf(pair);
-        } catch (RuntimeException e) {
-            return null;    // an unparseable code is not this handler's problem
-        }
+        return GenomeFacts.favourite(horse);
     }
 }

@@ -2,6 +2,7 @@ package com.example.horsegenetics.neoforge.server;
 
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -119,6 +120,7 @@ public final class WildHerdGoal extends Goal {
     @Override
     public void stop() {
         this.target = null;
+        this.pathedTo = null;
         horse.getNavigation().stop();
     }
 
@@ -133,9 +135,21 @@ public final class WildHerdGoal extends Goal {
         }
         this.recalcCooldown = adjustedTickDelay(15);
         if (horse.distanceToSqr(this.target) > stopRange * stopRange) {
+            // Keep the path while the leader is within a couple of blocks of where it was
+            // aimed (#201): a herd of followers repathing every 15 ticks behind a grazing
+            // leader paid an A* each for a path that ends in the same place.
+            BlockPos at = this.target.blockPosition();
+            if (horse.getNavigation().isInProgress() && this.pathedTo != null
+                    && this.pathedTo.closerThan(at, 2.5)) {
+                return;
+            }
+            this.pathedTo = at;
             horse.getNavigation().moveTo(this.target, 1.0);
         } else {
+            this.pathedTo = null;
             horse.getNavigation().stop();
         }
     }
+
+    private BlockPos pathedTo;
 }

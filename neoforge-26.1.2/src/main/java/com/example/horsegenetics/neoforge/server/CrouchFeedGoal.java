@@ -192,13 +192,12 @@ public final class CrouchFeedGoal extends Goal {
         if (!candidate.isAlive() || !candidate.isCrouching() || candidate.isSpectator()) {
             return false;
         }
-        if (heldFood(candidate).isEmpty()) {
+        // The geometry before the food (#201): the food test reads the diet, and
+        // this runs every other tick for every wild horse near a crouching player.
+        if (candidate.distanceToSqr(horse) > SEARCH_RADIUS * SEARCH_RADIUS || !looksAt(candidate)) {
             return false;
         }
-        if (candidate.distanceToSqr(horse) > SEARCH_RADIUS * SEARCH_RADIUS) {
-            return false;
-        }
-        return looksAt(candidate);
+        return !heldFood(candidate).isEmpty();
     }
 
     /** Whichever hand has food in it, so the off-hand works too. */

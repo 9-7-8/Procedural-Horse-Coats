@@ -129,8 +129,39 @@ public final class NaturalBreedingHandler {
         if (besideWithNothingBetween(mare, stallion)) {
             return true;
         }
+        return pathBetween(mare, stallion);
+    }
+
+    /**
+     * The path answer for one pair, kept while neither horse has moved a block (#201). A pair the path refuses -
+     * a stallion over a fence - was asked again every {@value #SCAN} ticks for the whole of her heat, an A* each
+     * time for an answer that could not have changed. Kept {@link #REACH_TTL} ticks at most, so a gate opened
+     * between two horses standing still is noticed within that.
+     */
+    private record PairKey(java.util.UUID mare, java.util.UUID stallion) {}
+
+    private record Reach(long mareAt, long stallionAt, boolean ok, long at) {}
+
+    private static final java.util.Map<PairKey, Reach> REACH = new java.util.HashMap<>();
+    private static final long REACH_TTL = 400L;
+
+    private static boolean pathBetween(Horse mare, Horse stallion) {
+        long now = mare.level().getGameTime();
+        long mareAt = mare.blockPosition().asLong();
+        long stallionAt = stallion.blockPosition().asLong();
+        PairKey key = new PairKey(mare.getUUID(), stallion.getUUID());
+        Reach known = REACH.get(key);
+        if (known != null && known.mareAt() == mareAt && known.stallionAt() == stallionAt
+                && now - known.at() < REACH_TTL) {
+            return known.ok();
+        }
         Path path = mare.getNavigation().createPath(stallion, 1);
-        return path != null && path.canReach();
+        boolean ok = path != null && path.canReach();
+        if (REACH.size() > SWEEP_ABOVE) {
+            REACH.values().removeIf(r -> now - r.at() >= REACH_TTL);
+        }
+        REACH.put(key, new Reach(mareAt, stallionAt, ok, now));
+        return ok;
     }
 
     /**
@@ -155,6 +186,19 @@ public final class NaturalBreedingHandler {
                 from, to, net.minecraft.world.level.ClipContext.Block.COLLIDER,
                 net.minecraft.world.level.ClipContext.Fluid.NONE, mare));
         return hit.getType() == net.minecraft.world.phys.HitResult.Type.MISS;
+    }
+
+    /** All of it is transient; none of it should reach the next singleplayer world (#200). */
+    @SubscribeEvent
+    static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        COURTSHIPS.clear();
+        CROWDED_LOGGED.clear();
+        UNFIT_LOGGED.clear();
+        UNREACHABLE_LOGGED.clear();
+        NOTICES.clear();
+        WILD_CAPPED.clear();
+        wildCappedSince = -1L;
+        REACH.clear();
     }
 
     @SubscribeEvent
@@ -188,10 +232,13 @@ public final class NaturalBreedingHandler {
             return;     // the cheap refusal first: most mares, most of the time
         }
 
+        // Entire stallions only (#201): NaturalCover.decide drops anything else, so a gelding, a colt or a
+        // ridden stallion beside her was paid a path for and then thrown away.
         List<Horse> near = level.getEntitiesOfClass(Horse.class,
                 mare.getBoundingBox().inflate(ReproRules.NATURAL_REACH),
                 h -> h != mare && h.isAlive() && HorseRecords.hasRealRecord(h)
-                        && HorseRecords.of(h).sex() == Sex.MALE && YardPens.together(mare, h));
+                        && HorseRecords.of(h).sex() == Sex.MALE && YardPens.together(mare, h)
+                        && party(h).entireStallion());
         if (near.isEmpty()) {
             return;
         }

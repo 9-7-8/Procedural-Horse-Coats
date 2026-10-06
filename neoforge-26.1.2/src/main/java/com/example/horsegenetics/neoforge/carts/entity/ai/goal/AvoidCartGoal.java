@@ -72,6 +72,11 @@ public class AvoidCartGoal<T extends AbstractDrawnEntity>
             return false;
         }
         this.lookCooldown = 10;
+        // No cart loaded anywhere on the server: nothing to look for (#201).
+        if (!this.mob.level().isClientSide()
+                && !com.example.horsegenetics.neoforge.carts.HorseCarts.anyCartLoaded()) {
+            return false;
+        }
         List<? extends AbstractDrawnEntity> entityList = this.mob.level().getEntitiesOfClass(this.avoidClass, this.mob.getBoundingBox().inflate(this.maxDist, 3.0, this.maxDist), entity -> true);
         this.toAvoid = CartTargetingUtil.getNearestEntity(entityList, this.avoidEntityTargeting, this.mob, this.mob.getX(), this.mob.getY(), this.mob.getZ());
         if (this.toAvoid == null) {

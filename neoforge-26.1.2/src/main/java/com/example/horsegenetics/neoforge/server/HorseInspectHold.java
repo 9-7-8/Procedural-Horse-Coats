@@ -84,7 +84,9 @@ public final class HorseInspectHold {
      * Is anyone reading about this horse right now? Walks the holds, which is a
      * map of at most one entry per online player and is asked once per tick per
      * held-capable horse from {@link InspectHoldGoal#canUse()} - cheap enough
-     * that a reverse index would be more bookkeeping than it saves.
+     * that a reverse index would be more bookkeeping than it saves. It is also
+     * asked by six herd goals, so the sweep of lapsed holds is once a server tick
+     * ({@link #sweep}) rather than once per call (#201).
      */
     public static boolean isHeld(AbstractHorse horse) {
         if (HOLDS.isEmpty() || !(horse.level() instanceof ServerLevel level)) {
@@ -92,17 +94,25 @@ public final class HorseInspectHold {
         }
         long now = level.getGameTime();
         UUID id = horse.getUUID();
-        boolean held = false;
-        for (Map.Entry<UUID, Hold> entry : HOLDS.entrySet()) {
-            Hold hold = entry.getValue();
-            if (hold.expiresAt() < now) {
-                continue; // lapsed; swept below rather than mid-iteration
-            }
-            if (hold.horseId().equals(id)) {
-                held = true;
+        for (Hold hold : HOLDS.values()) {
+            if (hold.expiresAt() >= now && hold.horseId().equals(id)) {
+                return true;
             }
         }
+        return false;
+    }
+
+    @SubscribeEvent
+    static void sweep(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (HOLDS.isEmpty()) {
+            return;
+        }
+        long now = event.getServer().overworld().getGameTime();
         HOLDS.values().removeIf(hold -> hold.expiresAt() < now);
-        return held;
+    }
+
+    @SubscribeEvent
+    static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        HOLDS.clear();
     }
 }

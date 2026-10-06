@@ -262,6 +262,18 @@ public final class HorseCarts {
 
     public static MinecraftServer server = null;
 
+    /**
+     * Carts loaded on the server, by UUID (#201). Every PathfinderMob in the world carries four
+     * {@code AvoidCartGoal}s, each an entity search once in ten asks; with no cart loaded anywhere the
+     * answer is known without looking. A stale entry only costs the search it used to cost.
+     */
+    private static final java.util.Set<java.util.UUID> LOADED_CARTS = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /** Is any cart loaded on the server? False means no mob can have one to avoid. */
+    public static boolean anyCartLoaded() {
+        return !LOADED_CARTS.isEmpty();
+    }
+
     // ------------------------------------------------------------------
     // Wiring
     // ------------------------------------------------------------------
@@ -282,10 +294,14 @@ public final class HorseCarts {
         modBus.addListener(HorseCarts::onEntityAttributes);
 
         NeoForge.EVENT_BUS.addListener((ServerStartedEvent e) -> server = e.getServer());
-        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent e) -> server = null);
+        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent e) -> {
+            server = null;
+            LOADED_CARTS.clear();
+        });
         NeoForge.EVENT_BUS.addListener(HorseCarts::onServerTick);
         NeoForge.EVENT_BUS.addListener(HorseCarts::onEntityInteract);
         NeoForge.EVENT_BUS.addListener(HorseCarts::onEntityJoin);
+        NeoForge.EVENT_BUS.addListener(HorseCarts::onEntityLeave);
     }
 
     private static void onRegister(final RegisterEvent event) {
@@ -384,8 +400,17 @@ public final class HorseCarts {
         if (event.getLevel().isClientSide()) {
             return;
         }
+        if (event.getEntity() instanceof com.example.horsegenetics.neoforge.carts.entity.AbstractDrawnEntity) {
+            LOADED_CARTS.add(event.getEntity().getUUID());
+        }
         MOB_GOAL_ADDER.onEntityJoinWorld(event.getEntity());
         PATHFINDER_GOAL_ADDER.onEntityJoinWorld(event.getEntity());
+    }
+
+    private static void onEntityLeave(final net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent event) {
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof com.example.horsegenetics.neoforge.carts.entity.AbstractDrawnEntity) {
+            LOADED_CARTS.remove(event.getEntity().getUUID());
+        }
     }
 
     // ------------------------------------------------------------------
