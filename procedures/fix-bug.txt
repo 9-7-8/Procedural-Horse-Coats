@@ -159,6 +159,9 @@ STEPS
      "#N: <what was wrong>" instead.
    - A test proves it and no runtime question remains -> close the issue, with a
      comment naming the commit and the test.
+   - Not a defect (the evidence shows the behaviour is correct, e.g. a vanilla WARN that
+     drops nothing) -> write the quirk where the next reader meets it (api-notes, the
+     class comment), commit as "#N:", and close as "not planned" with the proof (#208).
    - Only the game can prove it -> leave the issue open, and comment "fixed in
      <commit>, waiting on <pen> / an in-game check: <what to look for>". run-tests
      closes it on the yard PASS. A fix that only the owner's eyes can confirm stays

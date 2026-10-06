@@ -1,0 +1,71 @@
+2026-10-05 19:55 (start) - #208: the stasis_chamber "empty ingredients" WARN is not a defect
+
+ASKED
+-----
+- "/next-release": work the next release milestone. The next release is v0.5.046
+  (newest tag v0.5.045; milestone 43). Every open issue already had a
+  milestone. The four bugs carried over from v0.5.045 (#10, #31, #35, #36) each have a
+  fix commit and a "waiting on" comment, so they were skipped. #208 ranked above #209
+  because it could reach players on a released jar, while #209 is yard-only. #208 was
+  handed to fix-bug.
+
+DONE
+----
+- f9abbd7a  #208: the stasis_chamber "empty ingredients" WARN drops nothing.
+  The WARN is RecipeManager.finalizeRecipeLoading logging a non-special recipe whose
+  placementInfo() is impossible to place. "Will be ignored" only means it is left out of
+  the ingredient property sets (furnace and smithing inputs) and the stonecutter list.
+  It stays in the recipe map and still matches, and allDisplays is unpacked separately
+  from every recipe. StasisChamberRecipe is the modded-water half of the basic chamber
+  (c:buckets/water minus minecraft:water_bucket), so on a pack with no modded water it
+  has no ingredients by design. The vanilla grid is recipe/basic_stasis_chamber.json.
+  Changes: a new note at wiki/api-notes.html#recipe-empty-ingredients, a paragraph on
+  StasisChamberRecipe.placementInfo, and procedures/release.txt's known-harmless line
+  now points at the note. No behaviour change.
+  Proof: :neoforge-26.1.2:runGameTest logged the WARN and then passed
+  stasis_chambers_craft, which crafts the chamber through RecipeManager.getRecipeFor
+  ("All 55 required tests passed"). RecipeManager was read in
+  minecraft-patched-26.1.2.100-sources.jar.
+  Pictures: none (a log line; nothing visible changed).
+  Issue #208: closed as "not planned", with the proof comment, left on milestone v0.5.046.
+
+DECIDED
+-------
+- #208 is not a defect, so it closes without a code fix. This call was made without the
+  owner, on reading the vanilla source plus the gametest. release.txt already called the
+  WARN "known and harmless". Recorded on the issue and at
+  api-notes.html#recipe-empty-ingredients.
+- Silencing the WARN by making isSpecial() return true while the water tag is empty was
+  considered and not done. isSpecial also controls whether the recipe book unpacks
+  displays, and on a modded pack it could be read before tags are bound, which would hide
+  the modded recipe from the book. A log line is not worth that risk.
+
+FOUND ON THE WAY
+----------------
+- `gh issue close` has no --comment-file. Use `gh issue comment --body-file`, then close.
+- None filed.
+
+PROCEDURES
+----------
+- fix-bug.txt step 6 gained a "not a defect" branch: write the quirk where the next
+  reader meets it, commit as "#N:", and close as "not planned" with the proof. Without
+  it, step 6 covered only fixed outcomes.
+- release.txt: the stasis WARN line points at the new api-notes anchor.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. No common/ code changed, so it cannot move.
+- The modded-pack case was not booted (a pack with a modded water container): whether
+  the tag is bound before finalizeRecipeLoading, so that the modded recipe is placeable
+  there. horse-stasis.html's Verification summary already lists the modded-bucket path
+  as unplayed; nothing new was added.
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: one non-fix, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+/next-release again: its next unit is #209 (the test yard soundness check: a jukebox at
+head height), run by procedures/fix-bug.txt.
