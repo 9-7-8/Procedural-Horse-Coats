@@ -189,6 +189,7 @@ public final class TraderSale {
         for (Horse horse : level.getEntitiesOfClass(Horse.class, trader.getBoundingBox().inflate(16.0),
                 h -> h.isAlive() && h.isLeashed() && h.getLeashHolder() == trader && !h.isVehicle())) {
             ActionTrace.log("trader", ActionTrace.describeShort(horse) + " leaves with the wandering trader");
+            HorseRecords.forgetDeparting(horse); // #200: its record goes with it, if nothing needs it
             horse.discard();
         }
     }

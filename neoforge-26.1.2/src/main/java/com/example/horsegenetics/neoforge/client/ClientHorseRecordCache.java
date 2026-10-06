@@ -17,7 +17,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ClientHorseRecordCache {
 
     private static final Map<Integer, HorseRecord> BY_ENTITY = new ConcurrentHashMap<>();
-    private static final Map<UUID, HorseRecord> BY_ID = new ConcurrentHashMap<>();
+    /**
+     * Bounded, least-recently-used first (#200). Every tracked horse and every family-tree and offspring
+     * response lands here, each record carrying both genome codes, and it used to grow until logout. The
+     * screens that read it ask by id and handle a miss; a horse still in view is re-filed on its next sync.
+     */
+    private static final int BY_ID_CAP = 512;
+    private static final Map<UUID, HorseRecord> BY_ID = java.util.Collections.synchronizedMap(
+            new java.util.LinkedHashMap<>(64, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<UUID, HorseRecord> eldest) {
+                    return size() > BY_ID_CAP;
+                }
+            });
     private static final AtomicInteger TREE_VERSION = new AtomicInteger();
 
     public static void put(int entityId, HorseRecord record) {
@@ -27,6 +39,11 @@ public final class ClientHorseRecordCache {
 
     public static HorseRecord get(int entityId) {
         return BY_ENTITY.get(entityId);
+    }
+
+    /** The horse has left this client's level; its id may be reused. The by-id view keeps it, bounded. */
+    public static void forgetEntity(int entityId) {
+        BY_ENTITY.remove(entityId);
     }
 
     public static HorseRecord byId(UUID id) {

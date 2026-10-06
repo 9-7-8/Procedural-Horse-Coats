@@ -149,6 +149,11 @@ public final class InMemoryHorseDatabase implements HorseDatabase {
         return List.copyOf(byId.values());
     }
 
+    /** A read-only live view of every record - no copy, so for a single pass on the owning thread only. */
+    public Collection<HorseRecord> view() {
+        return java.util.Collections.unmodifiableCollection(byId.values());
+    }
+
     public int size() {
         return byId.size();
     }

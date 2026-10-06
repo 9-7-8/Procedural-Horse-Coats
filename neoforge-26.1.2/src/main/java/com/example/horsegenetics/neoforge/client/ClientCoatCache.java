@@ -8,9 +8,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Simple client-side store for coat data received via CoatSyncPayload.
  * Not persisted - repopulated from the server every time a horse comes
- * into render range. Entries are never explicitly evicted; for horses
- * this is a non-issue (population is small), but a real mod with many
- * synced entities would want to clean up on entity removal.
+ * into render range. Evicted when the horse leaves the client level
+ * ({@code ClientLifecycleHandler.onEntityLeave}, #200): each entry holds a
+ * parsed genome, and every horse ever tracked used to stay until logout.
  */
 public final class ClientCoatCache {
 
@@ -25,6 +25,11 @@ public final class ClientCoatCache {
     }
 
     /** Drop everything - entity ids are per-world, so this is called on world exit. */
+    /** The horse has left this client's level (#200); the server re-sends on tracking start. */
+    public static void forget(int entityId) {
+        CACHE.remove(entityId);
+    }
+
     public static void clear() {
         CACHE.clear();
     }

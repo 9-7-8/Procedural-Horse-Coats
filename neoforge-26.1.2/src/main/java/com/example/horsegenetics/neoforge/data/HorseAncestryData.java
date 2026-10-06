@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.data;
 
+import com.example.horsegenetics.common.horse.AncestryPruning;
 import com.example.horsegenetics.common.horse.HorseDatabase;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.InMemoryHorseDatabase;
@@ -83,6 +84,20 @@ public final class HorseAncestryData extends SavedData implements HorseDatabase 
         }
         setDirty();
         return true;
+    }
+
+    /**
+     * Forget a horse that is leaving the world for good, if {@link AncestryPruning#mayForget} says nothing could
+     * ask for it again (#200). One pass over the store for the parent check; called once per departure.
+     *
+     * @return whether it was forgotten
+     */
+    public boolean forgetIfUnclaimed(UUID id, boolean hasCovered) {
+        Optional<HorseRecord> record = delegate.lookup(id);
+        if (record.isEmpty() || !AncestryPruning.mayForget(record.get(), hasCovered, delegate.view())) {
+            return false;
+        }
+        return forget(id);
     }
 
     @Override

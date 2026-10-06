@@ -24,6 +24,11 @@ public final class ClientHorseCareCache {
         return BY_ENTITY.get(entityId);
     }
 
+    /** The horse has left this client's level (#200); the server re-sends on tracking start. */
+    public static void forget(int entityId) {
+        BY_ENTITY.remove(entityId);
+    }
+
     public static void clear() {
         BY_ENTITY.clear();
     }

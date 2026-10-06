@@ -188,6 +188,7 @@ public final class ArcaneWandererHandler {
         for (UUID id : herd) {
             if (level.getEntity(id) instanceof Horse horse && horse.isAlive() && !horse.isTamed()) {
                 CowboyHandler.clearBrand(horse);
+                HorseRecords.forgetDeparting(horse); // #200: its record goes with it, if nothing needs it
                 horse.discard();
                 taken++;
             }

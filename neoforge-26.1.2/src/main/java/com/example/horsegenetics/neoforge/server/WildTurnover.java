@@ -218,6 +218,7 @@ public final class WildTurnover {
             case REMOVE -> {
                 DebugAnnounce.log("Wild", WildLifetime.leftLine(describe(horse),
                         horse.blockPosition().toShortString(), fate, now - born));
+                HorseRecords.forgetDeparting(horse); // #200: its record goes with it, if nothing needs it
                 horse.discard();
                 removedTotal++;
             }

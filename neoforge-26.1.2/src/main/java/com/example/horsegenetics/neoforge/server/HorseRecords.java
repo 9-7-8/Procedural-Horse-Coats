@@ -65,6 +65,21 @@ public final class HorseRecords {
     }
 
     /**
+     * <b>This horse is leaving the world for good</b> - wild turnover, a dealer's rotation, a trader taking it.
+     * Its ancestry record goes too when nothing could ask for it again ({@code AncestryPruning}, owner
+     * 2026-10-06, #200). Call it before the discard. A tamed horse is always kept, whatever its record says.
+     */
+    public static void forgetDeparting(Horse horse) {
+        if (!(horse.level() instanceof ServerLevel level) || horse.isTamed() || !hasRealRecord(horse)) {
+            return;
+        }
+        com.example.horsegenetics.common.repro.Reproduction r = ReproHandler.of(horse);
+        boolean hasCovered = r.covers() > 0
+                || r.coverDay() != com.example.horsegenetics.common.repro.Reproduction.NEVER;
+        HorseAncestryData.get(level.getServer()).forgetIfUnclaimed(horse.getUUID(), hasCovered);
+    }
+
+    /**
      * A wild horse: everything rolled, <b>sex included</b> - it is a gene now,
      * so {@link Genotype#random} draws it along with the rest.
      */

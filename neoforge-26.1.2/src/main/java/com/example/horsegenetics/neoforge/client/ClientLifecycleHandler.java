@@ -38,6 +38,7 @@ public final class ClientLifecycleHandler {
         ClientCoatCache.clear();
         ClientHorseRecordCache.clear();
         ClientHorseCareCache.clear();
+        ClientHorseSocialCache.clear(); // never cleared before #200 - ids are per world, so it leaked onto the wrong horse
         ClientGeneDatabase.clear();
         ClientProgress.clear();
         ClientHorseRoster.clear();
@@ -59,6 +60,24 @@ public final class ClientLifecycleHandler {
         HorseBrowserScreen.forgetWorld();
         GeneticCoatTextureFactory.clear();
         FlatItemCatalog.clear();
+    }
+
+    /**
+     * A horse leaving this client's level takes its per-entity-id entries with it (#200). Safe because the
+     * server sends coat, record and care again whenever this player starts tracking the horse again.
+     * Client levels only: in singleplayer the integrated server fires this event too.
+     */
+    @SubscribeEvent
+    static void onEntityLeave(net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent event) {
+        if (!event.getLevel().isClientSide()
+                || !(event.getEntity() instanceof net.minecraft.world.entity.animal.equine.AbstractHorse)) {
+            return;
+        }
+        int id = event.getEntity().getId();
+        ClientCoatCache.forget(id);
+        ClientHorseRecordCache.forgetEntity(id);
+        ClientHorseCareCache.forget(id);
+        ClientHorseSocialCache.forget(id);
     }
 
     private ClientLifecycleHandler() {

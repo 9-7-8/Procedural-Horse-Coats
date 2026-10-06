@@ -830,6 +830,7 @@ public final class CowboyHandler {
         }
         cowboy.removeFromHerd(horse.getUUID());
         clearBrand(horse);
+        HorseRecords.forgetDeparting(horse); // #200: its record goes with it, if nothing needs it
         horse.discard();
     }
 

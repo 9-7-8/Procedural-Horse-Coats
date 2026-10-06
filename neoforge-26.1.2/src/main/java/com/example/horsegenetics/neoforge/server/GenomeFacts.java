@@ -7,6 +7,7 @@ import com.example.horsegenetics.common.genetics.GeneEpigenetics;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.HorseDiet;
+import com.example.horsegenetics.common.genetics.Undeath;
 import com.example.horsegenetics.common.genetics.genes.PassificationGene;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import net.minecraft.world.entity.animal.equine.Horse;
@@ -63,10 +64,11 @@ final class GenomeFacts {
         final HorseDiet diet;
         final String favourite;
         final List<PassificationGene.Route> routes;
+        final Undeath.Kind undead;
         volatile Boolean lethal;
 
         Facts(String code, String epigenome, boolean lycanCarrier, boolean sunSensitive, HorseDiet diet,
-              String favourite, List<PassificationGene.Route> routes, Boolean lethal) {
+              String favourite, List<PassificationGene.Route> routes, Undeath.Kind undead, Boolean lethal) {
             this.code = code;
             this.epigenome = epigenome;
             this.lycanCarrier = lycanCarrier;
@@ -74,16 +76,17 @@ final class GenomeFacts {
             this.diet = diet;
             this.favourite = favourite;
             this.routes = routes;
+            this.undead = undead;
             this.lethal = lethal;
         }
 
         Facts restrung(String code, String epigenome) {
-            return new Facts(code, epigenome, lycanCarrier, sunSensitive, diet, favourite, routes, lethal);
+            return new Facts(code, epigenome, lycanCarrier, sunSensitive, diet, favourite, routes, undead, lethal);
         }
     }
 
     private static final Facts NONE = new Facts("", "", false, false, HorseDiet.NORMAL, null, List.of(),
-            Boolean.FALSE);
+            Undeath.Kind.NONE, Boolean.FALSE);
 
     private static final Map<UUID, Facts> CACHE = new ConcurrentHashMap<>();
 
@@ -110,6 +113,11 @@ final class GenomeFacts {
     /** Every passification route into this horse, or an empty list. */
     static List<PassificationGene.Route> passificationRoutes(Horse horse) {
         return of(horse).routes;
+    }
+
+    /** Which undead this horse is, {@link Undeath.Kind#NONE} for the living. */
+    static Undeath.Kind undeadKind(Horse horse) {
+        return of(horse).undead;
     }
 
     /** Is this foal one that dies at birth? Keyed on both codes, since traits read the epigenome too. */
@@ -183,12 +191,14 @@ final class GenomeFacts {
         try {
             gt = Genotype.parse(code);
         } catch (RuntimeException bad) {
-            return new Facts(code, epi, false, false, HorseDiet.NORMAL, null, List.of(), null);
+            return new Facts(code, epi, false, false, HorseDiet.NORMAL, null, List.of(), Undeath.Kind.NONE, null);
         }
         boolean lycan = false;
         boolean sun = false;
         String favourite = null;
+        Undeath.Kind undead = Undeath.Kind.NONE;
         try {
+            undead = Undeath.kindOf(gt);
             lycan = !wild(Genes.LYCAN, gt.pair(Genes.LYCAN));
             sun = Genes.SUN_SENSITIVITY.isSensitive(gt.pair(Genes.SUN_SENSITIVITY));
             favourite = Genes.FOOD_PREFERENCE.favouriteOf(gt.pair(Genes.FOOD_PREFERENCE));
@@ -205,7 +215,7 @@ final class GenomeFacts {
         } catch (RuntimeException bad) {
             // an unparseable epigenome: a normal diet and no routes, as before
         }
-        return new Facts(code, epi, lycan, sun, diet, favourite, routes, null);
+        return new Facts(code, epi, lycan, sun, diet, favourite, routes, undead, null);
     }
 
     private static boolean wild(Gene gene, AllelePair pair) {
