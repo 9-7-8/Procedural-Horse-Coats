@@ -72,6 +72,11 @@ PROCEDURES
 ----------
 - Added: procedures/measure-worldgen.txt (/measure-worldgen), plus its keyword memory
   row.
+- release: new step 5a, photos. The owner pointed out that 0.5.045 shipped without
+  pictures of its four new parts. Five photo-shoot frames were added to the GitHub
+  release (assets, embedded under each bullet) and to wiki/releases.html#v0-5-045 (files
+  in wiki/assets/releases/). The step, DONE WHEN and NEVER now require one per visible
+  feature.
 - test-tiers: tier 3 is "about twenty minutes" (it said ten to fifteen; the owner asked
   why the run took so long), with this run's slowest classes. CLAUDE.md and end-session
   carried the same old figure and now say about twenty minutes.

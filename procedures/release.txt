@@ -117,6 +117,22 @@ STEPS
    - when replacing a broken release, the "replace <version>" line, and whether saves
      made under it are damaged.
 
+5a. Photos (owner, 2026-10-05). Everything new that a player can SEE in the range (a
+   grown part, a coat or look, an item, a block) gets a picture in the note.
+   - Take them from the range's own photo shoots, in run/screenshots/ (photo-*.png;
+     the session logs name the shoot). If a visible feature has none, take them with
+     photograph-horses before tagging.
+   - Look at each one with Read before choosing it. Pick the one where the thing is big
+     enough to see; a part too small to read is not a picture of it.
+   - Give each a clear name, <version>-<what>.png. Upload them as release assets
+     (`gh release upload v<new> <files>`, after step 7's create) and embed each under
+     its bullet with
+     <img src="https://github.com/<owner>/<repo>/releases/download/v<new>/<file>"
+     alt="..." width="427">, then `gh release edit v<new> --notes-file <note>`.
+   - Copy the same files into wiki/assets/releases/ for the wiki note (step 9), so the
+     wiki does not depend on GitHub's download links.
+   A release with nothing visible in it (fixes, lag) needs none.
+
 5b. Bring README.md up to date, BEFORE the build and the tag, so the README in the tagged
    commit describes the release. It is the page every new player sees first. Use the note
    you just wrote as the checklist:
@@ -171,6 +187,7 @@ and the summary says which; or:
 - the release set is green;
 - `gh release view` lists the jar;
 - the wiki note matches the GitHub note;
+- every visible new thing in the range has a photo, on GitHub and on the wiki (5a);
 - README.md was reviewed against the range and is in the tagged commit;
 - main and the tag are pushed, and the tree is clean.
 
@@ -186,6 +203,8 @@ NEVER
 - Never skip the release set: the full suite runs before every release.
 - Never tag with a README that is out of date: it is the first thing a new player reads.
 - Never stop at a pushed tag.
+- Never publish a note for a visible feature without its photo. Players decide whether
+  to update from the pictures.
 - Never write the note from memory instead of the tag range.
 - Never release from the cloud.
 - Never ship a patch release that breaks saves made under its series.
