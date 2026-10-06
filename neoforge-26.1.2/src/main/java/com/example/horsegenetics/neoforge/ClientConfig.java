@@ -101,7 +101,8 @@ public final class ClientConfig {
 
     /**
      * <b>Milliseconds of coat baking allowed per 50 ms.</b> The first bake in a
-     * window always runs, so zero means "one at a time". Added after walking
+     * window runs unless earlier windows overran by a whole budget or more (#203,
+     * carried forward as debt), so zero means "one at a time". Added after walking
      * toward a herd froze the owner's machine outright (2026-09-13).
      */
     public static final ModConfigSpec.IntValue COAT_BAKE_BUDGET_MS;
@@ -268,8 +269,9 @@ public final class ClientConfig {
         COAT_BAKE_BUDGET_MS = builder
                 .comment("Milliseconds per 50 ms that may be spent making new coat textures.",
                         "Coats that do not fit wait a frame or two and wear the stand-in",
-                        "meanwhile. The first coat in each 50 ms always runs, so 0 means",
-                        "\"one at a time\". Lower it on a slow machine, raise it on a fast one.")
+                        "meanwhile. The first coat in each 50 ms runs unless earlier ones",
+                        "overran the budget, so 0 means \"one at a time\". Lower it on a",
+                        "slow machine, raise it on a fast one.")
                 .defineInRange("coats.bakeBudgetMs", DEFAULT_COAT_BAKE_BUDGET_MS, 0, 50);
         PARTS = builder
                 .comment("Draw the parts a horse's genes grow - a unicorn's horn, and later",

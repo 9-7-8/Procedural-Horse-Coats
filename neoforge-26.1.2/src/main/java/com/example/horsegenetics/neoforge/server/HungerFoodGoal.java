@@ -176,8 +176,14 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
     public boolean canUse() {
         // Cheapest first: one attachment read decides it for a fed horse.
         double hunger = hunger();
+        // A dormant horse (#204) is asked less often while its hunger drains at the full rate, so each ask stands
+        // for the asks it skipped: the graze roll and the search countdown both scale by that, and a far paddock
+        // eats about as much as a watched one. Mob.serverAiStep evaluates goals when (tickCount + id) is even -
+        // every other tick awake, and on every dormant run tick, whose (tickCount + id) is a multiple of ten - so
+        // a dormant ask stands for span / 2 awake ones (read in the 26.1.2 patched sources).
+        int span = Math.max(1, DormancyHandler.span(horse) / 2);
         if (!Hunger.seeksFood(hunger)) {
-            if (Hunger.grazes(hunger) && horse.getRandom().nextInt(GRAZE_CHANCE) == 0
+            if (Hunger.grazes(hunger) && horse.getRandom().nextInt(Math.max(1, GRAZE_CHANCE / span)) == 0
                     && horse.level() instanceof ServerLevel level && free()) {
                 HorseDiet d = diet();
                 if (d != null && eatsAtAll(d)) {
@@ -186,7 +192,8 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
             }
             return false;
         }
-        if (--searchCooldown > 0) {
+        searchCooldown -= span;
+        if (searchCooldown > 0) {
             return false;
         }
         // A horse that cannot plan a path right now - in the air, which a horse just
