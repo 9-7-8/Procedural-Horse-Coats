@@ -42,14 +42,24 @@ public final class DebugPhotoShoot {
      * re-rolled until every {@code <key>=<pair>} after a {@code |} is on it - how a shot asks
      * for one strain, or one of a count group's horns.
      */
-    public record Shot(String name, Sex sex, String code, int dragonForm, Framing framing) {
+    public record Shot(String name, Sex sex, String code, int dragonForm, Framing framing,
+                       java.util.function.Predicate<HorseRecord> want) {
         public Shot(String name, Sex sex, String code, int dragonForm) {
             this(name, sex, code, dragonForm, Framing.HEAD);
         }
+
+        public Shot(String name, Sex sex, String code, int dragonForm, Framing framing) {
+            this(name, sex, code, dragonForm, framing, r -> true);
+        }
     }
 
-    /** Head and shoulders (the default), the whole horse side-on, or a whole foal. */
-    public enum Framing { HEAD, WIDE, FOAL }
+    /**
+     * Head and shoulders (the default), the whole horse from a little forward of side-on, a
+     * whole foal, the back seen from the side (a part along the spine, which WIDE shows
+     * end-on), or the back from behind and above (a part standing out from the back or the
+     * flanks, with the coat behind it - what a see-through part needs to show it is).
+     */
+    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK }
 
     private static final String BAY = "horsegenetics.extension=E/E-horsegenetics.agouti=A/A";
     private static final String BLACK = "horsegenetics.extension=E/E-horsegenetics.agouti=a/a";
@@ -164,6 +174,23 @@ public final class DebugPhotoShoot {
             ey = ty + 0.45 * k;
             ez = tz + 2.9 * k;
         }
+        if (shot.framing() == Framing.SIDE) {
+            // Square to the flank from the south, a little above the line of the back.
+            tx = hx + 0.1;
+            ty = origin.getY() + 1.3;
+            tz = hz;
+            ex = tx;
+            ey = ty + 0.9;
+            ez = tz + 3.4;
+        } else if (shot.framing() == Framing.BACK) {
+            // Behind the croup (east), to the south and well above, looking down the back.
+            tx = hx;
+            ty = origin.getY() + 1.4;
+            tz = hz;
+            ex = tx + 2.4;
+            ey = ty + 1.6;
+            ez = tz + 1.5;
+        }
         double dx = tx - ex;
         double dy = ty - ey;
         double dz = tz - ez;
@@ -184,6 +211,9 @@ public final class DebugPhotoShoot {
         HorseRecord rec = null;
         for (int attempt = 0; attempt < 200; attempt++) {
             rec = HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), shot.sex(), genotype);
+            if (!shot.want().test(rec)) {
+                continue;
+            }
             if (shot.dragonForm() < 0) {
                 return rec;
             }
