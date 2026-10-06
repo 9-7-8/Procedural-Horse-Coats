@@ -403,6 +403,17 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     the server. <strong>Singleplayer never encodes it</strong>, so every test short of a real client
     joining a real dedicated server passes &mdash; the reason the
     <code>every_recipe_encodes</code> gametest exists. Found by an outside tester, 2026-09-18.</li>
+    <li id="recipe-empty-ingredients"><strong>"Recipe X can't be placed due to empty ingredients and will
+    be ignored" does not drop the recipe.</strong> <code>RecipeManager.finalizeRecipeLoading</code> logs it
+    for any recipe that is not <code>isSpecial()</code> and whose <code>placementInfo()</code> is
+    impossible to place, and "ignored" means only that it is skipped when the ingredient property sets
+    (furnace and smithing inputs) and the stonecutter list are built. The recipe stays in the recipe map, so
+    it still matches a grid, and its displays are unpacked separately from every recipe. The one this mod
+    logs at every boot is <code>horsegenetics:stasis_chamber</code>, the modded-water half of the basic
+    chamber: on a pack with no water container but the vanilla bucket it has no ingredients <em>on
+    purpose</em> (see <code>StasisChamberRecipe.water()</code>), and the vanilla grid is its JSON twin's.
+    The <code>stasis_chambers_craft</code> gametest crafts the chamber in a run that logs the warning.
+    Verified 2026-10-05 by reading <code>RecipeManager</code> in the 26.1.2 sources (#208).</li>
 
 <li id="creative-tab-throw"><strong>A listener that throws out of
     <code>BuildCreativeModeTabContentsEvent</code> empties the entire tab, including vanilla's

@@ -219,6 +219,12 @@ public class StasisChamberRecipe extends CustomRecipe {
     /**
      * Where the recipe book may place this into the grid for you. Cached only
      * once it is real, for the reason {@link #water()} gives.
+     *
+     * <p>On a pack with no modded water this is {@code NOT_PLACEABLE}, and vanilla
+     * logs "can't be placed due to empty ingredients and will be ignored" at every
+     * boot. <b>That is expected and harmless</b>: the recipe stays in the recipe map
+     * and still matches; only the furnace/stonecutter lookups skip it
+     * ({@code wiki/api-notes.html#recipe-empty-ingredients}, #208).
      */
     @Override
     public PlacementInfo placementInfo() {
