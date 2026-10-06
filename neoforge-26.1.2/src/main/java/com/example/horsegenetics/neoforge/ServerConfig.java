@@ -166,6 +166,12 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue NEARBY_HORSE_CAP;
 
     /**
+     * <b>How far from every player a horse goes dormant</b> (#204) - ticking one tick in
+     * {@code common/care/Dormancy.STRIDE}. Server-side: it is the server's tick being spent.
+     */
+    public static final ModConfigSpec.IntValue DORMANCY_RADIUS;
+
+    /**
      * <b>How many covers a stallion makes in a day before his odds halve.</b>
      * Server-side for the same reason as {@link #NEARBY_HORSE_CAP}. See
      * {@code common/repro/StallionDay}, which carries it to every rule that asks.
@@ -630,6 +636,18 @@ public final class ServerConfig {
                 .defineInRange("fertility.nearby_horse_cap",
                         com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_CAP, 1,
                         com.example.horsegenetics.common.repro.ReproRules.MAX_NATURAL_CAP);
+        DORMANCY_RADIUS = builder
+                .comment("How far a horse must be from every player before it goes dormant, in blocks.",
+                        "(default: " + com.example.horsegenetics.common.care.Dormancy.DEFAULT_RADIUS
+                                + ", range 0 to " + com.example.horsegenetics.common.care.Dormancy.MAX_RADIUS + ")",
+                        "A dormant horse runs one tick in " + com.example.horsegenetics.common.care.Dormancy.STRIDE
+                                + ": it walks and grazes in slow motion, but its hunger,",
+                        "healing, bond, heat, pregnancy and growth keep their normal pace. It wakes",
+                        "within half a second of a player coming inside the radius.",
+                        "0 turns dormancy off. Server-side.")
+                .defineInRange("performance.dormancy_radius",
+                        com.example.horsegenetics.common.care.Dormancy.DEFAULT_RADIUS, 0,
+                        com.example.horsegenetics.common.care.Dormancy.MAX_RADIUS);
         FREE_COVERS_PER_DAY = builder
                 .comment("How many covers a stallion makes in one day before his chance of getting",
                         "a mare in foal is halved until tomorrow. (default: 3, range 0 to 1000)",
@@ -1060,6 +1078,15 @@ public final class ServerConfig {
             return GESTATION_DAYS.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.repro.ReproTiming.DEFAULT_GESTATION_DAYS;
+        }
+    }
+
+    /** {@code performance.dormancy_radius}, safely; 0 is off. */
+    public static int dormancyRadius() {
+        try {
+            return DORMANCY_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.care.Dormancy.DEFAULT_RADIUS;
         }
     }
 

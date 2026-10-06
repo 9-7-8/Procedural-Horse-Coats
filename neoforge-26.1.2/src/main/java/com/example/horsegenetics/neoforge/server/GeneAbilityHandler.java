@@ -2950,13 +2950,15 @@ public final class GeneAbilityHandler {
      * <p>Game time is saved with the world and keeps counting, and each horse is
      * offset by its UUID so two horses on the same beat are still not in
      * lockstep - the property {@code tickCount} was chosen for.
+     *
+     * <p>A dormant horse (#204) runs one tick in ten, and an exact-tick match would land on its run ticks
+     * only by luck. So a run counts every tick it stands for ({@link DormancyHandler#span}), and the beat
+     * fires once per interval either way.
      */
     private static boolean beat(Horse horse, int interval) {
-        if (interval <= 1) {
-            return true;
-        }
         long phase = horse.getUUID().getLeastSignificantBits() & 0x7FFFFFFFL;
-        return Math.floorMod(horse.level().getGameTime() + phase, (long) interval) == 0;
+        return com.example.horsegenetics.common.care.Dormancy.beatWithin(
+                horse.level().getGameTime(), phase, interval, DormancyHandler.span(horse));
     }
 
     /** Blocks above or below the horse's feet a summoned mob may be set down. */
