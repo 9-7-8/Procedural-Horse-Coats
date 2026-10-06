@@ -52,6 +52,7 @@ const RAM_HORN = 5;
 const RAM_TIP = 6;
 const HAIR = 7;
 const MEMBRANE = 8;
+const CRYSTAL = 9;
 
 /** Deterministic integer hash to [0,1). Nothing here may use Math.random. */
 function hash(x, y, salt) {
@@ -162,6 +163,20 @@ function membrane(u, v) {
   return 0.84 + band + fine;
 }
 
+/**
+ * Crystal - the shafts of a crystal growth. A crystal box is a few texels across
+ * each face, so the grain is long clean facets along v (the crystal's length), a
+ * bright line every two texels across u for the facet edges, and a faint slow flaw
+ * through the body. Pale, so the gem tint reads true; it is the region the crystal
+ * kind draws blended, and its solid points are BONE_TIP.
+ */
+function crystal(u, v) {
+  const edge = (u % 2 === 0) ? 0.08 : 0;
+  const facet = noise(u / 1.0, v / 7.0, 14, REGION) * 0.08;
+  const flaw = noise(u / 5.0, v / 3.0, 15, REGION) * 0.07;
+  return 0.80 + edge + facet - flaw;
+}
+
 const px = Buffer.alloc(SIZE * SIZE * 4);          // zeroed: an unused region is blank
 function paint(region, fn) {
   const ox = (region % ACROSS) * REGION;
@@ -188,12 +203,13 @@ paint(RAM_HORN, (u, v) => ram(u, v, false));
 paint(RAM_TIP, (u, v) => ram(u, v, true));
 paint(HAIR, (u, v) => hair(u, v));
 paint(MEMBRANE, (u, v) => membrane(u, v));
+paint(CRYSTAL, (u, v) => crystal(u, v));
 
 // The one thing worth asserting: every texel a box can reach is opaque. A part is
 // drawn through a cutout pipeline, which DISCARDS a fragment under an alpha of
 // 0.1 - so a region with a transparent corner is a horn with holes in it, and the
 // hole would appear only on the segment sizes that happen to reach that corner.
-const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM, RAM_HORN, RAM_TIP, HAIR, MEMBRANE];
+const PAINTED = [HORN, HORN_TIP, BONE, BONE_TIP, BLOOM, RAM_HORN, RAM_TIP, HAIR, MEMBRANE, CRYSTAL];
 for (const region of PAINTED) {
   const ox = (region % ACROSS) * REGION;
   const oy = Math.floor(region / ACROSS) * REGION;

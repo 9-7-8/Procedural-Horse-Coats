@@ -59,7 +59,8 @@ package com.example.horsegenetics.common.parts;
  *                 {@code 4.6}; {@link #ALL_ELEMENTS} for a part with no count
  * @param opacity  how opaque the regions its kind draws see-through
  *                 ({@link PartKind#translucentRegions()}) are: {@link #OPAQUE} for a
- *                 solid part, {@link #CRYSTAL_ALPHA} for a crystalline antler's shafts,
+ *                 solid part, {@link #CRYSTAL_ALPHA} for a crystalline antler's shafts
+ *                 and a crystal growth's,
  *                 a sail's own number for its membrane, and {@code 0} to draw those
  *                 regions not at all - a bone sail, its bare rays with no skin
  * @param bloomTint the colour of the {@link PartSheet#BLOOM} clumps, or
@@ -290,6 +291,27 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
         float grow = shape.stretchTo(size);
         return new AttachedPart(shape, grow, grow, 0f, UNDYED, UNDYED, false,
                 (float) count, OPAQUE, NO_BLOOM, 1f);
+    }
+
+    /**
+     * Crystal growths along the back, from the numbers the back crystals locus carries -
+     * white and dark until its colour locus dresses it, the shafts see-through at
+     * {@link #CRYSTAL_ALPHA} and the points solid. The kind scales per element
+     * ({@link PartKind#scalesPerElement()}): {@link #stretch} and {@link #girth} are each
+     * cluster's own grow, about its central crystal, so the clusters stay where they are
+     * along the back. Size is a uniform grow - a bigger crystal, not a taller thinner one.
+     *
+     * @param variant which of {@link CrystalGenerator#VARIANTS} arrangements - the seed's
+     * @param spread  {@code [0,1]}: how far the outer crystals of a cluster fan from upright
+     * @param size    position on the {@link CrystalSize} ladder - class is the mesh, the rest a stretch
+     * @param count   how many clusters show, from the withers back; fractional grows the last one in
+     */
+    public static AttachedPart crystals(int variant, double spread, double size, double count) {
+        int style = CrystalGenerator.style(variant, bucket(spread, CrystalGenerator.SPREADS));
+        PartShape shape = PartShape.of(PartKind.CRYSTALS, style, size);
+        float grow = shape.stretchTo(size);
+        return new AttachedPart(shape, grow, grow, 0f, UNDYED, UNDYED, false,
+                (float) count, CRYSTAL_ALPHA, NO_BLOOM, 1f);
     }
 
     /** {@code x} in {@code [0,1]}, clamped, to one of {@code n} equal buckets. */

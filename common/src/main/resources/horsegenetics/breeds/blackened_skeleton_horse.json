@@ -147,7 +147,8 @@
         "horsegenetics.dorsal_spines": "Dsp/Dsp",
         "horsegenetics.back_sail": "Sail/Sail",
         "horsegenetics.body_plates": "Plt/Plt",
-        "horsegenetics.tusks": "Nar/Nar"
+        "horsegenetics.tusks": "Nar/Nar",
+        "horsegenetics.back_crystals": "Crg/Crg"
       }
     }
   ],

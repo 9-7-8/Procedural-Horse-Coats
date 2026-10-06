@@ -72,7 +72,14 @@ public enum PartKind {
      * in its two twisted styles on a longer ladder ({@link NarwhalSize}), so a straight
      * tapered spiral of ivory, tip and all. Centred, so one kind.
      */
-    NARWHAL(PartAnchor.SNOUT, PartSheet.HORN);
+    NARWHAL(PartAnchor.SNOUT, PartSheet.HORN),
+
+    /**
+     * Crystal growths along the back - the back crystals locus. Clusters on the spine
+     * row's anchor and numbering, see-through shafts with solid points
+     * ({@link CrystalGenerator}). Centred, so one kind.
+     */
+    CRYSTALS(PartAnchor.SPINE, PartSheet.CRYSTAL);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -110,6 +117,8 @@ public enum PartKind {
             case PLATES_RIGHT, PLATES_LEFT -> PlateGenerator.styles();
             // The horn's two twisted styles; the narwhal never bends (HornGenerator).
             case NARWHAL -> HornGenerator.NARWHAL_STYLES;
+            // Arrangement (the seed) x lean spread.
+            case CRYSTALS -> CrystalGenerator.styles();
         };
     }
 
@@ -129,6 +138,7 @@ public enum PartKind {
             case PLATES_RIGHT, PLATES_LEFT -> PlateSize.classes();
             // The horn's fine steps: a segment count, not a class.
             case NARWHAL -> PartShape.SIZE_BUCKETS;
+            case CRYSTALS -> CrystalSize.classes();
         };
     }
 
@@ -159,8 +169,9 @@ public enum PartKind {
             case RAM_HORN_RIGHT, RAM_HORN_LEFT -> PartSheet.SOLID;
             // Nor a dragon horn; the same answer.
             case DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT -> PartSheet.SOLID;
-            // Nor the spines, nor a sail, nor the plates, nor a narwhal horn.
-            case SPINES, SAIL, PLATES_RIGHT, PLATES_LEFT, NARWHAL -> PartSheet.SOLID;
+            // Nor the spines, nor a sail, nor the plates, nor a narwhal horn. Nor the
+            // crystals: the treatment leaves glow out and says this is where it would go.
+            case SPINES, SAIL, PLATES_RIGHT, PLATES_LEFT, NARWHAL, CRYSTALS -> PartSheet.SOLID;
         };
     }
 
@@ -179,6 +190,8 @@ public enum PartKind {
         return switch (this) {
             case ANTLER_RIGHT, ANTLER_LEFT -> PartSheet.bit(PartSheet.BONE);
             case SAIL -> PartSheet.bit(PartSheet.MEMBRANE);
+            // A crystal's shafts, never its points - the crystal antler's split.
+            case CRYSTALS -> PartSheet.bit(PartSheet.CRYSTAL);
             case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES,
                  PLATES_RIGHT, PLATES_LEFT, NARWHAL -> 0;
         };
@@ -190,7 +203,7 @@ public enum PartKind {
      * saddle zone are hidden and the rest stay ({@link SaddleZone}).
      */
     public boolean saddleZoned() {
-        return this == SPINES || this == SAIL;
+        return this == SPINES || this == SAIL || this == CRYSTALS;
     }
 
     /**
@@ -199,10 +212,11 @@ public enum PartKind {
      * it would also stretch the row lengthwise - see {@link DorsalSpineGenerator}.
      * Every box of such a kind belongs to a group. The plates are rows down the flank,
      * two clusters to a mesh, so a whole-part scale would also pull the shoulder and
-     * hip clusters apart along the body.
+     * hip clusters apart along the body. Crystal growths are clusters along the back,
+     * each grown about its own central crystal.
      */
     public boolean scalesPerElement() {
-        return this == SPINES || this == SAIL || plates();
+        return this == SPINES || this == SAIL || plates() || this == CRYSTALS;
     }
 
     /** Is this a side of shoulder and hip plates? */
@@ -240,6 +254,7 @@ public enum PartKind {
             case SAIL -> "Back sail";
             case PLATES_RIGHT, PLATES_LEFT -> "Shoulder and hip plates";
             case NARWHAL -> "Narwhal horn";
+            case CRYSTALS -> "Crystal growths";
         };
     }
 }

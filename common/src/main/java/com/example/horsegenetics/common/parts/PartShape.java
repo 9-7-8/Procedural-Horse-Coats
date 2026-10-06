@@ -98,6 +98,7 @@ public record PartShape(PartKind kind, int style, int size) {
             case SAIL -> SailSize.lengthFor(position);
             case PLATES_RIGHT, PLATES_LEFT -> PlateSize.lengthFor(position);
             case NARWHAL -> NarwhalSize.lengthFor(position);
+            case CRYSTALS -> CrystalSize.lengthFor(position);
         };
     }
 

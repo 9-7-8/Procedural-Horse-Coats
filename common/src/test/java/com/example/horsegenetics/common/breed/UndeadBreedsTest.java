@@ -116,6 +116,9 @@ class UndeadBreedsTest {
                 if (p.kind() == PartKind.SAIL) {
                     // The sail's bone version: bare rays, the membrane left off.
                     assertEquals(0f, p.opacity(), "a skeleton's sail has skin");
+                } else if (p.kind() == PartKind.CRYSTALS) {
+                    // No bone in a crystal: a skeleton grows ordinary ones (owner, 2026-10-05).
+                    assertTrue(p.translucent(), "a skeleton's crystals are not crystal");
                 } else {
                     assertFalse(p.translucent(), "a skeleton's antler is crystal");
                 }
@@ -327,10 +330,11 @@ class UndeadBreedsTest {
             grouped.add(l.gene());
         }
         // Every granting locus GrownParts knows - if another horn-like part ships,
-        // the owner's rule is that the skeleton's pool takes it too.
+        // the owner's rule is that the skeleton's pool takes it too. Crystal growths
+        // have no bone and joined anyway, in ordinary colours (owner, 2026-10-05).
         assertEquals(java.util.Set.of(Genes.UNICORN_HORN.key(), Genes.ANTLERS.key(), Genes.RAM_HORNS.key(),
                 Genes.DRAGON_HORNS.key(), Genes.DORSAL_SPINES.key(), Genes.BACK_SAIL.key(),
-                Genes.BODY_PLATES.key(), Genes.TUSKS.key()), grouped);
-        assertEquals(PartKind.values().length, 12, "a new part kind: decide whether the skeleton grows it");
+                Genes.BODY_PLATES.key(), Genes.TUSKS.key(), Genes.BACK_CRYSTALS.key()), grouped);
+        assertEquals(PartKind.values().length, 13, "a new part kind: decide whether the skeleton grows it");
     }
 }

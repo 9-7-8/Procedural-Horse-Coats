@@ -140,6 +140,8 @@ import com.example.horsegenetics.common.genetics.genes.DragonHornsGene;
 import com.example.horsegenetics.common.genetics.genes.DragonHornColourGene;
 import com.example.horsegenetics.common.genetics.genes.BackSailColourGene;
 import com.example.horsegenetics.common.genetics.genes.BackSailGene;
+import com.example.horsegenetics.common.genetics.genes.BackCrystalColourGene;
+import com.example.horsegenetics.common.genetics.genes.BackCrystalsGene;
 import com.example.horsegenetics.common.genetics.genes.BodyPlateColourGene;
 import com.example.horsegenetics.common.genetics.genes.BodyPlatesGene;
 import com.example.horsegenetics.common.genetics.genes.TuskColourGene;
@@ -626,6 +628,10 @@ public final class Genes {
     public static final TusksGene TUSKS = new TusksGene();
     /** Tusk colour - codominant, the horn colour rule, one locus for every form. Silent without tusks. */
     public static final TuskColourGene TUSK_COLOUR = new TuskColourGene();
+    /** Crystal growths - dominant; clusters of see-through crystals along the back. Seed, size, count, spread on the copy. */
+    public static final BackCrystalsGene BACK_CRYSTALS = new BackCrystalsGene();
+    /** Crystal growth colour - codominant, the horn colour rule; crystals the base, points the tip. Silent without crystals. */
+    public static final BackCrystalColourGene BACK_CRYSTAL_COLOUR = new BackCrystalColourGene();
     /** Skeleton - recessive; two copies and the horse is its own bones (vanilla's skeleton sheet). Undead. */
     public static final SkeletonGene SKELETON = new SkeletonGene();
     /** Zombie - recessive; two copies and the horse is dead flesh (vanilla's zombie sheet). Undead. */
@@ -759,6 +765,7 @@ public final class Genes {
             RAM_HORNS, RAM_HORN_FORM, RAM_HORN_TIP,
             DRAGON_HORNS, DRAGON_HORN_COLOUR, DORSAL_SPINES, DORSAL_SPINE_COLOUR,
             BACK_SAIL, BACK_SAIL_COLOUR, BODY_PLATES, BODY_PLATE_COLOUR, TUSKS, TUSK_COLOUR,
+            BACK_CRYSTALS, BACK_CRYSTAL_COLOUR,
             SKELETON, ZOMBIE,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,

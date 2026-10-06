@@ -165,8 +165,9 @@ class BackSailGeneTest {
         assertEquals(PartSheet.bit(PartSheet.MEMBRANE), PartKind.SAIL.translucentRegions());
         assertEquals(PartSheet.bit(PartSheet.BONE), PartKind.ANTLER_LEFT.translucentRegions());
         assertEquals(PartSheet.bit(PartSheet.BONE), PartKind.ANTLER_RIGHT.translucentRegions());
+        assertEquals(PartSheet.bit(PartSheet.CRYSTAL), PartKind.CRYSTALS.translucentRegions());
         for (PartKind kind : PartKind.values()) {
-            if (!kind.antler() && kind != PartKind.SAIL) {
+            if (!kind.antler() && kind != PartKind.SAIL && kind != PartKind.CRYSTALS) {
                 assertEquals(0, kind.translucentRegions(), kind + " is never see-through");
             }
         }

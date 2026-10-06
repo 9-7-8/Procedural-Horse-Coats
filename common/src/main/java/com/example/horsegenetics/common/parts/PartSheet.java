@@ -88,6 +88,15 @@ public final class PartSheet {
      */
     public static final int MEMBRANE = 8;
 
+    /**
+     * Crystal - the shafts of a crystal growth on the back. Long clean facets running up
+     * the box's length, a bright edge and a faint inner flaw, over a pale ground. Opaque
+     * on the sheet, like every region; the crystal kind draws it see-through by tint
+     * ({@code PartKind.translucentRegions}), and its points stay on {@link #BONE_TIP},
+     * solid.
+     */
+    public static final int CRYSTAL = 9;
+
     /** Every region, as a mask for {@link #bit} tests. */
     public static final int ALL = -1;
 

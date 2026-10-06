@@ -567,6 +567,20 @@ public final class GeneDescriptions {
                             + "one for every form. White (ivory), the seven rainbow colours, "
                             + "pink, black, grey, bone and chaos. Two different copies make a "
                             + "tusk two-tone from root to tip."),
+            Map.entry("horsegenetics.back_crystals",
+                    "A magical, dominant gene: Crg grows clusters of crystals along the back, "
+                            + "see-through with solid points, fanning out from the spine. Where "
+                            + "each crystal stands is the horse's own and inherited whole; their "
+                            + "size, how many clusters and how far they fan are epigenetic and "
+                            + "inherited with the allele. Mares and stallions alike; grown at "
+                            + "maturity. A saddle or rider hides the clusters under the saddle. "
+                            + "Their colour is their own gene."),
+            Map.entry("horsegenetics.back_crystal_colour",
+                    "A magical, codominant gene that colours crystal growths and does nothing "
+                            + "to a horse without them - the horn colour rule on a locus of its "
+                            + "own. White, the seven rainbow colours, pink, black, grey, bone and "
+                            + "chaos. Two different copies make the see-through crystals one "
+                            + "colour and their solid points the other."),
             Map.entry("horsegenetics.ram_horn_tip",
                     "A magical, recessive gene: Tip/Tip fades a ram's horns into a colour "
                             + "of their own toward the points. The colour is inherited. Molten "

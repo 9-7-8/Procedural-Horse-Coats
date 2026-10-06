@@ -55,7 +55,7 @@ public final class GrownParts {
         if (genotype == null) {
             return List.of();
         }
-        // Eight granting loci. Each answers empty for nearly every horse, and the
+        // Nine granting loci. Each answers empty for nearly every horse, and the
         // list is only built when one of them says otherwise - so the common "no
         // parts" answer still allocates nothing.
         Optional<AttachedPart> horn = Genes.UNICORN_HORN.hornFor(genotype, epigenome);
@@ -68,8 +68,9 @@ public final class GrownParts {
         Optional<AttachedPart> sail = Genes.BACK_SAIL.sailFor(genotype, epigenome);
         Optional<List<AttachedPart>> plates = Genes.BODY_PLATES.platesFor(genotype, epigenome);
         List<AttachedPart> tusks = Genes.TUSKS.partsFor(genotype, epigenome);
+        Optional<AttachedPart> crystals = Genes.BACK_CRYSTALS.crystalsFor(genotype, epigenome);
         if (horn.isEmpty() && rack.isEmpty() && rams.isEmpty() && dragon.isEmpty() && spines.isEmpty()
-                && sail.isEmpty() && plates.isEmpty() && tusks.isEmpty()) {
+                && sail.isEmpty() && plates.isEmpty() && tusks.isEmpty() && crystals.isEmpty()) {
             return List.of();
         }
         List<AttachedPart> out = new ArrayList<>(10);
@@ -124,6 +125,12 @@ public final class GrownParts {
                 out.add(tusk.dressed(tints.base(), tints.tip(), false));
             }
         }
+        crystals.ifPresent(c -> {
+            // Base is the see-through crystal, tip the solid points - the crystal antler's
+            // mapping. A crystal has no bone, so Bon/Bon is simply bone-coloured crystal.
+            AbstractPartColourGene.Tints tints = Genes.BACK_CRYSTAL_COLOUR.tintsFor(genotype, epigenome);
+            out.add(c.dressed(tints.base(), tints.tip(), false));
+        });
         return List.copyOf(out);
     }
 
@@ -201,7 +208,7 @@ public final class GrownParts {
      * colour and horn glow do nothing to a hornless horse, so asked only of a wild
      * one they would look invisible. The baseline with "every part" is a horse
      * with a horn, a rack of antlers, ram's horns, dragon horns, dorsal spines, a back sail,
-     * body plates and a narwhal horn; a further granting
+     * body plates, a narwhal horn and crystal growths; a further granting
      * locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way
@@ -222,7 +229,8 @@ public final class GrownParts {
                 .with(new AllelePair(Genes.DORSAL_SPINES.Dsp, Genes.DORSAL_SPINES.Dsp))
                 .with(new AllelePair(Genes.BACK_SAIL.Sail, Genes.BACK_SAIL.Sail))
                 .with(new AllelePair(Genes.BODY_PLATES.Plt, Genes.BODY_PLATES.Plt))
-                .with(new AllelePair(Genes.TUSKS.Nar, Genes.TUSKS.Nar));
+                .with(new AllelePair(Genes.TUSKS.Nar, Genes.TUSKS.Nar))
+                .with(new AllelePair(Genes.BACK_CRYSTALS.Crg, Genes.BACK_CRYSTALS.Crg));
         List<AttachedPart> dressed = of(everyPart, epi);
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
             if (!of(wild.with(pair), epi).isEmpty()

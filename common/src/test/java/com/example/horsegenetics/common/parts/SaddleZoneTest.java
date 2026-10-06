@@ -83,7 +83,9 @@ class SaddleZoneTest {
         for (PartShape shape : PartGenerators.allShapes()) {
             // The rows along the back. The plates scale per element too, but run down the
             // flank in two clusters, and BodyPlatesGeneTest holds their numbering.
-            if (!shape.kind().saddleZoned()) {
+            // The crystal growths are a shorter row of clusters, and BackCrystalsGeneTest
+            // holds theirs.
+            if (!shape.kind().saddleZoned() || shape.kind() == PartKind.CRYSTALS) {
                 continue;
             }
             List<PartNode> nodes = PartGenerators.build(shape);
