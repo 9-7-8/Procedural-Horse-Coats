@@ -111,6 +111,10 @@ DECIDED
 - Embryos stop saving the sire's genome, accepting that an older jar cannot load a
   pregnancy a newer one saved (owner). fertility.html, Embryo javadoc.
 - Realm backups: keep 3, count off the main thread (owner). horse-realm.html.
+- Dormancy never applies with debug.tools on, so the yard and the debug corridor are
+  unaffected (owner, at end-session; commit 3f687ebf). horse-care.html#dormancy-code.
+  The yard therefore cannot check dormancy: horse-care.html#dormancy-1006 needs a world
+  with debug tools off.
 - Not asked, decided here: a stallion who has ever covered is never pruned (it is what
   makes dropping the sire copy safe); LAST_FIRED cooldowns are not evicted on unload (a
   horse on a chunk edge would get fresh cooldowns); presentCode storage, the meta

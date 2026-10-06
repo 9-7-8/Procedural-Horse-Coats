@@ -1585,8 +1585,11 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <li><strong>Foal age</strong> is vanilla&rsquo;s per-tick count in <code>AgeableMob.aiStep</code>; the
         handler takes the same step on each skipped tick.</li>
     <li><strong>Decided on run ticks only</strong>, so it costs one player-distance check per horse per
-        ten ticks. Never for a ridden, riding or leashed horse, nor on a
-        <code>GameTestServer</code>, where nobody is ever near.</li>
+        ten ticks. Never for a ridden, riding or leashed horse; never on a server with
+        <code>debug.tools</code> on (owner, 2026-10-06: the yard and the debug corridor put pens
+        far from the tester, and their PASS lines would run at a tenth of the pace); and never
+        on a <code>GameTestServer</code>, where nobody is ever near. So the yard never sees it,
+        and only a player&rsquo;s server, or the stress test, does.</li>
     <li><strong>What does slow:</strong> goals (grazing, wandering, food searches), physics, vanilla
         regeneration and potion timers. The stress test now measures with dormancy on unless its run
         directory sets the radius to 0.</li>
@@ -2339,7 +2342,9 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <p>
     <a href="?view=coding#dormancy-code">Dormancy</a> has its unit test and a green gametest run
-    (gametests never go dormant), and nothing else. Leave a paddock and come back:
+    (gametests never go dormant), and nothing else. The yard cannot show it either: dormancy is
+    off whenever <code>debug.tools</code> is on, so this wants a world with debug tools off.
+    Leave a paddock and come back:
 </p>
 
 <ul>
