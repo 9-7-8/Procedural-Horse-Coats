@@ -94,8 +94,9 @@ turn this off with `undead.convert`.
 
 **Some horses are magical.** Alongside the real coat genes there is a layer of
 invented ones: glowing manes, particle trails, extra speed or size, walking on water,
-milk that is not milk, a unicorn's horn or a rack of antlers. A breed carries only the
-magic it was made with. Now and then a foal turns up with a magical gene neither parent had.
+milk that is not milk, a unicorn's horn or a rack of antlers, spines or a see-through
+sail along the back, bone plates over the shoulders, a narwhal's spiral horn. A breed
+carries only the magic it was made with. Now and then a foal turns up with a magical gene neither parent had.
 
 **Design your own.** Three tools run in your browser from the wiki, with no coding:
 a [horse designer](https://9-7-8.github.io/Procedural-Horse-Coats/wiki/horse-designer/)
@@ -145,7 +146,8 @@ closer, and `coats.bakeBudgetMs` caps how much time per moment goes into making 
 ones. Lower either on a slower computer.
 
 The other thing in there worth knowing about is **`parts.enabled`**, which draws the
-bits some horses grow - a unicorn's horn, and a rack of antlers. A horn is about as much
+bits some horses grow - a unicorn's horn, a rack of antlers, spines, a sail, plates or a
+narwhal horn. A horn is about as much
 shape again as the horse wearing it and a rack more, so a big herd of them is the one case
 worth a switch: turn it off, or turn off just `parts.glow` (the extra pass a horn or
 antler points that shine in the dark need, and
