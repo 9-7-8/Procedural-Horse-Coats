@@ -25,6 +25,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -499,5 +500,16 @@ public final class EmergencyStasisHandler {
             LAST_REFUSED.entrySet().removeIf(e -> now - e.getValue() > FORGET_AFTER);
         }
         LAST_REFUSED.put(horse, now);
+    }
+
+    /** Holds live Horse, ServerLevel and ServerPlayer references - a closed singleplayer world kept reachable - and
+     * tick numbers meaningless in the next world (#203). A capture promised for the next tick is lost with the
+     * server, as it already is on a dedicated server's restart.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        PENDING.clear();
+        CAUGHT.clear();
+        LAST_REFUSED.clear();
     }
 }

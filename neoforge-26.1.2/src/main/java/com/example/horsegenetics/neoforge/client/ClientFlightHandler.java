@@ -34,8 +34,17 @@ public final class ClientFlightHandler {
     private ClientFlightHandler() {
     }
 
-    /** Flight per genetic code plus epigenome, so a mount is resolved once rather than every tick. */
-    private static final Map<String, HorseFlight.Flight> FLIGHT_BY_CODE = new HashMap<>();
+    /**
+     * Flight per horse, so a mount is resolved once rather than every tick - valid while the cache still hands back
+     * the same {@link HorseRecord} instance. Keyed this way rather than on {@code geneticCode + "|" + epigenomeCode}
+     * (#203): that key was a ~20KB string built on every call, every tick from the mixin and every frame from the
+     * flight HUD. A record is immutable and {@link ClientHorseRecordCache} replaces it whole on any change, so
+     * instance identity is a sound "unchanged" test.
+     */
+    private static final Map<Integer, Cached> BY_ENTITY = new HashMap<>();
+
+    private record Cached(HorseRecord source, HorseFlight.Flight flight) {
+    }
 
     /** Riders on this client who have asked to fly. In practice only ever the local player. */
     private static final Set<UUID> WANTS = ConcurrentHashMap.newKeySet();
@@ -56,11 +65,16 @@ public final class ClientFlightHandler {
         if (record == null || !record.hasGenome()) {
             return HorseFlight.Flight.NONE;
         }
-        if (FLIGHT_BY_CODE.size() > 512) {
-            FLIGHT_BY_CODE.clear();
+        Cached cached = BY_ENTITY.get(horse.getId());
+        if (cached != null && cached.source() == record) {
+            return cached.flight();
         }
-        return FLIGHT_BY_CODE.computeIfAbsent(
-                record.geneticCode() + "|" + record.epigenomeCode(), key -> resolve(record));
+        if (BY_ENTITY.size() > 512) {
+            BY_ENTITY.clear();
+        }
+        HorseFlight.Flight flight = resolve(record);
+        BY_ENTITY.put(horse.getId(), new Cached(record, flight));
+        return flight;
     }
 
     private static HorseFlight.Flight resolve(HorseRecord record) {

@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -309,5 +310,13 @@ public final class RealmRoster {
                 record.bredBy().orElse(""),
                 record.hasKnownParents(),
                 record.gelded());
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203).
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        SENDING.clear();
     }
 }

@@ -39,9 +39,17 @@ public final class RealmBackups extends SavedData {
      * @param takenAt    wall-clock milliseconds - a backup is an operator's
      *                   object, and they think in dates, not game ticks
      * @param reason     why it was taken: a change's id, or "by hand"
-     * @param horses     how many horses it holds, for the listing
+     * @param horses     how many horses it holds, for the listing; {@link #UNCOUNTED}
+     *                   until the background count of the copy finishes (#203)
      */
     public record Backup(String name, long takenAt, String reason, int horses) {
+        /** {@link #horses} before the count has come back. */
+        public static final int UNCOUNTED = -1;
+
+        public boolean counted() {
+            return horses >= 0;
+        }
+
         public static final Codec<Backup> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.STRING.fieldOf("name").forGetter(Backup::name),
                 Codec.LONG.fieldOf("taken_at").forGetter(Backup::takenAt),
@@ -96,6 +104,18 @@ public final class RealmBackups extends SavedData {
     public void added(Backup backup) {
         backups.add(backup);
         setDirty();
+    }
+
+    /** Record a backup's horse count once the background count of its copy is done. No-op if it was pruned meanwhile. */
+    public void counted(String name, int horses) {
+        for (int i = 0; i < backups.size(); i++) {
+            Backup b = backups.get(i);
+            if (b.name().equals(name)) {
+                backups.set(i, new Backup(b.name(), b.takenAt(), b.reason(), horses));
+                setDirty();
+                return;
+            }
+        }
     }
 
     /** Forget the oldest - its folder is already gone. */

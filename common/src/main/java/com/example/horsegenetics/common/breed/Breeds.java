@@ -91,6 +91,24 @@ public final class Breeds {
     private static volatile Map<String, Breed> BY_ID = CommonMaps.empty();
     private static volatile BreedSpawnSettings settings = BreedSpawnSettings.DEFAULT;
     private static boolean builtinsLoaded;
+    /**
+     * The lock-free "already loaded" read for {@link #all}, {@link #get} and
+     * {@link #displayName} (#203): those went through the synchronized
+     * {@link #loadBuiltins} on every call, and the herd and spawn code calls them
+     * per horse. Set only once a load has <i>finished</i> - {@code builtinsLoaded}
+     * goes true before the load starts, to stop it recursing, so it cannot be the
+     * fast path: a second thread would read a half-registered list.
+     */
+    private static volatile boolean ready;
+    /**
+     * {@link #forBiome} per source and biome (#203) - it rescanned every breed on
+     * every call. Swapped for an empty map, never cleared in place, by
+     * {@link #publish}: a reader that took the old map before a publish writes its
+     * answer into that one and it is dropped with it. ConcurrentHashMap is already
+     * used in common/ ({@code Epigenome}), so TeaVM compiles it.
+     */
+    private static volatile Map<BreedSource, java.util.concurrent.ConcurrentHashMap<String, List<Breed>>>
+            forBiome = new java.util.concurrent.ConcurrentHashMap<>();
 
     private Breeds() {
     }
@@ -126,8 +144,11 @@ public final class Breeds {
             all.add(seen);
             byId.put(seen.id(), seen);
         }
-        ALL = java.util.Collections.unmodifiableList(all);
+        // Immutable rather than an unmodifiable view, so all() can hand it out as
+        // it is instead of copying it per call (#203).
+        ALL = List.copyOf(all);
         BY_ID = java.util.Collections.unmodifiableMap(byId);
+        forBiome = new java.util.concurrent.ConcurrentHashMap<>(); // after ALL - see the field
     }
 
     /**
@@ -171,6 +192,7 @@ public final class Breeds {
             SHIPPED.add(b.id());
         }
         accept(result);
+        ready = true;
     }
 
     /**
@@ -232,9 +254,11 @@ public final class Breeds {
             String message = String.valueOf(e.getMessage());
             CommonLog.warn(message);
             messages.add(message);
+            ready = true; // as loaded as it will get - the lazy load is switched off above
             return messages;
         }
         messages.addAll(accept(new BreedSpecLoader.Result(parsed, List.of(), List.of())));
+        ready = true;
         return messages;
     }
 
@@ -245,20 +269,27 @@ public final class Breeds {
         settings = BreedSpawnSettings.DEFAULT;
         ALL = List.of();
         BY_ID = CommonMaps.empty();
+        forBiome = new java.util.concurrent.ConcurrentHashMap<>();
         builtinsLoaded = false;
+        ready = false;
     }
 
     // ------------------------------------------------------------------
     // Lookup
     // ------------------------------------------------------------------
 
+    /** Every breed, immutable. Not copied per call (#203) - {@code ALL} is immutable already. */
     public static List<Breed> all() {
-        loadBuiltins();
-        return List.copyOf(ALL);
+        if (!ready) {
+            loadBuiltins();
+        }
+        return ALL;
     }
 
     public static Breed get(String id) {
-        loadBuiltins();
+        if (!ready) {
+            loadBuiltins();
+        }
         return BY_ID.getOrDefault(id, FERAL_MIXED);
     }
 
@@ -270,7 +301,9 @@ public final class Breeds {
         if (id == null || id.isBlank() || id.equals("feral_mixed")) {
             return "Feral Mixed";
         }
-        loadBuiltins();
+        if (!ready) {
+            loadBuiltins();
+        }
         Breed b = BY_ID.get(id);
         if (b != null) {
             return b.name();
@@ -296,6 +329,22 @@ public final class Breeds {
      * steppe too.
      */
     public static List<Breed> forBiome(String biomeId, BreedSource source) {
+        if (biomeId == null || source == null) {
+            return scanBiome(biomeId, source); // ConcurrentHashMap takes no null key
+        }
+        if (!ready) {
+            loadBuiltins();
+        }
+        // The map before the list it was built from: publish() writes ALL first,
+        // so a reader that sees the new map is sure to see the new list.
+        Map<BreedSource, java.util.concurrent.ConcurrentHashMap<String, List<Breed>>> cache = forBiome;
+        List<Breed> hit = cache.computeIfAbsent(source, s -> new java.util.concurrent.ConcurrentHashMap<>())
+                .computeIfAbsent(biomeId, id -> List.copyOf(scanBiome(id, source)));
+        // A fresh, mutable list as before - wildCandidates filters it in place.
+        return new ArrayList<>(hit);
+    }
+
+    private static List<Breed> scanBiome(String biomeId, BreedSource source) {
         List<Breed> out = new ArrayList<>();
         for (Breed b : all()) {
             if (b.allows(source) && BiomeAnalogues.covers(b.biomes(), biomeId)) {

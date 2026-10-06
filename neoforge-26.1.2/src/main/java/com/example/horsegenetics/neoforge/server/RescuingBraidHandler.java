@@ -27,6 +27,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -329,5 +330,13 @@ public final class RescuingBraidHandler {
             LAST_TOLD.entrySet().removeIf(e -> now - e.getValue() > FORGET_AFTER);
         }
         LAST_TOLD.put(horse, now);
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203).
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        LAST_TOLD.clear();
     }
 }

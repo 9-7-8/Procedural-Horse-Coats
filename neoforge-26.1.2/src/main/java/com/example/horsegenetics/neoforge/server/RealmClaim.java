@@ -16,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.ArrayList;
@@ -223,7 +224,9 @@ public final class RealmClaim {
                 continue;
             }
             it.remove();
-            realm.setChunkForced(fetch.chunkX(), fetch.chunkZ(), false);
+            if (!stillWanted(fetch.chunkX(), fetch.chunkZ())) {
+                realm.setChunkForced(fetch.chunkX(), fetch.chunkZ(), false);
+            }
             if (player == null) {
                 continue;   // they logged out mid-fetch; the force is lifted, that is all
             }
@@ -238,6 +241,44 @@ public final class RealmClaim {
             // exist.
             request(player, fetch.horse());
         }
+    }
+
+    /**
+     * Does another fetch still waiting need this chunk? Two horses in one chunk fetched together share one force,
+     * and the first to finish must not lift it from under the second (#203). Asked after the finished one has been
+     * removed from {@link #PENDING}.
+     */
+    private static boolean stillWanted(int chunkX, int chunkZ) {
+        for (Fetch other : PENDING) {
+            if (other.chunkX() == chunkX && other.chunkZ() == chunkZ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * <b>Lift every force before the world closes</b> (#203). A forced chunk is saved with the level and lifted only
+     * by {@link #onServerTick}, so a server stopped inside a fetch's two seconds left that chunk forced for the life
+     * of the world - and in singleplayer the static {@link #PENDING} carried the fetch into the next world opened,
+     * where it would unforce a chunk of that one. Stopping, not stopped, so the realm level is still there to ask.
+     *
+     * <p>Unverified API usage, like the force itself: that {@code setChunkForced(false)} during
+     * {@link ServerStoppingEvent} reaches the forced-chunk record before the level's final save. NeoForge fires the
+     * event before {@code MinecraftServer.stopServer} saves the levels, which is what this relies on.
+     */
+    @SubscribeEvent
+    static void onServerStopping(ServerStoppingEvent event) {
+        if (PENDING.isEmpty()) {
+            return;
+        }
+        ServerLevel realm = event.getServer().getLevel(HorseRealm.REALM_LEVEL);
+        if (realm != null) {
+            for (Fetch fetch : PENDING) {
+                realm.setChunkForced(fetch.chunkX(), fetch.chunkZ(), false); // twice for a shared chunk is harmless
+            }
+        }
+        PENDING.clear();
     }
 
     /** The first holding pen ticket in the player's inventory, or {@code -1}. */

@@ -31,6 +31,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import org.jetbrains.annotations.Nullable;
@@ -526,5 +527,16 @@ public final class StallRecall {
 
     private static void say(ServerPlayer player, String text) {
         player.sendSystemMessage(Component.literal(text));
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203). Also forgets {@link com.example.horsegenetics.neoforge.item.StallSignItem}'s offered moves, which
+     * live in an item class with no event subscription of its own.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        PENDING.clear();
+        LAST_SEND.clear();
+        com.example.horsegenetics.neoforge.item.StallSignItem.forgetPendingMoves();
     }
 }

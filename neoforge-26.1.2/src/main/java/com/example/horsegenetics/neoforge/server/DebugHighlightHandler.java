@@ -16,6 +16,7 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -110,6 +111,24 @@ public final class DebugHighlightHandler {
      * first load.
      */
     private static final Set<UUID> PENDING_CLEAR = ConcurrentHashMap.newKeySet();
+
+    /**
+     * <b>Could any loaded horse be wearing a stale outline?</b> (#203) The reaper
+     * walked every horse in every level every ten seconds for the life of the
+     * server, in production too, though almost always there is nothing for it to
+     * find. It is not gated on the debug-tools switch, because F8 ships in real
+     * builds (see the class note) and its strays are real builds' strays.
+     *
+     * <p>Instead it sweeps only while this is set: true from server start (a
+     * horse outlined before a restart lost its {@link #PENDING_CLEAR} entry with
+     * the restart), set again whenever {@link #glowNear} lights anything, and
+     * whenever a horse already wearing {@code GLOWING} joins a level; cleared by a
+     * sweep that ran with the highlight off for everybody. A sweep with nobody's
+     * highlight on reaches every loaded horse, which is all there is to reach - an
+     * unloaded one comes back through {@link #onHorseLoaded}, which sets the flag
+     * again if it is still glowing.
+     */
+    private static volatile boolean mayBeStale = true;
 
     private DebugHighlightHandler() {
     }
@@ -268,6 +287,7 @@ public final class DebugHighlightHandler {
         }
         PlayerTeam lead = leadTeam(level);
         Set<UUID> lit = LIT.computeIfAbsent(player.getUUID(), id -> ConcurrentHashMap.newKeySet());
+        mayBeStale = true;
         for (Horse h : level.getEntitiesOfClass(Horse.class, player.getBoundingBox().inflate(RADIUS))) {
             h.addEffect(new MobEffectInstance(MobEffects.GLOWING, REFRESH + 20, 0, false, false, false));
             lit.add(h.getUUID());
@@ -361,9 +381,12 @@ public final class DebugHighlightHandler {
      * it is cleaning up after.
      */
     private static void reapStaleGlow(MinecraftServer server) {
-        if (!ON.isEmpty()) {
+        if (!ON.isEmpty() || !mayBeStale) {
             return;
         }
+        // Cleared before the walk, so a horse lit or loaded glowing mid-walk sets
+        // it again rather than being forgotten.
+        mayBeStale = false;
         for (ServerLevel level : server.getAllLevels()) {
             for (Horse horse : level.getEntities(EntityType.HORSE,
                     h -> h.hasEffect(MobEffects.GLOWING))) {
@@ -380,11 +403,25 @@ public final class DebugHighlightHandler {
      */
     @SubscribeEvent
     static void onHorseLoaded(EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide() || PENDING_CLEAR.isEmpty()) {
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Horse horse)) {
             return;
         }
-        if (event.getEntity() instanceof Horse horse && PENDING_CLEAR.remove(horse.getUUID())) {
+        if (!PENDING_CLEAR.isEmpty() && PENDING_CLEAR.remove(horse.getUUID())) {
             unlight(horse);
+        } else if (horse.hasEffect(MobEffects.GLOWING)) {
+            // Not one this session remembers lighting - lit before a restart, or by
+            // anything else. Let the next sweep decide (#203).
+            mayBeStale = true;
         }
+    }
+
+    /** The next world starts as unswept as this one did at boot, and the toggles' expiry ticks are this server's
+     * clock (#203).
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        ON.clear();
+        EXPIRES.clear();
+        mayBeStale = true;
     }
 }

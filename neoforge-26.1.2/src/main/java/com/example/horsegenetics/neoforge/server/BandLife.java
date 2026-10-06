@@ -16,6 +16,7 @@ import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
@@ -392,5 +393,13 @@ public final class BandLife {
 
     static Optional<Relationship> relationship(Horse horse, Horse other) {
         return horse.getData(ModAttachments.HORSE_SOCIAL.get()).ledger().with(other.getUUID());
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203). A fight's start time is the old world's clock.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        FIGHTS.clear();
     }
 }

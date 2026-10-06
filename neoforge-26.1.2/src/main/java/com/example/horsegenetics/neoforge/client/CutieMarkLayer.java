@@ -1,10 +1,11 @@
 package com.example.horsegenetics.neoforge.client;
 
-import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import java.util.Map;
 import java.util.Optional;
+import java.util.WeakHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.animal.equine.HorseModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -52,6 +53,17 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
     /** Packed block+sky light for a mark another gene has made emissive. */
     private static final int FULL_BRIGHT = 0x00F000F0;
 
+    /**
+     * The emblem's stacks, built once per mark rather than once per icon per
+     * frame (#203). Keyed on the {@link CutieMarkGene.Mark} that
+     * {@link com.example.horsegenetics.common.coat.CoatData#cutieMark()} memoises,
+     * which is one instance per horse's CoatData: a record's equals/hashCode on
+     * its {@code double[]} is the array's identity, so the lookup is cheap and two
+     * horses never alias. Weak, so an entry goes when its CoatData does. Render
+     * thread only.
+     */
+    private static final Map<CutieMarkGene.Mark, ItemStack[]> STACKS = new WeakHashMap<>();
+
     private final ItemStackRenderState[] itemStates = {
             new ItemStackRenderState(), new ItemStackRenderState(), new ItemStackRenderState()
     };
@@ -84,8 +96,7 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
         if (genetic.isFading()) {
             return;
         }
-        Optional<CutieMarkGene.Mark> maybe = Genes.CUTIE_MARK.markFor(
-                genetic.coatData.genotype(), genetic.coatData.epigenome());
+        Optional<CutieMarkGene.Mark> maybe = genetic.coatData.cutieMark();
         if (maybe.isEmpty()) {
             return;
         }
@@ -98,9 +109,9 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
         Minecraft mc = Minecraft.getInstance();
         ItemModelResolver resolver = mc.getItemModelResolver();
         Level level = mc.level;
+        ItemStack[] stacks = STACKS.computeIfAbsent(mark, CutieMarkLayer::stacksFor);
         for (int i = 0; i < count; i++) {
-            ItemStack stack = new ItemStack(FlatItemCatalog.pick(mark.picks()[i]));
-            resolver.updateForTopItem(itemStates[i], stack, ItemDisplayContext.FIXED, level, null, i);
+            resolver.updateForTopItem(itemStates[i], stacks[i], ItemDisplayContext.FIXED, level, null, i);
         }
 
         ModelPart body = this.getParentModel().root().getChild("body");
@@ -139,6 +150,16 @@ public class CutieMarkLayer extends RenderLayer<HorseRenderState, HorseModel> {
             }
             poseStack.popPose();
         }
+    }
+
+    /** One stack per pick - all three, whatever the count, so the array is index-safe. */
+    private static ItemStack[] stacksFor(CutieMarkGene.Mark mark) {
+        double[] picks = mark.picks();
+        ItemStack[] out = new ItemStack[picks.length];
+        for (int i = 0; i < picks.length; i++) {
+            out[i] = new ItemStack(FlatItemCatalog.pick(picks[i]));
+        }
+        return out;
     }
 
     /** Emblem-local offset (in "slots", scaled by {@link #SPACING}) for icon {@code i} of {@code n}. */

@@ -20,6 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -391,5 +392,17 @@ public final class PortalEventHandler {
     }
 
     private PortalEventHandler() {
+    }
+
+    /** Keyed by entity <b>int id</b>, which the next world hands out again from the same counter - so a fresh
+     * entity there could inherit a portal cooldown, a half-done dwell or a returning horse's invulnerability
+     * (#203).
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        DWELL.clear();
+        COOLDOWN.clear();
+        LAST_COUNTDOWN.clear();
+        RETURN_INVULN.clear();
     }
 }

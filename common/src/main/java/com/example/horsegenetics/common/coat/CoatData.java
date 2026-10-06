@@ -4,15 +4,18 @@ import com.example.horsegenetics.common.coat.pattern.CoatTextureComposer;
 import com.example.horsegenetics.common.coat.skin.HorseSkinGeometry.Part;
 import com.example.horsegenetics.common.genetics.CoatPhenotype;
 import com.example.horsegenetics.common.genetics.Epigenome;
+import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.GeneCodeDisplay;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.GrownParts;
+import com.example.horsegenetics.common.genetics.genes.CutieMarkGene;
 import com.example.horsegenetics.common.parts.AttachedPart;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -108,6 +111,7 @@ public final class CoatData {
     private String foalGlowKey;
     private Set<Part> glowParts;
     private List<AttachedPart> grownParts;
+    private Optional<CutieMarkGene.Mark> cutieMark;
 
     /**
      * The coat texture's cache key for one mesh: {@link #textureKey()} plus which
@@ -167,6 +171,24 @@ public final class CoatData {
             grownParts = parts;
         }
         return parts;
+    }
+
+    /**
+     * The cutie mark this horse wears - {@link CutieMarkGene#markFor}, contributions
+     * folded in. Memoised for the same reason as the rest (#203): the cutie-mark
+     * layer asked for it every frame per horse, and {@code markFor} walks every
+     * gene in {@link Genes#codeOrder()} looking for contributors.
+     *
+     * <p>The returned {@code Mark}'s {@code picks()} array is shared - read it,
+     * never write it.
+     */
+    public Optional<CutieMarkGene.Mark> cutieMark() {
+        Optional<CutieMarkGene.Mark> mark = cutieMark;
+        if (mark == null) {
+            mark = Genes.CUTIE_MARK.markFor(genotype(), epigenome());
+            cutieMark = mark;
+        }
+        return mark;
     }
 
     @Override

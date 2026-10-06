@@ -38,6 +38,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 import java.util.Set;
@@ -113,6 +114,20 @@ public final class LycanthropyHandler {
     /** Mob ids this build could not resolve - warned about once each. */
     private static final Set<String> WARNED = ConcurrentHashMap.newKeySet();
 
+    /**
+     * <b>Every animal that is a shifted horse right now</b> - the gate on the every-mob tick (#203). Without it every
+     * live non-horse mob in the world read its attachment map every tick to learn it was not one, and in almost every
+     * world none is. Added where a shift starts ({@link #shift}) and wherever an animal carrying an active shift joins
+     * a level ({@link #rewireOnJoin}) - which is what keeps it right across a save and load, a chunk reload and a
+     * dimension change, since each of those makes a new entity that joins. Removed at dawn and on death; a missed
+     * removal costs nothing but a membership hit, because the tick still reads the attachment itself.
+     *
+     * <p>Weak, so an animal unloaded or discarded any other way is not held. Keyed by the entity object, not by UUID:
+     * the old and new entity of a dimension change share a UUID, and a UUID set would let the old one's removal take
+     * the new one's entry with it. Server thread only, like the tick.
+     */
+    private static final Set<Mob> SHIFTED = java.util.Collections.newSetFromMap(new java.util.WeakHashMap<>());
+
     // ------------------------------------------------------------------
     // The clock
     // ------------------------------------------------------------------
@@ -149,11 +164,12 @@ public final class LycanthropyHandler {
             }
             return;
         }
-        if (!(entity instanceof Mob animal)) {
+        if (!(entity instanceof Mob animal) || SHIFTED.isEmpty() || !SHIFTED.contains(animal)) {
             return;
         }
         LycanShift shift = shiftOf(animal);
         if (!shift.active()) {
+            SHIFTED.remove(animal);
             return;
         }
         if ((animal.tickCount + animal.getId()) % SUN_CHECK_INTERVAL == 0 && !level.isDarkOutside()) {
@@ -258,6 +274,7 @@ public final class LycanthropyHandler {
         animal.setPersistenceRequired();
         animal.setHealth((float) Math.max(1.0, healthLeft * animal.getMaxHealth()));
         animal.setData(ModAttachments.LYCAN_SHIFT.get(), new LycanShift(mob, cloud, save(horse)));
+        SHIFTED.add(animal);
         addTemper(animal);
 
         horse.ejectPassengers();
@@ -360,6 +377,7 @@ public final class LycanthropyHandler {
         if (horse == null) {
             return;
         }
+        SHIFTED.remove(animal);
         double healthLeft = animal.getHealth() / Math.max(1.0F, animal.getMaxHealth());
         horse.setHealth((float) Math.max(1.0, healthLeft * horse.getMaxHealth()));
         animal.setData(ModAttachments.LYCAN_SHIFT.get(), LycanShift.NONE);
@@ -509,6 +527,7 @@ public final class LycanthropyHandler {
             return;     // the tag would not load; the animal dies as an animal
         }
         animal.setData(ModAttachments.LYCAN_SHIFT.get(), LycanShift.NONE);
+        SHIFTED.remove(animal);
         level.addFreshEntity(horse);
         ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " died as a " + shift.mob()
                 + " (" + event.getSource().getMsgId() + ") - the horse dies with it"
@@ -605,8 +624,20 @@ public final class LycanthropyHandler {
             return;
         }
         if (shiftOf(animal).active()) {
+            SHIFTED.add(animal); // a shifted animal loaded from disk, or carried to another level (#203)
             addTemper(animal);
         }
+    }
+
+    /**
+     * A singleplayer world closed and another opened in the same JVM must not inherit this one's shifted animals or
+     * its dusk prints (#203). The animals of the next world re-register through {@link #rewireOnJoin} as they load.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        SHIFTED.clear();
+        DUSK_PRINTS.clear();
+        LAST_GROUND.clear();
     }
 
     private static void addTemper(Mob animal) {

@@ -10,11 +10,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.ArrayDeque;
@@ -91,7 +94,21 @@ public final class StablePopulator {
     /** A cap on the scan, so a huge piece cannot cost a tick spike. */
     private static final int MAX_SCAN_SPOTS = 512;
 
-    private record Pending(Identifier structure, BoundingBox box, long dueAt) {
+    /**
+     * How many times a stable whose building is not all loaded yet is put back
+     * before it is given up on (#203) - {@value} x {@link #SETTLE_TICKS} ticks is
+     * five minutes. It is not lost: it was never claimed, so the next load of its
+     * start chunk queues it again.
+     */
+    private static final int MAX_RETRIES = 150;
+
+    /**
+     * One stable waiting. Carries its <b>dimension</b> (#203): the queue is drained
+     * from whichever level ticks, and without it a Nether tick could check - and
+     * populate - an overworld stable's box against the Nether.
+     */
+    private record Pending(ResourceKey<Level> dimension, Identifier structure, BoundingBox box,
+                           long dueAt, int retries) {
     }
 
     private static final Deque<Pending> QUEUE = new ArrayDeque<>();
@@ -100,9 +117,10 @@ public final class StablePopulator {
     }
 
     /** Already waiting? Same structure, same corner - the key claim() uses. */
-    private static boolean queued(Identifier structure, BoundingBox box) {
+    private static boolean queued(ResourceKey<Level> dimension, Identifier structure, BoundingBox box) {
         for (Pending p : QUEUE) {
-            if (p.structure().equals(structure)
+            if (p.dimension().equals(dimension)
+                    && p.structure().equals(structure)
                     && p.box().minX() == box.minX()
                     && p.box().minY() == box.minY()
                     && p.box().minZ() == box.minZ()) {
@@ -145,8 +163,13 @@ public final class StablePopulator {
             // are not. StablePopulationData.claim() is what makes this happen
             // once per world, and it is per (structure, corner), so queueing
             // the same stable more than once is harmless.
-            if (!queued(id, box)) {
-                QUEUE.add(new Pending(id, box, now + SETTLE_TICKS));
+            // Already filled: every later load of the chunk used to queue it anyway,
+            // log "[Stables] queued", and find it claimed 40 ticks on (#203).
+            if (StablePopulationData.get(level).isClaimed(id, new BlockPos(box.minX(), box.minY(), box.minZ()))) {
+                continue;
+            }
+            if (!queued(level.dimension(), id, box)) {
+                QUEUE.add(new Pending(level.dimension(), id, box, now + SETTLE_TICKS, 0));
                 // Log, not DebugAnnounce: this is once per stable per world and
                 // it is the line that answers "the building is there and the
                 // horses are not", so it must survive debug.announce being off.
@@ -171,15 +194,25 @@ public final class StablePopulator {
             if (pending == null) {
                 return;
             }
-            if (pending.dueAt() > now) {
-                QUEUE.add(pending);
+            if (!pending.dimension().equals(level.dimension()) || pending.dueAt() > now) {
+                QUEUE.add(pending); // another level's, or not due - its own level's tick takes it
                 continue;
             }
             if (!fullyLoaded(level, pending.box())) {
                 // Come back when the rest of the building exists. Re-queued
                 // rather than dropped: a player who walks away mid-generation
-                // and returns should still find horses.
-                QUEUE.add(new Pending(pending.structure(), pending.box(), now + SETTLE_TICKS));
+                // and returns should still find horses. But not for ever (#203):
+                // a building straddling chunks nobody loads again would sit in
+                // the queue for the life of the server. Dropping it loses
+                // nothing - it is unclaimed, so its chunk's next load re-queues it.
+                if (pending.retries() >= MAX_RETRIES) {
+                    HorseGenetics.LOGGER.info("[Stables] gave up waiting for {} at {} to load - "
+                                    + "it is queued again the next time its chunk loads",
+                            pending.structure(), pending.box().getCenter());
+                    continue;
+                }
+                QUEUE.add(new Pending(pending.dimension(), pending.structure(), pending.box(),
+                        now + SETTLE_TICKS, pending.retries() + 1));
                 continue;
             }
             try {
@@ -189,6 +222,12 @@ public final class StablePopulator {
                         pending.structure(), pending.box().getCenter(), failed);
             }
         }
+    }
+
+    /** The queue is per server; a singleplayer world closed with stables waiting must not hand them to the next (#203). */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        QUEUE.clear();
     }
 
     private static boolean fullyLoaded(ServerLevel level, BoundingBox box) {

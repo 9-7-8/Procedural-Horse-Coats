@@ -28,8 +28,16 @@ public final class ClientSwimHandler {
     private ClientSwimHandler() {
     }
 
-    /** Swim factor per genetic code plus epigenome (the magnitude lives on the allele copy); 1.0 means no swim gene. */
-    private static final Map<String, Double> FACTOR_BY_CODE = new HashMap<>();
+    /**
+     * Swim factor per horse, valid while the cache still hands back the same {@link HorseRecord} instance; 1.0 means
+     * no swim gene. Keyed this way rather than on {@code geneticCode + "|" + epigenomeCode} (#203): that key was a
+     * ~20KB string built on every call, and this is called every tick from the mixin. A record is immutable and
+     * {@link ClientHorseRecordCache} replaces it whole on any change, so instance identity is a sound "unchanged" test.
+     */
+    private static final Map<Integer, Cached> BY_ENTITY = new HashMap<>();
+
+    private record Cached(HorseRecord source, double factor) {
+    }
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
@@ -41,10 +49,16 @@ public final class ClientSwimHandler {
         if (record == null || !record.hasGenome()) {
             return 1.0;
         }
-        if (FACTOR_BY_CODE.size() > 512) {
-            FACTOR_BY_CODE.clear();
+        Cached cached = BY_ENTITY.get(horse.getId());
+        if (cached != null && cached.source() == record) {
+            return cached.factor();
         }
-        return FACTOR_BY_CODE.computeIfAbsent(record.geneticCode() + "|" + record.epigenomeCode(), k -> swimFactor(record));
+        if (BY_ENTITY.size() > 512) {
+            BY_ENTITY.clear();
+        }
+        double factor = swimFactor(record);
+        BY_ENTITY.put(horse.getId(), new Cached(record, factor));
+        return factor;
     }
 
     private static double swimFactor(HorseRecord record) {

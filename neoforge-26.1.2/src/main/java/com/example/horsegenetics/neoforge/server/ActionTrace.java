@@ -19,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
@@ -447,5 +448,13 @@ public final class ActionTrace {
 
     private static String playerName(Player player) {
         return player instanceof ServerPlayer sp ? sp.getGameProfile().name() : player.getName().getString();
+    }
+
+    /** Holds live Horse references - a closed singleplayer world's entities, and through them its level - until the
+     * next world's tick drained them (#203).
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        PENDING.clear();
     }
 }

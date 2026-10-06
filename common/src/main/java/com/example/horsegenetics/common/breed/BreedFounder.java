@@ -173,7 +173,11 @@ public final class BreedFounder {
         TargetBand sizeBand = targets.band(StatAxis.SCALE);
         double size = sizeBand == null ? Double.NaN : sizeBand.lerp(rng.nextFloat());
 
-        Genotype g = base;
+        // Collected and applied in one copy (#203): Genotype.with copies the whole
+        // map, so a with() per locus was quadratic in the gene count. Nothing in
+        // the loop reads the genotype being built, so the order and the result
+        // are exactly what the per-locus with() calls gave.
+        List<AllelePair> rolled = new java.util.ArrayList<>();
         for (Gene gene : Genes.codeOrder()) {
             String key = gene.key();
             if (key.equals("horsegenetics.sex")) {
@@ -186,33 +190,34 @@ public final class BreedFounder {
             // pins the vampiric allele on magic health means exactly that pair,
             // and the stats block steps aside on that axis.
             if (breed.constrains(key, strain)) {
-                g = g.with(breed.founderTable(key, strain).draw(rng));
+                rolled.add(breed.founderTable(key, strain).draw(rng));
                 continue;
             }
             if (BODY_STAT_KEYS.contains(key)) {
-                g = g.with(bodyStatPair(targets, gene, size));
+                rolled.add(bodyStatPair(targets, gene, size));
                 continue;
             }
             if (gene.feralOnly()) {
                 // A curiosity of the unbred population - no registry ever kept
                 // it. Checked after the breed's own pool, so a breed that
                 // genuinely wants one can still name it.
-                g = g.with(wild(gene));
+                rolled.add(wild(gene));
                 continue;
             }
             if (gene.affectsCoat() || dependedOnByACoatGene(key)) {
-                g = g.with(wild(gene)); // visually unified - no unnamed pattern, no stray modifier
+                rolled.add(wild(gene)); // visually unified - no unnamed pattern, no stray modifier
                 continue;
             }
             if (isMagical(gene)) {
-                g = g.with(wild(gene)); // no stray magic - a breed carries what it names
+                rolled.add(wild(gene)); // no stray magic - a breed carries what it names
                 continue;
             }
             if (gene instanceof HealthContribution) {
-                g = g.with(wild(gene)); // no disorder the breed sheet does not list
+                rolled.add(wild(gene)); // no disorder the breed sheet does not list
             }
             // otherwise: keep the base roll (the natural performance genes)
         }
+        Genotype g = base.withAll(rolled);
         g = drawCountGroups(breed, g, rng);
         // Before the epigenome exists, so the magical copies get their numbers like any other allele.
         g = stamp(g, forced);
@@ -227,7 +232,7 @@ public final class BreedFounder {
      * per-locus loop, so a breed without groups draws exactly what it always did.
      */
     private static Genotype drawCountGroups(Breed breed, Genotype genotype, Rng rng) {
-        Genotype g = genotype;
+        List<AllelePair> drawn = new java.util.ArrayList<>();
         for (Breed.CountGroup group : breed.countGroups()) {
             List<Breed.GroupLocus> left = new java.util.ArrayList<>(group.loci());
             int k = group.drawCount(rng);
@@ -238,22 +243,18 @@ public final class BreedFounder {
             for (Breed.GroupLocus locus : group.loci()) {
                 Gene gene = Genes.byKey(locus.gene());
                 if (picked.contains(locus)) {
-                    g = g.with(new AllelePair(gene.fromToken(locus.a()), gene.fromToken(locus.b())));
+                    drawn.add(new AllelePair(gene.fromToken(locus.a()), gene.fromToken(locus.b())));
                 } else {
-                    g = g.with(wild(gene));
+                    drawn.add(wild(gene));
                 }
             }
         }
-        return g;
+        return genotype.withAll(drawn); // one copy, not one per locus (#203)
     }
 
     /** The forced pairs, in the order given; a later pair on the same locus wins. */
     private static Genotype stamp(Genotype genotype, List<AllelePair> forced) {
-        Genotype g = genotype;
-        for (AllelePair pair : forced) {
-            g = g.with(pair);
-        }
-        return g;
+        return genotype.withAll(forced); // one copy, not one per pair (#203)
     }
 
     /**

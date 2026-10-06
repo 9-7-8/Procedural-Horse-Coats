@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -250,5 +251,13 @@ public final class HorseRealmLift {
             return Blocks.GRASS_BLOCK.defaultBlockState();
         }
         return was;
+    }
+
+    /** Chunk positions of <i>this</i> world's realm; carried into the next they would be lifted there (#203).
+     * Nothing is lost: an unlifted chunk is queued again when it next loads.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        PENDING.clear();
     }
 }
