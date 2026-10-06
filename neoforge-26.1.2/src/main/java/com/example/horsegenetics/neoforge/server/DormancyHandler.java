@@ -27,7 +27,8 @@ import java.util.WeakHashMap;
  * every {@code STRIDE} ticks whether it is awake or not, and wakes within that of a player arriving.
  *
  * <p><b>Never dormant:</b> a ridden or riding horse, a leashed one (its holder may be a mob that walks at full
- * speed - a cowboy's string - and a leash stretched past ten blocks breaks), and anything on a gametest server,
+ * speed - a cowboy's string - and a leash stretched past ten blocks breaks), anything on a server with debug tools on,
+ * and anything on a gametest server,
  * where nobody is ever near and every test would run in slow motion.
  *
  * <p><b>Not verified in-game.</b> The skipped ticks' effect on a horse in mid-air or in water (it falls and swims
@@ -93,7 +94,10 @@ public final class DormancyHandler {
 
     private static boolean shouldSleep(Horse horse, ServerLevel level) {
         int radius = ServerConfig.dormancyRadius();
+        // Never with debug tools on (owner, 2026-10-06): the yard and the debug corridor put pens far from the
+        // tester, and their goal-driven PASS lines would run at a tenth of the pace. A player's server has them off.
         if (radius <= 0 || horse.isVehicle() || horse.isPassenger() || horse.isLeashed()
+                || ServerConfig.debugTools()
                 || level.getServer() instanceof net.minecraft.gametest.framework.GameTestServer) {
             return false;
         }
