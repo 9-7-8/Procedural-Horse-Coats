@@ -86,6 +86,7 @@ const HOME = {
     'ops.resurrect_budget_mb': 'horse-afterlife.html#window',
     'fertility.nearby_horse_cap': 'fertility.html#setting',
     'fertility.free_covers_per_day': 'fertility.html#setting-free-covers',
+    'performance.dormancy_radius': 'horse-care.html#dormancy',
     'notices.owned_horse_damage': 'horse-care.html#hurt-notice',
     'notices.owned_horse_death': 'horse-care.html#death-notice',
     'notices.owned_horse_breeding': 'fertility.html#natural-notice',

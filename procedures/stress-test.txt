@@ -32,7 +32,11 @@ STEPS
 1. Make a fresh run directory under neoforge-26.1.2/ (gitignored), e.g. run-stress5, holding:
    - eula.txt: eula=true
    - defaultconfigs/horsegenetics-server.toml: [debug] tools = false, announce = false
-     (a player's server, not a dev one)
+     (a player's server, not a dev one). DORMANCY (#204, on by default): the stress
+     server has no player, so every horse in it is dormant and ticks one tick in ten.
+     That is a real measurement - a server with nobody near its horses - but not the one
+     the runs before 2026-10-06 took. Set [performance] dormancy_radius = 0 for the
+     awake number, and say in the report which one each table is.
    - server.properties, at least: online-mode=false, level-type=minecraft\:flat,
      spawn-monsters=false, simulation-distance=6, max-tick-time=-1,
      pause-when-empty-seconds=0 (or the empty server stops ticking after 60 s and the run

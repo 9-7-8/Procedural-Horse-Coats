@@ -746,8 +746,12 @@ colour.liftShadows(SHADOW_FLOOR);   // after every magical gene, before the comp
         hit and ignores the result.</li>
     <li><strong>A time budget.</strong> A new bake may start only while less than
         <code>coats.bakeBudgetMs</code> (default 4) has been spent in the current
-        50&nbsp;ms window. The first bake in a window always runs, so nothing is
-        starved and <code>0</code> means &ldquo;one at a time&rdquo;. A horse that
+        50&nbsp;ms window. The first bake in a window runs too, so nothing is
+        starved and <code>0</code> means &ldquo;one at a time&rdquo; &mdash; unless
+        earlier windows overran. Since #203 an overrun is carried forward as debt,
+        less one budget per window that passes, and while a whole budget or more is
+        owed the free first bake waits; one slow coat no longer buys the next window a
+        second slow one. A horse that
         has to wait wears the <strong>stand-in</strong> &mdash; the wild-type coat,
         baked once per mesh and shared &mdash; for a frame or two.</li>
     <li><strong>Distance.</strong> A horse beyond <code>coats.detailDistance</code>

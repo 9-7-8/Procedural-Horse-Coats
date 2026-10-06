@@ -649,6 +649,26 @@
         anybody could take.</li>
 </ul>
 
+<h2 id="dormancy">9. Horses nobody is near</h2>
+
+<p>
+    <strong>A horse with no player within 128 blocks slows down.</strong> It runs one tick in ten
+    (owner&rsquo;s call, 2026-10-06): it walks, grazes and looks about in slow motion, which nobody is
+    close enough to see. What it <em>is</em> does not slow. Its hunger, healing, bond, heat, pregnancy
+    and growing up all keep their normal pace, so a foal left in a far paddock is grown on time, and it
+    grazes about as often as a horse you are standing beside &mdash; though a horse that has to
+    <em>walk</em> to its hay walks there in slow motion. It wakes within half a second of
+    a player coming inside the radius.
+</p>
+
+<ul>
+    <li><strong>Never</strong> a horse being ridden, or one on a lead &mdash; a cowboy walks his string
+        at full speed, and a lead stretched past ten blocks snaps.</li>
+    <li><strong>One setting.</strong> <code>performance.dormancy_radius</code>, in blocks; 0 turns it
+        off and gives back the old behaviour exactly. Lower <code>simulation-distance</code> is the
+        vanilla alternative, and stops far horses altogether.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -678,7 +698,8 @@
         at priority 8, below all of <a href="#band-code">band life</a>. Its
         <code>ReachCheck</code> is the shared "can I walk there?" cache
         &mdash; a real <code>createPath</code> every two seconds, not every
-        tick.</li>
+        tick, and since #201 not even that while neither the horse nor its
+        target has moved a block (up to four checks in a row).</li>
     <li><code>network/HorseCareSyncPayload</code> &rarr;
         <code>client/ClientHorseCareCache</code> &mdash; bond + in-herd flag
         pushed to trackers on change and on start-tracking, shown on the
@@ -1535,6 +1556,67 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
     <a href="#ground-food-0924">the Verification tab</a>.
 </p>
 
+<h2 id="dormancy-code">Dormancy &mdash; skipping ticks without losing time (2026-10-06, #204)</h2>
+
+<p>
+    <code>server/DormancyHandler</code> cancels <code>EntityTickEvent.Pre</code> for a dormant
+    <code>Horse</code> on nine ticks in ten. Read in the 26.1.2 patched sources: the event is
+    cancellable, <code>ServerLevel.tickNonPassenger</code> increments <code>tickCount</code>
+    <em>before</em> firing it, and a cancel skips <code>Entity.tick()</code> whole &mdash; vanilla AI,
+    movement, and every mod <code>EntityTickEvent.Post</code> handler. The rule is
+    <code>common/care/Dormancy</code>; <code>DormancyTest</code> pins it.
+</p>
+
+<ul>
+    <li><strong>The run ticks are chosen so nothing is lost.</strong> A dormant horse runs on
+        <code>(tickCount + id) % 10 == 0</code>. Every per-horse scan in the mod is gated on
+        <code>(tickCount + id) % INTERVAL == 0</code> with an INTERVAL that is a multiple of 10 (20,
+        30, 40, 100, 200), and <code>tickCount</code> still advances on a skipped tick &mdash; so every
+        scan tick is a run tick. Hunger, healing, bond, heat, pregnancy, turnover and the herd life run
+        at their normal rate with no change to their code. <strong>A new scan interval that is not a
+        multiple of 10 silently runs less often for a dormant horse</strong>
+        (<code>Dormancy.alignedInterval</code>).</li>
+    <li><strong>World-clock beats are widened.</strong> <code>GeneAbilityHandler.beat</code> matched one
+        exact game tick, which a run lands on only by luck; it now counts every tick the run stands for
+        (<code>DormancyHandler.span</code>), so a gene effect on a beat fires once per beat.
+        <code>HungerFoodGoal</code> scales its graze roll and search countdown the same way, by
+        half the span: goals are evaluated when <code>tickCount + id</code> is even, every other
+        tick awake and on every dormant run.</li>
+    <li><strong>Foal age</strong> is vanilla&rsquo;s per-tick count in <code>AgeableMob.aiStep</code>; the
+        handler takes the same step on each skipped tick.</li>
+    <li><strong>Decided on run ticks only</strong>, so it costs one player-distance check per horse per
+        ten ticks. Never for a ridden, riding or leashed horse, nor on a
+        <code>GameTestServer</code>, where nobody is ever near.</li>
+    <li><strong>What does slow:</strong> goals (grazing, wandering, food searches), physics, vanilla
+        regeneration and potion timers. The stress test now measures with dormancy on unless its run
+        directory sets the radius to 0.</li>
+</ul>
+
+<h2 id="lag-audit-code">The lag audit&rsquo;s per-tick fixes (2026-10-06, #201)</h2>
+
+<ul>
+    <li><strong>One genome parse per horse.</strong> <code>server/GenomeFacts</code> is the per-horse
+        facts cache: diet, favourite food, passification routes, sun sensitivity, lycan carrier,
+        undead kind and lethal-at-birth, read off one parse and kept against both codes.
+        <code>HorseDietHandler.dietOf</code>, <code>FoodPreferenceHandler.favouriteOf</code>,
+        <code>Passification.routesOf</code>, <code>SunSensitivityHandler.isSensitive</code> and
+        <code>UndeadHorses.kindOf</code> read from it. An entry leaves with its horse; the old
+        whole-map clear at 4096 made every loaded horse re-parse on one tick. A content-equal hit is
+        re-stored holding the record&rsquo;s own strings, so the next check is an identity test
+        instead of a walk over two 20&nbsp;KB strings. The ability list in
+        <code>GeneAbilityHandler</code> works the same way.</li>
+    <li><strong>Searches that find nothing back off.</strong> <code>SunShadeGoal</code>&rsquo;s
+        5,625-square shelter search sits out 20 calls after a miss; <code>HungerFoodGoal</code>&rsquo;s
+        2,205-square food search doubles its wait after each miss to 160 calls, reset by a find or by
+        the horse moving eight blocks.</li>
+    <li><strong>Cheap tests first.</strong> <code>CrouchFeedGoal</code> asks distance and gaze before
+        the food test that reads the diet. <code>GeneAbilityHandler</code> skips its 14-attribute
+        sweep for a horse whose abilities move no attribute (once per snapshot, to clear leftovers).
+        <code>NaturalBreedingHandler</code> paths only to entire stallions and keeps each
+        pair&rsquo;s answer while neither horse moves (400 ticks at most). Cart goals skip their
+        search while no cart is loaded on the server.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -2250,8 +2332,27 @@ FILLY: LEAVES NOW: Band mare of 08758bbf</code></pre>
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>No horse can be killed by a single blow any more, and the yard has now watched the save, its window, its re-arming, the void and the bolt work, so what is left of it is what a player sees &mdash; the particles and the chat line against a charged creeper &mdash; plus a relog, a wild horse and the switches; a horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; a horse can no longer eat a crop through the fence either, and the check that matters more than the fix is the one that catches it overshooting &mdash; if an ordinary pen has stopped grazing its own grass, the sight line is being aimed at block centres and every tuft five paces off reads as barred; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, so the check that is left is the plain one &mdash; find a wild band on real ground and watch a grown filly leave it, for a neighbouring band or for a bachelor who founds one with her, since <strong>nothing refuses a suitor any more</strong> and the yard has only ever shown this in pens ten blocks wide; and bond now <strong>fades</strong> by a point a game day down to 31, which the yard has watched fall, stop at the floor and spare an unstamped horse, so what is left is a horse surviving a real unload, the everyday horse never noticing it, the off switch, and whether a slept night should cost bond; and food is no longer the only thing a horse will run at &mdash; an item that would <a href="gene-passification.html">passify</a> it is a gallop-tier lure whatever its diet says, so somebody has to hold a cake out to an untamed nightmare and then check the running stops once the offer is spent; and a tamed horse now <strong>refuses to be ridden by anybody but its owner and their team</strong>, which is the largest behaviour change here in a while and needs a second player before any of it can be believed &mdash; the check to run first is not the refusal but its opposite, that an <em>untamed</em> horse still lets you on, because if it does not then horses cannot be tamed at all.</p>
+    <p>No horse can be killed by a single blow any more, and the yard has now watched the save, its window, its re-arming, the void and the bolt work, so what is left of it is what a player sees &mdash; the particles and the chat line against a charged creeper &mdash; plus a relog, a wild horse and the switches; a horse under a fifth of its hearts now takes itself over and carries its rider out, and the check to run before any of the others is the saddle duplicator: ride a bond-81+ horse <strong>bare</strong>, hurt it to the threshold, and make sure no saddle lands in your inventory, because the phantom saddle bareback steering lends is a real one and handing it over would mint a free saddle per bolt; the fence is next, and the jump boost is meant to have settled it for even a poor jumper; an owner is now told in chat when one of their own horses is hurt, so the thing to watch is that it stays an alarm and not a flood &mdash; stand a horse in a campfire and count one line every five seconds, then check a second player hears nothing; the whole server is now told when an owned horse dies, which wants two players and one dead mare to confirm it is one line, everybody, red only for her owner; a hungry horse no longer walks at crops it cannot path to, so the check that settles it is the pasture that prompted it &mdash; fence a pen against a field and watch nobody lean on the rail, then confirm the same horses still eat the grass they are standing in and still cross the pen for a hay bale; a horse can no longer eat a crop through the fence either, and the check that matters more than the fix is the one that catches it overshooting &mdash; if an ordinary pen has stopped grazing its own grass, the sight line is being aimed at block centres and every tuft five paces off reads as barred; horses now pick food off the floor by what they graze rather than by vanilla&rsquo;s eight-item horse-food tag, which wants the modded server that prompted it; a bonded horse no longer watches its owner through a fence, so watch for the behaviour that was being crowded out, a bonded stallion covering a mare in heat while his owner stands in the paddock; and band life has still never run outside the yard, so the check that is left is the plain one &mdash; find a wild band on real ground and watch a grown filly leave it, for a neighbouring band or for a bachelor who founds one with her, since <strong>nothing refuses a suitor any more</strong> and the yard has only ever shown this in pens ten blocks wide; and bond now <strong>fades</strong> by a point a game day down to 31, which the yard has watched fall, stop at the floor and spare an unstamped horse, so what is left is a horse surviving a real unload, the everyday horse never noticing it, the off switch, and whether a slept night should cost bond; and food is no longer the only thing a horse will run at &mdash; an item that would <a href="gene-passification.html">passify</a> it is a gallop-tier lure whatever its diet says, so somebody has to hold a cake out to an untamed nightmare and then check the running stops once the offer is spent; and a tamed horse now <strong>refuses to be ridden by anybody but its owner and their team</strong>, which is the largest behaviour change here in a while and needs a second player before any of it can be believed &mdash; the check to run first is not the refusal but its opposite, that an <em>untamed</em> horse still lets you on, because if it does not then horses cannot be tamed at all; and a horse nobody is within 128 blocks of now <strong>goes dormant</strong>, ticking one tick in ten, which is meant to cost it nothing but walking pace &mdash; the check is a far paddock left for a day, and a foal there grown on time.</p>
 </div>
+
+<h3 id="dormancy-1006">Far horses slow down and keep time (2026-10-06, NOT played)</h3>
+
+<p>
+    <a href="?view=coding#dormancy-code">Dormancy</a> has its unit test and a green gametest run
+    (gametests never go dormant), and nothing else. Leave a paddock and come back:
+</p>
+
+<ul>
+    <li><strong>Nothing lost.</strong> A foal left 200 blocks away for a game day is as grown as
+        one you stood beside; a horse on grass is about as hungry as a watched one; a mare due while you were away
+        foals on time. <strong>Fail looks like</strong> a foal that is still small, or a mare
+        overdue &mdash; a scan interval that is not a multiple of ten, or a skipped age step.</li>
+    <li><strong>Nothing odd at the edge.</strong> From about 128 blocks, watch a herd: they should
+        amble, not jump. A horse in mid-air or in water when it went dormant falls and swims a tenth
+        as often, and nobody has watched that.</li>
+    <li><strong>The measurement.</strong> Run the stress test with and without
+        <code>performance.dormancy_radius = 0</code> and record both ms/tick tables.</li>
+</ul>
 
 <h3 id="riding-0929">A horse refuses a stranger (2026-09-29, NOT played)</h3>
 

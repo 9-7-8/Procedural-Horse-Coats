@@ -67,6 +67,7 @@ wiki/breed-format.html#strain-stats	all	A strain that scores its own stats
 wiki/breed-format.html#studbook-kinds	all	Studbook kinds: decided, not yet in the format
 wiki/breed-format.html#where	all	Where a breed may come from
 wiki/breeding.html#H	coding	H. Client sync, the information screen, family tree
+wiki/breeding.html#ancestry-pruning	coding	Forgetting a horse that has left for good (2026-10-06, #200)
 wiki/breeding.html#barn-name	coding	E. Barn name
 wiki/breeding.html#breeding-debug	coding	Every draw, written down (dev builds)
 wiki/breeding.html#drift	coding	Genetic drift
@@ -3036,6 +3037,8 @@ wiki/horse-care.html#bond-decay-code	coding	Decay — why it is elapsed days and
 wiki/horse-care.html#changes	gameplay	How bands change
 wiki/horse-care.html#death-notice	gameplay	5. When one of them dies
 wiki/horse-care.html#death-notice-code	coding	The death notice — why it is not vanilla's sentence
+wiki/horse-care.html#dormancy	gameplay	9. Horses nobody is near
+wiki/horse-care.html#dormancy-code	coding	Dormancy — skipping ticks without losing time (2026-10-06, #204)
 wiki/horse-care.html#escape	gameplay	6. When one of them is about to die
 wiki/horse-care.html#escape-code	coding	Bolting at low health — why it is not vanilla's panic with a health check
 wiki/horse-care.html#food-tempt	gameplay	Horses come to food — and run for their favourite
@@ -3045,6 +3048,7 @@ wiki/horse-care.html#hunger	gameplay	1. Hunger and healing
 wiki/horse-care.html#hurt-notice	gameplay	4. When one of your horses is hurt
 wiki/horse-care.html#hurt-notice-code	coding	The hurt notice — whose chat, how often, and why sunlight is a special case
 wiki/horse-care.html#kept-herds	gameplay	Tamed herds
+wiki/horse-care.html#lag-audit-code	coding	The lag audit’s per-tick fixes (2026-10-06, #201)
 wiki/horse-care.html#last-stand	gameplay	7. And when the blow lands anyway
 wiki/horse-care.html#last-stand-code	coding	Surviving a killing blow — two events, because they are two different refusals
 wiki/horse-care.html#mouth-reach	coding	…and only eats what it can get its mouth to

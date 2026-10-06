@@ -634,7 +634,11 @@
     after a flushing save, into <code>&lt;world&gt;/horsegenetics/realm-backups/&lt;name&gt;/</code>:
     every horse as a whole entity tag, UUID and attachments included, loaded or not, with no
     chunk loads. Not the terrain &mdash; the change being guarded against is usually a terrain
-    change, and putting the old terrain back would undo it. The newest ten are kept. Backups
+    change, and putting the old terrain back would undo it. The newest three are kept (ten until
+    2026-10-06, #203: each is a copy of every entity region of a realm that may hold thousands of
+    horses). The flushing save and the copy are on the server thread; the horse count shown by
+    <code>/horserealm backups</code> is read off the copy afterwards on a thread of its own, and
+    reads &ldquo;still being counted&rdquo; until it is in. Backups
     are taken at server start, before any realm chunk ticks, and never inside a change:
     the lift and the decoration run in the middle of a teleport, where a flushing save is
     not safe. <code>/horserealm backup</code> takes one by hand and also covers any change

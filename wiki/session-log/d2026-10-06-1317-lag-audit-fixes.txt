@@ -1,0 +1,157 @@
+2026-10-06 13:17 (end time) - The lag audit built: #200, #201, #202, #203 and dormancy (#204)
+
+ASKED
+-----
+- "build the rest of the lag fixes that we have in issues"
+  The open lag issues were #200 (memory), #201 (server per-tick scans), #202 (network
+  and saving), #203 (smaller items) and #204 (dormancy, needs-owner); #198 and #199
+  were already closed. All five were built. Four read-only agents first checked every
+  claim in the issues against the code (several were smaller than written, a few wrong
+  in detail); one worktree agent built #203 while this session built the rest.
+- Owner answers to the question round (see DECIDED): prune removed wild horses'
+  records; build dormancy as throttle-and-catch-up; drop the sire copy from saved
+  embryos; keep three realm backups and count off the main thread; dormancy on by
+  default at 128 blocks.
+
+DONE
+----
+- 6b8bafcd  #201, server per-tick scans and parses.
+  GenomeFacts became the one per-horse facts cache (diet, favourite food, passification
+  routes, sun sensitivity, lycan carrier, undead kind, lethal-at-birth), keyed on both
+  codes, evicted on EntityLeaveLevelEvent and server stop; a content-equal hit is
+  re-stored with the record's own Strings so later checks are identity tests (a reloaded
+  horse used to string-compare ~20 KB per check). dietOf / favouriteOf / routesOf /
+  isSensitive read from it. SunShadeGoal: a failed 5,625-square search waits 20 calls.
+  HungerFoodGoal: misses back off 40 -> 80 -> 160 calls, reset by a find or 8 blocks of
+  movement. CrouchFeedGoal: distance and gaze before the diet-reading food test.
+  BondFollowGoal.ReachCheck: reuses the answer while neither end moved (4 checks max).
+  WildHerdGoal: keeps its path while the leader stays within 2.5 blocks.
+  GeneAbilityHandler: skips the 14-attribute sweep for an ability list that moves no
+  attribute (one sweep per snapshot for leftovers); cooldowns keyed by horse then a
+  record key, not a built string; ability cache and world flags evicted on leave;
+  per-horse state cleared on server stop. HorseInspectHold: lapsed holds swept once a
+  server tick. NaturalBreedingHandler: only entire stallions are pathed to; each pair's
+  path answer kept while neither moved (400 ticks max). Cart goals: AvoidCartGoal skips
+  its search with no cart loaded (HorseCarts tracks loaded carts); PullCartGoal keeps
+  its CartWorld.
+- 6652a74a  #200, memory.
+  Ancestry pruning: HorseRecords.forgetDeparting, called before the discard in
+  WildTurnover (REMOVE), CowboyHandler.retireOne, ArcaneWandererHandler.moveOnIfDue and
+  TraderSale, forgets the record when common/horse/AncestryPruning.mayForget allows it:
+  not tamed, no owner/tamedBy/bredBy, nobody's parent, never covered a mare.
+  AncestryPruningTest (5). UndeadHorses reads GenomeFacts instead of a map keyed on
+  multi-KB code strings. Client: coat, record, care and social entries leave with the
+  horse (ClientLifecycleHandler.onEntityLeave, client levels only); the by-id record
+  view is a 512-entry LRU; ClientHorseSocialCache is now cleared on logout (it never
+  was, and its entity-id keys leaked onto the next world's horses).
+- 524b1862  #202, network and saving.
+  Tracking start sends only HorseRecordSyncPayload; the client builds the coat from its
+  codes (ModNetworking.acceptRecord, rebuilt only when the codes change). CoatSyncPayload
+  is built from the record's strings, never a server parse. Record lists (family tree,
+  offspring) are one NBT tag per record, so no generation can reach the 2 MiB decode
+  quota; payload registrar bumped "1" -> "2". Embryos stop saving the sire's genome
+  (read from older saves; birth looks him up by sire_id, falling back to the foal's own
+  traits). Save predicates on cowboy_brand, horse_cooldowns, passification, horse_gear;
+  HorseCareHandler reads the brand with getExistingDataOrNull (it is synced). Cart
+  haulage written every 4 metres, not every tick. HorseAfterlife dirties on a drop or
+  every 5 minutes of counted time. Realm census dirties on a chunk change and forgets a
+  horse that dies in the realm. Roster, realm roster, log, population, offspring and
+  family-tree requests: one answer per second per question per player.
+- 835b0691 (merged in 3283fd09)  #203, the smaller items, built by a worktree agent and
+  reviewed here. CoatData.cutieMark memoised and the layer's stacks cached; swim/flight
+  caches keyed by record instance, not a 20 KB string; the breed label memoised; the
+  coat bake budget carries overruns forward as debt; Genotype.withAll (BreedFounder
+  output proven byte-identical over 3,350 rolls by a temporary SHA-256 test); Breeds:
+  immutable ALL, a volatile ready fast path, forBiome cached per source and biome;
+  DebugHighlightHandler sweeps only while a stale glow is possible; BreedFounderLog at
+  DEBUG; StablePopulator skips claimed stables, carries a dimension (it could populate
+  against the wrong level - a correctness bug), caps re-queues, clears on stop;
+  BloodHuntGoal.traceSearch gated on debug tools; the chest loot condition fast-paths
+  its one pattern; LycanthropyHandler gates the every-mob tick on a weak set of shifted
+  animals; RealmBackup keeps 3 and counts horses on a daemon thread from the copy;
+  RealmClaim lifts its chunk forces on stop and refcounts them; ~20 classes clear their
+  statics on ServerStoppedEvent. Two-tone part slices (1d) skipped, reason in #210.
+- 4fcd6e08 + 06398951  #204, dormancy.
+  DormancyHandler cancels EntityTickEvent.Pre on 9 ticks in 10 for a Horse with no
+  player within performance.dormancy_radius (default 128, 0 = off); never ridden,
+  riding, leashed, or on a GameTestServer. Run ticks are (tickCount + id) % 10 == 0 and
+  every per-horse scan interval in the mod is a multiple of 10, so every scan still runs
+  on time (tickCount advances on a cancelled tick - read in the patched sources).
+  Foal age takes vanilla's step on each skipped tick. GeneAbilityHandler.beat counts the
+  ticks a dormant run stands for. HungerFoodGoal scales its graze roll and search
+  countdown by span / 2 (goals are evaluated when tickCount + id is even - checked in
+  Mob.serverAiStep). Rule in common/care/Dormancy, DormancyTest (6).
+- 23414a08  web.wasm rebaked for the common/ changes.
+
+Proof, all on this tree:
+- :common:test --tests for 19 classes, 177 tests, 0 failures: BreedFounder, Breeds,
+  NetherBreeds, RamHornBreeds, UndeadBreeds, Dormancy, Hunger, CoatBakeGolden,
+  CoatPipelineGolden, HorseSheetConverter, CommonPortability, CutieMarkGene, Genotype,
+  AncestryPruning, Descendants, InMemoryHorseDatabase, NaturalCover, ReproRules,
+  ReproText.
+- :neoforge-26.1.2:runGameTest: "All 55 required tests passed".
+- :neoforge-26.1.2:runServer to "Done (0.285s)"; the log's WARN/ERROR lines were all
+  vanilla or known (#208's stasis_chamber line); server.toml "corrected" because the new
+  key was added. The realm backup's background count logged "holds 0 horses". Run logs
+  and config restored afterwards.
+- :web:bakeDesignerAssets + check-designer-boots.mjs: 4 checks OK.
+- No pictures: nothing visual changed.
+
+Issues: #200, #201, #202, #203, #204 closed with their commits and moved to v0.5.046;
+#197 (tracking) closed; #210 filed for what was left and for the before/after stress
+run; #211 filed (bug, below).
+
+DECIDED
+-------
+- Ancestry: prune at removal, only records nothing could ask for again; no sweep of
+  old saves (owner). Recorded on breeding.html#ancestry-pruning.
+- Dormancy: throttle and catch up, not freeze (owner); on by default at 128 blocks
+  (owner). The stride of 10 and the aligned run ticks were this session's call, from
+  the read-only survey of every tick gate. horse-care.html#dormancy, #dormancy-code.
+- Embryos stop saving the sire's genome, accepting that an older jar cannot load a
+  pregnancy a newer one saved (owner). fertility.html, Embryo javadoc.
+- Realm backups: keep 3, count off the main thread (owner). horse-realm.html.
+- Not asked, decided here: a stallion who has ever covered is never pruned (it is what
+  makes dropping the sire copy safe); LAST_FIRED cooldowns are not evicted on unload (a
+  horse on a chunk edge would get fresh cooldowns); presentCode storage, the meta
+  payload, roster compaction and the stasis resend left out (#210); the request
+  throttle drops only a repeat of the same question within a second.
+
+FOUND ON THE WAY
+----------------
+- StablePopulator.QUEUE had no dimension and could populate a stable against whichever
+  level ticked first - fixed in 835b0691.
+- ClientHorseSocialCache.clear() was never called; fixed in 6652a74a.
+- NBT strings are written with writeUTF (65,535-byte limit, StringTag.write), and
+  EpigenomeSizeTest.reportsTheCodeSize measured the worst-case epigenome at 58,726
+  chars today - about 10% under it - while the test asserts against 131,072. Filed as
+  #211 (bug, v0.5.046); not fixed.
+- Mistake caught before commit: the first HungerFoodGoal dormancy scale used the full
+  span (10); Mob.serverAiStep evaluates goals on every dormant run, so it is span / 2.
+- A git "commit -F -" from a PowerShell here-string committed nothing; the message
+  went through a scratch file instead.
+
+PROCEDURES
+----------
+- procedures/stress-test.txt: a stress server has no player, so with dormancy on every
+  horse is dormant; set performance.dormancy_radius = 0 for the awake number and say
+  which each table is.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite (only the 19 classes above). It would also check every
+  gene's goldens beyond the two run, and the breed tests not named.
+- Nothing was played. Verification tabs added: horse-care.html#dormancy-1006,
+  breeding.html#verify-ancestry-pruning. The stress test was not run: #210.
+- The TeaVM build compiled Breeds' new ConcurrentHashMap caches; nothing in the
+  designer exercises forBiome.
+
+RELEASE
+-------
+Not offered: release is the owner's call and this is one batch of performance work
+landing on v0.5.046; offer it with that milestone.
+
+PICK UP FIRST
+-------------
+Run procedures/stress-test.txt twice (dormancy_radius 128 and 0) against 0a14b301 and
+HEAD, and write the numbers onto #210.
