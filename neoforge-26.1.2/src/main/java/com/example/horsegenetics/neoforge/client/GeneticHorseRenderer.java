@@ -111,6 +111,36 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 - (GeneticCoatTextureFactory.bakeNanos() - bakedBefore));
     }
 
+    /**
+     * The breed label per horse, valid while {@link ClientHorseRecordCache} still hands
+     * back the same record instance (#203). It feeds nothing but the dev-build
+     * {@code [coat]} line written when a bake happens, yet it was computed every
+     * frame for every horse - a {@code BreedLineage.parse} plus a
+     * {@code Breeds.displayName} lookup. A record is immutable and replaced whole on
+     * any change, so identity is a sound "unchanged" test. Render thread only.
+     */
+    private static final java.util.Map<Integer, LabelMemo> BREED_LABELS = new java.util.HashMap<>();
+
+    private record LabelMemo(com.example.horsegenetics.common.horse.HorseRecord source, String label) {
+    }
+
+    private static String breedLabelOf(int entityId,
+                                       com.example.horsegenetics.common.horse.HorseRecord rec) {
+        if (rec == null) {
+            return null;
+        }
+        LabelMemo memo = BREED_LABELS.get(entityId);
+        if (memo != null && memo.source() == rec) {
+            return memo.label();
+        }
+        if (BREED_LABELS.size() > 512) {
+            BREED_LABELS.clear();
+        }
+        String label = rec.lineage().displayName();
+        BREED_LABELS.put(entityId, new LabelMemo(rec, label));
+        return label;
+    }
+
     private void extractTimed(Horse horse, HorseRenderState renderState, float partialTick) {
         super.extractRenderState(horse, renderState, partialTick);
         stretchGaitToSize(renderState);
@@ -121,7 +151,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             }
             com.example.horsegenetics.common.horse.HorseRecord rec =
                     ClientHorseRecordCache.get(horse.getId());
-            geneticState.breedLabel = rec == null ? null : rec.lineage().displayName();
+            geneticState.breedLabel = breedLabelOf(horse.getId(), rec);
             GeneticCoatTextureFactory.Resolved textures = GeneticCoatTextureFactory.resolve(
                     geneticState.coatData, renderState.isBaby,
                     geneticState.breedLabel, withinDetailDistance(renderState));

@@ -76,8 +76,10 @@ public final class RealmBackupCommand {
         }
         try {
             RealmBackups.Backup b = RealmBackup.take(source.getServer(), realm, "by hand");
-            say(source, "Backed up " + b.horses() + " horses as " + b.name() + ".");
-            return b.horses();
+            // The horses are counted off the server thread after the copy (#203), so the number is not known yet.
+            say(source, "Backed up the horse realm as " + b.name()
+                    + ". Its horses are being counted - /horserealm backups shows the number when it is in.");
+            return 1;
         } catch (IOException | RuntimeException e) {
             HorseGenetics.LOGGER.error("[realm-backup] /horserealm backup failed", e);
             fail(source, "The backup failed: " + e.getMessage() + " - see the log.");
@@ -97,7 +99,8 @@ public final class RealmBackupCommand {
             source.sendSuccess(() -> Component.literal("  ")
                     .append(Component.literal(b.name()).withStyle(ChatFormatting.GOLD))
                     .append(Component.literal(" - " + when.format(new Date(b.takenAt())) + ", "
-                            + b.horses() + " horses, before: " + b.reason()).withStyle(ChatFormatting.GRAY)),
+                            + (b.counted() ? b.horses() + " horses" : "horses still being counted")
+                            + ", before: " + b.reason()).withStyle(ChatFormatting.GRAY)),
                     false);
         }
         return all.size();

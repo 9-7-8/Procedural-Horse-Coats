@@ -10,6 +10,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 
@@ -113,5 +114,13 @@ public final class HorseDeathNoticeHandler {
         }
         ANNOUNCED.put(horse, now);
         return false;
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203).
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        ANNOUNCED.clear();
     }
 }

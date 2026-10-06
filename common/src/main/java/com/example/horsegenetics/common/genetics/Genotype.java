@@ -181,6 +181,21 @@ public final class Genotype {
     }
 
     /**
+     * {@link #with} for many pairs at once: exactly what calling {@code with} on
+     * each in order gives - a later pair on the same locus wins, and the map keeps
+     * the same insertion order - but one map copy instead of one per pair (#203).
+     * A founder roll touches nearly every locus, and per-pair copies made that
+     * quadratic in the gene count.
+     */
+    public Genotype withAll(Iterable<AllelePair> pairs) {
+        Map<String, AllelePair> m = new LinkedHashMap<>(byGene);
+        for (AllelePair pair : pairs) {
+            m.put(pair.geneKey(), pair);
+        }
+        return new Genotype(m);
+    }
+
+    /**
      * <b>The genotype a person reads</b>: {@link #toCode()} without every gene sitting at
      * two copies of its wild-type allele where that combination does nothing (owner,
      * 2026-09-14: "it doesn't print double wild type for the genes where double wild has

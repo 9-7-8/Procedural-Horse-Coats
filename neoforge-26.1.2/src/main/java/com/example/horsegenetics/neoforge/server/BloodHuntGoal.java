@@ -133,7 +133,10 @@ public final class BloodHuntGoal extends Goal {
      * what the search found, or how many living things were in range and why each was ruled out.
      */
     private void traceSearch() {
-        if (!(horse.level() instanceof ServerLevel level)) {
+        // ActionTrace.log drops the line unless debug tools are on, so without this the r16 scan below ran once a
+        // minute per hurt blood-drinker in production for nothing (#203).
+        if (!com.example.horsegenetics.neoforge.ServerConfig.debugTools()
+                || !(horse.level() instanceof ServerLevel level)) {
             return;
         }
         long now = level.getGameTime();

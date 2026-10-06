@@ -10,6 +10,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.PlayLevelSoundEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
@@ -326,5 +327,16 @@ public final class NightBehaviourHandler {
         } catch (RuntimeException e) {
             return List.of();
         }
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203). All four are per-horse caches, rebuilt on demand.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        WATCHING.clear();
+        SILENT.clear();
+        TEMPER_ACTING.clear();
+        TIMED.clear();
     }
 }

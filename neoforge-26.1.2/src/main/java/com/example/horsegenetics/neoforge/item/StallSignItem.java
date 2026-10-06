@@ -68,6 +68,14 @@ public class StallSignItem extends Item {
 
     private static final Map<UUID, PendingMove> PENDING_MOVES = new HashMap<>();
 
+    /**
+     * Drop every standing offer - called when the server stops (from {@code StallRecall}), so a singleplayer world
+     * closed and another opened does not inherit offers timed against the old server's tick count (#203).
+     */
+    public static void forgetPendingMoves() {
+        PENDING_MOVES.clear();
+    }
+
     @SuppressWarnings("deprecation") // Item(Properties) - DeferredRegister supplies the id-carrying Properties
     public StallSignItem(Properties properties) {
         super(properties);

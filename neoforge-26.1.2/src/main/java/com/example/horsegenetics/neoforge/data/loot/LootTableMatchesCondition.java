@@ -6,6 +6,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -61,7 +62,27 @@ public record LootTableMatchesCondition(Pattern pattern) implements LootItemCond
         // Whole-string match, like the ids this replaces: a pattern is a table
         // shape, not a substring search, and `find()` would make "chests/" match
         // a block table called `mychests/stone`.
-        return pattern.matcher(context.getQueriedLootTableId().toString()).matches();
+        Identifier id = context.getQueriedLootTableId();
+        if (pattern.flags() == 0 && ANY_CHEST.equals(pattern.pattern())) {
+            return isAnyChest(id);
+        }
+        return pattern.matcher(id.toString()).matches();
+    }
+
+    /**
+     * {@link #ANY_CHEST} without the regex (#203). All three of the mod's global
+     * modifiers use that pattern and it ran - plus an id {@code toString} - on
+     * every loot roll in the game: every block broken, every mob killed.
+     *
+     * <p>Exactly the same answer: neither half of an id may contain {@code ':'},
+     * so {@code [^:]+} is "a non-empty namespace", the {@code ':'} is the
+     * separator, and {@code chests/.+} is a path starting {@code chests/} with at
+     * least one more character - none of them a line terminator, which {@code .}
+     * would refuse and a valid path cannot hold anyway.
+     */
+    static boolean isAnyChest(Identifier id) {
+        String path = id.getPath();
+        return !id.getNamespace().isEmpty() && path.length() > 7 && path.startsWith("chests/");
     }
 
     @Override

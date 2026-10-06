@@ -119,8 +119,12 @@ public final class RealmBackup {
      */
     private static final List<String> CHANGES = List.of(LIFT);
 
-    /** How many backups are kept; the oldest goes when another is taken. */
-    static final int KEEP = 10;
+    /**
+     * How many backups are kept; the oldest goes when another is taken. Three, not ten (owner, #203): each is a
+     * copy of every entity region file of a realm holding thousands of horses, and a world that already has more
+     * loses the extras at its next backup.
+     */
+    static final int KEEP = 3;
 
     /** Raises per server tick. Each one may load the chunk the horse goes back to. */
     private static final int RAISES_PER_TICK = 2;
@@ -179,6 +183,12 @@ public final class RealmBackup {
     @SubscribeEvent
     static void onServerStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
+        // A count the last session stopped before finishing (#203) - the copy is on disk, so count it again.
+        for (RealmBackups.Backup b : RealmBackups.get(server).all()) {
+            if (!b.counted()) {
+                countInBackground(server, b.name(), HorseRealm.REALM_LEVEL);
+            }
+        }
         List<String> missing = missing(server);
         if (missing.isEmpty()) {
             return;
@@ -191,8 +201,8 @@ public final class RealmBackup {
         }
         try {
             RealmBackups.Backup b = take(server, realm, String.join("+", missing));
-            HorseGenetics.LOGGER.info("[realm-backup] took {} ({} horses) before: {}",
-                    b.name(), b.horses(), missing);
+            HorseGenetics.LOGGER.info("[realm-backup] took {} before: {} (horses counted in the background)",
+                    b.name(), missing);
         } catch (IOException | RuntimeException e) {
             HorseGenetics.LOGGER.error("[realm-backup] could not back the horse realm up - these "
                     + "realm changes stay OFF until a backup succeeds (/horserealm backup): {}",
@@ -230,15 +240,48 @@ public final class RealmBackup {
         name = dir.getFileName().toString();
         Path entities = dir.resolve("entities");
         copyEntities(server, level.dimension(), entities);
-        int horses = read(entities, level.dimension()).size();
 
-        RealmBackups.Backup backup = new RealmBackups.Backup(name, System.currentTimeMillis(), reason, horses);
+        // The flush and the copy stay here, on the server thread: the copy has to be of the files as that save left
+        // them. Counting the horses does not (#203) - it opened and parsed every chunk of every region file, on the
+        // main thread, only to fill in a number for the listing. It reads the COPY, which nothing else writes, so it
+        // cannot race the live world, and the backup is usable (plan/restore read the copy themselves) before it is
+        // done.
+        RealmBackups.Backup backup = new RealmBackups.Backup(name, System.currentTimeMillis(), reason,
+                RealmBackups.Backup.UNCOUNTED);
         data.added(backup);
         data.cover(missing(server));
         while (data.all().size() > KEEP) {
             deleteTree(backupsRoot(server).resolve(data.dropOldest().name()));
         }
+        countInBackground(server, name, level.dimension());
         return backup;
+    }
+
+    /**
+     * Count a backup's horses off the server thread and hand the number back to it. A plain daemon thread rather than
+     * one of Minecraft's pools, because this is one long file read, rare, and must not hold a pool thread the chunk
+     * system wants. If the server stops first the number is simply never recorded; the next start counts it again.
+     * A backup pruned while it was being counted makes the read fail or the record a no-op - both harmless.
+     */
+    private static void countInBackground(MinecraftServer server, String name, ResourceKey<Level> dimension) {
+        Path entities = backupsRoot(server).resolve(name).resolve("entities");
+        Thread counter = new Thread(() -> {
+            int horses;
+            try {
+                horses = read(entities, dimension).size();
+            } catch (IOException | RuntimeException e) {
+                HorseGenetics.LOGGER.warn("[realm-backup] could not count the horses in {}", name, e);
+                return;
+            }
+            // MinecraftServer is a BlockableEventLoop: execute() runs this on the server thread, where saved data
+            // may be touched.
+            server.execute(() -> {
+                RealmBackups.get(server).counted(name, horses);
+                HorseGenetics.LOGGER.info("[realm-backup] {} holds {} horses", name, horses);
+            });
+        }, "phc-realm-backup-count");
+        counter.setDaemon(true);
+        counter.start();
     }
 
     private static Path backupsRoot(MinecraftServer server) {

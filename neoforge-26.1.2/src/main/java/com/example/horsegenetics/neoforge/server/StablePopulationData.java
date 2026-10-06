@@ -58,12 +58,24 @@ public final class StablePopulationData extends SavedData {
      * {@code false} for ever after, so the caller can simply return.
      */
     public boolean claim(Identifier structure, BlockPos corner) {
-        String key = structure + "@" + corner.getX() + "," + corner.getY() + "," + corner.getZ();
-        if (!filled.add(key)) {
+        if (!filled.add(key(structure, corner))) {
             return false;
         }
         setDirty();
         return true;
+    }
+
+    /**
+     * Has this stable been filled already? Read-only - unlike {@link #claim} it
+     * marks nothing. For the populator to skip queueing (and logging) a stable it
+     * would only find claimed 40 ticks later, on every reload of its chunk (#203).
+     */
+    public boolean isClaimed(Identifier structure, BlockPos corner) {
+        return filled.contains(key(structure, corner));
+    }
+
+    private static String key(Identifier structure, BlockPos corner) {
+        return structure + "@" + corner.getX() + "," + corner.getY() + "," + corner.getZ();
     }
 
     /** How many stables this level has filled - a debug line, not a game rule. */

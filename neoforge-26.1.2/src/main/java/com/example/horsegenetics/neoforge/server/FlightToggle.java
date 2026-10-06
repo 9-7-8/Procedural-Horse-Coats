@@ -4,6 +4,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.Set;
@@ -120,5 +121,14 @@ public final class FlightToggle {
             WANTS.remove(player.getUUID());
             LANDING.remove(player.getUUID());
         }
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203). The server's copy only - the client keeps its own in {@code ClientFlightHandler}.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        WANTS.clear();
+        LANDING.clear();
     }
 }

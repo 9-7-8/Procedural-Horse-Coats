@@ -284,6 +284,29 @@ class GenotypeTest {
     }
 
     @Test
+    void withAllIsRepeatedWith() {
+        // #203: the founder roll applies its pairs in one copy. It must be exactly
+        // the per-pair with() chain - same pairs, same map order (presentCode walks
+        // the map, not codeOrder), and a later pair on one locus winning.
+        java.util.List<AllelePair> pairs = new java.util.ArrayList<>();
+        for (Gene gene : Genes.codeOrder()) {
+            java.util.List<Allele> alleles = gene.alleles();
+            pairs.add(p(alleles.get(alleles.size() - 1), alleles.get(0)));
+        }
+        Gene first = Genes.codeOrder().get(0);
+        pairs.add(p(first.alleles().get(0), first.alleles().get(0)));
+        Genotype chained = Genotype.wildType();
+        for (AllelePair pair : pairs) {
+            chained = chained.with(pair);
+        }
+        Genotype bulk = Genotype.wildType().withAll(pairs);
+        assertEquals(chained, bulk);
+        assertEquals(chained.toCode(), bulk.toCode());
+        assertEquals(chained.presentCode(), bulk.presentCode());
+        assertEquals(Genotype.wildType(), Genotype.wildType().withAll(java.util.List.of()));
+    }
+
+    @Test
     void differentGenotypesNotEqual() {
         assertNotEquals(Genotype.wildType(), Genotype.parse(Codes.of("extension", "e/e")));
     }

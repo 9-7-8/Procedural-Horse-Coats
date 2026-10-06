@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -286,5 +287,14 @@ public final class HorseLog {
             return "";
         }
         return text.length() <= max ? text : text.substring(0, max);
+    }
+
+    /** Server-lifetime state; a singleplayer world closed and another opened in the same JVM must not inherit it
+     * (#203). Safe to drop rather than flush: the log itself is saved data ({@code HorseEventData}); this set only
+     * says whose open tab to push it to, and every one of those players is leaving.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        DIRTY.clear();
     }
 }

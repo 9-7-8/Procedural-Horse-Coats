@@ -62,7 +62,9 @@ import java.util.function.Supplier;
  *   <li><b>A time budget.</b> {@link #mayBake} lets a new bake start only
  *       while less than {@code coats.bakeBudgetMs} has been spent in the
  *       current {@value #WINDOW_MS} ms window - always at least one, so a coat
- *       is never starved. A horse that has to wait shows {@link #placeholder}
+ *       is never starved, unless an earlier window overran by a whole budget
+ *       (the overrun is carried forward as debt, #203).
+ *       A horse that has to wait shows {@link #placeholder}
  *       for a frame or two.</li>
  *   <li><b>Distance.</b> The renderer only allows a new bake for a horse inside
  *       {@code coats.detailDistance}; one further out wears the stand-in until
@@ -197,6 +199,13 @@ public final class GeneticCoatTextureFactory {
     private static long windowStart = System.nanoTime() - WINDOW_NANOS;
     private static long spentInWindow;
     private static boolean bakedInWindow;
+
+    /**
+     * The most overrun one window may carry forward, in windows' worth of budget
+     * (#203) - so a pathological bake delays the queue by about a second, not
+     * indefinitely.
+     */
+    private static final int MAX_CARRY_WINDOWS = 20;
 
     /** Session diagnostics, reported by {@link #clear()} and then reset. */
     private static long bakes;
@@ -342,15 +351,35 @@ public final class GeneticCoatTextureFactory {
      * never be starved; after that only while the window's spend is under
      * {@code coats.bakeBudgetMs}. A budget of zero is therefore "one bake per
      * {@value #WINDOW_MS} ms, whatever it costs".
+     *
+     * <p><b>Overrun is carried forward as debt (#203).</b> The free first bake
+     * made the budget a floor rather than a ceiling: a 40 ms bake against a 4 ms
+     * budget, once per window, is most of every frame. So a closing window's spend
+     * beyond its allowance - one budget per window elapsed, so idle time repays it -
+     * opens the next window as already spent, and while that carried spend is a
+     * whole budget or more the free first bake is withheld too. A small overrun
+     * (under one budget) still leaves the next window its bake. Capped at
+     * {@link #MAX_CARRY_WINDOWS} budgets, and off entirely at a budget of zero,
+     * whose meaning above it would otherwise contradict. A stop-gap: the real fix
+     * is a bake that does not run on the render thread.
      */
     private static boolean mayBake() {
         long now = System.nanoTime();
+        long budget = ClientConfig.coatBakeBudgetMs() * 1_000_000L;
         if (now - windowStart >= WINDOW_NANOS) {
+            long elapsedWindows = (now - windowStart) / WINDOW_NANOS;
+            long carry = 0L;
+            if (budget > 0L) {
+                // Saturating: elapsedWindows can be huge after a long pause.
+                long allowance = elapsedWindows > MAX_CARRY_WINDOWS * 4L
+                        ? Long.MAX_VALUE / 2 : elapsedWindows * budget;
+                carry = Math.max(0L, Math.min(spentInWindow - allowance, MAX_CARRY_WINDOWS * budget));
+            }
             windowStart = now;
-            spentInWindow = 0L;
-            bakedInWindow = false;
+            spentInWindow = carry;
+            bakedInWindow = carry > 0L;
         }
-        return !bakedInWindow || spentInWindow < ClientConfig.coatBakeBudgetMs() * 1_000_000L;
+        return !bakedInWindow || spentInWindow < budget;
     }
 
     /** Run a bake-and-upload and put what it cost against the window and the session. */

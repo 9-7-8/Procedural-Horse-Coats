@@ -11,6 +11,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.ChunkEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
@@ -428,5 +429,13 @@ public final class HorseRealmTerrain {
     }
 
     private HorseRealmTerrain() {
+    }
+
+    /** Chunk positions of <i>this</i> world's realm; carried into the next they would be built on there (#203).
+     * Nothing is lost: a chunk still waiting is queued again when it next loads.
+     */
+    @SubscribeEvent
+    static void onServerStopped(ServerStoppedEvent event) {
+        PENDING.clear();
     }
 }
