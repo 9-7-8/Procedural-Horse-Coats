@@ -30,6 +30,11 @@ BEFORE YOU START
    decoration, except in breeding), and the gene pages of the closest existing genes.
 3. Know the save rule (CLAUDE.md hard rule 10). Allele order is saved. Never reorder or
    rename an existing allele. A new allele is added without moving the existing ones.
+   On a Java gene that means APPENDED, after the wild type if the wild type was declared
+   last. A pair is stored lower order first, so a one-copy horse then reads n/Tsk and its
+   form's numbers are on the SECOND copy: any rule that reads "the copy that carries the
+   allele" must look the slot up, never assume slot 0 (TusksGene.copyFor), and its test
+   must cover an allele on each side of the wild type.
 
 STEPS
 -----
@@ -101,6 +106,10 @@ STEPS
        A part with NO bone still gets the pool question: the crystal growths joined it as
        ordinary crystals, colour unpinned (owner, 2026-10-05). Then hornsFollowTheCountGroup
        needs the kind's look allowed, as it allows the crystals' translucency.
+       A gene with SEVERAL forms asks one more thing: does the skeleton get one form, or
+       any of them? A count group's locus can hold a weighted choice of pairs
+       (wiki/breed-format.html#count-groups; the tusks slot rolls one of three, owner
+       2026-10-08), and the choice shares the locus's one slot.
 
 2. Read the code. Hand open-ended sweeps to an Explore agent (look-it-up). Grep every
    class and file named below before relying on it. Path shorthands:
@@ -294,6 +303,10 @@ STEPS
       by a fixed rotation AFTER the anchor's translate, before the per-horse tilt -
       model-parts.html#snout. Read the vanilla model for which bone the place moves with:
       the muzzle (upper_mouth) shares head's frame, and no jaw animates in 26.1.2.
+      A part that HANGS (a sabre fang) needs no layer turn at all: put a half-turn about x
+      on the mesh's own root box. A half-turn keeps the part on the anchor's y axis, so the
+      layer's stretch and tilt still act along it; a quarter-turn does not, which is why the
+      narwhal's is in the layer. model-parts.html#jaw-lip.
    3. The generator: C/parts/<X>Generator.java, beside HornGenerator, AntlerGenerator
       and RamHornGenerator. It emits PartNodes parent-before-child. Add a size class
       (like AntlerSize), and cases in PartGenerators.build and in PartShape's

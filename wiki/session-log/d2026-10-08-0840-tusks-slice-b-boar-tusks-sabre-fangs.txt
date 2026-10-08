@@ -1,0 +1,147 @@
+2026-10-08 08:40 - Tusks gene, slice B (#161): boar tusks and sabre fangs; #35 parked
+on Backlog. (The time is about when the session started; it ended near 09:25.)
+
+ASKED
+-----
+1. "/next-release" - the owner ran the next-release routine.
+   It found v0.5.046 as the next release, every open issue on a milestone, and the last
+   tag's milestone (v0.5.045) closed. The only bug that could be a unit was #35 (horses
+   suffocating in walls on the live server), which carries needs-owner, so its three
+   options were put to her before anything was picked.
+2. Her answer on #35: "Keep it parked, remove it from the next version so we stop hitting
+   it. Push it out as something to be tested on the next run testsx".
+   #35 was moved off v0.5.046 to the Backlog milestone, and queued for the next run-tests
+   (see DECIDED). The run then picked the first plan unit, #161.
+3. Asked whether the skeleton breeds should also grow boar tusks and sabre fangs in bone,
+   she chose "Roll one of the three" over "Narwhal only, for now" (my recommendation) and
+   "Fixed mixed pair". That put a breed-format change into this unit.
+
+DONE
+----
+A. #35 moved to Backlog (no commit; GitHub only).
+   - Issue #35: milestone v0.5.046 -> Backlog, needs-owner removed, a comment saying why
+     and what the next run-tests should try.
+   - Milestone v0.5.046's description: #35 listed under "Moved off this release".
+   - Milestone Backlog's description: a new "Parked bugs" section holding #35.
+   - Release plan #196: #35 taken off v0.5.046's bug line, with a "Slipped" line.
+   Pictures: no pictures, nothing visible changed. #35 is open.
+
+B. #161, Tusks gene slice B - commit 856e198a. Issue #161 closed by the commit; its
+   tracking parent #159 closed by hand (both pieces shipped).
+   What was missing: the tusks locus had one form, the narwhal horn (slice A, #160). The
+   treatment's other two forms had no geometry, no anchors and no alleles.
+   What shipped:
+   - common/parts/TuskGenerator.java: a tapering chain of three to five boxes that leaves
+     the jaw 66 degrees outward and curls back toward upright. Forms CURL, SWEEP, HOOKED;
+     three baked sweep buckets; two hook directions.
+   - common/parts/SabreGenerator.java: a flat blade (PartNode.width), two boxes, three when
+     curved; forms STRAIGHT, CURVED, SERRATED; three serration patterns. Its root box
+     carries a half-turn about x, so the fang hangs with no turn in the layer.
+   - TuskSize, SabreSize (four classes each); PartKind TUSK_RIGHT/LEFT, SABRE_RIGHT/LEFT;
+     PartAnchor JAW_RIGHT/LEFT, LIP_RIGHT/LEFT; AttachedPart.tusk and .sabre.
+   - TusksGene: alleles Tsk and Sab appended AFTER n (order Nar, n, Tsk, Sab), five new
+     expressions (tusks, sabre, tusks_sabre, tusks_narwhal, sabre_narwhal), founders
+     n/Tsk and n/Sab, tusksFor / sabreFor / tuskSizeOf / sabreSizeOf. The copy schema did
+     not change, so nothing saved changed and no migration was needed.
+   - neoforge client/AttachedPartLayer.java: ADULT_JAW, ADULT_LIP and two translate-only
+     cases in anchor().
+   - The count-group format: Breed.GroupLocus now holds a weighted list of pairs
+     (BreedSpecParser, BreedSpecWriter, BreedFounder.drawCountGroups, Breed.marginal,
+     GeneCensusTool). A one-pair locus draws no extra randomness. Both skeleton breed
+     files list Nar/Nar, Tsk/Tsk and Sab/Sab at weight 1 for horsegenetics.tusks.
+   - server/DebugPhotoShoot.java: a new Framing.MUZZLE (kept). The shot list was restored.
+   Proof, tests run by name (all green): TusksGeneTest, UndeadBreedsTest,
+   PartGeneratorTest, CoatBakeGoldenTest, CoatPipelineGoldenTest, BreedFilesTest,
+   BreedFounderTest, BreedBandsReachTest, BreedClimateRuleTest,
+   GeneDescriptionCoverageTest, CommonPortabilityTest, GrownPartsListedTest,
+   SaddleZoneTest, ResearchTopicTest, GeneWikiCarryTest. Two mutants were run and both
+   went red, then were reverted: TusksGene.copyFor always reading slot 0
+   (eachFormReadsTheCopyThatCarriesIt), and GroupLocus.draw always returning its first
+   pair (theTusksSlotRollsOneOfThreeForms). The coat-bake golden gained two rows
+   (horsegenetics.tusks Tsk and Sab) at the baseline hash; no pipeline hash moved.
+   Also green: :neoforge-26.1.2:build, check-parity.mjs, check-designer-boots.mjs,
+   check-links.mjs, check-gene-tabs.mjs, check-roadmap-execution.mjs.
+   Pictures: twelve stills by -PphotoShoot, eleven of them published as a private gallery
+   at https://claude.ai/artifact/W2ZyjwF9ASLPbbTnYEwHpF (files could not be attached in
+   this session). What they showed: every form drew on both sides with no gap at its
+   root. Boar tusks root well back on the side of the muzzle and rise toward the eye; the
+   short curl is a small lump; the hook is hard to read from the side. Sabre fangs hang
+   from the front of the muzzle well past the chin; the curved pair bends back; the
+   serrated pair's barbs show. Tsk/Sab and Nar/Sab horses wear both forms without them
+   touching. Two great valley skeletons wear fangs and tusks in bone. Red/Blu tusks are
+   red at the root. A picture is not a pass.
+
+DECIDED
+-------
+- (owner) #35 is parked: off v0.5.046, on Backlog, to be tested on the next run-tests.
+  Recorded on issue #35, both milestone descriptions and release plan #196.
+- (owner) The skeleton breeds roll one of the three tusk forms. Recorded on
+  wiki/gene-tusks.html#skeletons, wiki/decisions.html and wiki/breed-format.html#count-groups.
+- Calls made without the owner, all on wiki/decisions.html (the "Tusks, slice B" entry)
+  and wiki/gene-tusks.html's Coding tab:
+  - needs-owner was removed from #35. Reason: run-tests' survey leaves out needs-owner
+    issues, so the label would have hidden it from the routine she named. The three fix
+    options on the issue are still undecided.
+  - The three forms have equal weight in the skeleton slot.
+  - Founders n/Tsk 0.2% and n/Sab 0.15%, above the narwhal's 0.1% (the treatment asks
+    only that the narwhal be the rarest).
+  - A tusk's curve is a baked sweep bucket; a fang's curve is a free forward lean of up
+    to 0.35 rad. The seed picks a hook's direction and a serration pattern.
+  - The fang's half-turn lives on its mesh root, not in the layer.
+  - Sizes: tusks 2.5 to 9 units, fangs 3 to 10, four classes each.
+  - Anchor offsets ADULT_JAW (1.8, -7.2, -4.6) and ADULT_LIP (1.55, -7.6, -6.9), read from
+    the muzzle box.
+  - The tusks page's Roadmap tab was removed, since nothing is left planned on it.
+
+FOUND ON THE WAY
+----------------
+- No bug was filed.
+- A first photo shoot in Framing.HEAD left the tusks a few pixels across and was thrown
+  away; Framing.MUZZLE was added and the shoot run again. One extra client launch.
+- tools/stop-dev-java.ps1 exits 1 with "Cannot find a process" when it stops a runClient:
+  stopping the gradlew wrapper takes the client with it before the script reaches the
+  client's PID. Both processes were gone each time. Left alone; noted in
+  photograph-horses.txt.
+- SendUserFile cannot deliver files in this kind of session ("not on a project thread"),
+  so pictures went out as a gallery artifact, as photograph-horses step 6 allows.
+- A long Bash heredoc holding a Python patch truncated once (a known trap); the script
+  was rewritten with the Write tool. One scripted patch of add-a-gene.txt failed its
+  own match check and wrote nothing; the three edits were then made one at a time.
+- A one-copy boar reads n/Tsk, not Tsk/n, because Tsk was appended after n. That is the
+  price of keeping saves; the Gameplay tab says so.
+
+PROCEDURES
+----------
+- next-release.txt: a bug the owner parks goes to Backlog under "Parked bugs" and is not
+  pulled back onto a release; step 3 says what to do when she answers "park it".
+- photograph-horses.txt: Framing.MUZZLE for parts of the mouth, look at the first shot
+  before the rest finish, and the stop script's harmless exit 1.
+- add-a-gene.txt: an appended allele puts a one-copy horse's numbers on the second copy;
+  a many-formed gene's skeleton question and the count-group choice; a part that hangs
+  takes a half-turn on its mesh root.
+- No new procedure was needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other gene's
+  tests, the breed tests of breeds this did not touch, and the spec engine.
+- No gametest and no server boot were run. The breed files were read by the real parser
+  in BreedFilesTest; a boot would also show them loading at mod load.
+- Nobody has seen the tusks or fangs in a game beyond the stills: not moving, not
+  grazing, not on a foal, not with a bridle, not at great size, not on a tiny or huge
+  horse. The Tsk/Nar pair was unit-tested and not photographed.
+- Verification anchors: wiki/gene-tusks.html#open-tusks-fangs-look (new),
+  #open-narwhal-motion and #open-narwhal-foal-gear (widened to every form).
+
+RELEASE
+-------
+Not offered. v0.5.046 still has #157, #125 and #130 open, and #10, #31 and #36 wait on
+checks. #161's Release line is "rides with the parent"; the parent #159 is "patch on the
+last piece", and this was the last piece, so the tusks gene now counts as one feature
+toward the next release's bar.
+
+PICK UP FIRST
+-------------
+next-release: the next unit on v0.5.046 is #157 (Head parts slice B: ear fins, cheek
+spikes, brow ridge), owner-free. Before that, the owner's look at the gallery may move
+the boar tusks' anchor, which is a small change to ADULT_JAW in AttachedPartLayer.

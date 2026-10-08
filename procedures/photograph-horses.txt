@@ -63,6 +63,10 @@ STEPS
    the flank (the plates' spikes, crystals) points at a side camera: use Framing.BACK,
    behind and above, which shows both flanks and the coat behind the part. Both framings
    are kept in stage(); a new one goes there too rather than in a throwaway edit.
+   A part of the mouth (tusks, fangs) is a few pixels across in HEAD: use Framing.MUZZLE,
+   close on the muzzle from three-quarters front (added 2026-10-08, after a first shoot in
+   HEAD had to be thrown away). Look at the first saved shot before the rest finish: a wrong
+   framing costs a whole relaunch.
    Shot's last field, `want`, is a predicate on the rolled HorseRecord: record() re-rolls
    (200 tries) until it holds, which is how a shot pins epigenetic numbers (the crystals
    session, 2026-10-05: a full row at large size).
@@ -94,7 +98,11 @@ STEPS
      whatever --window-size says, so print innerWidth and scrollWidth into the page:
      equal means no sideways overflow.
 7. Close the client by launch-game steps 2 and 4: read the log, then
-   tools/stop-dev-java.ps1 (-WhatIf first).
+   tools/stop-dev-java.ps1 (-WhatIf first). The script lists two processes for one
+   runClient, the gradlew wrapper and the client. Stopping the wrapper takes the client
+   with it, so the script then fails on the second PID ("Cannot find a process") and
+   exits 1. That is a clean stop: confirm with the fml.modFolders query, which should
+   find nothing.
 8. Revert any SHOTS edit that only served this run, unless the owner wants it kept. Keep
    a new framing or a stage() improvement: the next shoot needs it.
 

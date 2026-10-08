@@ -56,6 +56,11 @@ STEPS
      issue's list in the same edit.
    Moving an issue between milestones edits BOTH milestone descriptions and the
    release-plan issue, so the three never disagree.
+   A bug the owner PARKS leaves the releases altogether: it goes on `Backlog`, under
+   "Parked bugs" in that milestone's description, and is never pulled back onto a
+   release by this step (it has a milestone, so the null-milestone rule does not see
+   it). #35 went there on 2026-10-08, after two runs in a row stopped to ask about it.
+   Only the owner un-parks one.
 
 3. List the next release's units, in this order (owner):
    a. its open `bug` and `tuning` issues, ranked by fix-bug step 1 (damage, then
@@ -76,7 +81,9 @@ STEPS
    An issue with `needs-owner` stays in the list. Before choosing it, put its open
    calls to the owner with the question tool, 2-4 options each with the
    recommendation first. If she answers, remove needs-owner and continue. If not,
-   skip it.
+   skip it. If she says to park it, move it to `Backlog` by step 2 and say on the issue
+   what picks it up next (for #35, the next run-tests, so needs-owner came off: that
+   routine's survey leaves out needs-owner issues).
    Re-check the order with `Depends on:` lines. The milestone list can be wrong, and
    the dependency wins.
 
