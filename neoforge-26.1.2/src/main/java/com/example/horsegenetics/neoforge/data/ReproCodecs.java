@@ -26,7 +26,7 @@ public final class ReproCodecs {
 
     private static final Codec<GenomeSample> SAMPLE = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("genotype").forGetter(GenomeSample::genotypeCode),
-            Codec.STRING.fieldOf("epigenome").forGetter(GenomeSample::epigenomeCode)
+            GenomeCodeCodecs.STORED_EPIGENOME.fieldOf("epigenome").forGetter(GenomeSample::epigenomeCode)
     ).apply(i, GenomeSample::new));
 
     private static final Codec<Embryo> EMBRYO = RecordCodecBuilder.create(i -> i.group(

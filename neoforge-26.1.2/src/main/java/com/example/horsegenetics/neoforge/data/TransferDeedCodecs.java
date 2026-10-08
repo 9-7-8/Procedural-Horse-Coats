@@ -28,7 +28,7 @@ public final class TransferDeedCodecs {
             Codec.STRING.optionalFieldOf("bred_by").forGetter(TransferDeed::bredBy),
             Codec.STRING.optionalFieldOf("issued_by", "").forGetter(TransferDeed::issuedBy),
             GenomeCodeCodecs.STORED_GENOTYPE.fieldOf("genetic_code").forGetter(TransferDeed::geneticCode),
-            Codec.STRING.fieldOf("epigenome_code").forGetter(TransferDeed::epigenomeCode)
+            GenomeCodeCodecs.STORED_EPIGENOME.fieldOf("epigenome_code").forGetter(TransferDeed::epigenomeCode)
     ).apply(i, TransferDeed::new));
 
     public static final StreamCodec<ByteBuf, TransferDeed> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);

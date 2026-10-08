@@ -381,6 +381,21 @@ python neoforge-26.1.2/tools/barn/bake-barn.py   # re-export from a structure bl
     saved client logs of those two days, nor the current one, has a <code>Failed to encode</code> or disconnect line.
 </p>
 
+<p id="verified-nbt-string-cap">
+    <strong>A saved genome code has a cap too, and it cannot be raised</strong> (issue #211, fixed 2026-10-08). NBT
+    writes every string with <code>DataOutput.writeUTF</code>, which stops at 65&nbsp;535 bytes. That is half of the
+    wire cap <code>EpigenomeSizeTest</code> watches, and a worst-case epigenome was within about a tenth of it. Over
+    it, a save does not fail: <code>NbtIo</code> logs <code>Failed to write NBT String</code> and writes an
+    <em>empty</em> string, so the horse would reload with no epigenome. So a code that fits is saved as the bare
+    string it always was, and a longer one as a list of pieces: the rule is <code>common/genetics/CodeChunks</code>,
+    and the one codec is <code>GenomeCodeCodecs.STORED_EPIGENOME</code>, used by the horse record, the seed jar, the
+    transfer paper and the pregnancy sample. Both shapes read, so no existing save changes. Record payloads are that
+    same codec as NBT (<code>ByteBufCodecs.fromCodec</code>), so they are covered with it.
+    <em>Proof:</em> <code>CodeChunksTest</code> checks the rule against <code>writeUTF</code> itself. The gametest
+    <code>long_epigenome_still_saves</code> takes a 70&nbsp;000-character code through each codec to bytes and back, and
+    across the wire; it was red before the fix (the record came back different) and is green after.
+</p>
+
 <p id="verified-test-world-launch">
     <strong><code>runClientTestWorld</code> needs no clicks</strong> (2026-09-14, the all-day run): the
     client lands in the horse dimension's test yard about thirty seconds after launch.

@@ -54,6 +54,31 @@ public final class GenomeCodeCodecs {
     public static final com.mojang.serialization.Codec<String> STORED_GENOTYPE =
             com.mojang.serialization.Codec.STRING.xmap(GenomeCodeCodecs::readable, code -> code);
 
+    /**
+     * An epigenome code as it is <b>saved</b>, and as it rides any payload built
+     * with {@code ByteBufCodecs.fromCodec} (which is NBT too). NBT writes a
+     * string with {@code DataOutput.writeUTF}, whose limit is 65,535 bytes and
+     * cannot be raised. Over it, a save does not fail: {@code NbtIo} logs
+     * "Failed to write NBT String" and writes an <b>empty</b> string, so the
+     * horse reloads with no epigenome at all (seen in the 26.1.2 game, issue
+     * #211, gametest {@code long_epigenome_still_saves}).
+     *
+     * <p>So a code that fits is written as the bare string it always was, and a
+     * longer one as a list of pieces ({@code CodeChunks}). Both shapes read, so
+     * no existing save changes. <b>No epigenome code is saved on a bare
+     * {@code Codec.STRING}.</b>
+     */
+    public static final com.mojang.serialization.Codec<String> STORED_EPIGENOME =
+            com.mojang.serialization.Codec.either(
+                    com.mojang.serialization.Codec.STRING,
+                    com.mojang.serialization.Codec.STRING.listOf())
+                    .xmap(saved -> saved.map(code -> code,
+                                    com.example.horsegenetics.common.genetics.CodeChunks::join),
+                            code -> com.example.horsegenetics.common.genetics.CodeChunks.fitsOneString(code)
+                                    ? com.mojang.datafixers.util.Either.left(code)
+                                    : com.mojang.datafixers.util.Either.right(
+                                            com.example.horsegenetics.common.genetics.CodeChunks.split(code)));
+
     private static String readable(String code) {
         return com.example.horsegenetics.common.genetics.Genotype.readableStored(code, segment ->
                 com.example.horsegenetics.neoforge.HorseGenetics.LOGGER.warn(

@@ -2253,6 +2253,8 @@ public final class ModGameTests {
         register(event, environment, STASIS_TAG_IS_READABLE, 100);
         // Three codec round trips in one tick.
         register(event, environment, OLD_PAPERS_STILL_READ, 100);
+        // Nine codec round trips through bytes, in one tick.
+        register(event, environment, LONG_EPIGENOME_STILL_SAVES, 100);
         // Leash, untie, then five ticks for a ground drop to become visible.
         register(event, environment, WHISTLED_LEAD_COMES_BACK, 100);
         // One horse, two mock players, all synchronous - nothing is dropped.
@@ -3752,6 +3754,130 @@ public final class ModGameTests {
                             + " on the next reload"), 0);
         }
         helper.succeed();
+    }
+
+    /**
+     * <b>A genome code too long for one NBT string still saves</b> (issue #211).
+     *
+     * <p>Every NBT string is written with {@code DataOutput.writeUTF}, which throws
+     * above 65,535 bytes, and an epigenome code grows with every gene that has an
+     * epigenetic schema. Past that line a horse's record would no longer write: the
+     * chunk it stands in, the ancestry file, a seed jar or a transfer paper holding
+     * it, and the record payloads, which are NBT too. So the saved codecs write a
+     * long code in pieces ({@code CodeChunks}), and this is the check that they do.
+     *
+     * <p>It is here and not in JUnit because the failure is in the game's own NBT
+     * writer, which the module's test classpath does not carry. Each codec is taken
+     * to bytes and back the way a region file holds it. Then the mirror: a code that
+     * fits is still the bare string it always was, and a bare string still reads, so
+     * no existing save changes shape (CLAUDE.md hard rule 10).
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> LONG_EPIGENOME_STILL_SAVES =
+            TEST_FUNCTIONS.register("long_epigenome_still_saves", () -> ModGameTests::longEpigenomeStillSaves);
+
+    private static void longEpigenomeStillSaves(GameTestHelper helper) {
+        // The codecs never parse the code, so its content does not matter - only its length.
+        String longCode = "ab:1.5;".repeat(10000);
+        String shortCode = "ab:1.5;";
+        String genotype = com.example.horsegenetics.common.genetics.Genotype
+                .random(new com.example.horsegenetics.common.SeededRng(1L)).toCode();
+        java.util.UUID id = java.util.UUID.fromString("00000000-0000-0211-0000-000000000211");
+
+        for (String code : new String[] {longCode, shortCode, ""}) {
+            com.example.horsegenetics.common.horse.HorseRecord record =
+                    new com.example.horsegenetics.common.horse.HorseRecord(id, "Long", "Code",
+                            java.util.Optional.empty(), genotype, code, java.util.Optional.empty(),
+                            java.util.Optional.empty(), java.util.Optional.empty(),
+                            java.util.Optional.empty(), java.util.Optional.empty(), 0,
+                            java.util.Optional.empty(), false, java.util.Optional.empty());
+            String what = code.length() + "-char epigenome";
+            com.example.horsegenetics.common.horse.HorseRecord recordBack = throughDisk(
+                    com.example.horsegenetics.neoforge.data.HorseRecordCodecs.CODEC, record,
+                    "a horse record with a " + what);
+            if (!record.equals(recordBack)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a horse record with a " + what + " came back from disk different"), 0);
+            }
+            com.example.horsegenetics.neoforge.data.StoredGenome jar =
+                    new com.example.horsegenetics.neoforge.data.StoredGenome(genotype, code, id, "Long Code", "");
+            if (!jar.equals(throughDisk(com.example.horsegenetics.neoforge.data.StoredGenome.CODEC, jar,
+                    "a stored genome with a " + what))) {
+                throw new GameTestAssertException(Component.literal(
+                        "a stored genome with a " + what + " came back from disk different"), 0);
+            }
+            com.example.horsegenetics.common.horse.TransferDeed deed =
+                    new com.example.horsegenetics.common.horse.TransferDeed(id, "Long Code",
+                            java.util.Optional.empty(), java.util.Optional.empty(), "", genotype, code);
+            if (!deed.equals(throughDisk(com.example.horsegenetics.neoforge.data.TransferDeedCodecs.CODEC, deed,
+                    "a transfer paper with a " + what))) {
+                throw new GameTestAssertException(Component.literal(
+                        "a transfer paper with a " + what + " came back from disk different"), 0);
+            }
+            // The wire: a record payload is this codec as NBT, so it has the same limit.
+            io.netty.buffer.ByteBuf buf = Unpooled.buffer();
+            try {
+                com.example.horsegenetics.neoforge.data.HorseRecordCodecs.STREAM_CODEC.encode(buf, record);
+                if (!record.equals(com.example.horsegenetics.neoforge.data.HorseRecordCodecs.STREAM_CODEC.decode(buf))) {
+                    throw new GameTestAssertException(Component.literal(
+                            "a horse record with a " + what + " came off the wire different"), 0);
+                }
+            } catch (RuntimeException e) {
+                if (e instanceof GameTestAssertException) {
+                    throw e;
+                }
+                throw new GameTestAssertException(Component.literal(
+                        "a horse record with a " + what + " does not cross the wire: " + e), 0);
+            } finally {
+                buf.release();
+            }
+        }
+
+        // The mirror: a code that fits is saved as the bare string every existing world holds...
+        com.example.horsegenetics.neoforge.data.StoredGenome small =
+                new com.example.horsegenetics.neoforge.data.StoredGenome(genotype, shortCode, id, "Short", "");
+        net.minecraft.nbt.Tag smallTag = com.example.horsegenetics.neoforge.data.StoredGenome.CODEC
+                .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, small).getOrThrow();
+        net.minecraft.nbt.Tag field = ((net.minecraft.nbt.CompoundTag) smallTag).get("epigenome");
+        if (!(field instanceof net.minecraft.nbt.StringTag)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a short epigenome code is no longer saved as a bare string (" + field
+                            + ") - an older release could not read a save this one wrote"), 0);
+        }
+        // ...and a long one is not.
+        net.minecraft.nbt.Tag bigField = ((net.minecraft.nbt.CompoundTag)
+                com.example.horsegenetics.neoforge.data.StoredGenome.CODEC.encodeStart(
+                        net.minecraft.nbt.NbtOps.INSTANCE,
+                        new com.example.horsegenetics.neoforge.data.StoredGenome(genotype, longCode, id, "Long", ""))
+                        .getOrThrow()).get("epigenome");
+        if (!(bigField instanceof net.minecraft.nbt.ListTag)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a " + longCode.length() + "-char epigenome code was not saved in pieces"), 0);
+        }
+        helper.succeed();
+    }
+
+    /** Encode, write as a region file would, read and decode; a failure anywhere names the step. */
+    private static <T> T throughDisk(com.mojang.serialization.Codec<T> codec, T value, String what) {
+        net.minecraft.nbt.Tag encoded = codec.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, value)
+                .result().orElse(null);
+        if (!(encoded instanceof net.minecraft.nbt.CompoundTag tag)) {
+            throw new GameTestAssertException(Component.literal(what + " does not encode"), 0);
+        }
+        try {
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+            try (java.io.DataOutputStream out = new java.io.DataOutputStream(bytes)) {
+                net.minecraft.nbt.NbtIo.write(tag, out);
+            }
+            net.minecraft.nbt.CompoundTag back;
+            try (java.io.DataInputStream in = new java.io.DataInputStream(
+                    new java.io.ByteArrayInputStream(bytes.toByteArray()))) {
+                back = net.minecraft.nbt.NbtIo.read(in);
+            }
+            return codec.parse(net.minecraft.nbt.NbtOps.INSTANCE, back).result().orElse(null);
+        } catch (java.io.IOException e) {
+            throw new GameTestAssertException(Component.literal(
+                    what + " cannot be written to disk: " + e), 0);
+        }
     }
 
     /**

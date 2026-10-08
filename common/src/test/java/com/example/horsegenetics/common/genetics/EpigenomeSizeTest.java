@@ -42,6 +42,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * to it and could not see the one that did not. Hence {@code GenomeCodeCodecs}:
  * the caps are in a single place so this test guards all of them at once, and
  * a genome code on a default-length string codec is now a bug on sight.
+ *
+ * <p><b>The third cap had no number anywhere</b> (issue #211). A saved code is
+ * an NBT string, NBT writes strings with {@code DataOutput.writeUTF}, and that
+ * stops at 65&nbsp;535 bytes - half of the cap this test watches. It is the
+ * JDK's limit and cannot be raised, so it is not guarded here: a code over it
+ * is saved in pieces instead ({@link CodeChunks}, {@code CodeChunksTest}, and
+ * the gametest {@code long_epigenome_still_saves}).
  */
 class EpigenomeSizeTest {
 
