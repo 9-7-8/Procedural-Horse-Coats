@@ -80,6 +80,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -694,6 +695,48 @@ public final class GeneAbilityHandler {
             return;
         }
         mob.getNavigation().moveTo(horse, 1.0);
+    }
+
+    /**
+     * <b>A leader that is gone takes its last order back</b> (#213).
+     *
+     * <p>{@link #followHorse} hands each follower a path on the leader's beat and installs no goal, so nothing
+     * renewed the order once the leader was gone - but nothing withdrew it either, and a cow five blocks out
+     * walked all five to the block a dead horse had stood on. The yard's PACK LEADER pen measured it: three or
+     * four cows still on their way a beat after the kill, in eight runs of ten.
+     *
+     * <p>Called at the death itself - the aura stops with {@code isAlive}, twenty ticks before the body is
+     * removed - and again from {@link #onEntityLeave} for a horse discarded or sent to another dimension.
+     * A path counts as the leader's when it ends within {@link #FOLLOW_STOP} of where the horse was, which
+     * also takes in the order of a beat or two before; a mob's own stroll ending there is stopped once and
+     * strolls again.
+     */
+    private static void releaseFollowers(Horse horse) {
+        if (!(horse.level() instanceof ServerLevel level)) {
+            return;
+        }
+        for (HorseAbilities.Active active : abilitiesOf(horse)) {
+            if (!(active.ability() instanceof GeneAbility.MobAura aura) || !"follow".equals(aura.mode())) {
+                continue;
+            }
+            BlockPos was = horse.blockPosition();
+            double near = FOLLOW_STOP * FOLLOW_STOP;
+            for (Mob mob : level.getEntitiesOfClass(Mob.class, horse.getBoundingBox().inflate(aura.radius()),
+                    Mob::isAlive)) {
+                BlockPos target = mob.getNavigation().getTargetPos();
+                if (mob != horse && mob.getNavigation().isInProgress() && target != null
+                        && target.distSqr(was) <= near) {
+                    mob.getNavigation().stop();
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    static void onLeaderDeath(LivingDeathEvent event) {
+        if (event.getEntity() instanceof Horse horse) {
+            releaseFollowers(horse);
+        }
     }
 
     // ------------------------------------------------------------------
@@ -1319,6 +1362,13 @@ public final class GeneAbilityHandler {
     static void onEntityLeave(EntityLeaveLevelEvent event) {
         if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Horse horse)) {
             return;
+        }
+        // Before the cache goes: a leader that was taken away lets its followers go (#213). One that only
+        // unloads with its chunk is left alone - its followers unload beside it, and a scan from inside a
+        // chunk unload is a risk for nothing.
+        Entity.RemovalReason reason = horse.getRemovalReason();
+        if (reason == Entity.RemovalReason.DISCARDED || reason == Entity.RemovalReason.CHANGED_DIMENSION) {
+            releaseFollowers(horse);
         }
         // The ability list and world samples leave with the horse too (#200): they hold both codes, and the
         // only eviction used to be a wholesale clear that made every loaded horse re-parse on one tick.

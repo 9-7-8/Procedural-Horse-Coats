@@ -118,8 +118,9 @@ import java.util.TreeMap;
  * modifier tack within its 99.9% band. <b>Fittings</b>: every added leather armour and saddle carries a
  * {@code tack_tint} whose seat and bridle are both dye colours and whose metal is one of iron, copper, bone, coal,
  * basalt or gold - FAIL on any gem (diamond, emerald, amethyst) or any other metal, or an undyed piece. <b>Papers</b>:
- * every research paper anywhere in any chest roll names a gene with a gene carrot, its first allele is not the wild
- * type, its second is the first again (X/X) or the wild type (X/n), and its token is in {@code ResearchTopic.lootPool}
+ * every research paper anywhere in any chest roll names a gene with a gene carrot, is a variant twice (X/X) or a
+ * variant with the wild type in either order (X/n or n/X - the token keeps the locus's allele order, #212), and
+ * its token is in {@code ResearchTopic.lootPool}
  * for that gene. FAIL on any other - a compound pair is printed.
  *
  * <p><b>Negative controls</b>, 2,000 rolls each with the parameters their sets require, read in
@@ -634,11 +635,15 @@ final class DebugYardLoot {
             }
             if (!gene.hasGeneCarrot()) {
                 why = "gene has no gene carrot";
-            } else if (topic.alleleA().equals(wild)) {
-                why = "first allele is the wild type";
             } else if (topic.alleleB().equals(topic.alleleA())) {
-                s.trueBreeding++;
-            } else if (topic.alleleB().equals(wild)) {
+                if (topic.alleleA().equals(wild)) {
+                    why = "wild/wild pair";
+                } else {
+                    s.trueBreeding++;
+                }
+            } else if (topic.alleleA().equals(wild) || topic.alleleB().equals(wild)) {
+                // Either order: ResearchTopic.of writes the pair as AllelePair holds it, in the locus's own
+                // allele order, so a carrier of a variant listed after the wild type reads n/X (#212).
                 s.carriers++;
             } else {
                 why = "COMPOUND pair";
@@ -1036,7 +1041,9 @@ final class DebugYardLoot {
         Set<String> gold = new HashSet<>();
         for (Map<String, Integer> m : List.of(youngSeen, matureSeen)) {
             for (String id : m.keySet()) {
-                if (id.contains("gold") && !id.equals("minecraft:golden_carrot")) {
+                // The seed is named for the carrot, so its id holds "gold" too (#212).
+                if (id.contains("gold") && !id.equals("minecraft:golden_carrot")
+                        && !id.equals(BuiltInRegistries.ITEM.getKey(seed).toString())) {
                     gold.add(id);
                 }
             }
@@ -1078,7 +1085,10 @@ final class DebugYardLoot {
             boolean onGrass = level.getBlockState(grass.above()).is(crop);
             boolean carrotPlaced = !level.getBlockState(farmCarrot.above()).isAir()
                     && !level.getBlockState(farmCarrot.above()).is(Blocks.LIGHT);
-            boolean groundsRight = level.getBlockState(dirt).is(Blocks.DIRT)
+            // Grass spreads onto the dirt target under the lamp within a minute, so either is the dirt
+            // case still standing; what this guards is the click having tilled or replaced a target (#212).
+            boolean groundsRight = (level.getBlockState(dirt).is(Blocks.DIRT)
+                    || level.getBlockState(dirt).is(Blocks.GRASS_BLOCK))
                     && level.getBlockState(grass).is(Blocks.GRASS_BLOCK);
             String detail = first + " | 40 ticks later: crop on farmland " + onFarm + ", on dirt " + onDirt
                     + ", on grass " + onGrass + ", anything above the golden-carrot farmland " + carrotPlaced;
@@ -1093,6 +1103,10 @@ final class DebugYardLoot {
     /** The hands right-click the top face of {@code ground} holding {@code held}, through the server's click path. */
     private static InteractionResult click(ServerLevel level, BlockPos ground, ItemStack held) {
         DebugYardClockwork.Hands h = new DebugYardClockwork.Hands(level);
+        // Creative, or HorseGeneticsEventHandler.noBlockPlaceInDebugDimension cancels the placing and every
+        // click reads Fail - which is what this check reported from 2026-10-05 to 2026-10-08 (#212). The
+        // flag keeps the stack's count and changes nothing BlockItem.place decides.
+        h.getAbilities().instabuild = true;
         h.snapTo(ground.getX() + 0.5, ground.getY() + 1, ground.getZ() - 0.5, 0.0F, 30.0F);
         h.setItemInHand(InteractionHand.MAIN_HAND, held);
         BlockHitResult hit = new BlockHitResult(

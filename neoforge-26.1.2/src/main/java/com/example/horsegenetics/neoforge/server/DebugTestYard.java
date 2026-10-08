@@ -164,16 +164,19 @@ final class DebugTestYard {
      * SHADOW LIGHT, KEEPING HORSES, STASIS BANK, GELDING, FOAL NAMES, COVER REACH, BOND DECAY and VERDANT FLOORS - each
      * check closed on its own page's Coding tab. The letters are names: AW follows W directly now.
      */
-    /** WALL PAIR and FENCE PAIR (east, {@link DebugYardReach}); WEATHER COPIES (west) answered on 2026-10-02 and went. */
+    /**
+     * RELOAD (west, {@link DebugYardReload}, 2026-10-08, #35 and #214) where WEATHER COPIES stood until it
+     * answered on 2026-10-02. WALL PAIR and FENCE PAIR (east) answered and went on 2026-10-08.
+     */
     static final int ROW_AW = ROW_W + ROW_W_D + PACKED_AISLE;
-    /** RESEARCH SHELF (west) - {@link DebugYardShelf}; STALL SHAPES (east) answered on 2026-10-04 (#25) and went. */
-    static final int ROW_AX = ROW_AW + NEW_ROW_D + PACKED_AISLE;
-    /** CHEST LOOT (west), CARROT CROP (east) - {@link DebugYardLoot}. */
-    static final int ROW_AY = ROW_AX + NEW_ROW_D + PACKED_AISLE;
-    /** GRAZING (west), HANDS AT FEEDING (east) - {@link DebugYardDiet}. */
-    static final int ROW_AZ = ROW_AY + NEW_ROW_D + PACKED_AISLE;
+    /*
+     * Rows AX, AY and AZ went on 2026-10-08, each pen on its own PASS lines with every check closed on its page:
+     * RESEARCH SHELF (wiki/item-research-shelf.html), CHEST LOOT and CARROT CROP (wiki/items.html,
+     * wiki/item-research-papers.html, #212), GRAZING and HANDS AT FEEDING (wiki/horse-care.html, #26,
+     * wiki/gene-food-preference.html). The letters are names: BB follows AW directly now.
+     */
     /** MUSIC (west), PACK LEADER (east) - {@link DebugYardSocial}. */
-    static final int ROW_BB = ROW_AZ + NEW_ROW_D + PACKED_AISLE;   // BA (FIREPROOF, BREATH) answered and went
+    static final int ROW_BB = ROW_AW + NEW_ROW_D + PACKED_AISLE;   // BA (FIREPROOF, BREATH) answered and went
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -247,10 +250,7 @@ final class DebugTestYard {
         DebugYardLong.build(level, gy, cx, mouthZ);
         // Rows AW-BC (2026-10-02): the second night's pens, one class a row.
         int rowX = cx + WEST_MIN;
-        DebugYardReach.build(level, gy, rowX, mouthZ + ROW_AW);
-        DebugYardShelf.build(level, gy, rowX, mouthZ + ROW_AX);
-        DebugYardLoot.build(level, gy, rowX, mouthZ + ROW_AY);
-        DebugYardDiet.build(level, gy, rowX, mouthZ + ROW_AZ);
+        DebugYardReload.build(level, gy, rowX, mouthZ + ROW_AW);
         DebugYardSocial.build(level, gy, rowX, mouthZ + ROW_BB);
         // After every row has registered its checks: the summaries name whatever has not answered.
         DebugYardClockwork.build(level, gy, cx, mouthZ);

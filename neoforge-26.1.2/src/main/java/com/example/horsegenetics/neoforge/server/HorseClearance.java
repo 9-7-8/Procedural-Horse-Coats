@@ -4,6 +4,7 @@ import com.example.horsegenetics.neoforge.HorseGenetics;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -12,6 +13,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
@@ -139,6 +141,27 @@ public final class HorseClearance {
         horse.snapTo(horse.getX(), top.getY(), horse.getZ(), horse.getYRot(), horse.getXRot());
         horse.resetFallDistance();
         return "lifted to the surface at " + horse.blockPosition().toShortString();
+    }
+
+    /** How many ticks after it is built a horse cannot be hurt by a wall - see {@link #onLoadedIntoWall}. */
+    static final int LOAD_GRACE_TICKS = 5;
+
+    /**
+     * <b>A horse just loaded is vanilla-sized for one tick, and a small one can be "in a wall" for it</b> (#214).
+     *
+     * <p>A loaded horse is built at the entity type's size and its saved {@code SCALE} lands at the end of its
+     * first tick, after {@code LivingEntity.baseTick} has already asked {@code isInWall}. A horse of scale 0.68
+     * saved flush against a wall therefore has, for that one tick, a vanilla-sized eye box reaching into the
+     * stone, and was hit for a point on every chunk load (the yard's RELOAD pen, 2026-10-08). So in-wall damage
+     * in a horse's first {@value #LOAD_GRACE_TICKS} ticks is not real. A horse that truly is buried is hit from
+     * then on exactly as before.
+     */
+    @SubscribeEvent
+    static void onLoadedIntoWall(LivingIncomingDamageEvent event) {
+        if (event.getEntity() instanceof Horse horse && horse.tickCount <= LOAD_GRACE_TICKS
+                && event.getSource().is(DamageTypes.IN_WALL)) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent
