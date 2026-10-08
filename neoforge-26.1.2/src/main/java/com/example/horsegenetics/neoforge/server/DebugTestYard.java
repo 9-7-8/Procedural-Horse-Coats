@@ -416,6 +416,9 @@ final class DebugTestYard {
                 // REACH WALL's stone divider (row Y west), the wall no cover may cross -
                 // under the grid for the same reason, the second build after the cut.
                 || state.is(Blocks.STONE)
+                // MUSIC's jukebox (DebugYardSocial.music), free-standing between the
+                // mares' cells on purpose: the pen is about being near it. #209.
+                || state.is(Blocks.JUKEBOX)
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.RESEARCH_SHELF.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.LEATHERWORKERS_POST.get())
                 || state.is(com.example.horsegenetics.neoforge.block.ModBlocks.SCIENTISTS_POST.get())
