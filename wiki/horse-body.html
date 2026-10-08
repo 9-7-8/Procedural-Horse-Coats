@@ -853,6 +853,26 @@ public interface GeneEpigenetics {
     <code>grown_horse_leaves_the_ceiling</code> holds it: the test goes red without the
     handler.
 </p>
+<p id="verified-reload-clear">
+    <strong>A chunk load by itself does not bury a horse</strong> (2026-10-08, test yard, pen RELOAD, two
+    <code>CLOCKWORK PASS</code> lines at 10:56:59). Twenty-four horses of scale 0.74 to 1.41 were each stood
+    flush in the corner of two stone walls, under the lowest ceiling its hitbox cleared, then saved, discarded
+    and rebuilt the way a chunk load rebuilds an entity. Every one was built vanilla-sized
+    (1.40 &times; 1.60) and took its saved scale on its first tick. None moved (0.000 blocks), none collided,
+    and none was in a wall. All nine that were bigger than vanilla fired a growing
+    <code>EntityEvent.Size</code>, so <code>HorseClearance</code> does see a reload&rsquo;s regrowth. That
+    rules the reload out as the way horses on the live server reach walls
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/35">#35</a>, still open); what is left is something that places an already-grown
+    horse in a block. Not covered: a horse over scale 1.41, and the storage&rsquo;s own data-fixer pass.
+</p>
+<p id="load-grace">
+    <strong>In-wall damage in a horse&rsquo;s first five ticks is ignored</strong>
+    (<code>HorseClearance.LOAD_GRACE_TICKS</code>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/214">#214</a>). The same pen found why:
+    <code>LivingEntity.baseTick</code> tests <code>isInWall</code> before the saved scale is applied, so for one
+    tick a small horse has a vanilla-sized head. One of scale 0.68 saved flush against a wall was hit for a
+    point on every load (09:41:29). After the fix, horses of scale 0.74, 0.76 and 0.76 in the same spot lost
+    nothing (10:56:59). A horse that really is buried is hit from the sixth tick on, as before.
+</p>
 
 <h2 id="notbuilt">What this is not</h2>
 
