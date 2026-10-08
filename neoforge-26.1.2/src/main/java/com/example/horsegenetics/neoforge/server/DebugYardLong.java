@@ -6,6 +6,9 @@ import com.example.horsegenetics.common.genetics.Epigenome;
 import com.example.horsegenetics.common.genetics.Gene;
 import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.genes.DryadGene;
+import com.example.horsegenetics.common.genetics.genes.RainbowDustGene;
+import com.example.horsegenetics.common.genetics.spec.GeneAbility;
+import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.Sex;
 import com.example.horsegenetics.common.repro.Embryo;
@@ -57,6 +60,9 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *   <tr><td>T</td><td>(oak deleted), DRYAD FLOWER</td><td>DRYAD OAK+BIRCH (half rate each), DRYAD DARK SMALL (widened 10x9)</td></tr>
  *   <tr><td>U</td><td>RATIO HYPP, RATIO LETHAL WHITE</td><td>RATIO BRINDLE, RATIO SIZE</td></tr>
  * </table>
+ *
+ * <p>Row U west holds RATIO RAINBOW F1 and F2 since 2026-10-08; every pen in the table above has answered and
+ * gone.
  *
  * <h2>The dryad rows stand on stone</h2>
  * A dryad plants anywhere within four blocks of itself, and a fence is not a wall to a
@@ -114,7 +120,20 @@ final class DebugYardLong {
             // RATIO MITF SW3, the last of them, passed at conception 40 on 2026-10-08 (SW3/SW3 16, SW3/N 17,
             // N/N 7; none born) and went - wiki/gene-mitf.html#verified-sw3-nonviable. ratio() and its judging
             // stay for the next inheritance question.
-            ActionTrace.log("test yard", "all-day pens built (none: every ratio pen has answered)");
+
+            // ROW U WEST (2026-10-08): rainbow dust, which wiki/gene-rainbow-dust.html has asked a RATIO pen for
+            // since the checklist was broken up. Its check has two halves and each gets a pen: "Rbw/Rbw x plain
+            // gives no rainbow foals" (every foal Rbw/n, none trailing), "and their foals crossed give about one
+            // in four" (Rbw/n x Rbw/n, 1:2:1 born, the trail on every Rbw/Rbw and on nothing else). The trail is
+            // read off the foal itself - GeneAbilityHandler.abilitiesOf, the list its own tick runs - so a
+            // carrier that expressed would FAIL here even with the ratio right.
+            ratio(level, gy, west, mouthZ + ROW_U, "RATIO RAINBOW F1", RainbowDustGene.KEY, "Rbw/Rbw", "n/n", false,
+                    List.of("RATIO RAINBOW F1", "Rbw/Rbw x n/n:", "every foal Rbw/n,", "none trails dust"),
+                    "every foal Rbw/n, none rainbow");
+            ratio(level, gy, west + 10, mouthZ + ROW_U, "RATIO RAINBOW F2", RainbowDustGene.KEY, "Rbw/n", "Rbw/n",
+                    false, List.of("RATIO RAINBOW F2", "Rbw/n x Rbw/n:", "1 in 4 Rbw/Rbw,", "only they trail"),
+                    "Rbw/Rbw 25%, Rbw/n 50%, n/n 25%; only Rbw/Rbw trails");
+            ActionTrace.log("test yard", "all-day pens built (row U west: RATIO RAINBOW F1, RATIO RAINBOW F2)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }
@@ -524,6 +543,16 @@ final class DebugYardLong {
         int conceptions;
         int colts;
         int mareMissing;
+        /**
+         * Set for a recessive whose expression is an emitter of its own (rainbow dust): every foal is read for it
+         * once it has ticked, and it must be there with two copies of {@link #mutant} and with no other pair.
+         */
+        @Nullable String trailGene;
+        /** Counted foals whose emitter has not been read yet; a verdict waits for this to empty. */
+        final Set<UUID> unread = new HashSet<>();
+        /** Foals read for the emitter, by copies of {@link #mutant}, and how many of each had it. */
+        final int[] readBy = new int[3];
+        final int[] trailBy = new int[3];
         /** A PASS or INCONCLUSIVE is logged once; a FAIL may still follow one, and says it overrides it. */
         boolean judged;
         boolean failed;
@@ -576,6 +605,14 @@ final class DebugYardLong {
             case "RATIO KIT W5" -> judgeBy(tally, Rule.CONCEIVED_121, "W5", false);
             case "RATIO MITF SW3" -> judgeBy(tally, Rule.CONCEIVED_121, "SW3", false);
             case "RATIO MILK CLASH" -> judgeBy(tally, Rule.NO_FOAL, "", false);
+            case "RATIO RAINBOW F1" -> {
+                judgeBy(tally, Rule.ALL_HET, "Rbw", false);
+                tally.trailGene = RainbowDustGene.KEY;
+            }
+            case "RATIO RAINBOW F2" -> {
+                judgeBy(tally, Rule.BORN_121, "Rbw", false);
+                tally.trailGene = RainbowDustGene.KEY;
+            }
             case "RATIO ACAN D5" -> {
                 judgeBy(tally, Rule.BORN_121, "D5", false);
                 tally.allSurvive = true;
@@ -646,6 +683,9 @@ final class DebugYardLong {
         t.counts.computeIfAbsent(cls, k -> new int[2])[0]++;
         t.born++;
         ActionTrace.log("test yard", t.name + ": foal " + t.born + " is " + cls + " | " + t.summary());
+        if (t.trailGene != null && copies(tokens(pair), t.mutant) >= 0) {
+            t.unread.add(id);
+        }
         judgeFoal(t, record.sex(), tokens(pair), cls);
     }
 
@@ -731,7 +771,11 @@ final class DebugYardLong {
                 var e = it.next();
                 Horse h = level.getEntity(e.getKey()) instanceof Horse x ? x : null;
                 String cls = t.classOf.get(e.getKey());
+                if (h != null && h.isAlive() && t.unread.remove(e.getKey())) {
+                    readTrail(t, h, cls);
+                }
                 if (h == null || !h.isAlive()) {
+                    t.unread.remove(e.getKey());
                     t.counts.computeIfAbsent(cls, k -> new int[2])[1]++;
                     t.died++;
                     ActionTrace.log("test yard", t.name + ": a " + cls + " foal died | " + t.summary());
@@ -764,6 +808,39 @@ final class DebugYardLong {
             judgeScan(level, t, now);
             scan(level, t, box, round + 1);
         });
+    }
+
+    /**
+     * Does this foal trail? Read off {@code GeneAbilityHandler.abilitiesOf}, the list the foal's own tick runs,
+     * at the first scan after its birth - so up to ten seconds old, joined and ticking. The gene's emitter with
+     * anything but two copies is the recessive expressing where it must not; two copies without it is the gene
+     * silent where it must fire.
+     */
+    private static void readTrail(Tally t, Horse foal, String cls) {
+        int m = copies(cls, t.mutant);
+        if (m < 0) {
+            return;
+        }
+        boolean trails = false;
+        for (HorseAbilities.Active a : GeneAbilityHandler.abilitiesOf(foal)) {
+            if (a.geneKey().equals(t.trailGene) && a.ability() instanceof GeneAbility.Emitter) {
+                trails = true;
+            }
+        }
+        t.readBy[m]++;
+        if (trails) {
+            t.trailBy[m]++;
+        }
+        if (trails != (m == 2)) {
+            fail(t, "at foal " + t.born, "a " + cls + " foal " + (trails ? "carries the gene's emitter" : "carries no"
+                    + " emitter") + "; the trail belongs to " + t.mutant + "/" + t.mutant + " and to nothing else");
+        }
+    }
+
+    private static String trailText(Tally t) {
+        return "; the trail read on " + (t.readBy[0] + t.readBy[1] + t.readBy[2]) + " foal(s): " + t.trailBy[2] + " of "
+                + t.readBy[2] + " with two copies, " + t.trailBy[1] + " of " + t.readBy[1] + " with one, " + t.trailBy[0]
+                + " of " + t.readBy[0] + " with none";
     }
 
     // ------------------------------------------------------------------
@@ -800,11 +877,15 @@ final class DebugYardLong {
         /** Brn/Y sire x n/n dam: every filly Brn/n, every colt without Brn. */
         SEX_LINKED,
         /** Watr/Watr x Lava/Lava: every conception lost, no foal ever. */
-        NO_FOAL
+        NO_FOAL,
+        /** A homozygote x a plain horse: every foal carries exactly one copy. */
+        ALL_HET
     }
 
     private static final int VERDICT_FOALS = 40;
     private static final int VERDICT_DRAWS = 40;
+    /** Foals for an every-foal-is-a-carrier verdict. One wrong foal FAILs, so twenty is a count, not a sample. */
+    private static final int VERDICT_HET = 20;
     /** The chi-square value at p = 0.01 with two degrees of freedom. */
     private static final double CHI2_2DF_P01 = 9.2103;
     /** Ten lost pregnancies and no foal; see {@link #judgeConception} for why it is read at the eleventh. */
@@ -925,6 +1006,12 @@ final class DebugYardLong {
             noteLabel(t, m, tokens);
         }
         switch (t.rule) {
+            case ALL_HET -> {
+                if (m != 1) {
+                    fail(t, "at foal " + t.born, "a " + cls + " foal; a " + t.mutant + "/" + t.mutant
+                            + " parent and a plain one can only make a carrier");
+                }
+            }
             case CONCEIVED_121 -> {
                 if (m == 2) {
                     fail(t, "at foal " + t.born, "a " + tokens + " foal was born; that genotype is impossible and"
@@ -1023,11 +1110,16 @@ final class DebugYardLong {
         if (t.rule == Rule.BORN_121) {
             int n = t.bornBy[0] + t.bornBy[1] + t.bornBy[2];
             // A lethal pen waits while a homozygote is still inside its FOAL_KEEP: past it, alive, it FAILs.
-            if (n >= VERDICT_FOALS && !(t.homozygoteDies && livingHomozygote(t))) {
-                ratioVerdict(t, t.bornBy, "at " + n + " foals born", t.homozygoteDies
-                        ? "; every " + label(t, 2) + " dead within " + FOAL_KEEP / 20 + " s of birth" : "");
+            if (n >= VERDICT_FOALS && !(t.homozygoteDies && livingHomozygote(t)) && t.unread.isEmpty()) {
+                ratioVerdict(t, t.bornBy, "at " + n + " foals born", (t.homozygoteDies
+                        ? "; every " + label(t, 2) + " dead within " + FOAL_KEEP / 20 + " s of birth" : "")
+                        + (t.trailGene == null ? "" : trailText(t)));
                 return;
             }
+        }
+        if (t.rule == Rule.ALL_HET && t.bornBy[1] >= VERDICT_HET && t.unread.isEmpty()) {
+            pass(t, "at " + t.born + " foals: every one " + label(t, 1) + trailText(t));
+            return;
         }
         if (t.damEntity == null || !(level.getEntity(t.damEntity) instanceof Horse dam && dam.isAlive())) {
             if (++t.mareMissing >= MARE_GONE_SCANS) {
@@ -1041,6 +1133,7 @@ final class DebugYardLong {
             String got = switch (t.rule) {
                 case CONCEIVED_121 -> t.draws + " conception draws of " + VERDICT_DRAWS;
                 case NO_FOAL -> t.conceptions + " conceptions of " + (MILK_CONCEPTIONS + 1);
+                case ALL_HET -> t.born + " foals of " + VERDICT_HET;
                 default -> t.born + " foals of " + VERDICT_FOALS;
             };
             inconclusive(t, "at " + RATIO_DEADLINE / 1200 + " min", "only " + got + " in eight hours; the pair"

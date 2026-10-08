@@ -520,4 +520,41 @@ class CoatTextureComposerTest {
         // grey does not touch a foal
         assertArrayEquals(composeFoal(BAY, 12345L), composeFoal(override("agouti=A/a", "grey=G3/N"), 12345L));
     }
+
+    /**
+     * <b>Voided has no number of its own</b> (wiki/gene-voided.html: "two voided horses with the same markings
+     * produce byte-identical coats, since its lightness knob is gone").
+     *
+     * <p>Two horses of one genotype, a voided tobiano, whose epigenomes were rolled from different seeds and
+     * then made to agree on every gene <i>except</i> voided. If voided still wrote anything on its copies, that
+     * is where the two would differ, and so would the coats. The last two assertions are the controls: the
+     * seeds really do paint different tobianos, and voided really does paint on this horse.
+     */
+    @Test
+    void twoVoidedHorsesWithTheSameMarkingsAreTheSameCoat() {
+        com.example.horsegenetics.common.genetics.Gene voided = Genes.byKeyOrNull("horsegenetics.voided");
+        assertTrue(voided != null, "the voided gene is not registered");
+        assertTrue(Epigenome.schemaOf(voided).isEmpty(), "voided carries a knob again: "
+                + Epigenome.schemaOf(voided));
+
+        Genotype marked = Genotype.parse(override("agouti=A/a", "tobiano=To/to", "voided=Vd/Vd"));
+        Epigenome first = Epigenome.fromSeed(11L);
+        Epigenome second = Epigenome.fromSeed(9_999L);
+        Epigenome agreed = second;
+        for (com.example.horsegenetics.common.genetics.Gene g : Genes.codeOrder()) {
+            if (g != voided && Epigenome.carries(g)) {
+                agreed = agreed.with(g.key(), first.copies(g));
+            }
+        }
+        int[] a = CoatTextureComposer.compose(marked, first, Skin.ADULT, true, template(Skin.ADULT), lut());
+        int[] b = CoatTextureComposer.compose(marked, agreed, Skin.ADULT, true, template(Skin.ADULT), lut());
+        assertArrayEquals(a, b, "two voided horses with the same markings baked different coats");
+
+        int[] other = CoatTextureComposer.compose(marked, second, Skin.ADULT, true, template(Skin.ADULT), lut());
+        assertFalse(Arrays.equals(a, other), "the two seeds painted the same tobiano, so this test compared"
+                + " one horse with itself");
+        int[] plain = CoatTextureComposer.compose(Genotype.parse(override("agouti=A/a", "tobiano=To/to")), first,
+                Skin.ADULT, true, template(Skin.ADULT), lut());
+        assertFalse(Arrays.equals(a, plain), "voided painted nothing on a tobiano");
+    }
 }

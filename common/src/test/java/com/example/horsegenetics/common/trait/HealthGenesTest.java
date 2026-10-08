@@ -167,6 +167,42 @@ class HealthGenesTest {
         }
     }
 
+    /**
+     * <b>The two JEB loci are two loci</b> (wiki/gene-lamc2.html: "breed a lamc2 carrier to a lama3 carrier
+     * repeatedly: no affected foal may ever appear. If one does, the two have been folded into one locus").
+     *
+     * <p>A draft-JEB carrier that is clear at LAMA3, bred to a Saddlebred-JEB carrier that is clear at LAMC2.
+     * No foal may be affected at either locus or be born anything but viable. The rest is the control that
+     * this is a cross of two independent loci and not of one: about half the foals carry each allele, and
+     * about a quarter carry both - which a single locus with two alleles would make every foal or none.
+     */
+    @Test
+    void aDraftJebCarrierAndASaddlebredJebCarrierNeverThrowAnAffectedFoal() {
+        Genotype draft = with(new AllelePair(Genes.LAMC2.variant, Genes.LAMC2.baseline));
+        Genotype saddlebred = with(new AllelePair(Genes.LAMA3.variant, Genes.LAMA3.baseline));
+        SeededRng rng = new SeededRng(31L);
+        int n = 20_000;
+        int lamc2 = 0;
+        int lama3 = 0;
+        int both = 0;
+        for (int i = 0; i < n; i++) {
+            Genotype foal = (i % 2 == 0 ? draft.breedWith(saddlebred, rng) : saddlebred.breedWith(draft, rng));
+            assertFalse(Genes.LAMC2.isAffected(foal.pair(Genes.LAMC2)), "a LAMC2-affected foal from one carrier");
+            assertFalse(Genes.LAMA3.isAffected(foal.pair(Genes.LAMA3)), "a LAMA3-affected foal from one carrier");
+            assertSame(Viability.VIABLE, HorseTraits.resolve(foal).viability(),
+                    "a foal of a lamc2 carrier and a lama3 carrier was born lethal: " + foal.toCode());
+            boolean c2 = Genes.LAMC2.isCarrier(foal.pair(Genes.LAMC2));
+            boolean a3 = Genes.LAMA3.isCarrier(foal.pair(Genes.LAMA3));
+            lamc2 += c2 ? 1 : 0;
+            lama3 += a3 ? 1 : 0;
+            both += c2 && a3 ? 1 : 0;
+        }
+        assertTrue(Math.abs(lamc2 / (double) n - 0.5) < 0.02, "lamc2 carriers " + lamc2 + " of " + n);
+        assertTrue(Math.abs(lama3 / (double) n - 0.5) < 0.02, "lama3 carriers " + lama3 + " of " + n);
+        assertTrue(Math.abs(both / (double) n - 0.25) < 0.02, "double carriers " + both + " of " + n
+                + ", wanted about a quarter: the two loci are not assorting independently");
+    }
+
     /** A carrier bred to a clear horse never produces an affected foal. */
     @Test
     void aCarrierBredToAClearHorseIsSafe() {

@@ -222,7 +222,9 @@ public final class HorseCareHandler {
             // going through awardBond - a foal's birthright, /bond, a debug yard - and
             // in an established world a stamp of zero would otherwise read as hundreds
             // of days owing and take that horse to the floor on its first tick.
-            after = after.with(after.bond(), after.herd(), after.bondToday(), today,
+            // bondToday goes back to 0 (#216): a horse really stamped on a world's first day carries a 0 too,
+            // and keeping its count carried day 0's cap into day 1. A never-stamped horse holds 0 already.
+            after = after.with(after.bond(), after.herd(), 0, today,
                     after.bondTicks(), after.togetherTicks());
         } else if (today > after.dayStamp()) {
             int left = Bond.decayed(after.bond(), today - after.dayStamp(),
