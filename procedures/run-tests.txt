@@ -23,6 +23,11 @@ BEFORE YOU START
    the rolled <date>-1.log.gz if it ran past midnight (check `head -1 latest.log`: if it
    starts at 00:00, read both). Grep for "[trace] test yard", "CLOCKWORK", "[watch]",
    WARN and ERROR.
+   Every FAIL and INCONCLUSIVE line in that run must be accounted for before anything
+   else: it is either an open issue already, or it becomes one in step 6. Three checks
+   failed on every launch from 2026-10-05 to 2026-10-08 with no issue, because each
+   session set them aside as known. Check the rolled logs for how long a line has been
+   failing, and whether it ever passed.
 
 STEPS
 -----
@@ -47,6 +52,17 @@ STEPS
    by the gene's Verified flag: a gene can be verified while a question about it is
    still open. INCONCLUSIVE and silent pens stay open. A night with no PASS line is
    evidence to record, not a closure.
+   d. Audit every pen still standing, not only the ones that passed this run: list its
+      checks (the pen's comment block) and find each on its page. A pen whose every
+      question is already recorded as verified is deleted now, even if an earlier
+      session closed the checks and left the pen. A pen that shares a class with one
+      still open loses only its own half.
+   e. Before a FAIL becomes a bug against the mod, rule out the pen. Read what the
+      check actually compares. The yard is in the debug dimension, which cancels every
+      block a survival player places, so a FakePlayer that places anything must be
+      creative; and a pen's horses are rolled apart from the locus it fixes, so one can
+      roll a disorder or a size that breaks the setup. A pen fault is still an issue
+      (bug + found-in-yard), fixed in the pen.
 
 3. Build new pens for open checks and issues a pen can answer unattended.
    A pen must start itself, run on a clock, and log its own PASS or FAIL (see the
@@ -62,6 +78,21 @@ STEPS
    detached, as launch-game describes, and confirm "all-day pens built" in a log
    newer than the launch. "Run tests" counts as permission to launch. If she is in a
    world, ask before closing it; the title screen may be closed without asking.
+   - Add -PyardSprint=600000 to runClientTestWorld. The yard then runs its eight game
+     hours in about three wall hours, and the short checks answer inside two minutes.
+     A sprint has two artefacts that are not mod faults: block entities do not tick for
+     roughly the first 180 sprinted ticks, and a "first poll" can land after the thing
+     it meant to watch has already happened. Confirm either against an unsprinted run.
+   - Wait for a verdict with a background `until grep -q ...; do sleep 2; done` (one
+     notification when it exits). A foreground sleep is refused.
+   - While the client runs, do not build (launch-game step 3). To check a change made
+     meanwhile, type-check with javac off the live process's classpath; the four
+     compile-only compat files (Jade, Waystones, FTB Teams, FadingGearMixin) error
+     there and nothing else should. Build for real once the client is closed.
+   - A fix whose proof is a pen needs the pen to hit the case. Sizes and other rolled
+     traits differ between launches, so give the pen several horses of the extreme it
+     needs, and say in the issue when a PASS could have been luck. Several launches
+     running are proof where one is not.
 
 6. Every bug found becomes a GitHub issue:
    `gh issue create --label bug --label found-in-yard`.
@@ -78,6 +109,8 @@ STEPS
      b. Add a pen or test that proves the fix, then rebuild and relaunch under step 5.
      c. Leave the issue open until a PASS proves the fix. Close it at once only when a
         unit test proves it and no runtime question remains.
+        Write "#N" in the commit message, never "fix #N" or "fixes #N": GitHub closes
+        the issue on push at those words, before any pen has read the fix.
      d. A fix only her eyes can confirm stays open for her.
    - LARGE (needs her in any way): list the fix options in the issue, recommendation
      first, and add needs-owner. That label takes the issue out of every later run's
@@ -114,7 +147,8 @@ NEVER
 -----
 - Never poll a long pen with sleep. Say when it should answer.
 - Never close a check on an INCONCLUSIVE or silent pen.
-- Never leave needs-owner off a bug that needs her.
+- Never leave needs-owner off a bug that needs her. If it was taken off so this run
+  would read the issue, put it back once the run has tested what it could.
 - Never put a bug on a Verification tab or in a feature issue (hard rule 9).
 - Never launch a hidden, unfocused client without pauseOnLostFocus:false (launch-game).
 

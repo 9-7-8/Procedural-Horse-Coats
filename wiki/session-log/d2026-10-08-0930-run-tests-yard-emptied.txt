@@ -1,0 +1,196 @@
+2026-10-08 09:30 - run-tests: four yard bugs found and fixed, #35's reload question
+answered, ten pens out. (The time is the session's start; it ended near 14:25.)
+
+ASKED
+-----
+1. "/run-tests" - the owner ran the run-tests routine (procedures/run-tests.txt).
+   Came of it: the whole loop below. Four issues opened and closed on proof (#212 to
+   #215), #35's parked question tested, ten answered pens deleted, three launches into
+   the yard, and a kit batch for the two fixes only she can confirm.
+2. "Can you check in and see if you need more time?" - asked while the session was
+   waiting on the last long pen. Came of it: the check showed the pen (RATIO MITF SW3)
+   had stalled for 50 minutes and would never answer, which became #215.
+3. "End session" - procedures/end-session.txt. Came of it: this log.
+
+DONE
+----
+A. The last run's failures, which nobody had filed. No commit of its own.
+   neoforge-26.1.2/run/logs held ten yard runs since 2026-10-05, every one about two
+   minutes long, and the same three CLOCKWORK FAIL lines in each (two CARROT CROP, one
+   CHEST LOOT), plus PACK LEADER's release check failing in eight of ten. The session
+   log of 2026-10-05 15:31 had noted them and found no matching issue; none was opened.
+
+B. #212, three false FAILs in the yard's row AY - commit a3553fbd. Issue CLOSED.
+   All three were DebugYardLoot's own checker:
+   - drops: the "nothing gold" filter was id.contains("gold") and the seed's id is
+     golden_carrot_seeds;
+   - planting: the FakePlayer was in survival, and
+     HorseGeneticsEventHandler.noBlockPlaceInDebugDimension cancels every survival
+     placement in the debug dimension, so every click read Fail and the seed had never
+     been tried on farmland at all;
+   - papers: the check assumed a paper's first allele is the variant, but
+     ResearchTopic.of keeps the locus's allele order, so a carrier can read n/X.
+   Proof: the launch of 09:40, CLOCKWORK PASS at 09:41:15 (200/200 drops at both ages,
+   nothing gold), 09:41:16 (seed Success on farmland, Fail on dirt and grass, golden
+   carrot Pass and nothing placed) and 09:41:19 (34287 chest papers: 17338 carrier,
+   16949 true-breeding, 0 bad). Recorded on wiki/items.html#verified-carrot-drops and
+   wiki/item-research-papers.html#verified-chest-pairs. The issue closed itself on push
+   because the commit message said "fix #212's"; the proof was added as a comment.
+   Pictures: no pictures.
+
+C. #213, pack leader followers - commit a3553fbd. Issue CLOSED.
+   What was wrong: GeneAbilityHandler.followHorse gives each follower a path on the
+   leader's beat and nothing withdrew it when the leader died, so cows walked out the
+   last few blocks to where it had stood.
+   The fix: GeneAbilityHandler.releaseFollowers stops the navigation of every mob in
+   the aura's radius whose path ends within FOLLOW_STOP (3) of the horse. It runs on
+   LivingDeathEvent, and from onEntityLeave for a horse DISCARDED or
+   CHANGED_DIMENSION (not for one that unloads with its chunk).
+   Proof: PACK LEADER's release check passed on three launches running (09:41:29 and
+   10:55:38 with two cows on their way at the kill, 10:56:51 with three). Before the
+   fix every run with three or more failed. Recorded on
+   wiki/gene-pack-leader.html#verified-release. Pictures: no pictures.
+
+D. #35, the reload question - commits a3553fbd, 53d68267, 08fe67a4. Issue OPEN,
+   parked, needs-owner back on.
+   A new pen, RELOAD (DebugYardReload, row AW west), stood each horse flush in the
+   corner of two stone walls under the lowest ceiling its hitbox cleared, saved it
+   (saveWithoutId), discarded it, and rebuilt it with
+   EntityType.loadEntityRecursive(HORSE, tag, level, LOAD, ...) and
+   ServerLevel.addLegacyChunkEntities, then watched 60 ticks.
+   Result at 10:56:59, 24 horses of scale 0.74 to 1.41: every one was built at
+   1.40 x 1.60 and took its saved scale on its first tick; none moved (0.000 blocks),
+   none collided, none was in a wall; all nine bigger than vanilla fired a growing
+   EntityEvent.Size. So a chunk load by itself does not bury a horse, and
+   HorseClearance does see the regrowth. What is left for #35 is something that places
+   an already-grown horse into a block. Recorded on
+   wiki/horse-body.html#verified-reload-clear and in two comments on #35. The three
+   fix options on #35 are still the owner's.
+   Not covered: a horse over scale 1.41; the storage's data-fixer pass; a horse that
+   was already in a block when saved. Pictures: no pictures.
+
+E. #214, found by that pen - commit a3553fbd. Issue CLOSED.
+   What was wrong: LivingEntity.baseTick tests isInWall before the saved SCALE is
+   applied, so a loaded horse has a vanilla-sized head for one tick. A horse of scale
+   0.68 flush against a wall took 1.0 from inWall on its reload (09:41:29).
+   The fix: HorseClearance.onLoadedIntoWall cancels IN_WALL damage while
+   horse.tickCount <= LOAD_GRACE_TICKS (5).
+   Proof: at 10:56:59 horses of scale 0.74, 0.76 and 0.76, all inside the reach (a
+   centre closer than 0.56 blocks to the wall), kept 22.0/22.0 and the log has no
+   inWall line. No single horse was run with and without the fix, since sizes are
+   rolled per launch. Recorded on wiki/horse-body.html#load-grace.
+
+F. #215, the ratio pen that stalled - commit 421d0942. Issue CLOSED.
+   What was wrong: RATIO MITF SW3 fixes only its pair's MITF alleles. Its mare rolled a
+   disorder (damage type horsegenetics.genetic_defect), dropped to 19/22, and every
+   cover after that was refused as "hurt ... a natural cover needs 90%". It stopped at
+   13 foals. Two older logs hold the same refusal 51 and 168 times.
+   The fix: DebugYardLong.scan heals the pen's adults each scan.
+   Proof: the launch of 10:56 ran to "RATIO MITF SW3 at conception 40 ... SW3/SW3 16,
+   SW3/N 17, N/N 7 against 1:2:1, chi-square 4.95 (2 df, p 0.084 ...); born SW3/N 17,
+   N/N 7, SW3/SW3 0 - PASS" at 11:53:06. Recorded on
+   wiki/gene-mitf.html#verified-sw3-nonviable. The same run closed fertility's
+   "a mare who loses a pregnancy is covered again" (sixteen losses, each followed by a
+   fresh cover): wiki/fertility.html#verified-covered-after-loss.
+
+G. Pens removed - commits ee773b07, 08fe67a4, 4f5bcbdd.
+   Deleted with every check recorded on its page: RESEARCH SHELF (DebugYardShelf),
+   CHEST LOOT and CARROT CROP (DebugYardLoot), GRAZING and HANDS AT FEEDING
+   (DebugYardDiet), WALL PAIR and FENCE PAIR (DebugYardReach), RELOAD
+   (DebugYardReload, written and deleted the same day), PACK LEADER (the east half of
+   DebugYardSocial) and RATIO MITF SW3 (the call in DebugYardLong; ratio() stays).
+   Most of those checks had been closed on the wiki on 2026-10-02 to 2026-10-04 and the
+   pens left standing. The yard is now row BB west, MUSIC, alone; rows AW to AZ are
+   gone. wiki/horse-dimension.html's row table says so.
+
+H. The hand kit - commit 421d0942. DebugTestWorldHandler has a new batch 1, "FIXES
+   WAITING ON YOU": a command whistle, two plain horses and a stick for #36, a stasis
+   bank for #10. The seven older batches moved down one. Not seen in game.
+
+Checks run: :neoforge-26.1.2:build green on the final tree (after the client was
+closed at 11:54); check-parity.mjs 7163 checks; :common:bakeUnverifiedGenes (no change);
+bake-verification-index, bake-roadmap-index, build-search-index, check-links,
+bake-agent-text and check-gene-tabs, all exit 0. Three launches by
+runClientTestWorld -PyardSprint=600000 (09:40, 10:55, 10:56); none had an ERROR line.
+
+DECIDED
+-------
+No owner decision was asked for or given this session. Calls made without her:
+- needs-owner went back on #35 once the run had tested it. The session before took it
+  off only so run-tests would read the issue. Recorded on #35.
+- #213 covers a leader that dies; one that is put in stasis, sold or sent to another
+  dimension is released by the same code but unread, and is an open check on
+  wiki/gene-pack-leader.html's Verification tab rather than part of the bug.
+- #214's grace is five ticks. Recorded on wiki/horse-body.html#load-grace.
+- A horse that unloads with its chunk does not release its followers (no scan from
+  inside a chunk unload). In the javadoc of GeneAbilityHandler.onEntityLeave.
+- The RELOAD pen was deleted the day it was written, by the yard's own rule: both its
+  questions were answered.
+- MUSIC stays. Its five checks pass, but the owner's finished-record question is only
+  ever "recorded, not judged" by the pen.
+
+FOUND ON THE WAY
+----------------
+- Bugs filed: #212, #213, #214, #215, all closed on proof this session.
+- Two verdicts under the tick sprint were artefacts and not filed. RESEARCH SHELF's
+  "copies keep arriving" read FAIL because the shelf's block entity did not tick for
+  about the first 180 sprinted ticks (progress 19 at 200 ticks; 198 unsprinted on
+  2026-10-05). GRAZING's hay check read INCONCLUSIVE because the horse ate the bale
+  before the first poll; it had passed unsprinted at 08:38 the same day. Both pens are
+  gone.
+- The note on wiki/item-research-papers.html that the wild-type-first papers "all came
+  from the cowboy house" was wrong: that table is only the first one rolled. Corrected.
+- MUSIC's finished-record reading says a finished disc paid nothing, but horse A was
+  already at bondToday 15, the daily cap, so the reading cannot tell. Left as it is on
+  wiki/gene-music-enjoyer.html's Verification tab.
+- Mistake: "fix #212's" in a commit message closed #212 on push, before the proof was
+  written on it. The proof went on as a comment; run-tests.txt now warns about the
+  wording.
+- Mistake: the first RELOAD pen relied on one Small/Small and one Big/Big horse. Their
+  size is on each copy's epigenome, so the second launch had nothing small enough and
+  read INCONCLUSIVE. The pen was given six of each and launched a third time.
+- The final pen removals (08fe67a4) were committed on a javac type-check, because the
+  client was running on the build output. The Gradle build that followed was green.
+- tools/stop-dev-java.ps1 leaves one Java process alone on every run (PID 15448 at
+  10:54). It was not this session's and was not touched.
+
+PROCEDURES
+----------
+- procedures/run-tests.txt:
+  - BEFORE YOU START: every FAIL and INCONCLUSIVE line of the last run is an issue or
+    becomes one; check how long it has been failing.
+  - step 2d: audit every pen still standing against its page and delete the ones with
+    nothing open; 2e: rule the pen out before blaming the mod (creative FakePlayer in
+    the debug dimension, rolled traits).
+  - step 5: -PyardSprint and its two artefacts; waiting with a background until-loop;
+    the javac type-check while the client runs; give a pen several horses of the
+    extreme it needs, and several launches where one PASS could be luck.
+  - step 6c: write "#N", never "fix #N", in a commit whose proof is still pending.
+  - NEVER: put needs-owner back after a run that had it taken off.
+- No new procedure was needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. Nothing in common/ changed; a full run would
+  still check every gene, breed and spec-engine test.
+- No gametest was run. GeneAbilityHandler and HorseClearance changed, and the gametests
+  that touch them (grown_horse_leaves_the_ceiling, the order and herd tests) were not
+  re-run; the yard launches exercised both changes instead.
+- No dedicated-server boot.
+- Nobody has seen the new kit batch 1 in game.
+- Not read by any pen: a pack leader discarded or sent to another dimension
+  (wiki/gene-pack-leader.html#verification).
+- Verification anchors added: none new. Checks closed: items (seed drops, planting),
+  item-research-papers (chest half), fertility (covered again after a loss).
+
+RELEASE
+-------
+Not offered. Three of the four fixes are to the debug yard; the two a player could
+meet (#213, #214) are a handful. v0.5.046 still has #157, #125 and #130 unbuilt and
+#10, #31 and #36 waiting on checks.
+
+PICK UP FIRST
+-------------
+next-release: the next unit on v0.5.046 is #157 (Head parts slice B: ear fins, cheek
+spikes, brow ridge). Before it, the owner's /testkit 1 answers on #36 and #10 close or
+reopen those two.
