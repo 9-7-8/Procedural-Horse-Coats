@@ -1,0 +1,97 @@
+2026-10-08 08:00 - #211: a long epigenome code saves in pieces (time is the session's start)
+
+ASKED
+-----
+1. "/next-release" (procedures/next-release.txt). Came of it: the milestones were checked
+   and one unit of v0.5.046 was built, issue #211, by procedures/fix-bug.txt.
+The owner made no other request and answered no question this session.
+
+DONE
+----
+Milestone housekeeping (next-release steps 1-2). No commit.
+- The last tag is v0.5.045 and its milestone is closed. The next release is v0.5.046.
+- Every open issue already had a milestone. Nothing was moved, so the release-plan issue
+  (#196) was not edited.
+- #211 was on the v0.5.046 milestone but not in its description. It is now listed there.
+
+Fix #211, commit e550c9dd. Issue CLOSED.
+- What was wrong: NBT writes every string with DataOutput.writeUTF, which stops at 65,535
+  bytes. A worst-case epigenome code is 58,726 bytes and grows with every gene that has an
+  epigenetic schema. EpigenomeSizeTest asserted only against the 131,072 wire cap, so it
+  could not see this limit.
+- What going over really does (the issue left it unverified): nothing fails. NbtIo.write
+  wraps its output in StringFallbackDataOutput, which catches the UTFDataFormatException,
+  logs "Failed to write NBT String" and writes an EMPTY string. A horse over the limit
+  would reload with no epigenome.
+- The fix: the limit is the JDK's and cannot be raised, so a long code is saved in pieces.
+  common/genetics/CodeChunks holds the rule (fitsOneString, split, join). A code that fits
+  is written as the bare string it always was; a longer one as a list of 16,384-character
+  pieces. GenomeCodeCodecs.STORED_EPIGENOME is the one codec (Codec.either of a string and
+  a string list). HorseRecordCodecs, StoredGenome, TransferDeedCodecs and ReproCodecs'
+  sample use it. HorseAncestryData, the stasis and afterlife snapshots and the record
+  payloads (ByteBufCodecs.fromCodec) go through the horse record's codec, so they are
+  covered. Both shapes read: no existing save changes, and no save written today differs.
+- Proof:
+  - :common:test --tests '*CodeChunksTest' (3 tests). It checks the rule against
+    DataOutputStream.writeUTF itself: 65,535 bytes writes, 65,536 throws, three-byte
+    characters count as bytes, every piece of a split code writes and joins back whole.
+  - New gametest long_epigenome_still_saves in ModGameTests. A 70,000-character code
+    goes through the record, seed-jar and transfer-paper codecs to bytes and back, and
+    the record across the wire. Run before the codec change: red, "a horse record with a
+    70000-char epigenome came back from disk different", with the "Failed to write NBT
+    String" ERROR beside it. Run after: "All 56 required tests passed" (55 before this
+    test was added).
+  - Also green: '*EpigenomeSizeTest', '*CommonPortabilityTest', :neoforge-26.1.2:build,
+    check-parity.mjs (7163 checks), check-designer-boots.mjs, check-links.mjs.
+- Docs in the same commit: wiki/architecture.html#verified-nbt-string-cap records the
+  fix; wiki/api-notes.html#nbt-string-limit records the NbtIo quirk.
+- Pictures: no pictures. Nothing about this bug can be seen.
+
+DECIDED
+-------
+- Chosen without the owner: save a long code in pieces, rather than the issue's other
+  suggestion (compact the epigenome form to stay under the limit). Reason: compacting
+  changes the code format everywhere, the designer included, and only moves the ceiling;
+  pieces remove it and change no existing save. Recorded on #211 and on
+  wiki/architecture.html#verified-nbt-string-cap.
+- Chosen without the owner: EpigenomeSizeTest keeps asserting against the 131,072 wire
+  cap and was not pointed at 65,535, because that limit no longer binds. Recorded in the
+  test's javadoc and on #211.
+- #35 was skipped as a unit, by next-release step 3: its fix (8e477dbd) is released and
+  its last comment says it waits on the burial position from the server's log.
+
+FOUND ON THE WAY
+----------------
+- No new bug filed.
+- A mistake, put right: a sed pass that swapped a literal euro sign for its \u escape
+  dropped the "\u", leaving "20AC" in CodeChunksTest, and the test failed for that reason.
+  The file was fixed and grepped before the run that counts.
+- A Bash heredoc holding the gametest body failed to parse; the text went through the
+  Write tool and a script in the scratchpad instead (both already in memory).
+
+PROCEDURES
+----------
+None needed. The three questions were asked: no step of next-release, fix-bug, rebake or
+end-session was wrong or skipped; nothing done here is a new repeatable routine; no
+change made here makes another procedure untrue.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other common/
+  test class against the new CodeChunks class, which nothing else calls.
+- The wasm was not rebaked: nothing under web/ reaches CodeChunks (rebake row b), and
+  check-designer-boots passed.
+- ReproCodecs' pregnancy sample uses the new codec but has no test of its own for a long
+  code; it is the same codec object the three tested sites use.
+- Nothing was looked at in game. No Verification-tab entry was added: the gametest
+  leaves no runtime question.
+
+RELEASE
+-------
+Not offered. v0.5.046 still has open bugs (#10, #31, #35, #36 waiting on checks, #209
+unfixed) and four planned features unbuilt.
+
+PICK UP FIRST
+-------------
+#209, the test yard's jukebox at head height, by next-release (which hands it to fix-bug);
+after it the plan's features in order: #161, #157, #125, #130.
