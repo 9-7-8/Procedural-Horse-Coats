@@ -1,0 +1,181 @@
+2026-10-08 14:30 - run-tests: seven new pens, eight checks closed, #216 fixed, stopped early
+by the owner. (The time is the session's start; it ended near 15:45.)
+
+ASKED
+-----
+1. "/run-tests" - the owner ran the run-tests routine (procedures/run-tests.txt).
+   Came of it: the loop below, as far as it got. Seven new pens and two unit tests, one
+   launch into the yard at 14:47, eight Verification checks closed, one bug filed, fixed
+   and closed (#216), one question put to the owner (#217).
+2. "Stop the tests and end the session, you're taking too much memory" - said while the
+   last long pen was four foals short of its verdict and before a planned second launch.
+   Came of it: the log was read, the client was stopped with tools/stop-dev-java.ps1 at
+   about 15:30, nothing was relaunched, and procedures/end-session.txt was run. Three
+   pens stand unanswered or unrun (PICK UP FIRST).
+
+DONE
+----
+A. The last run, read first. No commit of its own.
+   neoforge-26.1.2/run/logs/latest.log was the 10:56 launch of the session before:
+   15 PASS lines and no FAIL or INCONCLUSIVE (the one "FAIL" in it is the text of a
+   PASS line's threshold). All of it had been closed by that session. The only WARN of
+   this mod's was the stasis_chamber "empty ingredients" line, which is #208 and is on
+   wiki/api-notes.html#recipe-empty-ingredients. The three open bugs in the survey
+   (#36, #10, #31) each wait on the owner's eyes or on the live server's log; no pen
+   can answer them.
+
+B. #216, bond earned on a world's first day blocked day two - commit 0bb188ca. Issue
+   CLOSED.
+   What was wrong: HorseCareHandler.onHorseTick treats dayStamp == 0 as "never
+   stamped": it moved the stamp to today and KEPT bondToday. A horse really stamped on
+   care day 0 carries a 0 too, so a horse that reached the daily cap of 15 on a world's
+   first day could earn nothing on the second. The MUSIC pen had read this twice
+   (2026-10-02 and the 10:56 launch: "A 55 -> 55 across the rollover ... bondToday 15")
+   and both times it was written up as the pen's reading saying nothing.
+   The fix: that branch writes bondToday back to 0. A never-stamped horse holds 0
+   already, so nothing changes for it.
+   Proof: MUSIC gained a check of its own. Launch of 14:47, CLOCKWORK PASS at 14:51:45:
+   "A ended care day 0 at bondToday 15 (cap 15) and reads bondToday 1, bond 56 at 200
+   ticks into care day 1". Recorded on wiki/horse-care.html#day-zero-stamp.
+   Pictures: no pictures.
+
+C. The music enjoyer's finished-record question - commits 0bb188ca, 55cdd48c. Recorded,
+   and put to the owner as #217 (OPEN, tuning, needs-owner).
+   With #216 fixed the reading could finally be taken. 14:53:06: over the first 6,000
+   ticks of care day 1 the jukebox read "HAS_RECORD true, not playing" at all 30
+   readings and the tamed Msc/Msc mare went 56 -> 70. So one disc left in a jukebox
+   pays every Msc/Msc horse within eight blocks its fifteen points a day for ever.
+   Recorded on wiki/gene-music-enjoyer.html#verified-finished-record. #217 lists three
+   options, the recommended one being to pay only while a song is playing. MUSIC also
+   re-passed its five older checks and was deleted.
+
+D. New pens that answered on the 14:47 launch and were deleted - built in 0bb188ca,
+   removed in 55cdd48c. Each closed its check on its page:
+   - MEAT FLOOR (DebugYardGenes, row BE): four Mty/Mty horses with yields written to
+     0.1/0.1, 0.4/0.4, 0.2/0.6 and -3/-3 each dropped exactly one beef; a control
+     written 3/3 dropped three. PASS 14:47:48. wiki/gene-magic-meat.html
+     #verified-meat-floor; the page's Verification tab is gone.
+   - CLEANSING NARROW, WIDE and CROWD (row BE): every hit exactly 2.0 and exactly 40
+     ticks after that zombie's last; with twelve zombies in range each beat hurt eight
+     and the other four were first hurt ten beats later; a radius-4 horse hurt only the
+     zombie at 2.5 blocks while a radius-8 horse hurt those at 2.5, 4.5 and 6.5 and
+     left 8.5 and 10.5. Three PASS lines at 14:47:52. wiki/gene-cleansing-light.html
+     #verified-rhythm; the tab is gone.
+   - RATIO RAINBOW F1 (DebugYardLong, row U): Rbw/Rbw x n/n, twenty foals, every one
+     Rbw/n and none carrying the emitter. PASS 15:14:31. wiki/gene-rainbow-dust.html
+     #verified-f1. A new ALL_HET rule in DebugYardLong, and readTrail, which reads a
+     foal's own ability list.
+   The horses in MEAT FLOOR and CLEANSING had a number written onto both allele copies
+   after spawning (DebugYardGenes.horseWith, in git at 0bb188ca), because a founder's
+   is rolled and a pen that waits for the roll it needs seldom gets it.
+   Pictures: no pictures.
+
+E. PACK AWAY (DebugYardSocial, row BB east) - commits 0bb188ca, 55cdd48c. Check closed;
+   the pen STANDS for a new question.
+   A Cow/Cow leader is put thirteen blocks from ten cows one tick before its beat, the
+   cows walking to it are counted, and it is taken away: the first by Entity.discard
+   (how a stasis chamber takes a horse), the second by Entity.teleport to the
+   overworld. PASS at 14:47:52 (six cows walking to it; none one tick, one beat or two
+   beats later) and 14:47:55 (seven; none later). Recorded on
+   wiki/gene-pack-leader.html#verified-taken-away.
+   The seven is the new question: the aura touches at most six a beat. See FOUND.
+
+F. Two checks closed by unit tests - commit 0bb188ca.
+   - CoatTextureComposerTest.twoVoidedHorsesWithTheSameMarkingsAreTheSameCoat: a voided
+     tobiano baked from two epigenomes that agree on every gene but voided is equal
+     texel for texel; two controls. wiki/gene-voided.html#verified-deterministic.
+   - HealthGenesTest.aDraftJebCarrierAndASaddlebredJebCarrierNeverThrowAnAffectedFoal:
+     20,000 foals of a lamc2 carrier and a lama3 carrier, none affected, all viable,
+     about a quarter double carriers. wiki/gene-lamc2.html#verified-two-loci.
+   Both pages lost their Verification tab. Run: :common:test --tests '*HealthGenesTest'
+   --tests '*CoatTextureComposerTest', green.
+
+G. Pens standing at the end - commit 55cdd48c.
+   - RATIO RAINBOW F2 (row U west): Rbw/n x Rbw/n to forty foals against 1:2:1. Stopped
+     at 36: Rbw/Rbw 8, Rbw/n 22, n/n 6, no verdict, no foal failing the trail reading.
+   - PACK AWAY (row BB east), with logging added after the launch: each walking cow's
+     path node, a per-tick count over the ten beats after a removal, and cows walking
+     to the old block before the next leader reaches it. NOT RUN.
+   - AURA SILENT and AURA CONTROL (DebugYardGenes, row BD), rewritten after the launch:
+     six husks each, 24 readings, judged on the nearest any husk came. NOT RUN.
+
+Checks run: :neoforge-26.1.2:build green on the final tree (15:35, after the client was
+stopped); check-parity.mjs 7163 checks; :common:bakeGeneWikiPages and
+:common:bakeUnverifiedGenes (lamc2, voided and rainbow_dust left the list);
+bake-verification-index, bake-roadmap-index, sync-page-views, build-search-index,
+check-links and bake-agent-text. One launch by runClientTestWorld -PyardSprint=600000
+(14:47 to about 15:30); it had no ERROR line.
+
+DECIDED
+-------
+No owner decision was asked for or given, beyond the stop. Calls made without her:
+- The finished-record result was not "fixed quietly": it is #217 with needs-owner, as
+  the gene page had said it should be.
+- AURA SILENT logged a PASS at 14:47:57 and its check was NOT closed. The Wrd/Bai horse
+  had no aura and no husk targeted it, but its husks averaged 9.0 blocks off against
+  5.9 for the plain horse, and the page's pass is "exactly the control". The first
+  version's criterion was too loose; the reading is written under the open item on
+  wiki/gene-magic-mob-aura.html and the pen was rewritten.
+- PACK AWAY's check was closed on its two PASS lines and the pen kept, because the
+  same lines raised a question the pen is the right tool for. That question is a new
+  item on wiki/gene-pack-leader.html's Verification tab, not a bug: nothing is shown
+  broken yet.
+- The cleansing "radius reads as a radius" item sat under "with your hands". It was
+  closed on the measured reach; whether four blocks is a difference worth breeding
+  for is said on the page to be unjudged.
+- rainbow_dust left unverified-genes.txt because its page now has a Verified block,
+  though half its check is open. That is the bake's rule; the gene paints nothing.
+
+FOUND ON THE WAY
+----------------
+- Bug filed and fixed: #216 (closed). Question filed: #217 (open, the owner's).
+- Seven cows on a beat capped at six (PACK AWAY, 14:47:55). The seventh, cow 4, was 4.5
+  blocks off and had been sent to that same block by the first leader. Either its own
+  stroll ended on that block (about one chance in a hundred), or a released follower
+  took the walk up again. Vanilla's PathNavigation.stop() only clears the path: the
+  old target and a pending delayed recompute survive it, and tick() then walks the
+  target again. Read from the 26.1.2 sources; not shown to happen here.
+- A yard pen's world is new at every launch, so every pen runs on care days 0 and 1.
+  That is what hid #216 as "the pen's artefact" for six days.
+- Mistake: the first AURA SILENT judged on "a third of readings inside ten blocks",
+  which a ward-free pen passes whatever the gap to its control. Caught on reading the
+  PASS line's own numbers; the check stayed open.
+- Mistake: a long Bash heredoc holding Java source was cut short by the shell, twice.
+  The patch scripts were written with the Write tool after that (the local memory
+  already says to).
+- tools/stop-dev-java.ps1 left two Java processes alone (PIDs 23076 and 12140). The
+  first is the live server; neither was this session's, and neither was touched.
+
+PROCEDURES
+----------
+- procedures/run-tests.txt:
+  - step 2: read a PASS line's own numbers before closing on it;
+  - step 5: say how long a long pen will hold the client and its memory before
+    launching, and what to do when the owner says stop; a pen's world is new at every
+    launch (care day 0); write the number a pen needs onto the horse instead of
+    waiting for a founder to roll it.
+- No new procedure was needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. Only two test classes in common/ changed; a
+  full run would still check every gene, breed and spec-engine test.
+- No gametest was run. HorseCareHandler changed by one argument; the MUSIC pen
+  exercised it.
+- The final tree was built but never launched: the rewritten PACK AWAY and AURA pens,
+  and the yard without rows BE and MUSIC, have not been seen to build in a world.
+- No dedicated-server boot.
+- Verification items added: wiki/gene-pack-leader.html ("Seven cows on a beat capped at
+  six"). Reworded: gene-rainbow-dust (the F2 half), gene-magic-mob-aura (the first
+  reading), gene-music-enjoyer (hearts only).
+
+RELEASE
+-------
+Not offered. One player-facing fix (#216) since the last session; v0.5.046 still has
+#157, #125 and #130 unbuilt and #10, #31 and #36 waiting on checks.
+
+PICK UP FIRST
+-------------
+run-tests: launch the yard as it stands (RATIO RAINBOW F2, PACK AWAY, AURA SILENT). The
+two short pens answer inside three minutes; F2 needs about thirty-five, so ask the owner
+first whether the machine can spare the memory for that long.

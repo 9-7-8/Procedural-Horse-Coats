@@ -63,6 +63,11 @@ STEPS
       creative; and a pen's horses are rolled apart from the locus it fixes, so one can
       roll a disorder or a size that breaks the setup. A pen fault is still an issue
       (bug + found-in-yard), fixed in the pen.
+   f. Read a PASS line's own numbers before closing on it. A verdict is only the pen's
+      criterion, and a new pen's criterion can be too loose: AURA SILENT passed with its
+      husks at 9.0 blocks against a control's 5.9, where the page asks for "exactly the
+      control". When the numbers do not answer the page's question, leave the check
+      open, write the reading under it, and tighten the pen.
 
 3. Build new pens for open checks and issues a pen can answer unattended.
    A pen must start itself, run on a clock, and log its own PASS or FAIL (see the
@@ -83,6 +88,17 @@ STEPS
      A sprint has two artefacts that are not mod faults: block entities do not tick for
      roughly the first 180 sprinted ticks, and a "first poll" can land after the thing
      it meant to watch has already happened. Confirm either against an unsprinted run.
+   - A ratio pen holds the client, and its memory, for thirty to sixty minutes even
+     sprinted. Say so before launching, with the time it should answer. If the owner
+     says stop: read the log, stop the client, and write each unanswered pen's tally
+     under its open check as "not answered". A tally short of its verdict closes
+     nothing.
+   - The yard's world is new at every launch, so every pen runs on care days 0 and 1
+     and at game tick 0. A reading that looks like the pen's artefact may be the mod
+     treating day 0 or tick 0 as "never set" (#216 hid that way for six days).
+   - When a pen needs a particular number on a horse's allele copy (a radius, a yield),
+     write it after spawning instead of waiting for a founder to roll it, and read it
+     back before judging (DebugYardGenes.horseWith, in git at 0bb188ca).
    - Wait for a verdict with a background `until grep -q ...; do sleep 2; done` (one
      notification when it exits). A foreground sleep is refused.
    - While the client runs, do not build (launch-game step 3). To check a change made

@@ -28,14 +28,13 @@
 <section class="tab-panel" data-tab="gameplay">
 
 <div class="note warn">
-    <span class="label">Built, and not yet seen in game</span>
+    <span class="label">Measured in the yard, not yet played</span>
     <p>
-        The gene, its inheritance and its founder table exist and are covered by
-        the test suite; the translator that turns it into behaviour was written
-        against the 26.1.2 sources and is flagged unverified in its own comments.
-        <strong>Nothing on this page has been watched happening to a horse.</strong>
-        What to look at, and what is most likely to be wrong, is on the
-        <a href="#verification">Verification tab</a>.
+        The gene, its inheritance and its founder table are covered by the test
+        suite, and the test yard has measured what it does to undead: who it
+        hurts, how often, how many at once and how far. Those readings are under
+        <a href="#verified">Verified</a> on the Coding tab. Nobody has yet stood
+        beside one in play.
     </p>
 </div>
 
@@ -137,6 +136,29 @@
     the gene&rsquo;s.
 </p>
 
+<p id="verified-rhythm">
+    <strong>The beat, the cap and the radius</strong> (2026-10-08, test yard, pens CLEANSING NARROW, WIDE and
+    CROWD, three <code>CLOCKWORK PASS</code> lines at 14:47:52). The pens read every zombie&rsquo;s health once a
+    tick for fourteen beats, beside horses whose radius was written on both copies.
+</p>
+<ul>
+    <li><strong>The beat is slow.</strong> A zombie in the aura lost exactly
+        <code>CleansingLightGene.DAMAGE</code> (2.0) per hit, and every hit on every zombie came exactly
+        <code>INTERVAL_TICKS</code> (40) after that zombie&rsquo;s last: nine hits in a row on the nearest
+        zombie of each ladder, <em>&ldquo;t68,+40,+40,+40,+40,+40,+40,+40,+40&rdquo;</em>. No hit was lost to
+        the hurt-immunity frames.</li>
+    <li><strong>The cap bounds the scan.</strong> Twelve zombies stood within five blocks of a horse of
+        radius 6.5. Each of the first ten beats hurt eight of the twelve (<code>MAX_TARGETS</code>) and no
+        beat hurt more. The other four were first hurt ten beats later, once the first eight were dead, and
+        then four a beat.</li>
+    <li><strong>The radius is a radius.</strong> Two horses, written 4.0 and 8.0, each with a zombie at 2.5,
+        4.5, 6.5, 8.5 and 10.5 blocks. The narrow horse hurt only the zombie at 2.5. The wide one hurt those at
+        2.5, 4.5 and 6.5 and left 8.5 and 10.5 untouched. So the number on the copy is the reach, and a horse
+        from the top of the range clears four blocks more ground than one from the bottom. Whether that
+        reads as a difference worth breeding for is a matter of taste nobody has yet judged in play.</li>
+</ul>
+<p>The pens were deleted on these lines.</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -152,53 +174,11 @@
 
 </section>
 
-<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Open checks">
-
-<div class="note verify-summary">
-    <span class="label">What needs verifying here</span>
-    <p>Cleansing light is shown killing undead and sparing everything else, but nobody has watched
-    the beat step a zombie&rsquo;s health down, crowded it past its target cap, or compared two
-    radii.</p>
-</div>
-
-<h3 id="open-gene-cleansing-light">Still open (NOT played)</h3>
-
-<p>
-    The gene is one <code>Healing</code> ability with a negative amount, an <code>undead</code>
-    group and a radius carried on the allele copy. That it kills undead, spares a creeper, does
-    nothing on a carrier and drops no experience is on the <a href="#verified">Coding tab</a>, from
-    the clockwork pens. What is left is its rhythm, its cap and its range.
-</p>
-
-<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
-
-<ul>
-    <li><strong>The beat is slow, and that is why it is cheap.</strong> Watch one zombie&rsquo;s
-        health while it stands in the aura. <strong>Pass:</strong> it loses
-        <code>CleansingLightGene.DAMAGE</code> in discrete steps about two seconds apart, not
-        continuously. Faster than that means the hurt-immunity frames are eating most of the scan
-        the gene is paying for.</li>
-    <li><strong>The cap bounds the scan.</strong> Crowd more undead into range than
-        <code>MAX_TARGETS</code>. <strong>Pass:</strong> only that many are being hurt per beat and
-        the rest wait their turn &mdash; not every mob in the box at once.</li>
-</ul>
-
-<h4>In the game, with your hands</h4>
-
-<ul>
-    <li><strong>The radius reads as a radius.</strong> Two expressing horses at either end of the
-        epigenetic range. <strong>Pass:</strong> the wider one reaches undead the narrower one does
-        not, so breeding for the radius is a thing a player can notice at all.</li>
-</ul>
-</section>
-
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-fighter.html">Magic fighter</a>
         <a href="gene-healer.html">Healer</a>
         <a href="gene-holy-ward.html">Holy ward</a>
-        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/CleansingLightGene.java</code>
 </div>

@@ -1184,7 +1184,17 @@
         <code>HorseBreedingHandler.inheritBond</code>, <code>/bond</code>, a debug yard
         &mdash; and those leave the stamp at its default. In an established world that would
         read as hundreds of days owing and take the horse to the floor on its first tick, so
-        an unstamped horse is stamped with today and charged nothing.</li>
+        an unstamped horse is stamped with today and charged nothing.
+        <span id="day-zero-stamp">Its <code>bondToday</code> goes back to 0 as it is stamped
+        (2026-10-08, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/216">#216</a>): a horse really stamped on a
+        world&rsquo;s first day carries a stamp of zero too, and keeping its count carried day
+        0&rsquo;s cap into day 1, so a horse that reached fifteen on the first day could earn
+        nothing on the second. The yard&rsquo;s MUSIC pen, whose world is new at every launch,
+        read it twice as <em>&ldquo;A 55 -&gt; 55 across the rollover &hellip; bondToday
+        15&rdquo;</em>; with the fix it read <em>&ldquo;A ended care day 0 at bondToday 15 (cap
+        15) and reads bondToday 1, bond 56 at 200 ticks into care day 1&rdquo;</em>
+        (<code>CLOCKWORK PASS</code>, 14:51:45). Such a horse still pays no decay for that one
+        day, which is the lenient side.</span></li>
     <li><strong>It runs before the gain block</strong>, so a horse being ridden on a new day
         decays and earns it straight back rather than the other way round.</li>
     <li><strong>The floor is asked about before the subtraction.</strong> A stamp old enough

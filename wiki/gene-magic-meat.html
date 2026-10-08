@@ -103,6 +103,15 @@
     mean in the run was 3.13, so the floor at one was not exercised.
 </p>
 
+<p id="verified-meat-floor">
+    <strong>Never zero</strong> (2026-10-08, test yard, pen MEAT FLOOR, <code>CLOCKWORK PASS</code> at
+    14:47:48). A founder&rsquo;s yields are rolled between 2 and 7, so the pen wrote them: four untamed
+    <code>Mty/Mty</code> horses with yields of 0.1 and 0.1, 0.4 and 0.4, 0.2 and 0.6, and &minus;3 and &minus;3
+    (a drifted yield may go below zero; the hard bound is far under it). Each was killed and each dropped
+    exactly one beef. A fifth, written 3 and 3, dropped three, which shows the count read is the gene&rsquo;s.
+    The pen was deleted on this line.
+</p>
+
 <h2 id="average">Averaged, not summed</h2>
 
 <p>
@@ -168,36 +177,11 @@ return List.of(new GeneAbility.ItemDrop("meat", count, count,
 
 </section>
 
-<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Open checks">
-
-<div class="note verify-summary">
-    <span class="label">What needs verifying here</span>
-    <p>The beef is seen landing beside the leather at the average of the two copies&rsquo; yields; what is left is the floor &mdash; a meaty horse whose yields have drifted near zero must still drop one beef.</p>
-</div>
-
-<h3 id="open-magic-meat">Still open (NOT played)</h3>
-
-<p>
-    The yard&rsquo;s DEATH DROPS II pen killed meaty horses whose mean yields ran from 3.13 to 6.66,
-    so the <code>Math.max(1, &hellip;)</code> floor never had anything to catch.
-</p>
-
-<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
-
-<ul>
-    <li><strong>Never zero.</strong> Kill a <code>Mty/Mty</code> horse whose two yields both read
-        below 0.5. <strong>Pass:</strong> a meaty horse always drops at least one
-        beef, however low the yield numbers on its copies drifted.</li>
-</ul>
-</section>
-
 <div class="page-foot">
     <div class="seealso">
         <a href="gene-magic-item-drop.html">Magic item drop</a>
         <a href="gene-magic-milk-volume.html">Magic milk volume</a>
         <a href="making-a-gene.html#block">The effects block</a>
-        <a href="#verification">What to check in-game</a>
     </div>
     Source: <code>common/genetics/genes/MagicMeatGene.java</code>,
     <code>neoforge/server/GeneDeathHandler.java</code>

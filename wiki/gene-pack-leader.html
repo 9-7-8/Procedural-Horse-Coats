@@ -201,6 +201,16 @@
     at the death, and again when a leader is discarded or changes dimension. The pen was deleted on these lines.
 </p>
 
+<p id="verified-taken-away">
+    <strong>A leader taken away alive lets its followers go too</strong> (2026-10-08, test yard, pen PACK AWAY,
+    two <code>CLOCKWORK PASS</code> lines at 14:47:52 and 14:47:55). The pen puts a <code>Cow/Cow</code> leader
+    thirteen blocks from its cows one tick before its beat, counts the cows walking to it, and takes it away.
+    The first leader was discarded, which is how a stasis chamber takes a horse: six cows were walking to it,
+    and none was one tick, one beat or two beats later. The second was sent to the overworld
+    (<code>CHANGED_DIMENSION</code>): seven were walking to it and none was at any of the three readings.
+    A sale changes the owner and removes nothing, so there is nothing to release.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -222,8 +232,8 @@
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
     <p>Leader of the pack is confirmed cheap and working &mdash; a retinue forms, follows, stays
-    capped, and a mismatched pair leads none &mdash; and lets them go when it dies &mdash; but a leader
-    taken away rather than killed has not been read, and the Chaos allele (2026-10-01) has never met a modded mob.</p>
+    capped, and a mismatched pair leads none &mdash; and lets them go when it dies or is taken away &mdash; but one
+    beat read seven cows walking to it against a cap of six, which is unexplained, and the Chaos allele (2026-10-01) has never met a modded mob.</p>
 </div>
 
 <h3 id="chaos-unplayed">Chaos (2026-10-01, NOT played)</h3>
@@ -259,11 +269,16 @@
         its mob at all. <strong>Pass:</strong> nothing happens &mdash; and record it as the gene
         working. The allele description says this outright because it is the single most likely
         reason to file the locus as broken.</li>
-    <li><strong>Nothing is left behind when the leader is taken away rather than killed.</strong>
-        A leader that dies releases its followers at once
-        (<a href="?view=coding#verified-release">verified</a>). One that is put in a stasis chamber,
-        sold, or sent to another dimension is released by the same code, and no pen has read it.
-        <strong>Pass:</strong> no mob keeps walking toward where the horse was.</li>
+    <li><strong>Seven cows on a beat capped at six.</strong> On the second walk of the PACK AWAY pen
+        (2026-10-08, 14:47:55) seven cows were walking to the leader&rsquo;s block on one beat, and the aura
+        touches at most <code>MAX_TARGETS</code> (6). The seventh had been sent to that same block by the
+        leader before, and was released when that leader was discarded. Either its own stroll happened to end
+        on that block, about one chance in a hundred, or a released follower can take the walk up again later
+        than two beats (vanilla&rsquo;s <code>PathNavigation.stop</code> keeps the old target, and a delayed
+        recompute would walk it again). The pen now logs each walking cow&rsquo;s path node, counts every tick
+        of the ten beats after a removal, and counts cows walking to the old block before the next leader gets
+        there; that version has not run. <strong>Pass:</strong> no released cow is seen walking to the old
+        block again, over several launches.</li>
     <li><strong>No wild horse leads anything.</strong> The founder table for a matched-pair locus
         puts only carriers in the wild. <strong>Pass:</strong> you find carriers at roughly
         <code>WILD_CARRIER_PERCENT</code> and never a wild horse with a retinue.</li>

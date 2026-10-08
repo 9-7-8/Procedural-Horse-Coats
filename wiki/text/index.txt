@@ -1511,6 +1511,7 @@ wiki/gene-lamc2.html#breeds	science	Breeds
 wiki/gene-lamc2.html#carrot	gameplay	Its gene carrot
 wiki/gene-lamc2.html#inheritance	gameplay	Crossing two of them
 wiki/gene-lamc2.html#outcome	science	Why it is a lethal rather than a disability
+wiki/gene-lamc2.html#verified	coding	Verified
 wiki/gene-lantern.html#about	coding	Why it is built this way
 wiki/gene-lantern.html#carrot	gameplay	Its gene carrot
 wiki/gene-lantern.html#file	coding	The file
@@ -2304,6 +2305,7 @@ wiki/gene-rainbow-dust.html#inheritance	gameplay	Crossing two of them
 wiki/gene-rainbow-dust.html#invisible	gameplay	It paints nothing
 wiki/gene-rainbow-dust.html#not-particle	science	Why it is not a forty-first particle allele
 wiki/gene-rainbow-dust.html#recessive	coding	Recessive, with no wild carriers
+wiki/gene-rainbow-dust.html#verified	coding	Verified
 wiki/gene-ram-horn-form.html#carrot	gameplay	Its gene carrot
 wiki/gene-ram-horn-form.html#four	coding	One root for four horns
 wiki/gene-ram-horn-form.html#health	gameplay	Is it good for the horse?
@@ -2862,6 +2864,7 @@ wiki/gene-voided.html#finding	gameplay	Finding one
 wiki/gene-voided.html#inheritance	gameplay	Crossing two of them
 wiki/gene-voided.html#layers	coding	What it paints
 wiki/gene-voided.html#outcomes	gameplay	What it can come out as
+wiki/gene-voided.html#verified	coding	Verified
 wiki/gene-vortex.html#carrot	gameplay	Its gene carrot
 wiki/gene-vortex.html#file	coding	The file
 wiki/gene-vortex.html#finding	gameplay	Finding one

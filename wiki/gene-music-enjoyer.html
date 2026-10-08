@@ -119,6 +119,19 @@
     and their hunger was held full, so the gene was the only thing that could move a number.
 </p>
 
+<p id="verified-finished-record">
+    <strong>A finished record goes on paying</strong> (2026-10-08, test yard, pen MUSIC, the launch of 14:47).
+    The flag reads the jukebox&rsquo;s <code>HAS_RECORD</code> state and a disc that has played to its end is
+    still in the box. With the disc left to finish, the tamed <code>Msc/Msc</code> mare began the next care day
+    at <code>bondToday</code> 1 and over its first 6,000 ticks went 56 &rarr; 70, one point a beat up to the
+    cap, while the jukebox read <em>&ldquo;HAS_RECORD true, not playing&rdquo;</em> at all thirty readings.
+    So one disc in a jukebox is an unattended source of bond, bounded only by the daily cap of fifteen. Whether
+    it should be is the owner&rsquo;s call, and is <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/217">#217</a>.
+    The two earlier readings of this (2026-10-02 and 2026-10-08 morning) said nothing: the mare was still at
+    the day before&rsquo;s cap, which was <a href="horse-care.html#day-zero-stamp">a defect of its own</a>
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/216">#216</a>). The pen was deleted on this reading.
+</p>
+
 </section>
 
 <section class="tab-panel" data-tab="science">
@@ -139,8 +152,8 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Music enjoyer&rsquo;s bond, its cap and its controls are confirmed; what is left is whether a
-    finished record left in the jukebox still pays out, and the hearts a player should see.</p>
+    <p>Music enjoyer&rsquo;s bond, its cap and its controls are confirmed, and a finished record is known
+    to go on paying; what is left is the hearts a player should see.</p>
 </div>
 
 <h3 id="open-gene-music-enjoyer">Still open (NOT played)</h3>
@@ -150,22 +163,6 @@
     world flag, and the yard has watched it earn bond and stop at the cap (&sect;<a href="#verified">Verified</a>).
     The flag reads the jukebox&rsquo;s <code>HAS_RECORD</code> state, not whether it is playing.
 </p>
-
-<h4>Nothing here needs looking at to judge &mdash; do these first</h4>
-
-<ul>
-    <li><strong>Does a finished record still count?</strong> The flag tests whether the jukebox
-        <em>holds</em> a record, not whether it is audible, so a single disc left in one may go on
-        paying out for ever. <strong>Pass:</strong> record which it is. If bond keeps rising after the
-        track ends, one disc is an unattended bond source bounded only by the daily cap, and that is a
-        decision for the owner rather than a bug to fix quietly.
-        <em>Read once, not answered (yard, 2026-10-02 04:17):</em> over the first 6,000 ticks of the
-        next care day the box held a finished disc at all 30 readings and the tamed <code>Msc/Msc</code>
-        mare gained nothing (bond 55). But she still read <code>bondToday</code> 15 and no day&rsquo;s
-        decay had landed, so the day had not rolled over on her and the cap alone would have blocked any
-        gain &mdash; the reading cannot tell a dead flag from a full cap. Re-run it with the day&rsquo;s
-        rollover confirmed first (<code>bondToday</code> back at 0).</li>
-</ul>
 
 <h4>In the game, with your hands</h4>
 

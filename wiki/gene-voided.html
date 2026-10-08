@@ -126,21 +126,16 @@
 
 <p class="muted">Paints nothing.</p>
 
-</section>
+<h3 id="verified">Verified</h3>
 
-<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
-         data-tab-hint="Open checks">
-
-<div class="note verify-summary">
-    <span class="label">What needs verifying here</span>
-    <p>Only one thing is left here and it cannot be seen: voided lost its lightness knob, so two voided horses carrying the same markings must now bake <strong>byte-identical</strong> coats &mdash; a unit test or two bakes settles it without ever entering a world.</p>
-</div>
-
-<h3 id="open-older-gene-voided">Still open from before 2026-09-13 (NOT played)</h3>
-<p>Carried over when the wiki's one big checklist was broken up and given to the pages it was about. Ordered the way everything here is: what can be wrong <em>invisibly</em> first, &ldquo;does it look right&rdquo; last.</p>
-<ul>
-    <li><strong><a href="gene-voided.html">Voided</a> is deterministic</strong> (a unit test or two bakes). <strong>Pass:</strong> two voided horses with the same markings produce byte-identical coats, since its lightness knob is gone.</li>
-</ul>
+<p id="verified-deterministic">
+    <strong>Two voided horses with the same markings are the same coat</strong> (2026-10-08, unit test
+    <code>CoatTextureComposerTest.twoVoidedHorsesWithTheSameMarkingsAreTheSameCoat</code>). The gene's schema
+    is empty: it writes no number on its allele copies since the lightness knob went. The test bakes a voided
+    tobiano bay twice, from two epigenomes rolled on different seeds and then made to agree on every gene
+    except voided, and the two sheets are equal texel for texel. Its two controls hold: the two seeds
+    otherwise paint different tobianos, and the same horse without voided bakes a different coat.
+</p>
 
 </section>
 
