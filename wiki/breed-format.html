@@ -241,16 +241,23 @@
 <tr id="count-groups">
     <td><code>count_groups</code></td>
     <td>an array of <code>{ "name": "horns", "counts": [5350, 640, 320, 80, 10],
-        "loci": { "&lt;gene key&gt;": "Horn/Horn", &hellip; } }</code></td>
+        "loci": { "&lt;gene key&gt;": "Horn/Horn", &hellip; } }</code>. A locus&rsquo;s value is one
+        pair, or a choice of pairs written as a <code>genes</code> pool is:
+        <code>[{ "pair": "Nar/Nar", "weight": 1 }, { "pair": "Tsk/Tsk", "weight": 1 }]</code></td>
     <td>none. <strong>&ldquo;Some of these, rarely several.&rdquo;</strong>
         <code>counts[k]</code> is the relative weight of exactly <em>k</em> of the loci
         expressing; each founder draws that number, then picks which loci at random, and every
-        locus not picked is its gene&rsquo;s wild pair. Independent pools cannot tune
+        locus not picked is its gene&rsquo;s wild pair. A picked locus with a <strong>choice of
+        pairs</strong> draws one of them by weight (since 2026-10-08): it is still one locus to the
+        count, so its forms share the slot. In a choice, a pair the gene does not declare, or one
+        with no weight, is dropped with a warning; a one-pair locus draws no extra randomness, so a
+        file without a choice rolls as it always did. Independent pools cannot tune
         &ldquo;one is common&rdquo; against &ldquo;two is rare&rdquo;; this can. A locus in a
         group may not also be in <code>genes</code> or a strain (a hard error), and to the census
         and the band checks it looks like a pool holding its pair at the group&rsquo;s mean share.
         The <a href="breed-book.html#great-valley-skeleton-horse">skeleton horse</a>&rsquo;s horns
-        are the worked example. The breed designer carries groups through import and export but
+        are the worked example, and its <a href="gene-tusks.html#skeletons">tusks slot</a> is the
+        one choice. The breed designer carries groups through import and export but
         has no editor for them.</td>
 </tr>
 <tr>

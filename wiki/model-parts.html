@@ -115,11 +115,14 @@
 </p>
 
 <p>
-    And a <a href="gene-tusks.html">narwhal horn</a>: one copy of a very rare dominant grows one
-    long spiral tusk straight forward out of the front of the muzzle. Its length, thickness, twist
-    and lift are on the allele, and its colour is <a href="gene-tusk-colour.html">a gene of its
-    own</a>, ivory by default. It is the first form of the tusks gene; boar tusks and sabre fangs
-    are planned. Every part stacks: one horse can wear all eight.
+    And <a href="gene-tusks.html">tusks</a>, one very rare dominant gene with three forms: a
+    <strong>narwhal horn</strong>, one long spiral tusk straight forward out of the front of the
+    muzzle; <strong>boar tusks</strong>, a pair curling up from the corners of the lower jaw; and
+    <strong>sabre fangs</strong>, a pair of blades hanging from the upper lip past the chin. One
+    copy grows a form, and a horse with two different forms grows both. Each form&rsquo;s length,
+    thickness and shape are on its own allele, and their colour is
+    <a href="gene-tusk-colour.html">a gene of its own</a>, ivory by default. Every part stacks:
+    one horse can wear a horn, antlers, every body part and two tusk forms at once.
 </p>
 
 <p>
@@ -618,6 +621,32 @@
     (<code>NarwhalSize</code>), so the anchor and the pitch were the only new machinery.
 </p>
 
+<h3 id="jaw-lip">The jaw and lip anchors, and a part that hangs</h3>
+<p>
+    Shipped with the <a href="gene-tusks.html#slice-b">boar tusks and sabre fangs</a>, 2026-10-08.
+    Two more pairs of anchors on the muzzle box, both walking root &rarr; <code>head_parts</code>
+    &rarr; <code>head</code> like <code>SNOUT</code>, both read from the 26.1.2 sources and not
+    tuned by eye. The model has no separate lower jaw, so &ldquo;the corner of the jaw&rdquo; is a
+    place on that one box.
+</p>
+<ul>
+    <li><code>JAW_RIGHT</code> / <code>JAW_LEFT</code>: head-local <code>(&plusmn;1.8, -7.2, -4.6)</code>,
+        just inside the side wall, a unit above the chin, halfway along the muzzle. A boar tusk
+        leaves it sideways and curls up beside the nose.</li>
+    <li><code>LIP_RIGHT</code> / <code>LIP_LEFT</code>: head-local <code>(&plusmn;1.55, -7.6, -6.9)</code>,
+        just inside the front face, so the front half of a fang&rsquo;s blade stands proud of it
+        and shows from its root down.</li>
+</ul>
+<p>
+    Neither anchor turns its part, unlike <code>SNOUT</code>. A fang has to hang, and the
+    half-turn that hangs it is on the mesh&rsquo;s own root box (<code>SabreGenerator</code>). A
+    half-turn about <code>x</code> keeps the part on the anchor&rsquo;s <code>y</code> axis, so the
+    layer&rsquo;s stretch and per-horse tilt still act along the blade, and the two cases are a
+    translate and nothing else. A quarter-turn (the narwhal&rsquo;s) does not keep that axis, which
+    is why that one lives in the layer. The fang&rsquo;s blade is the third kind of flat box, after
+    the membrane and the plate&rsquo;s slab.
+</p>
+
 <h3 id="row-span">A row can be drawn shorter: span</h3>
 <p>
     <code>AttachedPart.span</code> is a scale along a row, on the pose stack along its own
@@ -650,7 +679,7 @@
 <tr><td><a href="gene-dorsal-spines.html">Dorsal spines</a></td><td><code>Bon/Bon</code> on <a href="gene-dorsal-spine-colour.html">dorsal spine colour</a></td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td><a href="gene-back-sail.html">Back sail</a></td><td><code>Bon/Bon</code> on <a href="gene-back-sail-colour.html">back sail colour</a>: bone rays, and the membrane left off (opacity 0)</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td><a href="gene-body-plates.html">Shoulder and hip plates</a></td><td><code>Bon/Bon</code> on <a href="gene-body-plate-colour.html">body plate colour</a>; all bone, so nothing is left off</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
-<tr><td><a href="gene-tusks.html">Narwhal horn</a></td><td><code>Bon/Bon</code> on <a href="gene-tusk-colour.html">tusk colour</a>; a tusk is a tooth, all hard</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
+<tr><td><a href="gene-tusks.html">Narwhal horn, boar tusks, sabre fangs</a></td><td><code>Bon/Bon</code> on <a href="gene-tusk-colour.html">tusk colour</a>; a tusk is a tooth, all hard</td><td>one slot in the horn count group, which <a href="gene-tusks.html#skeletons">rolls one of the three forms</a> (owner, 2026-10-05 and 2026-10-08)</td></tr>
 <tr><td><a href="gene-back-crystals.html">Crystal growths</a></td><td>none: a crystal has no bone. <code>Bon/Bon</code> on <a href="gene-back-crystal-colour.html">crystal growth colour</a> is only a colour</td><td>in the horn count group, as ordinary crystals in any colour (owner, 2026-10-05)</td></tr>
 <tr><td>Wings (not built)</td><td>the bones alone, no membrane</td><td>to ask when the wing part is built</td></tr>
 </tbody>
@@ -684,9 +713,9 @@
         <a href="gene-dorsal-spines.html">dorsal spines</a> and <a href="gene-back-crystals.html">crystal
         growths</a> (2026-10-05).
         <strong>Lower:</strong> pegasus wings (body-parented), lion and tufted tails, hoof
-        feathering (already wanted by the draught breeds), tusks (the
-        <a href="gene-tusks.html">narwhal horn</a> shipped 2026-10-05; boar tusks and sabre fangs
-        are <a href="gene-tusks.html#plan-slice-b">its next slice</a>).
+        feathering (already wanted by the draught breeds). The
+        <a href="gene-tusks.html">tusks</a> have shipped: the narwhal horn 2026-10-05, the boar
+        tusks and sabre fangs 2026-10-08.
     </p>
 </div>
 
@@ -752,8 +781,9 @@
         above. It would not need an animation asset.</li>
     <li><strong>Boar tusks and a nose tusk</strong> (the Yale, the heraldic antelope). These belong
         to the <a href="gene-tusks.html">tusks gene</a>. The nose tusk is its narwhal horn kept
-        short, which has shipped on the <a href="#snout"><code>SNOUT</code> anchor</a>; boar tusks on
-        new jaw anchors are <a href="gene-tusks.html#plan-slice-b">its next slice</a>.</li>
+        short, which has shipped on the <a href="#snout"><code>SNOUT</code> anchor</a>, and the boar
+        tusks have shipped on the <a href="#jaw-lip">jaw anchors</a> (2026-10-08). Both parts exist;
+        the breeds are what is left.</li>
     <li><strong>A lion&rsquo;s neck and chest, a stag&rsquo;s hindquarters, a mouth to the
         ears</strong> (the Leucrocotta). Adding a part is not enough here, because part of the
         vanilla horse has to be hidden first. That is the same capability the Hippocampus and the

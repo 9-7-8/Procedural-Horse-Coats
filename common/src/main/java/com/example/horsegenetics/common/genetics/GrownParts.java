@@ -208,7 +208,8 @@ public final class GrownParts {
      * colour and horn glow do nothing to a hornless horse, so asked only of a wild
      * one they would look invisible. The baseline with "every part" is a horse
      * with a horn, a rack of antlers, ram's horns, dragon horns, dorsal spines, a back sail,
-     * body plates, a narwhal horn and crystal growths; a further granting
+     * body plates, a narwhal horn and crystal growths (the tusks locus's other forms
+     * are found by the first half, on a wild horse); a further granting
      * locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way

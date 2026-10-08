@@ -2796,10 +2796,12 @@ wiki/gene-tusk-colour.html#colours	gameplay	The colours, and two-tone tusks
 wiki/gene-tusk-colour.html#health	gameplay	Is it good for the horse?
 wiki/gene-tusk-colour.html#inheritance	gameplay	Crossing two of them
 wiki/gene-tusk-colour.html#invented	science	Invented
-wiki/gene-tusks.html#alleles-later	coding	Why only Nar is declared
+wiki/gene-tusks.html#alleles-later	coding	Why the order is Nar, n, Tsk, Sab
 wiki/gene-tusks.html#carrot	gameplay	Its gene carrot
 wiki/gene-tusks.html#dominant	gameplay	One copy, either sex
+wiki/gene-tusks.html#expressions	coding	One outcome per set of forms
 wiki/gene-tusks.html#finding	gameplay	Finding one
+wiki/gene-tusks.html#forms	gameplay	The three forms
 wiki/gene-tusks.html#health	gameplay	Is it good for the horse?
 wiki/gene-tusks.html#inheritance	gameplay	Crossing two of them
 wiki/gene-tusks.html#invented	science	Invented
@@ -2807,8 +2809,10 @@ wiki/gene-tusks.html#numbers	coding	The numbers are generic
 wiki/gene-tusks.html#own-copy	coding	Each form reads its own copy
 wiki/gene-tusks.html#pattern	coding	Slice A of the tusks treatment
 wiki/gene-tusks.html#priority	coding	Why priority 334
+wiki/gene-tusks.html#skeletons	coding	The skeleton breeds roll one of the three
+wiki/gene-tusks.html#slice-b	coding	Slice B: boar tusks and sabre fangs
+wiki/gene-tusks.html#two-forms	gameplay	Two forms on one horse
 wiki/gene-tusks.html#what-varies	gameplay	What varies
-wiki/gene-tusks.html#where	gameplay	Where it sits
 wiki/gene-unicorn-horn.html#anchor	coding	The anchor, and the two models that do not agree
 wiki/gene-unicorn-horn.html#carrot	gameplay	Its gene carrot
 wiki/gene-unicorn-horn.html#deferred	coding	The deferred-submit trap, and why the model is typed on the part
@@ -3424,6 +3428,7 @@ wiki/model-parts.html#body-parts	coding	The body parts: an anchor off the head, 
 wiki/model-parts.html#bone-versions	coding	Every part with bone in it has a bone version
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#crystals	coding	Clusters as trees, and see-through prisms
+wiki/model-parts.html#jaw-lip	coding	The jaw and lip anchors, and a part that hangs
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
 wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw
 wiki/model-parts.html#plates	coding	Two rows to a mesh, and the flank anchors

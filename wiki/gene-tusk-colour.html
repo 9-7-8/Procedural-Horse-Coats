@@ -20,8 +20,8 @@
 <h1>Tusk colour</h1>
 
 <p class="lede">
-    What colour everything the <a href="gene-tusks.html">tusks gene</a> grows is: today, the
-    narwhal horn. The same colours and rules as <a href="gene-horn-colour.html">horn colour</a>
+    What colour everything the <a href="gene-tusks.html">tusks gene</a> grows is: the narwhal
+    horn, the boar tusks and the sabre fangs. The same colours and rules as <a href="gene-horn-colour.html">horn colour</a>
     (white, the rainbow, pink, black, grey or chaos), on a locus of its own. White is the wild
     type, and it reads as ivory. On a horse without tusks it does nothing.
 </p>
@@ -42,8 +42,8 @@
     a little shade of its own.
 </p>
 <p>
-    One colour gene covers every form. When the boar tusks and sabre fangs arrive, a horse with
-    fangs and a narwhal horn will wear both in the same colour.
+    One colour gene covers every form. A horse with fangs and a narwhal horn wears both in the
+    same colour.
 </p>
 
 <h2 id="bone">Bare bone</h2>
@@ -51,7 +51,7 @@
 <p>
     Two <code>Bon</code> copies are the bone version: a tusk is a tooth, so on a skeleton it is
     bare bone. No wild horse carries <code>Bon</code>; the skeleton horses do, so a skeleton that
-    grows a narwhal horn grows it in bone.
+    grows a narwhal horn, boar tusks or sabre fangs grows them in bone.
 </p>
 
 <h2 id="health">Is it good for the horse?</h2>
@@ -80,8 +80,9 @@
 
 <p>
     A key, a name, a priority and the words its outcomes are written in; everything else is
-    <code>AbstractPartColourGene</code>&rsquo;s. A narwhal horn is the horn&rsquo;s chain, so the shared
-    root-to-tip wording describes it, and the <code>Words</code> carry no <code>split</code>.
+    <code>AbstractPartColourGene</code>&rsquo;s. A narwhal horn is the horn&rsquo;s chain, and a boar
+    tusk and a sabre fang are chains root to point too, so the shared root-to-tip wording describes
+    all three and the <code>Words</code> carry no <code>split</code>.
     <code>GrownParts.of</code> puts one pair of tints on every part <code>TusksGene.partsFor</code>
     returns, which is what makes it one colour for every form.
 </p>

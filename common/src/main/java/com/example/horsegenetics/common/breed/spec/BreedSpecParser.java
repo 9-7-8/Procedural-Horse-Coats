@@ -334,6 +334,11 @@ public final class BreedSpecParser {
      * expressing; the founder draws that number, then picks which loci at random.
      * See {@code Breed.CountGroup}.
      *
+     * <p>A locus's value is one pair, or - for a gene with several forms - a choice
+     * of them written as a {@code genes} pool is,
+     * {@code [{"pair": "Nar/Nar", "weight": 1}, {"pair": "Tsk/Tsk", "weight": 1}]}:
+     * a picked founder draws one. See {@code Breed.GroupLocus}.
+     *
      * <p>A locus this install has not got, or a pair its gene does not declare,
      * drops that locus and is warned about, like a gene pool. A locus the breed
      * already names in {@code genes} or a strain is thrown: the two would disagree
@@ -377,9 +382,40 @@ public final class BreedSpecParser {
                     throw new IllegalArgumentException(at + ".loci names " + key
                             + ", which the breed already draws elsewhere");
                 }
-                String[] tokens = splitPair(asString(e.getValue(), at + ".loci." + key), at + ".loci." + key);
+                String where = at + ".loci." + key;
+                if (e.getValue() instanceof List<?>) {
+                    // A choice of pairs. An undeclared or weightless one is dropped and
+                    // warned about, like a combination in a genes pool.
+                    List<Object> choices = asArray(e.getValue(), where);
+                    List<Breed.Combo> pairs = new ArrayList<>();
+                    for (int c = 0; c < choices.size(); c++) {
+                        String choiceAt = where + "[" + c + "]";
+                        Map<String, Object> choice = asObject(choices.get(c), choiceAt);
+                        expectKeys(choice, Set.of("pair", "weight"));
+                        String[] tokens = splitPair(requireString(choice, "pair"), choiceAt);
+                        if (!hasAllele(gene, tokens[0]) || !hasAllele(gene, tokens[1])) {
+                            warn.accept(source + ": " + choiceAt + " names allele(s) \"" + tokens[0] + "/"
+                                    + tokens[1] + "\" that " + key + " does not declare - that pair is dropped");
+                            continue;
+                        }
+                        double weight = choice.containsKey("weight")
+                                ? asNumber(choice.get("weight"), choiceAt + ".weight") : 1.0;
+                        if (weight <= 0.0) {
+                            warn.accept(source + ": " + choiceAt + " has a weight of " + weight + " - dropped");
+                            continue;
+                        }
+                        pairs.add(new Breed.Combo(tokens[0], tokens[1], weight));
+                    }
+                    if (pairs.isEmpty()) {
+                        warn.accept(source + ": nothing in " + where + " survived - that locus is dropped");
+                        continue;
+                    }
+                    loci.add(new Breed.GroupLocus(key, pairs));
+                    continue;
+                }
+                String[] tokens = splitPair(asString(e.getValue(), where), where);
                 if (!hasAllele(gene, tokens[0]) || !hasAllele(gene, tokens[1])) {
-                    warn.accept(source + ": " + at + ".loci." + key + " names allele(s) \"" + tokens[0] + "/"
+                    warn.accept(source + ": " + where + " names allele(s) \"" + tokens[0] + "/"
                             + tokens[1] + "\" that it does not declare - that locus is dropped");
                     continue;
                 }

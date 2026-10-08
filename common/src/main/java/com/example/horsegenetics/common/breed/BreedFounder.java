@@ -243,7 +243,9 @@ public final class BreedFounder {
             for (Breed.GroupLocus locus : group.loci()) {
                 Gene gene = Genes.byKey(locus.gene());
                 if (picked.contains(locus)) {
-                    drawn.add(new AllelePair(gene.fromToken(locus.a()), gene.fromToken(locus.b())));
+                    // One of the locus's pairs; a one-pair locus draws nothing extra.
+                    Breed.Combo pair = locus.draw(rng);
+                    drawn.add(new AllelePair(gene.fromToken(pair.a()), gene.fromToken(pair.b())));
                 } else {
                     drawn.add(wild(gene));
                 }

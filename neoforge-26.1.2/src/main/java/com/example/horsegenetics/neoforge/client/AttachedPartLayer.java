@@ -167,6 +167,36 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     private static final float[] FOAL_SNOUT = ADULT_SNOUT;
 
     /**
+     * Where the <b>left</b> boar tusk roots on the adult muzzle, in head-local units;
+     * the right is the same with {@code x} negated. Read from the 26.1.2 sources, not
+     * seen: the muzzle box is {@code x -2..2, y -11..-6, z -7..-2} with {@code -y} the
+     * top of the nose and {@code -z} the front, and the model has no separate lower jaw
+     * (see {@link #ADULT_SNOUT}: nothing animates one), so the "corner of the jaw" is a
+     * place on that one box. {@code x 1.8} is just inside the side wall, {@code y -7.2}
+     * a unit above the chin where a mouth line would be, and {@code z -4.6} the middle
+     * of the muzzle's length. The tusk leaves sideways and curls up the side of the nose
+     * ({@code TuskGenerator}). A first placement from the boxes, not a tuned one.
+     */
+    private static final float[] ADULT_JAW = {1.8f, -7.2f, -4.6f};
+
+    /** The same on the foal. Never drawn - a foal grows no tusks - as {@link #FOAL_SPINE}. */
+    private static final float[] FOAL_JAW = ADULT_JAW;
+
+    /**
+     * Where the <b>left</b> sabre fang roots on the adult muzzle, in head-local units;
+     * the right is the same with {@code x} negated. Read from the same box, not seen:
+     * {@code z -6.9} is just inside the front face, so the front half of the blade
+     * stands proud of it and shows from its root down; {@code x 1.55} is inside the
+     * face's corner, and {@code y -7.6} the mouth line, a unit and a half above the chin
+     * the fang hangs past. The mesh turns itself over to hang ({@code SabreGenerator}),
+     * so this anchor needs no turn of its own. A first placement, not a tuned one.
+     */
+    private static final float[] ADULT_LIP = {1.55f, -7.6f, -6.9f};
+
+    /** The same on the foal. Never drawn - a foal grows no fangs - as {@link #FOAL_SPINE}. */
+    private static final float[] FOAL_LIP = ADULT_LIP;
+
+    /**
      * How far a part at {@link PartAnchor#SNOUT} is turned before it is drawn, about x.
      * Every part mesh grows up its own {@code -y}; a quarter-turn about {@code +x} takes
      * {@code -y} to {@code -z}, forward along the head's own axis - which, with the neck's
@@ -463,6 +493,23 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
                 headParts.translateAndRotate(poseStack);
                 headParts.getChild("head").translateAndRotate(poseStack);
                 yield baby ? FOAL_SNOUT : ADULT_SNOUT;
+            }
+            case JAW_RIGHT, JAW_LEFT -> {
+                // The head bone again: the muzzle shares its frame and no jaw animates.
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                float[] base = baby ? FOAL_JAW : ADULT_JAW;
+                float side = anchor == PartAnchor.JAW_LEFT ? 1f : -1f;
+                yield new float[] {side * base[0], base[1], base[2]};
+            }
+            case LIP_RIGHT, LIP_LEFT -> {
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                float[] base = baby ? FOAL_LIP : ADULT_LIP;
+                float side = anchor == PartAnchor.LIP_LEFT ? 1f : -1f;
+                yield new float[] {side * base[0], base[1], base[2]};
             }
         };
 

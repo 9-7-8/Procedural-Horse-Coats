@@ -201,7 +201,18 @@ public final class BreedSpecWriter {
             parts.add(field("counts", inlineArray(counts), 6));
             List<String> loci = new ArrayList<>();
             for (Breed.GroupLocus l : g.loci()) {
-                loci.add("        " + quote(l.gene()) + ": " + quote(l.a() + "/" + l.b()));
+                if (l.pairs().size() == 1) {
+                    Breed.Combo only = l.pairs().get(0);
+                    loci.add("        " + quote(l.gene()) + ": " + quote(only.a() + "/" + only.b()));
+                    continue;
+                }
+                // A choice of pairs, written as a genes pool is.
+                List<String> combos = new ArrayList<>();
+                for (Breed.Combo c : l.pairs()) {
+                    combos.add("          { \"pair\": " + quote(c.a() + "/" + c.b())
+                            + ", \"weight\": " + number(c.weight()) + " }");
+                }
+                loci.add("        " + quote(l.gene()) + ": [\n" + String.join(",\n", combos) + "\n        ]");
             }
             parts.add(field("loci", "{\n" + String.join(",\n", loci) + "\n      }", 6));
             out.add("    {\n" + String.join(",\n", parts) + "\n    }");

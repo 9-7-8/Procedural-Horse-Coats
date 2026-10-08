@@ -652,8 +652,15 @@ public final class GeneCensusTool {
                         continue;
                     }
                     String wild = gene.defaultAllele().token();
-                    pools.put(l.gene(), List.of(new Breed.Combo(l.a(), l.b(), share),
-                            new Breed.Combo(wild, wild, 1.0 - share)));
+                    // A locus with a choice of pairs shares its slot among them by weight.
+                    List<Breed.Combo> pool = new java.util.ArrayList<>();
+                    double total = l.totalWeight();
+                    for (Breed.Combo c : l.pairs()) {
+                        pool.add(new Breed.Combo(c.a(), c.b(),
+                                total > 0.0 ? share * Math.max(0.0, c.weight()) / total : 0.0));
+                    }
+                    pool.add(new Breed.Combo(wild, wild, 1.0 - share));
+                    pools.put(l.gene(), pool);
                 }
                 accumulate(out, breed, null, pools);
             }

@@ -558,9 +558,13 @@ public final class GeneDescriptions {
             Map.entry("horsegenetics.tusks",
                     "A magical, dominant gene with a form per allele. One Nar copy grows a "
                             + "narwhal horn: one long spiral tusk straight forward out of the "
-                            + "front of the muzzle. Its length, thickness, twist and lift are "
-                            + "epigenetic and inherited with the copy. Mares and stallions "
-                            + "alike; grown at maturity. Their colour is its own gene."),
+                            + "front of the muzzle. One Tsk copy grows boar tusks, curling up "
+                            + "from the corners of the lower jaw. One Sab copy grows sabre "
+                            + "fangs, hanging from the upper lip past the chin. A horse with "
+                            + "two different forms grows both, each from its own copy's "
+                            + "numbers: length, thickness, curve and style are epigenetic and "
+                            + "inherited with the copy. Mares and stallions alike; grown at "
+                            + "maturity. Their colour is its own gene."),
             Map.entry("horsegenetics.tusk_colour",
                     "A magical, codominant gene that colours tusks and does nothing to a "
                             + "horse without them - the horn colour rule on a locus of its own, "

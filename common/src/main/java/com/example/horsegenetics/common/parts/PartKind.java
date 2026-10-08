@@ -75,6 +75,25 @@ public enum PartKind {
     NARWHAL(PartAnchor.SNOUT, PartSheet.HORN),
 
     /**
+     * The right-hand boar tusk - the tusks locus's {@code Tsk} form. A short curved
+     * tusk rising from the corner of the lower jaw ({@link TuskGenerator}); ivory, tip
+     * and all, like the horn.
+     */
+    TUSK_RIGHT(PartAnchor.JAW_RIGHT, PartSheet.HORN),
+
+    /** The left-hand boar tusk. A pair is symmetric: both sides ask for the same style. */
+    TUSK_LEFT(PartAnchor.JAW_LEFT, PartSheet.HORN),
+
+    /**
+     * The right-hand sabre fang - the tusks locus's {@code Sab} form. A flat blade
+     * hanging from the front of the upper lip past the chin ({@link SabreGenerator}).
+     */
+    SABRE_RIGHT(PartAnchor.LIP_RIGHT, PartSheet.HORN),
+
+    /** The left-hand sabre fang. */
+    SABRE_LEFT(PartAnchor.LIP_LEFT, PartSheet.HORN),
+
+    /**
      * Crystal growths along the back - the back crystals locus. Clusters on the spine
      * row's anchor and numbering, see-through shafts with solid points
      * ({@link CrystalGenerator}). Centred, so one kind.
@@ -117,6 +136,10 @@ public enum PartKind {
             case PLATES_RIGHT, PLATES_LEFT -> PlateGenerator.styles();
             // The horn's two twisted styles; the narwhal never bends (HornGenerator).
             case NARWHAL -> HornGenerator.NARWHAL_STYLES;
+            // Form x sweep x which way a hook turns.
+            case TUSK_RIGHT, TUSK_LEFT -> TuskGenerator.styles();
+            // Form x serration pattern.
+            case SABRE_RIGHT, SABRE_LEFT -> SabreGenerator.styles();
             // Arrangement (the seed) x lean spread.
             case CRYSTALS -> CrystalGenerator.styles();
         };
@@ -138,6 +161,8 @@ public enum PartKind {
             case PLATES_RIGHT, PLATES_LEFT -> PlateSize.classes();
             // The horn's fine steps: a segment count, not a class.
             case NARWHAL -> PartShape.SIZE_BUCKETS;
+            case TUSK_RIGHT, TUSK_LEFT -> TuskSize.classes();
+            case SABRE_RIGHT, SABRE_LEFT -> SabreSize.classes();
             case CRYSTALS -> CrystalSize.classes();
         };
     }
@@ -150,7 +175,8 @@ public enum PartKind {
      * Dragon horns are a hard part and come with maturity too (owner, 2026-10-01:
      * foals wear the soft parts only). So do the body parts: they are hard parts,
      * and a foal's back is tiny (body-parts treatment). So is the narwhal horn: the
-     * unicorn horn is the only hard part a foal wears (tusks treatment).
+     * unicorn horn is the only hard part a foal wears (tusks treatment) - and so the
+     * boar tusks and sabre fangs.
      */
     public boolean showsOnFoal() {
         return this == HORN;
@@ -172,6 +198,8 @@ public enum PartKind {
             // Nor the spines, nor a sail, nor the plates, nor a narwhal horn. Nor the
             // crystals: the treatment leaves glow out and says this is where it would go.
             case SPINES, SAIL, PLATES_RIGHT, PLATES_LEFT, NARWHAL, CRYSTALS -> PartSheet.SOLID;
+            // Nor the boar tusks or the sabre fangs.
+            case TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT -> PartSheet.SOLID;
         };
     }
 
@@ -193,7 +221,7 @@ public enum PartKind {
             // A crystal's shafts, never its points - the crystal antler's split.
             case CRYSTALS -> PartSheet.bit(PartSheet.CRYSTAL);
             case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES,
-                 PLATES_RIGHT, PLATES_LEFT, NARWHAL -> 0;
+                 PLATES_RIGHT, PLATES_LEFT, NARWHAL, TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT -> 0;
         };
     }
 
@@ -222,6 +250,16 @@ public enum PartKind {
     /** Is this a side of shoulder and hip plates? */
     public boolean plates() {
         return this == PLATES_RIGHT || this == PLATES_LEFT;
+    }
+
+    /** Is this a boar tusk, of either side? */
+    public boolean tusk() {
+        return this == TUSK_RIGHT || this == TUSK_LEFT;
+    }
+
+    /** Is this a sabre fang, of either side? Its blade is a flat box ({@link SabreGenerator}). */
+    public boolean sabre() {
+        return this == SABRE_RIGHT || this == SABRE_LEFT;
     }
 
     /** Is this a dragon horn, of either side? */
@@ -254,6 +292,8 @@ public enum PartKind {
             case SAIL -> "Back sail";
             case PLATES_RIGHT, PLATES_LEFT -> "Shoulder and hip plates";
             case NARWHAL -> "Narwhal horn";
+            case TUSK_RIGHT, TUSK_LEFT -> "Boar tusks";
+            case SABRE_RIGHT, SABRE_LEFT -> "Sabre fangs";
             case CRYSTALS -> "Crystal growths";
         };
     }

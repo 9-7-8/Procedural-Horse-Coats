@@ -71,10 +71,30 @@ public enum PartAnchor {
      * straight out of the face - the narwhal horn (tusks treatment). The only anchor
      * whose part does not stand up from it: the client turns it to face forward.
      */
-    SNOUT
+    SNOUT,
+
+    /**
+     * The corner of the lower jaw on the <b>right</b> side, model {@code -x}, level
+     * with the mouth line. It rides the head, as {@link #SNOUT} does. A part here leaves
+     * the jaw sideways and curls up past the upper lip - the boar tusks (tusks treatment).
+     */
+    JAW_RIGHT,
+
+    /** The same on the other side, model {@code +x}. */
+    JAW_LEFT,
+
+    /**
+     * The front of the upper lip, <b>right</b> of centre, model {@code -x}, on the
+     * mouth line. It rides the head. A part here hangs down past the chin - the sabre
+     * fangs (tusks treatment).
+     */
+    LIP_RIGHT,
+
+    /** The same on the other side, model {@code +x}. */
+    LIP_LEFT
 
     // The next anchors, named here only so the shape of the enum is obvious and
-    // NOT declared until something draws them: JAW_x2 (boar tusks), LIP_x2 (sabre
-    // fangs), WITHERS_PAIR (wings), HOOF_x4 (feathering, shoes). Each is one row in
-    // the client's offset table and one entry here.
+    // NOT declared until something draws them: WITHERS_PAIR (wings), HOOF_x4
+    // (feathering, shoes). Each is one row in the client's offset table and one
+    // entry here.
 }

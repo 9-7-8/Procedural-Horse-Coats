@@ -90,8 +90,57 @@ public record Breed(
     /** The undead pools a breed may join (undead treatment D12): which vanilla undead horse it replaces. */
     public static final List<String> UNDEAD_POOLS = List.of("skeleton", "zombie");
 
-    /** One locus of a {@link CountGroup}: the pair it gets when the group picks it. */
-    public record GroupLocus(String gene, String a, String b) {}
+    /**
+     * One locus of a {@link CountGroup}: the pair it gets when the group picks it.
+     *
+     * <p>Usually one pair. A locus whose gene has several forms may list several,
+     * weighted, and a picked founder draws one of them: the skeleton horse's tusks
+     * slot is a narwhal horn, boar tusks or sabre fangs (owner, 2026-10-08). The group
+     * still counts it as one locus, so the forms share its slot rather than each
+     * taking one.
+     *
+     * @param pairs the pairs a picked founder draws from, by weight; never empty
+     */
+    public record GroupLocus(String gene, List<Combo> pairs) {
+        public GroupLocus {
+            pairs = List.copyOf(pairs);
+            if (pairs.isEmpty()) {
+                throw new IllegalArgumentException(gene + ": a grouped locus needs at least one pair");
+            }
+        }
+
+        /** A locus with one pair - every grouped locus but a many-formed one. */
+        public GroupLocus(String gene, String a, String b) {
+            this(gene, List.of(new Combo(a, b, 1.0)));
+        }
+
+        /** The weights' sum, for a caller sharing the locus out among its pairs. */
+        public double totalWeight() {
+            double total = 0.0;
+            for (Combo c : pairs) {
+                total += Math.max(0.0, c.weight());
+            }
+            return total;
+        }
+
+        /**
+         * The pair this founder gets. A one-pair locus consumes no randomness, so a
+         * breed whose groups never list a choice draws exactly what it always did.
+         */
+        public Combo draw(com.example.horsegenetics.common.Rng rng) {
+            if (pairs.size() == 1) {
+                return pairs.get(0);
+            }
+            double roll = rng.nextFloat() * totalWeight();
+            for (Combo c : pairs) {
+                roll -= Math.max(0.0, c.weight());
+                if (roll < 0.0) {
+                    return c;
+                }
+            }
+            return pairs.get(pairs.size() - 1);
+        }
+    }
 
     /**
      * <b>"Some of these, rarely several"</b> - a set of loci where the breed sheet
@@ -477,7 +526,12 @@ public record Breed(
         FounderTable.Builder b = FounderTable.builder();
         for (GroupLocus l : group.loci()) {
             if (l.gene().equals(geneKey)) {
-                b.weight(alleleOf(gene, l.a()), alleleOf(gene, l.b()), share);
+                // A locus with a choice of pairs shares its slot among them by weight.
+                double total = l.totalWeight();
+                for (Combo c : l.pairs()) {
+                    b.weight(alleleOf(gene, c.a()), alleleOf(gene, c.b()),
+                            total > 0.0 ? share * Math.max(0.0, c.weight()) / total : 0.0);
+                }
             }
         }
         b.weight(gene.defaultAllele(), gene.defaultAllele(), 100.0 - share);

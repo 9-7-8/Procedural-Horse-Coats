@@ -157,6 +157,48 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
     }
 
     /**
+     * One boar tusk, from the numbers the tusks locus's {@code Tsk} copy carries - white
+     * and dark until the tusk colour locus dresses it.
+     *
+     * @param left   the left side rather than the right
+     * @param form   a {@link TuskGenerator} form
+     * @param sweep  {@code [0,1]}: how far the tusk curls up from where it leaves the jaw
+     * @param hook   which way a hooked tusk's tip turns, {@code 0..}{@link TuskGenerator#HOOKS}{@code -1}
+     * @param length position on the {@link TuskSize} ladder - class is the mesh, the rest a stretch
+     * @param girth  extra scale across the tusk
+     */
+    public static AttachedPart tusk(boolean left, int form, double sweep, int hook, double length, double girth) {
+        PartKind kind = left ? PartKind.TUSK_LEFT : PartKind.TUSK_RIGHT;
+        // Only a hooked tusk reads the hook, so the other forms share one mesh.
+        int style = TuskGenerator.style(form, bucket(sweep, TuskGenerator.SWEEPS),
+                form == TuskGenerator.HOOKED ? hook : 0);
+        PartShape shape = PartShape.of(kind, style, length);
+        // A uniform scale within a class, the dragon horn's rule: the tusk leaves the
+        // jaw sideways, so a stretch along the anchor's y alone would shear it.
+        float grow = shape.stretchTo(length);
+        return new AttachedPart(shape, grow, (float) (grow * girth), 0f, UNDYED, UNDYED, false);
+    }
+
+    /**
+     * One sabre fang, from the numbers the tusks locus's {@code Sab} copy carries - white
+     * and dark until the tusk colour locus dresses it.
+     *
+     * @param left    the left side rather than the right
+     * @param form    a {@link SabreGenerator} form
+     * @param pattern which serration pattern, {@code 0..}{@link SabreGenerator#PATTERNS}{@code -1}
+     * @param length  position on the {@link SabreSize} ladder - class is the mesh, the rest a stretch
+     * @param girth   extra scale across the blade
+     * @param tilt    radians off straight down the face; negative leans the point forward
+     */
+    public static AttachedPart sabre(boolean left, int form, int pattern, double length, double girth,
+                                     double tilt) {
+        PartKind kind = left ? PartKind.SABRE_LEFT : PartKind.SABRE_RIGHT;
+        PartShape shape = PartShape.of(kind, SabreGenerator.style(form, pattern), length);
+        float grow = shape.stretchTo(length);
+        return new AttachedPart(shape, grow, (float) (grow * girth), (float) tilt, UNDYED, UNDYED, false);
+    }
+
+    /**
      * One antler of a rack, from the numbers the antlers locus carries - bone
      * coloured by {@code tint}, unlit, solid and bare until other loci dress it.
      *

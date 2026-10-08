@@ -223,6 +223,58 @@ class UndeadBreedsTest {
         assertEquals(SKELETON.undeadOf(), again.undeadOf());
     }
 
+    /**
+     * The tusks slot is one locus with a choice of three pairs (owner, 2026-10-08): a
+     * skeleton that draws it grows a narwhal horn, boar tusks or sabre fangs, each about
+     * a third of the time, always two copies of one form and never a mix. The slot's
+     * share of founders is unchanged - the three forms split it.
+     */
+    @Test
+    void theTusksSlotRollsOneOfThreeForms() {
+        int n = 20_000;
+        Map<String, Integer> byPair = new HashMap<>();
+        for (long seed = 0; seed < n; seed++) {
+            AllelePair pair = roll(SKELETON, seed).genotype().pair(Genes.TUSKS);
+            if (!pair.homozygousFor(Genes.TUSKS.n)) {
+                byPair.merge(pair.toTokens(), 1, Integer::sum);
+            }
+        }
+        assertEquals(java.util.Set.of("Nar/Nar", "Tsk/Tsk", "Sab/Sab"), byPair.keySet(), "pairs drawn: " + byPair);
+        int total = byPair.values().stream().mapToInt(Integer::intValue).sum();
+        double share = SKELETON.countGroups().get(0).shareEach();
+        assertEquals(share, total / (double) n, 0.006, "the slot's share moved: " + byPair);
+        for (Map.Entry<String, Integer> e : byPair.entrySet()) {
+            assertEquals(1 / 3.0, e.getValue() / (double) total, 0.08, e.getKey() + " of " + byPair);
+        }
+        // And to a caller asking about the sheet, each form holds a third of that share.
+        var table = SKELETON.founderTable(Genes.TUSKS.key());
+        int forms = 0;
+        for (AllelePair pair : table.pairs()) {
+            if (!pair.homozygousFor(Genes.TUSKS.n)) {
+                assertEquals(share / 3.0, table.share(pair), 1e-6, pair.toTokens());
+                forms++;
+            }
+        }
+        assertEquals(3, forms);
+    }
+
+    /** A choice is forgiven like a genes pool: a pair the gene does not declare is dropped, the rest kept. */
+    @Test
+    void aChoiceOfPairsDropsWhatItsGeneDoesNotDeclare() {
+        List<String> warnings = new java.util.ArrayList<>();
+        String json = "{\"id\": \"choosy\", \"name\": \"Choosy\", \"count_groups\": [{\"counts\": [0, 1], "
+                + "\"loci\": {\"horsegenetics.tusks\": [{\"pair\": \"Sab/Sab\", \"weight\": 3}, "
+                + "{\"pair\": \"Wal/Wal\", \"weight\": 1}, {\"pair\": \"Tsk/Tsk\", \"weight\": 0}]}}]}";
+        Breed breed = BreedSpecParser.parse(json, "choosy", warnings::add);
+        Breed.GroupLocus locus = breed.countGroups().get(0).loci().get(0);
+        assertEquals(List.of(new Breed.Combo("Sab", "Sab", 3.0)), locus.pairs());
+        assertEquals(2, warnings.size(), "one for the undeclared pair, one for the weightless: " + warnings);
+        for (long seed = 0; seed < 20; seed++) {
+            assertEquals("Sab/Sab", roll(breed, seed).genotype().pair(Genes.TUSKS).toTokens());
+        }
+        assertThrows(IllegalArgumentException.class, () -> new Breed.GroupLocus("horsegenetics.tusks", List.of()));
+    }
+
     @Test
     void aGroupedLocusNamedTwiceIsRefused() {
         String json = "{\"id\": \"twice\", \"name\": \"Twice\", \"genes\": {\"horsegenetics.unicorn_horn\": "
@@ -335,6 +387,6 @@ class UndeadBreedsTest {
         assertEquals(java.util.Set.of(Genes.UNICORN_HORN.key(), Genes.ANTLERS.key(), Genes.RAM_HORNS.key(),
                 Genes.DRAGON_HORNS.key(), Genes.DORSAL_SPINES.key(), Genes.BACK_SAIL.key(),
                 Genes.BODY_PLATES.key(), Genes.TUSKS.key(), Genes.BACK_CRYSTALS.key()), grouped);
-        assertEquals(PartKind.values().length, 13, "a new part kind: decide whether the skeleton grows it");
+        assertEquals(PartKind.values().length, 17, "a new part kind: decide whether the skeleton grows it");
     }
 }

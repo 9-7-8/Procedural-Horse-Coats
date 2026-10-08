@@ -47,6 +47,10 @@ public final class PartGenerators {
             // The unicorn horn's chain on the narwhal's own ladder: no new generator.
             case NARWHAL -> HornGenerator.generate(shape.nominalLength(),
                     HornGenerator.narwhalTwist(shape.style()));
+            case TUSK_RIGHT, TUSK_LEFT -> TuskGenerator.generate(
+                    shape.style(), shape.size(), shape.kind() == PartKind.TUSK_LEFT);
+            case SABRE_RIGHT, SABRE_LEFT -> SabreGenerator.generate(
+                    shape.style(), shape.size(), shape.kind() == PartKind.SABRE_LEFT);
             case CRYSTALS -> CrystalGenerator.generate(shape.style(), shape.size());
         };
     }
