@@ -752,6 +752,13 @@ final class DebugYardLong {
                     t.done.add(e.getKey());
                 }
             }
+            // The pair is kept fit (#215). Only the pen's locus is fixed and the rest of each genome is rolled,
+            // so a mare can roll a disorder that costs her a point now and then; health does not come back by
+            // itself and a natural cover needs 90%, which ended this pen at 13 foals on 2026-10-08.
+            for (Horse adult : level.getEntitiesOfClass(Horse.class, box, h -> !h.isBaby() && h.isAlive()
+                    && h.getHealth() < h.getMaxHealth())) {
+                adult.setHealth(adult.getMaxHealth());
+            }
             if (round % 60 == 59) {     // every ten minutes, whether or not anything changed
                 ActionTrace.log("test yard", t.name + " tally | " + t.summary());
             }

@@ -456,7 +456,8 @@ public final class DebugTestWorldHandler {
      * is not loaded is simply left out.
      */
     /**
-     * <b>Seven batches: fertility outside the yard, this evening's two, then the four the yard left.</b>
+     * <b>Eight batches. The first is the fixes only the owner's hands can confirm (2026-10-08, #36 and #10);
+     * the seven after it are described below with the numbers they had before it was put in front.</b>
      *
      * <p>Batch 1 is the part of fertility the yard cannot do. Rows O-T
      * ({@code DebugYardFertility}) are one pen per breeding scenario, so the
@@ -488,6 +489,7 @@ public final class DebugTestWorldHandler {
      * it should be - see {@code wiki/horse-dimension.html}.
      */
     private static final String[] BATCHES = {
+            "FIXES WAITING ON YOU - #36 the command whistle's plain hold, #10 the stasis bank's arrow",
             "NEW: FLYING - one egg per allele, a stick to tame, a saddle to ride. Double-tap jump.",
             "NEW: the ender whistle, and wild bands in the OVERWORLD (yard rows R-T run the rest)",
             "NEW: the Dhampir's loci - white, sun, blood - and the day loci (0-R, 0-DT)",
@@ -622,7 +624,7 @@ public final class DebugTestWorldHandler {
         // 2026-09-30: every pen that waited for a person went, then every pen whose question was
         // answered, and the survivors were packed together - so the letters skip, and are names.
         tell(player, Component.literal("Every pen runs itself - walk in, then leave it alone. "
-                        + "Nothing in the yard needs your hands; what does is batch 5. The letters "
+                        + "Nothing in the yard needs your hands; what does is batch 6. The letters "
                         + "skip because answered rows were deleted and the rest packed together.")
                 .withStyle(ChatFormatting.GOLD));
     }
@@ -710,6 +712,27 @@ public final class DebugTestWorldHandler {
         List<String> legend = new ArrayList<>();
         switch (n) {
             case 1 -> {
+                // TWO FIXES ONLY HANDS CAN CONFIRM (2026-10-08). #36: the command whistle's plain
+                // hold used to do nothing, because the client never knew who owned the horse. #10:
+                // the stasis bank drew its saved-searches arrow on the wrong tab. Both are fixed and
+                // unit- or game-tested as far as a test reaches; the click and the screen are hers.
+                put(inv, legend, 0, new ItemStack(ModItems.COMMAND_WHISTLE.get()),
+                        "COMMAND WHISTLE (#36) - aim at YOUR tamed horse and HOLD right-click WITHOUT "
+                                + "sneaking: a wheel should open with that horse's name on top, and you "
+                                + "should not mount it. Sneak + hold is every horse of yours in 16 blocks");
+                put(inv, legend, 1, many(preset(player, "Test: whistle horse", Sex.FEMALE, false, PALOMINO), 2),
+                        "two plain horses - tame ONE with the stick and leave the other wild: the plain "
+                                + "hold on the wild one should give no wheel");
+                put(inv, legend, 2, new ItemStack(Items.STICK), "stick - tames on the spot");
+                put(inv, legend, 3, new ItemStack(ModItems.HORSE_STASIS_BANK.get()),
+                        "STASIS BANK (#10) - place it and open it. On CHAMBERS there should be NO small "
+                                + "arrow; on BROWSE the arrow is back and opens the saved searches. Open "
+                                + "that menu, switch to Chambers: the menu should close");
+                tell(player, Component.literal("Two fixes waiting on your eyes: #36 (slots 1-3) and "
+                                + "#10 (slot 4). Say what you see and each issue closes or reopens.")
+                        .withStyle(ChatFormatting.GOLD));
+            }
+            case 2 -> {
                 // FLYING. One egg per allele of the one locus, each homozygous so
                 // there is no question which mode is being looked at, plus the two
                 // items it takes to get off the ground. Nothing else: the owner
@@ -737,7 +760,7 @@ public final class DebugTestWorldHandler {
                                 + "- that is bird_boned's locus - so land rather than step off.")
                         .withStyle(ChatFormatting.GOLD));
             }
-            case 2 -> {
+            case 3 -> {
                 // THE ENDER WHISTLE, and the one band-life test that needs a
                 // hand on the horse. The whistle's far call is the test that can
                 // fail without a sound - a portal ticket that never loads the
@@ -772,7 +795,7 @@ public final class DebugTestWorldHandler {
                                 + "wild band's info screen (the Social section) and the lead test.")
                         .withStyle(ChatFormatting.GOLD));
             }
-            case 3 -> {
+            case 4 -> {
                 // THE DHAMPIR, TAKEN APART. Each locus gets its own egg, so a
                 // behaviour can be pinned on the allele that owns it: the white
                 // one is everything at once, and the two singles are the check
@@ -809,7 +832,7 @@ public final class DebugTestWorldHandler {
                 tell(player, command("/testkit night", "night - for the hunt"));
                 tell(player, command("/testkit day", "day - for the burning and the day loci"));
             }
-            case 4 -> {
+            case 5 -> {
                 // THE NIGHT SHIFT. Six of the yard's pens now run on a clock
                 // and write their own readings (DebugWorldWatch), so this batch
                 // is not a list of things to do - it is the short list of
@@ -827,7 +850,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 3, new ItemStack(Items.CLOCK),
                         "clock - or /testkit night, which the dimension now honours");
                 put(inv, legend, 4, new ItemStack(Items.SADDLE),
-                        "saddle - the ridden tests are batch 5");
+                        "saddle - the ridden tests are batch 6");
                 // THE CONTROL FOR GAP 218, and the reason it is dark oak and not
                 // oak: the oak, birch, mushroom and bone-meal dryad pens all
                 // completed and are deleted, and dark oak planted saplings for a
@@ -857,7 +880,7 @@ public final class DebugTestWorldHandler {
                                 + "the plot down and the night with it.")
                         .withStyle(ChatFormatting.RED));
             }
-            case 5 -> {
+            case 6 -> {
                 // THE CHECKS A FAKEPLAYER CANNOT DO, which is every one of these. Until
                 // 2026-09-30 they were yard pens (the arena, row K, the pool, the
                 // infirmary's positive half); the yard only keeps what runs with nobody in
@@ -889,7 +912,7 @@ public final class DebugTestWorldHandler {
                                 + "a fake player cannot ride, be healed by an aura, or be found as an owner.")
                         .withStyle(ChatFormatting.GOLD));
             }
-            case 6 -> {
+            case 7 -> {
                 // Molten hooves left this batch on 2026-09-13: its four alleles
                 // are four stalls in the yard now, side by side, which is the
                 // only arrangement that can answer "does this one differ from
@@ -903,7 +926,7 @@ public final class DebugTestWorldHandler {
                 put(inv, legend, 3, new ItemStack(Items.SADDLE),
                         "saddle - prints follow a ridden horse too; the molten stalls are in the yard");
             }
-            case 7 -> {
+            case 8 -> {
                 String[] rest = {"tidewave", "inkcoil", "opal_fire", "beadscale", "scuted",
                         "sporefall", "wishstar", "datarain", "foamed"};
                 for (int i = 0; i < rest.length; i++) {
