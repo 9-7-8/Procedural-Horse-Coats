@@ -479,6 +479,15 @@
     Seen working in the yard on 2026-09-30 &mdash; <a href="#verified-hurt-mare">below</a>.
 </p>
 
+<p id="verified-covered-after-loss">
+    <strong>A mare who loses a pregnancy is covered again</strong> (2026-10-08, the yard&rsquo;s RATIO MITF SW3
+    pen, the 10:56 run). The pen loses pregnancies by design: sixteen of its mare&rsquo;s forty conceptions were
+    <code>early loss: 1 of 1 embryo(s) (nonviable-mitf)</code>, and each was followed by a fresh cover and
+    conception for the same mare, to the pen&rsquo;s PASS at conception 40 (11:53:06). She never went quiet
+    after a loss, which was the old behaviour gap 258 fixed. RATIO KIT W5 and RATIO MILK CLASH, the other two
+    pens this check named, reached their own verdicts the same way on 2026-10-02.
+</p>
+
 <p id="verified-hurt-mare">
     <strong>A hurt mare is refused, says so, and is covered at 90% rather than at full health</strong>
     (2026-09-30, the yard&rsquo;s HURT MARE pen, closed on its own PASS line). The pen sets a mare in heat to
@@ -1237,15 +1246,6 @@
     <li><strong>The fertility rows are empty.</strong> Since 2026-09-30 the last fertility pen, HURT
         MARE, is <a href="?view=coding#verified-hurt-mare">answered</a> and gone too, so expect no
         <code>fertility pen built</code> line at all.</li>
-    <li><strong>A mare who loses a pregnancy is covered again (2026-09-16, gap 258, NOT played).</strong>
-        This is the one to do first, because until now she never was. Stand at <strong>row W</strong>'s
-        ratio pens (RATIO KIT W5, RATIO MITF SW3, RATIO MILK CLASH) and leave them. Each loses
-        pregnancies by design. <em>Pass:</em> <code>early loss</code> lines keep being followed by fresh
-        <code>natural cover</code> lines for the same mare all run &mdash; MILK CLASH should conceive and
-        lose over and over, never stall. <em>Fail, the old behaviour:</em> one loss and that pen goes
-        quiet for the rest of the run while her readout still says <em>In heat</em>. Worth a census an
-        hour in: row W should now be building a real sample for
-        <a href="known-gaps.html#gap-225">gap 225</a>'s ratios.</li>
     <li><strong>Every pen has water now (2026-09-16, NOT played).</strong> A water cauldron is sunk flush
         into the floor of each pen's corner, from <code>DebugTestYard.fencedPlot</code>, so a hurt horse
         can heal anywhere in the yard. <em>Check:</em> no animal uses one as a step to leave its pen

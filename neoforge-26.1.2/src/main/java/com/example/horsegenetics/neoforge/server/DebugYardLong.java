@@ -111,11 +111,10 @@ final class DebugYardLong {
             // out (gap 225): the doubled allele must be lost at conception, never born. A milk clash
             // whose every foal would be Watr/Lava, which MilkGene forbids. And a colour gene with knobs,
             // for inheritance of its epigenetic values. The conception log (gap 245) covers all four.
-            ratio(level, gy, west + 9, mouthZ + ROW_W, "RATIO MITF SW3", "horsegenetics.mitf", "SW3/N", "SW3/N", false,
-                    List.of("RATIO: MITF SW3", "SW3/N x SW3/N:", "SW3/SW3 impossible", "- lost, never born"),
-                    "no SW3/SW3 foal ever; about 1 in 4 conceptions lost early, 2 SW3/N : 1 N/N born");
-            // RATIO STARBURST passed the same morning (40 foals, 6 : 23 : 11, p 0.341) and went.
-            ActionTrace.log("test yard", "all-day pens built (row W: RATIO MITF SW3)");
+            // RATIO MITF SW3, the last of them, passed at conception 40 on 2026-10-08 (SW3/SW3 16, SW3/N 17,
+            // N/N 7; none born) and went - wiki/gene-mitf.html#verified-sw3-nonviable. ratio() and its judging
+            // stay for the next inheritance question.
+            ActionTrace.log("test yard", "all-day pens built (none: every ratio pen has answered)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }
