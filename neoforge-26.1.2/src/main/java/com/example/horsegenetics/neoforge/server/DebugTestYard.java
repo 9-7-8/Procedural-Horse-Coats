@@ -172,15 +172,15 @@ final class DebugTestYard {
      * wiki/gene-food-preference.html). The letters are names: BB follows W directly now.
      */
     /**
-     * MUSIC (west) and PACK AWAY (east) - {@link DebugYardSocial}. PACK LEADER stood east until it answered on
-     * 2026-10-08 (#213).
+     * PACK AWAY (east) - {@link DebugYardSocial}. MUSIC (west) and PACK LEADER (east) both answered on
+     * 2026-10-08 and went.
      */
     static final int ROW_BB = ROW_W + ROW_W_D + PACKED_AISLE;   // BA (FIREPROOF, BREATH) answered and went
 
     /** AURA SILENT (west) and AURA CONTROL (east) - {@link DebugYardGenes}, 2026-10-08. */
     static final int ROW_BD = ROW_BB + NEW_ROW_D + PACKED_AISLE;
-    /** MEAT FLOOR and the three CLEANSING groups - {@link DebugYardGenes}. South of the husks on purpose. */
-    static final int ROW_BE = ROW_BD + NEW_ROW_D + PACKED_AISLE;
+    // Row BE (MEAT FLOOR and three CLEANSING groups) stood south of it for one launch and answered: see
+    // DebugYardGenes.
 
     /**
      * <b>The yard's depth is the last row, not a number somebody remembered to
@@ -189,7 +189,7 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    private static final int YARD_DEPTH_Z = ROW_BE + NEW_ROW_D + AISLE;   // BC (DRAUGHT, STALLION DAY) went too
+    private static final int YARD_DEPTH_Z = ROW_BD + NEW_ROW_D + AISLE;   // BC (DRAUGHT, STALLION DAY) went too
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -255,8 +255,8 @@ final class DebugTestYard {
         // Rows AW-BC (2026-10-02): the second night's pens, one class a row.
         int rowX = cx + WEST_MIN;
         DebugYardSocial.build(level, gy, rowX, mouthZ + ROW_BB);
-        // Rows BD and BE (2026-10-08): the silent aura pair, the meat floor and the cleansing-light groups.
-        DebugYardGenes.build(level, gy, rowX, mouthZ + ROW_BD, mouthZ + ROW_BE);
+        // Row BD (2026-10-08): the silent aura pair.
+        DebugYardGenes.build(level, gy, rowX, mouthZ + ROW_BD);
         // After every row has registered its checks: the summaries name whatever has not answered.
         DebugYardClockwork.build(level, gy, cx, mouthZ);
         // HURT MARE, NIGHT SHY, REACH WALL, REACH FENCE, STATS and the ARCANE DEALER went on their own PASS

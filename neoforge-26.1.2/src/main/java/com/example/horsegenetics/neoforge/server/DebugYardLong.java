@@ -61,8 +61,8 @@ import static com.example.horsegenetics.neoforge.server.DebugTestYard.WEST_MIN;
  *   <tr><td>U</td><td>RATIO HYPP, RATIO LETHAL WHITE</td><td>RATIO BRINDLE, RATIO SIZE</td></tr>
  * </table>
  *
- * <p>Row U west holds RATIO RAINBOW F1 and F2 since 2026-10-08; every pen in the table above has answered and
- * gone.
+ * <p>Row U west holds RATIO RAINBOW F2 since 2026-10-08 (F1 answered the same day); every pen in the table
+ * above has answered and gone.
  *
  * <h2>The dryad rows stand on stone</h2>
  * A dryad plants anywhere within four blocks of itself, and a fence is not a wall to a
@@ -127,13 +127,13 @@ final class DebugYardLong {
             // in four" (Rbw/n x Rbw/n, 1:2:1 born, the trail on every Rbw/Rbw and on nothing else). The trail is
             // read off the foal itself - GeneAbilityHandler.abilitiesOf, the list its own tick runs - so a
             // carrier that expressed would FAIL here even with the ratio right.
-            ratio(level, gy, west, mouthZ + ROW_U, "RATIO RAINBOW F1", RainbowDustGene.KEY, "Rbw/Rbw", "n/n", false,
-                    List.of("RATIO RAINBOW F1", "Rbw/Rbw x n/n:", "every foal Rbw/n,", "none trails dust"),
-                    "every foal Rbw/n, none rainbow");
+            // RATIO RAINBOW F1 passed at 20 foals on 2026-10-08 (every one Rbw/n, none trailing) and went -
+            // wiki/gene-rainbow-dust.html#verified-f1. F2 was stopped at 36 foals of 40 with the session, so it
+            // stands: Rbw/Rbw 8, Rbw/n 22, n/n 6 when it stopped, no verdict.
             ratio(level, gy, west + 10, mouthZ + ROW_U, "RATIO RAINBOW F2", RainbowDustGene.KEY, "Rbw/n", "Rbw/n",
                     false, List.of("RATIO RAINBOW F2", "Rbw/n x Rbw/n:", "1 in 4 Rbw/Rbw,", "only they trail"),
                     "Rbw/Rbw 25%, Rbw/n 50%, n/n 25%; only Rbw/Rbw trails");
-            ActionTrace.log("test yard", "all-day pens built (row U west: RATIO RAINBOW F1, RATIO RAINBOW F2)");
+            ActionTrace.log("test yard", "all-day pens built (row U west: RATIO RAINBOW F2)");
         } catch (RuntimeException e) {
             HorseGenetics.LOGGER.warn("[Debug] test yard: all-day rows failed to build", e);
         }

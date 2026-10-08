@@ -35,7 +35,6 @@ horsegenetics.stormvein
 horsegenetics.passification
 horsegenetics.markings
 horsegenetics.lama3
-horsegenetics.lamc2
 horsegenetics.ryr1
 horsegenetics.slc5a3
 horsegenetics.dmrt3
@@ -200,7 +199,6 @@ horsegenetics.stardust
 horsegenetics.striped_mane_tail
 horsegenetics.synort
 horsegenetics.valentine_appaloosa
-horsegenetics.voided
 horsegenetics.war_mask
 horsegenetics.winged
 horsegenetics.xuke
@@ -224,7 +222,6 @@ horsegenetics.polymoon
 horsegenetics.rosette
 horsegenetics.stars
 horsegenetics.wormholes
-horsegenetics.rainbow_dust
 horsegenetics.cvm
 horsegenetics.gbe1
 horsegenetics.gys1
