@@ -496,6 +496,34 @@
     property took.
 </p>
 
+<h3 id="verified-carrot-drops">Verified: what the crop drops, and where a seed plants</h3>
+
+<p>
+    <strong>A seedling returns its seed, a mature crop gives one golden carrot and two seeds, and
+    nothing else drops</strong> (2026-10-08, test yard row AY, pen CARROT CROP,
+    <code>CLOCKWORK PASS</code> at 09:41:15). Two hundred rolls of the block's own drops at each age:
+    200 of 200 at age 0 were exactly one <code>golden_carrot_seeds</code>, and 200 of 200 at age 7
+    were exactly two seeds and one <code>minecraft:golden_carrot</code>. No nugget, no ingot, no
+    other item at either age.
+</p>
+
+<p>
+    <strong>A seed plants on farmland and nowhere else, and a golden carrot plants nowhere</strong>
+    (2026-10-08, the same pen, <code>CLOCKWORK PASS</code> at 09:41:16). A fake player right-clicked
+    the top of each block through the server's own click path: the seed on dirt and on a grass block
+    both returned <code>Fail</code> and left air above; the seed on wet farmland returned
+    <code>Success</code> and left a <code>golden_carrot_crop</code>, still there forty ticks later; a
+    golden carrot on farmland returned <code>Pass</code> and placed nothing.
+</p>
+
+<p>
+    Both checks had read FAIL in every yard run from 2026-10-02 to 2026-10-08 08:38, and both times
+    it was the pen that was wrong
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/212">#212</a>): its "nothing
+    gold" filter counted the seed's own name, and its fake player was in survival, where the debug
+    dimension cancels every block placed. The pen was deleted on these PASS lines.
+</p>
+
 <h2 id="art">No two items look alike</h2>
 
 <p>
@@ -673,7 +701,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The quiet failures are here: golden carrot seeds carry this mod's <strong>first block tint</strong> and fail invisibly &mdash; a gold item dropping where nothing gold should, a seed planting off farmland, a tint that misses the model &mdash; while chest loot's rates are <a href="items.html?view=coding#verified-chest-loot">proven</a> and only how they feel is open; and <strong>twenty-four item sprites were recoloured at once</strong>, fourteen of them by repointing a model at art that did not exist until that moment, which is exactly how a purple cube happens.</p>
+    <p>The quiet failures are here: golden carrot seeds carry this mod's <strong>first block tint</strong> and can fail invisibly &mdash; a tint that misses the model grows plain orange carrots &mdash; while the crop's drops and planting and chest loot's rates are <a href="items.html?view=coding#verified-chest-loot">proven</a> and only how they feel is open; and <strong>twenty-four item sprites were recoloured at once</strong>, fourteen of them by repointing a model at art that did not exist until that moment, which is exactly how a purple cube happens.</p>
 </div>
 
 <h3 id="item-art-0929">Twenty-four recoloured item sprites (2026-09-29, NOT played)</h3>
@@ -715,18 +743,15 @@
 <h3 id="goldencarrot-0918">Golden carrot seeds (2026-09-18, NOT played)</h3>
 
 <p>It <a href="#verified-carrot-growth">grows</a> and turns up in chests at the
-<a href="#verified-chest-loot">configured 20%</a> (both 2026-10-02). The drops and the planting
-were read by the yard the same night but its own checks were wrong, so they stay open.</p>
+<a href="#verified-chest-loot">configured 20%</a> (both 2026-10-02), and its
+<a href="#verified-carrot-drops">drops and where it plants</a> are verified too (2026-10-08). What
+is left needs eyes or a villager.</p>
 
 <ul>
     <li><strong>The crop is gold, not orange.</strong> It is vanilla's carrot sheets under a
         block tint, and this mod's first block tint - if the tint does not reach it, it grows
         as plain carrots and looks like a bug in the loot table rather than in the model. The
         seed icon should be gold too, by a different mechanism.</li>
-    <li><strong>Breaking it early returns the seed</strong>, and a mature one gives one golden
-        carrot and two seeds. <strong>Nothing gold ever drops.</strong></li>
-    <li><strong>The seed will not plant on anything but farmland</strong>, and a golden carrot
-        still will not plant at all.</li>
     <li><strong>The supplier sells them at rank 5</strong>, 38 emeralds, twice. Level him up
         and look. He has four other rank-5 trades and rolls three of the five.</li>
     <li><strong>The two checklist boxes tick</strong> - plant one, harvest one.</li>

@@ -341,6 +341,19 @@
     <a href="item-research-shelf.html#verified-storage-0802">the shelf's page</a>.
 </p>
 
+<p id="verified-chest-pairs">
+    <strong>Every research paper a chest produces is a carrier or a true-breeding pair</strong>
+    (2026-10-08, test yard row AY, pen CHEST LOOT, <code>CLOCKWORK PASS</code> at 09:41:19). 2,000
+    rolls of each of the 57 chest loot tables gave 34,287 papers over 331 genes: 17,338 carrier,
+    16,949 true-breeding, none compound, and every token in <code>ResearchTopic.lootPool</code>.
+    A paper's token keeps the locus's own allele order, so a carrier of a variant listed after the
+    wild type reads wild-type-first (<em>eye_colour_left Brn/Wht</em>,
+    <em>body_plate_colour Wht/Vio</em>). That is still a carrier pair. The pen counted those 1,564
+    as failures from 2026-10-02 until it was corrected
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/212">#212</a>), and the note
+    that they all came from the cowboy house was wrong: that table is only the first one rolled.
+</p>
+
 </section>
 
 <section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
@@ -351,8 +364,7 @@
     <p>A paper names an <strong>allele pair</strong> as of 2026-09-24 and, beyond the shelf filing
     two pairs side by side, none of it has been played: the pair a book takes off a horse, the
     carrot crafted from it granting <em>that</em> pair, an old whole-gene paper in the
-    owner&rsquo;s existing world still working &mdash; and the cowboy house's chests write some
-    eye pairs wild-type-first.</p>
+    owner&rsquo;s existing world still working, and what the supplier sells.</p>
 </div>
 
 <h3 id="check-pair-papers" data-check-kind="open-gap">The pair swap, in play (NOT played)</h3>
@@ -378,13 +390,10 @@ can be wrong without saying so:
     <li><strong>Copy both off an Equine Research Shelf.</strong> Filing them as two rows is
         <a href="#verified-shelf-pairs">verified</a>, and a carrier paper copies with no screen
         open; that the true-breeding row copies onto a blank book too has not been seen.</li>
-    <li><strong>A chest and the supplier.</strong> Found and bought papers should only ever be
-        carrier or true-breeding &mdash; a compound pair out of a chest means
-        <code>ResearchTopic.lootPool</code> is not what the draw is reading. The yard read the chest
-        half on 2026-10-02 and it <strong>failed</strong>: 1198 of 34,287 chest papers, all from
-        <code>horsegenetics:chests/cowboy_house</code>, are eye-locus pairs written wild-type-first
-        (e.g. <em>eye_sector_right WT/Top</em>, <em>eye_colour_left Brn/Cha</em>); every other paper
-        was a carrier or true-breeding pair.</li>
+    <li><strong>The supplier.</strong> Bought papers should only ever be carrier or
+        true-breeding, as <a href="?view=coding#verified-chest-pairs">found ones are</a>
+        (2026-10-08) &mdash; a compound pair on his counter means
+        <code>ResearchTopic.lootPool</code> is not what the trade is reading.</li>
     <li><strong>Does a shelf full of pairs still read?</strong> Lowest priority, and the one the
         flat-list decision was made on: the Copy tab is five rows and the list is now much longer
         than it was. If it is unusable, grouping the rows under a gene heading was the rejected

@@ -3411,6 +3411,7 @@ wiki/items.html#tack-derived	gameplay	The textures are derived, not drawn
 wiki/items.html#tack-fit	gameplay	Tack fits a resized horse now — verified
 wiki/items.html#tack-found	gameplay	Somebody else’s tack, in a chest
 wiki/items.html#tack-scope	gameplay	What it deliberately does not touch
+wiki/items.html#verified-carrot-drops	coding	Verified: what the crop drops, and where a seed plants
 wiki/items.html#verified-carrot-growth	coding	Verified: the crop grows
 wiki/items.html#verified-chest-loot	coding	Verified: the rates are the configured ones
 wiki/known-gaps.html#migrated	all	Migrated open checks

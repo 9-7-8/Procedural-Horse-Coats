@@ -210,8 +210,9 @@
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
     <p>Leader of the pack is confirmed cheap and working &mdash; a retinue forms, follows, stays
-    capped, and a mismatched pair leads none &mdash; but its followers are not released at once when the
-    horse dies, and the Chaos allele (2026-10-01) has never met a modded mob.</p>
+    capped, and a mismatched pair leads none &mdash; but whether its followers are released at once when the
+    horse dies is waiting on more yard runs
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/213">#213</a>), and the Chaos allele (2026-10-01) has never met a modded mob.</p>
 </div>
 
 <h3 id="chaos-unplayed">Chaos (2026-10-01, NOT played)</h3>
@@ -251,9 +252,14 @@
         following it. <strong>Pass:</strong> the followers go back to wandering at once, and no mob
         keeps walking toward where the horse was. A leak here is the exact lifecycle failure the
         stateless design exists to prevent, and it would only ever be noticed as mobs behaving oddly
-        long afterwards. <em>Failed in the yard (2026-10-02 03:53:59):</em> one and two beats after the
-        leader was killed, two and then one cow were still walking out the last 2&ndash;3 blocks of their
-        path to the block it died on &mdash; the path expires, but not at once.</li>
+        long afterwards. The yard's PACK LEADER pen failed this in eight runs of ten up to
+        2026-10-08: cows walked out the last few blocks of their path to the block the leader died
+        on. That is a bug with a fix in,
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/213">#213</a>, and the pen
+        passed once after it (2026-10-08 09:41:29, two cows on their way at the kill, none a beat
+        later). One pass does not settle it, because two runs passed by luck before the fix; the
+        pen stays until it has passed several times running. A horse that is discarded or sent to
+        another dimension is released by the same code and has not been read.</li>
     <li><strong>No wild horse leads anything.</strong> The founder table for a matched-pair locus
         puts only carriers in the wild. <strong>Pass:</strong> you find carriers at roughly
         <code>WILD_CARRIER_PERCENT</code> and never a wild horse with a retinue.</li>
