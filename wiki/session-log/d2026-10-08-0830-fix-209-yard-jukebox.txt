@@ -1,0 +1,96 @@
+2026-10-08 08:30 - #209: the yard's soundness check and MUSIC's jukebox; #35 parked (time is the session's start, approximate)
+
+ASKED
+-----
+1. "/next-release" (procedures/next-release.txt). Came of it: the milestones were checked,
+   #35 was found to be a live unit again and put to the owner, and one unit of v0.5.046
+   was built, issue #209, by procedures/fix-bug.txt.
+2. Asked with the question tool what the mod should do when one of its horses takes
+   in-wall damage (#35). The owner answered "Park #35, do #209". Came of it: #35 carries
+   needs-owner with the evidence and three options, and nothing was built for it.
+
+DONE
+----
+Milestone housekeeping (next-release steps 1-2). No commit.
+- The last tag is v0.5.045 and its milestone is closed. The next release is v0.5.046.
+- Every open issue already had a milestone. Nothing moved between milestones, so the
+  release-plan issue (#196) was not edited.
+- The v0.5.046 milestone description was brought up to date: #35 is listed as waiting on
+  the owner, not on a check; #208 (closed as not planned on 2026-10-05) and #209 moved
+  under "fixed and closed".
+
+#35, horses suffocating in walls on the live server. No commit. Issue OPEN, needs-owner.
+- The raw server logs (prev-nightly.log and latest.log, read only; window 5 Oct 20:27 to
+  7 Oct 23:59, jar 0.5.045) hold seven more [suffrescue] rescues and no [clearance] line
+  for any of them. Three [clearance] lines in the same window show HorseClearance does
+  act when a horse grows.
+- Every rescued horse had lost a whole number of points, so each went from full health
+  to a quarter in 10 to 13 seconds. The 6 Oct 19:15 pair began 26 seconds after a login.
+- Ruled out: the operator's mobcull (:11, :41) and itemclear (:58) do not line up. The
+  mod never overrides a horse's dimensions or eye height, so a horse with its eyes in a
+  block always has a colliding box.
+- The cause is still unknown, because nothing logs where the horse was. The table, the
+  findings and three options are in the comment on #35 (2026-10-08).
+
+Fix #209, commit ee8f5c3b. Issue CLOSED.
+- What was wrong: DebugTestYard.verify warned "test yard is NOT sound: ... 1 blocked at
+  head height (first at -16, 129, 158, which is minecraft:jukebox)" on every launch into
+  the yard. The block is the MUSIC pen's own jukebox (DebugYardSocial.music places it at
+  x0+3, gy+1, z0+6, free-standing between the mares' cells). verify samples the yard on a
+  grid, the grid lands on it, and isFurniture did not list jukeboxes. The pen was right
+  and the check was wrong.
+- The fix: Blocks.JUKEBOX joins isFurniture's list of deliberate furniture.
+- Proof: :neoforge-26.1.2:build and check-parity.mjs (7163 checks) green. Then
+  runClientTestWorld, launched detached at 08:38. The fresh latest.log says "row BB built
+  (west: MUSIC; east: PACK LEADER)" and "[Debug] test yard built and walkable at x=3,
+  z=4..168". The 2026-10-05 log, with the same pen, said NOT sound and named the jukebox.
+  The new log has no WARN or ERROR line of the mod's own.
+- Pictures: no pictures. The bug is a log line.
+
+DECIDED
+-------
+- (owner) Park #35 and build #209 instead. Recorded on #35 (needs-owner, comment of
+  2026-10-08) and in the v0.5.046 milestone description.
+- Chosen without the owner: #35 counts as a unit again although its fix is in and it was
+  "waiting on the server's log", because that log has answered and the answer is that the
+  fix did not stop it. Recorded in procedures/next-release.txt step 3.
+- Chosen without the owner: #209 is fixed in the check, not in the pen. Moving the
+  jukebox would change the distances the MUSIC pen measures.
+
+FOUND ON THE WAY
+----------------
+- No new bug filed.
+- The session before this one (d2026-10-08-0800) skipped #35 as "waiting on a check"
+  two days after the check had failed. The procedure now says what to do.
+- tools/stop-dev-java.ps1 printed "Cannot find a process with the process identifier"
+  for the client: stopping the gradlew wrapper first had already ended it. Harmless, and
+  left alone.
+
+PROCEDURES
+----------
+- procedures/next-release.txt, step 3: a waiting bug whose check has come back and
+  failed is a unit again; read the last comment for what the check showed.
+No other change needed: fix-bug, launch-game and end-session were followed as written,
+and nothing done here is a new routine.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. The change is one line in a debug-only class
+  of the NeoForge module, which no common/ test reaches.
+- Gametests were not run: none calls DebugTestYard.verify.
+- The yard was up for under a minute. Its pens' own PASS lines were not waited for; that
+  is run-tests' job.
+- The server's export folders (2026-10-06, 2026-10-06-run2, 2026-10-07) were NOT
+  reviewed. Only the raw logs were searched, and only for #35's lines. review-server-logs
+  still owes those folders.
+- No Verification-tab entry was added.
+
+RELEASE
+-------
+Not offered. v0.5.046 still has #35 waiting on the owner, #10, #31 and #36 waiting on
+checks, and four planned features unbuilt.
+
+PICK UP FIRST
+-------------
+#161, the tusks gene slice B (boar tusks and sabre fangs), by next-release (which hands it
+to process-intake); before it, the owner's answer on #35 if she has one.

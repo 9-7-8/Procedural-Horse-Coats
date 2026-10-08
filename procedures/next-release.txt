@@ -70,6 +70,9 @@ STEPS
    first. A fix commit with no "waiting on" comment (a release session shipped #35's that
    way) gets the comment now, naming the commit, the tag that carries it and the check,
    and is then skipped. Only a bug with no fix commit is a unit.
+   A waiting bug whose check has come back and FAILED is a unit again: read the last
+   comment for what the check showed, not only for the word "waiting". #35 was skipped
+   for a run after the server's log had shown its fix did not stop the rescues.
    An issue with `needs-owner` stays in the list. Before choosing it, put its open
    calls to the owner with the question tool, 2-4 options each with the
    recommendation first. If she answers, remove needs-owner and continue. If not,
