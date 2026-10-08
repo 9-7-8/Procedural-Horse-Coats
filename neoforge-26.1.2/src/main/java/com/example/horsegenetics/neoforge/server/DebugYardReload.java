@@ -57,15 +57,15 @@ import java.util.stream.Stream;
  * <p><b>Two verdicts.</b>
  * <ul>
  *   <li>{@link #CLEAR} - PASS: no reloaded horse's box collided, no horse was in a wall, and none lost health, with
- *       at least {@value #MIN_TESTED} tested and the scales spanning both sides of 1 (one at or under 0.9, one at or
- *       over 1.2). FAIL: any did, each named with its scale, where it was put and where it ended. INCONCLUSIVE:
+ *       at least {@value #MIN_TESTED} tested and the scales spanning both sides of 1 (one at or under 0.78, small
+ *       enough for #214's vanilla-sized first tick to reach the wall, and one at or over 1.2). FAIL: any did, each named with its scale, where it was put and where it ended. INCONCLUSIVE:
  *       too few horses or too narrow a spread.</li>
  *   <li>{@link #SIZE} - PASS: every reloaded horse bigger than vanilla (scale over 1.02) fired at least one
  *       growing {@code EntityEvent.Size} after its reload, which is the only thing {@code HorseClearance} listens
  *       for. FAIL: one regrew without it - a growth the fix for #35 cannot see.</li>
  * </ul>
  * <b>A PASS here rules the reload out and does not close #35</b>: only the live server's log can. About three
- * minutes for the fourteen horses; deadline {@value #DEADLINE} ticks.
+ * minutes for the twenty-four horses; deadline {@value #DEADLINE} ticks.
  */
 @EventBusSubscriber
 final class DebugYardReload {
@@ -90,8 +90,15 @@ final class DebugYardReload {
             "", "", "", "",
             "horsegenetics.lcorl=L/L", "horsegenetics.lcorl=L/L", "horsegenetics.lcorl=L/L",
             "horsegenetics.hmga2=p/p", "horsegenetics.hmga2=p/p", "horsegenetics.hmga2=p/p",
-            "horsegenetics.body_size=Big/n", "horsegenetics.body_size=Big/Big",
-            "horsegenetics.body_size=Small/n", "horsegenetics.body_size=Small/Small"};
+            "horsegenetics.body_size=Big/n", "horsegenetics.body_size=Small/n",
+            // The size gene's reach is on each copy's epigenome, so one Small/Small horse came out at 0.68 and
+            // the next at 0.81 (2026-10-08) - and only a horse under about 0.8 can show #214. Six of each.
+            "horsegenetics.body_size=Big/Big", "horsegenetics.body_size=Big/Big",
+            "horsegenetics.body_size=Big/Big", "horsegenetics.body_size=Big/Big",
+            "horsegenetics.body_size=Big/Big", "horsegenetics.body_size=Big/Big",
+            "horsegenetics.body_size=Small/Small", "horsegenetics.body_size=Small/Small",
+            "horsegenetics.body_size=Small/Small", "horsegenetics.body_size=Small/Small",
+            "horsegenetics.body_size=Small/Small", "horsegenetics.body_size=Small/Small"};
 
     private static int run;
     private static @Nullable UUID watching;
@@ -327,9 +334,9 @@ final class DebugYardReload {
         if (!s.bad.isEmpty()) {
             DebugYardClockwork.verdict(CLEAR, false, s.bad.size() + " not clear after the reload: "
                     + String.join(" // ", s.bad) + " | " + base);
-        } else if (s.tested < MIN_TESTED || s.minScale > 0.9 || s.maxScale < 1.2) {
+        } else if (s.tested < MIN_TESTED || s.minScale > 0.78 || s.maxScale < 1.2) {
             DebugYardClockwork.inconclusive(CLEAR, "none buried, but too few horses or too narrow a spread of scale"
-                    + " to say (want " + MIN_TESTED + ", one at or under 0.9 and one at or over 1.2) | " + base);
+                    + " to say (want " + MIN_TESTED + ", one at or under 0.78 and one at or over 1.2) | " + base);
         } else {
             DebugYardClockwork.verdict(CLEAR, true, "none collided, none in a wall, none hurt, each back at its saved"
                     + " scale | " + base + " | per-horse lines: grep 'RELOAD '");
