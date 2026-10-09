@@ -166,6 +166,10 @@ public final class HorseOrdering {
             }
         }
         List<Refusal> answers = give(player, horses, order);
+        // #36: an AIMED order is the plain hold-right-click wheel working for a real player.
+        FieldLog.log("whistle", "ORDER " + order + (all ? " to every horse in reach" : " AIMED at one horse")
+                + " | " + horses.size() + " horse(s), " + answers.stream().filter(r -> r == null).count()
+                + " obeyed");
         if (all) {
             player.sendSystemMessage(Component.literal(HorseOrders.summary(order, answers)));
         } else if (answers.size() == 1 && !horses.isEmpty()) {

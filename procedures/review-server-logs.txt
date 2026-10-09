@@ -146,6 +146,10 @@ STEPS
                 line is #244 happening.
      dealer     "SHORT STRING": a cowboy or dealer who founded with fewer horses than he
                 wanted (seen with none, 2026-10-07).
+     corridor   #31. ENTER and TEARDOWN with the milliseconds each part of an F6 visit took
+                in its one tick. Read them beside the Cupboard traces and any Can't keep up.
+     whistle    #36. One ORDER line per command-whistle order. "AIMED at one horse" is the
+                plain hold-right-click wheel working for a player on that build.
      tables     #210. Row counts of the three whole-file tables at start, hourly and at stop.
    A topic goes when its issue closes; delete its row here in the same change.
    The exporter does not know these lines. Any mod line also carries the logger name

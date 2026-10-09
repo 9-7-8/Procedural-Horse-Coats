@@ -282,10 +282,13 @@ public final class DebugPenManager {
             return;
         }
 
+        // Timed for the live server's log (#31): the stall is whatever this one tick spends here.
+        long started = System.nanoTime();
         Plot old = PLOTS.remove(player.getUUID());
         if (old != null) {
             tearDown(debug, old);
         }
+        long afterTearDown = System.nanoTime();
 
         int originX = allocateOriginX();
         Plot plot = new Plot(originX, PLOT_BASE_Y, returnDim, returnPos.immutable());
@@ -296,10 +299,16 @@ public final class DebugPenManager {
         // building all thirty in this one tick stalled a live server for 0.8 s).
         ensureBuiltUpToIndex(debug, plot,
                 CorridorPacing.entryTarget(DebugTestYard.EAST_DX, PERIOD, LAST_SEGMENT_INDEX));
+        long afterCorridor = System.nanoTime();
         // After the corridor, because the yard's path is cut THROUGH the wall
         // the corridor lays down. Once per plot: the geometry is fixed, so a
         // plot rebuilt on a recycled X gets the same yard in the same place.
         DebugTestYard.build(debug, plot);
+        long afterYard = System.nanoTime();
+        FieldLog.log("corridor", "ENTER plot x=" + originX + " built in one tick: "
+                + (old == null ? "no old plot" : "old plot torn down in " + (afterTearDown - started) / 1_000_000L + " ms")
+                + ", first segments " + (afterCorridor - afterTearDown) / 1_000_000L + " ms, yard "
+                + (afterYard - afterCorridor) / 1_000_000L + " ms, total " + (afterYard - started) / 1_000_000L + " ms");
 
         // Spawn on the road just past the return portal, facing +X down the corridor.
         player.teleportTo(debug, originX + 3.5, PLOT_BASE_Y + 1, 0.5, Set.of(), -90.0f, 0.0f, false);
@@ -1240,7 +1249,10 @@ public final class DebugPenManager {
     private static void tearDown(ServerLevel level, Plot plot) {
         HorseAncestryData ancestry = level.getServer() == null
                 ? null : HorseAncestryData.get(level.getServer());
+        long started = System.nanoTime();
         int removed = sweepPlot(level, plot, ancestry);
+        FieldLog.log("corridor", "TEARDOWN plot x=" + plot.originX + " swept in "
+                + (System.nanoTime() - started) / 1_000_000L + " ms, " + removed + " entities removed");
         // The watch's forced chunks go AFTER the sweep, not before. They have
         // to go at all - otherwise the dimension keeps ticking a yard that is
         // nobody's for the life of the world - but releasing them first means
