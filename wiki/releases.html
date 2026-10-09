@@ -86,6 +86,90 @@
     </p>
 </div>
 
+<h2 id="v0-5-046">0.5.046 &mdash; chests on horses, a storage harness, and eight new things to grow</h2>
+
+<p>A feature release. Horses can now carry chests, on a new storage harness. Eight new things can grow on a horse: crystals along the back, boar tusks, sabre fangs, ear fins, cheek spikes, a brow ridge, and two new shapes of ram horn. Horses far from every player now cost a server much less. A handful of bugs are fixed.</p>
+<p><strong>Update the server and every client together.</strong> The network format changed, so a 0.5.046 client cannot join a 0.5.045 server, or the other way round.</p>
+
+<h3 id="v0-5-046-chests-on-horses">Chests on horses</h3>
+<ul>
+    <li><strong>A horse can carry a container on each flank.</strong> A chest, a barrel, a shulker box, an ender chest, a shelf, a decorated pot, or another mod&rsquo;s storage block. Right-click the horse with it, or use the Pack slots on the Gear tab. Right-click the chest to open it; from the saddle, open it from the Gear tab.</li>
+    <li><strong>It needs a storage harness first</strong> (below).</li>
+    <li><strong>Weight slows the horse.</strong> Every item counts the same. A stronger puller carries more: with a full chest on each flank, a horse with the best pulling score keeps half its speed and an ordinary horse keeps about an eighth. An ender chest opens your own ender chest and weighs nothing.</li>
+    <li><strong>A chest with items in it will not come off.</strong> A shulker box goes on and comes off full.</li>
+    <li>Only the owner can hang or open one, on an adult horse, within eight blocks.</li>
+    <li><strong>Another mod&rsquo;s chest opens its own screen.</strong> While it is open, the block really stands at the bottom of the world under you.<br><img src="../release-photos/v0.5.046/storage-harness-chest.png" alt="A horse carrying a chest on a blue-dyed golden storage harness" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+</ul>
+<p><em>A chest on a golden harness with blue-dyed leather.</em></p>
+<p><img src="../release-photos/v0.5.046/storage-harness-from-behind.png" alt="A horse from behind with a chest on each flank and a red-dyed harness" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></p>
+<p><em>From behind: one chest a side, and the dyed straps over the back.</em></p>
+
+<h3 id="v0-5-046-the-storage-harness">The storage harness</h3>
+<ul>
+    <li><strong>Four new items:</strong> the Copper, Iron, Golden and Netherite Storage Harness. Craft one from 2 leather, 1 horse hair and 2 ingots of the metal (1 ingot for netherite). They do not upgrade into each other.</li>
+    <li><strong>A horse wears one before it can carry a chest</strong>, in its own Harness slot on the Gear tab. It comes off only after both chests are off.</li>
+    <li><strong>A better metal makes the load lighter:</strong> 2.5%, 5%, 7.5% and 10%.</li>
+    <li><strong>The leather dyes</strong> like leather armour, and the harness is drawn on the horse.</li>
+    <li>It cannot be enchanted yet (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/220">#220</a>).<br><img src="../release-photos/v0.5.046/storage-harness-empty.png" alt="A horse wearing an empty iron storage harness" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+</ul>
+<p><em>An iron harness with nothing on it yet.</em></p>
+
+<h3 id="v0-5-046-when-a-geared-horse-dies-is-sold-or-is-set-free">When a geared horse dies, is sold or is set free</h3>
+<ul>
+    <li><strong>A dead horse sets its chests down as blocks,</strong> with everything still inside, in the nearest open dry space within three blocks. If there is none, they drop as items. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/221">#221</a>)</li>
+    <li><strong>Everything else it wore drops as items:</strong> harness, braid, saddle, armour. A braid used to be lost. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/218">#218</a>)</li>
+    <li><strong>Selling a horse or turning it loose hands its gear and chests back to you first.</strong> A transfer paper passes the horse on with its luggage.</li>
+    <li>A gene that replaces a horse&rsquo;s drops no longer eats its saddle and armour.</li>
+</ul>
+
+<h3 id="v0-5-046-new-things-a-horse-can-grow">New things a horse can grow</h3>
+<p>All of these are rare in wild horses, are genes that pass to foals, and only change how the horse looks. Each of the first six has its own colour gene.</p>
+<ul>
+    <li><strong>Crystal growths.</strong> Up to six clusters of see-through prisms along the back. Dominant. A saddle hides the middle ones.<br><img src="../release-photos/v0.5.046/crystal-growths.png" alt="Red and blue crystal clusters along a grey horse&#x27;s back" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+    <li><strong>Boar tusks and sabre fangs.</strong> Two more forms of the tusks gene, beside the narwhal horn. A horse with two different forms grows both.<br><img src="../release-photos/v0.5.046/boar-tusks.png" alt="Boar tusks, red at the base and blue at the tip" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><img src="../release-photos/v0.5.046/sabre-fangs.png" alt="Curved sabre fangs hanging from the upper jaw" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+    <li><strong>Ear fins.</strong> A fin behind each ear: a blade, a fan or a frill. Recessive, so two plain horses can have a finned foal. Foals wear them too.<br><img src="../release-photos/v0.5.046/ear-fins.png" alt="Fan-shaped ear fins in red and blue" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+    <li><strong>Cheek spikes.</strong> Up to four spikes along each cheek. Dominant.<br><img src="../release-photos/v0.5.046/cheek-spikes.png" alt="Red and yellow cheek spikes" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+    <li><strong>A brow ridge.</strong> A ridge across the forehead: plain, notched or spined. Dominant.<br><img src="../release-photos/v0.5.046/brow-ridge.png" alt="A notched brow ridge, blue and white" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+    <li><strong>Two new ram horn shapes.</strong> The <strong>horizontal twist</strong>: flat, wide horns straight out to the sides, like the old Egyptian ram. The <strong>scimitar</strong>: one long blade a side, swept back over the neck, like a goat or an ibex. Curled horns still hide both; a scimitar hides a corkscrew.<br><img src="../release-photos/v0.5.046/horizontal-twist-horns.png" alt="Horizontal-twist ram horns, seen from the front" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><img src="../release-photos/v0.5.046/scimitar-horns.png" alt="Scimitar ram horns, seen from the side" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+    <li><strong>Skeleton horses</strong> (Great Valley and Blackened) can grow cheek spikes and a brow ridge in bare bone, crystals in any colour, and any of the three tusk forms. They never grow ear fins.<br><img src="../release-photos/v0.5.046/skeleton-bone-head-parts.png" alt="A skeleton horse with a bone narwhal horn and bone cheek spikes" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"></li>
+</ul>
+
+<h3 id="v0-5-046-a-lighter-server">A lighter server</h3>
+<ul>
+    <li><strong>Horses nobody is near go dormant.</strong> A horse with no player within 128 blocks does its thinking one tick in ten. Hunger, healing, bond, heat, pregnancy and growing up keep their normal pace. A ridden or leashed horse is never dormant. <code>performance.dormancy_radius</code> in <code>server.toml</code> sets the distance; 0 turns it off. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/204">#204</a>)</li>
+    <li><strong>Less work per horse everywhere else:</strong> a horse&rsquo;s genes are read once and kept, searches back off when they find nothing, memory that used to grow for the life of a server is released, and less is sent and saved. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/200">#200</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/201">#201</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/202">#202</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/203">#203</a>)</li>
+    <li>A generated stable could be filled with horses against the wrong dimension. It no longer can.</li>
+</ul>
+
+<h3 id="v0-5-046-fixes">Fixes</h3>
+<ul>
+    <li><strong>Bond earned on a world&rsquo;s first day no longer blocks earning on day two.</strong> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/216">#216</a>)</li>
+    <li><strong>A music-loving horse earns bond only while a record is playing.</strong> A finished disc left in the jukebox used to pay for ever. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/217">#217</a>)</li>
+    <li><strong>When a pack leader dies, its followers stop walking to where it stood.</strong> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/213">#213</a>)</li>
+    <li><strong>A very small horse standing against a wall no longer takes a point of damage each time its chunk loads.</strong> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/214">#214</a>)</li>
+    <li><strong>A horse with a very long line of ancestors could have lost its per-horse variation on save.</strong> That data is now saved in pieces. No world is known to have hit it. (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/211">#211</a>)</li>
+</ul>
+
+<h3 id="v0-5-046-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<div class="note warn"><p><strong>Update server and clients together, and do not go back.</strong> A 0.5.046 client and a 0.5.045 server cannot connect to each other. A world saved by 0.5.046 with a pregnant mare in it will not load that pregnancy in an older jar.</p></div>
+<ul>
+    <li><strong>Nothing needs migrating.</strong> Worlds from 0.5.037 on keep loading. No horse changes shape: the new horn and tusk forms were added without moving the old ones.</li>
+    <li><strong>A horse&rsquo;s worn gear no longer survives its death.</strong> It drops. A horse brought back afterwards comes back bare.</li>
+    <li><strong>A horse needs a harness to carry a chest.</strong> <code>packs.harness_required = false</code> in <code>server.toml</code> turns that off.</li>
+    <li><strong>Wild horses are a little different.</strong> Newly spawned wild horses can, rarely, carry the new parts: crystals, cheek spikes and a brow ridge at about 3 in 1,000 each, ear fins at about 1 in 400, boar tusks about 1 in 500, sabre fangs about 1 in 700. Among horned horses, curled ram horns are a little less common, to make room for the two new shapes. In the two skeleton breeds the new parts share the existing horn roll.</li>
+    <li>Horses already in your world keep their genes.</li>
+    <li><strong>Records of wild horses that never mattered are forgotten.</strong> An untamed, unowned horse with no foals that leaves the world no longer stays in the family records.</li>
+    <li><strong>The horse realm keeps 3 backups, not 10.</strong></li>
+    <li><strong>New settings in <code>server.toml</code>,</strong> all with defaults that need no action. The game logs the file as "corrected" the first time, which is normal. <code>performance.dormancy_radius</code> (128), <code>packs.weight</code> (true), <code>packs.max_items</code> (3970), <code>packs.free_items</code> (0), <code>packs.curve_exponent</code> (1.0), <code>packs.min_speed</code> (0.0), <code>packs.real_screens</code> (true), <code>packs.place_on_death</code> (true), <code>packs.harness_required</code> (true), <code>packs.harness_best_reduction</code> (0.1).</li>
+    <li><strong>For pack makers:</strong> item tags under <code>horsegenetics:horse_storage/</code> (<code>denied</code>, <code>weightless</code>, <code>keeps_contents</code>, <code>plain_screen</code>) decide what counts as a chest and how it behaves.</li>
+</ul>
+
+<h3 id="v0-5-046-not-played-yet-known-rough-edges">Not played yet / known rough edges</h3>
+<p>Open bugs: <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a> and <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/36">#36</a> are fixed in earlier releases and stay open until they are confirmed in a game or in a server&rsquo;s log. <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/35">#35</a>, horses ending up inside blocks on one live server, is still open and its cause is not known.</p>
+<p>Chests and the harness pass their automated tests, but nobody has played with them yet. No other mod&rsquo;s chest has been opened on a horse in a real modpack. Chests set down as blocks after a death have been tested but not watched. Two players on one server, and a land-claim mod refusing a set-down, are untried. How much a horse can carry is a first value.</p>
+<p>Dormancy has not been watched in a played world, and its effect on a busy server has not been measured.</p>
+<p>The new parts have been photographed standing still. Nobody has watched them on a moving horse, under tack, or in a played game. Their looks are first drafts: crystals are small at wild sizes, a boar tusk&rsquo;s hook is hard to read from the side, and ear fins are thin from the front. Ram horns larger than a wild horse rolls have not been seen at all. There is no photo of the harness items, the new Gear slots or the chest screens in this note. What still needs looking at is on <a href="verification.html">the verification index</a>.</p>
+
 <h2 id="v0-5-045">0.5.045 &mdash; spines, sails, plates and a narwhal horn, and less lag</h2>
 
 <p>

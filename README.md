@@ -53,11 +53,13 @@ body armour and braids you can put on today, and you can dye saddles and armour
 colour by colour at the Tack Dyeing Bench - with any dye, ingot or gem, including
 ones from other mods. Right-click your horse holding a piece of tack and it goes on.
 
-**Load them up.** Hang a chest, a barrel, a shulker box or an ender chest on each side
-of your horse - anything you can place and store items in, other mods' storage included.
-Right-click the chest to open it. The more a horse carries the slower it goes, and a
-stronger horse carries more; an ender chest weighs nothing. A server can change how
-much a horse can carry, or turn the weight off.
+**Load them up.** Put a storage harness on your horse - copper, iron, golden or
+netherite, with leather you can dye - then hang a chest, a barrel, a shulker box or an
+ender chest on each side: anything you can place and store items in, other mods' storage
+included. Right-click the chest to open it. The more a horse carries the slower it goes;
+a stronger horse carries more, a better harness lightens the load, and an ender chest
+weighs nothing. If the horse dies, its chests are set down where it fell with everything
+still inside. A server can change how much a horse can carry, or turn the weight off.
 
 **Ride comfortably.** Mine from the saddle, open your own pack with **Alt + E**, get
 your lead back when a horse is called to you, and see through the horse when you
@@ -100,8 +102,10 @@ turn this off with `undead.convert`.
 
 **Some horses are magical.** Alongside the real coat genes there is a layer of
 invented ones: glowing manes, particle trails, extra speed or size, walking on water,
-milk that is not milk, a unicorn's horn or a rack of antlers, spines or a see-through
-sail along the back, bone plates over the shoulders, a narwhal's spiral horn. A breed
+milk that is not milk, a unicorn's horn, a rack of antlers or a ram's horns in six
+shapes, spines, crystals or a see-through sail along the back, bone plates over the
+shoulders, a narwhal's spiral horn, boar tusks or sabre fangs, fins behind the ears,
+spikes on the cheeks, a ridge across the brow. A breed
 carries only the magic it was made with. Now and then a foal turns up with a magical gene neither parent had.
 
 **Design your own.** Three tools run in your browser from the wiki, with no coding:
@@ -152,8 +156,8 @@ closer, and `coats.bakeBudgetMs` caps how much time per moment goes into making 
 ones. Lower either on a slower computer.
 
 The other thing in there worth knowing about is **`parts.enabled`**, which draws the
-bits some horses grow - a unicorn's horn, a rack of antlers, spines, a sail, plates or a
-narwhal horn. A horn is about as much
+bits some horses grow - a unicorn's horn, a rack of antlers, spines, a sail, plates,
+crystals, tusks or fins. A horn is about as much
 shape again as the horse wearing it and a rack more, so a big herd of them is the one case
 worth a switch: turn it off, or turn off just `parts.glow` (the extra pass a horn or
 antler points that shine in the dark need, and
