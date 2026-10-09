@@ -186,4 +186,9 @@ public final class HorseWhereabouts extends SavedData {
         Seen s = byHorse.get(horse);
         return s != null && s.stasis();
     }
+
+    /** How many horses have a sighting - the row count of a file that is written whole (#210). */
+    public int size() {
+        return byHorse.size();
+    }
 }

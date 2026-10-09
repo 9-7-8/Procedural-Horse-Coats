@@ -281,6 +281,12 @@ public final class LycanthropyHandler {
         horse.discard();
         level.addFreshEntity(animal);
         puff(level, animal);
+        // Always logged (#243): which body, where, and whether the place it was put already hurts it.
+        FieldLog.log("lycan", "SHIFT " + horse.getUUID() + " (" + ActionTrace.describeShort(horse) + ") into " + mob
+                + " at " + FieldLog.where(animal) + String.format(" | horse hp %.1f/%.1f, form hp %.1f/%.1f",
+                        horse.getHealth(), horse.getMaxHealth(), animal.getHealth(), animal.getMaxHealth())
+                + (animal.isSensitiveToWater() ? " | WATER HURTS THIS FORM" : "")
+                + (animal.isInWaterOrRain() ? " | in water or rain" : " | dry"));
         if (ServerConfig.debugTools()) {
             String print = roundTripPrint(horse);
             DUSK_PRINTS.put(horse.getUUID(), print);
@@ -385,6 +391,9 @@ public final class LycanthropyHandler {
         animal.discard();
         level.addFreshEntity(horse);
         puff(level, horse);
+        FieldLog.log("lycan", "REVERT " + horse.getUUID() + " (" + ActionTrace.describeShort(horse) + ") back from "
+                + shift.mob() + " at " + FieldLog.where(horse)
+                + String.format(" | hp %.1f/%.1f", horse.getHealth(), horse.getMaxHealth()));
         if (ServerConfig.debugTools()) {
             ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " back from a " + shift.mob() + " at dawn | "
                     + roundTripPrint(horse) + String.format(", hp %.1f/%.1f", horse.getHealth(), horse.getMaxHealth())
@@ -533,9 +542,18 @@ public final class LycanthropyHandler {
                 + " (" + event.getSource().getMsgId() + ") - the horse dies with it"
                 + (ServerConfig.debugTools() ? roundTrip(horse) : ""));
         horse.hurtServer(level, event.getSource(), Float.MAX_VALUE);
+        boolean byTheSameBlow = !horse.isAlive();
         if (horse.isAlive()) {
             horse.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
         }
+        // Always logged (#243, #244): what killed the form, and whether the horse really died with it.
+        FieldLog.log("lycan", "FORM DIED " + horse.getUUID() + " (" + ActionTrace.describeShort(horse) + ") as "
+                + shift.mob() + " of " + event.getSource().getMsgId() + " at " + FieldLog.where(animal)
+                + (animal.isInWaterOrRain() ? " | in water or rain" : " | dry")
+                + " | horse " + (byTheSameBlow ? "died of the same blow"
+                        : horse.isAlive() ? String.format("SURVIVED at %.1f/%.1f hp", horse.getHealth(),
+                                horse.getMaxHealth())
+                        : "died of the fallback kill"));
     }
 
     // ------------------------------------------------------------------

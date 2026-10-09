@@ -1,6 +1,5 @@
 package com.example.horsegenetics.neoforge.server;
 
-import com.example.horsegenetics.neoforge.HorseGenetics;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -86,9 +85,10 @@ public final class HorseClearance {
             }
             // Always logged, debug tools or not: this is the line #35 never had,
             // the place a horse got buried.
-            HorseGenetics.LOGGER.info("[clearance] {} grew into blocks at {} (scale {}) - {}",
-                    horse.getUUID(), from, String.format("%.2f", horse.getScale()),
-                    moved == null ? "no clear spot near, left where it was" : moved);
+            // On the live-server tag (FieldLog); "[clearance]" stays in the text so an old grep still finds it.
+            FieldLog.log("in-blocks", "[clearance] " + horse.getUUID() + " grew into blocks at " + from
+                    + " (scale " + String.format("%.2f", horse.getScale()) + ") - "
+                    + (moved == null ? "no clear spot near, left where it was" : moved));
         }
     }
 

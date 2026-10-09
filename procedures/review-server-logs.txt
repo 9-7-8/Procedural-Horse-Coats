@@ -131,6 +131,28 @@ STEPS
    a horse it moved out of a wall after growing. Count those beside the rescues, and pair
    them by UUID. A rescue with no clearance line before it for the same horse means
    something other than growth is putting horses in walls (#35's open question).
+   THE MOD'S OWN LIVE-SERVER LINES all start "[phc-live] <topic> |" (server/FieldLog,
+   always on, in builds after 0.5.046). Grep them first; they are written for this review:
+     zcat -f debug-*.log.gz latest.log | grep -a 'phc-live'
+   Topics, each tied to an open issue:
+     in-blocks  #35. "SUFFOCATING <uuid> ... at x, y, z" is where a horse is being hurt by a
+                wall: the burial spot the rescue line never gave, with its scale, the blocks
+                its box touches and how long it has been loaded. "LOADED INSIDE BLOCKS" is a
+                horse whose box collided ten ticks after it joined, so it was saved there.
+                The "[clearance]" line now sits under this topic too. Pair all three with
+                the [suffrescue] lines by UUID.
+     lycan      #243, #244. SHIFT, REVERT and FORM DIED for every shifted horse. "WATER HURTS
+                THIS FORM" marks a body like the strider; "horse SURVIVED" on a FORM DIED
+                line is #244 happening.
+     dealer     "SHORT STRING": a cowboy or dealer who founded with fewer horses than he
+                wanted (seen with none, 2026-10-07).
+     tables     #210. Row counts of the three whole-file tables at start, hourly and at stop.
+   A topic goes when its issue closes; delete its row here in the same change.
+   The exporter does not know these lines. Any mod line also carries the logger name
+   "[horsegenetics/]", which is the way to separate ours from the other mods' in general.
+   The exporter keeps only Horse, Donkey and Mule deaths. A shifted horse dies as another
+   animal carrying its name, so grep the raw logs for `Named entity` and read every
+   non-equine line whose name matches a horse death beside it (#243 was found this way).
    The raw logs usually run past the last export's window. Anything found there is
    still in scope: file it as usual, and say in "Reported by" that it came from the raw
    log, not from an export. A frame of ours that the fix never named is a new issue

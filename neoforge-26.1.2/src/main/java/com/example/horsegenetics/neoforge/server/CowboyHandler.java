@@ -372,6 +372,12 @@ public final class CowboyHandler {
 
         HorseGenetics.LOGGER.info("{} set up at {} with {} horses",
                 cowboy.cowboyName(), cowboy.blockPosition(), cowboy.herdIds().size());
+        if (cowboy.herdIds().size() < herdSize) {
+            // A dealer was seen founding with none of his string on the live server (2026-10-07).
+            FieldLog.log("dealer", "SHORT STRING " + cowboy.cowboyName() + (arcane ? " (arcane)" : "") + " wanted "
+                    + herdSize + " horses and placed " + cowboy.herdIds().size() + " at " + FieldLog.where(cowboy)
+                    + (paddock == null ? " | founded where he stood" : " | walked to a paddock"));
+        }
         announce(cowboy, level);
     }
 
