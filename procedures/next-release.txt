@@ -32,6 +32,11 @@ BEFORE YOU START
      gh api "repos/<owner>/<repo>/milestones?state=all&per_page=100" \
        --jq '.[] | "\(.number) \(.title) \(.state) open=\(.open_issues) closed=\(.closed_issues)"'
    `gh repo view --json nameWithOwner` gives <owner>/<repo>.
+4. `git log --oneline <last tag>..HEAD --grep 'NOT COMPILED'`. A cloud session cannot
+   build, and marks its code commits that way. If one is newer than the last local
+   build, run `./gradlew :neoforge-26.1.2:compileJava` now and fix what it broke before
+   picking a unit; say so in the unit's commit. (79aff1cb left a duplicate method that
+   was only found when #243's failing test would not build.)
 
 STEPS
 -----

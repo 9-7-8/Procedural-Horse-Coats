@@ -1,0 +1,82 @@
+2026-10-09 15:23 (end of session) - next-release: the lycan shift refuses a body that
+water hurts (#243)
+
+ASKED
+-----
+1. "/next-release" - ran procedures/next-release.txt. The next release is v0.5.047 (the
+   equipment release; last tag v0.5.046). Two open bugs had no milestone and joined it;
+   the first unit by rank was #243, handed to procedures/fix-bug.txt, fixed and closed.
+2. Asked with the question tool which of #243's three fixes to build (it carried
+   needs-owner). Answer: "Refuse the body".
+
+DONE
+----
+1. Milestone housekeeping (no commit; GitHub only).
+   #243 and #244, filed by the server log review with no milestone, went on v0.5.047.
+   The milestone's description and the release-plan issue (#196) were edited in step.
+2. Fix #243: a horse shifted into a strider died in rain or water. Commit 84bf3803.
+   - Wrong: Strider.isSensitiveToWater() is true, and LivingEntity.aiStep deals drowning
+     damage to such a mob in water or rain. MobRoster tags the strider GROUND, and
+     LycanthropyHandler.isWearable asked only whether a body swims, flies or is hostile.
+     Two named horses died that way on the live server on 0.5.045.
+   - Fix: isWearable also fails animal.isSensitiveToWater(). A Strd/Strd horse stays a
+     horse; the allele and the roster entry stay (the roster is saved by position).
+     ChaosRoster calls the same check, so a modded water-shy mob leaves the lycan list
+     and keeps pack leader and the spawner.
+   - Proof: the chaos_roster gametest gained a strider row. Before the fix:
+     "minecraft:strider classified as [LYCAN, PACK, SPAWNER], expected [PACK, SPAWNER]".
+     After it, chaos_roster passed in four runs of :neoforge-26.1.2:runGameTest.
+     :neoforge-26.1.2:build green, check-parity OK (7163 checks), check-links OK,
+     check-designer-boots OK.
+   - Pictures: no pictures. Nothing to see: a horse that stays a horse.
+   - Issue: #243 closed, with the proof comment. Page: wiki/gene-lycan.html, Gameplay
+     #water-hurts and Coding #strider-refused.
+3. Same commit: the module did not compile on main. Commit 79aff1cb ("NOT COMPILED:
+   live-server logging") had added a second HorseAncestryData.size(). The new one was
+   removed and its comment kept on the old one; both returned the same count.
+   The two NOT COMPILED commits (79aff1cb, 4d6e089c) now compile and their
+   "[phc-live] tables" line was seen in the gametest log. Nothing else of theirs was
+   checked.
+
+DECIDED
+-------
+- #243 is fixed by refusing the body, not by cancelling the water damage (which was the
+  recommendation) or by shifting only where it is dry (owner). Recorded on #243 and on
+  wiki/gene-lycan.html#strider-refused.
+- A horse already inside a strider when a server updates is left alone until dawn or
+  death (made without the owner; it is written on the page and on #243).
+- The strider stays in the shapes table on the lycan page with a note, since the allele
+  still exists (made without the owner).
+
+FOUND ON THE WAY
+----------------
+- #245 filed: the order_stay_walks_back gametest failed in 1 of 5 runs, with the horse
+  one tick old and still in the air. It passed in the other four, and the #243 change
+  touches no order code. On v0.5.047, after #244. #40 and #37 are the earlier flakes of
+  the same family, both closed.
+- The live server's java process was running throughout and was left alone.
+
+PROCEDURES
+----------
+- procedures/next-release.txt, BEFORE YOU START: a new step 4. A cloud session's commit
+  marked NOT COMPILED is compiled before a unit is picked, because this run met a main
+  that did not compile only when its failing test would not build.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite. The only common/ change is a comment in MobRoster.
+- :web:bakeDesignerAssets was skipped for the same reason (a comment cannot move the
+  wasm); check-designer-boots was run.
+- Nobody has watched a Strd/Strd horse stay a horse at dusk in game. The gametest proves
+  the classifier, and LycanthropyHandler.shift already called isWearable.
+- No Verification-tab anchors were added.
+
+RELEASE
+-------
+Not offered. One fix is far below the bar, and v0.5.047.1's features are not built.
+
+PICK UP FIRST
+-------------
+#244 (a shifted horse survives its animal form's death at 1 health), by
+procedures/next-release.txt, which hands it to procedures/fix-bug.txt. Its cause and a
+fitting fix are written in the issue; it needs no owner call.
