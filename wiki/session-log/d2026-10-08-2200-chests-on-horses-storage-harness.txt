@@ -213,3 +213,17 @@ fell (the yard cannot place blocks); anything a player's hands do inside a menu.
 PICK UP FIRST (replaces the line above): have the owner play
 horse-gear.html#verify-packs with Sophisticated Storage installed (hand-over-a-test), and
 answer the enchantment question on #220.
+
+ENDED 2026-10-09 (end-session)
+------------------------------
+ASKED: "End the session for now and leave #220 open, we'll answer it later. It can ship with
+no enchantments just fine" -> #220 left open with that recorded on it; the harness page says
+so.
+DECIDED (owner): the storage harness ships without enchantments.
+PROCEDURES changed at the end, from this session's own mistakes and findings:
+  test-tiers.txt - an UP-TO-DATE test task tests nothing; --rerun.
+  add-a-config-option.txt - a default must be a literal for bake-config-keys.
+  run-tests.txt - what the yard cannot do (a FakePlayer menu, a placed block) and that a
+    menu can be tested on the dev client's own player.
+  photograph-horses.txt - shots can dress their horse (earlier in the session).
+RELEASE: see the summary; offered at the end of the session by release step 1.

@@ -130,6 +130,9 @@ STEPS
    - Run it in the background, logging to a file, and do other work. Never poll it with
      sleep.
    - Read the real exit code from the log. Never trust a piped command's exit code.
+   - Check the log says "> Task :common:test" with no UP-TO-DATE after it. When nothing
+     under common/ changed since the last run, Gradle skips the task, exits 0 in under a
+     second, and has tested nothing. To run it anyway: `./gradlew :common:test --rerun`.
    - Let it finish. If one must be stopped, run `./gradlew --stop` (it takes its test
      workers with it) AND delete common/build/test-results/test/ before running anything
      else. Never kill a JVM by hand: a hook refuses it, and a hand-picked kill took the

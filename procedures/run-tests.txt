@@ -70,6 +70,13 @@ STEPS
       open, write the reading under it, and tighten the pen.
 
 3. Build new pens for open checks and issues a pen can answer unattended.
+   What the yard cannot do, so do not build a pen for it: a FakePlayer cannot open a
+   menu (NeoForge's FakePlayer.openMenu does nothing), and nothing but a creative player
+   can place a block in the debug dimension - an entity's placement is cancelled too, so
+   a feature that places blocks shows only its refused-placement fallback there. A menu
+   CAN be tested on the dev client's own player: find the non-fake ServerPlayer in the
+   level, spawn the horse beside them, and open it for them (DebugYardPacks, in git at
+   7acbfa07).
    A pen must start itself, run on a clock, and log its own PASS or FAIL (see the
    DebugTestYard javadoc, DebugWorldWatch, and DebugYardClockwork for anything that needs
    hands). A check that needs the owner's eyes or hands cannot be a pen: leave it where

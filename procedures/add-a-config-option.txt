@@ -54,7 +54,8 @@ STEPS
    - Give it .comment(...) lines stating what it does, the default, the range, and
      "Server-side" or "Client-side".
    - The default lives ONCE, as a constant in common/ (ReproRules.DEFAULT_NATURAL_CAP),
-     never typed twice.
+     never typed twice. Write it as a literal: bake-config-keys.mjs reads the source and
+     cannot evaluate an expression (4 * 27 * 64 failed the bake; 6912 with a comment did not).
 
 4. Write a safe accessor beside it:
      public static T name() {
