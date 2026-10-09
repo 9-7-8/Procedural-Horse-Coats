@@ -84,6 +84,9 @@ public final class HorseResurrection {
         // and a horse that came back still carrying them would be a way to
         // copy two chests of anything.
         HorsePackHandler.strip(horse);
+        // And the rest of its gear, which drops on death too (#218): the
+        // snapshot was taken before the drops, so it is still in the tag.
+        TackEquipHandler.takeGear(horse);
         // Whatever killed it.
         horse.removeAllEffects();
         horse.clearFire();

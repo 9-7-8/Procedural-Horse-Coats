@@ -3873,6 +3873,15 @@ public final class ModGameTests {
             packFail("a dying horse should set its chest down nearby with the 64 cobblestone in the slot"
                     + " they were in, and drop none of it; chest at " + stood + ", " + loose + " dropped");
         }
+        int harnesses = 0;
+        for (var drop : drops) {
+            if (drop.getItem().is(ModItems.IRON_STORAGE_HARNESS.get())) {
+                harnesses += drop.getItem().getCount();
+            }
+        }
+        if (harnesses != 1 || !harness.on(horse).isEmpty()) {
+            packFail("a dead horse's harness should drop as an item, once (#218); " + harnesses + " dropped");
+        }
         if (!left.on(horse).isEmpty() || !packs.isEmpty()
                 || speed.getModifier(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "pack_load")) != null) {
             packFail("a horse that has set its chest down is still carrying it");

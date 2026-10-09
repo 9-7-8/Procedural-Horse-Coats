@@ -210,20 +210,33 @@ public final class TackEquipHandler {
         if (!(horse.level() instanceof net.minecraft.server.level.ServerLevel level)) {
             return;
         }
-        for (HorseTackSlot slot : HorseTackSlot.values()) {
-            if (slot.isVanilla() || slot.isStorage()) {
-                continue;
-            }
-            ItemStack worn = slot.takeOff(horse);
-            if (worn.isEmpty()) {
-                continue;
-            }
+        for (ItemStack worn : takeGear(horse)) {
             if (player == null) {
                 horse.spawnAtLocation(level, worn);
             } else if (!player.getInventory().add(worn)) {
                 player.drop(worn, false);
             }
         }
+    }
+
+    /**
+     * Everything the horse wears in this mod's own slots, off it, as stacks -
+     * the harness included, which is why the chests must already be gone
+     * ({@code HorseTackSlot.mayTakeOff}). Not the saddle or the barding, which
+     * are vanilla's, and not the chests, which are {@code HorsePackHandler}'s.
+     */
+    public static java.util.List<ItemStack> takeGear(net.minecraft.world.entity.animal.equine.AbstractHorse horse) {
+        java.util.List<ItemStack> taken = new java.util.ArrayList<>();
+        for (HorseTackSlot slot : HorseTackSlot.values()) {
+            if (slot.isVanilla() || slot.isStorage()) {
+                continue;
+            }
+            ItemStack worn = slot.takeOff(horse);
+            if (!worn.isEmpty()) {
+                taken.add(worn);
+            }
+        }
+        return taken;
     }
 
     private static void refuse(PlayerInteractEvent.EntityInteract event, Player player,

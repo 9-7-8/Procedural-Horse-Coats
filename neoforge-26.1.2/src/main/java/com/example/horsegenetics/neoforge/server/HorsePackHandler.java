@@ -409,6 +409,10 @@ public final class HorsePackHandler {
             }
         }
         loose.addAll(unload(horse));
+        // And everything else it wears in this mod's own slots - the harness,
+        // a braid - drops as items (owner, 2026-10-09, #218). After the chests,
+        // because the harness does not come off while one hangs from it.
+        loose.addAll(TackEquipHandler.takeGear(horse));
         for (ItemStack stack : loose) {
             event.getDrops().add(new ItemEntity(level, horse.getX(), horse.getY() + 0.5, horse.getZ(), stack));
         }

@@ -187,10 +187,10 @@ public final class ModAttachments {
     // HorseGear. Synced, because the Gear tab draws the worn stacks on the
     // client and there is no container open to carry them; the click that
     // changes one is still a server-checked packet (TackSlotPayload), so the
-    // sync is a read-only view rather than an authority. copyOnDeath so a
-    // re-summoned horse is still dressed - the same call HORSE_CARE makes,
-    // and losing a full set of tack to a death you did not see would be worse
-    // than losing a bond.
+    // sync is a read-only view rather than an authority. It DROPS when the
+    // horse dies (owner, 2026-10-09, #218), and HorseResurrection.revive
+    // clears it from the snapshot so a horse brought back does not wear a
+    // second set. (It was kept for the resurrection until then.)
     // The command whistle's standing order (HorseOrderAttachment). SYNCED, so the
     // wheel greys and the screens show it without asking the server. NOT
     // copyOnDeath: an order dies with the horse. Default: no order, which is also
