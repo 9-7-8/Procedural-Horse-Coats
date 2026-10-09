@@ -53,6 +53,12 @@ body armour and braids you can put on today, and you can dye saddles and armour
 colour by colour at the Tack Dyeing Bench - with any dye, ingot or gem, including
 ones from other mods. Right-click your horse holding a piece of tack and it goes on.
 
+**Load them up.** Hang a chest, a barrel, a shulker box or an ender chest on each side
+of your horse - anything you can place and store items in, other mods' storage included.
+Right-click the chest to open it. The more a horse carries the slower it goes, and a
+stronger horse carries more; an ender chest weighs nothing. A server can change how
+much a horse can carry, or turn the weight off.
+
 **Ride comfortably.** Mine from the saddle, open your own pack with **Alt + E**, get
 your lead back when a horse is called to you, and see through the horse when you
 look at the ground.
@@ -119,7 +125,7 @@ Everything is explained in depth on **[the wiki](https://9-7-8.github.io/Procedu
 which is the full guide to every gene, breed, item and rule, and is kept up to date as the
 mod grows.
 
-**Still being built:** better tack (pads, bridles, boots, shoes, saddlebags), feeding
+**Still being built:** better tack (pads, bridles, boots, shoes), feeding
 troughs, a lasso, and more fantasy breeds. The wiki's roadmap pages list what is planned.
 
 ---

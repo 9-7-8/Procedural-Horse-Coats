@@ -23,7 +23,7 @@
     Everything a horse wears, in one place. A <strong>Gear tab</strong> on the
     horse information screen holds <strong>nineteen slots</strong> laid out on a
     picture of the horse itself &mdash; head, mane and tail, body, chest, a slot
-    per leg and a slot per hoof, and two for saddlebags. Two of them are real
+    per leg and a slot per hoof, and two for the chests it carries. Two of them are real
     vanilla equipment slots and the other seventeen are a data attachment of our
     own, which is the constraint the whole system is shaped by.
     <strong>The slots exist; almost nothing to put in them does yet.</strong>
@@ -106,8 +106,9 @@
     <tr><td><strong>Hooves</strong></td><td>Hoof equipment &times; 4</td>
         <td>Four independent hoof slots. See the <a href="item-horse-shoes.html">horse-shoe page</a>
             for the first planned occupant.</td></tr>
-    <tr><td><strong>Storage</strong></td><td>Bag &times; 2</td>
-        <td>Saddlebags, near side and off side.</td></tr>
+    <tr><td><strong>Storage</strong></td><td>Pack &times; 2</td>
+        <td>A chest, a barrel, a shulker box &mdash; anything that stores items &mdash; near
+            side and off side. See <a href="#horse-chests">chests on a horse</a>.</td></tr>
 </table>
 
 <div class="note"><span class="label">A bridle and a halter share one slot on purpose</span>
@@ -174,14 +175,16 @@
         not be carrying.</li>
 </ul>
 
-<div class="note warn"><span class="label">Fifteen of the nineteen are empty by design</span>
+<div class="note warn"><span class="label">Thirteen of the nineteen are empty by design</span>
     <p>
         The <strong>saddle</strong> and the <strong>barding</strong> have had
         something that fits them all along, and the <strong>mane</strong> and
         <strong>tail</strong> now take the
         <a href="item-rescuing-braid.html">rescuing braid</a> &mdash; the first
-        piece of gear of this mod's own to fill a slot of this mod's own. The
-        other fifteen accept nothing: not because they are broken, but because
+        piece of gear of this mod's own to fill a slot of this mod's own. The two
+        <strong>packs</strong> take <a href="#horse-chests">anything that stores
+        items</a>. The
+        other thirteen accept nothing: not because they are broken, but because
         the gear that fills them has not been made. The tab says so on screen, so
         it reads as unfinished rather than faulty.
     </p>
@@ -206,6 +209,105 @@
         decoration</a>, and it reversed an earlier &ldquo;tack gets no
         stats&rdquo; call &mdash; see
         <a href="decisions.html#settled-tack-stats">design decisions</a>.
+    </p>
+</div>
+
+<h2 id="horse-chests">Chests on a horse</h2>
+<p>
+    A horse carries <strong>one container on each flank</strong>. Not a saddlebag of this
+    mod's making: the chest, barrel or shulker box you already have. <strong>Anything you
+    can place in the world and store items in, you can hang on the side of a horse</strong>
+    &mdash; other mods' chests and crates included, with nothing to configure.
+</p>
+<table>
+    <tr><th>You want to</th><th>Do this</th></tr>
+    <tr><td><strong>Hang one</strong></td>
+        <td>Hold it and right-click your horse. It goes on the flank you are standing at, or
+            the other one if that is taken. Or put it in a <strong>Pack</strong> slot on the
+            Gear tab or in the Dress window. An adult horse of your own; a foal carries
+            nothing.</td></tr>
+    <tr><td><strong>Open one</strong></td>
+        <td><strong>Right-click the chest itself</strong>, where it hangs. A click anywhere
+            else on the horse still does what it always did, which is usually to get on.
+            From the saddle, where there is no clicking it: open the horse's screen, go to
+            Gear, click the Pack slot and choose <strong>Open</strong>.</td></tr>
+    <tr><td><strong>Take one off</strong></td>
+        <td><strong>Empty it first.</strong> A chest with anything in it will not come off,
+            so nothing is ever spilled by a stray click. A <strong>shulker box</strong> is
+            the exception: it comes off full, with its contents inside it, because that is
+            what a shulker box is &mdash; and it goes on full the same way.</td></tr>
+</table>
+<p>
+    <strong>The chest keeps its own screen and its own size.</strong> A chest or a barrel
+    opens as the ordinary twenty-seven slots, a shulker box as a shulker box, a shelf as its
+    three, a modded crate as however many it has. Nothing is locked and nothing is
+    shrunk to fit the horse &mdash; what the horse limits is below.
+</p>
+<p>
+    <strong>An ender chest</strong> opens <em>your</em> ender chest &mdash; whoever
+    opens it &mdash; exactly as one standing on the ground does. Nothing in it is on the
+    horse.
+</p>
+
+<h3 id="pack-load">What a load costs</h3>
+<p>
+    <strong>The more a horse carries, the slower it goes.</strong> Every item weighs the
+    same, whatever it is: a stack of feathers and a stack of anvils are both sixty-four
+    items. How many a horse can carry is its
+    <a href="horse-body.html">pulling ability</a> &mdash; the same score a
+    <a href="carts.html">cart</a> reads &mdash; so the horse you bred to haul a wagon is
+    also the one that carries the most.
+</p>
+<ul>
+    <li><strong>It is a straight line.</strong> Half a load is half the slowdown, and an
+        empty chest costs nothing at all.</li>
+    <li><strong>There is a most a horse can carry</strong>, and a horse loaded that far
+        stands still until something is taken out. Nothing is refused at the chest
+        &mdash; you can always put the item in; the horse answers for it. For an ordinary
+        horse the default is twice what two full vanilla chests hold, so two full chests
+        cost it half its speed and a weak horse cannot move them.</li>
+    <li><strong>An ender chest weighs nothing</strong>, however full. What is in it is
+        somewhere else.</li>
+    <li>The Gear tab says how many items the horse is carrying and how much of its speed
+        it keeps.</li>
+</ul>
+<p>
+    A server can turn the weight off, set the maximum, give every horse a free allowance,
+    bend the curve and let an overloaded horse crawl rather than stop: the
+    <code>packs.*</code> keys on the <a href="config.html">config page</a>.
+</p>
+
+<h3 id="pack-rules">What happens to it</h3>
+<ul>
+    <li><strong>The horse dies:</strong> both chests and everything in them drop where it
+        fell, as a donkey's do. A horse brought back afterwards comes back without them.</li>
+    <li><strong>You sell it or turn it loose:</strong> the chests and their contents are
+        handed back to you first.</li>
+    <li><strong>You sign it over with a
+        <a href="item-transfer-papers.html">transfer paper</a>:</strong> it goes as it
+        stands, luggage and all.</li>
+    <li><strong>A stasis chamber, a ticket, a whistle:</strong> the chests travel with the
+        horse.</li>
+    <li><strong>Only the owner</strong> can open, hang or take off a chest, and only from
+        within eight blocks.</li>
+</ul>
+
+<div class="note"><span class="label">What counts as storage</span>
+    <p>
+        Nobody keeps a list. A thing is storage if placing it makes a block that holds
+        items, which is how another mod's chest works the day it is installed.
+        <strong>Machines are left out</strong> &mdash; hoppers, droppers, dispensers,
+        crafters, furnaces, brewing stands and jukeboxes hold items too, and none of them
+        is somewhere you keep things. Item tags let a datapack adjust it:
+        <code>horsegenetics:horse_storage/denied</code> (never),
+        <code>horsegenetics:gear/saddlebag_left</code> and <code>_right</code> (always),
+        <code>horsegenetics:horse_storage/weightless</code> (weighs nothing, like the
+        ender chest) and <code>horsegenetics:horse_storage/keeps_contents</code> (comes
+        off full, like a shulker box).
+    </p>
+    <p>
+        Only the <em>number of slots</em> comes from the block. A modded drawer that holds
+        thousands of one item in the world is that many ordinary slots on a horse.
     </p>
 </div>
 
@@ -255,6 +357,15 @@
     behaviour wanted while the pieces do not exist. Shipping a piece means adding
     it to its tag, and a datapack can do the same without touching Java: the braid
     went in without a line of Java in <code>HorseTackSlot</code> changing.
+</p>
+<p>
+    <strong>The two storage slots are the exception, and the only one.</strong> What they
+    take is not a list anyone could keep, so <code>HorseTackSlot.fits</code> asks
+    <code>HorseStorage</code> instead and their tags are only an <em>addition</em> to what
+    it detects &mdash; see <a href="#packs">chests</a> below. Every caller asks
+    <code>fits</code> or <code>accepts</code>, never the tag directly:
+    <code>TackEquipHandler</code> read the tag itself until 2026-10-08, which was correct
+    for seventeen slots and would have made a chest unwearable by hand.
 </p>
 
 <h2 id="attachment">Why an attachment and not a container</h2>
@@ -437,11 +548,186 @@
     </p>
 </div>
 
-<div class="note warn"><span class="label">Nothing is drawn on the horse yet</span>
+<h2 id="packs">Chests: a worn piece, a store, and a load</h2>
+<p>
+    Shipped 2026-10-08, to four calls the owner made that day (recorded on
+    <a href="decisions.html">design decisions</a>): any placeable storage rather than an
+    item of our own; the chest's own slots, never locked; weight by item count against
+    pulling ability, server-configurable, ender chests exempt; a full chest does not come
+    off. Three things, each with one home:
+</p>
+<table>
+    <tr><th>What</th><th>Where</th><th>Synced?</th></tr>
+    <tr><td>The <strong>chest</strong> &mdash; the stack hung on a flank</td>
+        <td><code>HorseGear</code>, under <code>SADDLEBAG_LEFT</code> /
+            <code>SADDLEBAG_RIGHT</code>, like any worn piece</td>
+        <td>Yes, with the rest of the gear</td></tr>
+    <tr><td>The <strong>contents</strong></td>
+        <td><code>data/HorsePacks</code>, the <code>HORSE_PACKS</code> attachment, keyed by
+            the same slot name</td>
+        <td>No. Saved only; a client sees them through the menu it has open</td></tr>
+    <tr><td>The <strong>load</strong> &mdash; two item counts and which side is weightless</td>
+        <td><code>data/HorsePackLoad</code>, the <code>HORSE_PACK_LOAD</code> attachment</td>
+        <td>Yes, and not saved: recounted on join and on every change</td></tr>
+</table>
+<p>
+    The slot names say <em>saddlebag</em> because they are keys in saved worlds and were
+    chosen before the owner settled what hangs there. They are not to be renamed.
+</p>
+
+<h3 id="packs-detect">What is storage: <code>entity/HorseStorage</code></h3>
+<p>
+    <code>slots(stack, level, near)</code> is the whole question, and zero means <em>not
+    storage</em>. The item must be a <code>BlockItem</code> whose block is an
+    <code>EntityBlock</code>; one block entity is built &mdash; never added to a level
+    &mdash; and asked how many slots it has: <code>Container.getContainerSize</code> if it
+    is a <code>Container</code>, otherwise the size of NeoForge's item capability
+    (<code>Capabilities.Item.BLOCK</code>). The answer is cached per item, on each side
+    separately. <code>horse_storage/denied</code> wins over everything; a slot tag makes
+    an item storage that the probe finds nothing in, at <code>UNKNOWN_SIZE</code> &mdash;
+    which is how the ender chest gets in, since its block entity holds nothing.
+</p>
+<div class="note warn"><span class="label">Unverified against another mod's chest</span>
     <p>
-        There is <strong>no render layer</strong> for fifteen of the seventeen
+        The probe was written against vanilla's block entities.
+        <code>BlockCapability.getCapability</code> handed a block entity that is in no
+        level is <code>@ApiStatus.Internal</code> in NeoForge, and a provider that looks at
+        the world around <code>near</code> sees whatever is really there. Every failure is
+        caught, logged once per item and read as <em>not storage</em>. It is an open check
+        on the <a href="#verify-packs">Verification tab</a>.
+    </p>
+</div>
+<p>
+    <strong>Only the slot count is taken; the storage is ours.</strong> Running somebody
+    else's block entity with no block under it &mdash; so that their own screen opened
+    &mdash; was the other design, and it fails in the one place nobody can test from here:
+    a modded menu's client side usually looks its block entity up <em>by position</em>, and
+    on a horse there is none. So a chest whose size vanilla has a screen for opens
+    vanilla's (<code>ChestMenu</code> for nine-by-N up to six rows,
+    <code>ShulkerBoxMenu</code> for a keeps-its-contents chest of twenty-seven), and any
+    other size opens <code>menu/HorsePackMenu</code>, a plain grid: nine across up to
+    fifty-four slots, then wider rather than scrolling, to
+    <code>HorsePacks.MAX_SLOTS</code>.
+</p>
+
+<h3 id="packs-store">The store is mutable, on purpose</h3>
+<p>
+    <code>HorseGear</code> is immutable and copies every stack across its boundary.
+    <code>HorsePacks</code> cannot be: a container hands out its <em>live</em> stacks and
+    vanilla's menus grow and shrink them in place, so a store that copied on the way out
+    would turn every merge into a silent loss. The attachment's value is therefore a
+    mutable object, one per horse (<code>builder(HorsePacks::new)</code> &mdash; a shared
+    default would be one chest for every horse on the server), and
+    <code>HorsePackHandler.PackContainer</code> is a window straight onto it. Nothing marks
+    it dirty because nothing needs to: an entity is written with its chunk regardless.
+</p>
+<p>
+    A list grows to the highest slot written and is never cut, and a container is never
+    smaller than what it holds &mdash; so a chest whose mod shrank it, or was removed,
+    still shows every stack. Stacks filed under a slot whose chest has gone are kept, and
+    <code>unload</code> returns them.
+</p>
+
+<h3 id="packs-rules">Putting on and taking off go through the slot</h3>
+<ul>
+    <li><code>HorseTackSlot.set</code>, for a storage slot, calls
+        <code>HorsePackHandler.unpack</code>: a stack that arrives with a
+        <code>minecraft:container</code> component &mdash; a shulker box, a chest picked
+        with its inventory &mdash; is emptied into the store, so there is one copy.
+        <strong>An empty component is left exactly as it was.</strong> Barrels, shelves and
+        shulker boxes carry an empty one by default, and a barrel that came back without it
+        would never stack with another; the gametest pins it.</li>
+    <li><code>HorseTackSlot.mayTakeOff</code> is false for a chest with anything in it,
+        unless <code>HorseStorage.keepsContents</code>. The server counts the store; a
+        client reads the synced count, which is why <code>HorsePackLoad</code> exists at
+        all.</li>
+    <li><code>HorseTackSlot.takeOff</code> is the only way a worn piece is handed to
+        somebody: it packs a keeps-its-contents chest's stacks back into the item
+        (<code>HorsePackHandler.pack</code>) and clears the slot. <code>GearView</code>
+        and <code>handleTackSlot</code> both used to read <code>on()</code> and then
+        <code>set(EMPTY)</code>; both now call it, and the Dress window's slot refuses
+        through <code>mayPickup</code>.</li>
+</ul>
+
+<h3 id="packs-load">The load: <code>common/pack/PackLoad</code></h3>
+<p>
+    Pure, in <code>common/</code>, and pinned by <code>PackLoadTest</code>. The load is a
+    plain count of items; capacity is <code>CartDraft.capacity(pull)</code>, the carts'
+    own curve, so there is one axis of strength. The server's five
+    <code>packs.*</code> keys leave <code>ServerConfig</code> only as one
+    <code>PackLoad.Curve</code>, through <code>packCurve()</code>, so no reader can take
+    one key and miss the others. <code>HorsePackHandler.refresh</code> recounts, writes
+    <code>HORSE_PACK_LOAD</code> if it changed, and sets a <strong>transient</strong>
+    <code>ADD_MULTIPLIED_TOTAL</code> modifier on movement speed
+    (<code>horsegenetics:pack_load</code>) &mdash; transient like the carts', and re-made
+    on <code>EntityJoinLevelEvent</code>, so a config change is picked up on the next load
+    or the next change to a chest rather than baked into the save. A weightless chest's
+    items are synced in the count and left out of <code>weighed()</code>.
+</p>
+<p>
+    <code>HorseSpeedFloor</code> does not undo it: that floor is on the attribute's
+    <em>base</em>, and this is a modifier, exactly as the cart's is.
+</p>
+
+<h3 id="packs-click">Clicking the chest: <code>common/pack/PackBox</code></h3>
+<p>
+    <code>HorsePackHandler.onClickChest</code> does not ask which face of the hitbox was
+    struck &mdash; a horse's hitbox is a square column that does not turn with it, so
+    &ldquo;the left face&rdquo; is the flank one time in four. It casts the player's own
+    line of sight against a box per flank in the horse's frame, scaled by the horse's
+    size. <code>PackBox</code> holds that box and the three centre constants, and
+    <code>client/PackLayer</code> draws the chest from the same three, so what is clicked
+    is what is seen. The event is cancelled on both sides, as
+    <code>TackEquipHandler</code>'s is, or the client predicts a mount. It runs at
+    <code>LOW</code>: after everything that claims a click by what is in the hand, before
+    the equip handler.
+</p>
+
+<h3 id="packs-draw">Drawing it: <code>client/PackLayer</code></h3>
+<p>
+    The layer knows nothing about chests. The worn stack is resolved to its ordinary item
+    model in <code>GeneticHorseRenderer.extractRenderState</code>
+    (<code>ItemDisplayContext.NONE</code>, so no display transform) and submitted on the
+    body bone, turned so a block's front faces away from the horse and squeezed to
+    <code>PackBox.DRAWN_THICK</code>. A barrel is a barrel, a dyed shulker box is its
+    colour, and another mod's crate draws as its own item does. Photographed on
+    2026-10-08 with a chest, barrel, shulker box, ender chest, shelf, decorated pot and
+    copper chest: upright, latch outward on both flanks.
+</p>
+
+<h3 id="packs-lifecycle">Every way a horse leaves</h3>
+<table>
+    <tr><th>Path</th><th>What happens to the chests</th></tr>
+    <tr><td>Death</td>
+        <td><code>HorsePackHandler.onDrops</code> (<code>LivingDropsEvent</code>,
+            <code>LOWEST</code>) adds both chests and their contents to the drops. Lowest
+            because <code>GeneDeathHandler.onHorseDrops</code> <em>clears</em> the list
+            for some genes.</td></tr>
+    <tr><td>Resurrection, a realm-backup raise</td>
+        <td>The afterlife snapshot is taken before the drops, so it still holds them;
+            <code>HorseResurrection.revive</code> calls <code>strip</code>, or two chests of
+            anything could be copied by dying.</td></tr>
+    <tr><td>Sold to a cowboy or the trader; turned loose</td>
+        <td><code>CowboySale.returnTack</code> and <code>HorseRelease.returnTack</code>
+            call <code>giveBack</code>. Those horses can later be discarded outright.</td></tr>
+    <tr><td>Stasis, lycanthropy, undead conversion</td>
+        <td>A whole-entity save and load; both attachments ride in the tag.</td></tr>
+    <tr><td>Transfer paper</td><td>The same entity changes owner; nothing moves.</td></tr>
+</table>
+<p>
+    Tests: <code>PackLoadTest</code> (the curve and the click box) and the gametest
+    <code>horse_carries_chests</code> (detection against the real registries and tag
+    files, the flank chosen, the click claimed, the count and the modifier, the
+    won't-come-off rule, a shulker box's round trip, a barrel that still stacks, the save
+    codec, and the drops).
+</p>
+
+<div class="note warn"><span class="label">Thirteen slots still draw nothing</span>
+    <p>
+        There is <strong>no render layer</strong> for thirteen of the seventeen
         gear slots, because there is nothing to render. The saddle and the barding
-        draw as they always have, through vanilla, and the mane and tail are drawn
+        draw as they always have, through vanilla, the two packs are drawn by
+        <code>PackLayer</code> as above, and the mane and tail are drawn
         by <code>BraidLayer</code> &mdash; the first of these, and the worked
         example of the shape: one submit of the whole model through a mask baked
         from the mesh, tinted. Every piece past those needs a
@@ -461,7 +747,8 @@
     <p>
         Nineteen slots ship with <strong>almost nothing to put in them</strong>, so the
         whole accessories system is the plan: derived models rather than drawn ones, a
-        tack bench, dye and pattern, enchanted tack, hoof equipment, native tack, horse chests and
+        tack bench, dye and pattern, enchanted tack, hoof equipment, native tack, panniers that
+        are modelled rather than squeezed blocks, and
         the saddle pad &mdash; with the armour materials the one piece that is only data.
     </p>
 </div>
@@ -529,9 +816,10 @@
             second copy stored only on the client.</li>
         <li><strong>Phase 5: utility gear.</strong> I would implement enchanted tack, hoof equipment and horse
             chests as a second tier of features after the shared plumbing is proven. Hoof equipment should be
-            a real item with an enchantment slot and a horse-side effect system; horse chests should
-            be attachment-backed storage with a horse-side menu rather than a widened container; both
-            should share the same schema for validation and ownership rules.</li>
+            a real item with an enchantment slot and a horse-side effect system. Horse chests
+            shipped on 2026-10-08 as attachment-backed storage &mdash; see
+            <a href="#packs">the Coding tab</a> &mdash; and the two should share the same
+            validation and ownership rules.</li>
         <li><strong>Phase 6: equipment actions.</strong> Add equip-all and unequip-all actions for
             every tack and equipment slot, using the same server-side acceptance checks as a single
             slot transfer. The operation should be deterministic, report slots that could not be
@@ -725,7 +1013,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <tr><td><strong>Boots</strong> &times; 4</td><td>One per leg.</td></tr>
 <tr><td><strong>Hoof equipment</strong> &times; 4</td><td>One per hoof, and a different thing from a boot. <a href="item-horse-shoes.html">See the dedicated page.</a></td></tr>
 <tr><td><strong>Martingale / collar</strong>, <strong>fly mask</strong></td><td>The two remaining real pieces of tack.</td></tr>
-<tr><td><strong>Chest</strong> &times; 2</td><td><a href="#horse-chests">Storage</a>, which is its own section because a chest is not worn.</td></tr>
+<tr><td><strong>Chest</strong> &times; 2</td><td><a href="#horse-chests">Storage</a> &mdash; shipped 2026-10-08, and on the Gameplay tab now.</td></tr>
 </tbody>
 </table>
 </div>
@@ -1081,76 +1369,28 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 
 <hr>
 
-<h2 id="horse-chests">Horse chests, ender chests, and the look of a loaded horse</h2>
+<h2 id="horse-chests-next">Chests on a horse: what is left</h2>
 
 <p>
-    <strong>Suggested implementation:</strong> model this as attachment-backed storage rather than
-    a widened horse container. Create a small <code>HorseChestInventory</code> or similar data
-    object, register it under <code>ModAttachments</code>, and add a menu that opens from the
-    gear screen or a right-click action. The first version should be a single bag capacity tied to
-    <code>HorseTraits.pull()</code>, with a pure item-based chest and no cross-inventory ender
-    carry; that keeps the gameplay rule stable while the code proves storage and transfer logic
-    without entangling it with a more sprawling inventory feature.
+    Chests shipped on 2026-10-08 and are on the <a href="#horse-chests">Gameplay</a> and
+    <a href="#packs">Coding</a> tabs. Three things from the original plan did not:
 </p>
-<p>
-    Give a horse saddlebags &mdash; storage that travels with the animal &mdash; in
-    <strong>two slots</strong>, per <a href="#accessories-slots">the roster</a>.
-</p>
-<p>
-    <strong>A horse is deliberately not a chested horse in vanilla.</strong> The chest flag, the
-    extra slots and the screen that shows them all live on
-    <code>AbstractChestedHorse</code> (donkey, mule, llama), and <code>Horse</code> does not
-    extend it &mdash; so there is nothing to switch on, and this is a container of our own or it
-    is nothing.
-</p>
-<p>
-    <strong>That part is well-trodden ground here.</strong> The mod already registers menus
-    (<code>menu/ModMenus</code>, with <code>EquestrianBenchMenu</code> and
-    <code>ResearchShelfMenu</code> as working examples) and already stores per-horse state in a
-    data attachment, which is where a container would live. <strong>It also already runs six
-    containers on the things a horse <em>pulls</em></strong> &mdash;
-    <code>WagonMenu</code> alone is three chests over twelve rows, all backed by
-    <code>carts/util/CartInventory</code> &mdash; so the inventory code is written and only its
-    owner changes. <code>entity/HorseTackSlot</code> draws the line explicitly today:
-    <em>&ldquo;the chest a donkey carries is not one of these and is not here.&rdquo;</em>
-</p>
-
 <ul>
-    <li><strong>An ender chest on a horse</strong> was asked for by name. It is the interesting
-        one because it has no contents of its own &mdash; it is a view onto the player's ender
-        inventory, so it sidesteps every question about what happens to the contents on death or
-        on <a href="item-transfer-papers.html">a transfer of ownership</a>, and raises one of its
-        own: <em>whose</em> ender inventory, the owner's or the rider's.</li>
-    <li><strong>Chests from other mods must work.</strong> Not a hardcoded list of chest items
-        &mdash; the same rule the rest of the compat layer follows. A chest is whatever carries
-        the right tag, and its look comes from what it is. <em>Its</em> size is the container's
-        own business and should not be confused with the horse's: the bullet below is the
-        ceiling the animal imposes, and a roomy modded chest does not raise it. Which of the
-        two binds &mdash; and whether a big chest on a weak horse is refused or simply
-        part-filled &mdash; wants deciding once rather than per chest.</li>
-    <li><strong>The look of a chested horse is its own complaint, and a fair one.</strong>
-        Vanilla's chested donkey is two boxes clipped to its flanks. Since this mod already
-        re-renders the horse and <a href="#accessories-geometry">is proposing to derive
-        equipment geometry from the horse's own parts</a>, panniers that actually sit on the
-        animal are the same feature as everything else in
-        <a href="#accessories">the accessories system</a> and should be built with it, not
-        before it.</li>
-    <li><strong>Capacity is a function of <em>pulling ability</em>, not size</strong> (owner).
-        That stat already exists and is already resolved from the genome: a 1&ndash;10 score
-        read as <code>HorseTraits.pull()</code>, reached through
-        <code>HorseDraft.pullOf</code>, falling back to <code>HorseTraits.BASE_PULL</code> for a
-        horse with no genome of ours. So there is nothing to derive &mdash; the number a
-        saddlebag should read is the number <a href="carts.html">the carts</a> already read.
-        <strong>Size would have been the wrong proxy</strong>, and cheaply wrong: it measures
-        how big a horse is rather than what it can shift, so a tall light horse would out-carry
-        a cob that plainly should win. Pull is the honest stat, and using it means
-        <em>one</em> axis of strength runs through carts and storage both, so a horse bred to
-        haul a wagon is the horse that carries the most &mdash; rather than two parallel
-        breeding goals that happen to look alike.</li>
-    <li><strong>Still undecided:</strong> whether the chest is a vanilla chest right-clicked
-        onto the horse or an item of our own; whether it survives a transfer of ownership and
-        what happens to the contents if it does not; and whether it appears beside the saddle in
-        the horse screen or in a screen of its own.</li>
+    <li><strong>The look of a loaded horse.</strong> A chest is drawn as its own block,
+        halved and squeezed flat against the flank. That is honest and it works for any
+        mod's block, but it is still a box clipped to a horse &mdash; the complaint about
+        vanilla's donkey. Panniers that sit on the animal are the same feature as
+        <a href="#accessories-geometry">deriving equipment geometry from the horse's own
+        parts</a> and should be built with it.</li>
+    <li><strong>Other mods' interdimensional storage.</strong> The ender chest is handled
+        by name. Another mod's equivalent is only <em>weightless</em> if a datapack tags
+        it, and only works at all if its block entity holds items &mdash; one that fronts
+        a global inventory keyed by a frequency would be a plain box here. Doing better
+        means running the block's own logic, which is the design
+        <a href="#packs-detect">the Coding tab</a> explains turning down.</li>
+    <li><strong>A key to open them from the saddle.</strong> Today it is the horse
+        screen, the Gear tab and the slot's menu: three clicks for something a rider does
+        often.</li>
 </ul>
 
 </section>
@@ -1169,9 +1409,59 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         &ldquo;the hand&rdquo; &mdash; so the write path changed again, underneath a screen
         nobody had confirmed the first version of. Since 2026-09-30 there is also a
         <strong>Dress</strong> window, a real container menu with the player's inventory
-        beside the doll, and nothing about it has been opened in a game.
+        beside the doll, and nothing about it has been opened in a game. Since 2026-10-08 a
+        horse carries a <strong>chest on each flank</strong>, proven by a gametest and a
+        photo shoot and never opened, loaded or ridden by a player.
     </p>
 </div>
+
+<h3 id="verify-packs">Chests on a horse (2026-10-08, NOT played)</h3>
+<p>
+    Built from the owner's request the same day; see <a href="#packs">the Coding tab</a>.
+    The gametest <code>horse_carries_chests</code> and a clean server boot cover the rules
+    a mock player can reach. <strong>No menu has been opened</strong> &mdash; the harness
+    has no real player &mdash; so everything a hand does inside a chest is unproven. In
+    the order they can be wrong without showing:
+</p>
+<ul>
+    <li><strong>Put things in, log out, log in.</strong> The stacks are where they were,
+        in the slots they were in. Then the same across a server restart, and through a
+        stasis chamber and back.</li>
+    <li><strong>Shift-click a full inventory into a chest and back</strong>, and
+        double-click to gather a stack: nothing duplicated, nothing short. The store
+        hands vanilla its live stacks, and this is the path that proves that was
+        right.</li>
+    <li><strong>Try to take a chest off with one item in it</strong> &mdash; in the Dress
+        window (it should not lift) and from the picker's <em>Take off</em> line (it should
+        say to empty it). Then a shulker box, which should come off full and go back on
+        full, with the same items in the same places.</li>
+    <li><strong>Kill a loaded horse.</strong> Two chests and everything in them on the
+        ground, once. Then resurrect it: it comes back with no chests. On a horse that
+        turns to something when it dies (a gene with a death drop), the luggage must still
+        be there.</li>
+    <li><strong>Sell a loaded horse to a cowboy, and turn one loose:</strong> the chests
+        and contents are in your inventory or at your feet.</li>
+    <li><strong>Load it and ride it.</strong> Two full chests should halve an ordinary
+        horse's speed, the Gear tab's <em>Carrying</em> line should say so, and emptying
+        them should give the speed back at once. A horse at its maximum should not walk.
+        Then <code>packs.weight = false</code> on the server and a relog.</li>
+    <li><strong>An ender chest</strong> opens yours, a second player's opens theirs, and
+        filling it does not slow the horse.</li>
+    <li><strong>Walk away with a chest open</strong>, and have the horse walk away from
+        you: the window closes past eight blocks, with nothing lost off the cursor.</li>
+    <li><strong>A dedicated server with two players:</strong> a stranger clicking your
+        horse's chest gets a refusal, not a mount and not a menu.</li>
+    <li><strong>Another mod's chest</strong> &mdash; the open check on
+        <code>HorseStorage</code>'s probe. Hang one, open it, count its slots, and read the
+        log for <em>Could not ask</em>. A chest whose size is not nine-by-N opens the plain
+        grid; a very large one should come up wide, not off the screen.</li>
+    <li><em>Then look at it:</em> the click box against the drawn chest on a small and a
+        large horse (it is deliberately a little generous); the chest on a rearing horse
+        and a galloping one; a shelf and a decorated pot, which are odd shapes to squeeze;
+        the <strong>L</strong> and <strong>R</strong> buttons under the <strong>i</strong>
+        on the vanilla horse inventory; and whether a chest on the off side of the Dress
+        window's doll reads as the off side.</li>
+</ul>
 
 <h3 id="verify-dress">The Dress window (2026-09-30, NOT played)</h3>
 <p>
@@ -1349,7 +1639,8 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         <a href="breeding.html">Breeding &amp; pedigree</a>
         <a href="#verification">the Verification tab</a>
     </div>
-    Source: <code>neoforge-26.1.2/{entity,data,client,network}/</code>
+    Source: <code>neoforge-26.1.2/{entity,data,client,network,menu,server}/</code>,
+    <code>common/pack/</code>
 </div>
 
 </article>
