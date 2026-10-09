@@ -1,0 +1,159 @@
+2026-10-09 14:18 - The equipment release planned, and worn gear's 3D rule scoped (#223)
+(The time is the END of the session; it began after the 0.5.046 release, the same day.)
+
+No code was touched. Everything below is GitHub issues, milestones and three rule files.
+
+ASKED
+-----
+1. "Tell me all the issues and features queued for the next build", then "check again".
+   Listed v0.5.047's 15 open issues. The first answer called five of them strays
+   because the milestone's description did not list them; the second check read the
+   milestone history and found the owner had moved them there that morning.
+2. "I want to do all of the equipment parts for the next release, and then bump
+   everything else up a release." Done: see DONE 1.
+3. "Saddle pads should be on there somewhere, with all the stuff about making them out
+   of banners. Additionally there should be scoping to make all parts at least a bit 3d,
+   even if that's just taking the existing mesh and creating edges around it." Filed
+   #222 and #223.
+4. "Look through the rest of the roadmaps for equipment, and create issues for any that
+   are missing them, and then add them to this next release. The goal here is to do
+   every equipment part in one huge release." Filed #224-#235.
+5. "Is there any way for us to push carts and jumps out further? Or does the equipment
+   rely on woods?" It does not; the three cart and jump issues went to a new v0.5.061.
+6. "What is everything on the docket now that is either not scoped, or it's not clear
+   whether it belongs on this release? What are all our open questions still with the
+   next release? Also, going forwards, lets try to have releases all center around a
+   certain feature (bugs are just addressed highest priority first)." Listed both; the
+   themed-release rule is recorded (DONE 3).
+7. "Curios integration should be the LAST thing we work on this release. Use your
+   question tool to ask me things you still need me to decide." #231 moved last; five
+   rounds of questions asked and recorded (DECIDED).
+8. "is there anything else large and cross-cutting we should decide before we get
+   started on this release?" and "Is there anything else we need to decide?" Three more
+   rounds; #236, #237 and #238 filed from the answers.
+9. "scope a feature for 223". Done: see DONE 4.
+
+DONE
+----
+1. The release plan was re-drawn (GitHub only; no commit).
+   v0.5.047 is the equipment release. Every non-equipment issue moved one release
+   later: the old v0.5.047's other pieces (#158, #49, #131, tracking #156) are
+   v0.5.048, each later release shifted by one, and the old v0.5.059 is a new
+   milestone v0.5.060. Carts and jumps (#66, #233, #234) are a new v0.5.061. v0.6.x and
+   v1.0.0 kept their names. Every milestone description and the release-plan issue
+   (#196) were rewritten to match. The releases the bridle pieces left (now v0.5.054
+   and v0.5.056) are lighter and were not re-packed.
+   Proof: `gh issue list` per milestone after the move; no open issue has a null
+   milestone. No pictures.
+2. Issues filed from the equipment Roadmap tabs, which had plans and no issues:
+   #222 saddle pads, #225 native tack, #226 tack bench, #227 dye and pattern,
+   #228 enchanted tack, #229 armour materials, #230 stand and tack pack, #231 Curios,
+   #232 chests remainder, #233 vardo, #234 cart and jump bench; and from the owner's
+   answers #236 gear durability, #237 other mods' tack in our slots, #238 gear in the
+   world. #235 (braid dyeing) was filed and closed, folded into #227. #224 (derived
+   gear models) was filed and closed, folded into #223. All open ones are `idea`,
+   unsized, each carrying its page's plan and a comment with the owner's answers.
+3. Rule files, commit 614aeb93 (pushed):
+   - CLAUDE.md rule 10 names the interim version number.
+   - procedures/release.txt: a fourth, interim number (0.5.047.1, .2 ...), each a full
+     release; the milestone stays open until the last one.
+   - procedures/next-release.txt: a scoped piece goes to the release whose THEME it
+     belongs to, not the first with about 10 points of room; a themed release is still
+     next while its milestone has open issues; an idea the owner put on a release is
+     not sent back to Backlog.
+   Proof: none needed beyond reading them; CLAUDE.md is 199 lines. No pictures.
+4. #223 scoped by procedures/write-intake-document.txt. It is now a `scoped`,
+   `tracking` parent titled "Worn gear is 3D: lifted and rimmed, or built from boxes",
+   holding the whole treatment, with three sub-issues: #239 piece 1 (the rim builder,
+   the rule and the braid, L), #240 piece 2 (edged horse armour, M), #241 piece 3 (the
+   worn-piece table and a leg proof, M). The decision log is a comment on #223.
+   What exists was read, not remembered: an Explore agent surveyed every layer
+   GeneticHorseRenderer registers, and ModelPart, LayerDefinitions, EquipmentLayerRenderer
+   and OrderedSubmitNodeCollector were read in the 26.1.2 sources jar. Nothing was
+   javap'd, so those facts are UNVERIFIED in the treatment, in checking order.
+   Comments on #164, #140 and #222 say what the scoping changed for them.
+
+DECIDED
+-------
+All (owner), asked with the question tool, unless marked. Recorded as a comment on the
+issue named, and as standing decisions in #196 under v0.5.047.
+- The release: equipment only; carts and jumps out to v0.5.061; Curios last; ships as
+  six interim versions v0.5.047.1 to .6 (the six-way split was this session's proposal,
+  which she kept); foundations and the three riskiest pieces (#228, #227, #226) scoped
+  first, the rest stage by stage.
+- Releases are themed from now on; bugs are worked highest priority first (#196,
+  next-release.txt, and the memory file releases-are-themed).
+- Cross-cutting: per-piece stat caps only, no shared cap; each piece keeps its own
+  material tiers; durability exists, off by default in config (#236); art is generated
+  placeholders she repaints; new gear code stays separable for the Equipment jar; one
+  config switch per family and a number per bonus; other mods' tack is accepted in our
+  slots (#237); wild horses are bare, gear is in loot and trades, and stable and
+  villager horses may wear it (#238).
+- Per piece: mod saddle 10% at top tier through config, from the leatherworker and the
+  tack bench (#75, `needs-owner` removed); enchantments ruled on one at a time, "magic
+  belongs to genes, reason and strength belongs to enchantments", from anywhere vanilla
+  enchantments come from (#228); a harness weight enchantment stacks with a config cap,
+  and an unranked modded metal is ranked by its armour stats (#220); separate benches
+  sharing a widget, and tack is made at the bench only (#226); the six vanilla armour
+  materials named explicitly (#229); blanket weather, boots leg protection, fly mask
+  calm, martingale control, foals a halter only, mane and tail the braid only (#225);
+  stand, pack and buttons as three pieces, buttons first (#230); banners on every piece
+  and never consumed (#227, #222); no panniers, a key from the saddle, weightless
+  modded storage from the live server's mod list (#232).
+- #223: worn gear only; two builders by kind of piece; the rim follows the painted
+  outline; 0.25 floor; ALL horse armour edged, with one client switch for all rims,
+  horses only, lifted to 0.25; rim takes the edge texel's colour; grown parts poke
+  through; the braid is the proof piece; worn meshes get their own cache and cap; each
+  piece counts toward the next interim version and no save changes.
+- NOT the owner's (this session's, written as Recommended in #223): the saddle stays
+  vanilla-drawn; the face limit and fallback; the config key's name; the common/gear
+  package; the debug-only test boot; building #140's worn hook as the first step of
+  the shoes' rendering.
+None of these is on wiki/decisions.html yet. Each goes there when its piece is built.
+
+FOUND ON THE WAY
+----------------
+- Mistake: the first "queued for the next build" answer treated #73, #74, #75, #220
+  and #66 as misplaced. Put right on "check again" by reading each issue's milestone
+  timeline.
+- Mistake: the release's sized total was written as 20 points for most of the session.
+  It was 16 (#164 5, #140 2, #73 2, #74 2, #75 5); with #239-#241 it is 25. The
+  milestone and #196 now say 25.
+- "Bench only" removes crafting-grid tack recipes players on a released jar already
+  use; it needs a line in the release note when #226 ships.
+- "Not consumed" contradicts wiki/saddle-pads.html ("Consume the source banner") and
+  how the Tack Dyeing Bench uses up dye today. Noted on #222 and #227.
+- The all-armour-edged call bends philosophy's "vanilla mechanics stay intact". She was
+  told and confirmed it with the client switch; it is to be recorded on decisions as a
+  looks-only exception when #240 ships.
+- #164's step 4 (an item model per hoof) is superseded: shoes are box-built. #140 got
+  `needs-owner` for whether it merges into #164.
+- Stale text seen and left alone: HorseTackSlot's javadoc says nineteen slots (there
+  are twenty); PartMeshes' javadoc says sixty-four meshes; wiki/model-parts.html says
+  only a membrane or a slab is flat (the test lists five exceptions; #239 fixes that
+  sentence).
+- The 26.1.2 sources jar was unzipped into the session scratchpad, outside the repo.
+
+PROCEDURES
+----------
+- procedures/next-release.txt and procedures/release.txt changed (DONE 3).
+- write-intake-document says a comment is posted per decision round. This session
+  posted one decision log at the end instead; the rounds are separated inside it.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No test, build or game was run: nothing compiled changed.
+- A full :common:test run would check nothing this session touched.
+- The eight UNVERIFIED lines in #223 section 6 are unread in javap and unseen in a game.
+- No Verification-tab anchor was added; #239-#241 list the play checks that become them.
+
+RELEASE
+-------
+Not offered. Nothing player-facing was built.
+
+PICK UP FIRST
+-------------
+#239 (piece 1 of #223: the rim builder, the rule and the braid), by
+procedures/process-intake.txt. Its first step is UNVERIFIED 1 in #223: prove one rim
+face on the braid. Before or beside it, the owner's scoping order has #228, #227 and
+#226 next, by procedures/write-intake-document.txt.
