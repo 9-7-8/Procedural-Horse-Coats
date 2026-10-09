@@ -3105,6 +3105,7 @@ wiki/horse-gear.html#ceiling	coding	The two-slot ceiling
 wiki/horse-gear.html#click	coding	The click path
 wiki/horse-gear.html#doll	coding	The paper doll
 wiki/horse-gear.html#gear-inventory	coding	The Dress window — a real menu beside the doll
+wiki/horse-gear.html#gear-leaves	coding	What the other slots do when a horse leaves
 wiki/horse-gear.html#horse-chests	gameplay	Chests on a horse
 wiki/horse-gear.html#pack-load	gameplay	What a load costs
 wiki/horse-gear.html#pack-rules	gameplay	What happens to it

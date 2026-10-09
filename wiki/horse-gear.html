@@ -270,9 +270,10 @@
         empty chest costs nothing at all.</li>
     <li><strong>There is a most a horse can carry</strong>, and a horse loaded that far
         stands still until something is taken out. Nothing is refused at the chest
-        &mdash; you can always put the item in; the horse answers for it. For an ordinary
-        horse the default is twice what two full vanilla chests hold, so two full chests
-        cost it half its speed and a weak horse cannot move them.</li>
+        &mdash; you can always put the item in; the horse answers for it. By default a
+        horse with a pulling ability of 10 keeps half its speed with a full vanilla chest
+        on each flank; an ordinary horse with the same load keeps about an eighth, and a
+        weak one cannot move it.</li>
     <li><strong>An ender chest weighs nothing</strong>, however full. What is in it is
         somewhere else.</li>
     <li>The Gear tab says how many items the horse is carrying and how much of its speed
@@ -769,6 +770,24 @@
     colour, and another mod's crate draws as its own item does. Photographed on
     2026-10-08 with a chest, barrel, shulker box, ender chest, shelf, decorated pot and
     copper chest: upright, latch outward on both flanks.
+</p>
+
+<h3 id="gear-leaves">What the other slots do when a horse leaves</h3>
+<p>
+    Fixed 2026-10-08 (#218). A horse <strong>sold</strong> to a cowboy or the trader, or
+    <strong>turned loose</strong>, hands back what it wears in this mod's own slots:
+    <code>TackEquipHandler.returnGear</code>, called from
+    <code>CowboySale.returnTack</code> and <code>HorseRelease.returnTack</code> beside the
+    saddle and the barding. Until then a braid left with the horse and was deleted when a
+    dealer's string or the wild turnover discarded it. In the same change
+    <code>GeneDeathHandler.onHorseDrops</code> stopped clearing the saddle and barding out
+    of the drops of a horse whose gene replaces its loot.
+</p>
+<p>
+    <strong>On death the fifteen still do not drop</strong>, and that is the recorded
+    design rather than an oversight: <code>HORSE_GEAR</code> rides in the afterlife
+    snapshot so that a horse brought back is still dressed. A horse nobody brings back
+    takes them with it. Whether that should change is the open half of #218.
 </p>
 
 <h3 id="packs-lifecycle">Every way a horse leaves</h3>
@@ -1515,8 +1534,8 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         be there.</li>
     <li><strong>Sell a loaded horse to a cowboy, and turn one loose:</strong> the chests
         and contents are in your inventory or at your feet.</li>
-    <li><strong>Load it and ride it.</strong> Two full chests should halve an ordinary
-        horse's speed, the Gear tab's <em>Carrying</em> line should say so, and emptying
+    <li><strong>Load it and ride it.</strong> Two full chests should halve a pull-10
+        horse's speed and leave an ordinary one at a crawl, the Gear tab's <em>Carrying</em> line should say so, and emptying
         them should give the speed back at once. A horse at its maximum should not walk.
         Then <code>packs.weight = false</code> on the server and a relog.</li>
     <li><strong>An ender chest</strong> opens yours, a second player's opens theirs, and
