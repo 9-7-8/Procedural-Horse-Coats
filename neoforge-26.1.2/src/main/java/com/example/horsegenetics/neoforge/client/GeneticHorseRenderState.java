@@ -105,6 +105,13 @@ public class GeneticHorseRenderState extends HorseRenderState {
     public float fadeAlpha = RiderFade.OPAQUE;
 
     /**
+     * The storage harness: the dyed leather's colour and the fittings' metal, as
+     * opaque ARGB - both zero when the horse wears none. See {@link HarnessLayer}.
+     */
+    public int harnessLeather = 0;
+    public int harnessMetal = 0;
+
+    /**
      * The chests on the near and off flanks, resolved to their item models -
      * empty when nothing hangs there. See {@link PackLayer}.
      */

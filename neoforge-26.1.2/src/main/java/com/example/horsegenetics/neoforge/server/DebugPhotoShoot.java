@@ -84,6 +84,18 @@ public final class DebugPhotoShoot {
         };
     }
 
+    /** Put a storage harness on the horse, its leather dyed {@code rgb} - or left as it is for -1. */
+    public static java.util.function.Consumer<Horse> harness(net.minecraft.world.item.Item harness, int rgb) {
+        return horse -> {
+            net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(harness);
+            if (rgb >= 0) {
+                stack.set(net.minecraft.core.component.DataComponents.DYED_COLOR,
+                        new net.minecraft.world.item.component.DyedItemColor(rgb));
+            }
+            com.example.horsegenetics.neoforge.entity.HorseTackSlot.HARNESS.set(horse, stack);
+        };
+    }
+
     /** Turn the horse to face east, so the south-side cameras see its off flank. */
     public static java.util.function.Consumer<Horse> facingEast() {
         return horse -> {

@@ -63,6 +63,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // saddle or a rider (SaddleZone), so the saddle never has to be drawn over
         // one. A saddle pad, when something draws it, is the next case to check.
         this.addLayer(new AttachedPartLayer(this));
+        this.addLayer(new HarnessLayer(this));
         this.addLayer(new PackLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
@@ -168,6 +169,16 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             // field rather than asking again, so that the coat, the glow, a
             // braid and the gear cannot disagree about how solid this horse is.
             geneticState.fadeAlpha = RiderFade.alphaFor(horse);
+            net.minecraft.world.item.ItemStack harness =
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.HARNESS.on(horse);
+            if (harness.getItem() instanceof com.example.horsegenetics.neoforge.item.StorageHarnessItem worn) {
+                geneticState.harnessLeather = 0xFF000000 | (net.minecraft.world.item.component.DyedItemColor
+                        .getOrDefault(harness, HarnessLayer.UNDYED) & 0x00FFFFFF);
+                geneticState.harnessMetal = HarnessLayer.metal(worn.tier());
+            } else {
+                geneticState.harnessLeather = 0;
+                geneticState.harnessMetal = 0;
+            }
             // The chests on its flanks, as whatever items they are. NONE: no
             // display transform, so PackLayer places an untouched unit block.
             this.itemModelResolver.updateForLiving(geneticState.packLeft,
