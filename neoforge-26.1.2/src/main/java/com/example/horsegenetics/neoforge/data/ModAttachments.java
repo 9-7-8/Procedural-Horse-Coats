@@ -210,6 +210,28 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // What is inside the chests on a horse's flanks - see HorsePacks. The chest
+    // itself is a worn piece in HORSE_GEAR above; this is its contents. SAVED
+    // and NOT synced: the stacks are a menu's business and nobody else's, and a
+    // paddock of clients re-sent 54 stacks per click is the wrong cost. A fresh
+    // instance per horse, because the value is mutable - a shared default would
+    // be one chest for every horse on the server. NOT copyOnDeath: the contents
+    // drop where the horse fell (HorsePackHandler.onDrops).
+    public static final Supplier<AttachmentType<HorsePacks>> HORSE_PACKS =
+            ATTACHMENT_TYPES.register("horse_packs", () -> AttachmentType
+                    .builder(HorsePacks::new)
+                    .serialize(HorsePacks.MAP_CODEC, packs -> !packs.isEmpty())
+                    .build());
+
+    // How many items those chests hold, which is all a client may know about
+    // them - see HorsePackLoad. SYNCED and NOT saved: the server recounts on
+    // join and on every change, so there is nothing stored to go stale.
+    public static final Supplier<AttachmentType<HorsePackLoad>> HORSE_PACK_LOAD =
+            ATTACHMENT_TYPES.register("horse_pack_load", () -> AttachmentType
+                    .builder(() -> HorsePackLoad.NONE)
+                    .sync(HorsePackLoad.STREAM_CODEC)
+                    .build());
+
     // The horse a shifted lycanthrope used to be, held on the ANIMAL rather than
     // on a horse - at night there is no horse to hold it. See data/LycanShift.
     // Not copyOnDeath: an animal that dies takes the horse inside it with it.

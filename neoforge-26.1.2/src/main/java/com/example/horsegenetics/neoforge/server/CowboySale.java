@@ -228,6 +228,9 @@ public final class CowboySale {
             horse.setItemSlot(slot, ItemStack.EMPTY);
             giveOrDrop(seller, worn.copy());
         }
+        // And the chests on its flanks, with everything in them. A horse walks
+        // into his string carrying nothing of yours.
+        HorsePackHandler.giveBack(horse, seller);
     }
 
     /**

@@ -63,6 +63,7 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // saddle or a rider (SaddleZone), so the saddle never has to be drawn over
         // one. A saddle pad, when something draws it, is the next case to check.
         this.addLayer(new AttachedPartLayer(this));
+        this.addLayer(new PackLayer(this));
         this.addLayer(
             new SimpleEquipmentLayer<>(
                 this,
@@ -167,6 +168,14 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             // field rather than asking again, so that the coat, the glow, a
             // braid and the gear cannot disagree about how solid this horse is.
             geneticState.fadeAlpha = RiderFade.alphaFor(horse);
+            // The chests on its flanks, as whatever items they are. NONE: no
+            // display transform, so PackLayer places an untouched unit block.
+            this.itemModelResolver.updateForLiving(geneticState.packLeft,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_LEFT.on(horse),
+                    net.minecraft.world.item.ItemDisplayContext.NONE, horse);
+            this.itemModelResolver.updateForLiving(geneticState.packRight,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_RIGHT.on(horse),
+                    net.minecraft.world.item.ItemDisplayContext.NONE, horse);
             // The same discipline for grown parts: every layer reads the field.
             // Resolving them walks the genotype and the epigenome, and that walk
             // is memoised on the CoatData (#205), so it runs once per horse, not

@@ -80,6 +80,18 @@ public final class ModMenus {
                     () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension
                             .create(HorseGearMenu::new));
 
+    /**
+     * <b>A chest on a horse</b>, when it has a number of slots vanilla has no
+     * chest screen for. Extra-data, like the two above: the client is told how
+     * many slots to draw.
+     *
+     * @see HorsePackMenu for why most chests on horses never reach it
+     */
+    public static final DeferredHolder<MenuType<?>, MenuType<HorsePackMenu>> HORSE_PACK =
+            MENUS.register("horse_pack",
+                    () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension
+                            .create(HorsePackMenu::new));
+
     public static void register(IEventBus modEventBus) {
         MENUS.register(modEventBus);
     }

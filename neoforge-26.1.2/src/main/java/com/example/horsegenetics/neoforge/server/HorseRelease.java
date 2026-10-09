@@ -168,5 +168,9 @@ public final class HorseRelease {
                 horse.spawnAtLocation(level, worn.copy());
             }
         }
+        // The chests on its flanks and what is in them, by the same rule: a
+        // wild horse may be culled by the turnover, and luggage must not go
+        // with it.
+        HorsePackHandler.giveBack(horse, player);
     }
 }

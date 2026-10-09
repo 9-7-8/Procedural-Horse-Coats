@@ -79,6 +79,11 @@ public final class HorseResurrection {
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             horse.setItemSlot(slot, ItemStack.EMPTY);
         }
+        // The chests on its flanks, for the same reason and more of it: they
+        // and everything in them dropped where it fell (HorsePackHandler.onDrops),
+        // and a horse that came back still carrying them would be a way to
+        // copy two chests of anything.
+        HorsePackHandler.strip(horse);
         // Whatever killed it.
         horse.removeAllEffects();
         horse.clearFire();

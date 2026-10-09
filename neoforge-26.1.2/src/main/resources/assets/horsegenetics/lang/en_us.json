@@ -264,6 +264,8 @@
   "message.horsegenetics.shear.regrowing": "You groomed this one recently - there's nothing loose in its coat.",
   "message.horsegenetics.tack.not_yours": "%s belongs to somebody else. Tack up your own.",
   "message.horsegenetics.tack.too_young": "%s is a foal. Nothing fits a foal.",
+  "message.horsegenetics.pack.not_yours": "%s belongs to somebody else, and so does what it is carrying.",
+  "message.horsegenetics.pack.not_empty": "Empty the %s first - it will not come off with things in it.",
   "message.horsegenetics.transfer.already_yours": "This horse is already yours.",
   "message.horsegenetics.transfer.not_your_paper": "These papers are not in your name.",
   "message.horsegenetics.transfer.not_yours": "This is %s's horse. You'll need his papers.",

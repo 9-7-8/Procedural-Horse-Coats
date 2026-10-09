@@ -47,12 +47,14 @@ import org.jspecify.annotations.Nullable;
  * The other seventeen slots ride in the {@code HORSE_GEAR} attachment, which
  * vanilla cannot see, so before this there was exactly one way to put a braid in
  * a mane: open the screen, find the Gear tab, click the slot, pick the item.
- * Today two slot tags have anything in them at all - {@code gear/mane} and
- * {@code gear/tail}, both holding the rescuing braid - so today this equips a
- * braid and nothing else. <b>That is not a special case in the code.</b> It
- * walks the roster and asks each slot's tag, so every piece still to be made -
- * pads, blankets, saddlebags, boots, shoes - arrives already wearable by hand
- * the moment it is added to its tag, with nothing here to change.
+ * Today that is a rescuing braid ({@code gear/mane}, {@code gear/tail}) and a
+ * chest for either flank - anything {@code HorseStorage} finds an inventory
+ * in. <b>Neither is a special case in the code.</b> It walks the roster and
+ * asks each slot whether the item {@linkplain HorseTackSlot#fits fits}, so every
+ * piece still to be made - pads, blankets, boots, shoes - arrives already
+ * wearable by hand the moment it is added to its tag, with nothing here to
+ * change. The one thing it knows about chests is which flank: the one the
+ * player is standing at, because that is the one they can see.
  *
  * <h2>Which clicks it takes, and which it deliberately leaves</h2>
  * <ul>
@@ -102,7 +104,7 @@ public final class TackEquipHandler {
             return;
         }
         ItemStack stack = event.getItemStack();
-        if (!isModTack(stack)) {
+        if (!isModTack(horse, stack)) {
             return;     // not a piece of this mod's gear - the click is none of our business
         }
         if (!horse.isTamed()) {
@@ -121,7 +123,7 @@ public final class TackEquipHandler {
             return;
         }
 
-        HorseTackSlot target = firstEmptySlotFor(horse, stack);
+        HorseTackSlot target = firstEmptySlotFor(horse, player, stack);
         if (target == null) {
             return;     // nothing free that takes it - fall through, and let them mount
         }
@@ -149,12 +151,14 @@ public final class TackEquipHandler {
      * anything else is left completely untouched - including the clicks that
      * refuse below, which must not fire for a carrot.
      */
-    private static boolean isModTack(ItemStack stack) {
+    private static boolean isModTack(Horse horse, ItemStack stack) {
         if (stack.isEmpty()) {
             return false;
         }
         for (HorseTackSlot slot : HorseTackSlot.values()) {
-            if (!slot.isVanilla() && stack.is(slot.tag())) {
+            // fits, not the tag: the two storage slots take anything that
+            // stores items, which no tag lists - see HorseStorage.
+            if (slot.fits(horse, stack)) {
                 return true;
             }
         }
@@ -169,7 +173,14 @@ public final class TackEquipHandler {
      * answer predictable for the slots that come in sets: a braid goes to the
      * mane before the tail, a boot to the near fore before the off fore.
      */
-    private static @Nullable HorseTackSlot firstEmptySlotFor(Horse horse, ItemStack stack) {
+    private static @Nullable HorseTackSlot firstEmptySlotFor(Horse horse, Player player, ItemStack stack) {
+        // A chest goes on the flank you are standing at, which is the one you
+        // can see - and on the other only when that one is taken.
+        HorseTackSlot near = HorsePackHandler.slotOn(com.example.horsegenetics.common.pack.PackBox.sideOf(
+                player.getX() - horse.getX(), player.getZ() - horse.getZ(), horse.yBodyRot));
+        if (near.accepts(horse, stack) && near.on(horse).isEmpty()) {
+            return near;
+        }
         for (HorseTackSlot slot : HorseTackSlot.values()) {
             if (!slot.isVanilla() && slot.accepts(horse, stack) && slot.on(horse).isEmpty()) {
                 return slot;

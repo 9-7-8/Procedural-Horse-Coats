@@ -1,6 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:ender_chest"
+    "#minecraft:shulker_boxes"
   ]
 }

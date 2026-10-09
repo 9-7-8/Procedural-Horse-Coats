@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:hopper",
+    "minecraft:dropper",
+    "minecraft:dispenser",
+    "minecraft:crafter",
+    "minecraft:furnace",
+    "minecraft:blast_furnace",
+    "minecraft:smoker",
+    "minecraft:brewing_stand",
+    "minecraft:jukebox",
+    "horsegenetics:horse_stasis_bank"
+  ]
+}

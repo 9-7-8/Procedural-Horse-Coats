@@ -246,6 +246,12 @@ public final class HorseGearMenu extends AbstractContainerMenu {
             return horse != null && tack.accepts(horse, stack);
         }
 
+        /** A chest with things in it stays where it is - see {@link HorseTackSlot#mayTakeOff}. */
+        @Override
+        public boolean mayPickup(Player who) {
+            return horse != null && tack.mayTakeOff(horse);
+        }
+
         @Override
         public int getMaxStackSize() {
             return 1;
@@ -291,9 +297,20 @@ public final class HorseGearMenu extends AbstractContainerMenu {
             return true;
         }
 
+        /**
+         * A copy of what is worn - and for a shulker box hung on a flank, a copy
+         * <i>with its contents inside</i>. Vanilla's click code reads a slot,
+         * hands that stack to the cursor or the inventory, and only then clears
+         * the slot; a shulker box read without its contents would arrive empty
+         * and leave them stranded on the horse.
+         */
         @Override
         public ItemStack getItem(int index) {
-            return tack(index).on(horse).copy();
+            HorseTackSlot slot = tack(index);
+            ItemStack worn = slot.on(horse).copy();
+            return slot.isStorage()
+                    ? com.example.horsegenetics.neoforge.server.HorsePackHandler.packedView(horse, slot, worn)
+                    : worn;
         }
 
         @Override
@@ -306,16 +323,24 @@ public final class HorseGearMenu extends AbstractContainerMenu {
 
         @Override
         public ItemStack removeItemNoUpdate(int index) {
-            ItemStack worn = tack(index).on(horse).copy();
-            if (!worn.isEmpty()) {
-                tack(index).set(horse, ItemStack.EMPTY);
-            }
-            return worn;
+            // takeOff rather than on-then-set: a shulker box leaves with its
+            // contents packed inside it, and a full chest does not leave.
+            return tack(index).takeOff(horse);
         }
 
+        /**
+         * Whatever was here has already been read by {@link #getItem} and
+         * given to somebody - that is the only order vanilla writes a slot in -
+         * so a shulker box's contents went with it and are dropped from the
+         * horse's store before the new piece goes on.
+         */
         @Override
         public void setItem(int index, ItemStack stack) {
-            tack(index).set(horse, stack);
+            HorseTackSlot slot = tack(index);
+            if (slot.isStorage()) {
+                com.example.horsegenetics.neoforge.server.HorsePackHandler.departed(horse, slot);
+            }
+            slot.set(horse, stack);
         }
 
         @Override

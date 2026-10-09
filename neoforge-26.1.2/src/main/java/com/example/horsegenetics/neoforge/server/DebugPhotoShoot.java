@@ -43,7 +43,8 @@ public final class DebugPhotoShoot {
      * for one strain, or one of a count group's horns.
      */
     public record Shot(String name, Sex sex, String code, int dragonForm, Framing framing,
-                       java.util.function.Predicate<HorseRecord> want) {
+                       java.util.function.Predicate<HorseRecord> want,
+                       java.util.function.Consumer<Horse> dress) {
         public Shot(String name, Sex sex, String code, int dragonForm) {
             this(name, sex, code, dragonForm, Framing.HEAD);
         }
@@ -51,6 +52,45 @@ public final class DebugPhotoShoot {
         public Shot(String name, Sex sex, String code, int dragonForm, Framing framing) {
             this(name, sex, code, dragonForm, framing, r -> true);
         }
+
+        public Shot(String name, Sex sex, String code, int dragonForm, Framing framing,
+                    java.util.function.Predicate<HorseRecord> want) {
+            this(name, sex, code, dragonForm, framing, want, horse -> { });
+        }
+
+        /**
+         * This shot with something done to the horse once it is standing on the stage -
+         * how a picture gets gear on it. {@link DebugPhotoShoot#packs} hangs a chest on
+         * each flank; {@link DebugPhotoShoot#facingEast} turns the horse round, so a
+         * {@link Framing#SIDE} camera sees its off side instead of its near one.
+         */
+        public Shot dressed(java.util.function.Consumer<Horse> how) {
+            return new Shot(name, sex, code, dragonForm, framing, want, dress.andThen(how));
+        }
+    }
+
+    /** Hang {@code near} and {@code off} on the horse's flanks; null leaves a flank bare. */
+    public static java.util.function.Consumer<Horse> packs(
+            net.minecraft.world.item.@Nullable Item near, net.minecraft.world.item.@Nullable Item off) {
+        return horse -> {
+            if (near != null) {
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_LEFT.set(horse,
+                        new net.minecraft.world.item.ItemStack(near));
+            }
+            if (off != null) {
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_RIGHT.set(horse,
+                        new net.minecraft.world.item.ItemStack(off));
+            }
+        };
+    }
+
+    /** Turn the horse to face east, so the south-side cameras see its off flank. */
+    public static java.util.function.Consumer<Horse> facingEast() {
+        return horse -> {
+            horse.setYRot(-90f);
+            horse.setYBodyRot(-90f);
+            horse.setYHeadRot(-90f);
+        };
     }
 
     /**
@@ -151,6 +191,7 @@ public final class DebugPhotoShoot {
         }
         HorseRecords.apply(horse, record(horse, shot));
         level.addFreshEntity(horse);
+        shot.dress().accept(horse);
         current = horse;
 
         // A head-and-shoulders portrait. The head is about 1.8 blocks up and a block west

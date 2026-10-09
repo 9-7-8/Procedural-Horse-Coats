@@ -15,7 +15,8 @@ import net.neoforged.neoforge.client.event.ScreenEvent;
 /**
  * This mod's one addition to the vanilla horse inventory screen: a single
  * <b>i</b> button at the top left of the window, which opens
- * {@link HorseInfoScreen}.
+ * {@link HorseInfoScreen} - and, under it, an <b>L</b> or <b>R</b> for each
+ * chest the horse is carrying, which opens that chest.
  *
  * <p><b>How this screen is still reached.</b> <kbd>E</kbd> while riding, and
  * shift-right-click on a tamed donkey, mule or any other equine this mod keeps
@@ -74,6 +75,33 @@ public final class HorseScreenHooks {
                 .build();
         infoButton.active = horseOf(screen) != null;
         event.addListener(infoButton);
+
+        // One more button per chest the horse is carrying, under the i. Only
+        // when there is a chest on that flank, so a horse without one has the
+        // same single button it always had.
+        AbstractHorse horse = horseOf(screen);
+        if (horse == null) {
+            return;
+        }
+        int row = 1;
+        for (com.example.horsegenetics.neoforge.entity.HorseTackSlot slot
+                : com.example.horsegenetics.neoforge.server.HorsePackHandler.SLOTS) {
+            net.minecraft.world.item.ItemStack chest = slot.on(horse);
+            if (chest.isEmpty()) {
+                continue;
+            }
+            boolean near = slot == com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_LEFT;
+            event.addListener(Button.builder(Component.literal(near ? "L" : "R"),
+                            b -> net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
+                                    new com.example.horsegenetics.neoforge.network.OpenHorsePackPayload(
+                                            horse.getId(), slot.name())))
+                    .bounds(left - BUTTON - GAP, top + TOP_INSET + row * (BUTTON + 2), BUTTON, BUTTON)
+                    .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                            "Open the " + chest.getHoverName().getString() + " on its "
+                                    + (near ? "near" : "off") + " side")))
+                    .build());
+            row++;
+        }
     }
 
     private static void openInfo(HorseInventoryScreen screen) {

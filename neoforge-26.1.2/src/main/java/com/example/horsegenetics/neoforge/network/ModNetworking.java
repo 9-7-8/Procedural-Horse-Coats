@@ -484,6 +484,12 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                OpenHorsePackPayload.TYPE,
+                OpenHorsePackPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> handleOpenHorsePack(payload, context.player()))
+        );
+
+        registrar.playToServer(
                 MountHorsePayload.TYPE,
                 MountHorsePayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleMountHorse(payload, context.player()))
@@ -704,11 +710,26 @@ public final class ModNetworking {
         if (putOn.isEmpty() && worn.isEmpty()) {
             return; // nothing to take off and nothing that would go on
         }
+        if (!worn.isEmpty()) {
+            // A chest with things in it does not come off - and this one is
+            // said out loud, because the picker's "Take off" line was right
+            // there and a click that does nothing reads as a bug.
+            if (!tack.mayTakeOff(horse)) {
+                serverPlayer.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                        "message.horsegenetics.pack.not_empty", worn.getHoverName()), true);
+                return;
+            }
+            // takeOff, not the stack read above: a shulker box leaves with its
+            // contents packed back inside it.
+            worn = tack.takeOff(horse);
+        }
 
         // One call for both backings: the saddle and the barding are real
         // equipment slots, the other seventeen are keys in the HORSE_GEAR
         // attachment, and HorseTackSlot.set is the only place that knows which.
-        tack.set(horse, putOn.isEmpty() ? ItemStack.EMPTY : putOn.split(1));
+        if (!putOn.isEmpty()) {
+            tack.set(horse, putOn.split(1));
+        }
         if (!worn.isEmpty()) {
             // Back to the player, and on the floor at their feet if there is no
             // room - never deleted.
@@ -741,6 +762,24 @@ public final class ModNetworking {
                         id, inventory, horse),
                 horse.getDisplayName()),
                 buffer -> buffer.writeVarInt(horse.getId()));
+    }
+
+    /**
+     * A screen's button for a chest on a horse - the way to one while riding,
+     * when there is no clicking it. {@code HorsePackHandler.open} asks the same
+     * things the click does: a chest there, the player's horse, close by.
+     */
+    private static void handleOpenHorsePack(OpenHorsePackPayload payload,
+                                            net.minecraft.world.entity.player.Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        Entity target = serverPlayer.level().getEntity(payload.entityId());
+        com.example.horsegenetics.neoforge.entity.HorseTackSlot tack =
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.byName(payload.slot());
+        if (target instanceof Horse horse && tack != null) {
+            com.example.horsegenetics.neoforge.server.HorsePackHandler.open(serverPlayer, horse, tack);
+        }
     }
 
     /**

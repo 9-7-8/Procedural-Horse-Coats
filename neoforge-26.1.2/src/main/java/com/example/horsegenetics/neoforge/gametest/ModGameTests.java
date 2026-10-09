@@ -2291,6 +2291,8 @@ public final class ModGameTests {
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
         // Four horses spawned and seven interact events posted, all in one tick.
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
+        // One horse, a dozen registry probes, four interact events and a drops event; one tick.
+        register(event, environment, HORSE_CARRIES_CHESTS, 100);
         // Builds one instance of every mob it classifies, inside one tick.
         register(event, environment, CHAOS_ROSTER, 100);
         // One bank filled and one button pressed twice, then five ticks for the
@@ -3600,6 +3602,216 @@ public final class ModGameTests {
         }
         assertHeld(helper, player, 1, "a braid was spent on an untamed horse");
 
+        helper.succeed();
+    }
+
+    /**
+     * <b>A horse carries a chest on each flank</b> - what counts as one, where it
+     * goes, what a load costs, what will and will not come off, and what a dead
+     * horse leaves behind.
+     *
+     * <p>Everything a player would notice going wrong here goes wrong silently:
+     * a tag that failed to load makes a furnace hang on a horse or an ender
+     * chest refuse to; a handler never registered makes a click mount instead
+     * of open; a chest taken off full is a stack of items that simply stop
+     * existing. So each is asserted against the real registries and through
+     * real events, the way {@code right_click_equips_tack} is.
+     *
+     * <p>It does not open a menu - that needs a real {@code ServerPlayer}, and
+     * the harness's mock player is not one. What a menu writes is
+     * {@code HorsePacks}, which is written directly here instead.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HORSE_CARRIES_CHESTS =
+            TEST_FUNCTIONS.register("horse_carries_chests", () -> ModGameTests::horseCarriesChests);
+
+    private static void packFail(String what) {
+        throw new GameTestAssertException(Component.literal(what), 0);
+    }
+
+    private static void horseCarriesChests(GameTestHelper helper) {
+        var left = com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_LEFT;
+        var right = com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_RIGHT;
+        var curve = com.example.horsegenetics.neoforge.ServerConfig.packCurve();
+        if (!curve.enabled() || !com.example.horsegenetics.neoforge.ServerConfig.rightClickEquipsTack()) {
+            packFail("packs.weight or behaviour.rightclick_equips_tack is off in this run's server"
+                    + " config, so this test asserts the wrong branch - turn it back on rather than"
+                    + " deleting the test");
+        }
+
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setTamed(true);
+        horse.setOwner(player);
+        horse.setYRot(0f);
+        horse.yBodyRot = 0f;
+        var level = helper.getLevel();
+        BlockPos at = horse.blockPosition();
+
+        // 1. What counts. Sizes come off the real block entities; the two that
+        //    are decided by a tag prove the tag files loaded.
+        Object[][] sizes = {
+                {Items.CHEST, 27}, {Items.TRAPPED_CHEST, 27}, {Items.BARREL, 27},
+                {Items.SHULKER_BOX, 27}, {Items.OAK_SHELF, 3}, {Items.DECORATED_POT, 1},
+                {Items.ENDER_CHEST, com.example.horsegenetics.neoforge.entity.HorseStorage.UNKNOWN_SIZE},
+                {Items.HOPPER, 0}, {Items.FURNACE, 0}, {Items.DISPENSER, 0},
+                // Ours, and it answers the item capability (hoppers feed it): a machine.
+                {ModItems.HORSE_STASIS_BANK.get(), 0},
+                {Items.DIRT, 0}, {Items.SADDLE, 0}};
+        for (Object[] row : sizes) {
+            ItemStack stack = new ItemStack((net.minecraft.world.item.Item) row[0]);
+            int found = com.example.horsegenetics.neoforge.entity.HorseStorage.slots(stack, level, at);
+            if (found != (int) row[1]) {
+                packFail(stack.getItem() + " should give a horse " + row[1] + " slots and gives " + found
+                        + " - a furnace or hopper above zero means horse_storage/denied did not load,"
+                        + " an ender chest at zero means gear/saddlebag_* did not");
+            }
+        }
+        if (!left.accepts(horse, new ItemStack(Items.CHEST))
+                || com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE
+                        .accepts(horse, new ItemStack(Items.CHEST))) {
+            packFail("a chest must fit a pack slot and no other slot");
+        }
+
+        // 2. Right-click with a chest in hand: it goes on the flank the player
+        //    is standing at. Yaw 0 faces +Z, so +X is the horse's near side.
+        //    Looking straight up, so the click is on the horse and on no chest.
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.CHEST, 2));
+        player.setPos(horse.getX() - 2.0, horse.getY(), horse.getZ());
+        player.setXRot(-90f);
+        assertClaimed(helper, player, horse, true, "a chest offered from the off side");
+        if (!right.on(horse).is(Items.CHEST) || !left.on(horse).isEmpty()) {
+            packFail("a chest offered from the horse's off side did not go on its off side");
+        }
+        assertClaimed(helper, player, horse, true, "a second chest, the off side already full");
+        if (!left.on(horse).is(Items.CHEST)) {
+            packFail("a second chest did not go on the remaining flank");
+        }
+        assertHeld(helper, player, 0, "two chests should have been spent on two flanks");
+
+        // 3. Clicking the chest itself is claimed - it opens, it does not mount -
+        //    and clicking past it is not. Eye level with the chest, looking along
+        //    -X at the near flank from two blocks off.
+        double scale = horse.getScale();
+        player.setPos(horse.getX() + 2.0,
+                horse.getY() + com.example.horsegenetics.common.pack.PackBox.CENTRE_UP * scale
+                        - player.getEyeHeight(),
+                horse.getZ() + com.example.horsegenetics.common.pack.PackBox.CENTRE_FORWARD * scale);
+        player.setYRot(90f);
+        player.setXRot(0f);
+        assertClaimed(helper, player, horse, true, "a click on the chest on the near flank");
+        player.setXRot(-90f);
+        assertClaimed(helper, player, horse, false, "a click that is on the horse and not on a chest");
+
+        // 4. A stack in the near chest: counted, weighed, and the chest stays on.
+        var packs = horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_PACKS);
+        packs.set(left.name(), 0, new ItemStack(Items.COBBLESTONE, 64));
+        com.example.horsegenetics.neoforge.server.HorsePackHandler.refresh(horse);
+        var load = horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_PACK_LOAD);
+        if (load.left() != 64 || load.right() != 0 || load.weighed() != 64) {
+            packFail("64 cobblestone in the near chest counted as " + load);
+        }
+        double expected = com.example.horsegenetics.common.pack.PackLoad.speedModifier(curve, 64,
+                com.example.horsegenetics.neoforge.server.HorseDraft.pullOf(horse));
+        var speed = horse.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        var modifier = speed.getModifier(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "pack_load"));
+        if (expected >= 0.0 || modifier == null || Math.abs(modifier.amount() - expected) > 1.0e-9) {
+            packFail("a loaded horse should carry a speed modifier of " + expected + " and carries "
+                    + (modifier == null ? "none" : String.valueOf(modifier.amount())));
+        }
+        if (left.mayTakeOff(horse) || !left.takeOff(horse).isEmpty() || !left.on(horse).is(Items.CHEST)
+                || packs.count(left.name()) != 64) {
+            packFail("a chest with a stack in it came off the horse, or lost the stack trying");
+        }
+
+        // 5. The ender chest weighs nothing whatever is filed under it, and a
+        //    shulker box goes on full, comes off full, and is one copy throughout.
+        if (!right.takeOff(horse).is(Items.CHEST)) {
+            packFail("an empty chest did not come off");
+        }
+        right.set(horse, new ItemStack(Items.ENDER_CHEST));
+        packs.set(right.name(), 0, new ItemStack(Items.IRON_INGOT, 10));
+        com.example.horsegenetics.neoforge.server.HorsePackHandler.refresh(horse);
+        if (horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_PACK_LOAD).weighed() != 64) {
+            packFail("what is behind an ender chest was weighed");
+        }
+        packs.take(right.name());
+        right.set(horse, ItemStack.EMPTY);
+
+        ItemStack shulker = new ItemStack(Items.SHULKER_BOX);
+        net.minecraft.core.NonNullList<ItemStack> inside =
+                net.minecraft.core.NonNullList.withSize(27, ItemStack.EMPTY);
+        inside.set(5, new ItemStack(Items.DIAMOND, 3));
+        shulker.set(net.minecraft.core.component.DataComponents.CONTAINER,
+                net.minecraft.world.item.component.ItemContainerContents.fromItems(inside));
+        right.set(horse, shulker);
+        ItemStack worn = right.on(horse);
+        if (worn.getOrDefault(net.minecraft.core.component.DataComponents.CONTAINER,
+                net.minecraft.world.item.component.ItemContainerContents.EMPTY)
+                .nonEmptyItems().iterator().hasNext()
+                || !packs.get(right.name(), 5).is(Items.DIAMOND) || packs.count(right.name()) != 3) {
+            packFail("a shulker box went on a horse and its contents are not in the horse's store,"
+                    + " once, at the slot they were in");
+        }
+        // What the Dress window shows, and hands to a click, is the box WITH its
+        // contents - a copy, the store untouched until the click is finished.
+        ItemStack shown = com.example.horsegenetics.neoforge.server.HorsePackHandler
+                .packedView(horse, right, right.on(horse));
+        net.minecraft.core.NonNullList<ItemStack> seen =
+                net.minecraft.core.NonNullList.withSize(27, ItemStack.EMPTY);
+        shown.getOrDefault(net.minecraft.core.component.DataComponents.CONTAINER,
+                net.minecraft.world.item.component.ItemContainerContents.EMPTY).copyInto(seen);
+        if (!seen.get(5).is(Items.DIAMOND) || packs.count(right.name()) != 3
+                || seen.get(5) == packs.get(right.name(), 5)) {
+            packFail("a shulker box on a horse should show its contents as a copy, and leave the"
+                    + " store as it was");
+        }
+        ItemStack back = right.takeOff(horse);
+        net.minecraft.core.NonNullList<ItemStack> returned =
+                net.minecraft.core.NonNullList.withSize(27, ItemStack.EMPTY);
+        back.getOrDefault(net.minecraft.core.component.DataComponents.CONTAINER,
+                net.minecraft.world.item.component.ItemContainerContents.EMPTY).copyInto(returned);
+        if (!back.is(Items.SHULKER_BOX) || !returned.get(5).is(Items.DIAMOND) || returned.get(5).getCount() != 3
+                || packs.count(right.name()) != 0 || !right.on(horse).isEmpty()) {
+            packFail("a shulker box did not come off the horse with its contents inside it");
+        }
+        // And an empty barrel comes back the barrel it went on as, so it stacks.
+        right.set(horse, new ItemStack(Items.BARREL));
+        if (!ItemStack.isSameItemSameComponents(right.takeOff(horse), new ItemStack(Items.BARREL))) {
+            packFail("a barrel came off a horse differing from a fresh barrel - it will not stack");
+        }
+
+        // 6. What is saved is what was there.
+        var ops = level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+        var reread = com.example.horsegenetics.neoforge.data.HorsePacks.CODEC
+                .encodeStart(ops, packs)
+                .flatMap(tag -> com.example.horsegenetics.neoforge.data.HorsePacks.CODEC.parse(ops, tag))
+                .result().orElse(null);
+        if (reread == null || reread.count(left.name()) != 64 || !reread.get(left.name(), 0).is(Items.COBBLESTONE)) {
+            packFail("a horse's packs did not survive being saved and read back");
+        }
+
+        // 7. A dead horse drops the chest and what was in it, and keeps neither.
+        java.util.List<net.minecraft.world.entity.item.ItemEntity> drops = new java.util.ArrayList<>();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                new net.neoforged.neoforge.event.entity.living.LivingDropsEvent(
+                        horse, level.damageSources().generic(), drops, false));
+        int chests = 0;
+        int cobble = 0;
+        for (var drop : drops) {
+            if (drop.getItem().is(Items.CHEST)) {
+                chests += drop.getItem().getCount();
+            } else if (drop.getItem().is(Items.COBBLESTONE)) {
+                cobble += drop.getItem().getCount();
+            }
+        }
+        if (chests != 1 || cobble != 64 || !left.on(horse).isEmpty() || !packs.isEmpty()
+                || speed.getModifier(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "pack_load")) != null) {
+            packFail("a dying horse should drop one chest and 64 cobblestone and keep nothing; it"
+                    + " dropped " + chests + " and " + cobble);
+        }
+        horse.discard();
         helper.succeed();
     }
 

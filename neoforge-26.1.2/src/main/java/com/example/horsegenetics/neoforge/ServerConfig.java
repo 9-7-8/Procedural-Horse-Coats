@@ -249,6 +249,20 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue RIGHTCLICK_EQUIPS_TACK;
 
     /**
+     * <b>What the chests on a horse cost it</b> - five keys that are one curve,
+     * read together and only through {@link #packCurve()}. Whether items weigh
+     * anything, how many an ordinary horse carries free, how many stop it, the
+     * shape between the two, and the speed it keeps at the end. See
+     * {@code common.pack.PackLoad}, which is the model, and
+     * {@code server/HorsePackHandler}, which applies it.
+     */
+    public static final ModConfigSpec.BooleanValue PACK_WEIGHT;
+    public static final ModConfigSpec.IntValue PACK_MAX_ITEMS;
+    public static final ModConfigSpec.IntValue PACK_FREE_ITEMS;
+    public static final ModConfigSpec.DoubleValue PACK_CURVE_EXPONENT;
+    public static final ModConfigSpec.DoubleValue PACK_MIN_SPEED;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -812,6 +826,51 @@ public final class ServerConfig {
                         "click does what it would have done, which is usually mount the horse.",
                         "Your own horse only, and not a foal - a foal wears no tack at all.")
                 .define("behaviour.rightclick_equips_tack", true);
+        PACK_WEIGHT = builder
+                .comment("Whether what is in the chests on a horse slows it down. (default: true)",
+                        "A horse can carry a chest, a barrel, a shulker box or another mod's",
+                        "storage on each flank. On, every item in them weighs the same, whatever",
+                        "it is, and the more a horse carries the slower it goes - by how much is",
+                        "the four packs.* keys below, scaled by the horse's pulling ability, the",
+                        "same score a cart reads. Off, a loaded horse is as fast as an empty one.",
+                        "An ender chest never counts either way: what is in it is not on the horse.",
+                        "Server-side. Takes effect the next time a chest changes or the horse loads.")
+                .define("packs.weight", com.example.horsegenetics.common.pack.PackLoad.DEFAULT_ENABLED);
+        PACK_MAX_ITEMS = builder
+                .comment("The most items an ordinary horse can ever carry. (default: 6912)",
+                        "At this many the horse is down to packs.min_speed - which is zero unless",
+                        "you change it, so it stands still until something is taken out. Nothing",
+                        "is refused at the chest; the horse answers for what is put in it.",
+                        "'Ordinary' is a pulling ability of 5. A stronger horse carries more and a",
+                        "weaker one less: a 10 carries about 1.7 times this, a 2 about half.",
+                        "The default is four vanilla chests of full stacks, so two full chests",
+                        "cost an ordinary horse half its speed. Range 1 to 10,000,000. Server-side.")
+                .defineInRange("packs.max_items",
+                        com.example.horsegenetics.common.pack.PackLoad.DEFAULT_MAX_ITEMS,
+                        1, com.example.horsegenetics.common.pack.PackLoad.MAX_ITEMS_LIMIT);
+        PACK_FREE_ITEMS = builder
+                .comment("How many items an ordinary horse carries at no cost. (default: 0)",
+                        "The curve starts here instead of at the first item. Scaled by pulling",
+                        "ability like the maximum, and always kept below it. Server-side.")
+                .defineInRange("packs.free_items",
+                        com.example.horsegenetics.common.pack.PackLoad.DEFAULT_FREE_ITEMS,
+                        0, com.example.horsegenetics.common.pack.PackLoad.MAX_ITEMS_LIMIT);
+        PACK_CURVE_EXPONENT = builder
+                .comment("The shape of the curve between free and the maximum. (default: 1.0)",
+                        "1.0 is a straight line: every item costs the same, half a load is half",
+                        "the slowdown. Above 1 the first items cost little and the last ones a",
+                        "lot; below 1 the other way round. Range 0.1 to 10. Server-side.")
+                .defineInRange("packs.curve_exponent",
+                        com.example.horsegenetics.common.pack.PackLoad.DEFAULT_EXPONENT,
+                        com.example.horsegenetics.common.pack.PackLoad.MIN_EXPONENT,
+                        com.example.horsegenetics.common.pack.PackLoad.MAX_EXPONENT);
+        PACK_MIN_SPEED = builder
+                .comment("The fraction of its speed a horse keeps at its maximum. (default: 0.0)",
+                        "0 makes packs.max_items a real maximum: a horse loaded that far will not",
+                        "walk. 0.25 lets an overloaded horse crawl at a quarter speed instead.",
+                        "1.0 is the same as turning packs.weight off. Range 0 to 1. Server-side.")
+                .defineInRange("packs.min_speed",
+                        com.example.horsegenetics.common.pack.PackLoad.DEFAULT_MIN_SPEED, 0.0, 1.0);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -1476,6 +1535,23 @@ public final class ServerConfig {
             return RIGHTCLICK_EQUIPS_TACK.get();
         } catch (IllegalStateException notLoaded) {
             return true;
+        }
+    }
+
+    /**
+     * <b>The pack-load curve this world plays with</b> - {@code packs.*}, as the
+     * one value {@code common.pack.PackLoad} takes. The only way the load
+     * settings leave this class, so no caller can read one key and miss the
+     * others, and a client that has not been sent the server's config yet gets
+     * the default curve rather than an exception.
+     */
+    public static com.example.horsegenetics.common.pack.PackLoad.Curve packCurve() {
+        try {
+            return new com.example.horsegenetics.common.pack.PackLoad.Curve(
+                    PACK_WEIGHT.get(), PACK_FREE_ITEMS.get(), PACK_MAX_ITEMS.get(),
+                    PACK_CURVE_EXPONENT.get(), PACK_MIN_SPEED.get());
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.pack.PackLoad.Curve.DEFAULT;
         }
     }
 

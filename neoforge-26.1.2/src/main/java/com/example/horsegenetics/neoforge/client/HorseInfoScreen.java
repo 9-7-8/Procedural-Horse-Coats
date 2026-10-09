@@ -823,6 +823,9 @@ public final class HorseInfoScreen extends Screen {
     private record PickRow(int index, ItemStack stack, String label) {
     }
 
+    /** A picker row that opens the chest in a storage slot rather than changing what is worn. */
+    private static final int OPEN_PACK = -2;
+
     private void openGearPicker(HorseTackSlot slot, int anchorX, int anchorY) {
         pickerSlot = slot;
         pickerScroll = 0;
@@ -858,8 +861,15 @@ public final class HorseInfoScreen extends Screen {
         }
         ItemStack worn = pickerSlot.on(horse);
         if (!worn.isEmpty()) {
-            rows.add(new PickRow(TackSlotPayload.TAKE_OFF, worn,
-                    "Take off " + worn.getHoverName().getString()));
+            if (pickerSlot.isStorage()) {
+                // A chest is opened far more often than it is taken off, so
+                // that is the first line - and the way to one from the saddle,
+                // where there is no clicking the chest itself.
+                rows.add(new PickRow(OPEN_PACK, worn, "Open " + worn.getHoverName().getString()));
+            }
+            rows.add(new PickRow(TackSlotPayload.TAKE_OFF, worn, pickerSlot.mayTakeOff(horse)
+                    ? "Take off " + worn.getHoverName().getString()
+                    : "Take off - empty it first"));
         }
         var player = Minecraft.getInstance().player;
         if (player == null) {
@@ -939,7 +949,7 @@ public final class HorseInfoScreen extends Screen {
             g.itemDecorations(this.font, row.stack(), pickerX + 1, ry + 1);
             drawFitted(g, row.label(), pickerX + 21,
                     ry + (PICK_ROW_H - this.font.lineHeight) / 2, PICK_W - 25,
-                    row.index() == TackSlotPayload.TAKE_OFF ? LABEL : VALUE);
+                    row.index() < 0 ? LABEL : VALUE);
         }
         if (rows.size() > PICK_VISIBLE) {
             drawFitted(g, "scroll for " + (rows.size() - PICK_VISIBLE) + " more",
@@ -956,6 +966,7 @@ public final class HorseInfoScreen extends Screen {
      */
     private boolean hasAnyGearFor(HorseTackSlot slot) {
         return slot.isVanilla()
+                || slot.isStorage()     // detected, not tagged - and vanilla alone has dozens
                 || net.minecraft.core.registries.BuiltInRegistries.ITEM
                         .getTagOrEmpty(slot.tag()).iterator().hasNext();
     }
@@ -975,6 +986,12 @@ public final class HorseInfoScreen extends Screen {
         closeGearPicker();
         if (picked < 0 || slot == null || horse == null) {
             return true;    // clicked away, or clicked the empty-state line
+        }
+        if (rows.get(picked).index() == OPEN_PACK) {
+            ClientPacketDistributor.sendToServer(
+                    new com.example.horsegenetics.neoforge.network.OpenHorsePackPayload(
+                            horse.getId(), slot.name()));
+            return true;
         }
         ClientPacketDistributor.sendToServer(new TackSlotPayload(
                 horse.getId(), slot.name(), rows.get(picked).index()));
@@ -1758,6 +1775,7 @@ public final class HorseInfoScreen extends Screen {
         }
 
         c.gear(mouseX, mouseY);
+        drawPackLoad(c);
 
         if (!ownsHorse()) {
             c.wrapped("Not your horse - you can see what it is wearing and no more.", DESC, 0);
@@ -1778,9 +1796,37 @@ public final class HorseInfoScreen extends Screen {
         // joins its slot's tag as it is made. Without this line the tab reads
         // as broken rather than as unfinished.
         c.gap(4);
-        c.wrapped("Only the saddle, the barding, the mane and the tail have anything to put "
-                + "in them so far. The other fifteen slots are built and empty - the gear that "
-                + "fills them is still to be made.", DIM_TEXT, 0);
+        c.wrapped("The saddle, the barding, the mane and the tail have something to put in "
+                + "them, and the two packs take a chest, a barrel, a shulker box or anything "
+                + "else that stores items. The other thirteen slots are built and empty - the "
+                + "gear that fills them is still to be made.", DIM_TEXT, 0);
+    }
+
+    /**
+     * What the chests on this horse hold and what that is costing it - shown
+     * only when there is a chest. The count is the synced
+     * {@code HORSE_PACK_LOAD}; the percentage is {@code PackLoad} on the server's
+     * own curve, which NeoForge syncs with the rest of the server config, so
+     * this is the number the server applied rather than a guess at it.
+     */
+    private void drawPackLoad(Cursor c) {
+        if (horse == null || (HorseTackSlot.SADDLEBAG_LEFT.on(horse).isEmpty()
+                && HorseTackSlot.SADDLEBAG_RIGHT.on(horse).isEmpty())) {
+            return;
+        }
+        var load = horse.getData(ModAttachments.HORSE_PACK_LOAD.get());
+        var curve = com.example.horsegenetics.neoforge.ServerConfig.packCurve();
+        long weighed = load.weighed();
+        int kept = (int) Math.round(100.0 * com.example.horsegenetics.common.pack.PackLoad.retention(
+                curve, weighed, traits().pull()));
+        String carried = (load.left() + load.right()) + " items";
+        if (!curve.enabled() || weighed == 0) {
+            c.pair("Carrying", carried, VALUE);
+        } else {
+            c.pair("Carrying", carried + " - keeps " + kept + "% of its speed",
+                    kept >= 70 ? GOOD : kept < 45 ? BAD : VALUE);
+        }
+        c.gap(2);
     }
 
     // ------------------------------------------------------------------

@@ -3,6 +3,7 @@ package com.example.horsegenetics.neoforge.entity;
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.example.horsegenetics.neoforge.data.HorseGear;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
+import com.example.horsegenetics.neoforge.server.HorsePackHandler;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -31,14 +32,20 @@ import java.util.Locale;
  * this enum should need to care which a slot is - {@link #on} and {@link #set}
  * cover both.
  *
- * <h2>What a slot accepts is a tag, and every tag is empty today</h2>
+ * <h2>What a slot accepts is a tag, and most tags are empty</h2>
  * Each attachment-backed slot reads an item tag named for it -
- * {@code horsegenetics:gear/mane} and so on. <b>None of those tags has any item
- * in it yet</b>, because the pieces that fill these slots have not been made;
+ * {@code horsegenetics:gear/mane} and so on. Most of those tags have nothing
+ * in them, because the pieces that fill these slots have not been made;
  * the roster and the screen landed first on purpose, and a slot whose tag is
  * empty correctly refuses everything rather than accepting dirt. Shipping a
  * piece means adding it to its tag, and a datapack can do the same without
  * touching Java.
+ *
+ * <p><b>The two storage slots are the exception.</b> They take anything that
+ * stores items, which is not a list anyone could keep, so {@link #fits} asks
+ * {@link HorseStorage} for them and their tags only add to what it detects.
+ * They are also the only slots with a rule about coming <i>off</i>:
+ * {@link #mayTakeOff} and {@link #takeOff}.
  *
  * <h2>Why the head is one slot and not two</h2>
  * A bridle and a halter are genuinely different pieces - a haltered horse can
@@ -73,8 +80,16 @@ public enum HorseTackSlot {
             "A rug or a sheet - what a horse wears when it is not being ridden.", 0.66f, 0.01f),
 
     // -- Storage ------------------------------------------------------------
-    SADDLEBAG_LEFT(null, Zone.STORAGE, "Bag", "A saddlebag, on the near side.", 0.88f, 0.06f),
-    SADDLEBAG_RIGHT(null, Zone.STORAGE, "Bag", "A saddlebag, on the off side.", 0.88f, 0.24f),
+    // What goes here is not a tag's business: a chest, a barrel, a shulker box,
+    // another mod's crate - anything HorseStorage finds an inventory in. The
+    // names say "saddlebag" because they are keys in saved worlds and were
+    // chosen before the owner settled what hangs there (2026-10-08).
+    SADDLEBAG_LEFT(null, Zone.STORAGE, "Pack",
+            "A chest, a barrel, a shulker box - anything that stores items - on the near side.",
+            0.88f, 0.06f),
+    SADDLEBAG_RIGHT(null, Zone.STORAGE, "Pack",
+            "A chest, a barrel, a shulker box - anything that stores items - on the off side.",
+            0.88f, 0.24f),
 
     // -- Legs ---------------------------------------------------------------
     // Four legs and four hooves rather than one "set of four" apiece: a horse
@@ -164,9 +179,18 @@ public enum HorseTackSlot {
         return anchorY;
     }
 
-    /** The item tag this slot accepts. Empty until the pieces that fill it exist. */
+    /**
+     * The item tag this slot accepts. Empty until the pieces that fill it
+     * exist - and for the two storage slots only an <i>addition</i> to what
+     * {@link HorseStorage} already detects. Ask {@link #fits}, not this.
+     */
     public TagKey<Item> tag() {
         return tag;
+    }
+
+    /** Whether this is one of the two slots a chest hangs in - see {@link HorseStorage}. */
+    public boolean isStorage() {
+        return zone == Zone.STORAGE;
     }
 
     /** What the horse is wearing here. A copy for gear slots; never mutate it. */
@@ -192,8 +216,49 @@ public enum HorseTackSlot {
             }
             return;
         }
+        if (isStorage() && !stack.isEmpty() && !horse.level().isClientSide()) {
+            // A chest that arrives with things already in it - a shulker box,
+            // or anything else that keeps its contents as an item - is emptied
+            // into the horse's own store, so there is one copy of them.
+            stack = HorsePackHandler.unpack(horse, this, stack);
+        }
         HorseGear gear = horse.getData(ModAttachments.HORSE_GEAR);
         horse.setData(ModAttachments.HORSE_GEAR, gear.with(name(), stack));
+        if (isStorage() && !horse.level().isClientSide()) {
+            HorsePackHandler.refresh(horse);
+        }
+    }
+
+    /**
+     * Whether what is here may come off. Everything may, except a chest with
+     * things still in it: that is emptied first (owner, 2026-10-08), so nothing
+     * is ever spilled by a click. A shulker box is the exception to the
+     * exception - it comes off full, because that is what a shulker box is.
+     */
+    public boolean mayTakeOff(AbstractHorse horse) {
+        return !isStorage() || HorsePackHandler.mayTakeOff(horse, this);
+    }
+
+    /**
+     * Take what is here off the horse and hand it back: the worn piece, and the
+     * slot left empty. Server side. Empty when there is nothing here or when
+     * {@link #mayTakeOff} says no - a caller that skipped the question loses
+     * nothing by it.
+     *
+     * <p>Every path that gives a worn piece <i>to somebody</i> goes through
+     * this rather than {@link #on} then {@link #set}, because a shulker box
+     * leaves with its contents packed back inside it and only this knows that.
+     */
+    public ItemStack takeOff(AbstractHorse horse) {
+        ItemStack worn = on(horse).copy();
+        if (worn.isEmpty() || !mayTakeOff(horse)) {
+            return ItemStack.EMPTY;
+        }
+        if (isStorage()) {
+            worn = HorsePackHandler.pack(horse, this, worn);
+        }
+        set(horse, ItemStack.EMPTY);
+        return worn;
     }
 
     /**
@@ -206,6 +271,22 @@ public enum HorseTackSlot {
         }
         if (slot != null) {
             return horse.isEquippableInSlot(stack, slot);
+        }
+        return fits(horse, stack);
+    }
+
+    /**
+     * Whether {@code stack} is the kind of thing this slot takes, before asking
+     * whether this horse may wear anything at all. A tag for every gear slot
+     * but the two storage ones, which ask {@link HorseStorage} - and always
+     * false for the saddle and the barding, which are vanilla's to answer.
+     */
+    public boolean fits(AbstractHorse horse, ItemStack stack) {
+        if (slot != null || stack.isEmpty()) {
+            return false;
+        }
+        if (isStorage()) {
+            return HorseStorage.slots(stack, horse.level(), horse.blockPosition()) > 0;
         }
         return stack.is(tag);
     }

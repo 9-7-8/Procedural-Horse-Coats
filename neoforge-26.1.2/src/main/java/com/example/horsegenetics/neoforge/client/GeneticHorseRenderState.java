@@ -104,6 +104,15 @@ public class GeneticHorseRenderState extends HorseRenderState {
      */
     public float fadeAlpha = RiderFade.OPAQUE;
 
+    /**
+     * The chests on the near and off flanks, resolved to their item models -
+     * empty when nothing hangs there. See {@link PackLayer}.
+     */
+    public final net.minecraft.client.renderer.item.ItemStackRenderState packLeft =
+            new net.minecraft.client.renderer.item.ItemStackRenderState();
+    public final net.minecraft.client.renderer.item.ItemStackRenderState packRight =
+            new net.minecraft.client.renderer.item.ItemStackRenderState();
+
     /** Whether anything about this horse should be drawn see-through at all. */
     public boolean isFading() {
         return fadeAlpha < RiderFade.OPAQUE;
