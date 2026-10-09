@@ -145,6 +145,10 @@ STEPS
       an item, block or screen, take an in-game screenshot the same way (DebugPhotoShoot
       has no item stage: extend it, or screenshot by hand with the owner's world closed
       per launch-game). Name files plainly: <subject>.png, e.g. back-sail.png.
+      A shot one of the range's own sessions already took is as good as a new one, if
+      the part's code has not changed since (`git log <shot's time>.. -- <its generator>`):
+      list run/screenshots/photo-* by date, pick from a contact sheet, and shoot only what
+      is missing. 0.5.046 needed no new shoot.
    c. Look at every picture with Read. Retake any that is empty, mis-framed, or hides the
       part. Then CROP each one to the part that matters (owner, 2026-10-05: full-widescreen
       shots leave a lot of empty space at the sides). Crop to the subject's bounding box

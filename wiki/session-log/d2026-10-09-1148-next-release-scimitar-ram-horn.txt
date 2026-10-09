@@ -123,15 +123,17 @@ PROCEDURES
 - photograph-horses: Framing.PROFILE for a part in the head's front-to-back plane; a
   `want` the roll cannot reach falls through silently to a random roll, and a wild ram
   horn's size stops at the standard class, so pin a size a founder can roll.
+- release (5c): a photo one of the range's own sessions already took may be reused if
+  the part has not changed since; shoot only what is missing.
+- test-tiers: the slowest classes of this release's full run.
 - next-release, process-intake, add-a-gene, rebake, launch-game, end-session: followed as
   written, none changed.
 
 NOT RUN / NOT CHECKED
 ---------------------
-- The full :common:test suite was not run. It would still check every breed's seeded
-  founder rolls against the changed ram_horn_form founder table (only the named breed and
-  founder classes above were run), and every other class not named.
-- No gametests were run: nothing on the NeoForge side changed but the photo stage.
+- The full :common:test suite was not run while building #130, and then WAS run for the
+  release (1,725 green, on the tree that was tagged), with the gametests and the rest of
+  the release set; see RELEASE.
 - Nobody has seen Sci on a moving, grazing or rearing horse, with Rhm, under a halter,
   saddle or rider, or at the heavy and massive classes:
   gene-ram-horn-form.html#open-ram-scimitar.
@@ -144,13 +146,52 @@ v0.5.046's plan is built: its five pieces are closed. Three bugs stayed open on 
 fixed and waiting on a check only the owner or the live server can give (#10 and #36 an
 in-game look, #31 the server's log). By next-release step 6 the owner was asked once
 whether to release without them. She answered "Release now, move the 3 bugs
-(Recommended)" (owner). The three bugs move to v0.5.047 and the release is cut by
-procedures/release.txt in this same session; that work has its own entry in the release
-notes (wiki/releases.html), and anything it changes about this log is appended below.
+(Recommended)" (owner).
+
+The move. #10, #31 and #36 went to the v0.5.047 milestone, with both milestone
+descriptions and the release-plan issue (#196) edited in the same step and a comment on
+each bug.
+
+The release, by procedures/release.txt. Tag v0.5.046 on commit 428d1ec9, "0.5.046 -
+chests on horses, a storage harness, and eight new things to grow":
+https://github.com/9-7-8/Procedural-Horse-Coats/releases/tag/v0.5.046 with
+horsegenetics-0.5.046.jar attached (7,371,447 bytes, state "uploaded"; opened to confirm
+version 0.5.046 and the new classes).
+- The release set, all green: every tier-0 node check; the full :common:test suite
+  (1,725 tests, 0 failed, 15m 49s; its slowest classes are now in test-tiers tier 3);
+  :neoforge-26.1.2:test; :neoforge-26.1.2:runGameTest (all 59 required tests passed);
+  the seven headless browser checks; a dedicated-server boot to "Done (" with no /ERROR]
+  line, and only known warnings (vanilla command ambiguities, the mod-version difference
+  on the dev world, the stasis_chamber "empty ingredients" line, offline mode). The
+  owner's logs, run/phc and run/config were copied aside and put back.
+- The note was written from the whole range v0.5.045..HEAD (a subagent read every
+  session log in it and marked each item player-facing or dev-only), not from this
+  session's own work, which is one item of it. The range's largest pieces are another
+  session's: chests on horses and the storage harness (#218-#221), the lag audit and
+  dormancy (#200-#204). The note leads with a warning that the network version went from
+  "1" to "2", so server and clients update together.
+- README.md: "Load them up" now names the storage harness a chest needs (the audit found
+  the README still said to hang a chest with no harness) and what a dead horse does with
+  its chests; the magical list and the parts.enabled paragraph name the new parts.
+- Photos: release-photos/v0.5.046/, twelve in-game photos cropped to the horse, one per
+  new part with a look, plus discord-post.md. They are this range's own photo-stage
+  shots (taken by the sessions that built each part, and this session's scimitar shoot),
+  chosen from contact sheets and looked at again after cropping; no new shoot was run for
+  them. No photo: the four harness item sprites, the Gear tab's Harness and Pack slots
+  and the chest screens (the photo stage stages horses only), and the behaviour-only
+  work (dormancy, the fixes). The note says so.
+- The same note is on wiki/releases.html#v0-5-046.
+- Milestone v0.5.046 is closed; #216, #218, #219 and #221, closed in the range with no
+  milestone, were put on it first.
+- A session cannot post to Discord: release-photos/v0.5.046/discord-post.md is the
+  owner's or the bot's to post.
+Left for a later session, found by the audit and not fixed here: the skeleton breeds'
+lore still says "all four for about 1 in 640" though their horn pool has more kinds now
+(unverified arithmetic, breed-book).
 
 PICK UP FIRST
 -------------
-next-release: after v0.5.046 is out, the next unit is v0.5.047's first buildable one,
-its bugs first (#10, #31, #36 wait on checks, so they are skipped unless one has failed),
-then #164 Horse shoes, by process-intake. The owner could look at #10 and #36 in game
-first; both only wait on that.
+next-release: v0.5.046 is out. The next release is v0.5.047; its three bugs (#10, #31,
+#36) wait on checks and are skipped unless one has failed, so the first unit is #164
+Horse shoes, by process-intake. The owner could look at #10 and #36 in game first, and
+post release-photos/v0.5.046/discord-post.md.
