@@ -9,7 +9,7 @@ import java.util.List;
  * {@link AntlerGenerator} gives: a mirrored copy by negative scale would turn culled
  * boxes inside out.
  *
- * <h2>The five shapes</h2>
+ * <h2>The six shapes</h2>
  * <ul>
  *   <li>{@link #CURL} - the ram's spiral. Every segment turns the same amount
  *       backward, so the chain goes up, back, down past the ear and forward again
@@ -29,6 +29,12 @@ import java.util.List;
  *       ({@link PartNode#width}), so the twist reads as a turning ribbon; the
  *       {@code curl} bucket sets how far it turns. A little shorter than a corkscrew of the
  *       same class, because it reaches sideways.</li>
+ *   <li>{@link #SCIMITAR} - a goat's or ibex's horn: one long blade a side rising
+ *       from the skull and sweeping back over the neck in a single shallow arc. The
+ *       curl's rule - a backward bend per segment and never a roll - but a fraction
+ *       of a turn instead of a spiral, with almost no outward lean, and narrow across
+ *       ({@link PartNode#width}) the way a goat's horn is. The {@code curl} bucket is
+ *       the sweep: nearly straight to a full quarter turn and a little more.</li>
  * </ul>
  *
  * <h2>No count, no seed</h2>
@@ -55,9 +61,11 @@ public final class RamHornGenerator {
     public static final int SCURS = 3;
     /** Sideways, flat and shallowly twisted. */
     public static final int HORIZONTAL = 4;
+    /** One long blade, swept back. */
+    public static final int SCIMITAR = 5;
 
     /** How many shapes. In {@code ram_horn_form}'s allele order. */
-    public static final int FORMS = 5;
+    public static final int FORMS = 6;
 
     /** Curl buckets - how far round a curl goes, how tight a corkscrew twists. */
     public static final int CURLS = 4;
@@ -73,6 +81,12 @@ public final class RamHornGenerator {
 
     /** Roll per horizontal-twist segment, in degrees, by bucket - shallower than a corkscrew's. */
     private static final float[] FLAT_TWIST_DEGREES = {8f, 14f, 20f, 26f};
+
+    /** Total backward sweep of a scimitar, in degrees, by bucket - an arc, never a spiral. */
+    private static final float[] SWEEP_DEGREES = {35f, 55f, 78f, 100f};
+
+    /** A scimitar's breadth across over its depth front to back: a blade, narrower than it is deep. */
+    private static final float BLADE = 0.7f;
 
     /** A horizontal horn's thickness over its breadth: a flat section, not a square one. */
     private static final float FLAT = 0.6f;
@@ -122,6 +136,17 @@ public final class RamHornGenerator {
                     PartNode n = out.get(i);
                     out.set(i, new PartNode(n.parent(), n.t(), n.ox(), n.oy(), n.oz(), n.rx(), n.ry(), n.rz(),
                             n.len(), n.girth(), n.tex(), n.group(), n.girth() * FLAT));
+                }
+            }
+            case SCIMITAR -> {
+                // The curl's chain with a fraction of its bend: up and a little out, then back.
+                float bend = -(float) Math.toRadians(SWEEP_DEGREES[k]) / SEGMENTS[c];
+                chain(out, -1, 0f, SEGMENTS[c], length * 1.05f, length, -0.50f, s * 0.28f,
+                        bend, s * 0.015f, 0f, 0.72f);
+                for (int i = 0; i < out.size(); i++) {
+                    PartNode n = out.get(i);
+                    out.set(i, new PartNode(n.parent(), n.t(), n.ox(), n.oy(), n.oz(), n.rx(), n.ry(), n.rz(),
+                            n.len(), n.girth(), n.tex(), n.group(), n.girth() * BLADE));
                 }
             }
             default -> curl(out, -1, 0f, SEGMENTS[c], length, length, k, s, -0.55f);

@@ -501,8 +501,8 @@ public final class GeneDescriptions {
                             + "thickness and shade are epigenetic. Grown at maturity."),
             Map.entry("horsegenetics.ram_horn_form",
                     "A magical dominance series for the shape of ram's horns: four-horned "
-                            + "over curled over corkscrew over horizontal twist over scurs. Does "
-                            + "nothing to a polled horse."),
+                            + "over curled over scimitar over corkscrew over horizontal twist over "
+                            + "scurs. Does nothing to a polled horse."),
             Map.entry("horsegenetics.dragon_horns",
                     "A magical, recessive gene: Drg/Drg grows a pair of horns behind the ears, "
                             + "swept back over the neck. Swept, straight or curled, and their "

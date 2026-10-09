@@ -106,7 +106,8 @@ class RamHornsGeneTest {
     void theHorizontalTwistSitsBetweenCorkscrewAndScurs() {
         RamHornFormGene form = Genes.RAM_HORN_FORM;
         assertEquals(List.of("Crl", "Crk", "Fhn", "Scr", "Hzt"),
-                form.alleles().stream().map(a -> a.token()).toList(), "allele order is saved: append only");
+                form.alleles().stream().map(a -> a.token()).toList().subList(0, 5),
+                "allele order is saved: append only");
         assertEquals(RamHornGenerator.FORMS, form.alleles().size());
         assertEquals(form.alleles().size(), form.expressions().size());
         for (int i = 0; i < form.alleles().size(); i++) {
@@ -129,6 +130,80 @@ class RamHornsGeneTest {
         }
         assertTrue(GrownParts.of(horse(Sex.FEMALE, "ram_horns", "Rhm/n", "ram_horn_form", "Hzt/Hzt"),
                 Epigenome.fromSeed(3)).isEmpty(), "Rhm is a stallion's");
+    }
+
+    /** Sci sits under curled and over corkscrew, was appended after Hzt (saves), and reaches both horns. */
+    @Test
+    void theScimitarSitsBetweenCurledAndCorkscrew() {
+        RamHornFormGene form = Genes.RAM_HORN_FORM;
+        assertEquals(List.of("Crl", "Crk", "Fhn", "Scr", "Hzt", "Sci"),
+                form.alleles().stream().map(a -> a.token()).toList(), "allele order is saved: append only");
+        assertEquals(RamHornGenerator.FORMS, form.alleles().size());
+        assertEquals(form.alleles().size(), form.expressions().size());
+        for (int i = 0; i < form.alleles().size(); i++) {
+            assertEquals(i, form.alleles().get(i).order());
+        }
+        assertEquals(RamHornGenerator.SCIMITAR, shape(form, "Sci/Sci"));
+        assertEquals(RamHornGenerator.SCIMITAR, shape(form, "Crk/Sci"));
+        assertEquals(RamHornGenerator.SCIMITAR, shape(form, "Hzt/Sci"));
+        assertEquals(RamHornGenerator.SCIMITAR, shape(form, "Scr/Sci"));
+        assertEquals(RamHornGenerator.CURL, shape(form, "Crl/Sci"));
+        assertEquals(RamHornGenerator.FOUR, shape(form, "Fhn/Sci"));
+        assertEquals("ram-horn-scimitar", form.expressionOf(
+                Genotype.parse(Codes.of("ram_horn_form", "Crk/Sci")).pair(form)).id());
+        for (Sex sex : Sex.values()) {
+            List<AttachedPart> horns = GrownParts.of(
+                    horse(sex, "ram_horns", "Rh/n", "ram_horn_form", "Sci/Sci"), Epigenome.fromSeed(3));
+            assertEquals(2, horns.size(), "Rh horns either sex: " + sex);
+            for (AttachedPart side : horns) {
+                assertEquals(RamHornGenerator.SCIMITAR, side.shape().style() / RamHornGenerator.CURLS);
+            }
+        }
+        assertTrue(GrownParts.of(horse(Sex.FEMALE, "ram_horns", "Rhm/n", "ram_horn_form", "Sci/Sci"),
+                Epigenome.fromSeed(3)).isEmpty(), "Rhm is a stallion's");
+        assertEquals(2, GrownParts.of(horse(Sex.MALE, "ram_horns", "Rhm/n", "ram_horn_form", "Sci/Sci"),
+                Epigenome.fromSeed(3)).size(), "and a stallion grows the pair");
+    }
+
+    /**
+     * The scimitar at every curl and size: inside the box budget, one unbranched blade
+     * narrower across than deep, bent backward and never rolled, sweeping further by the
+     * bucket, and always an arc - well short of the curl's half turn.
+     */
+    @Test
+    void theScimitarIsOneBladeSweptBackByTheCurl() {
+        for (int size = 0; size < RamHornSize.classes(); size++) {
+            float last = 0f;
+            for (int curl = 0; curl < RamHornGenerator.CURLS; curl++) {
+                for (boolean left : new boolean[] {true, false}) {
+                    List<PartNode> nodes = RamHornGenerator.generate(RamHornGenerator.SCIMITAR, curl, size, left);
+                    assertTrue(nodes.size() >= 2 && nodes.size() <= RamHornGenerator.MAX_NODES,
+                            nodes.size() + " boxes");
+                    PartNode root = nodes.get(0);
+                    assertTrue(root.parent() < 0);
+                    assertTrue(root.rx() < 0f, "the root leans back, not forward");
+                    assertTrue(Math.abs(root.rz()) < Math.toRadians(30), "the root rises, it does not reach sideways");
+                    assertEquals(left, root.rz() > 0f, "each side leans outward");
+                    float sweep = 0f;
+                    for (int i = 0; i < nodes.size(); i++) {
+                        PartNode n = nodes.get(i);
+                        assertTrue(n.width() < n.girth(), "a blade, box " + i);
+                        if (i > 0) {
+                            assertEquals(i - 1, n.parent(), "one unbranched chain");
+                            assertEquals(0f, n.ry(), "a blade never rolls");
+                            assertTrue(n.rx() < 0f, "every box bends backward");
+                            assertTrue(n.girth() <= nodes.get(i - 1).girth(), "it tapers");
+                            sweep -= n.rx();
+                        }
+                    }
+                    assertTrue(sweep < Math.toRadians(110), "an arc, not a spiral: " + Math.toDegrees(sweep));
+                    if (left) {
+                        assertTrue(sweep > last, "a higher curl bucket sweeps further back");
+                        last = sweep;
+                    }
+                }
+            }
+        }
     }
 
     private static int shape(RamHornFormGene form, String tokens) {

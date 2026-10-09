@@ -62,8 +62,8 @@ class PartGeneratorTest {
                 assertTrue(node.len() > 0f, shape + " box " + i + " has no length");
                 assertTrue(node.girth() >= MIN_GIRTH,
                         shape + " box " + i + " is " + node.girth() + " units thick");
-                // A flat box - a membrane, a plate's slab, a sabre fang's blade, an ear fin's ray or a
-                // horizontal-twist ram horn - may be
+                // A flat box - a membrane, a plate's slab, a sabre fang's blade, an ear fin's ray, or a
+                // horizontal-twist or scimitar ram horn - may be
                 // thinner across x, never past this, and nothing else is flat at all.
                 assertTrue(node.width() >= MIN_WIDTH && node.width() <= node.girth(),
                         shape + " box " + i + " is " + node.width() + " units wide");
@@ -71,9 +71,10 @@ class PartGeneratorTest {
                                 || (shape.kind().plates() && node.isRoot())
                                 || shape.kind().sabre() || shape.kind().earFin()
                                 || (shape.kind().ramHorn()
-                                        && shape.style() / RamHornGenerator.CURLS == RamHornGenerator.HORIZONTAL),
+                                        && (shape.style() / RamHornGenerator.CURLS == RamHornGenerator.HORIZONTAL
+                                        || shape.style() / RamHornGenerator.CURLS == RamHornGenerator.SCIMITAR)),
                         shape + " box " + i + " is flat and is neither a membrane, a slab, a blade, a ray "
-                                + "nor a horizontal horn");
+                                + "nor a horizontal or scimitar horn");
                 assertTrue(node.t() >= 0f && node.t() <= 1f,
                         shape + " box " + i + " sits at t=" + node.t() + " along its parent");
                 assertTrue(node.tex() >= 0 && node.tex() < PartSheet.CAPACITY,

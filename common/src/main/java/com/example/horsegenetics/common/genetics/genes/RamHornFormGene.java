@@ -22,16 +22,17 @@ import java.util.Map;
  *   <tr><th>allele</th><th>shape</th></tr>
  *   <tr><td>{@code Fhn}</td><td>four-horned - an upright pair and a curled pair, like a Jacob sheep</td></tr>
  *   <tr><td>{@code Crl}</td><td>curl - the ram's spiral; the ordinary shape</td></tr>
+ *   <tr><td>{@code Sci}</td><td>scimitar - one long blade swept back, a goat's or an ibex's</td></tr>
  *   <tr><td>{@code Crk}</td><td>corkscrew - long, straight and twisted</td></tr>
  *   <tr><td>{@code Hzt}</td><td>horizontal twist - flat, wide and sideways, Khnum's old horns</td></tr>
  *   <tr><td>{@code Scr}</td><td>scurs - loose stubs</td></tr>
  * </table>
- * <p>Dominance runs down the table: {@code Fhn > Crl > Crk > Hzt > Scr}. Four-horned on
+ * <p>Dominance runs down the table: {@code Fhn > Crl > Sci > Crk > Hzt > Scr}. Four-horned on
  * top because the real multi-horned trait is dominant; scurs at the bottom, so a
  * scurred line is something bred for. One shape on both sides, never codominant,
  * for the antler form locus's reason.
  *
- * <p>The allele order - {@code Crl, Crk, Fhn, Scr, Hzt} - is {@link RamHornGenerator}'s shape
+ * <p>The allele order - {@code Crl, Crk, Fhn, Scr, Hzt, Sci} - is {@link RamHornGenerator}'s shape
  * order and is stored in every genotype: append, never reorder.
  */
 public final class RamHornFormGene implements Gene {
@@ -46,10 +47,11 @@ public final class RamHornFormGene implements Gene {
     public final Allele Fhn = new Allele(KEY, RamHornGenerator.FOUR, "Fhn", "Four-horned (Fhn)");
     public final Allele Scr = new Allele(KEY, RamHornGenerator.SCURS, "Scr", "Scurs (Scr)");
     public final Allele Hzt = new Allele(KEY, RamHornGenerator.HORIZONTAL, "Hzt", "Horizontal twist (Hzt)");
-    private final List<Allele> alleles = List.of(Crl, Crk, Fhn, Scr, Hzt);
+    public final Allele Sci = new Allele(KEY, RamHornGenerator.SCIMITAR, "Sci", "Scimitar (Sci)");
+    private final List<Allele> alleles = List.of(Crl, Crk, Fhn, Scr, Hzt, Sci);
 
     /** Most dominant first. */
-    private final List<Allele> dominance = List.of(Fhn, Crl, Crk, Hzt, Scr);
+    private final List<Allele> dominance = List.of(Fhn, Crl, Sci, Crk, Hzt, Scr);
 
     private final Expression CURLED = Expression.wildType("ram-horn-curl", "Curled horns",
             "Ram's horns, if the horse has any, curl back, down past the ear and forward again "
@@ -69,8 +71,13 @@ public final class RamHornFormGene implements Gene {
                     + "Egyptian ram's, and Khnum's. Shows only when no four-horned, curled or "
                     + "corkscrew allele is beside it. Does nothing to a polled horse.");
 
+    private final Expression SCIMITAR = Expression.wildType("ram-horn-scimitar", "Scimitar horns",
+            "One long blade a side, rising from the skull and sweeping back over the neck - a "
+                    + "goat's horns, or an ibex's. Shows over corkscrew, horizontal twist and scurs, "
+                    + "and under four-horned and curled. Does nothing to a polled horse.");
+
     /** In allele order. */
-    private final List<Expression> byShape = List.of(CURLED, CORKSCREW, FOUR, SCURS, HORIZONTAL);
+    private final List<Expression> byShape = List.of(CURLED, CORKSCREW, FOUR, SCURS, HORIZONTAL, SCIMITAR);
 
     private final FounderTable founders;
 
@@ -80,8 +87,9 @@ public final class RamHornFormGene implements Gene {
         frequencies.put(Fhn, 0.08);
         frequencies.put(Scr, 0.10);
         frequencies.put(Hzt, 0.04);
+        frequencies.put(Sci, 0.06);
         // The plain allele last: a maximal founder roll is the ordinary horse.
-        frequencies.put(Crl, 0.66);
+        frequencies.put(Crl, 0.60);
         founders = FounderTable.hardyWeinberg(frequencies, pair -> true);
     }
 
