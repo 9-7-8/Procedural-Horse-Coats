@@ -295,8 +295,9 @@
     <li><strong>The horse dies:</strong> it sets its chests down. Each one is placed as a
         block in the nearest open space to where it fell, with everything still inside. If
         there is no room within three blocks, or the land is protected, that chest and its
-        contents drop as items instead. A horse brought back afterwards comes back without
-        them. A server can go back to always dropping items with
+        contents drop as items instead. Everything else it was wearing &mdash; its harness,
+        a braid, its saddle and barding &mdash; drops as items. A horse brought back afterwards
+        comes back with none of it. A server can go back to always dropping items with
         <code>packs.place_on_death</code>.</li>
     <li><strong>You sell it or turn it loose:</strong> the chests and their contents are
         handed back to you first.</li>
@@ -793,10 +794,13 @@
     of the drops of a horse whose gene replaces its loot.
 </p>
 <p>
-    <strong>On death the others still do not drop</strong>, and that is the recorded
-    design rather than an oversight: <code>HORSE_GEAR</code> rides in the afterlife
-    snapshot so that a horse brought back is still dressed. A horse nobody brings back
-    takes them with it. Whether that should change is the open half of #218.
+    <strong>On death everything drops</strong> (owner, 2026-10-09, #218). After the chests
+    are dealt with, <code>HorsePackHandler.onDrops</code> adds whatever is left in this mod's
+    own slots &mdash; the harness, a braid &mdash; to the drops through
+    <code>TackEquipHandler.takeGear</code>, and <code>HorseResurrection.revive</code> takes the
+    same gear off the snapshot, which was made before the drops, so a horse brought back
+    does not wear a second set. Until then the gear stayed with the body and came back only
+    with a resurrection.
 </p>
 
 <h3 id="packs-lifecycle">Every way a horse leaves</h3>
