@@ -1,0 +1,166 @@
+2026-10-08 22:00 - Chests on horses, hosted modded chests, and the storage harness
+(22:00 is about when the session started; the owner went to bed partway and the rest ran
+unattended on her say-so.)
+
+ASKED
+-----
+1. "Can you implement the chests on horses feature? It should support any chest, barrel,
+   shulker if it makes sense, ender chest, as well as modded storage like shelves and other
+   types of chests. Basically, anything you can place down in the world and store items in,
+   you can place on the side of a horse. They should have two chest slots, one on each side"
+   -> built (DONE 1), after one round of four questions (DECIDED).
+2. "Queue: the curve should be that a 10/10 pull horse can carry two full loaded (64x in
+   every slot) one block chests on each side at 50% speed" -> filed as #219, then built
+   (DONE 3).
+3. "Queue: we need to add the storage harness piece of equipment, which has tiers and
+   enchantments. By default, the best level only provides a 10% weight reduction, but this
+   can be changed in the config. This uses standard leather which can be dyed and then also
+   uses metal fittings, and the quality of the metal determines the weight reduction bonus.
+   A server which wants to focus on gear over breeding can change the config to make this
+   bonus bigger, if they want. This piece of gear is required before chests can be added to
+   a horse. It basically just looks like a strap over the butt and a metal frame around
+   where the chests fit into" -> filed as #220, then built except its enchantments (DONE 6).
+4. "Queue: can we have it so that a horse that dies simply places the chests down into the
+   world, in the nearest open space?" -> filed as #221, then built (DONE 5).
+5. "Commit and push, then figure out how to make it so a chest opens as it would if it was
+   placed in the real world" -> pushed; researched in the ATM11 jars; one question asked,
+   she chose the hidden real block; built (DONE 2).
+6. "Queue: I'm going to sleep, so commit at each stage and then work through all the rest of
+   the issues related to this and get it ready to be added to a release" -> every stage was
+   committed and pushed on its own; #219 and #221 closed, #218 and #220 left open on one
+   question each; the release set of tests was run (NOT RUN lists the results). No release
+   was cut.
+
+DONE
+----
+1. Chests on horses. 70806861 (code), b422c6fc (docs).
+   Missing: the two storage gear slots took nothing. Now a horse carries one container per
+   flank - anything whose block has an item inventory, detected from the block rather than
+   listed (entity/HorseStorage), minus a deny tag of machines. Contents are a saved,
+   unsynced attachment (data/HorsePacks); vanilla's ChestMenu / ShulkerBoxMenu open over it
+   and menu/HorsePackMenu covers other sizes. Right-clicking the drawn chest opens it
+   (common/pack/PackBox, a line-of-sight test in the horse's frame); client/PackLayer draws
+   the worn stack as its own item. The load is a count of items against pulling ability
+   (common/pack/PackLoad), a transient speed modifier, five packs.* server keys, ender
+   chests exempt. A chest with items in it does not come off; a shulker box leaves and
+   arrives full. Sale and release hand the chests back; resurrection strips them.
+   Proof: PackLoadTest; gametest horse_carries_chests (mutated once: mayTakeOff forced true
+   -> red); runGameTest 57 green; a dedicated-server boot to Done with the new keys
+   generated and no ERROR of ours.
+   Pictures: nine photo-shoot shots (chest, barrel, shulker box, ender chest, shelf,
+   decorated pot, copper and trapped chest; near side, off side, from behind). All upright,
+   latch outward on both flanks. The first set showed the chest running past the rump and a
+   pixel above the back; PackBox's centre moved 1.5 forward and 0.5 down and was re-shot.
+   They could not be attached in this session: run/screenshots/photo-pack-*.png.
+
+2. Another mod's chest opens as its own block. c8698a1e (code), 4fad5b5d (docs).
+   Found by reading the owner's ATM11 jars: Sophisticated Storage's StorageContainerMenu is
+   built from a BlockPos on both sides, looks its block entity up in the player's level and
+   throws if it is absent; its stillValid does the same lookup; DimStorage's menu factory
+   reads a position. So a block entity that is never placed cannot open one. server/
+   HostedPacks really places the chest at level.getMinY() under the player (the block above
+   cleared for a lid), the way BlockItem.place does, opens it through useWithoutItem, and
+   picks it up with vanilla's pick-block-with-data. The horse's copy is re-picked every
+   tick; a SavedData journal restores both original blocks after a crash with no drops; two
+   mixins (HostedMenuPlayerMixin, HostedMenuPacketMixin) answer the menu's reach check for
+   the horse; the block update is sent to the opener ahead of the menu packet. Vanilla
+   containers are unchanged. packs.real_screens and the horse_storage/plain_screen tag
+   switch it off; any failure falls back to the plain grid.
+   Proof: gametest hosted_chest_is_a_real_block, with a vanilla chest and an unjoined
+   ServerPlayer (mutated once: HostedPacks.stillValid returning null -> red, "vanilla closed
+   the menu"); runGameTest 58 green. No pictures: nothing visible changed.
+   NOT proven: no modded chest is installed in the dev run.
+
+3. #219, the default curve. 3d1a12e4. packs.max_items 6912 -> 3970, so a pull-10 horse keeps
+   half its speed under a full vanilla chest on each flank (3456 items).
+   PackLoadTest.theDefaultCurve pins it. Closed.
+
+4. #218, worn gear lost. 6005209c. TackEquipHandler.returnGear hands back the attachment
+   gear on sale and release (it used to leave with the horse and be deleted when a dealer's
+   string or the wild turnover discarded it), and GeneDeathHandler stopped clearing saddle
+   and barding out of the drops of a horse whose gene replaces its loot. Gametest step 6b.
+   Open, needs-owner: whether gear should drop on death.
+
+5. #221, chests set down on death. 41cf6fda (code), 55bd876b (docs). HorsePackHandler.onDrops
+   places each chest in the nearest replaceable, dry position within three blocks (one with
+   something under it for preference), asks EventHooks.onBlockPlace first so a claim can
+   refuse, fills a plain chest slot for slot; anything that cannot be placed drops as
+   before. packs.place_on_death. Gametest step 7. Closed.
+
+6. #220, the storage harness. e5dbb202 (mechanics), 1e090b0b (drawn), e5a6e311 (docs).
+   HARNESS gear slot; copper, iron, golden and netherite harnesses (item/StorageHarnessItem,
+   common/pack/HarnessTier); a chest goes on only a harnessed horse and the harness comes
+   off only after both chests (packs.harness_required); the tier takes an even share of
+   packs.harness_best_reduction (0.10) off the load before the curve; shapeless recipes;
+   drawn two-layer art with the leather tinted by dye; client/HarnessLayer draws a rump
+   strap, a spine strap and a framed shelf on each flank.
+   Proof: PackLoadTest (theHarnessLightensTheLoad, aServerMaySetTheHarness); gametest
+   horse_carries_chests steps 1b and 4; check-recipes, check-duplicate-item-art; server boot.
+   Pictures: six shots - an iron and a copper harness bare, a red-dyed netherite one and a
+   blue-dyed golden one with chests, side, back and wide. The strap takes the dye, the
+   frames take the metal, the chest sits in its frame.
+   run/screenshots/photo-harness-*.png. The four item sprites were looked at as a contact
+   sheet after the wiki bake first showed four identical white straps (FOUND 3).
+   Open, needs-owner: the enchantments.
+
+DECIDED
+-------
+(owner) Capacity: the chest keeps its own slots and none is locked; items weigh by count
+        against pull; server-configurable; interdimensional storage exempt.
+(owner) A chest with items in it will not come off; a shulker box comes off full.
+(owner) Storage is detected, machines left out.
+(owner) Right-click the chest to open it, plus buttons.
+(owner) A modded chest gets its real screen by being really placed, hidden, while open.
+(owner) The default curve's anchor; the harness's shape; chests set down on death.
+(session, hers to amend) "Two chests on each side" read as one per flank; "the chest UI
+        isn't changed" read as no locked slots, later superseded by request 5; weight is a
+        raw item count; owner only, within eight blocks; the slot label is Pack; four harness
+        tiers in even shares, a slot of its own, an item per tier, no upgrading,
+        packs.harness_required; gear on death left as designed.
+All recorded on wiki/decisions.html, which links to horse-gear.html#packs,
+#packs-hosted, #pack-load, #pack-rules and item-storage-harness.html#tiers; the two open
+ones are on #218 and #220.
+
+FOUND ON THE WAY
+----------------
+1. #218 (filed): worn gear never dropped or returned. Partly fixed, see DONE 4.
+2. A barrel, a shelf and a shulker box carry an EMPTY minecraft:container component by
+   default. Stripping it on the way onto a horse would have handed back a barrel that never
+   stacked again. Caught while writing the gametest, fixed before the first commit; the
+   test pins it.
+3. wiki/tools/bake-item-art.mjs copied layer0 only, so a layered, dyed item came out as its
+   untinted base. It now composites layers with the default dye. (e5a6e311)
+4. The Dress window read a slot and then cleared it, which would have handed over a shulker
+   box without its contents. GearView.getItem now shows the packed box and setItem drops the
+   store's copy. Fixed before the first commit.
+5. bake-config-keys.mjs cannot evaluate an expression as a default (4 * 27 * 64); the
+   default is a literal with a comment.
+6. Mistake: the first compile of this session ran before checking whether the owner's
+   client was open. It was not. Every later launch checked first.
+
+PROCEDURES
+----------
+photograph-horses.txt: a shot can now dress its horse - .dressed(...), with
+DebugPhotoShoot.packs(near, off), harness(item, rgb) and facingEast(). The procedure said
+"a horse with gear: this procedure" and the tool had no way to do it.
+
+NOT RUN / NOT CHECKED
+---------------------
+RESULTS OF THE RELEASE SET, run at the end of the session:
+  see the last section of this file, written when the runs finished.
+Nobody has played any of this. New Verification-tab anchors: horse-gear.html#verify-packs
+and item-storage-harness.html#verify-harness. First on the list: a real modded chest
+(Sophisticated Storage) opened on a horse, which no test here can stand in for.
+Not checked: two players on a dedicated server; a claim mod refusing a set-down; a horse
+dying with a hosted chest open; a rider outrunning an open modded chest.
+
+RELEASE
+-------
+Not offered and not cut: the owner asked for the work to be made ready to go into one.
+Nothing saved by a released version changed shape (the HORSE_PACKS codec gained an optional
+field beside its first one), so it is a patch release when she wants it.
+
+PICK UP FIRST
+-------------
+Have the owner play horse-gear.html#verify-packs with Sophisticated Storage installed
+(hand-over-a-test), and answer the two needs-owner questions on #218 and #220.
