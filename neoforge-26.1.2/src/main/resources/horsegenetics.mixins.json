@@ -17,6 +17,8 @@
     "LeashPlacerMixin",
     "LeashDropMixin",
     "CartHorseMixin",
+    "HostedMenuPlayerMixin",
+    "HostedMenuPacketMixin",
     "CartEntityInvoker"
   ],
   "client": [

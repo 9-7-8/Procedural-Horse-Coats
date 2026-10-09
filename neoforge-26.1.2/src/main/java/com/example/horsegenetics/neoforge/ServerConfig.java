@@ -263,6 +263,14 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue PACK_MIN_SPEED;
 
     /**
+     * <b>Does another mod's chest open as its own block?</b> On - the default -
+     * and it is stood in the world, out of sight, for as long as its screen is
+     * open. Off, every modded chest opens as this mod's plain grid. See
+     * {@code server/HostedPacks}.
+     */
+    public static final ModConfigSpec.BooleanValue PACK_REAL_SCREENS;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -871,6 +879,18 @@ public final class ServerConfig {
                         "1.0 is the same as turning packs.weight off. Range 0 to 1. Server-side.")
                 .defineInRange("packs.min_speed",
                         com.example.horsegenetics.common.pack.PackLoad.DEFAULT_MIN_SPEED, 0.0, 1.0);
+        PACK_REAL_SCREENS = builder
+                .comment("Whether another mod's chest on a horse opens its own screen. (default: true)",
+                        "A modded chest's screen needs its block to exist in the world. On, the",
+                        "chest is really placed at the very bottom of the world under the player",
+                        "for as long as it is open, opened the way the block opens, and picked",
+                        "back up when the screen closes; the block that was there is put back.",
+                        "Off, modded chests open as a plain grid of slots instead - use this if a",
+                        "storage mod misbehaves on a horse. Vanilla's chests, barrels and shulker",
+                        "boxes are not affected either way: they never need a block.",
+                        "One item can be switched alone with the item tag",
+                        "horsegenetics:horse_storage/plain_screen. Server-side.")
+                .define("packs.real_screens", true);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -1552,6 +1572,15 @@ public final class ServerConfig {
                     PACK_CURVE_EXPONENT.get(), PACK_MIN_SPEED.get());
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.pack.PackLoad.Curve.DEFAULT;
+        }
+    }
+
+    /** {@code packs.real_screens}, safely. */
+    public static boolean packRealScreens() {
+        try {
+            return PACK_REAL_SCREENS.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
         }
     }
 

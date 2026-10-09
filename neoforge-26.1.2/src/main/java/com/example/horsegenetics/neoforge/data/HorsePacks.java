@@ -58,11 +58,43 @@ public final class HorsePacks {
     private static final Codec<Map<String, List<ItemStackWithSlot>>> SAVED =
             Codec.unboundedMap(Codec.STRING, ItemStackWithSlot.CODEC.listOf());
 
+    /**
+     * A chest carried <i>whole</i>: the item as vanilla's pick-block-with-data
+     * would hand it over, everything the block held inside it, and how many
+     * items that was the last time the block was live. See {@link #hold}.
+     */
+    public record Held(ItemStack chest, int items) {
+        static final Codec<Held> CODEC = com.mojang.serialization.codecs.RecordCodecBuilder.create(i -> i.group(
+                ItemStack.CODEC.fieldOf("chest").forGetter(Held::chest),
+                Codec.INT.optionalFieldOf("items", 0).forGetter(Held::items)
+        ).apply(i, Held::new));
+    }
+
+    /** The plain store alone - what {@code packs} has always held, and all a test needs. */
     public static final Codec<HorsePacks> CODEC = SAVED.xmap(HorsePacks::fromSaved, HorsePacks::toSaved);
 
-    public static final MapCodec<HorsePacks> MAP_CODEC = CODEC.fieldOf("packs");
+    /**
+     * {@code packs} is the plain store, as it was first saved; {@code held} was
+     * added beside it rather than inside it, so a horse saved before there were
+     * held chests reads exactly as it did.
+     */
+    public static final MapCodec<HorsePacks> MAP_CODEC =
+            com.mojang.serialization.codecs.RecordCodecBuilder.mapCodec(i -> i.group(
+                    SAVED.optionalFieldOf("packs", Map.of()).forGetter(HorsePacks::toSaved),
+                    Codec.unboundedMap(Codec.STRING, Held.CODEC).optionalFieldOf("held", Map.of())
+                            .forGetter(packs -> packs.held)
+            ).apply(i, (saved, held) -> {
+                HorsePacks packs = fromSaved(saved);
+                held.forEach((slot, chest) -> {
+                    if (!chest.chest().isEmpty()) {
+                        packs.held.put(slot, chest);
+                    }
+                });
+                return packs;
+            }));
 
     private final Map<String, List<ItemStack>> bySlot = new LinkedHashMap<>();
+    private final Map<String, Held> held = new LinkedHashMap<>();
 
     public HorsePacks() {
     }
@@ -156,13 +188,35 @@ public final class HorsePacks {
         return 0;
     }
 
-    /** How many items are in {@code slot}'s chest, whatever they are. */
+    /**
+     * <b>Carry {@code slot}'s chest whole.</b> For a chest that opens as its own
+     * block ({@code HostedPacks}): its contents are not stacks this class can
+     * list, they are whatever the block entity saved, so the whole item is kept
+     * - block data, components and all - and put back into the world to be
+     * opened. {@code items} is the count taken while it was last live, which is
+     * the only time anybody can count it.
+     */
+    public void hold(String slot, ItemStack chest, int items) {
+        if (chest.isEmpty()) {
+            held.remove(slot);
+        } else {
+            held.put(slot, new Held(chest, Math.max(0, items)));
+        }
+    }
+
+    /** The chest carried whole on {@code slot}, or null - the stored stack, not a copy. */
+    public @org.jspecify.annotations.Nullable Held held(String slot) {
+        return held.get(slot);
+    }
+
+    /** How many items are in {@code slot}'s chest, whatever they are and however it is carried. */
     public int count(String slot) {
+        Held whole = held.get(slot);
+        long total = whole == null ? 0 : whole.items();
         List<ItemStack> stacks = bySlot.get(slot);
         if (stacks == null) {
-            return 0;
+            return (int) Math.min(Integer.MAX_VALUE, total);
         }
-        long total = 0;
         for (ItemStack stack : stacks) {
             total += stack.getCount();
         }
@@ -187,6 +241,6 @@ public final class HorsePacks {
     }
 
     public boolean isEmpty() {
-        return slots().isEmpty();
+        return held.isEmpty() && slots().isEmpty();
     }
 }

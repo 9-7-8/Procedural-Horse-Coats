@@ -125,6 +125,13 @@ public final class HorsePackHandler {
      * A stack that will not fit stays inside the item rather than vanishing.
      */
     public static ItemStack unpack(AbstractHorse horse, HorseTackSlot slot, ItemStack chest) {
+        if (HostedPacks.hosts(chest)) {
+            // Another mod's chest is carried whole, and opened as its own block.
+            ItemStack face = HostedPacks.adopt(horse, slot, chest);
+            if (face != null) {
+                return face;
+            }
+        }
         ItemContainerContents inside = chest.get(DataComponents.CONTAINER);
         // Nothing inside is the ordinary case and must leave the stack exactly
         // as it was: a barrel and a shulker box carry an EMPTY container
@@ -181,6 +188,11 @@ public final class HorsePackHandler {
      * after {@link #mayTakeOff}, so for anything else there is nothing to move.
      */
     public static ItemStack pack(AbstractHorse horse, HorseTackSlot slot, ItemStack chest) {
+        if (HostedPacks.holds(horse, slot)) {
+            ItemStack whole = HostedPacks.view(horse, slot, chest);
+            HostedPacks.forget(horse, slot);
+            return whole;
+        }
         if (!HorseStorage.keepsContents(chest)) {
             return chest;
         }
@@ -204,7 +216,13 @@ public final class HorsePackHandler {
      * out to be.
      */
     public static ItemStack packedView(AbstractHorse horse, HorseTackSlot slot, ItemStack chest) {
-        if (chest.isEmpty() || !HorseStorage.keepsContents(chest) || horse.level().isClientSide()) {
+        if (chest.isEmpty() || horse.level().isClientSide()) {
+            return chest;
+        }
+        if (HostedPacks.holds(horse, slot)) {
+            return HostedPacks.view(horse, slot, chest);
+        }
+        if (!HorseStorage.keepsContents(chest)) {
             return chest;
         }
         HorsePacks packs = packs(horse);
@@ -228,6 +246,10 @@ public final class HorsePackHandler {
      * still filed under the slot are stranded ones that must not be thrown away.
      */
     public static void departed(AbstractHorse horse, HorseTackSlot slot) {
+        if (!horse.level().isClientSide() && HostedPacks.holds(horse, slot)) {
+            HostedPacks.forget(horse, slot);
+            return;
+        }
         if (!horse.level().isClientSide() && HorseStorage.keepsContents(slot.on(horse))) {
             packs(horse).take(slot.name());
         }
@@ -399,6 +421,11 @@ public final class HorsePackHandler {
                     }, Component.translatable("container.enderchest")));
             player.awardStat(Stats.OPEN_ENDERCHEST);
             play(horse, SoundEvents.ENDER_CHEST_OPEN);
+            return true;
+        }
+
+        if (HostedPacks.holds(horse, slot) && HostedPacks.hosts(worn) && HostedPacks.open(player, horse, slot)) {
+            play(horse, openSound(worn));
             return true;
         }
 

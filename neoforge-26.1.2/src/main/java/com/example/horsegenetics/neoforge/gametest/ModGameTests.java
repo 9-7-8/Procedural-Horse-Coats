@@ -2293,6 +2293,8 @@ public final class ModGameTests {
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
         // One horse, a dozen registry probes, four interact events and a drops event; one tick.
         register(event, environment, HORSE_CARRIES_CHESTS, 100);
+        // One horse and one unjoined player; a chest stood at the bottom of the world for four ticks.
+        register(event, environment, HOSTED_CHEST_IS_A_REAL_BLOCK, 100);
         // Builds one instance of every mob it classifies, inside one tick.
         register(event, environment, CHAOS_ROSTER, 100);
         // One bank filled and one button pressed twice, then five ticks for the
@@ -3813,6 +3815,158 @@ public final class ModGameTests {
         }
         horse.discard();
         helper.succeed();
+    }
+
+    /**
+     * <b>A chest that opens as its own block really is one while it is open, and
+     * the world is as it was afterwards.</b> The path another mod's chest takes
+     * ({@code server/HostedPacks}), driven with a vanilla chest because no
+     * modded one is installed here - {@code hosts()} is the only thing that
+     * tells them apart, and this calls past it.
+     *
+     * <p>What it pins: the chest goes on carrying what it held as an item, and
+     * is counted; opening it stands a real chest at the bottom of the world
+     * with the block above cleared, and opens <i>that block's</i> menu; the
+     * menu stays open with the player forty blocks out of the block's reach
+     * (the mixins - vanilla's own {@code doTick} is called, and would close it)
+     * and shuts when the player leaves the <i>horse</i>; what is put in is on
+     * the horse a tick later; and closing puts both original blocks back with
+     * nothing left in the journal.
+     *
+     * <p>The player is a real {@code ServerPlayer} that never joins the player
+     * list: {@code makeMockServerPlayerInLevel} does join, which fires this
+     * mod's login payloads down a channel that has negotiated nothing and takes
+     * the run down. Nothing on this path sends a payload of ours.
+     *
+     * <p><b>It cannot show a modded client finding the block</b> - there is no
+     * client. That is the open check on the gear page.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HOSTED_CHEST_IS_A_REAL_BLOCK =
+            TEST_FUNCTIONS.register("hosted_chest_is_a_real_block", () -> ModGameTests::hostedChestIsARealBlock);
+
+    private static void hostedChestIsARealBlock(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var server = level.getServer();
+        var left = com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLEBAG_LEFT;
+
+        var profile = new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "pack-test");
+        net.minecraft.server.level.ServerPlayer player = new net.minecraft.server.level.ServerPlayer(
+                server, level, profile, net.minecraft.server.level.ClientInformation.createDefault());
+        net.minecraft.network.Connection connection =
+                new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
+        new io.netty.channel.embedded.EmbeddedChannel(connection);
+        player.connection = new net.minecraft.server.network.ServerGamePacketListenerImpl(server, connection,
+                player, net.minecraft.server.network.CommonListenerCookie.createInitial(profile, false));
+
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setNoAi(true);
+        horse.setNoGravity(true);
+        horse.setTamed(true);
+        horse.setOwner(player);
+        // Forty blocks up: far outside any block reach of the bottom of the world.
+        horse.snapTo(horse.getX(), horse.getY() + 40.0, horse.getZ());
+        player.snapTo(horse.getX() + 1.0, horse.getY(), horse.getZ());
+
+        BlockPos bottom = new BlockPos(player.getBlockX(), level.getMinY(), player.getBlockZ());
+        BlockState wasBelow = level.getBlockState(bottom);
+        BlockState wasAbove = level.getBlockState(bottom.above());
+
+        // 1. On it goes, carrying three diamonds as an item.
+        ItemStack chest = new ItemStack(Items.CHEST);
+        net.minecraft.core.NonNullList<ItemStack> inside =
+                net.minecraft.core.NonNullList.withSize(27, ItemStack.EMPTY);
+        inside.set(5, new ItemStack(Items.DIAMOND, 3));
+        chest.set(net.minecraft.core.component.DataComponents.CONTAINER,
+                net.minecraft.world.item.component.ItemContainerContents.fromItems(inside));
+        ItemStack face = com.example.horsegenetics.neoforge.server.HostedPacks.adopt(horse, left, chest);
+        var packs = horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_PACKS);
+        if (face == null || packs.held(left.name()) == null || packs.held(left.name()).items() != 3
+                || packs.count(left.name()) != 3) {
+            packFail("a chest carried whole should arrive counted at 3 items; face=" + face
+                    + " held=" + packs.held(left.name()));
+        }
+        if (face.getOrDefault(net.minecraft.core.component.DataComponents.CONTAINER,
+                net.minecraft.world.item.component.ItemContainerContents.EMPTY).nonEmptyItems().iterator().hasNext()) {
+            packFail("the worn face of a carried chest still has its contents in it, which every client"
+                    + " in sight would be sent");
+        }
+        if (level.getBlockState(bottom) != wasBelow || level.getBlockState(bottom.above()) != wasAbove
+                || com.example.horsegenetics.neoforge.server.HostedPacks.standing(server) != 0) {
+            packFail("putting a chest on a horse left a block standing at the bottom of the world");
+        }
+        horse.setData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_GEAR,
+                horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_GEAR)
+                        .with(left.name(), face));
+
+        // 2. Open: a real chest, a real chest menu, room above it for the lid.
+        if (!com.example.horsegenetics.neoforge.server.HostedPacks.open(player, horse, left)) {
+            packFail("a carried chest would not open as its block");
+        }
+        if (!level.getBlockState(bottom).is(Blocks.CHEST) || !level.getBlockState(bottom.above()).isAir()
+                || !(player.containerMenu instanceof net.minecraft.world.inventory.ChestMenu)
+                || com.example.horsegenetics.neoforge.server.HostedPacks.standing(server) != 1) {
+            packFail("opening a carried chest should stand a chest at " + bottom + " with air above and"
+                    + " open its menu; found " + level.getBlockState(bottom) + " and "
+                    + player.containerMenu.getClass().getSimpleName());
+        }
+        if (!player.containerMenu.getSlot(5).getItem().is(Items.DIAMOND)) {
+            packFail("the standing chest does not hold what the horse was carrying");
+        }
+
+        // 3. Vanilla's own per-tick check, forty blocks from the block: still open.
+        player.doTick();
+        if (!(player.containerMenu instanceof net.minecraft.world.inventory.ChestMenu)) {
+            packFail("vanilla closed the menu for being out of the block's reach - the stillValid"
+                    + " mixins are not answering for the horse");
+        }
+        player.containerMenu.getSlot(0).set(new ItemStack(Items.IRON_INGOT, 10));
+
+        helper.runAfterDelay(2L, () -> {
+            // 4. A tick later the horse has it, without anything being closed.
+            if (packs.count(left.name()) != 13) {
+                packFail("ten ingots put into an open chest should be on the horse within a tick;"
+                        + " it counts " + packs.count(left.name()));
+            }
+            // 5. Walk away from the HORSE and it shuts, and the world is put back.
+            player.snapTo(horse.getX() + 20.0, horse.getY(), horse.getZ());
+            player.doTick();
+            if (player.containerMenu instanceof net.minecraft.world.inventory.ChestMenu) {
+                packFail("the menu stayed open twenty blocks from the horse");
+            }
+            helper.runAfterDelay(2L, () -> {
+                if (level.getBlockState(bottom) != wasBelow || level.getBlockState(bottom.above()) != wasAbove
+                        || com.example.horsegenetics.neoforge.server.HostedPacks.standing(server) != 0) {
+                    packFail("closing a carried chest did not put the world back: "
+                            + level.getBlockState(bottom) + " / " + level.getBlockState(bottom.above()));
+                }
+                // 6. Off it comes, whole - and an empty one comes off plain.
+                ItemStack whole = left.takeOff(horse);
+                if (!whole.isEmpty()) {
+                    packFail("a carried chest with thirteen items in it came off the horse");
+                }
+                ItemStack shown = com.example.horsegenetics.neoforge.server.HostedPacks.view(horse, left, face);
+                net.minecraft.core.NonNullList<ItemStack> back =
+                        net.minecraft.core.NonNullList.withSize(27, ItemStack.EMPTY);
+                shown.getOrDefault(net.minecraft.core.component.DataComponents.CONTAINER,
+                        net.minecraft.world.item.component.ItemContainerContents.EMPTY).copyInto(back);
+                if (!back.get(0).is(Items.IRON_INGOT) || back.get(0).getCount() != 10
+                        || !back.get(5).is(Items.DIAMOND)) {
+                    packFail("the chest as an item does not hold what was put in it while it stood");
+                }
+                com.example.horsegenetics.neoforge.server.HostedPacks.forget(horse, left);
+                ItemStack emptyFace = com.example.horsegenetics.neoforge.server.HostedPacks
+                        .adopt(horse, left, new ItemStack(Items.CHEST));
+                ItemStack plain = com.example.horsegenetics.neoforge.server.HostedPacks.view(horse, left, emptyFace);
+                if (!ItemStack.isSameItemSameComponents(plain, new ItemStack(Items.CHEST))) {
+                    packFail("an empty chest carried whole came back differing from a fresh chest: "
+                            + plain.getComponentsPatch());
+                }
+                com.example.horsegenetics.neoforge.server.HostedPacks.forget(horse, left);
+                horse.discard();
+                helper.succeed();
+            });
+        });
     }
 
     /**

@@ -83,6 +83,13 @@ public final class HorseStorage {
      */
     public static final TagKey<Item> KEEPS_CONTENTS = tag("horse_storage/keeps_contents");
 
+    /**
+     * Another mod's storage that should open as this mod's plain grid rather
+     * than as its own block - the off switch, per item, for
+     * {@code server/HostedPacks}.
+     */
+    public static final TagKey<Item> PLAIN_SCREEN = tag("horse_storage/plain_screen");
+
     /** What a chest that is storage only because a tag says so is given. */
     public static final int UNKNOWN_SIZE = 27;
 
