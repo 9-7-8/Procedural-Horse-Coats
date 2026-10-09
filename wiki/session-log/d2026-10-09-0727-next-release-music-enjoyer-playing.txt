@@ -1,0 +1,99 @@
+2026-10-09 07:27 - next-release: #217, a jukebox pays music-enjoyer bond only while it plays
+(the time is the END of the session, local; it began about twenty minutes earlier)
+
+ASKED
+-----
+1. "/next-release" - the owner ran procedures/next-release.txt. It found v0.5.046 as the
+   next release, put the two open issues with no milestone on one (#217, #220), and
+   picked #217 as the run's one unit. The three other bugs on the milestone (#10, #31,
+   #36) each have a fix in and a last comment saying they wait on a check, so they were
+   skipped as the procedure says.
+2. Asked with the question tool how #217 should pay (it carried needs-owner). The owner
+   answered "Only while playing (Recommended)". That made it buildable; it was built by
+   procedures/fix-bug.txt.
+
+DONE
+----
+Fix #217 - commit d4c12b91. Issue CLOSED, on milestone v0.5.046.
+  What was wrong: the `near_jukebox` world flag in
+  neoforge-26.1.2/.../server/GeneAbilityHandler.java (sampleWorld) read the jukebox
+  block's HAS_RECORD state. A disc that has played to its end stays in the box, so one
+  disc inserted once paid every tamed Msc/Msc horse within eight blocks the whole daily
+  bond cap, every day, with nobody there and no music (measured in the yard's MUSIC pen on
+  2026-10-08: 56 to 70 over 6,000 ticks beside a finished disc).
+  The fix: the search moved into a public static
+  GeneAbilityHandler.jukeboxPlayingNear(Level, BlockPos). It still reads HAS_RECORD first
+  (a block-state read) and only then fetches the block entity and asks
+  JukeboxBlockEntity.getSongPlayer().isPlaying(). In the 26.1.2 sources isPlaying is "a
+  song is set", and JukeboxSongPlayer.tick calls stop() when the song has finished; the
+  jukebox ticks only while HAS_RECORD is true (JukeboxBlock.getTicker). The 20-tick
+  sampling and the reach are unchanged. The flag's name is unchanged, so no gene file,
+  schema or fixture moved, and nothing saved changed (hard rule 10 not involved).
+  Proof: new gametest `jukebox_pays_only_while_playing` in ModGameTests (registered in
+  TEST_FUNCTIONS and in onRegisterGameTests). One jukebox, four states, through the
+  handler's own search: empty (false), disc in and playing (true), song stopped with the
+  disc left in (false), a fresh disc (true). With the isPlaying condition removed on
+  purpose, `./gradlew :neoforge-26.1.2:runGameTest` failed with exactly "a finished record
+  still in the jukebox (HAS_RECORD true, not playing) counted as music" (1 required test
+  failed); with the fix, "All 59 required tests passed". Then
+  `./gradlew :neoforge-26.1.2:build` green and check-parity OK.
+  Docs in the same commit: wiki/gene-music-enjoyer.html - the Coding tab gained
+  #pays-only-while-playing and #verified-finished-record now reads as history; the
+  Verification tab gained one in-game look. Bakes run: sync-page-views (nothing),
+  bake-verification-index, bake-roadmap-index, check-roadmap-execution,
+  build-search-index, check-links, bake-agent-text.
+  Pictures: no pictures. A bond number is not something a screenshot shows.
+
+Milestones (GitHub only, no commit):
+  - #217 (tuning, found-in-yard) had no milestone: put on v0.5.046, needs-owner removed
+    after the owner's answer, listed in that milestone's description, now under "Bugs
+    fixed and closed on this milestone".
+  - #220 (storage harness remainder: enchantments, other mods' metals) had no milestone:
+    put on Backlog, with a line in Backlog's description.
+  - The release-plan issue #196 has one line under v0.5.046 saying both.
+
+DECIDED
+-------
+- (owner) #217: a jukebox pays music-enjoyer bond only while a record is playing.
+  Recorded on the issue and on wiki/gene-music-enjoyer.html#pays-only-while-playing.
+- (made without the owner) #220 goes on Backlog, not a release. It is labelled `scoped`
+  but what is left of it has no size label and two open owner calls, and the plan places
+  only sized pieces. It joins a release when it is sized. Recorded in the Backlog
+  milestone's description and in #196.
+- (made without the owner) the gametest ends the song with JukeboxSongPlayer.stop rather
+  than waiting out a three-minute disc, because that is the call the jukebox's own tick
+  makes at the end of a song.
+
+FOUND ON THE WAY
+----------------
+- No bugs filed.
+- The gameplay tab of the gene page already said "near a playing jukebox", and so did the
+  gene's description in MusicEnjoyerGene; the code now matches the words.
+- common/horse/StasisProduce's javadoc mentions "is a jukebox playing" as a world flag a
+  stored horse cannot read; untouched, still true.
+
+PROCEDURES
+----------
+- procedures/next-release.txt, step 2: a `scoped` issue with NO size label (a built
+  feature's unscoped remainder, like #220) had no rule. It now says: Backlog, with a
+  line in that milestone's description, until it is sized.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run; nothing in common/ changed.
+- Not seen in game: a real disc running out beside a horse, and the hearts stopping with
+  it. On wiki/gene-music-enjoyer.html's Verification tab ("The bond stops when the song
+  ends"), beside the older "The hearts show".
+- Still waiting on their checks, on v0.5.046: #10 (in-game look at the stasis bank's
+  Chambers tab), #36 (in-game: plain hold of the command whistle), #31 (the live
+  server's log after an F6 entry).
+
+RELEASE
+-------
+Not offered. v0.5.046 still has open features (#157, #125, #130) and three bugs waiting
+on checks.
+
+PICK UP FIRST
+-------------
+#157 Head parts - slice B (ear fins, cheek spikes, brow ridge), the next unit of v0.5.046,
+by procedures/next-release.txt (it hands to process-intake). It has no owner call open.

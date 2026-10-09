@@ -54,6 +54,9 @@ STEPS
      everything it depends on, in the first release with room (about 10 points,
      S=1 M=2 L=5). Add it to that milestone's description and to the release-plan
      issue's list in the same edit.
+   - a `scoped` issue with NO size label (what is left of a feature that was built
+     without it, like #220's enchantments) -> `Backlog`, with a line in that milestone's
+     description saying what would size it. The plan places only sized pieces.
    Moving an issue between milestones edits BOTH milestone descriptions and the
    release-plan issue, so the three never disagree.
    A bug the owner PARKS leaves the releases altogether: it goes on `Backlog`, under
