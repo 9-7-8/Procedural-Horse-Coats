@@ -174,3 +174,42 @@ PICK UP FIRST
 -------------
 Have the owner play horse-gear.html#verify-packs with Sophisticated Storage installed
 (hand-over-a-test), and answer the two needs-owner questions on #218 and #220.
+
+CONTINUED 2026-10-09 06:10 (same session, the owner back)
+---------------------------------------------------------
+ASKED: "Gear should all drop as items on death. Can you run the full tests now, and build
+some yard tests for this and test those?"
+
+DONE
+7. #218, gear on death (owner's answer). 7acbfa07 (code), 6bbcea04 (docs).
+   HorsePackHandler.onDrops adds the harness and any other attachment gear to the drops
+   after the chests (TackEquipHandler.takeGear); HorseResurrection.revive takes the same
+   gear off the snapshot. Gametest horse_carries_chests asserts the harness drops once.
+   Closed.
+8. Yard row BE, DebugYardPacks: seven clockwork checks, in the same commit. Launched with
+   -PyardSprint=600000 at 06:29; all seven PASS at 06:30 on the first launch, no ERROR and
+   no other FAIL or INCONCLUSIVE line in the log. PACK HARNESS FIRST, PACK LOAD (0.2250 ->
+   0.1369, kept 0.6083 = PackLoad's figure), PACK STASIS, PACK DEATH (everything left
+   behind once; 0 set down as blocks, because the debug dimension refuses a placed block -
+   so it proves the fallback, not the placing), PACK RAISED, PACK REAL MENU, PACK HOSTED (a
+   barrel 129 blocks under the real player, still open after forty real ticks, world put
+   back). Under the owner's rule the pens were then removed; the records are on
+   wiki/horse-gear.html#verified-yard-packs. No pictures: nothing visible changed.
+9. The release set again, on 7acbfa07: every node check; the full :common:test FORCED with
+   --rerun (the first attempt was UP-TO-DATE and ran nothing): 1698 tests, 0 failures,
+   14m 57s; :neoforge-26.1.2:test 37 tests, 0 failures; runGameTest 58 of 58; the seven
+   browser checks; a dedicated-server boot to Done with no ERROR of ours.
+
+FOUND ON THE WAY
+7. Mistake: a scripted edit to ModAttachments.java sliced from the wrong "copyOnDeath so a"
+   and removed several registrations. The build caught it; the file was restored from git
+   and the edit redone on the exact text.
+8. A Gradle test task that is UP-TO-DATE runs nothing and exits 0. "Run the full tests"
+   needs --rerun when common/ has not changed since the last run.
+
+STILL NOT SEEN IN A GAME: a modded chest on a horse; chests actually set down where a horse
+fell (the yard cannot place blocks); anything a player's hands do inside a menu.
+
+PICK UP FIRST (replaces the line above): have the owner play
+horse-gear.html#verify-packs with Sophisticated Storage installed (hand-over-a-test), and
+answer the enchantment question on #220.

@@ -782,6 +782,51 @@
     copper chest: upright, latch outward on both flanks.
 </p>
 
+<h3 id="verified-yard-packs">Seen in the yard, 2026-10-09</h3>
+<p>
+    Seven clockwork checks (<code>DebugYardPacks</code>, row BE, in git at <code>7acbfa07</code>)
+    all passed on their first launch at 06:30 and the pens were removed. They are what the
+    gametests cannot do: a real death, a whole-entity save, the live attribute, and menus on
+    a real player's connection.
+</p>
+<table>
+    <tr><th>Check</th><th>What was read</th></tr>
+    <tr><td>PACK HARNESS FIRST</td>
+        <td>The hands, holding two chests, clicked a bare horse: refused with
+            <code>message.horsegenetics.pack.needs_harness</code>, both chests still held. A copper
+            harness by click went on; two more clicks hung a chest on each flank; the harness then
+            would not come off.</td></tr>
+    <tr><td>PACK LOAD</td>
+        <td>1728 items on a pull-5 horse in a netherite harness: the live speed attribute went
+            0.2250 &rarr; 0.1369, a kept share of 0.6083, which is <code>PackLoad</code>'s own figure
+            (0.5647 without the harness); emptied, 0.2250 again.</td></tr>
+    <tr><td>PACK STASIS</td>
+        <td>A horse with an iron harness, a chest (64 cobblestone in slot 7) and a shulker box (5
+            diamonds) went through <code>HorseStasisHandler.snapshot</code>, was discarded and
+            released: all of it back in the same slots, the synced load 64 and 5, the speed
+            modifier re-made on join.</td></tr>
+    <tr><td>PACK DEATH</td>
+        <td>A harnessed horse with a chest and a barrel killed with <code>genericKill</code>, through
+            every death handler: one chest, one barrel, 64 cobblestone, 5 diamonds, 32 iron and one
+            golden harness left behind, and nothing on the body. <strong>None was set down as a
+            block</strong>: the debug dimension refuses every block an entity places, so this is
+            the claim-refused fallback, proven against a real protection handler. The placing
+            itself is the gametest's and has not been seen in a game.</td></tr>
+    <tr><td>PACK RAISED</td>
+        <td>The same horse raised from a snapshot taken before it died: no harness, no chests, an
+            empty store.</td></tr>
+    <tr><td>PACK REAL MENU</td>
+        <td>For the dev client's own player: <code>HorsePackHandler.open</code> opened vanilla's
+            <code>ChestMenu</code>; forty real ticks later it was still open, and ten ingots put in
+            a slot were counted on the horse and in the synced load.</td></tr>
+    <tr><td>PACK HOSTED</td>
+        <td>A barrel carried whole and opened as its block stood <strong>129 blocks under the
+            player</strong>; forty real ticks on, the menu was still open &mdash; far outside block
+            reach, so the mixins held it through the real <code>ServerPlayer.tick</code> &mdash;
+            seven ingots were counted on the horse, and after closing both blocks were back and
+            the journal empty.</td></tr>
+</table>
+
 <h3 id="gear-leaves">What the other slots do when a horse leaves</h3>
 <p>
     Fixed 2026-10-08 (#218). A horse <strong>sold</strong> to a cowboy or the trader, or
@@ -1538,8 +1583,8 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 </p>
 <ul>
     <li><strong>Put things in, log out, log in.</strong> The stacks are where they were,
-        in the slots they were in. Then the same across a server restart, and through a
-        stasis chamber and back.</li>
+        in the slots they were in. Then the same across a server restart. (A whole-entity
+        save and load is <a href="#verified-yard-packs">seen</a>; a real relog is not.)</li>
     <li><strong>Shift-click a full inventory into a chest and back</strong>, and
         double-click to gather a stack: nothing duplicated, nothing short. The store
         hands vanilla its live stacks, and this is the path that proves that was
@@ -1551,12 +1596,15 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
     <li><strong>Kill a loaded horse.</strong> Two chests standing where it fell, each with
         its contents in the slots they were in, and nothing of them loose on the ground.
         Then kill one in a one-block tunnel, in water, and inside a claim: what cannot be
-        placed must drop instead, once. Then resurrect it: it comes back with no chests. On a horse that
+        placed must drop instead, once. (The drop-instead half and the bare resurrection are
+        <a href="#verified-yard-packs">seen</a>; chests actually standing where a horse fell
+        have only been seen by a gametest.) Then resurrect it: it comes back with no chests. On a horse that
         turns to something when it dies (a gene with a death drop), the luggage must still
         be there.</li>
     <li><strong>Sell a loaded horse to a cowboy, and turn one loose:</strong> the chests
         and contents are in your inventory or at your feet.</li>
-    <li><strong>Load it and ride it.</strong> Two full chests should halve a pull-10
+    <li><strong>Load it and ride it.</strong> (The speed attribute moving by the right amount is
+        <a href="#verified-yard-packs">seen</a>; what it feels like under a rider is not.) Two full chests should halve a pull-10
         horse's speed and leave an ordinary one at a crawl, the Gear tab's <em>Carrying</em> line should say so, and emptying
         them should give the speed back at once. A horse at its maximum should not walk.
         Then <code>packs.weight = false</code> on the server and a relog.</li>
