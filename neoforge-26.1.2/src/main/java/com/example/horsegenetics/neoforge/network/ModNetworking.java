@@ -716,7 +716,8 @@ public final class ModNetworking {
             // there and a click that does nothing reads as a bug.
             if (!tack.mayTakeOff(horse)) {
                 serverPlayer.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
-                        "message.horsegenetics.pack.not_empty", worn.getHoverName()), true);
+                        tack.isStorage() ? "message.horsegenetics.pack.not_empty"
+                                : "message.horsegenetics.pack.harness_in_use", worn.getHoverName()), true);
                 return;
             }
             // takeOff, not the stack read above: a shulker box leaves with its

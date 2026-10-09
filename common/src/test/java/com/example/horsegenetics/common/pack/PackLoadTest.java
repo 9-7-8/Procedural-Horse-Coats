@@ -105,6 +105,36 @@ class PackLoadTest {
         assertTrue(kept >= 0.0 && kept <= 1.0, "retention out of range: " + kept);
     }
 
+    @Test
+    @DisplayName("the best harness takes a tenth off by default, and the tiers divide it evenly")
+    void theHarnessLightensTheLoad() {
+        assertEquals(0.10, HarnessTier.NETHERITE.reduction(PackLoad.DEFAULT_HARNESS_BEST), EPS);
+        double last = 0.0;
+        for (final HarnessTier tier : HarnessTier.values()) {
+            final double reduction = tier.reduction(PackLoad.DEFAULT_HARNESS_BEST);
+            assertEquals(last + PackLoad.DEFAULT_HARNESS_BEST / HarnessTier.values().length, reduction, EPS,
+                    tier + " should be one even step above the tier below it");
+            last = reduction;
+        }
+        assertEquals(900.0, PackLoad.lightened(1000, 0.10), EPS);
+        assertEquals(0.0, PackLoad.lightened(0, 0.10), EPS);
+        // A lighter load is a faster horse, on the same curve.
+        final PackLoad.Curve curve = PackLoad.Curve.DEFAULT;
+        assertTrue(PackLoad.retention(curve, PackLoad.lightened(2000, 0.10), HorseTraits.BASE_PULL)
+                > PackLoad.retention(curve, 2000, HorseTraits.BASE_PULL));
+    }
+
+    @Test
+    @DisplayName("a server may make the harness matter more, and never make a load weigh nothing")
+    void aServerMaySetTheHarness() {
+        assertEquals(0.50, HarnessTier.NETHERITE.reduction(0.50), EPS);
+        assertEquals(0.125, HarnessTier.COPPER.reduction(0.50), EPS);
+        assertEquals(0.0, HarnessTier.NETHERITE.reduction(0.0), EPS);
+        assertEquals(PackLoad.MAX_HARNESS_BEST, HarnessTier.NETHERITE.reduction(7.0), EPS);
+        assertEquals(PackLoad.DEFAULT_HARNESS_BEST, PackLoad.harnessBest(Double.NaN), EPS);
+        assertTrue(PackLoad.lightened(1000, 99.0) > 0.0, "a harness must not make a load weightless");
+    }
+
     // ------------------------------------------------------------------
     // The click box
     // ------------------------------------------------------------------

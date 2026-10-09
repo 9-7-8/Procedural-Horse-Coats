@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather",
+    "minecraft:leather",
+    "horsegenetics:horse_hair",
+    "minecraft:gold_ingot",
+    "minecraft:gold_ingot"
+  ],
+  "result": {
+    "id": "horsegenetics:golden_storage_harness"
+  }
+}

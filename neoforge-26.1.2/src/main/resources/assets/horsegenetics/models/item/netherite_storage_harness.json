@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "horsegenetics:item/storage_harness_leather",
+    "layer1": "horsegenetics:item/storage_harness_fittings_netherite"
+  }
+}

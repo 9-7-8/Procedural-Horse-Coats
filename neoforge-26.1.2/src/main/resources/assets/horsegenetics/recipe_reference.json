@@ -563,6 +563,19 @@
       "count": 1
     },
     {
+      "id": "copper_storage_harness",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:leather",
+        "minecraft:leather",
+        "horsegenetics:horse_hair",
+        "minecraft:copper_ingot",
+        "minecraft:copper_ingot"
+      ],
+      "out": "horsegenetics:copper_storage_harness",
+      "count": 1
+    },
+    {
       "id": "cowboy_hitch",
       "kind": "shapeless",
       "in": [
@@ -899,6 +912,19 @@
       "count": 1
     },
     {
+      "id": "golden_storage_harness",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:leather",
+        "minecraft:leather",
+        "horsegenetics:horse_hair",
+        "minecraft:gold_ingot",
+        "minecraft:gold_ingot"
+      ],
+      "out": "horsegenetics:golden_storage_harness",
+      "count": 1
+    },
+    {
       "id": "golden_whistle",
       "kind": "shapeless",
       "in": [
@@ -965,6 +991,19 @@
         "minecraft:book"
       ],
       "out": "horsegenetics:intermediate_stasis_chamber",
+      "count": 1
+    },
+    {
+      "id": "iron_storage_harness",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:leather",
+        "minecraft:leather",
+        "horsegenetics:horse_hair",
+        "minecraft:iron_ingot",
+        "minecraft:iron_ingot"
+      ],
+      "out": "horsegenetics:iron_storage_harness",
       "count": 1
     },
     {
@@ -1410,6 +1449,18 @@
         "minecraft:iron_ingot"
       ],
       "out": "horsegenetics:metalsmiths_post",
+      "count": 1
+    },
+    {
+      "id": "netherite_storage_harness",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:leather",
+        "minecraft:leather",
+        "horsegenetics:horse_hair",
+        "minecraft:netherite_ingot"
+      ],
+      "out": "horsegenetics:netherite_storage_harness",
       "count": 1
     },
     {

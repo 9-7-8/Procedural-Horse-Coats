@@ -1797,9 +1797,10 @@ public final class HorseInfoScreen extends Screen {
         // as broken rather than as unfinished.
         c.gap(4);
         c.wrapped("The saddle, the barding, the mane and the tail have something to put in "
-                + "them, and the two packs take a chest, a barrel, a shulker box or anything "
-                + "else that stores items. The other thirteen slots are built and empty - the "
-                + "gear that fills them is still to be made.", DIM_TEXT, 0);
+                + "them. The harness slot takes a storage harness, and once that is on the two "
+                + "packs take a chest, a barrel, a shulker box or anything else that stores "
+                + "items. The other thirteen slots are built and empty - the gear that fills "
+                + "them is still to be made.", DIM_TEXT, 0);
     }
 
     /**
@@ -1817,8 +1818,10 @@ public final class HorseInfoScreen extends Screen {
         var load = horse.getData(ModAttachments.HORSE_PACK_LOAD.get());
         var curve = com.example.horsegenetics.neoforge.ServerConfig.packCurve();
         long weighed = load.weighed();
+        double eased = com.example.horsegenetics.neoforge.server.HorsePackHandler.harnessReduction(horse);
         int kept = (int) Math.round(100.0 * com.example.horsegenetics.common.pack.PackLoad.retention(
-                curve, weighed, traits().pull()));
+                curve, com.example.horsegenetics.common.pack.PackLoad.lightened(weighed, eased),
+                traits().pull()));
         String carried = (load.left() + load.right()) + " items";
         if (!curve.enabled() || weighed == 0) {
             c.pair("Carrying", carried, VALUE);

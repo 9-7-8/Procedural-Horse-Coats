@@ -123,6 +123,13 @@ public final class TackEquipHandler {
             return;
         }
 
+        if (!HorseTackSlot.harnessed(horse) && HorseTackSlot.SADDLEBAG_LEFT.fits(horse, stack)) {
+            // A rule of this mod's, so it is said rather than left to look like
+            // a click that did nothing: a chest needs a harness to hang from.
+            refuse(event, player, client, "message.horsegenetics.pack.needs_harness", horse);
+            return;
+        }
+
         HorseTackSlot target = firstEmptySlotFor(horse, player, stack);
         if (target == null) {
             return;     // nothing free that takes it - fall through, and let them mount

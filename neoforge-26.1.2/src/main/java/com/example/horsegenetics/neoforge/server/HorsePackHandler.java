@@ -345,8 +345,8 @@ public final class HorsePackHandler {
         if (speed == null) {
             return;
         }
-        double modifier = PackLoad.speedModifier(ServerConfig.packCurve(), load.weighed(),
-                HorseDraft.pullOf(horse));
+        double modifier = PackLoad.speedModifier(ServerConfig.packCurve(),
+                PackLoad.lightened(load.weighed(), harnessReduction(horse)), HorseDraft.pullOf(horse));
         AttributeModifier current = speed.getModifier(LOAD_MODIFIER_ID);
         if (modifier >= 0.0) {
             if (current != null) {
@@ -356,6 +356,17 @@ public final class HorsePackHandler {
             speed.addOrUpdateTransientModifier(new AttributeModifier(
                     LOAD_MODIFIER_ID, modifier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
+    }
+
+    /**
+     * The share of its load this horse's harness takes off: its fittings' tier
+     * of the server's {@code packs.harness_best_reduction}, and nothing for a
+     * horse wearing none. Both sides - the Gear tab works the same sum out.
+     */
+    public static double harnessReduction(AbstractHorse horse) {
+        return HorseTackSlot.HARNESS.on(horse).getItem()
+                instanceof com.example.horsegenetics.neoforge.item.StorageHarnessItem harness
+                ? harness.reduction() : 0.0;
     }
 
     @SubscribeEvent

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather",
+    "minecraft:leather",
+    "horsegenetics:horse_hair",
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot"
+  ],
+  "result": {
+    "id": "horsegenetics:copper_storage_harness"
+  }
+}

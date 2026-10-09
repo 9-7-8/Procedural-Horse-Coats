@@ -3670,10 +3670,39 @@ public final class ModGameTests {
                         + " an ender chest at zero means gear/saddlebag_* did not");
             }
         }
+        // 1b. No harness, no chest (#220): the slot refuses, and a right-click
+        //     holding one is a refusal said out loud - claimed, and nothing spent.
+        var harness = com.example.horsegenetics.neoforge.entity.HorseTackSlot.HARNESS;
+        if (!com.example.horsegenetics.neoforge.ServerConfig.packHarnessRequired()) {
+            packFail("packs.harness_required is off in this run's server config - turn it back on"
+                    + " rather than deleting the test");
+        }
+        if (left.accepts(horse, new ItemStack(Items.CHEST))) {
+            packFail("a chest went on a horse with no harness to hang it from");
+        }
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.CHEST, 2));
+        player.setXRot(-90f);
+        assertClaimed(helper, player, horse, true, "a chest offered to a horse with no harness");
+        assertHeld(helper, player, 2, "a chest was spent on a horse with no harness");
+        if (!left.on(horse).isEmpty() || !right.on(horse).isEmpty()) {
+            packFail("a right-click hung a chest on a horse with no harness");
+        }
+        ItemStack iron = new ItemStack(ModItems.IRON_STORAGE_HARNESS.get());
+        if (!harness.accepts(horse, iron) || left.accepts(horse, iron)
+                || harness.accepts(horse, new ItemStack(Items.CHEST))) {
+            packFail("a harness must fit the harness slot and only that, and a chest must not");
+        }
+        harness.set(horse, iron);
+        double eased = com.example.horsegenetics.neoforge.server.HorsePackHandler.harnessReduction(horse);
+        if (Math.abs(eased - com.example.horsegenetics.common.pack.HarnessTier.IRON.reduction(
+                com.example.horsegenetics.neoforge.ServerConfig.packHarnessBestReduction())) > 1.0e-9
+                || eased <= 0.0) {
+            packFail("an iron harness should take its tier's share off the load; it takes " + eased);
+        }
         if (!left.accepts(horse, new ItemStack(Items.CHEST))
                 || com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE
                         .accepts(horse, new ItemStack(Items.CHEST))) {
-            packFail("a chest must fit a pack slot and no other slot");
+            packFail("a chest must fit a pack slot on a harnessed horse, and no other slot");
         }
 
         // 2. Right-click with a chest in hand: it goes on the flank the player
@@ -3714,8 +3743,18 @@ public final class ModGameTests {
         if (load.left() != 64 || load.right() != 0 || load.weighed() != 64) {
             packFail("64 cobblestone in the near chest counted as " + load);
         }
-        double expected = com.example.horsegenetics.common.pack.PackLoad.speedModifier(curve, 64,
+        double expected = com.example.horsegenetics.common.pack.PackLoad.speedModifier(curve,
+                com.example.horsegenetics.common.pack.PackLoad.lightened(64, eased),
                 com.example.horsegenetics.neoforge.server.HorseDraft.pullOf(horse));
+        double bare = com.example.horsegenetics.common.pack.PackLoad.speedModifier(curve, 64,
+                com.example.horsegenetics.neoforge.server.HorseDraft.pullOf(horse));
+        if (expected <= bare) {
+            packFail("a harness should make the same load cost less speed");
+        }
+        // The harness is what the chests hang from: it stays on while they do.
+        if (harness.mayTakeOff(horse) || !harness.takeOff(horse).isEmpty() || harness.on(horse).isEmpty()) {
+            packFail("a harness came off a horse that was still carrying a chest");
+        }
         var speed = horse.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
         var modifier = speed.getModifier(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "pack_load"));
         if (expected >= 0.0 || modifier == null || Math.abs(modifier.amount() - expected) > 1.0e-9) {

@@ -80,6 +80,12 @@ public enum HorseTackSlot {
             "A rug or a sheet - what a horse wears when it is not being ridden.", 0.66f, 0.01f),
 
     // -- Storage ------------------------------------------------------------
+    // The strap and frame a chest hangs from. It goes on before either chest
+    // does, and comes off after both (owner, 2026-10-08) - see accepts and
+    // mayTakeOff. Listed before the two packs so that it is also tried first.
+    HARNESS(null, Zone.STORAGE, "Harness",
+            "A storage harness - the strap and frame a chest hangs from. It goes on before any chest.",
+            0.75f, 0.15f),
     // What goes here is not a tag's business: a chest, a barrel, a shulker box,
     // another mod's crate - anything HorseStorage finds an inventory in. The
     // names say "saddlebag" because they are keys in saved worlds and were
@@ -190,7 +196,16 @@ public enum HorseTackSlot {
 
     /** Whether this is one of the two slots a chest hangs in - see {@link HorseStorage}. */
     public boolean isStorage() {
-        return zone == Zone.STORAGE;
+        return this == SADDLEBAG_LEFT || this == SADDLEBAG_RIGHT;
+    }
+
+    /**
+     * Whether this horse can have a chest hung on it: it wears a harness, or
+     * the server has said none is needed ({@code packs.harness_required}).
+     */
+    public static boolean harnessed(AbstractHorse horse) {
+        return !com.example.horsegenetics.neoforge.ServerConfig.packHarnessRequired()
+                || !HARNESS.on(horse).isEmpty();
     }
 
     /** What the horse is wearing here. A copy for gear slots; never mutate it. */
@@ -224,7 +239,7 @@ public enum HorseTackSlot {
         }
         HorseGear gear = horse.getData(ModAttachments.HORSE_GEAR);
         horse.setData(ModAttachments.HORSE_GEAR, gear.with(name(), stack));
-        if (isStorage() && !horse.level().isClientSide()) {
+        if ((isStorage() || this == HARNESS) && !horse.level().isClientSide()) {
             HorsePackHandler.refresh(horse);
         }
     }
@@ -236,6 +251,11 @@ public enum HorseTackSlot {
      * exception - it comes off full, because that is what a shulker box is.
      */
     public boolean mayTakeOff(AbstractHorse horse) {
+        if (this == HARNESS) {
+            // The chests hang from it. They come off first.
+            return !com.example.horsegenetics.neoforge.ServerConfig.packHarnessRequired()
+                    || (SADDLEBAG_LEFT.on(horse).isEmpty() && SADDLEBAG_RIGHT.on(horse).isEmpty());
+        }
         return !isStorage() || HorsePackHandler.mayTakeOff(horse, this);
     }
 
@@ -271,6 +291,9 @@ public enum HorseTackSlot {
         }
         if (slot != null) {
             return horse.isEquippableInSlot(stack, slot);
+        }
+        if (isStorage() && !harnessed(horse)) {
+            return false;   // nothing to hang it from
         }
         return fits(horse, stack);
     }

@@ -414,6 +414,26 @@ public final class ModItems {
     public static final DeferredItem<RescuingBraidItem> RESCUING_BRAID =
             register("rescuing_braid", properties -> new RescuingBraidItem(properties.stacksTo(1)));
 
+    // --- storage harnesses - what a chest hangs from ----------------------
+    // One per metal the fittings can be made of; the metal is the tier, and the
+    // tier is the share of the load it takes off (common.pack.HarnessTier). The
+    // ids are vanilla's own spelling for the same metals - "golden", not "gold".
+    // stacksTo(1): it is worn, one to a horse.
+    public static final DeferredItem<StorageHarnessItem> COPPER_STORAGE_HARNESS = harness("copper",
+            com.example.horsegenetics.common.pack.HarnessTier.COPPER);
+    public static final DeferredItem<StorageHarnessItem> IRON_STORAGE_HARNESS = harness("iron",
+            com.example.horsegenetics.common.pack.HarnessTier.IRON);
+    public static final DeferredItem<StorageHarnessItem> GOLDEN_STORAGE_HARNESS = harness("golden",
+            com.example.horsegenetics.common.pack.HarnessTier.GOLD);
+    public static final DeferredItem<StorageHarnessItem> NETHERITE_STORAGE_HARNESS = harness("netherite",
+            com.example.horsegenetics.common.pack.HarnessTier.NETHERITE);
+
+    private static DeferredItem<StorageHarnessItem> harness(String metal,
+            com.example.horsegenetics.common.pack.HarnessTier tier) {
+        return register(metal + "_storage_harness",
+                properties -> new StorageHarnessItem(tier, properties.stacksTo(1)));
+    }
+
     // --- transfer papers - how a horse changes hands --------------------
     // A blank is bound to whoever crafted it and can only be signed against a
     // horse that player currently owns; signing it produces a signed paper,

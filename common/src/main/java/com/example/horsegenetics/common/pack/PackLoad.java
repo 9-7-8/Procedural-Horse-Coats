@@ -75,6 +75,15 @@ public final class PackLoad {
     /** {@code packs.min_speed} - the fraction of its speed a horse at its maximum keeps. */
     public static final double DEFAULT_MIN_SPEED = 0.0;
 
+    /**
+     * {@code packs.harness_best_reduction} - the share of the load the best
+     * storage harness takes off. See {@link HarnessTier}.
+     */
+    public static final double DEFAULT_HARNESS_BEST = 0.10;
+
+    /** A harness may lighten a load; it may not make it weigh nothing. */
+    public static final double MAX_HARNESS_BEST = 0.95;
+
     public static final int MAX_ITEMS_LIMIT = 10_000_000;
     public static final double MIN_EXPONENT = 0.1;
     public static final double MAX_EXPONENT = 10.0;
@@ -113,6 +122,25 @@ public final class PackLoad {
         }
     }
 
+    /** A server's harness setting, kept to what a harness may do. */
+    public static double harnessBest(final double best) {
+        return Double.isNaN(best) ? DEFAULT_HARNESS_BEST : Math.max(0.0, Math.min(MAX_HARNESS_BEST, best));
+    }
+
+    /**
+     * What {@code items} weigh on a horse whose harness takes {@code reduction}
+     * of the load off: the number the curve is asked about. Fractional, because
+     * a tenth off sixty-four items is not a whole number of items and rounding
+     * it would make a harness worth nothing on a small load.
+     */
+    public static double lightened(final long items, final double reduction) {
+        if (items <= 0) {
+            return 0.0;
+        }
+        final double kept = 1.0 - Math.max(0.0, Math.min(MAX_HARNESS_BEST, reduction));
+        return items * kept;
+    }
+
     /** The most this horse can carry: where the curve ends. */
     public static double most(final Curve curve, final double pull) {
         return curve.maxItems() * CartDraft.capacity(pull);
@@ -124,7 +152,7 @@ public final class PackLoad {
     }
 
     /** How far along its curve this load puts this horse: 0 unburdened, 1 at its maximum. */
-    public static double fraction(final Curve curve, final long items, final double pull) {
+    public static double fraction(final Curve curve, final double items, final double pull) {
         if (!curve.enabled() || items <= 0) {
             return 0.0;
         }
@@ -140,7 +168,7 @@ public final class PackLoad {
      * The fraction of its own speed a horse keeps carrying {@code items}:
      * {@code 1.0} for an empty one, {@code curve.minSpeed()} at its maximum.
      */
-    public static double retention(final Curve curve, final long items, final double pull) {
+    public static double retention(final Curve curve, final double items, final double pull) {
         final double fraction = fraction(curve, items, pull);
         if (fraction <= 0.0) {
             return 1.0;
@@ -153,7 +181,7 @@ public final class PackLoad {
      * zero. Named for the operation it feeds, as {@link CartDraft#speedModifier}
      * is - a wrong sign here makes a loaded horse faster.
      */
-    public static double speedModifier(final Curve curve, final long items, final double pull) {
+    public static double speedModifier(final Curve curve, final double items, final double pull) {
         return retention(curve, items, pull) - 1.0;
     }
 }

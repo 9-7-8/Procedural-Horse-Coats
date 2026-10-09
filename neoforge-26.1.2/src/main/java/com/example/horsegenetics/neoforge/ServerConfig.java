@@ -279,6 +279,19 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue PACK_PLACE_ON_DEATH;
 
     /**
+     * <b>Must a horse wear a storage harness before it carries a chest?</b> On -
+     * the default, and the owner's rule. See {@code HorseTackSlot.harnessed}.
+     */
+    public static final ModConfigSpec.BooleanValue PACK_HARNESS_REQUIRED;
+
+    /**
+     * <b>How much of the load the best harness takes off.</b> A tenth by
+     * default; every tier is an even share of it. See
+     * {@code common.pack.HarnessTier}.
+     */
+    public static final ModConfigSpec.DoubleValue PACK_HARNESS_BEST_REDUCTION;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -908,6 +921,24 @@ public final class ServerConfig {
                         "- no room within three blocks, or a protected area - is dropped as items",
                         "instead. Off, chests and contents always drop as items. Server-side.")
                 .define("packs.place_on_death", true);
+        PACK_HARNESS_REQUIRED = builder
+                .comment("Whether a horse needs a storage harness before it can carry a chest.",
+                        "(default: true) On, a chest goes on only a horse already wearing a",
+                        "harness, and the harness comes off only after both chests have. Off,",
+                        "chests hang on a bare horse and a harness is only its weight bonus.",
+                        "Server-side.")
+                .define("packs.harness_required", true);
+        PACK_HARNESS_BEST_REDUCTION = builder
+                .comment("How much lighter the best storage harness makes a horse's load. (default: 0.1)",
+                        "0.1 means what the horse carries weighs 10% less in a netherite harness.",
+                        "The other metals are even steps below it: gold three quarters of this,",
+                        "iron half, copper a quarter. Small by default on purpose, so that how",
+                        "much a horse carries stays a matter of breeding. A server that would",
+                        "rather it were a matter of gear raises this - 0.5 halves the load in the",
+                        "best harness. 0 makes every harness the same. Range 0 to 0.95. Server-side.")
+                .defineInRange("packs.harness_best_reduction",
+                        com.example.horsegenetics.common.pack.PackLoad.DEFAULT_HARNESS_BEST, 0.0,
+                        com.example.horsegenetics.common.pack.PackLoad.MAX_HARNESS_BEST);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -1589,6 +1620,24 @@ public final class ServerConfig {
                     PACK_CURVE_EXPONENT.get(), PACK_MIN_SPEED.get());
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.pack.PackLoad.Curve.DEFAULT;
+        }
+    }
+
+    /** {@code packs.harness_required}, safely. */
+    public static boolean packHarnessRequired() {
+        try {
+            return PACK_HARNESS_REQUIRED.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /** {@code packs.harness_best_reduction}, safely. */
+    public static double packHarnessBestReduction() {
+        try {
+            return PACK_HARNESS_BEST_REDUCTION.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.pack.PackLoad.DEFAULT_HARNESS_BEST;
         }
     }
 
