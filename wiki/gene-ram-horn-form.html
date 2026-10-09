@@ -21,7 +21,7 @@
 
 <p class="lede">
     The shape of a horned horse&rsquo;s <a href="gene-ram-horns.html">ram horns</a>: curled,
-    corkscrew, four-horned, horizontal twist or scurs. One shape on both sides. On a polled horse it does nothing.
+    scimitar, corkscrew, four-horned, horizontal twist or scurs. One shape on both sides. On a polled horse it does nothing.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -30,13 +30,14 @@
 
 <div class="gene-inheritance" data-gene="horsegenetics.ram_horn_form"></div>
 
-<h2 id="shapes">The five shapes</h2>
+<h2 id="shapes">The six shapes</h2>
 
 <table class="data">
     <thead><tr><th>Allele</th><th>Shape</th><th>Looks like</th></tr></thead>
     <tbody>
         <tr><td><code>Fhn</code></td><td>Four-horned</td><td>A short upright pair and a curled pair sweeping down &mdash; a Jacob sheep</td></tr>
         <tr><td><code>Crl</code></td><td>Curled</td><td>Back, down past the ear and forward again &mdash; the ordinary ram&rsquo;s horn</td></tr>
+        <tr><td><code>Sci</code></td><td>Scimitar</td><td>One long blade a side, rising from the skull and sweeping back over the neck &mdash; a goat or an ibex</td></tr>
         <tr><td><code>Crk</code></td><td>Corkscrew</td><td>Long, straight and twisted, rising up and out &mdash; a Racka or a markhor</td></tr>
         <tr><td><code>Hzt</code></td><td>Horizontal twist</td><td>Flat, wide horns straight out to the sides in a shallow twist &mdash; the old Egyptian ram, and Khnum</td></tr>
         <tr><td><code>Scr</code></td><td>Scurs</td><td>Loose stubs, the half-horned state</td></tr>
@@ -44,12 +45,15 @@
 </table>
 
 <p>
-    Each hides the ones below it: four-horned shows over anything, curl over corkscrew,
-    corkscrew over the horizontal twist, and everything over scurs. So scurs need two copies, and
-    two curled horses can throw a scurred foal. The horizontal twist is the rarest shape in the
-    wild and shows only beside another copy of itself or a scurs allele. How far it twists is the
-    horn&rsquo;s <a href="gene-ram-horns.html">curl</a> number, the one that says how far round a
-    curled horn goes.
+    Each hides the ones below it: four-horned shows over anything, curl over scimitar,
+    scimitar over corkscrew, corkscrew over the horizontal twist, and everything over scurs. So
+    scurs need two copies, and two curled horses can throw a scurred foal. A scimitar horse
+    crossed with a corkscrew one throws scimitars, and a curled horse still hides both. The
+    horizontal twist is the rarest shape in the wild and shows only beside another copy of itself
+    or a scurs allele. How far it twists is the horn&rsquo;s
+    <a href="gene-ram-horns.html">curl</a> number, the one that says how far round a curled horn
+    goes; on a scimitar the same number is the sweep, from a nearly straight blade to one that
+    arcs back level over the neck.
 </p>
 
 <h2 id="health">Is it good for the horse?</h2>
@@ -69,19 +73,19 @@
     <div><dt>Class</dt><dd><code>RamHornFormGene</code></dd></div>
     <div><dt>Priority</dt><dd>237 (magical band); only a code-order slot</dd></div>
     <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
-    <div><dt>Alleles</dt><dd><span class="allele wild">Crl</span> <span class="allele dom">Crk</span> <span class="allele dom">Fhn</span> <span class="allele dom">Scr</span> <span class="allele dom">Hzt</span> &mdash; dominance <code>Fhn &gt; Crl &gt; Crk &gt; Hzt &gt; Scr</code>; <code>Crl</code> is the default</dd></div>
-    <div><dt>Founders</dt><dd>Hardy&ndash;Weinberg over <code>Crl</code> 0.66, <code>Crk</code> 0.12, <code>Scr</code> 0.10, <code>Fhn</code> 0.08, <code>Hzt</code> 0.04</dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele wild">Crl</span> <span class="allele dom">Crk</span> <span class="allele dom">Fhn</span> <span class="allele dom">Scr</span> <span class="allele dom">Hzt</span> <span class="allele dom">Sci</span> &mdash; dominance <code>Fhn &gt; Crl &gt; Sci &gt; Crk &gt; Hzt &gt; Scr</code>; <code>Crl</code> is the default</dd></div>
+    <div><dt>Founders</dt><dd>Hardy&ndash;Weinberg over <code>Crl</code> 0.60, <code>Crk</code> 0.12, <code>Scr</code> 0.10, <code>Fhn</code> 0.08, <code>Sci</code> 0.06, <code>Hzt</code> 0.04</dd></div>
     <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
 </dl>
 
 <h2 id="order">Allele order is generator order</h2>
 
 <p>
-    <code>Crl, Crk, Fhn, Scr, Hzt</code> is the declaration order, the stored order, and
+    <code>Crl, Crk, Fhn, Scr, Hzt, Sci</code> is the declaration order, the stored order, and
     <code>RamHornGenerator</code>&rsquo;s shape indices, so <code>shapeOf(pair)</code> is the
     dominant allele&rsquo;s <code>order()</code> and the first factor of the mesh style. Dominance
-    is its own list. Append, never reorder: <code>Hzt</code> came later and went on the end,
-    so no saved horse changed shape, and <code>RamHornsGeneTest</code> pins the order.
+    is its own list. Append, never reorder: <code>Hzt</code> and then <code>Sci</code> came later and
+    went on the end, so no saved horse changed shape, and <code>RamHornsGeneTest</code> pins the order.
 </p>
 
 <h2 id="horizontal">The horizontal twist is a flat corkscrew laid level</h2>
@@ -97,6 +101,26 @@
     Neither ram-horned breed&rsquo;s pool names it, so
     <code>RamHornBreedsTest</code> checks the four shapes the pools do name. It cost the
     <a href="model-parts.html#box-budget">box budget</a> one raise.
+</p>
+
+<h2 id="scimitar">The scimitar is a curl that stops early</h2>
+
+<p>
+    <code>Sci</code> (2026-10-09, #130) is <code>RamHornGenerator.SCIMITAR</code>: the
+    curl&rsquo;s chain &mdash; one unbranched run of boxes that bend backward and never roll
+    &mdash; with a fraction of its bend. The root leans about 29&deg; back and 16&deg; out; the
+    curl bucket is the whole sweep, shared out over the segments (35&deg;, 55&deg;, 78&deg; or
+    100&deg;, where a curl turns 200&deg; to 390&deg;); the outward lean per segment is a fifth of
+    a curl&rsquo;s, so the two blades stay nearly parallel; and every box is narrower across
+    than it is deep (<code>PartNode.width</code> at 0.7 of its girth), a goat&rsquo;s horn in
+    section. It is 1.05 of its class length, the longest reach of the six. A horn is at most
+    twelve boxes against <code>MAX_NODES</code>, which settles the treatment&rsquo;s question
+    whether a blade fits. It has no ridges of its own beyond the horn region&rsquo;s texture. It
+    took 0.06 of the founder table from <code>Crl</code>. Its dominance slot, under curled and
+    over corkscrew, is the treatment&rsquo;s recommendation, taken with <code>Hzt</code> left
+    where it was. No breed pool names it yet; the goat breeds that pin it are later pieces
+    (#131 on). It fits inside the <a href="model-parts.html#box-budget">box budget</a>&rsquo;s
+    raise.
 </p>
 
 <h2 id="four">One root for four horns</h2>
@@ -117,7 +141,9 @@
 
 <p>
     The shapes are real sheep and goat horn types &mdash; the ram&rsquo;s spiral, the
-    straight twisted horn of the Hungarian Racka, the two pairs of a Jacob, the level corkscrew
+    straight twisted horn of the Hungarian Racka, the two pairs of a Jacob, the backswept sabre
+    of a domestic goat or an ibex (<em>Capra</em>, whose horns are narrow from side to side and
+    deep from front to back), the level corkscrew
     horns of the extinct Egyptian <em>Ovis longipes palaeoaegyptiacus</em> that the god Khnum
     wears, and scurs &mdash; but
     in real animals they are breed characters and several loci, not one allele series. Polycerate
@@ -131,7 +157,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The horizontal twist has been photographed standing still and the other four shapes have not been looked at side by side; none has been watched on a moving horse, a foal or under tack.</p>
+    <p>The horizontal twist and the scimitar have been photographed standing still and the other four shapes have not been looked at side by side; none has been watched on a moving horse, a foal or under tack.</p>
 </div>
 
 <h3 id="open-ram-shapes">Each shape, side by side</h3>
@@ -152,6 +178,24 @@
     not be hidden inside a halter). Foals grow no horns, so a foal should show none. Whether the
     twist is visible at play distance, rather than only the flat taper, is a matter of taste for
     the owner. Spawn one with <code>ram_horns=Rh/n</code> and <code>ram_horn_form=Hzt/Hzt</code>.
+</p>
+
+<h3 id="open-ram-scimitar">The scimitar in play</h3>
+<p>
+    Still pictures (2026-10-09, the photo stage, in profile, head-on, three-quarter face and
+    from behind): at the standard class, the largest a wild horse rolls, the horns stand about a
+    head&rsquo;s length above the poll and arc back toward the crest; the four sweep buckets
+    read as four different horns, from nearly straight to a tip pointing level backward; a
+    small-class pair is a short hooked stub; a coloured tip fades in along the outer half; and
+    beside a curl and a corkscrew of the same class it is plainly its own shape. From dead ahead
+    the pair is a narrow V and the sweep cannot be seen. Nobody has seen them on a walking,
+    grazing or rearing horse (a grazing head tips the blades forward), on a stallion with
+    <code>Rhm</code>, at the heavy and massive classes (no wild roll reaches them, so the stage
+    could not show them), under a low ceiling, or with a halter, a saddle and a rider on: the
+    most swept blade ends over the crest, where a rider&rsquo;s hands are. Foals grow no horns,
+    so a foal should show none. Whether the blade wants visible ridges of its own, and whether
+    the least swept bucket is too straight, are matters of taste for the owner. Spawn one with
+    <code>ram_horns=Rh/n</code> and <code>ram_horn_form=Sci/Sci</code>.
 </p>
 
 </section>

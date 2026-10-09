@@ -84,11 +84,18 @@ STEPS
    A part that reaches SIDEWAYS from the head (the horizontal ram horns) is end-on or
    foreshortened in every framing above: use Framing.FRONT, dead ahead of the horse and a
    little above the poll (added 2026-10-09).
+   A part that lies in the head's front-to-back plane (a swept-back horn: the scimitar) is
+   foreshortened by FACE and FRONT and a dozen pixels long in SIDE: use Framing.PROFILE,
+   close and square to the head from the south (added 2026-10-09).
    A part's size is an epigenetic roll, and an unpinned one is often too small to judge:
    pin it with `want` on the first shoot (GrownParts.of(genotype, epigenome), then
    shape().size()), and keep one unpinned shot for what a typical roll looks like. Put a
    horn on a bay or chestnut horse: its shade can roll black, and a black horn on a black
    horse is invisible.
+   A `want` the roll cannot reach does not fail: after its 200 tries record() keeps the
+   last random roll, and the picture shows a horse that is not the one the file name says.
+   Check the range a founder can roll before pinning (a wild ram horn's size is 0 to 0.6,
+   so its largest class is standard; heavy and massive are bred, never rolled).
 2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
    Between two shoots, stop the first client (step 7) BEFORE recompiling: the shoot's
    client stays open after "[photo] done", and a build under it is the launch-game mistake.

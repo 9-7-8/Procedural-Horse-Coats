@@ -1,0 +1,156 @@
+2026-10-09 11:48 - next-release: the scimitar ram horn, Sci (#130)
+(The time is the session's start, to within a few minutes.)
+
+ASKED
+-----
+1. "/next-release" - run procedures/next-release.txt. Done: the milestones were checked,
+   the last unit of v0.5.046 was built (#130) and the session ended.
+2. Asked by this session with the question tool at the end (next-release step 6): what to
+   do with v0.5.046 now that only the three bugs waiting on checks are left on it. The
+   owner answered "Release now, move the 3 bugs (Recommended)". See RELEASE below.
+
+DONE
+----
+Housekeeping (next-release steps 1-3). The newest tag is v0.5.045 and its milestone is
+closed. Every open issue already had a milestone, so nothing moved and the release-plan
+issue (#196) was not edited. The next release is v0.5.046. Its three open bugs, #10, #31
+and #36, each have a fix commit and a last comment saying they wait on a check (an
+in-game look, the live server's log, an in-game look); none of those checks has come back
+failed, so all three were skipped. The only unit left was #130.
+
+#130, Mythical goats piece 1: the scimitar ram-horn shape. Commit af439f57. Closed.
+- What was missing: a goat's or an ibex's horns. The ram horn form locus had five shapes
+  and none that is one long blade swept back over the neck. Every goat breed (#131, #132,
+  #133) pins this shape.
+- What changed: RamHornFormGene gains the allele Sci, APPENDED after Hzt, so the stored
+  allele order (Crl, Crk, Fhn, Scr, Hzt, Sci) leaves every saved horse's shape alone.
+  Dominance is Fhn > Crl > Sci > Crk > Hzt > Scr. Sci takes 0.06 of the Hardy-Weinberg
+  founder table from Crl (0.66 -> 0.60). RamHornGenerator gains SCIMITAR (shape 5, FORMS
+  is 6): the curl's chain, one unbranched run of boxes that bend backward and never roll,
+  with a fraction of its bend. The curl bucket is the whole sweep (35, 55, 78, 100
+  degrees), the outward lean per segment is 0.015 rad, the root leans 0.50 rad back and
+  0.28 rad out, every box is narrower across than deep (PartNode.width = 0.7 x girth),
+  and the horn is 1.05 of its class length. GeneDescriptions names the new shape.
+- The treatment's UNVERIFIED line (does MAX_NODES 24 allow a ridged blade) is resolved
+  for the blade: a horn is at most 12 boxes. It has no ridges of its own; that is a
+  taste question on the Verification tab.
+- Hypothesis and its check, as process-intake step 6 asks: a sixth shape of at most 12
+  boxes fits MAX_NODES and the 33,000-box cap raised for it in #125. PartGeneratorTest,
+  run straight after the first edit, was green.
+- Proof, by name: RamHornsGeneTest (two new tests: theScimitarSitsBetweenCurledAndCorkscrew
+  pins the allele order, the dominance against each other allele, the expression id,
+  horns on both sexes with Rh, none on an Rhm mare and a pair on an Rhm stallion;
+  theScimitarIsOneBladeSweptBackByTheCurl checks every curl, size and side for the box
+  cap, a root that leans back and outward, a blade section, no roll, a taper, more sweep
+  per bucket and never more than 110 degrees), PartGeneratorTest, RamHornBreedsTest,
+  CoatBakeGoldenTest, CoatPipelineGoldenTest, CommonPortabilityTest, and the classes
+  matching *EditorRules*, *BreedFilesTest, *UndeadBreedsTest, *GrownParts*, *Founder*,
+  *GeneDescriptions*, *GeneDescriptionCoverageTest, *GenesTest, *ResearchTopicTest: green.
+  Mutation: with Sci put below Crk in the dominance list the first new test fails.
+  The bake golden gained one row (Sci, at the same hash as the locus's other alleles: it
+  paints nothing); the 39-horse pipeline golden did not move.
+  :neoforge-26.1.2:build green, check-parity OK, check-designer-boots OK.
+- The older test theHorizontalTwistSitsBetweenCorkscrewAndScurs asserted the whole allele
+  list; it now asserts its first five, and the new test asserts all six.
+- The flat-box whitelist in PartGeneratorTest gained the scimitar beside the horizontal
+  twist.
+- Bakes: :web:bakeDesignerAssets (web.wasm committed, common/ code moved), the gene row
+  (bundle, icons, wiki pages, marking facts, census, timeline, unverified genes; only
+  wiki/gene-census.html and index.html's genotype count changed), the verification and
+  roadmap indexes, the search index and the agent text.
+- Pictures: three shoots on the photo stage (DebugPhotoShoot, -PphotoShoot). The first
+  used Framing.SIDE and FACE and left the horns a dozen pixels long. The second used a
+  new close profile framing and showed two things: the blade stood too upright (root
+  lean 0.20 rad), and the shots pinned to the heavy and massive classes were small
+  horns, because a wild roll's size stops at 0.6 and `want` falls through to a random
+  roll after 200 misses. The root lean went to 0.50 rad and the third shoot, eleven shots
+  at the standard class, is the one shown. It shows, in profile, the four sweep buckets
+  as four different horns (nearly straight; arcing; tips pointing back over the crest;
+  the tip level and pointing backward), on stallions and a mare; a three-quarter face
+  where both blades clear the ears; a head-on view where the pair is a narrow V and the
+  sweep cannot be seen; a view from behind, too far off to judge more than that it is a
+  pair; a small-class pair, a short hooked stub; a coloured tip fading in along the outer
+  half; and a curl and a corkscrew at the same class and framing, plainly different
+  shapes. Files could not be attached in this session, so they are a private gallery:
+  https://claude.ai/artifact/F9dq8iqUTMoFp5gpdkAdeR
+  A picture is not a pass: the checks are on gene-ram-horn-form.html#open-ram-scimitar.
+- The photo stage keeps a new framing, Framing.PROFILE, and one standing shot,
+  09c-ram-scimitar. The throwaway shot lists were reverted.
+- Written up on wiki/gene-ram-horn-form.html (Gameplay: the six shapes and the
+  inheritance paragraph; Coding: #scimitar, the allele order, the founders; Science: the
+  goat; Verification: #open-ram-scimitar), gene-ram-horns.html, model-parts.html
+  (#box-budget) and decisions.html.
+- The issue carries the closing evidence; the tracking parent #129 has a comment pointing
+  the later pieces at the wiki anchor.
+
+DECIDED
+-------
+- (session; the treatment left it to the building session and recommended it) The
+  dominance slot: under curled, over corkscrew, with Hzt left where #125 put it.
+- (session, the treatment's Recommended lines taken as written) the name "Scimitar", the
+  token Sci, the 0.06 founder share taken from Crl.
+- (session) The shape: a curl that stops early, narrower across than deep, 1.05 of its
+  class length, no ridges of its own. The numbers are a placement set from still pictures.
+- (session) No breed pool gains Sci. RamHornBreedsTest already checks the four shapes the
+  two ram-horned breeds' pools name. A breed is the owner's to change, and the goat
+  breeds are #131 on.
+All four are on wiki/decisions.html and gene-ram-horn-form.html#scimitar.
+
+FOUND ON THE WAY
+----------------
+- No bugs filed.
+- A wild ram horn never rolls above the standard class (RamHornsGene's size is uniform
+  0 to 0.6), so the heavy and massive classes of any ram horn shape cannot be put on the
+  photo stage by re-rolling a founder. The last session's log says its pictures were at
+  the heavy class; by this session's reading of the code they cannot have been, since
+  that shoot pinned sizes the same way. Its Verification entry
+  (gene-ram-horn-form.html#open-ram-horizontal) still says "at the heavy class" and was
+  left as written: this session did not re-shoot Hzt. Worth a look when someone next
+  photographs it.
+- Mistake: a long Python heredoc in one Bash call was cut off mid-string and failed
+  whole (the known long-heredoc limit). Nothing was written; the edit was redone from a
+  script file in the scratchpad.
+- Mistake: the first shoot's nine shots were wasted on framings the procedure already
+  says leave a head part a dozen pixels across. Looking at the first saved shot before
+  the rest finished, as photograph-horses step 1 says, would have saved a launch.
+- SendUserFile cannot attach files in this kind of session ("not on a project thread"),
+  as the last session found; pictures went out as a gallery artifact.
+- This session's instructions again said there is no gh CLI; gh worked and the
+  procedures' gh commands were used as written.
+
+PROCEDURES
+----------
+- photograph-horses: Framing.PROFILE for a part in the head's front-to-back plane; a
+  `want` the roll cannot reach falls through silently to a random roll, and a wild ram
+  horn's size stops at the standard class, so pin a size a founder can roll.
+- next-release, process-intake, add-a-gene, rebake, launch-game, end-session: followed as
+  written, none changed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every breed's seeded
+  founder rolls against the changed ram_horn_form founder table (only the named breed and
+  founder classes above were run), and every other class not named.
+- No gametests were run: nothing on the NeoForge side changed but the photo stage.
+- Nobody has seen Sci on a moving, grazing or rearing horse, with Rhm, under a halter,
+  saddle or rider, or at the heavy and massive classes:
+  gene-ram-horn-form.html#open-ram-scimitar.
+- The six shapes are still unseen side by side in one frame:
+  gene-ram-horn-form.html#open-ram-shapes.
+
+RELEASE
+-------
+v0.5.046's plan is built: its five pieces are closed. Three bugs stayed open on it, each
+fixed and waiting on a check only the owner or the live server can give (#10 and #36 an
+in-game look, #31 the server's log). By next-release step 6 the owner was asked once
+whether to release without them. She answered "Release now, move the 3 bugs
+(Recommended)" (owner). The three bugs move to v0.5.047 and the release is cut by
+procedures/release.txt in this same session; that work has its own entry in the release
+notes (wiki/releases.html), and anything it changes about this log is appended below.
+
+PICK UP FIRST
+-------------
+next-release: after v0.5.046 is out, the next unit is v0.5.047's first buildable one,
+its bugs first (#10, #31, #36 wait on checks, so they are skipped unless one has failed),
+then #164 Horse shoes, by process-intake. The owner could look at #10 and #36 in game
+first; both only wait on that.

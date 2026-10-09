@@ -2371,7 +2371,8 @@ wiki/gene-ram-horn-form.html#horizontal	coding	The horizontal twist is a flat co
 wiki/gene-ram-horn-form.html#inheritance	gameplay	Crossing two of them
 wiki/gene-ram-horn-form.html#order	coding	Allele order is generator order
 wiki/gene-ram-horn-form.html#real-sheep	science	Analogous, not measured
-wiki/gene-ram-horn-form.html#shapes	gameplay	The five shapes
+wiki/gene-ram-horn-form.html#scimitar	coding	The scimitar is a curl that stops early
+wiki/gene-ram-horn-form.html#shapes	gameplay	The six shapes
 wiki/gene-ram-horn-tip.html#carrot	gameplay	Its gene carrot
 wiki/gene-ram-horn-tip.html#door	coding	How it reaches the horns, and the prints
 wiki/gene-ram-horn-tip.html#finding	gameplay	Finding one
