@@ -10,6 +10,7 @@ import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.entity.HorseStorage;
 import com.example.horsegenetics.neoforge.entity.HorseTackSlot;
 import com.example.horsegenetics.neoforge.menu.HorsePackMenu;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -372,10 +373,15 @@ public final class HorsePackHandler {
     // ------------------------------------------------------------------
 
     /**
-     * A dead horse drops its chests and what was in them - what a donkey does.
+     * <b>A dead horse sets its chests down where it fell</b> - each one a real
+     * block in the nearest open space, with everything still inside it.
+     * (Owner, 2026-10-08, #221; it spilled them as items before, as a donkey
+     * does.) A chest that cannot be set down - no room, somebody's claim, a
+     * block that refuses - is dropped as it used to be, and so is anything that
+     * was on the horse and does not fit the placed block.
      *
      * <p>{@code LOWEST}, so it runs after {@code GeneDeathHandler.onHorseDrops},
-     * which <i>clears</i> the drop list for some genes: a horse that turns to
+     * which removes the horse's loot for some genes: a horse that turns to
      * glass when it dies still leaves your luggage.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -383,9 +389,113 @@ public final class HorsePackHandler {
         if (!(event.getEntity() instanceof Horse horse) || !(horse.level() instanceof ServerLevel level)) {
             return;
         }
-        for (ItemStack stack : unload(horse)) {
+        List<ItemStack> loose = new ArrayList<>();
+        if (ServerConfig.packPlaceOnDeath()) {
+            for (HorseTackSlot slot : SLOTS) {
+                if (!slot.on(horse).isEmpty()) {
+                    setDown(level, horse, slot, loose);
+                }
+            }
+        }
+        loose.addAll(unload(horse));
+        for (ItemStack stack : loose) {
             event.getDrops().add(new ItemEntity(level, horse.getX(), horse.getY() + 0.5, horse.getZ(), stack));
         }
+    }
+
+    /** How far from where the horse fell a chest may be set down, across and up or down. */
+    private static final int SET_DOWN_REACH = 3;
+    private static final int SET_DOWN_RISE = 2;
+
+    /**
+     * Set {@code slot}'s chest down near the horse, full. On success the slot
+     * and its store are empty and anything that did not fit is in
+     * {@code loose}; on failure nothing has moved and the caller drops it.
+     */
+    private static boolean setDown(ServerLevel level, Horse horse, HorseTackSlot slot, List<ItemStack> loose) {
+        BlockPos pos = openSpace(level, horse.blockPosition());
+        if (pos == null) {
+            return false;
+        }
+        // Somebody's claim says no: the same question a placing hand is asked.
+        if (net.neoforged.neoforge.event.EventHooks.onBlockPlace(horse,
+                net.neoforged.neoforge.common.util.BlockSnapshot.create(level.dimension(), level, pos),
+                net.minecraft.core.Direction.UP)) {
+            return false;
+        }
+        net.minecraft.world.level.block.state.BlockState before = level.getBlockState(pos);
+        boolean whole = HostedPacks.holds(horse, slot);
+        // A chest carried whole goes down as the whole item; any other goes down
+        // as what is worn and is then filled from the horse's store.
+        ItemStack chest = whole ? HostedPacks.view(horse, slot, slot.on(horse)) : slot.on(horse);
+        try {
+            net.minecraft.world.level.block.entity.BlockEntity entity =
+                    HostedPacks.setDown(level, pos, chest, null, net.minecraft.world.level.block.Block.UPDATE_ALL);
+            if (entity == null && !HorseStorage.isEnderChest(chest)) {
+                level.setBlock(pos, before, net.minecraft.world.level.block.Block.UPDATE_ALL);
+                return false;
+            }
+            if (whole) {
+                HostedPacks.forget(horse, slot);
+            } else {
+                List<ItemStack> stacks = packs(horse).take(slot.name());
+                for (int i = 0; i < stacks.size(); i++) {
+                    ItemStack stack = stacks.get(i);
+                    if (stack.isEmpty()) {
+                        continue;
+                    }
+                    if (entity instanceof Container container && i < container.getContainerSize()
+                            && container.getItem(i).isEmpty()) {
+                        container.setItem(i, stack);
+                    } else {
+                        loose.add(stack);
+                    }
+                }
+            }
+        } catch (RuntimeException | LinkageError failed) {
+            HorseGenetics.LOGGER.warn("Could not set a dead horse's {} down at {}; it is dropped instead: {}",
+                    chest.getItem(), pos, failed.toString());
+            level.setBlock(pos, before, net.minecraft.world.level.block.Block.UPDATE_ALL
+                    | net.minecraft.world.level.block.Block.UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS);
+            return false;
+        }
+        slot.set(horse, ItemStack.EMPTY);
+        return true;
+    }
+
+    /**
+     * The nearest place a chest can stand: empty (or only grass and the like),
+     * dry, and for preference with something under it. Nearest first, so a
+     * horse that dies in a field leaves its chests where it lay and one that
+     * dies in a tunnel leaves them in the tunnel.
+     */
+    private static @Nullable BlockPos openSpace(ServerLevel level, BlockPos fell) {
+        BlockPos floating = null;
+        double floatingDistance = Double.MAX_VALUE;
+        BlockPos best = null;
+        double bestDistance = Double.MAX_VALUE;
+        for (BlockPos pos : BlockPos.betweenClosed(
+                fell.offset(-SET_DOWN_REACH, -SET_DOWN_RISE, -SET_DOWN_REACH),
+                fell.offset(SET_DOWN_REACH, SET_DOWN_RISE, SET_DOWN_REACH))) {
+            if (!level.isInWorldBounds(pos) || !level.isLoaded(pos) || !level.getWorldBorder().isWithinBounds(pos)) {
+                continue;
+            }
+            net.minecraft.world.level.block.state.BlockState state = level.getBlockState(pos);
+            if (!state.canBeReplaced() || !state.getFluidState().isEmpty() || level.getBlockEntity(pos) != null) {
+                continue;
+            }
+            double distance = pos.distSqr(fell);
+            if (!level.getBlockState(pos.below()).canBeReplaced()) {
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    best = pos.immutable();
+                }
+            } else if (distance < floatingDistance) {
+                floatingDistance = distance;
+                floating = pos.immutable();
+            }
+        }
+        return best != null ? best : floating;
     }
 
     // ------------------------------------------------------------------

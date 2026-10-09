@@ -405,27 +405,46 @@ public final class HostedPacks {
         LIVE.add(key(level, pos));
         LIVE.add(key(level, pos.above()));
         try {
-            BlockState state = item.getBlock().defaultBlockState();
             level.setBlock(pos.above(), Blocks.AIR.defaultBlockState(), LIFT);
-            level.setBlock(pos, state, PLACE);
-            BlockEntity entity = level.getBlockEntity(pos);
-            if (entity == null) {
+            if (setDown(level, pos, chest, placer, PLACE) == null) {
                 lift(site);
                 refuse(chest, "make a block entity", null);
                 return null;
             }
-            // BlockItem.place, in its order: the item's block data, its
-            // components, then the block's own say.
-            BlockItem.updateCustomBlockEntityTag(level, placer, pos, chest);
-            entity.applyComponentsFromItemStack(chest);
-            entity.setChanged();
-            state.getBlock().setPlacedBy(level, pos, level.getBlockState(pos), placer, chest);
             return site;
         } catch (RuntimeException | LinkageError failed) {
             lift(site);
             refuse(chest, "be placed", failed);
             return null;
         }
+    }
+
+    /**
+     * Put {@code chest}'s block at {@code pos} with everything the item carries
+     * applied to it - {@code BlockItem.place}'s own steps, in its order: the
+     * block, the item's block data, its components, then the block's own say.
+     * The block entity, or null if the item's block has none (in which case
+     * whatever was set is left for the caller to clear). May throw whatever
+     * another mod's block throws; both callers catch.
+     */
+    public static @Nullable BlockEntity setDown(ServerLevel level, BlockPos pos, ItemStack chest,
+                                                net.minecraft.world.entity.@Nullable LivingEntity placer,
+                                                int flags) {
+        if (!(chest.getItem() instanceof BlockItem item)) {
+            return null;
+        }
+        BlockState state = item.getBlock().defaultBlockState();
+        level.setBlock(pos, state, flags);
+        BlockEntity entity = level.getBlockEntity(pos);
+        if (entity == null) {
+            return null;
+        }
+        BlockItem.updateCustomBlockEntityTag(level,
+                placer instanceof Player player ? player : null, pos, chest);
+        entity.applyComponentsFromItemStack(chest);
+        entity.setChanged();
+        state.getBlock().setPlacedBy(level, pos, level.getBlockState(pos), placer, chest);
+        return entity;
     }
 
     /**

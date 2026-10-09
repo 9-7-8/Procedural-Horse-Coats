@@ -3806,25 +3806,42 @@ public final class ModGameTests {
                     + " HorsePackHandler.giveBack");
         }
 
-        // 7. A dead horse drops the chest and what was in it, and keeps neither.
+        // 7. A dead horse sets the chest down where it fell, full, and keeps
+        //    nothing (#221). Nothing of it is left to drop as an item.
+        if (!com.example.horsegenetics.neoforge.ServerConfig.packPlaceOnDeath()) {
+            packFail("packs.place_on_death is off in this run's server config, so this test asserts"
+                    + " the wrong branch - turn it back on rather than deleting the test");
+        }
         java.util.List<net.minecraft.world.entity.item.ItemEntity> drops = new java.util.ArrayList<>();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
                 new net.neoforged.neoforge.event.entity.living.LivingDropsEvent(
                         horse, level.damageSources().generic(), drops, false));
-        int chests = 0;
-        int cobble = 0;
-        for (var drop : drops) {
-            if (drop.getItem().is(Items.CHEST)) {
-                chests += drop.getItem().getCount();
-            } else if (drop.getItem().is(Items.COBBLESTONE)) {
-                cobble += drop.getItem().getCount();
+        BlockPos stood = null;
+        for (BlockPos pos : BlockPos.betweenClosed(at.offset(-3, -2, -3), at.offset(3, 2, 3))) {
+            if (level.getBlockState(pos).is(Blocks.CHEST)) {
+                stood = pos.immutable();
             }
         }
-        if (chests != 1 || cobble != 64 || !left.on(horse).isEmpty() || !packs.isEmpty()
-                || speed.getModifier(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "pack_load")) != null) {
-            packFail("a dying horse should drop one chest and 64 cobblestone and keep nothing; it"
-                    + " dropped " + chests + " and " + cobble);
+        int loose = 0;
+        for (var drop : drops) {
+            if (drop.getItem().is(Items.CHEST) || drop.getItem().is(Items.COBBLESTONE)) {
+                loose += drop.getItem().getCount();
+            }
         }
+        if (stood == null || loose != 0
+                || !(level.getBlockEntity(stood) instanceof net.minecraft.world.Container placed)
+                || !placed.getItem(0).is(Items.COBBLESTONE) || placed.getItem(0).getCount() != 64) {
+            packFail("a dying horse should set its chest down nearby with the 64 cobblestone in the slot"
+                    + " they were in, and drop none of it; chest at " + stood + ", " + loose + " dropped");
+        }
+        if (!left.on(horse).isEmpty() || !packs.isEmpty()
+                || speed.getModifier(Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "pack_load")) != null) {
+            packFail("a horse that has set its chest down is still carrying it");
+        }
+        // Leave the harness as it was found.
+        level.setBlock(stood, Blocks.AIR.defaultBlockState(),
+                net.minecraft.world.level.block.Block.UPDATE_ALL
+                        | net.minecraft.world.level.block.Block.UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS);
         horse.discard();
         helper.succeed();
     }

@@ -271,6 +271,14 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue PACK_REAL_SCREENS;
 
     /**
+     * <b>Does a dead horse set its chests down as blocks?</b> On - the default -
+     * and each is placed in the nearest open space with its contents inside.
+     * Off, they spill as items the way a donkey's do. See
+     * {@code HorsePackHandler.onDrops}.
+     */
+    public static final ModConfigSpec.BooleanValue PACK_PLACE_ON_DEATH;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -893,6 +901,13 @@ public final class ServerConfig {
                         "One item can be switched alone with the item tag",
                         "horsegenetics:horse_storage/plain_screen. Server-side.")
                 .define("packs.real_screens", true);
+        PACK_PLACE_ON_DEATH = builder
+                .comment("Whether a horse that dies sets its chests down as blocks. (default: true)",
+                        "On, each chest it was carrying is placed in the nearest open space to",
+                        "where it fell, with everything still inside. A chest with nowhere to go",
+                        "- no room within three blocks, or a protected area - is dropped as items",
+                        "instead. Off, chests and contents always drop as items. Server-side.")
+                .define("packs.place_on_death", true);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -1574,6 +1589,15 @@ public final class ServerConfig {
                     PACK_CURVE_EXPONENT.get(), PACK_MIN_SPEED.get());
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.pack.PackLoad.Curve.DEFAULT;
+        }
+    }
+
+    /** {@code packs.place_on_death}, safely. */
+    public static boolean packPlaceOnDeath() {
+        try {
+            return PACK_PLACE_ON_DEATH.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
         }
     }
 
