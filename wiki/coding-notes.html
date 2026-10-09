@@ -1014,6 +1014,28 @@ done</code></pre>
     </p>
 </div>
 
+<div class="note" id="field-log">
+    <span class="label">A live server speaks on one tag: <code>[phc-live]</code></span>
+    <p>
+        <code>ActionTrace</code> is gated on debug tools, which a real server has off, so
+        the only record of what happens to players' horses is what is logged
+        unconditionally. <code>server/FieldLog</code> is the one place for that. Every line
+        starts <code>[phc-live] &lt;topic&gt; |</code>, so one grep lifts ours out of a log
+        shared with a few hundred other mods, and the topic is an open issue's subject
+        (<code>in-blocks</code>, <code>lycan</code>, <code>dealer</code>,
+        <code>corridor</code>, <code>whistle</code>, <code>tables</code>).
+    </p>
+    <p>
+        <strong>The rule for a line there:</strong> it is always on, so it must be rare or
+        rate-limited where it is written; it names a horse by UUID, which is what pairs it
+        with the operator's own scripts; and it is deleted with its issue. The list of
+        topics and what each one answers is kept in
+        <code>procedures/review-server-logs.txt</code>, which is what reads them. Any line
+        of ours also carries the logger name <code>[horsegenetics/]</code>, which is the
+        general way to tell this mod's output from the rest.
+    </p>
+</div>
+
 <div class="note danger" id="debug-crash">
     <span class="label">A debug overlay took the world down, and hid its own bug for four minutes first</span>
     <p>

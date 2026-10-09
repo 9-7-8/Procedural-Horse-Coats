@@ -1,0 +1,135 @@
+2026-10-09 15:11 - Server logs reviewed (10-06 to 10-09), two lycan bugs filed, [phc-live] logging merged UNBUILT
+(The time is the END of the session; it began about 14:30 the same day.)
+
+Nothing in this session was compiled or run. The live server was up all session, and its
+operator's notes say a build on this machine makes it swap. The owner builds later.
+
+ASKED
+-----
+1. /review-server-logs. Done by procedures/review-server-logs.txt: seven export folders,
+   two bugs filed, two issues commented on, the folders zipped to the archive. See DONE 1.
+2. "give me a shorter summary of what this closed, what it opened, and what it just added
+   more info to". Given: closed nothing; opened #243 and #244; added to #35 and #210.
+3. "Can you add more logging in around some of our open issues, so these live server runs
+   can give us more useful data? Make sure to add your own tag of some kind to all of our
+   debug prints, so you know what comes from us". Done: see DONE 2. The existing log
+   calls were NOT retagged (see DECIDED 3).
+4. "Look through all the open issues we have that are tagged with bug, and see if any of
+   them are worth adding more logging for in the same way you just did". Six open bugs
+   read; #31 and #36 got topics (DONE 3); #10 did not (a client screen, nothing for a
+   server to see); #35, #243 and #244 were already covered.
+5. "okay, merge everything and end the session. I'll do a build later". The branch
+   field-log-unbuilt was fast-forwarded into main and deleted; this log is that end.
+
+DONE
+----
+1. Server log review (no commit; issues are the output).
+   Folders 2026-10-06, -run2, 2026-10-07, 2026-10-08, -run2, 2026-10-09, -run2. All
+   incremental, all on 0.5.045, window 5 Oct 20:23 to 9 Oct 13:08. No export covers
+   8 Oct 15:33 to 23:59 (a restart overwrote prev-nightly.log first); those hours were
+   read from the raw debug-3 and debug-2 logs and held nothing horse-related.
+   - #243 filed (bug, needs-owner, DAMAGE): a horse whose lycan form is the strider dies in
+     rain or water. Strider.isSensitiveToWater() is true and LivingEntity.aiStep hurts it
+     with drown damage; MobRoster tags the strider Habitat.GROUND and isWearable has no
+     water test. Two named horses died this way on 7 Oct, near an arcane dealer. Three
+     fix options are on the issue; open, waiting on the owner's pick.
+   - #244 filed (bug, PLAYERS): the horse survives its form's death at 1 health. The last
+     stand saves the first blow, which sets lastHurt to Float.MAX_VALUE, so the fallback
+     genericKill at LycanthropyHandler:537 is refused by the hurt cooldown (generic_kill
+     is not in bypasses_cooldown). The horse re-shifts within 40 ticks and dies on the
+     second form death. Open; no owner call needed.
+   - #35 commented: two more rescues on 9 Oct 13:40, no [clearance] line for either, 24 s
+     after a login at the same base as the 6 Oct pair, server idle at 20 TPS before it.
+     All eleven rescues on 0.5.044 and 0.5.045 fall inside one player's sessions.
+   - #210 commented: the operator's measured sizes (horse_ancestry.dat 3.38 MB at 954
+     horses, before pruning shipped in 0.5.046) and "no tick gain shown at matched load".
+   - Chunk-load tally since 6 Oct: the counter reproduced the control (115); one frame
+     of ours, HorseRealm.safeReturn, an intended site.
+   - Archive: C:\Users\Isabel\PCH-logs-archive\PCH-logs-2026-10-06_to_2026-10-09-run2.zip.
+   Proof: the log lines quoted on each issue; the game sources read from
+   neoforge-26.1.2/build/moddev/artifacts. No pictures.
+
+2. Live-server logging on one tag (79aff1cb). NOT COMPILED.
+   New class neoforge server/FieldLog: FieldLog.log(topic, detail) writes
+   "[phc-live] <topic> | <detail>", always on. Topics added:
+   - in-blocks (#35): on a horse's in-wall hit, first and then every 100 ticks, its UUID,
+     position, scale, box, the blocks the box touches, what its eyes are in, ticks since
+     it joined; "LOADED INSIDE BLOCKS" for a horse whose box collides on tick 10; and
+     HorseClearance's [clearance] line now goes through FieldLog (the word stays).
+   - lycan (#243, #244): SHIFT, REVERT, FORM DIED in LycanthropyHandler, with water or
+     rain and whether the horse died of the same blow, of the fallback, or SURVIVED.
+   - dealer: CowboyHandler logs SHORT STRING when a cowboy founds with fewer horses
+     than he wanted (one founded "with 0 horses" on 7 Oct).
+   - tables (#210): row counts of HorseAncestryData, HorseWhereabouts and WildCellLedger
+     at start, hourly and at stop. HorseAncestryData.size() and HorseWhereabouts.size()
+     are new.
+   Proof: none. Read against the 26.1.2 sources only. No pictures.
+
+3. Two more topics (4d6e089c). NOT COMPILED.
+   - corridor (#31): DebugPenManager.enter and tearDown log the milliseconds each part
+     took in its tick.
+   - whistle (#36): HorseOrdering.handle logs one ORDER line, "AIMED at one horse" or
+     "to every horse in reach".
+   Proof: none. No pictures.
+
+4. Docs (the docs commit after this log's code commits): the FieldLog note on
+   wiki/coding-notes.html#field-log; the open check on
+   wiki/horse-body.html#field-log-unbuilt; procedures/review-server-logs.txt.
+
+DECIDED
+-------
+1. Commit the logging unbuilt, not wait for the server's downtime and not compile beside
+   it (owner, by the question tool). Recorded in both commit messages and on
+   wiki/horse-body.html#field-log-unbuilt.
+2. Merge it to main unbuilt (owner: "merge everything ... I'll do a build later"). It had
+   been put on a branch first, a call made without her, so an uncompiled change could not
+   ride into a release.
+3. The roughly 177 existing logger calls were not moved onto the tag (made without the
+   owner, and told to her): every mod line already carries the logger name
+   "[horsegenetics/]". Only the new lines and [clearance] are on [phc-live].
+4. #243 and #244 have no milestone; next-release assigns them (made without the owner).
+
+FOUND ON THE WAY
+----------------
+- Bugs filed: #243, #244.
+- MISTAKE, NOT PUT RIGHT: the 9 Oct comment on #35 says "Four came with a login or a lag
+  spike; the 7 Oct 14:16, 14:45 and 18:17 ones had neither." The right count is seven
+  with a login or lag spike, and four without (5 Oct 16:30, 7 Oct 14:16, 14:45, 18:17).
+  Editing the comment was refused by the permission classifier. The owner was told.
+- An earlier comment on #35 (not this session's) names a player, against the rule in
+  review-server-logs. Left alone; the owner was told.
+- The exporter keeps only Horse, Donkey and Mule deaths, so a shifted horse's form
+  deaths never reach 04-equine-deaths.txt. Now in the procedure.
+- The operator's question, unanswered: is there an intended ceiling on the wild
+  population (542 to 807 in a week, flattening)? Put to the owner in the report.
+- A generated name, "Slave to the" (horse-names-alpha.txt:161), was seen on the server.
+  Left alone; put to the owner in the report.
+- The operator's notes record "no builds or test runs while the live server is up"
+  (down 23:58 to 12:00 on weekdays) as the owner's rule since 8 Oct. It is in no
+  procedure yet; this session followed it and did not write it down as a rule.
+
+PROCEDURES
+----------
+- procedures/review-server-logs.txt: the [phc-live] tag and its topics; grep non-equine
+  `Named entity` lines for a shifted horse's death; the raw logs are now debug-N.log.gz;
+  an export can skip hours; the operator's hand-written 08-*.txt files.
+- No new procedure. Adding a live-server log line is described on
+  wiki/coding-notes.html#field-log.
+
+NOT RUN / NOT CHECKED
+---------------------
+- NOTHING WAS BUILT. `./gradlew :neoforge-26.1.2:build` has not seen 79aff1cb or
+  4d6e089c. Main may not compile. The gametests and a server boot are owed too.
+- check-parity ran and is green (it cannot see this Java).
+- A full :common:test run would check nothing this session touched (no common/ change).
+- Verification anchor added: wiki/horse-body.html#field-log-unbuilt.
+
+RELEASE
+-------
+Not offered. Main holds two unbuilt commits; nothing to release.
+
+PICK UP FIRST
+-------------
+With the live server down, build main (`./gradlew :neoforge-26.1.2:build`, then the
+gametests) by procedures/test-tiers.txt, and close wiki/horse-body.html#field-log-unbuilt
+by procedures/close-a-check.txt; then #244 by procedures/fix-bug.txt.

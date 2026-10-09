@@ -977,8 +977,31 @@ public interface GeneEpigenetics {
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Nobody has ever raced the horse screen&rsquo;s new metre readout &mdash; ride a measured run and build a pillar to the printed jump height, because the <code>&times;43.17</code> constant behind it is unproven and the fit assumes body scale 1.0 &mdash; and a pregnancy lost to a lethal pairing must never name the gene in chat.</p>
+    <p>Nobody has ever raced the horse screen&rsquo;s new metre readout &mdash; ride a measured run and build a pillar to the printed jump height, because the <code>&times;43.17</code> constant behind it is unproven and the fit assumes body scale 1.0 &mdash; and a pregnancy lost to a lethal pairing must never name the gene in chat; and the live-server <code>[phc-live]</code> logging was merged without ever being compiled.</p>
 </div>
+
+<h3 id="field-log-unbuilt">The <code>[phc-live]</code> logging has never been compiled or run (2026-10-09)</h3>
+
+<p>
+    <code>server/FieldLog</code> and its calls in <code>HorseClearance</code>,
+    <code>LycanthropyHandler</code>, <code>CowboyHandler</code>, <code>DebugPenManager</code> and
+    <code>HorseOrdering</code> went to main unbuilt (79aff1cb, 4d6e089c), on the owner's call: the
+    live server was up, and a build on this machine makes it swap. It only logs; no behaviour
+    was meant to change. What it is for is on
+    <a href="coding-notes.html#field-log">coding notes</a>.
+</p>
+<ul>
+    <li><strong>It compiles.</strong> <code>./gradlew :neoforge-26.1.2:build</code>, with the
+        server down. The API calls were read from the 26.1.2 sources, not proven by a compiler.</li>
+    <li><strong>The gametests still pass</strong>, and a dev server boots with one
+        <code>[phc-live] tables | at start</code> line and no error.</li>
+    <li><strong>A horse in a wall says so.</strong> In the yard, a horse pushed into a block
+        logs <code>[phc-live] in-blocks | SUFFOCATING</code> with its position and the blocks
+        its box touches, once, then again every five seconds.</li>
+    <li><strong>On the live server</strong> (the first release that carries it): the next
+        <code>[suffrescue]</code> line has a <code>[phc-live] in-blocks</code> line for the same
+        UUID before it. That line is the burial spot issue #35 is waiting for.</li>
+</ul>
 
 <h3 id="stat-units-0918">Speed and jump in metres on the horse screen (2026-09-18, NOT played)</h3>
 

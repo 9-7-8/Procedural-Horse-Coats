@@ -122,6 +122,14 @@ STEPS
    debug-*.log.gz too: they carry every INFO/WARN line as well, and they sometimes hold
    a day that prev-nightly.log has already lost. Name the hours no log covers in
    every count you post, so a zero is not read as covering them.
+   Since about 2026-10-06 the server keeps no dated .log.gz files: the day's logs are
+   debug-1.log.gz (newest) to debug-5.log.gz, plus latest.log and debug.log. Print each
+   file's first and last timestamp before counting, so the covered hours are known.
+   An export can also SKIP hours: when a folder's Window starts later than the folder
+   before it ended (2026-10-09 skipped 10-08 15:33 to 23:59, because a restart overwrote
+   prev-nightly.log first), read those hours from the raw logs: deaths, chat and errors.
+   The operator sometimes adds a hand-written 08-*.txt to a folder (measurements, or a
+   warning that lag in the window was the host and not the mod). Read it with 00-SUMMARY.
    The operator's scripts can HIDE a mod defect. suffocation_rescue.js pulls a nearly
    dead horse out of a wall and logs "[suffrescue] moved horse <uuid>". Each line is a
    death that did not happen, so it never reaches 04-equine-deaths.txt, and the exporter
