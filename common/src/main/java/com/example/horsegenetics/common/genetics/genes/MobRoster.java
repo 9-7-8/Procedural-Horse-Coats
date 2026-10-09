@@ -111,7 +111,9 @@ public final class MobRoster {
         peaceful("Shp", "minecraft:sheep", "Sheep", Habitat.GROUND);
         peaceful("Snf", "minecraft:sniffer", "Sniffer", Habitat.GROUND);
         peaceful("Sqd", "minecraft:squid", "Squid", Habitat.WATER);
-        // Lava, not water, and it walks on land perfectly well - shivering.
+        // Lava, not water. It walks on land, but water and rain hurt it, so the
+        // lycan shift refuses the body at dusk (#243) and Strd/Strd stays a horse;
+        // the entry keeps its place because the roster is saved by position.
         peaceful("Strd", "minecraft:strider", "Strider", Habitat.GROUND);
         peaceful("Tdp", "minecraft:tadpole", "Tadpole", Habitat.WATER);
         peaceful("Tlma", "minecraft:trader_llama", "Trader llama", Habitat.GROUND);

@@ -100,11 +100,6 @@ public final class HorseAncestryData extends SavedData implements HorseDatabase 
         return forget(id);
     }
 
-    /** How many horses the store holds - the row count of a file that is written whole (#210). */
-    public int size() {
-        return delegate.view().size();
-    }
-
     @Override
     public int offspringCount(UUID parentA, UUID parentB) {
         return delegate.offspringCount(parentA, parentB);
@@ -120,6 +115,7 @@ public final class HorseAncestryData extends SavedData implements HorseDatabase 
         return delegate.descendantsOf(id, depth);
     }
 
+    /** How many horses the store holds - the row count of a file that is written whole (#210). */
     public int size() {
         return delegate.size();
     }

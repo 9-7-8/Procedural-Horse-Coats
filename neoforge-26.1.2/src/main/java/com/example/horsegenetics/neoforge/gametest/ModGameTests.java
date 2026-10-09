@@ -4737,6 +4737,8 @@ public final class ModGameTests {
         expectUses(helper, level, net.minecraft.world.entity.EntityType.BAT, java.util.EnumSet.of(P, S));
         expectUses(helper, level, net.minecraft.world.entity.EntityType.COD, java.util.EnumSet.of(P, S));
         expectUses(helper, level, net.minecraft.world.entity.EntityType.BEE, java.util.EnumSet.of(P, S));
+        // #243: water and rain hurt a strider, so a horse shut in one died in the first storm.
+        expectUses(helper, level, net.minecraft.world.entity.EntityType.STRIDER, java.util.EnumSet.of(P, S));
         expectUses(helper, level, net.minecraft.world.entity.EntityType.ZOMBIE, java.util.EnumSet.of(S));
         expectUses(helper, level, net.minecraft.world.entity.EntityType.HORSE,
                 java.util.EnumSet.noneOf(com.example.horsegenetics.neoforge.server.ChaosRoster.Use.class));

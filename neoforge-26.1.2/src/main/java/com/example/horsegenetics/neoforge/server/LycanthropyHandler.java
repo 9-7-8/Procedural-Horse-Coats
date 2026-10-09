@@ -248,13 +248,13 @@ public final class LycanthropyHandler {
             // registry tomorrow, so the body itself is checked here, where the
             // game will actually answer the question. A horse is never shut
             // inside something that drowns in air, flies out of its owner's
-            // reach, or is hunted on sight.
+            // reach, is hunted on sight, or is hurt by rain (the strider, #243).
             //
             // This supersedes the owner's 2026-09-13 call that a were-fish
             // "should absolutely still shift and then just die" - the fish
             // alleles do not exist any more (owner, 2026-09-24).
             if (WARNED.add(mob)) {
-                HorseGenetics.LOGGER.warn("[lycan] '{}' swims, flies or is hostile in this build - "
+                HorseGenetics.LOGGER.warn("[lycan] '{}' swims, flies, is hostile or is hurt by water in this build - "
                         + "{} will not shift", mob, record.displayName());
             }
             animal.discard();
@@ -300,12 +300,15 @@ public final class LycanthropyHandler {
      * the lycan blacklist, asked of the animal the registry actually handed us
      * rather than of the id we asked for.
      *
-     * <p>Three things disqualify a body, and all three are the same complaint -
+     * <p>Four things disqualify a body, and all four are the same complaint -
      * the owner cannot get their horse back. It <b>swims</b>, so the horse
      * suffocates the moment it shifts in a field; it <b>flies</b>, so it is over
-     * the treeline before dawn and its owner never sees it again; or it is
+     * the treeline before dawn and its owner never sees it again; it is
      * <b>hostile</b>, so everything in the world attacks it and it attacks its
-     * owner. Each is asked the broadest way the game offers, exactly as
+     * owner; or <b>water hurts it</b>, so the first rain kills it where the
+     * horse stood (#243: two were-striders drowned on the live server, and the
+     * owner's call of 2026-10-09 was to refuse the body rather than shield it).
+     * Each is asked the broadest way the game offers, exactly as
      * {@link MobGroups} does, so that a modded mob answers honestly:
      * {@link MobCategory} for the spawn-time classification, {@link Enemy} and
      * {@link FlyingAnimal} for the interfaces mods implement, and the navigation
@@ -327,7 +330,7 @@ public final class LycanthropyHandler {
                 || animal instanceof FlyingAnimal
                 || animal.getNavigation() instanceof FlyingPathNavigation
                 || animal.getMoveControl() instanceof FlyingMoveControl;
-        return !swims && !flies && !MobGroups.isHostile(animal);
+        return !swims && !flies && !MobGroups.isHostile(animal) && !animal.isSensitiveToWater();
     }
 
     /** Debug only: each shifted horse's {@link #roundTripPrint} at dusk, for the dawn and death lines to compare. */

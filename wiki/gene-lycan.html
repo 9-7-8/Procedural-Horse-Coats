@@ -98,6 +98,16 @@
     from other people's mods.
 </p>
 
+<p id="water-hurts">
+    <strong>Nor a body that water hurts.</strong> The strider walks on land, so it is on
+    the list, but rain and water damage it, and a horse shut inside one died in the first
+    storm. Since 2026-10-09 the shift refuses any such body: a <code>Strd/Strd</code>
+    horse stays a horse all night, like a shape the game cannot find. The allele is still
+    there and still inherited, so a code means the same thing as before; it simply does
+    nothing. The same test keeps a water-shy animal from another mod out of
+    <a href="#chaos">Chaos</a>.
+</p>
+
 <h2 id="identity">Identity survives the night</h2>
 
 <p>
@@ -172,7 +182,8 @@
     <span class="label">A mechanical rule, not a taste</span>
     <p>
         That is why the list contains a strider and a wandering trader without anybody
-        having to defend either, and it is why the two golems, the villager, the copper
+        having to defend either (though the strider <a href="#water-hurts">no longer
+        shifts</a>), and it is why the two golems, the villager, the copper
         golem and the mannequin are out &mdash; they are
         <code>MobCategory.MISC</code>. The frog and the turtle stay: both walk, and
         neither drowns in air. The tadpole does, and does not.
@@ -365,8 +376,9 @@
     whether it swims (the four water spawn categories), flies (<code>AMBIENT</code>,
     <code>FlyingAnimal</code>, a <code>FlyingPathNavigation</code> or a
     <code>FlyingMoveControl</code>) or is hostile (<code>Enemy</code> or <code>MONSTER</code>,
-    through <code>MobGroups.isHostile</code>), and a body that fails refuses the shift and logs
-    once. <code>AMBIENT</code> is in the flying list because vanilla's bat flies without a flying
+    through <code>MobGroups.isHostile</code>) or is hurt by water
+    (<code>isSensitiveToWater()</code>, <a href="#strider-refused">since 2026-10-09</a>), and a
+    body that fails refuses the shift and logs once. <code>AMBIENT</code> is in the flying list because vanilla's bat flies without a flying
     navigation or the interface to show for it &mdash; unverified in game, and the safe direction
     to be wrong in.
 </p>
@@ -414,6 +426,24 @@
 </p>
 
 <h3 id="verified">Verified</h3>
+
+<p id="strider-refused">
+    <strong>A body that water hurts is refused, so the were-strider no longer shifts</strong>
+    (issue #243, 2026-10-09). On the live server (0.5.045) two named horses shifted into striders
+    outdoors and each logged <code>Strider[...] died: ... drowned</code> followed by its horse's
+    death: <code>Strider.isSensitiveToWater()</code> is true, and <code>LivingEntity.aiStep</code>
+    deals drowning damage to such a mob while it is in water or rain. <code>MobRoster</code> tags
+    the strider <code>GROUND</code>, and <code>isWearable</code> asked only about swimming, flying
+    and hostility. Of three fixes offered (cancel the water damage, refuse the body, shift only
+    where it is dry) the owner chose to refuse the body: <code>isWearable</code> now also fails
+    <code>animal.isSensitiveToWater()</code>. The roster entry stays, because the roster is saved
+    by position, so <code>Strd/Strd</code> is a genotype that does nothing.
+    <code>ChaosRoster</code> uses the same check, so a modded water-shy mob leaves the lycan list
+    (not pack leader or the spawner). Proof: the <code>chaos_roster</code> gametest classifies
+    <code>minecraft:strider</code> as pack and spawner only; before the fix it failed with
+    &ldquo;classified as [LYCAN, PACK, SPAWNER]&rdquo;. A horse already inside a strider when the
+    server updates stays one until dawn or death; nothing reverts it early.
+</p>
 
 <p id="gap-243">
     <strong>A lycan cannot come back in mid-air any more, and the guard that used to catch it
