@@ -13,9 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * The pack load's claims, and the click box's, as assertions.
  *
  * <p>The ones that matter: an empty horse and a switched-off server lose
- * nothing, the default costs an ordinary horse half its speed for two full
- * chests, pull moves the maximum, and a server can move every part of the
- * curve.
+ * nothing, the default costs a pull-10 horse half its speed for a full chest
+ * on each flank, pull moves the maximum, and a server can move every part of
+ * the curve.
  */
 class PackLoadTest {
 
@@ -29,13 +29,16 @@ class PackLoadTest {
         assertEquals(0.0, PackLoad.speedModifier(PackLoad.Curve.DEFAULT, 0, HorseTraits.BASE_PULL), EPS);
     }
 
+    /** The owner's anchor for the default curve; the maximum is a whole number, hence the tolerance. */
     @Test
-    @DisplayName("two full vanilla chests cost an ordinary horse half its speed by default")
+    @DisplayName("a pull-10 horse keeps half its speed under a full vanilla chest on each flank, by default")
     void theDefaultCurve() {
-        assertEquals(0.5, PackLoad.retention(PackLoad.Curve.DEFAULT, TWO_FULL_CHESTS,
-                HorseTraits.BASE_PULL), EPS);
-        assertEquals(-0.5, PackLoad.speedModifier(PackLoad.Curve.DEFAULT, TWO_FULL_CHESTS,
-                HorseTraits.BASE_PULL), EPS);
+        assertEquals(0.5, PackLoad.retention(PackLoad.Curve.DEFAULT, TWO_FULL_CHESTS, 10), 1.0e-3);
+        assertEquals(-0.5, PackLoad.speedModifier(PackLoad.Curve.DEFAULT, TWO_FULL_CHESTS, 10), 1.0e-3);
+        // And what that leaves an ordinary horse: it moves, slowly.
+        final double ordinary = PackLoad.retention(PackLoad.Curve.DEFAULT, TWO_FULL_CHESTS,
+                HorseTraits.BASE_PULL);
+        assertTrue(ordinary > 0.1 && ordinary < 0.2, "an ordinary horse under two full chests keeps " + ordinary);
     }
 
     @Test

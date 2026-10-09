@@ -51,11 +51,15 @@ public final class PackLoad {
 
     /**
      * {@code packs.max_items} - what an ordinary horse can carry before it
-     * stops: four vanilla chests of full stacks, twice what its two flanks hold
-     * in vanilla chests. So two full chests cost an ordinary horse half its
-     * speed, and a weak one cannot move them at all.
+     * stops. Set from the other end (owner, 2026-10-08): <b>a horse with a
+     * pulling score of ten keeps half its speed under a full vanilla chest on
+     * each flank</b> - 2 x 27 x 64 = 3456 items - so its maximum is twice that,
+     * and this is that maximum divided by a ten's capacity
+     * ({@code CartDraft.capacity(10)}, about 1.74). An ordinary horse under the
+     * same two chests is down to about an eighth of its speed, and a weak one
+     * cannot move them. {@code PackLoadTest.theDefaultCurve} pins the anchor.
      */
-    public static final int DEFAULT_MAX_ITEMS = 6912;    // 4 chests x 27 slots x 64; a literal, for bake-config-keys
+    public static final int DEFAULT_MAX_ITEMS = 3970;    // a literal, for bake-config-keys
 
     /** {@code packs.free_items} - what an ordinary horse carries for nothing. */
     public static final int DEFAULT_FREE_ITEMS = 0;

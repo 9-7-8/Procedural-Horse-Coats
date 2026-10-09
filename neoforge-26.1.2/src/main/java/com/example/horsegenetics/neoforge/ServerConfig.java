@@ -845,14 +845,16 @@ public final class ServerConfig {
                         "Server-side. Takes effect the next time a chest changes or the horse loads.")
                 .define("packs.weight", com.example.horsegenetics.common.pack.PackLoad.DEFAULT_ENABLED);
         PACK_MAX_ITEMS = builder
-                .comment("The most items an ordinary horse can ever carry. (default: 6912)",
+                .comment("The most items an ordinary horse can ever carry. (default: 3970)",
                         "At this many the horse is down to packs.min_speed - which is zero unless",
                         "you change it, so it stands still until something is taken out. Nothing",
                         "is refused at the chest; the horse answers for what is put in it.",
                         "'Ordinary' is a pulling ability of 5. A stronger horse carries more and a",
                         "weaker one less: a 10 carries about 1.7 times this, a 2 about half.",
-                        "The default is four vanilla chests of full stacks, so two full chests",
-                        "cost an ordinary horse half its speed. Range 1 to 10,000,000. Server-side.")
+                        "The default is set so that a horse with a pulling ability of 10 keeps",
+                        "half its speed carrying a full vanilla chest on each flank (3456 items).",
+                        "An ordinary horse with that load keeps about an eighth of its speed.",
+                        "Range 1 to 10,000,000. Server-side.")
                 .defineInRange("packs.max_items",
                         com.example.horsegenetics.common.pack.PackLoad.DEFAULT_MAX_ITEMS,
                         1, com.example.horsegenetics.common.pack.PackLoad.MAX_ITEMS_LIMIT);
