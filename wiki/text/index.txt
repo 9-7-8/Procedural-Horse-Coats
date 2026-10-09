@@ -3112,6 +3112,7 @@ wiki/horse-gear.html#packs	coding	Chests: a worn piece, a store, and a load
 wiki/horse-gear.html#packs-click	coding	Clicking the chest: common/pack/PackBox
 wiki/horse-gear.html#packs-detect	coding	What is storage: entity/HorseStorage
 wiki/horse-gear.html#packs-draw	coding	Drawing it: client/PackLayer
+wiki/horse-gear.html#packs-hosted	coding	Another mod's chest opens as its block: server/HostedPacks
 wiki/horse-gear.html#packs-lifecycle	coding	Every way a horse leaves
 wiki/horse-gear.html#packs-load	coding	The load: common/pack/PackLoad
 wiki/horse-gear.html#packs-rules	coding	Putting on and taking off go through the slot

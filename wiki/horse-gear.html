@@ -239,9 +239,16 @@
 </table>
 <p>
     <strong>The chest keeps its own screen and its own size.</strong> A chest or a barrel
-    opens as the ordinary twenty-seven slots, a shulker box as a shulker box, a shelf as its
-    three, a modded crate as however many it has. Nothing is locked and nothing is
-    shrunk to fit the horse &mdash; what the horse limits is below.
+    opens as the ordinary twenty-seven slots and a shulker box as a shulker box.
+    <strong>Another mod's chest opens the screen it opens when it is placed</strong>
+    &mdash; its own slots, its own upgrades and buttons. A shelf or a decorated pot, which
+    have no screen even on the ground, open as a small plain grid. Nothing is locked and
+    nothing is shrunk to fit the horse &mdash; what the horse limits is below.
+</p>
+<p>
+    A modded chest travels as one piece: if the horse dies it drops as a single item with
+    everything still inside, which goes back into it when you place it, rather than
+    spilling.
 </p>
 <p>
     <strong>An ender chest</strong> opens <em>your</em> ender chest &mdash; whoever
@@ -598,17 +605,86 @@
     </p>
 </div>
 <p>
-    <strong>Only the slot count is taken; the storage is ours.</strong> Running somebody
-    else's block entity with no block under it &mdash; so that their own screen opened
-    &mdash; was the other design, and it fails in the one place nobody can test from here:
-    a modded menu's client side usually looks its block entity up <em>by position</em>, and
-    on a horse there is none. So a chest whose size vanilla has a screen for opens
-    vanilla's (<code>ChestMenu</code> for nine-by-N up to six rows,
-    <code>ShulkerBoxMenu</code> for a keeps-its-contents chest of twenty-seven), and any
-    other size opens <code>menu/HorsePackMenu</code>, a plain grid: nine across up to
-    fifty-four slots, then wider rather than scrolling, to
-    <code>HorsePacks.MAX_SLOTS</code>.
+    <strong>For vanilla's containers only the slot count is taken, and the storage is
+    ours.</strong> A size vanilla has a screen for opens vanilla's (<code>ChestMenu</code>
+    for nine-by-N up to six rows, <code>ShulkerBoxMenu</code> for a keeps-its-contents
+    chest of twenty-seven) over <code>HorsePacks</code>, and any other size opens
+    <code>menu/HorsePackMenu</code>, a plain grid: nine across up to fifty-four slots, then
+    wider rather than scrolling, to <code>HorsePacks.MAX_SLOTS</code>. No block is needed
+    for any of that. Another mod's chest is a different matter &mdash; see
+    <a href="#packs-hosted">the next section</a>.
 </p>
+
+<h3 id="packs-hosted">Another mod's chest opens as its block: <code>server/HostedPacks</code></h3>
+<p>
+    A modded menu finds its block entity <em>in the world, at a position</em>, on the server
+    and on the client both. Read out of the jars in the owner's modpack on 2026-10-08:
+    Sophisticated Storage's <code>StorageContainerMenu</code> is built from a
+    <code>BlockPos</code> on both sides and throws if nothing is there, its
+    <code>stillValid</code> looks the same position up again, and DimStorage's menu factory
+    reads a position off the packet. (That mod's own author wrote a second set of menus,
+    <em>Sophisticated Storage In Motion</em>, to put its storage on a minecart.) A block
+    entity that was never placed cannot open one.
+</p>
+<p>
+    <strong>So it is placed</strong> &mdash; the owner's call, from four options. While a
+    hosted chest is open it really exists: at <code>level.getMinY()</code> under the
+    player, where the bedrock is, with the block above cleared so a lid has room. It goes
+    down the way a hand puts it (<code>BlockItem.updateCustomBlockEntityTag</code>,
+    <code>applyComponentsFromItemStack</code>, <code>setPlacedBy</code>), is opened through
+    the block's own <code>useWithoutItem</code>, and is picked up the way vanilla's
+    pick-block-with-data does (<code>saveCustomOnly</code> into
+    <code>minecraft:block_entity_data</code>, plus <code>collectComponents</code>).
+    Between openings the chest is that one <code>ItemStack</code>, kept in
+    <code>HorsePacks.hold</code> with the item count taken while it stood; what is worn in
+    <code>HorseGear</code>, drawn and synced, is the same stack without its contents.
+</p>
+<table>
+    <tr><th>What could go wrong</th><th>What stops it</th></tr>
+    <tr><td>The server dies with a chest standing</td>
+        <td>The horse's copy is re-picked <strong>every tick</strong> while the chest is
+            live, and a <code>SavedData</code> journal names both positions before they are
+            touched. On the next start the journal is swept and the original blocks go back
+            with <code>UPDATE_SKIP_BLOCK_ENTITY_SIDEEFFECTS</code> &mdash; no drops. A crash
+            can lose a tick; it cannot make a second chest.</td></tr>
+    <tr><td>Every menu asks &ldquo;is the player still at my block&rdquo;, and the block is a
+            hundred blocks down</td>
+        <td><code>mixin/HostedMenuPlayerMixin</code> and <code>HostedMenuPacketMixin</code>
+            wrap the five places vanilla asks (<code>ServerPlayer.tick</code>,
+            <code>doTick</code>; the click, button and recipe packets) and hand a hosted
+            player's question to <code>HostedPacks.stillValid</code>, which answers for the
+            <em>horse</em>. Anybody else gets the menu's own answer after one empty-map
+            check.</td></tr>
+    <tr><td>The modded client builds its menu before the block arrives</td>
+        <td>The block update and the block entity's data are sent to the opening player
+            <em>ahead of</em> the call that opens the menu, rather than left to the
+            end-of-tick broadcast.</td></tr>
+    <tr><td>Somebody else finds the block</td>
+        <td>Clicks and breaks at a live position are cancelled.</td></tr>
+    <tr><td>It will not place, will not open, or throws</td>
+        <td>It is lifted, the item is remembered as one that does not host until the next
+            restart, logged once, and the chest opens as the plain grid.</td></tr>
+    <tr><td>The rider leaves the column the block is in</td>
+        <td>The chest shuts sixty-four blocks out. A galloping rider can outrun an open
+            modded chest; a vanilla one has no such limit.</td></tr>
+</table>
+<p>
+    <code>HostedPacks.hosts</code> decides which chests take this path: not the
+    <code>minecraft</code> namespace, not the ender chest, not anything in
+    <code>horsegenetics:horse_storage/plain_screen</code>, and nothing with
+    <code>packs.real_screens</code> off. An empty hosted chest that is no different from a
+    new one comes off the horse as a plain item, so it stacks; anything else comes off
+    carrying its block data. The gametest <code>hosted_chest_is_a_real_block</code> drives
+    the whole path with a vanilla chest and an unjoined <code>ServerPlayer</code>, and was
+    seen to fail with the mixin answer removed.
+</p>
+<div class="note warn"><span class="label">Unverified against another mod</span>
+    <p>
+        No modded chest is installed in the dev run, so no modded menu has been opened
+        this way. It is the first check on the <a href="#verify-packs">Verification
+        tab</a>.
+    </p>
+</div>
 
 <h3 id="packs-store">The store is mutable, on purpose</h3>
 <p>
@@ -702,7 +778,7 @@
         <td><code>HorsePackHandler.onDrops</code> (<code>LivingDropsEvent</code>,
             <code>LOWEST</code>) adds both chests and their contents to the drops. Lowest
             because <code>GeneDeathHandler.onHorseDrops</code> <em>clears</em> the list
-            for some genes.</td></tr>
+            for some genes. A hosted chest drops as its one whole item.</td></tr>
     <tr><td>Resurrection, a realm-backup raise</td>
         <td>The afterlife snapshot is taken before the drops, so it still holds them;
             <code>HorseResurrection.revive</code> calls <code>strip</code>, or two chests of
@@ -1382,12 +1458,10 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         vanilla's donkey. Panniers that sit on the animal are the same feature as
         <a href="#accessories-geometry">deriving equipment geometry from the horse's own
         parts</a> and should be built with it.</li>
-    <li><strong>Other mods' interdimensional storage.</strong> The ender chest is handled
-        by name. Another mod's equivalent is only <em>weightless</em> if a datapack tags
-        it, and only works at all if its block entity holds items &mdash; one that fronts
-        a global inventory keyed by a frequency would be a plain box here. Doing better
-        means running the block's own logic, which is the design
-        <a href="#packs-detect">the Coding tab</a> explains turning down.</li>
+    <li><strong>Other mods' interdimensional storage weighs what it holds.</strong> It
+        opens as its own block now, so it works; but only the ender chest is weightless by
+        name, and another mod's equivalent is weightless only if a datapack adds it to
+        <code>horse_storage/weightless</code>.</li>
     <li><strong>A key to open them from the saddle.</strong> Today it is the horse
         screen, the Gear tab and the slot's menu: three clicks for something a rider does
         often.</li>
@@ -1451,10 +1525,18 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         you: the window closes past eight blocks, with nothing lost off the cursor.</li>
     <li><strong>A dedicated server with two players:</strong> a stranger clicking your
         horse's chest gets a refusal, not a mount and not a menu.</li>
-    <li><strong>Another mod's chest</strong> &mdash; the open check on
-        <code>HorseStorage</code>'s probe. Hang one, open it, count its slots, and read the
-        log for <em>Could not ask</em>. A chest whose size is not nine-by-N opens the plain
-        grid; a very large one should come up wide, not off the screen.</li>
+    <li><strong>Another mod's chest &mdash; first, because nothing here has run one.</strong>
+        With Sophisticated Storage installed: hang a chest, open it, and its own screen
+        should come up, with its upgrade slots. Put things in, close, reopen: still there.
+        Open it from the saddle and ride: it stays open until you are sixty-four blocks
+        from where you opened it. Read the log for <em>would not</em> and <em>Could not
+        ask</em>; either means it fell back to the plain grid. Dig to the bottom of the
+        world under you while it is open only if you are curious: there is a chest there,
+        and it will not let you touch it. Then kill the server with the chest open and
+        start it again: the log names the position, the bedrock is back, and the horse
+        still has the chest.</li>
+    <li><strong>A shelf and a decorated pot</strong>, which have no screen of their own,
+        open the plain grid at three slots and one.</li>
     <li><em>Then look at it:</em> the click box against the drawn chest on a small and a
         large horse (it is deliberately a little generous); the chest on a rearing horse
         and a galloping one; a shelf and a decorated pot, which are odd shapes to squeeze;
