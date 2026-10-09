@@ -1,0 +1,5 @@
+Storage harness
+(Gameplay / non-genetic)
+The strap over a horse's rump and the metal frame on each flank that a chest hangs in. A horse wears one before it can carry a chest at all , and it takes a little of the load off. It comes with copper, iron, golden or netherite fittings — the better the metal, the more it helps — and its leather takes dye. Built on 2026-10-08 and not yet played; its enchantments are not built, and which ones it gets is still to be decided.
+
+Gameplay / non-genetic Storage harness The strap over a horse's rump and the metal frame on each flank that a chest hangs in. A horse wears one before it can carry a chest at all , and it takes a little of the load off. It comes with copper, iron, golden or netherite fittings — the better the metal, the more it helps — and its leather takes dye. Built on 2026-10-08 and not yet played; its enchantments are not built, and which ones it gets is still to be decided. Chests on a horse Horse gear: the slots Pulling ability Config the Verification tab the Roadmap tab Source: common/pack/HarnessTier , neoforge-26.1.2/{item,entity,server,client}/

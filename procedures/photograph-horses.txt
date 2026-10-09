@@ -75,7 +75,8 @@ STEPS
    Grep every allele token before using it.
    A horse wearing something: end the shot with .dressed(...), which runs on the horse
    once it stands on the stage. DebugPhotoShoot.packs(near, off) hangs a chest on each
-   flank; facingEast() turns the horse round, so a SIDE camera sees its off side.
+   flank; facingEast() turns the horse round, so a SIDE camera sees its off side;
+   harness(item, rgb) puts a storage harness on, dyed, or undyed for -1.
 2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
 3. Copy run/logs/latest.log and debug.log to the scratchpad first: they hold the owner's
    last play session (CLAUDE.md: read it rather than asking), and the launch overwrites

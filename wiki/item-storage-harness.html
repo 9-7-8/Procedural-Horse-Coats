@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storage harness &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+<script defer src="assets/item-art/names.js"></script>
+<script defer src="item-art.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
+<h1>Storage harness</h1>
+<p class="lede">
+    The strap over a horse's rump and the metal frame on each flank that a chest hangs in.
+    <strong>A horse wears one before it can <a href="horse-gear.html#horse-chests">carry a
+    chest</a> at all</strong>, and it takes a little of the load off. It comes with copper,
+    iron, golden or netherite fittings &mdash; the better the metal, the more it helps
+    &mdash; and its leather takes dye. Built on 2026-10-08 and not yet played; its
+    enchantments are not built, and which ones it gets is still to be decided.
+</p>
+
+<div class="item-art" data-items="copper_storage_harness,iron_storage_harness,golden_storage_harness,netherite_storage_harness"></div>
+
+<section id="gameplay" class="tab-panel" data-tab="gameplay" data-tab-label="Gameplay">
+
+<h2 id="what-it-is">What it is</h2>
+<p>
+    A piece of <a href="horse-gear.html">gear</a> with a slot of its own, <strong>Harness</strong>,
+    beside the two Pack slots on the Gear tab. Hold one and right-click your horse and it
+    goes on; or put it in its slot on the Gear tab or in the Dress window. An adult horse
+    of your own, like every other piece.
+</p>
+
+<h2 id="rules">The harness comes first, and leaves last</h2>
+<ul>
+    <li><strong>No harness, no chest.</strong> The Pack slots refuse everything on a horse
+        that is not wearing one, and a right-click holding a chest says so rather than
+        putting you in the saddle.</li>
+    <li><strong>It does not come off while a chest hangs from it.</strong> Take both chests
+        off, then the harness.</li>
+    <li>A server can drop the rule with <code>packs.harness_required</code>; a harness is
+        then only its weight bonus.</li>
+</ul>
+
+<h2 id="tiers">The four metals</h2>
+<p>
+    <a href="horse-gear.html#pack-load">What a horse carries slows it down</a>, by how many
+    items there are against how strong it is. A harness makes the load count for a little
+    less.
+</p>
+<table>
+    <tr><th>Harness</th><th>Fittings</th><th>The load weighs, by default</th></tr>
+    <tr><td><strong>Copper</strong></td><td>2 copper ingots</td><td>2.5% less</td></tr>
+    <tr><td><strong>Iron</strong></td><td>2 iron ingots</td><td>5% less</td></tr>
+    <tr><td><strong>Golden</strong></td><td>2 gold ingots</td><td>7.5% less</td></tr>
+    <tr><td><strong>Netherite</strong></td><td>1 netherite ingot</td><td>10% less</td></tr>
+</table>
+<p>
+    Every one is crafted the same way otherwise: <strong>two leather and a horse hair</strong>
+    with the metal, in any arrangement. There is no upgrading one into the next.
+</p>
+<div class="note rule"><span class="label">Small on purpose</span>
+    <p>
+        How much a horse can carry is its pulling ability, and pulling ability is something
+        you <em>breed</em> for. A tenth off, at best, is a harness that helps a good horse
+        and cannot stand in for one. A server that would rather gear mattered more than
+        bloodlines raises one number, <code>packs.harness_best_reduction</code> on the
+        <a href="config.html">config page</a>, and all four tiers move with it: the netherite
+        harness takes that much off, and the other three are even steps below. The item's
+        tooltip shows the figure your server uses.
+    </p>
+</div>
+
+<h2 id="dye">Dyeing it</h2>
+<p>
+    The leather dyes like leather armour &mdash; in the crafting grid with any dye, or
+    several mixed. The fittings keep their metal's colour. On the
+    horse the strap is the colour you dyed it.
+</p>
+
+<h2 id="look">What it looks like on the horse</h2>
+<p>
+    A strap over the rump, a second running back along the spine to the tail, and on each
+    flank a frame with a shelf under it. A chest sits in its frame; with no chest the frame
+    is empty.
+</p>
+
+</section>
+
+<section id="coding" class="tab-panel" data-tab="coding" data-tab-label="Coding">
+
+<h2 id="classes">Where it is</h2>
+<table>
+    <tr><th>What</th><th>Where</th></tr>
+    <tr><td>The tiers and the sum</td>
+        <td><code>common/pack/HarnessTier</code> and <code>PackLoad.lightened</code>, pinned by
+            <code>PackLoadTest</code> (<code>theHarnessLightensTheLoad</code>,
+            <code>aServerMaySetTheHarness</code>)</td></tr>
+    <tr><td>The item</td>
+        <td><code>item/StorageHarnessItem</code>, one class and an item per tier in
+            <code>ModItems</code></td></tr>
+    <tr><td>The slot and both rules</td>
+        <td><code>entity/HorseTackSlot.HARNESS</code>, <code>harnessed</code>,
+            <code>accepts</code>, <code>mayTakeOff</code></td></tr>
+    <tr><td>The refusal by hand</td><td><code>server/TackEquipHandler</code></td></tr>
+    <tr><td>The load</td>
+        <td><code>server/HorsePackHandler.harnessReduction</code>, read in
+            <code>refresh</code> and by the Gear tab</td></tr>
+    <tr><td>Drawing it</td><td><code>client/HarnessLayer</code></td></tr>
+</table>
+
+<h2 id="tier-maths">One number, divided evenly</h2>
+<p>
+    A tier's reduction is <code>share() * best</code>, where <code>share()</code> is its
+    place in <code>HarnessTier</code>'s order over the number of tiers, and <code>best</code>
+    is <code>packs.harness_best_reduction</code>. So the server has one dial and adding a
+    tier re-divides it; nothing saved refers to a tier by number. The load the curve is
+    asked about is <code>PackLoad.lightened(weighed, reduction)</code> &mdash; fractional on
+    purpose, because a tenth off sixty-four items is not a whole number of items and
+    rounding it would make a harness worth nothing on a small load. It is applied
+    <em>before</em> the curve, so it moves a horse's maximum by the same share.
+    <code>MAX_HARNESS_BEST</code> stops a config from making a load weigh nothing.
+</p>
+
+<h2 id="items-per-tier">An item per tier, not a component</h2>
+<p>
+    The house rule from <code>bake-recipe-reference.mjs</code>: a recipe cannot tell
+    &ldquo;with a component&rdquo; from &ldquo;without&rdquo;, so anything a recipe must
+    distinguish is its own item. The ids use vanilla's own spelling for the metals
+    (<code>golden_storage_harness</code>) and are permanent. The tooltip is written from
+    <code>ServerConfig.packHarnessBestReduction()</code> rather than from a lang string with
+    a figure in it.
+</p>
+
+<h2 id="slot-rules">Both rules live on the slot</h2>
+<p>
+    <code>HorseTackSlot.accepts</code> refuses a storage slot on a horse that is not
+    <code>harnessed</code>, which every path asks: the Dress window's <code>mayPlace</code>,
+    the picker's packet, and the right-click. <code>mayTakeOff</code> refuses the harness
+    while either pack slot is full. <code>TackEquipHandler</code> adds only the sentence
+    &mdash; a refusal that is claimed and said, the same way a foal's is, because a rule this
+    mod invented that fails silently reads as a bug. <code>isStorage()</code> is the two
+    pack slots by name, not the whole Storage zone the harness also sits in.
+</p>
+
+<h2 id="art">The art</h2>
+<p>
+    Drawn in <code>tools/bake-drawn-items.mjs</code> as a two-layer item:
+    <code>storage_harness_leather</code>, near white so that <code>minecraft:dye</code> tints
+    it true and shared by all four, under a <code>storage_harness_fittings_&lt;metal&gt;</code>
+    sprite each. All four are in <code>minecraft:dyeable</code>.
+</p>
+
+<h2 id="layer">The layer</h2>
+<p>
+    <code>HarnessLayer</code> is the first piece of gear here drawn as <strong>geometry</strong>
+    rather than as a mask over the horse's own mesh, because a frame stands off the flank
+    and a mask cannot. Two model parts built once from boxes in the body bone's units, baked
+    straight from a <code>LayerDefinition</code>, submitted on the body bone through one flat
+    white texture with the colour as the tint. The frames are placed from
+    <code>PackBox</code>, the same numbers the chest is drawn and clicked at, so a chest sits
+    in its frame by construction. Photographed on 2026-10-08, bare and with chests, undyed
+    and dyed.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>
+        The storage harness was built on 2026-10-08 with its rules covered by a gametest and
+        its look by a photo shoot, and no player has crafted, dyed, worn or ridden with one.
+    </p>
+</div>
+
+<h3 id="verify-harness">The storage harness (2026-10-08, NOT played)</h3>
+<ul>
+    <li><strong>Craft all four</strong> from the recipes on the Recipes tab; each should be
+        its own item with its own fittings.</li>
+    <li><strong>Try to hang a chest on a bare horse</strong>, by right-click and in the Dress
+        window: refused, with a line on the action bar for the click.</li>
+    <li><strong>Harness on, then two chests, then try to take the harness off:</strong> it
+        stays, and the picker's Take off line says the chests hang from it.</li>
+    <li><strong>The weight.</strong> Fill both chests on a horse in a copper harness, read the
+        Gear tab's Carrying line, swap to netherite (chests off, harness off, new harness,
+        chests on) and read it again: the speed kept should rise a little. Then set
+        <code>packs.harness_best_reduction</code> to 0.5 and relog: the tooltip and the line
+        should both follow.</li>
+    <li><strong>Dye one</strong> in the crafting grid and put it on: the strap on the horse is
+        that colour, the fittings are not.</li>
+    <li><em>Then look at it:</em> the strap and frames on a galloping and a rearing horse, on
+        a very small and a very large one, under a saddle and a barding (does the rump strap
+        fight the barding's own geometry?), and whether an empty frame reads as a frame.</li>
+</ul>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Enchantments, and other mods' metals">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        The harness was asked for with enchantments and has none, and other mods' metals do
+        not make harnesses yet.
+    </p>
+</div>
+
+<h3 id="plan-enchantments">Enchantments</h3>
+<p>
+    The owner asked for a harness that &ldquo;has tiers and enchantments&rdquo;. The tiers are
+    built; the enchantments are not, because the <a href="horse-gear.html#accessories-enchanting">gear
+    plan</a> says the rule for what is an enchantment and what is a gene should be written
+    down before the first enchantable piece is made &mdash; nothing in this mod is enchantable
+    yet, and the first one pays for the whole path. What needs deciding: which enchantments a
+    harness takes (a further weight reduction, and if so whether it stacks past the best
+    tier's share; anything else), whether they come from the enchanting table or only from
+    books, and what each costs. Tracked on #220.
+</p>
+
+<h3 id="plan-modded-metals">Other mods' metals</h3>
+<p>
+    Four vanilla metals are written by hand. The
+    <a href="compatibility.html">generated-materials layer</a> already makes a barding per
+    modded ingot; a harness per modded metal would be the same scan, and needs a rule for
+    where a metal nobody ranked sits among the tiers.
+</p>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-gear.html#horse-chests">Chests on a horse</a>
+        <a href="horse-gear.html">Horse gear: the slots</a>
+        <a href="horse-body.html#pull">Pulling ability</a>
+        <a href="config.html">Config</a>
+        <a href="#verification">the Verification tab</a>
+        <a href="#roadmap">the Roadmap tab</a>
+    </div>
+    Source: <code>common/pack/HarnessTier</code>,
+    <code>neoforge-26.1.2/{item,entity,server,client}/</code>
+</div>
+
+</article>
+</main>
+</body>
+</html>

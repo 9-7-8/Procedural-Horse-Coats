@@ -18,13 +18,13 @@
 <article class="doc">
 
 <p class="eyebrow core">Gameplay <span class="sep">/</span> non-genetic</p>
-<h1>Horse gear: the nineteen slots</h1>
+<h1>Horse gear: the slots</h1>
 <p class="lede">
     Everything a horse wears, in one place. A <strong>Gear tab</strong> on the
-    horse information screen holds <strong>nineteen slots</strong> laid out on a
+    horse information screen holds <strong>twenty slots</strong> laid out on a
     picture of the horse itself &mdash; head, mane and tail, body, chest, a slot
     per leg and a slot per hoof, and two for the chests it carries. Two of them are real
-    vanilla equipment slots and the other seventeen are a data attachment of our
+    vanilla equipment slots and the other eighteen are a data attachment of our
     own, which is the constraint the whole system is shaped by.
     <strong>The slots exist; almost nothing to put in them does yet.</strong>
     The roster, the storage and the screen shipped first on purpose &mdash; every
@@ -37,7 +37,7 @@
 
 <div class="note warn"><span class="label">Built, and not yet played</span>
     <p>
-        The Gear tab, the nineteen-slot roster and the attachment behind it landed
+        The Gear tab, the twenty-slot roster and the attachment behind it landed
         on 2026-09-21 and <strong>have not been opened in a game</strong>. What to
         look at, in the order worth looking, is on this page&rsquo;s own
         <a href="#verification">Verification</a> tab. The two slots that came before
@@ -61,13 +61,13 @@
 <p>
     Overview used to carry the two tack slots in a row under the stats. It now
     says how many pieces the horse is wearing and sends you here, because a row
-    nineteen slots wide would have pushed the rest of Overview off the page.
+    twenty slots wide would have pushed the rest of Overview off the page.
     That line is the <em>first</em> thing on Overview, above the sex and the
     stats: what a horse has on is the one fact on that page that changes between
     two looks at it.
 </p>
 
-<h2 id="slots">The nineteen slots</h2>
+<h2 id="slots">The twenty slots</h2>
 <p>
     They are arranged on a small three-quarter view of the horse, in the place
     the gear actually goes: the near fore boot is under the near fore leg, the
@@ -106,9 +106,10 @@
     <tr><td><strong>Hooves</strong></td><td>Hoof equipment &times; 4</td>
         <td>Four independent hoof slots. See the <a href="item-horse-shoes.html">horse-shoe page</a>
             for the first planned occupant.</td></tr>
-    <tr><td><strong>Storage</strong></td><td>Pack &times; 2</td>
-        <td>A chest, a barrel, a shulker box &mdash; anything that stores items &mdash; near
-            side and off side. See <a href="#horse-chests">chests on a horse</a>.</td></tr>
+    <tr><td><strong>Storage</strong></td><td>Harness, Pack &times; 2</td>
+        <td>A <a href="item-storage-harness.html">storage harness</a>, and then a chest, a
+            barrel, a shulker box &mdash; anything that stores items &mdash; near side and off
+            side. See <a href="#horse-chests">chests on a horse</a>.</td></tr>
 </table>
 
 <div class="note"><span class="label">A bridle and a halter share one slot on purpose</span>
@@ -175,13 +176,15 @@
         not be carrying.</li>
 </ul>
 
-<div class="note warn"><span class="label">Thirteen of the nineteen are empty by design</span>
+<div class="note warn"><span class="label">Thirteen of the twenty are empty by design</span>
     <p>
         The <strong>saddle</strong> and the <strong>barding</strong> have had
         something that fits them all along, and the <strong>mane</strong> and
         <strong>tail</strong> now take the
         <a href="item-rescuing-braid.html">rescuing braid</a> &mdash; the first
-        piece of gear of this mod's own to fill a slot of this mod's own. The two
+        piece of gear of this mod's own to fill a slot of this mod's own. The
+        <strong>harness</strong> slot takes a
+        <a href="item-storage-harness.html">storage harness</a> and the two
         <strong>packs</strong> take <a href="#horse-chests">anything that stores
         items</a>. The
         other thirteen accept nothing: not because they are broken, but because
@@ -222,7 +225,9 @@
 <table>
     <tr><th>You want to</th><th>Do this</th></tr>
     <tr><td><strong>Hang one</strong></td>
-        <td>Hold it and right-click your horse. It goes on the flank you are standing at, or
+        <td><strong>The horse needs a <a href="item-storage-harness.html">storage harness</a>
+            first</strong> &mdash; a chest hangs from it. Then hold the chest and right-click
+            your horse. It goes on the flank you are standing at, or
             the other one if that is taken. Or put it in a <strong>Pack</strong> slot on the
             Gear tab or in the Dress window. An adult horse of your own; a foal carries
             nothing.</td></tr>
@@ -332,8 +337,8 @@
     <strong>This is the constraint the whole system is shaped by.</strong>
     <code>EquipmentSlot</code> has exactly two animal entries &mdash;
     <code>BODY</code> and <code>SADDLE</code> &mdash; and
-    <code>EquipmentClientInfo.LayerType</code> is not extensible. Nineteen slots
-    were therefore never going to be nineteen equipment slots. The two real ones
+    <code>EquipmentClientInfo.LayerType</code> is not extensible. Twenty slots
+    were therefore never going to be twenty equipment slots. The two real ones
     are spent on the saddle and the barding, which are the two vanilla already
     draws for free; every other piece is a key in a synced data attachment.
 </p>
@@ -361,9 +366,9 @@
 <p>
     Every gear slot reads an item tag named for it &mdash;
     <code>horsegenetics:gear/mane</code>,
-    one tag per non-vanilla slot, seventeen of them. <strong>Two of them have an
-    entry</strong> &mdash; <code>gear/mane</code> and <code>gear/tail</code>, both holding the
-    <a href="item-rescuing-braid.html">rescuing braid</a> &mdash; and the other fifteen are
+    one tag per non-vanilla slot. <code>gear/mane</code> and <code>gear/tail</code> hold the
+    <a href="item-rescuing-braid.html">rescuing braid</a> and <code>gear/harness</code> the four
+    <a href="item-storage-harness.html">storage harnesses</a>; most of the rest are
     empty. A slot whose tag is empty
     correctly refuses everything rather than accepting dirt, which is exactly the
     behaviour wanted while the pieces do not exist. Shipping a piece means adding
@@ -377,7 +382,7 @@
     it detects &mdash; see <a href="#packs">chests</a> below. Every caller asks
     <code>fits</code> or <code>accepts</code>, never the tag directly:
     <code>TackEquipHandler</code> read the tag itself until 2026-10-08, which was correct
-    for seventeen slots and would have made a chest unwearable by hand.
+    for eighteen slots and would have made a chest unwearable by hand.
 </p>
 
 <h2 id="attachment">Why an attachment and not a container</h2>
@@ -464,7 +469,7 @@
     Asked for on 2026-09-25 (<em>&ldquo;the player's inventory must be visible on the right
     side of the gear screen, so they can equip/unequip items&rdquo;</em>) and built on
     2026-09-30. <code>menu/HorseGearMenu</code> is an <code>AbstractContainerMenu</code>
-    with the nineteen tack slots and the player's thirty-six; <code>client/HorseGearScreen</code>
+    with the twenty tack slots and the player's thirty-six; <code>client/HorseGearScreen</code>
     draws it, doll on the left and inventory on the right.
 </p>
 <p>
@@ -496,7 +501,7 @@
 </p>
 <ul>
     <li><code>mayPlace</code> is <code>HorseTackSlot.accepts</code>, which carries
-        <code>usableOn</code> &mdash; so the fifteen empty tags refuse everything and a foal's
+        <code>usableOn</code> &mdash; so the empty tags refuse everything and a foal's
         slots refuse too.</li>
     <li><strong>One piece per slot</strong> (<code>getMaxStackSize</code> on the slot and the
         view). That also shuts every vanilla merge path, the only paths that grow a slot's
@@ -788,7 +793,7 @@
     of the drops of a horse whose gene replaces its loot.
 </p>
 <p>
-    <strong>On death the fifteen still do not drop</strong>, and that is the recorded
+    <strong>On death the others still do not drop</strong>, and that is the recorded
     design rather than an oversight: <code>HORSE_GEAR</code> rides in the afterlife
     snapshot so that a horse brought back is still dressed. A horse nobody brings back
     takes them with it. Whether that should change is the open half of #218.
@@ -830,7 +835,7 @@
 
 <div class="note warn"><span class="label">Thirteen slots still draw nothing</span>
     <p>
-        There is <strong>no render layer</strong> for thirteen of the seventeen
+        There is <strong>no render layer</strong> for thirteen of the eighteen
         gear slots, because there is nothing to render. The saddle and the barding
         draw as they always have, through vanilla, the two packs are drawn by
         <code>PackLayer</code> as above, and the mane and tail are drawn

@@ -32,6 +32,7 @@
 // item is easy to add and easy to forget to write up, and a roster where every
 // item is somewhere is the only version of "every item page has that item" that
 // stays true.
+import { readPng, writePng } from '../../neoforge-26.1.2/tools/png.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -79,7 +80,15 @@ function items() {
     const ref = model.textures?.layer0 || model.textures?.particle;
     if (!ref) { out.set(id, { sprite: null }); continue; }
     if (!ref.startsWith('horsegenetics:item/')) { out.set(id, { vanilla: ref }); continue; }
-    out.set(id, { sprite: ref.slice('horsegenetics:item/'.length) });
+    // A layered item (the storage harness: dyed leather under metal fittings) is
+    // not any one of its files. Its upper layers are kept so the bake can put the
+    // picture together the way the game does.
+    const over = [];
+    for (let i = 1; model.textures[`layer${i}`]; i++) {
+      const upper = model.textures[`layer${i}`];
+      if (upper.startsWith('horsegenetics:item/')) over.push(upper.slice('horsegenetics:item/'.length));
+    }
+    out.set(id, { sprite: ref.slice('horsegenetics:item/'.length), over });
   }
   return out;
 }
@@ -120,7 +129,7 @@ for (const [id, pages] of want) {
   }
   const name = lang[`item.horsegenetics.${id}`] || lang[`block.horsegenetics.${id}`];
   if (!name) { errors.push(`${id}: no lang key, so it has no name in game either`); continue; }
-  show.set(id, { sprite: item.sprite, name });
+  show.set(id, { sprite: item.sprite, over: item.over || [], name });
 }
 
 // Everything shippable that nobody put on a page.
@@ -138,8 +147,31 @@ if (errors.length) {
 }
 
 fs.mkdirSync(OUT, { recursive: true });
-for (const [id, { sprite }] of show) {
-  fs.copyFileSync(path.join(SPRITES, `${sprite}.png`), path.join(OUT, `${id}.png`));
+for (const [id, { sprite, over }] of show) {
+  if (!over || !over.length) {
+    fs.copyFileSync(path.join(SPRITES, `${sprite}.png`), path.join(OUT, `${id}.png`));
+    continue;
+  }
+  // Layered: layer0 in its default dye (items/<id>.json, tints[0]), the upper
+  // layers over it untinted - what the item looks like in a hand, undyed.
+  const base = readPng(path.join(SPRITES, `${sprite}.png`));
+  const def = JSON.parse(fs.readFileSync(path.join(ASSETS, 'items', `${id}.json`), 'utf8'));
+  const dye = def.model?.tints?.[0]?.default;
+  const px = Buffer.from(base.px);
+  if (typeof dye === 'number') {
+    const rgb = [(dye >> 16) & 255, (dye >> 8) & 255, dye & 255];
+    for (let i = 0; i < px.length; i += 4) {
+      for (let c = 0; c < 3; c++) px[i + c] = Math.round(px[i + c] * rgb[c] / 255);
+    }
+  }
+  for (const upper of over) {
+    const top = readPng(path.join(SPRITES, `${upper}.png`));
+    if (top.w !== base.w || top.h !== base.h) throw new Error(`${id}: layer ${upper} is a different size`);
+    for (let i = 0; i < px.length; i += 4) {
+      if (top.px[i + 3] > 0) top.px.copy(px, i, i, i + 4);
+    }
+  }
+  writePng(path.join(OUT, `${id}.png`), base.w, base.h, px);
 }
 for (const f of fs.readdirSync(OUT)) {
   if (f !== 'names.js' && !show.has(f.replace(/\.png$/, ''))) fs.unlinkSync(path.join(OUT, f));

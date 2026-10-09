@@ -106,6 +106,8 @@ const HOME = {
     'packs.min_speed': 'horse-gear.html#pack-load',
     'packs.real_screens': 'horse-gear.html#packs-hosted',
     'packs.place_on_death': 'horse-gear.html#pack-rules',
+    'packs.harness_required': 'item-storage-harness.html#rules',
+    'packs.harness_best_reduction': 'item-storage-harness.html#tiers',
     'behaviour.bond_decay_per_day': 'horse-care.html#bond-decay',
     'behaviour.bond_floor': 'horse-care.html#bond-decay',
     'behaviour.owner_only_riding': 'horse-care.html#riding',
