@@ -115,7 +115,7 @@ public final class DebugPhotoShoot {
      * front (a part on the skull or the cheek: fins, spikes, a ridge - HEAD shows the whole
      * horse and leaves them a dozen pixels across).
      */
-    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE, FACE }
+    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE, FACE, FRONT }
 
     private static final String BAY = "horsegenetics.extension=E/E-horsegenetics.agouti=A/A";
     private static final String BLACK = "horsegenetics.extension=E/E-horsegenetics.agouti=a/a";
@@ -144,6 +144,9 @@ public final class DebugPhotoShoot {
                             + "-horsegenetics.ram_horn_tip=Tip/Tip", -1),
             new Shot("09-ram-corkscrew", Sex.FEMALE,
                     GREY + "-horsegenetics.ram_horns=Rh/n-horsegenetics.ram_horn_form=Crk/Crk", -1),
+            new Shot("09b-ram-horizontal-twist", Sex.MALE,
+                    CHESTNUT + "-horsegenetics.ram_horns=Rh/n-horsegenetics.ram_horn_form=Hzt/Hzt", -1,
+                    Framing.FRONT),
             new Shot("10-everything-at-once", Sex.MALE,
                     BAY + "-horsegenetics.unicorn_horn=Horn/Horn-horsegenetics.dragon_horns=Drg/Drg"
                             + "-horsegenetics.dragon_horn_colour=Gry/Gry-horsegenetics.ram_horns=Rh/n"
@@ -239,6 +242,16 @@ public final class DebugPhotoShoot {
             ex = tx - 0.9;
             ey = ty + 0.35;
             ez = tz + 1.3;
+        } else if (shot.framing() == Framing.FRONT) {
+            // Head-on: dead ahead of the horse (west) and a little above the poll, for a part
+            // that reaches SIDEWAYS from the head (the horizontal ram horns), which every
+            // other framing sees end-on or foreshortened.
+            tx = hx - 0.9;
+            ty = origin.getY() + 1.9;
+            tz = hz;
+            ex = tx - 1.7;
+            ey = ty + 0.5;
+            ez = tz;
         } else if (shot.framing() != Framing.HEAD) {
             // The whole horse from a little forward of side-on, for a look that is the
             // whole body (the skeleton's cut-outs). A foal is half the size, so half the way.

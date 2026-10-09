@@ -62,14 +62,18 @@ class PartGeneratorTest {
                 assertTrue(node.len() > 0f, shape + " box " + i + " has no length");
                 assertTrue(node.girth() >= MIN_GIRTH,
                         shape + " box " + i + " is " + node.girth() + " units thick");
-                // A flat box - a membrane, a plate's slab, a sabre fang's blade or an ear fin's ray - may be
+                // A flat box - a membrane, a plate's slab, a sabre fang's blade, an ear fin's ray or a
+                // horizontal-twist ram horn - may be
                 // thinner across x, never past this, and nothing else is flat at all.
                 assertTrue(node.width() >= MIN_WIDTH && node.width() <= node.girth(),
                         shape + " box " + i + " is " + node.width() + " units wide");
                 assertTrue(node.width() == node.girth() || node.tex() == PartSheet.MEMBRANE
                                 || (shape.kind().plates() && node.isRoot())
-                                || shape.kind().sabre() || shape.kind().earFin(),
-                        shape + " box " + i + " is flat and is neither a membrane, a slab, a blade nor a ray");
+                                || shape.kind().sabre() || shape.kind().earFin()
+                                || (shape.kind().ramHorn()
+                                        && shape.style() / RamHornGenerator.CURLS == RamHornGenerator.HORIZONTAL),
+                        shape + " box " + i + " is flat and is neither a membrane, a slab, a blade, a ray "
+                                + "nor a horizontal horn");
                 assertTrue(node.t() >= 0f && node.t() <= 1f,
                         shape + " box " + i + " sits at t=" + node.t() + " along its parent");
                 assertTrue(node.tex() >= 0 && node.tex() < PartSheet.CAPACITY,
@@ -110,6 +114,10 @@ class PartGeneratorTest {
      * is what memory costs - and the cache fills lazily, so it holds only racks
      * somebody bred. A world with every one of them in view is the case for an
      * eviction policy, and it is a measurement nobody has made.
+     *
+     * <p>Raised from 32,000 to 33,000 by the owner (2026-10-09) for the two new ram horn
+     * shapes, the horizontal twist and the scimitar - one shape is two sides, four curl
+     * buckets and five size classes of horn. Room for those two and nothing else.
      */
     @Test
     void theWholeSetOfMeshesIsSmall() {
@@ -123,7 +131,7 @@ class PartGeneratorTest {
         for (PartShape shape : all) {
             boxes += PartGenerators.build(shape).size();
         }
-        assertTrue(boxes <= 32_000, "every mesh the part cache can hold is " + boxes
+        assertTrue(boxes <= 33_000, "every mesh the part cache can hold is " + boxes
                 + " boxes; past this it wants a real eviction policy, not a bigger number here");
     }
 

@@ -101,6 +101,73 @@ class RamHornsGeneTest {
         }
     }
 
+    /** Hzt sits under corkscrew and over scurs, was appended (saves), and reaches both horns. */
+    @Test
+    void theHorizontalTwistSitsBetweenCorkscrewAndScurs() {
+        RamHornFormGene form = Genes.RAM_HORN_FORM;
+        assertEquals(List.of("Crl", "Crk", "Fhn", "Scr", "Hzt"),
+                form.alleles().stream().map(a -> a.token()).toList(), "allele order is saved: append only");
+        assertEquals(RamHornGenerator.FORMS, form.alleles().size());
+        assertEquals(form.alleles().size(), form.expressions().size());
+        for (int i = 0; i < form.alleles().size(); i++) {
+            assertEquals(i, form.alleles().get(i).order());
+        }
+        assertEquals(RamHornGenerator.HORIZONTAL, shape(form, "Hzt/Hzt"));
+        assertEquals(RamHornGenerator.HORIZONTAL, shape(form, "Hzt/Scr"));
+        assertEquals(RamHornGenerator.CORKSCREW, shape(form, "Crk/Hzt"));
+        assertEquals(RamHornGenerator.CURL, shape(form, "Crl/Hzt"));
+        assertEquals(RamHornGenerator.FOUR, shape(form, "Fhn/Hzt"));
+        assertEquals("ram-horn-horizontal", form.expressionOf(
+                Genotype.parse(Codes.of("ram_horn_form", "Hzt/Scr")).pair(form)).id());
+        for (Sex sex : Sex.values()) {
+            List<AttachedPart> horns = GrownParts.of(
+                    horse(sex, "ram_horns", "Rh/n", "ram_horn_form", "Hzt/Hzt"), Epigenome.fromSeed(3));
+            assertEquals(2, horns.size(), "Rh horns either sex: " + sex);
+            for (AttachedPart side : horns) {
+                assertEquals(RamHornGenerator.HORIZONTAL, side.shape().style() / RamHornGenerator.CURLS);
+            }
+        }
+        assertTrue(GrownParts.of(horse(Sex.FEMALE, "ram_horns", "Rhm/n", "ram_horn_form", "Hzt/Hzt"),
+                Epigenome.fromSeed(3)).isEmpty(), "Rhm is a stallion's");
+    }
+
+    private static int shape(RamHornFormGene form, String tokens) {
+        return form.shapeOf(Genotype.parse(Codes.of("ram_horn_form", tokens)).pair(form));
+    }
+
+    /**
+     * The horizontal twist at every curl and size: inside the box budget, flat, rolled
+     * and never bent, leaving the skull more sideways than up, and tighter by the bucket.
+     */
+    @Test
+    void theHorizontalTwistIsFlatLevelAndTwistsByTheCurl() {
+        for (int size = 0; size < RamHornSize.classes(); size++) {
+            float last = 0f;
+            for (int curl = 0; curl < RamHornGenerator.CURLS; curl++) {
+                List<PartNode> nodes = RamHornGenerator.generate(RamHornGenerator.HORIZONTAL, curl, size, true);
+                assertTrue(nodes.size() >= 2 && nodes.size() <= RamHornGenerator.MAX_NODES, nodes.size() + " boxes");
+                PartNode root = nodes.get(0);
+                assertTrue(root.parent() < 0);
+                assertTrue(root.rz() > Math.toRadians(60) && root.rz() < Math.toRadians(90),
+                        "the root leaves sideways, not up: " + Math.toDegrees(root.rz()));
+                float total = 0f;
+                for (int i = 0; i < nodes.size(); i++) {
+                    PartNode n = nodes.get(i);
+                    assertTrue(n.width() < n.girth(), "a flat section, box " + i);
+                    if (i > 0) {
+                        assertEquals(i - 1, n.parent(), "one unbranched chain");
+                        assertEquals(0f, n.rx(), "a twist never bends");
+                        assertEquals(0f, n.rz(), "a twist never leans");
+                        assertTrue(n.ry() > 0f);
+                        total += n.ry();
+                    }
+                }
+                assertTrue(total > last, "a higher curl bucket twists further");
+                last = total;
+            }
+        }
+    }
+
     /** A coloured tip keeps the horn's shade at the base; one copy shows nothing. */
     @Test
     void aTippedHornFadesFromItsShadeIntoTheTip() {

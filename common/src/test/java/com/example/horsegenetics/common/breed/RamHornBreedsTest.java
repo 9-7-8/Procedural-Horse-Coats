@@ -28,6 +28,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class RamHornBreedsTest {
 
+    /** The four shapes both breed pools name. A later shape (Hzt) is on neither breed until the owner puts it there. */
+    private static final Set<Integer> FLOCK_SHAPES = Set.of(RamHornGenerator.CURL, RamHornGenerator.CORKSCREW,
+            RamHornGenerator.FOUR, RamHornGenerator.SCURS);
+
     private static Breed breed(String id) {
         Breed b = Breeds.get(id);
         assertNotNull(b, id + " should be a registered breed");
@@ -109,7 +113,7 @@ class RamHornBreedsTest {
             assertEquals(right.tipTint() & 0xFFFFFF, ((GeneAbility.Emitter) prints.get(0)).color(),
                     "prints that do not match the horn tip, seed " + seed);
         }
-        assertEquals(RamHornGenerator.FORMS, shapes.size(), "every shape");
+        assertEquals(FLOCK_SHAPES, shapes, "every shape the breed's pool names");
         assertTrue(tips.size() > 300, "the tip colour should be any colour: " + tips.size());
     }
 
@@ -158,6 +162,6 @@ class RamHornBreedsTest {
         assertTrue(pied > 0.07 * n && pied < 0.13 * n, "pied " + pied);
         assertTrue(ramsHorned > 0.62 * n && ramsHorned < 0.78 * n, "horned rams " + ramsHorned);
         assertTrue(ewesHorned > 0.10 * n && ewesHorned < 0.20 * n, "horned ewes " + ewesHorned);
-        assertEquals(RamHornGenerator.FORMS, shapes.size(), "every horn shape turns up in a flock");
+        assertEquals(FLOCK_SHAPES, shapes, "every horn shape in the pool turns up in a flock");
     }
 }

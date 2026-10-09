@@ -9,7 +9,7 @@ import java.util.List;
  * {@link AntlerGenerator} gives: a mirrored copy by negative scale would turn culled
  * boxes inside out.
  *
- * <h2>The four shapes</h2>
+ * <h2>The five shapes</h2>
  * <ul>
  *   <li>{@link #CURL} - the ram's spiral. Every segment turns the same amount
  *       backward, so the chain goes up, back, down past the ear and forward again
@@ -23,6 +23,12 @@ import java.util.List;
  *       and a curl hanging from the same root and sweeping down. One root, so one
  *       tree - the lower horn's first box sits at the base of the upper one.</li>
  *   <li>{@link #SCURS} - two or three loose stubs, the half-horned state.</li>
+ *   <li>{@link #HORIZONTAL} - Khnum's old horns: one straight horn a side leaving
+ *       the skull almost level, flat in section and shallowly twisted. The corkscrew's
+ *       rule again - a roll on segments with no bend - but on a flat box
+ *       ({@link PartNode#width}), so the twist reads as a turning ribbon; the
+ *       {@code curl} bucket sets how far it turns. A little shorter than a corkscrew of the
+ *       same class, because it reaches sideways.</li>
  * </ul>
  *
  * <h2>No count, no seed</h2>
@@ -47,9 +53,11 @@ public final class RamHornGenerator {
     public static final int FOUR = 2;
     /** Loose stubs. */
     public static final int SCURS = 3;
+    /** Sideways, flat and shallowly twisted. */
+    public static final int HORIZONTAL = 4;
 
     /** How many shapes. In {@code ram_horn_form}'s allele order. */
-    public static final int FORMS = 4;
+    public static final int FORMS = 5;
 
     /** Curl buckets - how far round a curl goes, how tight a corkscrew twists. */
     public static final int CURLS = 4;
@@ -62,6 +70,12 @@ public final class RamHornGenerator {
 
     /** Roll per corkscrew segment, in degrees, by bucket - the {@link HornGenerator} ceiling is 34. */
     private static final float[] TWIST_DEGREES = {12f, 20f, 27f, 34f};
+
+    /** Roll per horizontal-twist segment, in degrees, by bucket - shallower than a corkscrew's. */
+    private static final float[] FLAT_TWIST_DEGREES = {8f, 14f, 20f, 26f};
+
+    /** A horizontal horn's thickness over its breadth: a flat section, not a square one. */
+    private static final float FLAT = 0.6f;
 
     /** Segments per size class for a full horn. */
     private static final int[] SEGMENTS = {4, 6, 8, 10, 12};
@@ -100,6 +114,16 @@ public final class RamHornGenerator {
             }
             case SCURS -> chain(out, -1, 0f, 2 + c / 2, Math.min(4.5f, length * 0.22f), length * 0.7f,
                     -0.25f, s * 0.45f, 0.15f, s * 0.10f, 0f, 0.55f);
+            case HORIZONTAL -> {
+                // The corkscrew's chain, laid nearly level and a little back, then flattened.
+                chain(out, -1, 0f, SEGMENTS[c], length * 0.8f, length, -0.12f, s * 1.45f,
+                        0f, 0f, (float) Math.toRadians(FLAT_TWIST_DEGREES[k]), 0.60f);
+                for (int i = 0; i < out.size(); i++) {
+                    PartNode n = out.get(i);
+                    out.set(i, new PartNode(n.parent(), n.t(), n.ox(), n.oy(), n.oz(), n.rx(), n.ry(), n.rz(),
+                            n.len(), n.girth(), n.tex(), n.group(), n.girth() * FLAT));
+                }
+            }
             default -> curl(out, -1, 0f, SEGMENTS[c], length, length, k, s, -0.55f);
         }
         return out;
