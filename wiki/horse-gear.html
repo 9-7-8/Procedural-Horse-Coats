@@ -246,9 +246,9 @@
     nothing is shrunk to fit the horse &mdash; what the horse limits is below.
 </p>
 <p>
-    A modded chest travels as one piece: if the horse dies it drops as a single item with
-    everything still inside, which goes back into it when you place it, rather than
-    spilling.
+    A modded chest travels as one piece: if it ever has to drop rather than be set down, it
+    drops as a single item with everything still inside, which goes back into it when you
+    place it, rather than spilling.
 </p>
 <p>
     <strong>An ender chest</strong> opens <em>your</em> ender chest &mdash; whoever
@@ -287,8 +287,12 @@
 
 <h3 id="pack-rules">What happens to it</h3>
 <ul>
-    <li><strong>The horse dies:</strong> both chests and everything in them drop where it
-        fell, as a donkey's do. A horse brought back afterwards comes back without them.</li>
+    <li><strong>The horse dies:</strong> it sets its chests down. Each one is placed as a
+        block in the nearest open space to where it fell, with everything still inside. If
+        there is no room within three blocks, or the land is protected, that chest and its
+        contents drop as items instead. A horse brought back afterwards comes back without
+        them. A server can go back to always dropping items with
+        <code>packs.place_on_death</code>.</li>
     <li><strong>You sell it or turn it loose:</strong> the chests and their contents are
         handed back to you first.</li>
     <li><strong>You sign it over with a
@@ -795,7 +799,14 @@
     <tr><th>Path</th><th>What happens to the chests</th></tr>
     <tr><td>Death</td>
         <td><code>HorsePackHandler.onDrops</code> (<code>LivingDropsEvent</code>,
-            <code>LOWEST</code>) adds both chests and their contents to the drops. Lowest
+            <code>LOWEST</code>) sets each chest down as a block (#221):
+            <code>openSpace</code> picks the nearest replaceable, dry position within three
+            blocks, preferring one with something under it; NeoForge's
+            <code>EventHooks.onBlockPlace</code> is asked first so a claim can refuse; the
+            block goes down through <code>HostedPacks.setDown</code>, the same
+            place-as-a-hand-would steps a hosted chest uses, and a plain chest is then
+            filled slot for slot from <code>HorsePacks</code>. Whatever cannot be placed, or
+            does not fit the placed block, is added to the drops as before. Lowest
             because <code>GeneDeathHandler.onHorseDrops</code> <em>clears</em> the list
             for some genes. A hosted chest drops as its one whole item.</td></tr>
     <tr><td>Resurrection, a realm-backup raise</td>
@@ -1528,8 +1539,10 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         window (it should not lift) and from the picker's <em>Take off</em> line (it should
         say to empty it). Then a shulker box, which should come off full and go back on
         full, with the same items in the same places.</li>
-    <li><strong>Kill a loaded horse.</strong> Two chests and everything in them on the
-        ground, once. Then resurrect it: it comes back with no chests. On a horse that
+    <li><strong>Kill a loaded horse.</strong> Two chests standing where it fell, each with
+        its contents in the slots they were in, and nothing of them loose on the ground.
+        Then kill one in a one-block tunnel, in water, and inside a claim: what cannot be
+        placed must drop instead, once. Then resurrect it: it comes back with no chests. On a horse that
         turns to something when it dies (a gene with a death drop), the luggage must still
         be there.</li>
     <li><strong>Sell a loaded horse to a cowboy, and turn one loose:</strong> the chests

@@ -105,6 +105,7 @@ const HOME = {
     'packs.curve_exponent': 'horse-gear.html#pack-load',
     'packs.min_speed': 'horse-gear.html#pack-load',
     'packs.real_screens': 'horse-gear.html#packs-hosted',
+    'packs.place_on_death': 'horse-gear.html#pack-rules',
     'behaviour.bond_decay_per_day': 'horse-care.html#bond-decay',
     'behaviour.bond_floor': 'horse-care.html#bond-decay',
     'behaviour.owner_only_riding': 'horse-care.html#riding',
