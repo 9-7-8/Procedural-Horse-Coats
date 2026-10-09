@@ -52,6 +52,11 @@ public final class PartGenerators {
             case SABRE_RIGHT, SABRE_LEFT -> SabreGenerator.generate(
                     shape.style(), shape.size(), shape.kind() == PartKind.SABRE_LEFT);
             case CRYSTALS -> CrystalGenerator.generate(shape.style(), shape.size());
+            case EAR_FIN_RIGHT, EAR_FIN_LEFT -> EarFinGenerator.generate(
+                    shape.style(), shape.size(), shape.kind() == PartKind.EAR_FIN_LEFT);
+            case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeGenerator.generate(
+                    shape.size(), shape.kind() == PartKind.CHEEK_SPIKE_LEFT);
+            case BROW_RIDGE -> BrowRidgeGenerator.generate(shape.style(), shape.size());
         };
     }
 

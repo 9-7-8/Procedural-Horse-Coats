@@ -93,6 +93,15 @@
     ],
     "horsegenetics.tusk_colour": [
       { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.cheek_spike_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.brow_ridge_colour": [
+      { "pair": "Bon/Bon", "weight": 100 }
+    ],
+    "horsegenetics.ear_fins": [
+      { "pair": "n/n", "weight": 100 }
     ]
   },
   "count_groups": [
@@ -112,7 +121,9 @@
           { "pair": "Tsk/Tsk", "weight": 1 },
           { "pair": "Sab/Sab", "weight": 1 }
         ],
-        "horsegenetics.back_crystals": "Crg/Crg"
+        "horsegenetics.back_crystals": "Crg/Crg",
+        "horsegenetics.cheek_spikes": "Chk/Chk",
+        "horsegenetics.brow_ridge": "Brw/Brw"
       }
     }
   ],

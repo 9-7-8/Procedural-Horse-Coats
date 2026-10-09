@@ -356,6 +356,68 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
                 (float) count, CRYSTAL_ALPHA, NO_BLOOM, 1f);
     }
 
+    /**
+     * One ear fin, from the numbers the ear fins locus carries - white and dark until
+     * its colour locus dresses it. The kind scales per element
+     * ({@link PartKind#scalesPerElement()}), and size is a uniform grow of each ray about
+     * the anchor they all root on - a bigger fin, not a longer thinner one.
+     *
+     * @param left   the left side rather than the right
+     * @param form   an {@link EarFinGenerator} form
+     * @param spread {@code [0,1]}: how wide a fan or a frill opens
+     * @param size   position on the {@link EarFinSize} ladder - class is the mesh, the rest a grow
+     * @param rays   how many rays a fan or a frill shows, the longest first; fractional
+     *               grows the next one in. A blade is one slab and has nothing to count
+     */
+    public static AttachedPart earFin(boolean left, int form, double spread, double size, double rays) {
+        PartKind kind = left ? PartKind.EAR_FIN_LEFT : PartKind.EAR_FIN_RIGHT;
+        // Only a fan or a frill opens: the generator gives every blade one style.
+        int style = EarFinGenerator.style(form, bucket(spread, EarFinGenerator.SPREADS));
+        PartShape shape = PartShape.of(kind, style, size);
+        float grow = shape.stretchTo(size);
+        int most = EarFinGenerator.maxRays(EarFinGenerator.formOf(shape.style()));
+        float shown = most == 0 ? ALL_ELEMENTS : (float) Math.min(rays, most);
+        return new AttachedPart(shape, grow, grow, 0f, UNDYED, UNDYED, false, shown, OPAQUE, NO_BLOOM, 1f);
+    }
+
+    /**
+     * One cheek's spikes, from the numbers the cheek spikes locus carries - white and
+     * dark until its colour locus dresses it. The kind scales per element
+     * ({@link PartKind#scalesPerElement()}): {@link #stretch} is each spike's length out
+     * from the cheek and {@link #girth} its thickness, both in the spike's own frame, so
+     * the row keeps its place.
+     *
+     * @param left   the left side rather than the right
+     * @param length position on the {@link CheekSpikeSize} ladder - class is the mesh, the rest a stretch
+     * @param girth  extra thickness on top of the length
+     * @param count  how many spikes show, from the back forward; fractional grows the next one in
+     */
+    public static AttachedPart cheekSpikes(boolean left, double length, double girth, double count) {
+        PartKind kind = left ? PartKind.CHEEK_SPIKE_LEFT : PartKind.CHEEK_SPIKE_RIGHT;
+        PartShape shape = PartShape.of(kind, 0, length);
+        float grow = shape.stretchTo(length);
+        return new AttachedPart(shape, grow, (float) (grow * girth), 0f, UNDYED, UNDYED, false,
+                (float) count, OPAQUE, NO_BLOOM, 1f);
+    }
+
+    /**
+     * A brow ridge, from the numbers the brow ridge locus carries - white and dark until
+     * its colour locus dresses it. The bar lies across the head ({@link BrowRidgeGenerator}),
+     * so {@link #stretch} is its height off the skull and {@link #girth} its width across
+     * the head (and its depth front to back with it).
+     *
+     * @param form   a {@link BrowRidgeGenerator} form
+     * @param bump   {@code [0,1]}: how tall the bumps or spines stand
+     * @param height position on the {@link BrowRidgeSize} ladder - class is the mesh, the rest a stretch
+     * @param width  scale across the head; {@code 1} is {@link BrowRidgeGenerator#WIDTH}
+     */
+    public static AttachedPart browRidge(int form, double bump, double height, double width) {
+        // Only a notched or spined ridge has bumps: the generator gives every plain one one style.
+        int style = BrowRidgeGenerator.style(form, bucket(bump, BrowRidgeGenerator.BUMPS));
+        PartShape shape = PartShape.of(PartKind.BROW_RIDGE, style, height);
+        return new AttachedPart(shape, shape.stretchTo(height), (float) width, 0f, UNDYED, UNDYED, false);
+    }
+
     /** {@code x} in {@code [0,1]}, clamped, to one of {@code n} equal buckets. */
     private static int bucket(double x, int n) {
         double c = x < 0.0 ? 0.0 : (x > 1.0 ? 1.0 : x);

@@ -111,9 +111,11 @@ public final class DebugPhotoShoot {
      * end-on), or the back from behind and above (a part standing out from the back or the
      * flanks, with the coat behind it - what a see-through part needs to show it is), or
      * the muzzle close up from three-quarters front (a part of the mouth: tusks, fangs,
-     * which HEAD leaves a few pixels across).
+     * which HEAD leaves a few pixels across), or the whole head close up from three-quarters
+     * front (a part on the skull or the cheek: fins, spikes, a ridge - HEAD shows the whole
+     * horse and leaves them a dozen pixels across).
      */
-    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE }
+    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE, FACE }
 
     private static final String BAY = "horsegenetics.extension=E/E-horsegenetics.agouti=A/A";
     private static final String BLACK = "horsegenetics.extension=E/E-horsegenetics.agouti=a/a";
@@ -228,6 +230,15 @@ public final class DebugPhotoShoot {
             ex = tx - 0.9;
             ey = ty + 0.1;
             ez = tz + 1.1;
+        } else if (shot.framing() == Framing.FACE) {
+            // The head from ears to muzzle: aim at the eye, a block west of the middle and
+            // under two up, and stand a block and a half off, forward and to the south.
+            tx = hx - 0.9;
+            ty = origin.getY() + 1.85;
+            tz = hz;
+            ex = tx - 0.9;
+            ey = ty + 0.35;
+            ez = tz + 1.3;
         } else if (shot.framing() != Framing.HEAD) {
             // The whole horse from a little forward of side-on, for a look that is the
             // whole body (the skeleton's cut-outs). A foal is half the size, so half the way.

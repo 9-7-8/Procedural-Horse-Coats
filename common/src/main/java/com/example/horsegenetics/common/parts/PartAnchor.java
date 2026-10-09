@@ -91,7 +91,37 @@ public enum PartAnchor {
     LIP_RIGHT,
 
     /** The same on the other side, model {@code +x}. */
-    LIP_LEFT
+    LIP_LEFT,
+
+    /**
+     * The side of the skull at the outer base of the <b>right</b> ear, model
+     * {@code -x}. On the head, <b>not on the ear</b>: vanilla's ears are fixed children
+     * of the head and nothing animates them, so either would hold still, and the head
+     * is the one the other anchors already walk to. Just forward of {@link #NAPE_RIGHT},
+     * so a fin and a dragon horn root side by side. A part here fans out from the head
+     * and back - the ear fins (head-parts treatment).
+     */
+    EAR_RIGHT,
+
+    /** The same on the other side, model {@code +x}. */
+    EAR_LEFT,
+
+    /**
+     * The <b>right</b> side of the head about midway between the eye and the mouth,
+     * model {@code -x}. It rides the head. A part here points out from the cheek - the
+     * cheek spikes (head-parts treatment).
+     */
+    CHEEK_RIGHT,
+
+    /** The same on the other side, model {@code +x}. */
+    CHEEK_LEFT,
+
+    /**
+     * Across the front of the skull above and in front of the eyes, on the midline -
+     * further down the face than {@link #FOREHEAD}, so a unicorn horn still stands
+     * behind whatever is here. It rides the head. The brow ridge (head-parts treatment).
+     */
+    BROW
 
     // The next anchors, named here only so the shape of the enum is obvious and
     // NOT declared until something draws them: WITHERS_PAIR (wings), HOOF_x4

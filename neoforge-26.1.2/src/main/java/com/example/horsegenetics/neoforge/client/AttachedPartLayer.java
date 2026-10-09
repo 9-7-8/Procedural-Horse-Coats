@@ -197,6 +197,56 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     private static final float[] FOAL_LIP = ADULT_LIP;
 
     /**
+     * Where the <b>left</b> ear fin roots on the adult skull, in head-local units; the
+     * right is the same with {@code x} negated. On the head, not the ear: read from the
+     * 26.1.2 sources, {@code left_ear} and {@code right_ear} are {@code PartPose.ZERO}
+     * children of {@code head} and {@code AbstractEquineModel.setupAnim} never touches
+     * them, so the ears do not move on their own and a fin on the head cannot be left
+     * behind by one. The head box is {@code x -3..3, y -11..-6, z -2..5} and the ear
+     * {@code x 0.55..2.55, y -13..-10, z 4..5}; so {@code x 2.9} is just inside the side
+     * wall and outside the ear, {@code y -10.4} a little under the top of the skull, and
+     * {@code z 3.4} a unit forward of the dragon horn's root ({@link #ADULT_NAPE}), so
+     * the two stand side by side. A first placement from the boxes, not a tuned one.
+     */
+    private static final float[] ADULT_EAR = {2.9f, -10.4f, 3.4f};
+
+    /**
+     * The same on the foal - and drawn, because a foal wears its ear fins. Its head box
+     * is {@code y -3.95..0.05, z -6.71..2.30} and its ears pivot at
+     * {@code x 2, y -4.25, z 1.9}; the same distances from the top and the back of the
+     * skull as the adult's. Read from {@code BabyHorseModel}, not seen.
+     */
+    private static final float[] FOAL_EAR = {2.9f, -3.35f, 0.7f};
+
+    /**
+     * Where the <b>left</b> cheek's spikes root on the adult head, in head-local units;
+     * the right is the same with {@code x} negated. Read from the same box, not seen:
+     * {@code x 2.7} is a little inside the side wall, so a spike shows no gap at its
+     * root; {@code y -8.0} is below the middle of the head's depth, toward the jaw; and
+     * {@code z 0.8} puts the row ({@code CheekSpikeGenerator}: two units either way)
+     * between the muzzle's start at {@code z -2} and the back of the skull. Where the
+     * eye is painted is the coat's, so "midway between the eye and the mouth" is for
+     * the owner's eyes.
+     */
+    private static final float[] ADULT_CHEEK = {2.7f, -8.0f, 0.8f};
+
+    /** The same on the foal. Never drawn - a foal grows no cheek spikes - as {@link #FOAL_SPINE}. */
+    private static final float[] FOAL_CHEEK = ADULT_CHEEK;
+
+    /**
+     * Where a brow ridge sits on the adult skull, in head-local units. Read from the
+     * same box, not seen: the top of the skull is {@code y -11}, and the mesh sinks its
+     * own underside ({@code BrowRidgeGenerator.SINK}), so the anchor is on the surface.
+     * {@code z -1.2} is two units further down the face than the horn's root
+     * ({@link #ADULT_FOREHEAD} at {@code z 1}), just behind where the muzzle starts, so
+     * a horn stands behind the ridge and clear of it at its default size.
+     */
+    private static final float[] ADULT_BROW = {0f, -11.0f, -1.2f};
+
+    /** The same on the foal. Never drawn - a foal grows no brow ridge - as {@link #FOAL_SPINE}. */
+    private static final float[] FOAL_BROW = ADULT_BROW;
+
+    /**
      * How far a part at {@link PartAnchor#SNOUT} is turned before it is drawn, about x.
      * Every part mesh grows up its own {@code -y}; a quarter-turn about {@code +x} takes
      * {@code -y} to {@code -z}, forward along the head's own axis - which, with the neck's
@@ -268,7 +318,7 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
         boolean underSaddle = SaddleZone.covers(saddleDrawn, state.isRidden);
         for (AttachedPart part : genetic.parts) {
             // A foal grows no antlers, ram's horns or dragon horns - they come with
-            // maturity (PartKind.showsOnFoal) - but wears its half-size horn.
+            // maturity (PartKind.showsOnFoal) - but wears its half-size horn and ear fins.
             if (state.isBaby && !part.kind().showsOnFoal()) {
                 continue;
             }
@@ -510,6 +560,29 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
                 float[] base = baby ? FOAL_LIP : ADULT_LIP;
                 float side = anchor == PartAnchor.LIP_LEFT ? 1f : -1f;
                 yield new float[] {side * base[0], base[1], base[2]};
+            }
+            case EAR_RIGHT, EAR_LEFT -> {
+                // The head, not the ear bone: nothing animates the ears (see ADULT_EAR).
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                float[] base = baby ? FOAL_EAR : ADULT_EAR;
+                float side = anchor == PartAnchor.EAR_LEFT ? 1f : -1f;
+                yield new float[] {side * base[0], base[1], base[2]};
+            }
+            case CHEEK_RIGHT, CHEEK_LEFT -> {
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                float[] base = baby ? FOAL_CHEEK : ADULT_CHEEK;
+                float side = anchor == PartAnchor.CHEEK_LEFT ? 1f : -1f;
+                yield new float[] {side * base[0], base[1], base[2]};
+            }
+            case BROW -> {
+                ModelPart headParts = root.getChild("head_parts");
+                headParts.translateAndRotate(poseStack);
+                headParts.getChild("head").translateAndRotate(poseStack);
+                yield baby ? FOAL_BROW : ADULT_BROW;
             }
         };
 

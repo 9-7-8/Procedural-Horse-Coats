@@ -555,6 +555,44 @@ public final class GeneDescriptions {
                             + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
                             + "Two different copies make every plate one colour and its edge, rib "
                             + "or spike the other."),
+            Map.entry("horsegenetics.ear_fins",
+                    "A magical, recessive gene: two Efn copies grow a fin at the outer base "
+                            + "of each ear, fanned out from the head and swept back. A single "
+                            + "blade, a fan of three or a frill of five rays, and its size, how "
+                            + "wide it opens and how many rays show, are epigenetic and "
+                            + "inherited with the allele. Mares and stallions alike, and a foal "
+                            + "wears them too. Their colour is its own gene."),
+            Map.entry("horsegenetics.ear_fin_colour",
+                    "A magical, codominant gene that colours ear fins and does nothing to a "
+                            + "horse without them - the horn colour rule on a locus of its own. "
+                            + "White, the seven rainbow colours, pink, black, grey, bone and chaos. "
+                            + "Two different copies make every ray one colour and its point, or "
+                            + "a frill's rod, the other."),
+            Map.entry("horsegenetics.cheek_spikes",
+                    "A magical, dominant gene: one Chk copy grows a short row of bone spikes "
+                            + "along each cheek, pointing out from the head and a little back, "
+                            + "the longest at the rear. Their length, thickness and how many "
+                            + "each cheek has are epigenetic and inherited with the allele. "
+                            + "Mares and stallions alike; grown at maturity. Their colour is "
+                            + "its own gene."),
+            Map.entry("horsegenetics.cheek_spike_colour",
+                    "A magical, codominant gene that colours cheek spikes and does nothing "
+                            + "to a horse without them - the horn colour rule on a locus of its "
+                            + "own. White, the seven rainbow colours, pink, black, grey, bone and "
+                            + "chaos. Two different copies make every spike two-tone from root "
+                            + "to point."),
+            Map.entry("horsegenetics.brow_ridge",
+                    "A magical, dominant gene: one Brw copy grows a low wide ridge of bone "
+                            + "across the brow, above and in front of the eyes. Plain, notched "
+                            + "or spined, and its height, width and how tall its bumps stand, "
+                            + "are epigenetic and inherited with the allele. Mares and "
+                            + "stallions alike; grown at maturity. Its colour is its own gene."),
+            Map.entry("horsegenetics.brow_ridge_colour",
+                    "A magical, codominant gene that colours a brow ridge and does nothing "
+                            + "to a horse without one - the horn colour rule on a locus of its "
+                            + "own. White, the seven rainbow colours, pink, black, grey, bone and "
+                            + "chaos. Two different copies make the bar one colour and its step, "
+                            + "bumps or spine points the other."),
             Map.entry("horsegenetics.tusks",
                     "A magical, dominant gene with a form per allele. One Nar copy grows a "
                             + "narwhal horn: one long spiral tusk straight forward out of the "

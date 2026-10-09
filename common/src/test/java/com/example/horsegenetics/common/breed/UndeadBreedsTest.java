@@ -143,6 +143,8 @@ class UndeadBreedsTest {
         assertEquals("Bon/Bon", g.genotype().pair(Genes.BACK_SAIL_COLOUR).toTokens());
         assertEquals("Bon/Bon", g.genotype().pair(Genes.BODY_PLATE_COLOUR).toTokens());
         assertEquals("Bon/Bon", g.genotype().pair(Genes.TUSK_COLOUR).toTokens());
+        assertEquals("Bon/Bon", g.genotype().pair(Genes.CHEEK_SPIKE_COLOUR).toTokens());
+        assertEquals("Bon/Bon", g.genotype().pair(Genes.BROW_RIDGE_COLOUR).toTokens());
     }
 
     private static final Breed BLACKENED = Breeds.get("blackened_skeleton_horse");
@@ -386,7 +388,16 @@ class UndeadBreedsTest {
         // have no bone and joined anyway, in ordinary colours (owner, 2026-10-05).
         assertEquals(java.util.Set.of(Genes.UNICORN_HORN.key(), Genes.ANTLERS.key(), Genes.RAM_HORNS.key(),
                 Genes.DRAGON_HORNS.key(), Genes.DORSAL_SPINES.key(), Genes.BACK_SAIL.key(),
-                Genes.BODY_PLATES.key(), Genes.TUSKS.key(), Genes.BACK_CRYSTALS.key()), grouped);
-        assertEquals(PartKind.values().length, 17, "a new part kind: decide whether the skeleton grows it");
+                Genes.BODY_PLATES.key(), Genes.TUSKS.key(), Genes.BACK_CRYSTALS.key(),
+                Genes.CHEEK_SPIKES.key(), Genes.BROW_RIDGE.key()), grouped);
+        // Ear fins are the one part left out: cartilage, like an ear, so no bone version
+        // and no skeleton ever grows them (owner, 2026-10-09) - pinned n/n, not merely ungrouped.
+        for (Breed breed : List.of(SKELETON, BLACKENED)) {
+            for (long seed = 0; seed < 2_000; seed++) {
+                assertEquals("n/n", roll(breed, seed).genotype().pair(Genes.EAR_FINS).toTokens(),
+                        breed.id() + " grew ear fins");
+            }
+        }
+        assertEquals(PartKind.values().length, 22, "a new part kind: decide whether the skeleton grows it");
     }
 }

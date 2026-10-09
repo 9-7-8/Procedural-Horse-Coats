@@ -62,14 +62,14 @@ class PartGeneratorTest {
                 assertTrue(node.len() > 0f, shape + " box " + i + " has no length");
                 assertTrue(node.girth() >= MIN_GIRTH,
                         shape + " box " + i + " is " + node.girth() + " units thick");
-                // A flat box - a membrane, a plate's slab, or a sabre fang's blade - may be
+                // A flat box - a membrane, a plate's slab, a sabre fang's blade or an ear fin's ray - may be
                 // thinner across x, never past this, and nothing else is flat at all.
                 assertTrue(node.width() >= MIN_WIDTH && node.width() <= node.girth(),
                         shape + " box " + i + " is " + node.width() + " units wide");
                 assertTrue(node.width() == node.girth() || node.tex() == PartSheet.MEMBRANE
                                 || (shape.kind().plates() && node.isRoot())
-                                || shape.kind().sabre(),
-                        shape + " box " + i + " is flat and is neither a membrane, a slab nor a blade");
+                                || shape.kind().sabre() || shape.kind().earFin(),
+                        shape + " box " + i + " is flat and is neither a membrane, a slab, a blade nor a ray");
                 assertTrue(node.t() >= 0f && node.t() <= 1f,
                         shape + " box " + i + " sits at t=" + node.t() + " along its parent");
                 assertTrue(node.tex() >= 0 && node.tex() < PartSheet.CAPACITY,

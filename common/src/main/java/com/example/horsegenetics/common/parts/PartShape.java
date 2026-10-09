@@ -101,6 +101,9 @@ public record PartShape(PartKind kind, int style, int size) {
             case TUSK_RIGHT, TUSK_LEFT -> TuskSize.lengthFor(position);
             case SABRE_RIGHT, SABRE_LEFT -> SabreSize.lengthFor(position);
             case CRYSTALS -> CrystalSize.lengthFor(position);
+            case EAR_FIN_RIGHT, EAR_FIN_LEFT -> EarFinSize.lengthFor(position);
+            case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeSize.lengthFor(position);
+            case BROW_RIDGE -> BrowRidgeSize.lengthFor(position);
         };
     }
 

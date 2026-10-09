@@ -382,6 +382,13 @@ public enum GeneFamily {
         MAGICAL_OVERRIDES.put("horsegenetics.tusk_colour", MAGIC_PARTS);
         MAGICAL_OVERRIDES.put("horsegenetics.back_crystals", MAGIC_PARTS);
         MAGICAL_OVERRIDES.put("horsegenetics.back_crystal_colour", MAGIC_PARTS);
+        // The rest of the head parts: ear fins, cheek spikes, brow ridge.
+        MAGICAL_OVERRIDES.put("horsegenetics.ear_fins", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.ear_fin_colour", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.cheek_spikes", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.cheek_spike_colour", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.brow_ridge", MAGIC_PARTS);
+        MAGICAL_OVERRIDES.put("horsegenetics.brow_ridge_colour", MAGIC_PARTS);
 
         // The sex locus paints nothing and is not a disorder. The editors keep
         // it off their lists entirely - the Sex button owns it - but it is a

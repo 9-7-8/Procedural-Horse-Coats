@@ -55,7 +55,7 @@ public final class GrownParts {
         if (genotype == null) {
             return List.of();
         }
-        // Nine granting loci. Each answers empty for nearly every horse, and the
+        // Twelve granting loci. Each answers empty for nearly every horse, and the
         // list is only built when one of them says otherwise - so the common "no
         // parts" answer still allocates nothing.
         Optional<AttachedPart> horn = Genes.UNICORN_HORN.hornFor(genotype, epigenome);
@@ -69,8 +69,12 @@ public final class GrownParts {
         Optional<List<AttachedPart>> plates = Genes.BODY_PLATES.platesFor(genotype, epigenome);
         List<AttachedPart> tusks = Genes.TUSKS.partsFor(genotype, epigenome);
         Optional<AttachedPart> crystals = Genes.BACK_CRYSTALS.crystalsFor(genotype, epigenome);
+        Optional<List<AttachedPart>> fins = Genes.EAR_FINS.finsFor(genotype, epigenome);
+        Optional<List<AttachedPart>> cheeks = Genes.CHEEK_SPIKES.spikesFor(genotype, epigenome);
+        Optional<AttachedPart> brow = Genes.BROW_RIDGE.ridgeFor(genotype, epigenome);
         if (horn.isEmpty() && rack.isEmpty() && rams.isEmpty() && dragon.isEmpty() && spines.isEmpty()
-                && sail.isEmpty() && plates.isEmpty() && tusks.isEmpty() && crystals.isEmpty()) {
+                && sail.isEmpty() && plates.isEmpty() && tusks.isEmpty() && crystals.isEmpty()
+                && fins.isEmpty() && cheeks.isEmpty() && brow.isEmpty()) {
             return List.of();
         }
         List<AttachedPart> out = new ArrayList<>(10);
@@ -130,6 +134,26 @@ public final class GrownParts {
             // mapping. A crystal has no bone, so Bon/Bon is simply bone-coloured crystal.
             AbstractPartColourGene.Tints tints = Genes.BACK_CRYSTAL_COLOUR.tintsFor(genotype, epigenome);
             out.add(c.dressed(tints.base(), tints.tip(), false));
+        });
+        fins.ifPresent(pair -> {
+            // Its own colour locus, one pair of tints for both sides: a ray is the base, its
+            // point or a frill's rod the tip. No bone version: Bon/Bon is bone-coloured fins.
+            AbstractPartColourGene.Tints tints = Genes.EAR_FIN_COLOUR.tintsFor(genotype, epigenome);
+            for (AttachedPart side : pair) {
+                out.add(side.dressed(tints.base(), tints.tip(), false));
+            }
+        });
+        cheeks.ifPresent(pair -> {
+            // The horn's rule root to point, on every spike. Bon/Bon is bare bone spikes.
+            AbstractPartColourGene.Tints tints = Genes.CHEEK_SPIKE_COLOUR.tintsFor(genotype, epigenome);
+            for (AttachedPart side : pair) {
+                out.add(side.dressed(tints.base(), tints.tip(), false));
+            }
+        });
+        brow.ifPresent(ridge -> {
+            // The bar is the base and whatever stands on it the tip. Bon/Bon is bare bone.
+            AbstractPartColourGene.Tints tints = Genes.BROW_RIDGE_COLOUR.tintsFor(genotype, epigenome);
+            out.add(ridge.dressed(tints.base(), tints.tip(), false));
         });
         return List.copyOf(out);
     }
@@ -208,9 +232,9 @@ public final class GrownParts {
      * colour and horn glow do nothing to a hornless horse, so asked only of a wild
      * one they would look invisible. The baseline with "every part" is a horse
      * with a horn, a rack of antlers, ram's horns, dragon horns, dorsal spines, a back sail,
-     * body plates, a narwhal horn and crystal growths (the tusks locus's other forms
-     * are found by the first half, on a wild horse); a further granting
-     * locus adds itself to it.
+     * body plates, a narwhal horn, crystal growths, ear fins, cheek spikes and a brow
+     * ridge (the tusks locus's other forms are found by the first half, on a wild horse);
+     * a further granting locus adds itself to it.
      *
      * <p>Asked of the model rather than kept as a list, the same way
      * {@code DesignerApi.showsAs} asks the cutie mark. It is the other half of "does
@@ -231,7 +255,10 @@ public final class GrownParts {
                 .with(new AllelePair(Genes.BACK_SAIL.Sail, Genes.BACK_SAIL.Sail))
                 .with(new AllelePair(Genes.BODY_PLATES.Plt, Genes.BODY_PLATES.Plt))
                 .with(new AllelePair(Genes.TUSKS.Nar, Genes.TUSKS.Nar))
-                .with(new AllelePair(Genes.BACK_CRYSTALS.Crg, Genes.BACK_CRYSTALS.Crg));
+                .with(new AllelePair(Genes.BACK_CRYSTALS.Crg, Genes.BACK_CRYSTALS.Crg))
+                .with(new AllelePair(Genes.EAR_FINS.Efn, Genes.EAR_FINS.Efn))
+                .with(new AllelePair(Genes.CHEEK_SPIKES.Chk, Genes.CHEEK_SPIKES.Chk))
+                .with(new AllelePair(Genes.BROW_RIDGE.Brw, Genes.BROW_RIDGE.Brw));
         List<AttachedPart> dressed = of(everyPart, epi);
         for (AllelePair pair : GenotypeCatalog.allPairsOf(gene)) {
             if (!of(wild.with(pair), epi).isEmpty()

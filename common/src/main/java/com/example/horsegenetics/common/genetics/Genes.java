@@ -143,6 +143,12 @@ import com.example.horsegenetics.common.genetics.genes.BackSailGene;
 import com.example.horsegenetics.common.genetics.genes.BackCrystalColourGene;
 import com.example.horsegenetics.common.genetics.genes.BackCrystalsGene;
 import com.example.horsegenetics.common.genetics.genes.BodyPlateColourGene;
+import com.example.horsegenetics.common.genetics.genes.BrowRidgeColourGene;
+import com.example.horsegenetics.common.genetics.genes.BrowRidgeGene;
+import com.example.horsegenetics.common.genetics.genes.CheekSpikeColourGene;
+import com.example.horsegenetics.common.genetics.genes.CheekSpikesGene;
+import com.example.horsegenetics.common.genetics.genes.EarFinColourGene;
+import com.example.horsegenetics.common.genetics.genes.EarFinsGene;
 import com.example.horsegenetics.common.genetics.genes.BodyPlatesGene;
 import com.example.horsegenetics.common.genetics.genes.TuskColourGene;
 import com.example.horsegenetics.common.genetics.genes.TusksGene;
@@ -632,6 +638,18 @@ public final class Genes {
     public static final BackCrystalsGene BACK_CRYSTALS = new BackCrystalsGene();
     /** Crystal growth colour - codominant, the horn colour rule; crystals the base, points the tip. Silent without crystals. */
     public static final BackCrystalColourGene BACK_CRYSTAL_COLOUR = new BackCrystalColourGene();
+    /** Ear fins - recessive; a fin at the outer base of each ear, and the head part a foal wears. Size, form, spread, rays on the copy. */
+    public static final EarFinsGene EAR_FINS = new EarFinsGene();
+    /** Ear fin colour - codominant, the horn colour rule; ray the base, point or rod the tip. Silent without ear fins. */
+    public static final EarFinColourGene EAR_FIN_COLOUR = new EarFinColourGene();
+    /** Cheek spikes - dominant; a short row of spikes along each cheek. Length, girth, count on the copy. */
+    public static final CheekSpikesGene CHEEK_SPIKES = new CheekSpikesGene();
+    /** Cheek spike colour - codominant, the horn colour rule, root to point. Silent without cheek spikes. */
+    public static final CheekSpikeColourGene CHEEK_SPIKE_COLOUR = new CheekSpikeColourGene();
+    /** Brow ridge - dominant; one low wide ridge across the brow. Height, width, form, bump on the copy. */
+    public static final BrowRidgeGene BROW_RIDGE = new BrowRidgeGene();
+    /** Brow ridge colour - codominant, the horn colour rule; bar the base, what stands on it the tip. Silent without a ridge. */
+    public static final BrowRidgeColourGene BROW_RIDGE_COLOUR = new BrowRidgeColourGene();
     /** Skeleton - recessive; two copies and the horse is its own bones (vanilla's skeleton sheet). Undead. */
     public static final SkeletonGene SKELETON = new SkeletonGene();
     /** Zombie - recessive; two copies and the horse is dead flesh (vanilla's zombie sheet). Undead. */
@@ -766,6 +784,7 @@ public final class Genes {
             DRAGON_HORNS, DRAGON_HORN_COLOUR, DORSAL_SPINES, DORSAL_SPINE_COLOUR,
             BACK_SAIL, BACK_SAIL_COLOUR, BODY_PLATES, BODY_PLATE_COLOUR, TUSKS, TUSK_COLOUR,
             BACK_CRYSTALS, BACK_CRYSTAL_COLOUR,
+            EAR_FINS, EAR_FIN_COLOUR, CHEEK_SPIKES, CHEEK_SPIKE_COLOUR, BROW_RIDGE, BROW_RIDGE_COLOUR,
             SKELETON, ZOMBIE,
             MAGIC_WHITE, SHADOWCREATURE,
             MSTN, PDK4, CKM, RYR2, LCORL, HMGA2, PATN1, PATN2, DMRT3,

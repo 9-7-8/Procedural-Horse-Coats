@@ -98,7 +98,32 @@ public enum PartKind {
      * row's anchor and numbering, see-through shafts with solid points
      * ({@link CrystalGenerator}). Centred, so one kind.
      */
-    CRYSTALS(PartAnchor.SPINE, PartSheet.CRYSTAL);
+    CRYSTALS(PartAnchor.SPINE, PartSheet.CRYSTAL),
+
+    /**
+     * The right-hand ear fin - the ear fins locus. Thin slabs fanned from the outer
+     * base of the ear ({@link EarFinGenerator}); keratin, like the horn. A soft part,
+     * so a foal wears it.
+     */
+    EAR_FIN_RIGHT(PartAnchor.EAR_RIGHT, PartSheet.HORN),
+
+    /** The left-hand ear fin. A pair is symmetric: both sides ask for the same style. */
+    EAR_FIN_LEFT(PartAnchor.EAR_LEFT, PartSheet.HORN),
+
+    /**
+     * The right cheek's spikes - the cheek spikes locus. A short row of bone cones
+     * pointing out and a little back ({@link CheekSpikeGenerator}).
+     */
+    CHEEK_SPIKE_RIGHT(PartAnchor.CHEEK_RIGHT, PartSheet.BONE),
+
+    /** The left cheek's spikes. */
+    CHEEK_SPIKE_LEFT(PartAnchor.CHEEK_LEFT, PartSheet.BONE),
+
+    /**
+     * A brow ridge - the brow ridge locus. One low wide bar of bone across the front
+     * of the skull ({@link BrowRidgeGenerator}). Centred, so one kind.
+     */
+    BROW_RIDGE(PartAnchor.BROW, PartSheet.BONE);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -142,6 +167,12 @@ public enum PartKind {
             case SABRE_RIGHT, SABRE_LEFT -> SabreGenerator.styles();
             // Arrangement (the seed) x lean spread.
             case CRYSTALS -> CrystalGenerator.styles();
+            // The blade, and form x how wide a fan or a frill opens.
+            case EAR_FIN_RIGHT, EAR_FIN_LEFT -> EarFinGenerator.styles();
+            // One: length, girth and count are all draw-time.
+            case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeGenerator.styles();
+            // The plain ridge, and form x bump size.
+            case BROW_RIDGE -> BrowRidgeGenerator.styles();
         };
     }
 
@@ -164,6 +195,9 @@ public enum PartKind {
             case TUSK_RIGHT, TUSK_LEFT -> TuskSize.classes();
             case SABRE_RIGHT, SABRE_LEFT -> SabreSize.classes();
             case CRYSTALS -> CrystalSize.classes();
+            case EAR_FIN_RIGHT, EAR_FIN_LEFT -> EarFinSize.classes();
+            case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeSize.classes();
+            case BROW_RIDGE -> BrowRidgeSize.classes();
         };
     }
 
@@ -176,10 +210,11 @@ public enum PartKind {
      * foals wear the soft parts only). So do the body parts: they are hard parts,
      * and a foal's back is tiny (body-parts treatment). So is the narwhal horn: the
      * unicorn horn is the only hard part a foal wears (tusks treatment) - and so the
-     * boar tusks and sabre fangs.
+     * boar tusks and sabre fangs. Of the head parts a foal wears the soft one, the ear
+     * fins, and neither hard one: no cheek spikes and no brow ridge (head-parts treatment).
      */
     public boolean showsOnFoal() {
-        return this == HORN;
+        return this == HORN || earFin();
     }
 
     /**
@@ -200,6 +235,8 @@ public enum PartKind {
             case SPINES, SAIL, PLATES_RIGHT, PLATES_LEFT, NARWHAL, CRYSTALS -> PartSheet.SOLID;
             // Nor the boar tusks or the sabre fangs.
             case TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT -> PartSheet.SOLID;
+            // Nor the ear fins, the cheek spikes or the brow ridge.
+            case EAR_FIN_RIGHT, EAR_FIN_LEFT, CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT, BROW_RIDGE -> PartSheet.SOLID;
         };
     }
 
@@ -221,7 +258,9 @@ public enum PartKind {
             // A crystal's shafts, never its points - the crystal antler's split.
             case CRYSTALS -> PartSheet.bit(PartSheet.CRYSTAL);
             case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES,
-                 PLATES_RIGHT, PLATES_LEFT, NARWHAL, TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT -> 0;
+                 PLATES_RIGHT, PLATES_LEFT, NARWHAL, TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT,
+                 // An ear fin has no membrane between its rays yet (head-parts treatment).
+                 EAR_FIN_RIGHT, EAR_FIN_LEFT, CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT, BROW_RIDGE -> 0;
         };
     }
 
@@ -241,10 +280,23 @@ public enum PartKind {
      * Every box of such a kind belongs to a group. The plates are rows down the flank,
      * two clusters to a mesh, so a whole-part scale would also pull the shoulder and
      * hip clusters apart along the body. Crystal growths are clusters along the back,
-     * each grown about its own central crystal.
+     * each grown about its own central crystal. Cheek spikes are a row along the cheek
+     * whose spikes point across the anchor's up, so only a spike's own frame can
+     * lengthen it ({@link CheekSpikeGenerator}). An ear fin's rays are each rooted on the
+     * anchor so that each is its base colour whole ({@link EarFinGenerator}).
      */
     public boolean scalesPerElement() {
-        return this == SPINES || this == SAIL || plates() || this == CRYSTALS;
+        return this == SPINES || this == SAIL || plates() || this == CRYSTALS || cheekSpike() || earFin();
+    }
+
+    /** Is this an ear fin, of either side? Its rays are flat boxes ({@link EarFinGenerator}). */
+    public boolean earFin() {
+        return this == EAR_FIN_RIGHT || this == EAR_FIN_LEFT;
+    }
+
+    /** Is this a cheek's spikes, of either side? */
+    public boolean cheekSpike() {
+        return this == CHEEK_SPIKE_RIGHT || this == CHEEK_SPIKE_LEFT;
     }
 
     /** Is this a side of shoulder and hip plates? */
@@ -295,6 +347,9 @@ public enum PartKind {
             case TUSK_RIGHT, TUSK_LEFT -> "Boar tusks";
             case SABRE_RIGHT, SABRE_LEFT -> "Sabre fangs";
             case CRYSTALS -> "Crystal growths";
+            case EAR_FIN_RIGHT, EAR_FIN_LEFT -> "Ear fins";
+            case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> "Cheek spikes";
+            case BROW_RIDGE -> "Brow ridge";
         };
     }
 }
