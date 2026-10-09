@@ -1,0 +1,112 @@
+2026-10-09 15:34 - next-release: a horse no longer outlives its animal form (#244)
+(The time is the end of the session.)
+
+ASKED
+-----
+1. "/next-release" (the owner ran the command, with no argument).
+   -> procedures/next-release.txt was followed. The next release is v0.5.047 (the
+      equipment release). Its first unit with work left was bug #244, built by
+      procedures/fix-bug.txt. Fixed, proven, closed.
+No other request was made.
+
+DONE
+----
+1. Housekeeping (next-release steps 1-2). The last tag is v0.5.046 and its milestone is
+   closed. Every open issue already had a milestone, so nothing moved. The two NOT
+   COMPILED commits (79aff1cb, 4d6e089c) are older than the last local build (84bf3803
+   built on top of them), so no extra compile was needed.
+   Units of v0.5.047, bugs first: #244 (no fix commit: 79aff1cb only added logging),
+   then #245. #10, #31 and #36 are fixed and wait on their checks, and were skipped.
+
+2. Fix #244, commit 86f10208. Issue CLOSED, with the proof in a comment.
+   What was wrong: LycanthropyHandler.onWereAnimalDeath restores the horse and kills it
+   with the blow that killed its animal form, then falls back to genericKill if the
+   horse is still alive. A full-health horse has its last stand armed.
+   HorseLastStandHandler saved it from the first blow (health 1). That saved blow still
+   left vanilla's hurt cooldown (invulnerableTime 20, lastHurt Float.MAX_VALUE). The
+   genericKill source is in bypasses_invulnerability, not bypasses_cooldown, so the
+   fallback was refused. The horse stood at 1 health, shifted again within two seconds,
+   and died only when the second form died (live server, 0.5.045, two horses).
+   The fix:
+   - LycanthropyHandler keeps the horse it is killing in a private static
+     (dyingWithItsForm), set only for the two hurt calls, cleared in a finally.
+   - HorseLastStandHandler.unsurvivable now also answers true for that horse
+     (LycanthropyHandler.diesWithItsForm), on both the incoming and the killing-blow
+     event. Its refusal line says "its animal form died".
+   - The cooldown is cleared (horse.invulnerableTime = 0) before the fallback, so
+     nothing that refuses the first blow can block it.
+   The horse now dies of the blow that killed its form, so its death line names the
+   real cause, not "was killed". The fallback is left for gene immunities.
+   A test door was added: LycanthropyHandler.shiftInto(horse, level, type). shift() was
+   split, and its second half is the new private wear(); shiftInto calls wear() with a
+   chosen body, so a gametest gets a real shifted animal without a lycan genome or
+   nightfall.
+   Proof:
+   - New gametest were_animal_death_kills_the_horse (ModGameTests): a founded,
+     full-health horse is shut in a cow by shiftInto, the cow is killed with
+     damageSources().generic(), and the horse must be dead of that same source.
+   - Red with the two fix lines commented out: "the horse outlived its animal form at
+     1.0 of 21.02916 health [invulnerableTime 20]". This run was both the reproduction
+     and the break-on-purpose.
+   - Green with the fix: ./gradlew :neoforge-26.1.2:runGameTest, "All 60 required tests
+     passed", and the log reads "[phc-live] lycan | FORM DIED ... as minecraft:cow of
+     generic ... | horse died of the same blow".
+   - ./gradlew :neoforge-26.1.2:build green; check-parity OK (7163 checks, 60 cases);
+     check-links OK.
+   Pictures: no pictures. Nothing about this bug can be seen.
+   Docs in the same commit: wiki/gene-lycan.html#form-death-kills (Coding tab,
+   Verified), and the last stand's exemption list on wiki/horse-care.html.
+
+3. GitHub: the v0.5.047 milestone description and the release-plan issue (#196) now
+   list #244 as fixed and closed, and #245 as the one bug left with work in it.
+
+DECIDED
+-------
+- (Not the owner; made in this session.) The last stand stands aside for a form's
+  death, rather than only clearing the cooldown before the fallback. Either kills the
+  horse. This one keeps the real cause on the death line, which the javadoc on
+  onWereAnimalDeath calls the point of killing the restored horse. Recorded on
+  wiki/gene-lycan.html#form-death-kills and in the comment on #244.
+- (Not the owner.) #244 was judged small by fix-bug step 4: the cause was written in
+  the issue and confirmed by the red test, and the expected behaviour ("a were-animal
+  dying IS the horse dying") is the owner's own, from 2026-09-13.
+
+FOUND ON THE WAY
+----------------
+- The yard's old LYCAN DOOMED pen could never have caught this: it killed its wolf with
+  /kill, which is exempt from the last stand. Noted on the lycan page. No issue.
+- A mistake, put right: the first scripted edit to HorseLastStandHandler threw on a
+  javadoc line whose indentation was guessed wrong. It throws before writing, so
+  nothing was changed; the second run matched.
+- A mistake, put right: the first draft of the gametest called helper.fail inside
+  succeedWhen, which retries, and a retry would have shifted a horse already gone. The
+  blow is now struck once and its verdict kept.
+- No bugs filed.
+
+PROCEDURES
+----------
+None needed. The three questions were asked: no step of next-release, fix-bug,
+end-session or write-session-log was wrong or missing this session, nothing new was
+done that will be repeated, and no other procedure names anything that changed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. No common/ file changed.
+- Nobody has seen this in game. The gametest covers the rule. On the live server, after
+  the release, review-server-logs should find no "[phc-live] lycan | FORM DIED" line
+  ending in "SURVIVED".
+- The fallback kill after a gene immunity refuses the first blow (a fire-immune horse in
+  a burning animal) has no gametest. Its code path is unchanged except for the cooldown
+  reset in front of it.
+- No Verification-tab anchors were added.
+
+RELEASE
+-------
+Not offered. One bug fix is below the bar, and v0.5.047 ships as interim versions once a
+stage is built.
+
+PICK UP FIRST
+-------------
+#245, the order_stay_walks_back gametest flake (1 red in 5; the horse is one tick old and
+still falling), by /next-release, which hands it to procedures/fix-bug.txt. After it, the
+first feature of v0.5.047.1 is #239 (worn gear is 3D, piece 1), by process-intake.
