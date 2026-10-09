@@ -2316,6 +2316,8 @@ public final class ModGameTests {
         register(event, environment, ORDER_COMBAT_GATE, 100);
         // Founded at 25, then three owner-mirror passes, one every 40 ticks.
         register(event, environment, WHISTLE_SEES_THE_OWNER, 300);
+        // Synchronous: one jukebox through four states inside one tick.
+        register(event, environment, JUKEBOX_PAYS_ONLY_WHILE_PLAYING, 20);
         // Synchronous: one cross-world move, checked in the same tick.
         register(event, environment, TURNOUT_RELEASES_THE_HORSE_THAT_ARRIVED, 20);
         // Founded at 25, then a combat scan once a second - after the wait for the
@@ -3102,6 +3104,74 @@ public final class ModGameTests {
             }
             checked[0] = true;
         });
+    }
+
+    /**
+     * <b>A jukebox pays a music-loving horse only while it plays</b> (issue #217). The
+     * {@code near_jukebox} flag read the block's {@code HAS_RECORD} state, and a disc that
+     * has played to its end is still in the box, so one disc paid the daily bond cap for
+     * ever. Four states of one jukebox, through the handler's own search: empty, playing,
+     * finished with the disc left in, and a fresh disc put in. The finish is
+     * {@code JukeboxSongPlayer.stop}, the call the player's own {@code tick} makes when the
+     * song runs out (26.1.2 sources), so the test need not wait three minutes of song.
+     * UNVERIFIED outside this test: {@code setTheItem} and {@code Items.MUSIC_DISC_CAT}
+     * are used nowhere else in the repo.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> JUKEBOX_PAYS_ONLY_WHILE_PLAYING =
+            TEST_FUNCTIONS.register("jukebox_pays_only_while_playing", () -> ModGameTests::jukeboxPaysOnlyWhilePlaying);
+
+    private static void jukeboxPaysOnlyWhilePlaying(GameTestHelper helper) {
+        net.minecraft.server.level.ServerLevel level = helper.getLevel();
+        BlockPos box = helper.absolutePos(new BlockPos(0, 1, 0));
+        BlockPos horseAt = box.offset(3, 0, 2);
+        java.util.function.BooleanSupplier near = () ->
+                com.example.horsegenetics.neoforge.server.GeneAbilityHandler.jukeboxPlayingNear(level, horseAt);
+        if (near.getAsBoolean()) {
+            helper.fail("a playing jukebox was in reach before this test placed one - it proves nothing from here");
+            return;
+        }
+        level.setBlockAndUpdate(box, Blocks.JUKEBOX.defaultBlockState());
+        if (!(level.getBlockEntity(box) instanceof net.minecraft.world.level.block.entity.JukeboxBlockEntity jukebox)) {
+            helper.fail("the placed jukebox has no block entity");
+            return;
+        }
+        try {
+            if (near.getAsBoolean()) {
+                helper.fail("an empty jukebox counted as music");
+                return;
+            }
+            jukebox.setTheItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.MUSIC_DISC_CAT));
+            if (!level.getBlockState(box).getValue(net.minecraft.world.level.block.JukeboxBlock.HAS_RECORD)
+                    || !jukebox.getSongPlayer().isPlaying()) {
+                helper.fail("the disc did not start: HAS_RECORD "
+                        + level.getBlockState(box).getValue(net.minecraft.world.level.block.JukeboxBlock.HAS_RECORD)
+                        + ", playing " + jukebox.getSongPlayer().isPlaying());
+                return;
+            }
+            if (!near.getAsBoolean()) {
+                helper.fail("a jukebox playing three blocks away did not count as music");
+                return;
+            }
+            jukebox.getSongPlayer().stop(level, level.getBlockState(box));
+            if (!level.getBlockState(box).getValue(net.minecraft.world.level.block.JukeboxBlock.HAS_RECORD)) {
+                helper.fail("the finished disc left the box - the state under test was never reached");
+                return;
+            }
+            if (near.getAsBoolean()) {
+                helper.fail("a finished record still in the jukebox (HAS_RECORD true, not playing) counted as music");
+                return;
+            }
+            jukebox.setTheItem(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.MUSIC_DISC_CAT));
+            if (!near.getAsBoolean()) {
+                helper.fail("a fresh disc after a finished one did not count as music");
+                return;
+            }
+        } finally {
+            // Out again, disc and all: the search reaches eight blocks, past this test's cell.
+            jukebox.setTheItem(net.minecraft.world.item.ItemStack.EMPTY);
+            level.setBlockAndUpdate(box, Blocks.AIR.defaultBlockState());
+        }
+        helper.succeed();
     }
 
     /**

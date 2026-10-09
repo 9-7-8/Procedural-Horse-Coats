@@ -50,6 +50,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.JukeboxBlock;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
@@ -2212,6 +2213,31 @@ public final class GeneAbilityHandler {
     /** A biome at least this warm is hot for {@code hot_biome}: vanilla's desert, badlands, savanna and Nether sit at 1.0 to 2.0. */
     private static final float HOT_BIOME_TEMPERATURE = 1.0F;
 
+    /**
+     * {@code near_jukebox}: a jukebox within {@link #JUKEBOX_RANGE} blocks (three up or down)
+     * that is <b>playing a song</b>, not one that merely holds a disc (issue #217, owner
+     * 2026-10-09). It used to read the block's {@code HAS_RECORD} state, and a disc that has
+     * played to its end stays in the box, so one disc inserted once paid a music-loving horse
+     * its whole daily bond cap every day for ever with nobody there. {@code HAS_RECORD} is
+     * still read first: it is a block-state read, and only a box that passes it has its
+     * block entity fetched. {@code JukeboxSongPlayer.isPlaying} is "a song is set", cleared
+     * by {@code tick} when the song has finished (26.1.2 sources); the jukebox only ticks in
+     * a ticking chunk, which a horse being ticked eight blocks away all but guarantees.
+     * Public for the gametest {@code jukebox_pays_only_while_playing}.
+     */
+    public static boolean jukeboxPlayingNear(Level level, BlockPos at) {
+        for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
+                at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {
+            BlockState state = level.getBlockState(p);
+            if (state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD)
+                    && level.getBlockEntity(p) instanceof JukeboxBlockEntity jukebox
+                    && jukebox.getSongPlayer().isPlaying()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean sampleWorld(Horse horse, Level level, String wanted) {
         BlockPos at = horse.blockPosition();
         switch (wanted) {
@@ -2235,14 +2261,7 @@ public final class GeneAbilityHandler {
                 // height, so a snowy peak in a temperate biome counts and it does not have to be snowing.
                 return level.getBiome(at).value().coldEnoughToSnow(at, level.getSeaLevel());
             case "near_jukebox":
-                for (BlockPos p : BlockPos.betweenClosed(at.offset(-JUKEBOX_RANGE, -3, -JUKEBOX_RANGE),
-                        at.offset(JUKEBOX_RANGE, 3, JUKEBOX_RANGE))) {
-                    BlockState state = level.getBlockState(p);
-                    if (state.is(Blocks.JUKEBOX) && state.getValue(JukeboxBlock.HAS_RECORD)) {
-                        return true;
-                    }
-                }
-                return false;
+                return jukeboxPlayingNear(level, at);
             case "hostile_near":
                 if (!(level instanceof ServerLevel sl)) {
                     return false;
