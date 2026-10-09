@@ -39,6 +39,9 @@ STEPS
    a. The last release is the newest tag: `git tag --sort=-v:refname | head -1`.
    b. The next release is the OPEN milestone with the lowest version above that tag
       that still has open issues. `Backlog` is never a release.
+      A themed release cut in interim versions (tags v0.5.047.1, .2 ...; release.txt)
+      is still the next release while its milestone has open issues: an interim tag
+      does not finish it. Work its stages in the order its description lists them.
    c. If the last tag's own milestone is still open, it was missed at release time:
       assign it every issue closed between the previous tag and that tag (dates from
       `git log -1 --format=%cI <tag>`) that has no milestone, then close it, as
@@ -51,9 +54,15 @@ STEPS
      release), and add it to that milestone's description under "Bugs first";
    - an `idea`, `survey`, or the two queue documents -> `Backlog`;
    - a `scoped` issue with a size label -> a release, by the plan's method: after
-     everything it depends on, in the first release with room (about 10 points,
-     S=1 M=2 L=5). Add it to that milestone's description and to the release-plan
+     everything it depends on, in the release whose THEME it belongs to (owner,
+     2026-10-09: a release centres on one feature or family, as v0.5.047 is
+     equipment; it is no longer packed to about 10 points, and may be far larger or
+     smaller). No release has that theme -> a new themed milestone, placed by asking
+     the owner. Sizes (S=1 M=2 L=5) still say how big a release is, not where a
+     piece goes. Add it to that milestone's description and to the release-plan
      issue's list in the same edit.
+     An unscoped `idea` the owner puts on a themed release herself stays there
+     (v0.5.047 holds many); this step never moves it back to `Backlog`.
    - a `scoped` issue with NO size label (what is left of a feature that was built
      without it, like #220's enchantments) -> `Backlog`, with a line in that milestone's
      description saying what would size it. The plan places only sized pieces.

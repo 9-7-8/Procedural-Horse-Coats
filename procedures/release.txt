@@ -27,6 +27,11 @@ THE VERSION IS 0.<COMPAT>.<PATCH> (owner, 2026-10-01):
 - COMPAT, the second number: a compatibility indicator. It moves only for a substantial
   new feature that cannot be made back-compatible with saves (CLAUDE.md hard rule 10).
   A release that moves it is the only kind that may break saves.
+- INTERIM, a fourth number (owner, 2026-10-09): a big themed release ships in stages as
+  0.<compat>.<patch>.1, .2 and so on (v0.5.047, the equipment release, is the first). Each
+  interim jar is a full release by every step of this file - tests, note, jar, server boot,
+  saves keep loading - and its stages are listed in the milestone's description. The
+  milestone stays open until the LAST interim version; the next patch number starts after it.
 Releases are cut by hand, in a local session, with a jar and a server boot behind them.
 A scheduled self-releasing job was tried once and retired by the owner.
 

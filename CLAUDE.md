@@ -131,7 +131,7 @@ file under `wiki/session-log/` from its index; those files are not baked.
    MOVES** to the same page's Coding or Gameplay tab: `procedures/close-a-check.txt`.
 10. **Saves keep loading.** A world from any release since the baseline on `wiki/releases.html#saves`
    loads in every later one of its `0.X` series: a change to anything saved brings its migration.
-   The version is `0.<compat>.<patch>`. Patch: every release, but releasing is the owner's call,
+   The version is `0.<compat>.<patch>` (`.<n>` more for an interim jar of a big themed release). Patch: every release, but releasing is the owner's call,
    offered only for a substantial batch, never a handful of fixes (`procedures/release.txt`). Compat:
    only a substantial feature that cannot keep saves loading; only it may break them.
 11. **Ask the owner with the question tool** (AskUserQuestion: 2-4 options, recommendation
