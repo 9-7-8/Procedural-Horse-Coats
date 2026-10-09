@@ -2367,10 +2367,11 @@ wiki/gene-rainbow-dust.html#verified	coding	Verified
 wiki/gene-ram-horn-form.html#carrot	gameplay	Its gene carrot
 wiki/gene-ram-horn-form.html#four	coding	One root for four horns
 wiki/gene-ram-horn-form.html#health	gameplay	Is it good for the horse?
+wiki/gene-ram-horn-form.html#horizontal	coding	The horizontal twist is a flat corkscrew laid level
 wiki/gene-ram-horn-form.html#inheritance	gameplay	Crossing two of them
 wiki/gene-ram-horn-form.html#order	coding	Allele order is generator order
 wiki/gene-ram-horn-form.html#real-sheep	science	Analogous, not measured
-wiki/gene-ram-horn-form.html#shapes	gameplay	The four shapes
+wiki/gene-ram-horn-form.html#shapes	gameplay	The five shapes
 wiki/gene-ram-horn-tip.html#carrot	gameplay	Its gene carrot
 wiki/gene-ram-horn-tip.html#door	coding	How it reaches the horns, and the prints
 wiki/gene-ram-horn-tip.html#finding	gameplay	Finding one

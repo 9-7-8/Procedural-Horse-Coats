@@ -81,7 +81,17 @@ STEPS
    once it stands on the stage. DebugPhotoShoot.packs(near, off) hangs a chest on each
    flank; facingEast() turns the horse round, so a SIDE camera sees its off side;
    harness(item, rgb) puts a storage harness on, dyed, or undyed for -1.
+   A part that reaches SIDEWAYS from the head (the horizontal ram horns) is end-on or
+   foreshortened in every framing above: use Framing.FRONT, dead ahead of the horse and a
+   little above the poll (added 2026-10-09).
+   A part's size is an epigenetic roll, and an unpinned one is often too small to judge:
+   pin it with `want` on the first shoot (GrownParts.of(genotype, epigenome), then
+   shape().size()), and keep one unpinned shot for what a typical roll looks like. Put a
+   horn on a bay or chestnut horse: its shade can roll black, and a black horn on a black
+   horse is invisible.
 2. Compile: ./gradlew :neoforge-26.1.2:compileJava, logged to a file, exit code read.
+   Between two shoots, stop the first client (step 7) BEFORE recompiling: the shoot's
+   client stays open after "[photo] done", and a build under it is the launch-game mistake.
 3. Copy run/logs/latest.log and debug.log to the scratchpad first: they hold the owner's
    last play session (CLAUDE.md: read it rather than asking), and the launch overwrites
    them. Put them back after step 7. Then launch by launch-game step 5, with the task

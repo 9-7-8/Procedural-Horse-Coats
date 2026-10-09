@@ -71,7 +71,7 @@
 <p>
     And <a href="gene-ram-horns.html">ram horns</a>, built on the antler pattern: one copy grows a
     pair (on any horse with <code>Rh</code>, on stallions only with <code>Rhm</code>), a shape gene
-    makes them curled, corkscrew, four-horned or scurs, and a tip gene fades the points into a
+    makes them curled, corkscrew, four-horned, horizontal twist or scurs, and a tip gene fades the points into a
     colour of their own. The <a href="breed-book.html#mirrorgazer">Mirrorgazer</a> and the
     <a href="breed-book.html#not_a_sheep">Not A Sheep</a> carry them.
 </p>
@@ -710,6 +710,11 @@
     ear fins have two size classes, not three. The next part with more than a few dozen boxes
     meets the cap again, and that is the owner&rsquo;s call
     (<a href="#open-parts-box-budget">Verification</a>).
+    The first such call (owner, 2026-10-09): the cap went from 32,000 to 33,000 for the two new
+    ram horn shapes, the <a href="gene-ram-horn-form.html#horizontal">horizontal twist</a> (#125)
+    and the scimitar (#130). One horn shape is two sides, four curl buckets and five size
+    classes, 320 boxes, so the raise holds those two and nothing else. The flat-box rule gained
+    its fifth exception with it: a horizontal-twist horn&rsquo;s boxes are flat.
 </p>
 
 <h3 id="row-span">A row can be drawn shorter: span</h3>
@@ -1029,9 +1034,10 @@
     <code>PartGeneratorTest.theWholeSetOfMeshesIsSmall</code> holds the total of every bakeable
     mesh under a fixed number of boxes, and its message says that past it the cache &ldquo;wants a
     real eviction policy, not a bigger number here&rdquo;. The ear fins, cheek spikes and brow
-    ridge reached it (2026-10-09) and were trimmed to fit. The goat beard and ruff (#158) and the
-    two new ram horn shapes (#125, #130) will each go over. The owner&rsquo;s call, before the
-    next of them is built: raise the cap on a measurement (how much memory a full cache really
+    ridge reached it (2026-10-09) and were trimmed to fit. The two new ram horn shapes (#125,
+    #130) got a raise to 33,000 that fits exactly those two (owner, 2026-10-09;
+    <a href="#box-budget">the box budget</a>). The goat beard and ruff (#158) will go over again.
+    The owner&rsquo;s call, before that or any later part is built: raise the cap on a measurement (how much memory a full cache really
     holds, which nobody has taken), build the eviction, or keep trimming. The cache fills lazily,
     so a world only holds the meshes somebody bred.
 </p>

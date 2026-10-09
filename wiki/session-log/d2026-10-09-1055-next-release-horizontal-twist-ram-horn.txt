@@ -1,0 +1,135 @@
+2026-10-09 10:55 - next-release: the horizontal-twist ram horn, Hzt (#125)
+(The time is the session's start.)
+
+ASKED
+-----
+1. "/next-release" - run procedures/next-release.txt. Done: the milestones were checked,
+   one unit of v0.5.046 was built (#125) and the session ended.
+2. Asked by this session with the question tool: what to do about the part cache's box
+   cap, which #125 went over. The owner answered "Raise to 33,000 (Recommended)". Done.
+
+DONE
+----
+Housekeeping (next-release steps 1-3). The newest tag is v0.5.045 and its milestone is
+closed. Every open issue already had a milestone, so nothing moved and the release-plan
+issue (#196) was not edited. The next release is v0.5.046. Its three open bugs, #10, #31
+and #36, each have a fix commit and a last comment saying they wait on a check (an
+in-game look, the live server's log, an in-game look), and none of those checks has come
+back failed, so all three were skipped. The first unit left in the milestone's order was
+#125; #130 (the scimitar) follows and may not share a session with it.
+
+#125, Mythical rams piece 1: the horizontal-twist ram horn. Commit 508e487f. Closed.
+- What was missing: Khnum's horns. The ram horn form locus had four shapes and none that
+  leaves the skull sideways.
+- What changed: RamHornFormGene gains the allele Hzt, APPENDED after Scr, so the stored
+  allele order of every saved horse is unchanged. Dominance is Fhn > Crl > Crk > Hzt >
+  Scr. Hzt takes 0.04 of the Hardy-Weinberg founder table from Crl (0.70 -> 0.66).
+  RamHornGenerator gains HORIZONTAL (shape 4, FORMS is 5): the corkscrew's chain, one
+  unbranched run of boxes that roll and never bend, with its root leaned 1.45 rad off
+  upright and 0.12 rad back, every box flat (PartNode.width = 0.6 x girth), 0.8 of the
+  class length, and the curl bucket picking the roll per segment (8, 14, 20, 26 degrees).
+  GeneDescriptions names the new shape.
+- The treatment's UNVERIFIED line (does MAX_NODES 24 allow it at every size) is resolved:
+  a horn is at most 12 boxes.
+- Proof, by name: RamHornsGeneTest (two new tests:
+  theHorizontalTwistSitsBetweenCorkscrewAndScurs pins the allele order, the dominance
+  against each other allele, the expression id, horns on both sexes with Rh and none on
+  an Rhm mare; theHorizontalTwistIsFlatLevelAndTwistsByTheCurl checks every curl and size
+  for the box cap, a sideways root, flat boxes, no bend, and more twist per bucket),
+  RamHornBreedsTest, PartGeneratorTest, CoatBakeGoldenTest, CoatPipelineGoldenTest,
+  CommonPortabilityTest, and the classes matching *EditorRules*, *BreedFilesTest,
+  *UndeadBreedsTest, *GrownParts*, *Founder*, *GeneDescriptions*, *GenesTest: all green.
+  Mutation: with Hzt put above Crk in the dominance list the first new test fails.
+  The bake golden gained one row (Hzt, at the same hash as the locus's other alleles: it
+  paints nothing); the 39-horse pipeline golden did not move.
+  :neoforge-26.1.2:build green, check-parity OK, check-designer-boots OK, check-links OK.
+- Bakes: :web:bakeDesignerAssets (web.wasm committed, common/ code moved), the gene row
+  (bundle, icons, wiki pages, marking facts, census, timeline, unverified genes; only
+  wiki/gene-census.html and index.html's genotype count changed), the verification and
+  roadmap indexes, the search index and the agent text.
+- Pictures: four shoots on the photo stage (DebugPhotoShoot, -PphotoShoot). The first
+  used unpinned sizes on a black horse and showed almost nothing; the second added a
+  head-on framing but stood too far back; the third showed the horn clearly and showed it
+  short and rising about 15 degrees, so the reach went from 0.6 to 0.8 of the class length
+  and the lean from 1.30 to 1.45 rad; the fourth is the one shown. It shows, head-on, a
+  stallion and a mare at the heavy class with level horns about a head's width a side,
+  below and outside the ears, flat, the twist visible as a stepped edge on a high curl
+  roll and barely at all on a low one; an average-size roll; a three-quarter face where
+  the near horn is foreshortened; a view from behind where both horns clear the neck; and
+  a corkscrew from the same angle for comparison. Files could not be attached in this
+  session, so they are a private gallery: https://claude.ai/artifact/Pm9s8KYSoG4emLeU5wxxjB
+  A picture is not a pass: the checks are on gene-ram-horn-form.html#open-ram-horizontal.
+- The photo stage keeps a new framing, Framing.FRONT, and one standing shot,
+  09b-ram-horizontal-twist. The throwaway shot list was reverted.
+- Written up on wiki/gene-ram-horn-form.html (Gameplay: the five shapes; Coding:
+  #horizontal and the allele order; Science: the Egyptian ram; Verification:
+  #open-ram-horizontal), gene-ram-horns.html, model-parts.html#box-budget and
+  decisions.html.
+
+DECIDED
+-------
+- (owner) The part cache's box cap, PartGeneratorTest.theWholeSetOfMeshesIsSmall, rises
+  from 32,000 to 33,000: room for Hzt and the scimitar (#130) and nothing else. Recorded
+  in the test's javadoc, model-parts.html#box-budget and decisions.html. The wider
+  question (measure the cache, build eviction, or keep trimming) stays open on
+  model-parts.html#open-parts-box-budget and comes back at the goat beard and ruff (#158).
+- (session, the treatment's Recommended lines taken as written) the name "Horizontal
+  twist", the token Hzt, the dominance slot under Crk and over Scr, the 0.04 founder share
+  taken from Crl.
+- (session) The shape: a flat corkscrew laid level, 0.8 of its class length. The numbers
+  are a first placement set from four still pictures.
+- (session) Neither ram-horned breed (Mirrorgazer, Not A Sheep) gains Hzt. Their tests
+  asserted "every shape turns up"; they now assert the four shapes the pools name. A
+  breed is the owner's to change, and the issue says the breed pools that pin Hzt are
+  another session's (#127, Khnum).
+- (session) The flat-box rule in PartGeneratorTest gained an exception for a
+  horizontal-twist ram horn.
+
+FOUND ON THE WAY
+----------------
+- No bugs filed.
+- Mistake: the photo client stays open after "[photo] done", and twice a recompile ran
+  under it before it was stopped. It was this session's own throwaway client and nothing
+  crashed, but it is the mistake launch-game warns of. photograph-horses now says to stop
+  the client before recompiling between shoots.
+- Mistake: one PowerShell call that stopped the client, edited the generator and removed
+  the old screenshots was refused whole because of its Remove-Item wildcard, and the wait
+  that followed read the previous shoot's files as fresh. Caught before anything was
+  written down from them; the step was redone in pieces.
+- SendUserFile cannot attach files in this kind of session ("not on a project thread"),
+  so pictures go out as a gallery artifact, as photograph-horses step 6 already allows.
+- This session's instructions said there is no gh CLI and to use GitHub MCP tools; no
+  such tools were present and gh worked, so the procedures' gh commands were used as
+  written.
+
+PROCEDURES
+----------
+- photograph-horses: Framing.FRONT for a part that reaches sideways; pin a part's size
+  with `want` on the first shoot and keep one unpinned shot; put a horn on a bay or
+  chestnut horse; stop the client before recompiling between shoots.
+- add-a-gene (10d): a new shape on an existing part costs boxes, so run PartGeneratorTest
+  first; the flat-box whitelist; a breed test that counts shapes by FORMS breaks when a
+  shape is appended.
+- next-release, process-intake, rebake, end-session: followed as written, none changed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every breed's seeded
+  founder rolls against the changed ram_horn_form founder table (only the named breed and
+  founder classes above were run), and every other class not named.
+- No gametests were run: nothing on the NeoForge side changed but the photo stage.
+- Nobody has seen Hzt on a moving horse, with Rhm, under a halter or saddle, or at the
+  massive class: gene-ram-horn-form.html#open-ram-horizontal.
+- The other four shapes are still unseen side by side:
+  gene-ram-horn-form.html#open-ram-shapes.
+
+RELEASE
+-------
+Not offered. v0.5.046 still has #130 to build and three bugs waiting on checks.
+
+PICK UP FIRST
+-------------
+next-release: v0.5.046's last unit is #130, the scimitar ram horn (Sci), by
+process-intake. The box cap already has room for it. It appends to the same allele list
+as Hzt, so its allele goes after Hzt and its dominance slot is the building session's call.
+The owner could look at #10 and #36 in game first; both only wait on that.

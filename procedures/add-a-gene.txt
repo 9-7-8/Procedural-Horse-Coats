@@ -361,6 +361,15 @@ STEPS
          Count styles x size classes x boxes for the new kind first. A style that ignores
          one of its buckets (a blade's spread, a plain ridge's bump) is ONE style, not one
          per bucket. Raising the cap is the owner's call, never a quiet edit.
+         A new SHAPE on an existing part costs boxes too: every style is baked at every
+         bucket and size (a ram horn form is 2 sides x 4 curls x 5 sizes, 320 boxes), so run
+         --tests '*PartGeneratorTest' straight after adding one, before anything else.
+       - Flat boxes are a whitelist. everyShapeBuildsWithParentsBeforeChildren lets only
+         named kinds set PartNode.width below girth; a new flat part or shape adds its
+         exception there, with the reason in the comment.
+       - A test that counts "every shape" by the generator's FORMS breaks when a shape is
+         appended that no breed pool names (RamHornBreedsTest did). Assert the shapes the
+         pool names; a breed gains the new one only when the owner says so.
        - Two-tone is by depth. PartModel.along is a box's depth over its branch's depth:
          a root is the base colour, a leaf the tip, and a box one down a chain of two is
          drawn as a half-blend of both. Anything that must be the base colour whole is a
