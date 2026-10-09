@@ -32,6 +32,12 @@ ASKED
    started on this release?" and "Is there anything else we need to decide?" Three more
    rounds; #236, #237 and #238 filed from the answers.
 9. "scope a feature for 223". Done: see DONE 4.
+10. "Are we ready to end this session and then start building, or is there anything
+   else we need to scope that's cross-cutting?" Yes; the one call left in stage .1
+   (#140 against #164) was asked and answered.
+11. "end session, we'll scope each part as we get to it if it doesn't affect other
+   parts". The session was ended by procedures/end-session.txt, and the scoping order
+   on #196 and the milestone was amended to her words.
 
 DONE
 ----
@@ -105,10 +111,15 @@ issue named, and as standing decisions in #196 under v0.5.047.
   horses only, lifted to 0.25; rim takes the edge texel's colour; grown parts poke
   through; the braid is the proof piece; worn meshes get their own cache and cap; each
   piece counts toward the next interim version and no save changes.
+- #140 (the worn hook and the four hoof anchors) stays its own piece and is built
+  BEFORE horse shoes, after #239; #164 now depends on it (comments on #140 and #164;
+  `needs-owner` came off #140).
+- Scoping order, amended at the end of the session: every remaining piece is scoped
+  when its turn comes, just before it is built, unless it affects other pieces. This
+  replaces her earlier pick of scoping #228, #227 and #226 ahead (#196, the milestone).
 - NOT the owner's (this session's, written as Recommended in #223): the saddle stays
   vanilla-drawn; the face limit and fallback; the config key's name; the common/gear
-  package; the debug-only test boot; building #140's worn hook as the first step of
-  the shoes' rendering.
+  package; the debug-only test boot.
 None of these is on wiki/decisions.html yet. Each goes there when its piece is built.
 
 FOUND ON THE WAY
@@ -126,8 +137,7 @@ FOUND ON THE WAY
 - The all-armour-edged call bends philosophy's "vanilla mechanics stay intact". She was
   told and confirmed it with the client switch; it is to be recorded on decisions as a
   looks-only exception when #240 ships.
-- #164's step 4 (an item model per hoof) is superseded: shoes are box-built. #140 got
-  `needs-owner` for whether it merges into #164.
+- #164's step 4 (an item model per hoof) is superseded: shoes are box-built.
 - Stale text seen and left alone: HorseTackSlot's javadoc says nineteen slots (there
   are twenty); PartMeshes' javadoc says sixty-four meshes; wiki/model-parts.html says
   only a membrane or a slab is flat (the test lists five exceptions; #239 fixes that
@@ -139,10 +149,18 @@ PROCEDURES
 - procedures/next-release.txt and procedures/release.txt changed (DONE 3).
 - write-intake-document says a comment is posted per decision round. This session
   posted one decision log at the end instead; the rounds are separated inside it.
+  The procedure was right and was not changed.
+- Missing procedure, filed as #242 (procedure, idea, size S, Backlog): re-planning a
+  release. The bulk milestone move, the description rewrites and the #196 rewrite were
+  done by hand six times, and both mistakes under FOUND ON THE WAY came from that.
+- No other procedure's steps were made untrue: only next-release.txt named the
+  10-point packing rule (grep of procedures/).
 
 NOT RUN / NOT CHECKED
 ---------------------
-- No test, build or game was run: nothing compiled changed.
+- No test or game was run. The Gradle build was skipped by end-session step 2: the
+  session touched no Java, resource or Gradle file. check-parity, check-links, the
+  search index and the agent-text bake were run at the end.
 - A full :common:test run would check nothing this session touched.
 - The eight UNVERIFIED lines in #223 section 6 are unread in javap and unseen in a game.
 - No Verification-tab anchor was added; #239-#241 list the play checks that become them.
@@ -155,5 +173,4 @@ PICK UP FIRST
 -------------
 #239 (piece 1 of #223: the rim builder, the rule and the braid), by
 procedures/process-intake.txt. Its first step is UNVERIFIED 1 in #223: prove one rim
-face on the braid. Before or beside it, the owner's scoping order has #228, #227 and
-#226 next, by procedures/write-intake-document.txt.
+face on the braid. Then #240 and #241 in either order, #140, and #164.
