@@ -189,10 +189,10 @@ final class DebugTestYard {
      * outside the plot box that tears the plot down and carries tamed horses
      * home. Derived now, which is the whole class of bug gone.
      */
-    /** Row BE (2026-10-09): PACKS and PACK DEATH - chests on horses and the storage harness. */
-    static final int ROW_BE = ROW_BD + NEW_ROW_D + PACKED_AISLE;
-
-    private static final int YARD_DEPTH_Z = ROW_BE + NEW_ROW_D + AISLE;   // BC (DRAUGHT, STALLION DAY) went too
+    // Row BE (PACKS, PACK DEATH - chests on horses and the storage harness) stood for one launch on
+    // 2026-10-09: all seven of DebugYardPacks' checks passed at 06:30 and the row went. The records are on
+    // wiki/horse-gear.html#verified-yard-packs and the pens are in git at 7acbfa07.
+    private static final int YARD_DEPTH_Z = ROW_BD + NEW_ROW_D + AISLE;   // BC (DRAUGHT, STALLION DAY) went too
 
     /** The west block's left edge, and the east block's right edge. */
     static final int WEST_MIN = WEST_MAX - BLOCK_W;
@@ -260,8 +260,6 @@ final class DebugTestYard {
         DebugYardSocial.build(level, gy, rowX, mouthZ + ROW_BB);
         // Row BD (2026-10-08): the silent aura pair.
         DebugYardGenes.build(level, gy, rowX, mouthZ + ROW_BD);
-        // Row BE (2026-10-09): chests on horses and the storage harness.
-        DebugYardPacks.build(level, gy, rowX, mouthZ + ROW_BE);
         // After every row has registered its checks: the summaries name whatever has not answered.
         DebugYardClockwork.build(level, gy, cx, mouthZ);
         // HURT MARE, NIGHT SHY, REACH WALL, REACH FENCE, STATS and the ARCANE DEALER went on their own PASS
