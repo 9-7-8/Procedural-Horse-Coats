@@ -67,7 +67,11 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
  *   <li><b>Anything in {@code minecraft:bypasses_invulnerability}</b> - the void,
  *       {@code /kill}, and the generic kill {@link LycanthropyHandler} falls back
  *       to when a were-animal dies of something its horse body shrugs off. That
- *       fallback was written for gene immunities and covers this one for free.</li>
+ *       fallback was written for gene immunities.</li>
+ *   <li><b>Its animal form dying</b> (#244). {@link LycanthropyHandler#onWereAnimalDeath}
+ *       kills the horse with the blow that killed the form, and this handler stands aside
+ *       for it. The fallback did not cover it: the saved blow left a hurt cooldown, and
+ *       {@code generic_kill} bypasses invulnerability but not that.</li>
  * </ul>
  *
  * <p><b>Every horse, not only a horse with a genome.</b> {@code AbstractHorse},
@@ -116,7 +120,7 @@ public final class HorseLastStandHandler {
         if (!(horse.level() instanceof ServerLevel level)) {
             return;
         }
-        if (!ServerConfig.lastStand() || unsurvivable(event.getSource())) {
+        if (!ServerConfig.lastStand() || unsurvivable(event.getSource(), horse)) {
             return;
         }
 
@@ -158,12 +162,12 @@ public final class HorseLastStandHandler {
         // checks out on paper, so the next occurrence is what has to say.
         float blow = event.getNewDamage();
         boolean wouldBeFatal = LastStand.fatal(blow, horse.getHealth());
-        if (!ServerConfig.lastStand() || unsurvivable(event.getSource())) {
+        if (!ServerConfig.lastStand() || unsurvivable(event.getSource(), horse)) {
             if (wouldBeFatal) {
                 ActionTrace.log("last-stand", ActionTrace.describeShort(horse) + " was NOT saved from "
                         + event.getSource().getMsgId() + " (" + blow + " vs " + horse.getHealth()
                         + " health): " + (ServerConfig.lastStand()
-                                ? "that damage type is exempt"
+                                ? LycanthropyHandler.diesWithItsForm(horse) ? "its animal form died" : "that damage type is exempt"
                                 : "behaviour.last_stand is off in phc/server.toml"));
             }
             return;
@@ -229,8 +233,9 @@ public final class HorseLastStandHandler {
      * exemptions have nothing in common except that - see the class notes for
      * why each one is here.
      */
-    private static boolean unsurvivable(DamageSource source) {
+    private static boolean unsurvivable(DamageSource source, AbstractHorse horse) {
         return source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
-                || source.is(LethalFoalHandler.GENETIC_DEFECT);
+                || source.is(LethalFoalHandler.GENETIC_DEFECT)
+                || LycanthropyHandler.diesWithItsForm(horse);
     }
 }

@@ -1140,7 +1140,9 @@
         <code>minecraft:bypasses_invulnerability</code> is the other &mdash; the void,
         <code>/kill</code>, and the generic kill <code>LycanthropyHandler</code> falls back to when
         a were-animal dies of something its horse body shrugs off. That fallback was written for
-        gene immunities and covers this one unchanged.</li>
+        gene immunities. It did not cover the last stand (issue #244): the saved blow left a hurt
+        cooldown that refused it, so the handler now also stands aside for a horse whose animal
+        form has just died (<a href="gene-lycan.html#form-death-kills">lycanthropy</a>).</li>
     <li><strong><code>AbstractHorse</code>, not <code>Horse</code>.</strong> Matching the hurt and
         death notices and the care handler&rsquo;s own herd scan rather than the goal handlers: a
         rule about not dying should not depend on having been born here. It is a wider family than

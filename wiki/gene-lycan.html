@@ -445,6 +445,26 @@
     server updates stays one until dawn or death; nothing reverts it early.
 </p>
 
+<p id="form-death-kills">
+    <strong>A horse does not outlive its animal form</strong> (issue #244, 2026-10-09). On the live
+    server (0.5.045) a full-health horse whose form died stood up again at 1 health, shifted again
+    within two seconds, and died only when the second form died. The last stand saved it from the
+    blow that killed the form. That saved blow still left vanilla&rsquo;s hurt cooldown
+    (<code>invulnerableTime</code> 20, <code>lastHurt</code> at the maximum), and the fallback
+    <code>genericKill</code> is in <code>bypasses_invulnerability</code> but not
+    <code>bypasses_cooldown</code>, so it was refused. <code>onWereAnimalDeath</code> now marks the
+    horse while it kills it, <code>HorseLastStandHandler</code> stands aside for a marked horse on
+    both of its events, and the cooldown is cleared before the fallback. The horse therefore dies
+    of the blow that killed its form, with that cause on its death line, and the fallback is left
+    for gene immunities. Proof: the <code>were_animal_death_kills_the_horse</code> gametest shuts a
+    founded, full-health horse in a cow with the handler&rsquo;s own code
+    (<code>shiftInto</code>) and kills the cow with an ordinary blow. Before the fix it failed with
+    &ldquo;the horse outlived its animal form at 1.0 of 21.02916 health [invulnerableTime
+    20]&rdquo;; after it the horse is dead of <code>generic</code> and the log reads
+    <code>FORM DIED ... horse died of the same blow</code>. The yard&rsquo;s LYCAN DOOMED pen never
+    saw this, because it killed its wolf with <code>/kill</code>, which is exempt.
+</p>
+
 <p id="gap-243">
     <strong>A lycan cannot come back in mid-air any more, and the guard that used to catch it
     stays</strong> (was open check 243; closed 2026-09-24). Wild bat and parrot shifters reverted

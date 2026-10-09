@@ -2316,6 +2316,8 @@ public final class ModGameTests {
         register(event, environment, ORDER_COMBAT_GATE, 100);
         // Founded at 25, then three owner-mirror passes, one every 40 ticks.
         register(event, environment, WHISTLE_SEES_THE_OWNER, 300);
+        // Founded at 25, then one blow and its answer inside one tick.
+        register(event, environment, WERE_ANIMAL_DEATH_KILLS_THE_HORSE, 100);
         // Synchronous: one jukebox through four states inside one tick.
         register(event, environment, JUKEBOX_PAYS_ONLY_WHILE_PLAYING, 20);
         // Synchronous: one cross-world move, checked in the same tick.
@@ -3235,6 +3237,68 @@ public final class ModGameTests {
         });
     }
 
+    /**
+     * <b>A horse does not outlive its animal form</b> (issue #244). A full-health horse has
+     * its last stand armed, and that saved it from the blow that killed its form: it stood
+     * at 1 health, the fallback kill was refused by the hurt cooldown the saved blow left,
+     * and it shifted again. The horse is shut in a cow by the handler's own code and the cow
+     * is killed by an ordinary blow; the horse must be dead, and dead of that blow.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> WERE_ANIMAL_DEATH_KILLS_THE_HORSE =
+            TEST_FUNCTIONS.register("were_animal_death_kills_the_horse", () -> ModGameTests::wereAnimalDeathKillsTheHorse);
+
+    private static void wereAnimalDeathKillsTheHorse(GameTestHelper helper) {
+        keepTicking(helper);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, new BlockPos(2, 0, 2));
+        // The blow is struck once; a retry would shift a horse that is already gone.
+        String[] verdict = {null};
+        boolean[] struck = {false};
+        helper.succeedWhen(() -> {
+            if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                throw new GameTestAssertException(Component.literal("the horse is not founded yet"), 0);
+            }
+            if (!struck[0]) {
+                struck[0] = true;
+                verdict[0] = killTheFormOf(horse, helper.getLevel());
+            }
+            if (verdict[0] != null) {
+                throw new GameTestAssertException(Component.literal(verdict[0]), 0);
+            }
+        });
+    }
+
+    /** Null when the horse died with its form of the same blow, else what went wrong. */
+    private static String killTheFormOf(net.minecraft.world.entity.animal.equine.Horse horse, ServerLevel level) {
+        java.util.UUID id = horse.getUUID();
+        if (!com.example.horsegenetics.neoforge.ServerConfig.lastStand()
+                || horse.getHealth() < horse.getMaxHealth()) {
+            return "the horse's last stand is not armed (health " + horse.getHealth() + " of "
+                    + horse.getMaxHealth() + "), so this would prove nothing";
+        }
+        net.minecraft.world.entity.Mob cow = com.example.horsegenetics.neoforge.server.LycanthropyHandler
+                .shiftInto(horse, level, net.minecraft.world.entity.EntityType.COW);
+        if (cow == null || horse.isAlive()) {
+            return "the horse did not shift";
+        }
+        cow.hurtServer(level, level.damageSources().generic(), Float.MAX_VALUE);
+        if (cow.isAlive()) {
+            return "the cow survived the blow";
+        }
+        if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse back)) {
+            return "no horse came back out of the dead cow: " + level.getEntity(id);
+        }
+        if (back.isAlive()) {
+            return "the horse outlived its animal form at " + back.getHealth() + " of "
+                    + back.getMaxHealth() + " health [invulnerableTime " + back.invulnerableTime + "]";
+        }
+        var cause = back.getLastDamageSource();
+        if (cause == null || !cause.is(net.minecraft.world.damagesource.DamageTypes.GENERIC)) {
+            return "the horse died, but of " + (cause == null ? "nothing" : cause.getMsgId())
+                    + " rather than the blow that killed its form";
+        }
+        return null;
+    }
     /**
      * <b>A turnout releases the horse that arrived, not the one that left</b> (issue #29).
      * A cross-world move builds a new entity, so a release applied to the old reference

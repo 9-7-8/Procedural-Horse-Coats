@@ -260,7 +260,26 @@ public final class LycanthropyHandler {
             animal.discard();
             return;
         }
+        wear(horse, level, animal, mob, cloud);
+    }
 
+    /**
+     * <b>The gametest's door</b> (#244): shut this horse in a body of this type now, whatever
+     * its genes and the sun say, and hand the animal back. Everything after the choice of body
+     * is {@link #shift}'s own code, so what the test kills is a real shifted animal.
+     */
+    @Nullable
+    public static Mob shiftInto(Horse horse, ServerLevel level, EntityType<? extends Mob> type) {
+        Mob animal = type.create(level, EntitySpawnReason.CONVERSION);
+        if (animal == null) {
+            return null;
+        }
+        wear(horse, level, animal, EntityType.getKey(type).toString(), 0xFFFFFF);
+        return animal;
+    }
+
+    /** The second half of {@link #shift}: the body is chosen, and the horse goes into it. */
+    private static void wear(Horse horse, ServerLevel level, Mob animal, String mob, int cloud) {
         // IT SHIFTS WHEREVER IT IS STANDING. What is not guarded is the rest of
         // the night: a were-animal that dies takes its horse with it, properly,
         // with a death, drops and a line in the log - see onWereAnimalDeath.
@@ -492,6 +511,18 @@ public final class LycanthropyHandler {
     }
 
     /**
+     * The horse {@link #onWereAnimalDeath} is killing right now, and null the rest of the time
+     * (#244). {@link HorseLastStandHandler} reads it through {@link #diesWithItsForm}: a form's
+     * death is not a blow the horse may survive. Server thread only, like the event.
+     */
+    @Nullable
+    private static Horse dyingWithItsForm;
+
+    static boolean diesWithItsForm(Entity horse) {
+        return horse == dyingWithItsForm;
+    }
+
+    /**
      * <b>A were-animal dying IS the horse dying.</b>
      *
      * <p>Owner, 2026-09-13: <i>"We need a horse dying of lycanthropy to be
@@ -521,6 +552,11 @@ public final class LycanthropyHandler {
      * what killed the animal (a fire-immune horse inside a burning were-cow),
      * and a horse that shrugs off the blow that killed its own body would be a
      * resurrection rather than a death.
+     *
+     * <p>The last stand is not asked (#244). It saved the horse from the first blow, and the
+     * hurt cooldown that blow left then refused the fallback, so a horse outlived its form at
+     * 1 health and shifted again. Proven by the {@code were_animal_death_kills_the_horse}
+     * gametest.
      */
     @SubscribeEvent
     static void onWereAnimalDeath(LivingDeathEvent event) {
@@ -544,10 +580,22 @@ public final class LycanthropyHandler {
         ActionTrace.log("lycan", ActionTrace.describeShort(horse) + " died as a " + shift.mob()
                 + " (" + event.getSource().getMsgId() + ") - the horse dies with it"
                 + (ServerConfig.debugTools() ? roundTrip(horse) : ""));
-        horse.hurtServer(level, event.getSource(), Float.MAX_VALUE);
-        boolean byTheSameBlow = !horse.isAlive();
-        if (horse.isAlive()) {
-            horse.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+        // #244: the last stand stands aside for both blows. It used to save the horse from the
+        // first one at 1 health, and the hurt cooldown that blow left (invulnerableTime, lastHurt)
+        // then refused the fallback, which bypasses invulnerability but not the cooldown. The
+        // horse walked away from its own body's death and shifted again two seconds later.
+        dyingWithItsForm = horse;
+        boolean byTheSameBlow;
+        try {
+            horse.hurtServer(level, event.getSource(), Float.MAX_VALUE);
+            byTheSameBlow = !horse.isAlive();
+            if (horse.isAlive()) {
+                // Whatever refused the first blow, it must not have left a cooldown behind.
+                horse.invulnerableTime = 0;
+                horse.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+            }
+        } finally {
+            dyingWithItsForm = null;
         }
         // Always logged (#243, #244): what killed the form, and whether the horse really died with it.
         FieldLog.log("lycan", "FORM DIED " + horse.getUUID() + " (" + ActionTrace.describeShort(horse) + ") as "
