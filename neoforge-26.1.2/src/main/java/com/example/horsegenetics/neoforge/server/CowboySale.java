@@ -231,6 +231,8 @@ public final class CowboySale {
         // And the chests on its flanks, with everything in them. A horse walks
         // into his string carrying nothing of yours.
         HorsePackHandler.giveBack(horse, seller);
+        // And whatever else it wears in this mod's own slots (#218).
+        TackEquipHandler.returnGear(horse, seller);
     }
 
     /**

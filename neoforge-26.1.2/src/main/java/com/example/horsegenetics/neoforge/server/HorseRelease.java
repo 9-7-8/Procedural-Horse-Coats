@@ -172,5 +172,6 @@ public final class HorseRelease {
         // wild horse may be culled by the turnover, and luggage must not go
         // with it.
         HorsePackHandler.giveBack(horse, player);
+        TackEquipHandler.returnGear(horse, player);     // #218
     }
 }

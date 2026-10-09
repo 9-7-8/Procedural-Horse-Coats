@@ -135,6 +135,14 @@ public final class GeneDeathHandler {
      * is why the two live on two loci and why a diamond horse can also be a meat
      * horse.
      */
+    /** A saddle or a barding: something worn in one of the two animal equipment slots. */
+    private static boolean isTack(ItemStack stack) {
+        net.minecraft.world.item.equipment.Equippable worn =
+                stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);
+        return worn != null && (worn.slot() == net.minecraft.world.entity.EquipmentSlot.SADDLE
+                || worn.slot() == net.minecraft.world.entity.EquipmentSlot.BODY);
+    }
+
     @SubscribeEvent
     static void onHorseDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof Horse horse)) {
@@ -160,7 +168,10 @@ public final class GeneDeathHandler {
             return;
         }
         if (replace) {
-            event.getDrops().clear();
+            // Its loot, not its tack: the saddle and barding a player put on are
+            // in this same list, and "this horse leaves diamonds instead of
+            // leather" was never meant to take them (#218).
+            event.getDrops().removeIf(drop -> !isTack(drop.getItem()));
         }
         for (ItemStack stack : added) {
             event.getDrops().add(new ItemEntity(level, horse.getX(), horse.getY(), horse.getZ(), stack));

@@ -189,6 +189,36 @@ public final class TackEquipHandler {
         return null;
     }
 
+    /**
+     * <b>Everything the horse wears in this mod's own slots, handed back</b> -
+     * to {@code player}'s inventory or their feet, or onto the ground under the
+     * horse when there is nobody. For a horse that is leaving its owner without
+     * dying: sold, or turned loose. The saddle and the barding are the caller's
+     * (they are vanilla's slots), and the chests on its flanks are
+     * {@code HorsePackHandler.giveBack}'s; this is the fifteen in between, which
+     * until #218 simply left with the horse and were deleted with it when a
+     * dealer's string or the wild turnover discarded it.
+     */
+    public static void returnGear(Horse horse, @Nullable Player player) {
+        if (!(horse.level() instanceof net.minecraft.server.level.ServerLevel level)) {
+            return;
+        }
+        for (HorseTackSlot slot : HorseTackSlot.values()) {
+            if (slot.isVanilla() || slot.isStorage()) {
+                continue;
+            }
+            ItemStack worn = slot.takeOff(horse);
+            if (worn.isEmpty()) {
+                continue;
+            }
+            if (player == null) {
+                horse.spawnAtLocation(level, worn);
+            } else if (!player.getInventory().add(worn)) {
+                player.drop(worn, false);
+            }
+        }
+    }
+
     private static void refuse(PlayerInteractEvent.EntityInteract event, Player player,
                                boolean client, String key, Horse horse) {
         // ServerPlayer, not Player: the two-argument overload that puts a line on

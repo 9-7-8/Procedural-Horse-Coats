@@ -3794,6 +3794,18 @@ public final class ModGameTests {
             packFail("a horse's packs did not survive being saved and read back");
         }
 
+        // 6b. A horse leaving its owner alive hands back what it wears in this
+        //     mod's own slots (#218) - a braid used to go with it and be deleted.
+        var mane = com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE;
+        mane.set(horse, new ItemStack(ModItems.RESCUING_BRAID.get()));
+        com.example.horsegenetics.neoforge.server.TackEquipHandler.returnGear(horse, player);
+        if (!mane.on(horse).isEmpty()
+                || player.getInventory().countItem(ModItems.RESCUING_BRAID.get()) != 1
+                || !left.on(horse).is(Items.CHEST)) {
+            packFail("returnGear should hand the braid to the player and leave the chest to"
+                    + " HorsePackHandler.giveBack");
+        }
+
         // 7. A dead horse drops the chest and what was in it, and keeps neither.
         java.util.List<net.minecraft.world.entity.item.ItemEntity> drops = new java.util.ArrayList<>();
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
