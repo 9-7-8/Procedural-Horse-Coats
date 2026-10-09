@@ -146,8 +146,18 @@ DebugPhotoShoot.packs(near, off), harness(item, rgb) and facingEast(). The proce
 
 NOT RUN / NOT CHECKED
 ---------------------
-RESULTS OF THE RELEASE SET, run at the end of the session:
-  see the last section of this file, written when the runs finished.
+THE RELEASE SET was run at the end of the session, on 83cded3f's code, all green:
+  - node checks: links, roadmap-execution, recipes, block-models, duplicate-item-art,
+    progress-tasks, gene-tabs, breed-heights;
+  - the full :common:test suite: 1698 tests, 0 failures, 0 errors, 15m 13s;
+  - :neoforge-26.1.2:test;
+  - :neoforge-26.1.2:runGameTest: all 58 required tests passed;
+  - the seven headless browser checks (designer-boots, creator-steps, path-canvas,
+    colour-control, glow-control, glow-render, ai);
+  - a dedicated-server boot to "Done (" with every new packs.* key generated; the only
+    WARN lines were the stasis_chamber recipe one that was there before, and NeoForge
+    correcting the existing server.toml to add the new keys.
+  Nothing a full run would still need to check.
 Nobody has played any of this. New Verification-tab anchors: horse-gear.html#verify-packs
 and item-storage-harness.html#verify-harness. First on the list: a real modded chest
 (Sophisticated Storage) opened on a horse, which no test here can stand in for.
