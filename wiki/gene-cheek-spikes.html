@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cheek spikes &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Cheek spikes</h1>
+
+<p class="lede">
+    One copy and the horse grows a short row of bone spikes along each cheek, pointing out from
+    the head and a little back, the longest at the rear. How long and thick they are and how many
+    each cheek has is written on the allele. Their colour is a gene of its own,
+    <a href="gene-cheek-spike-colour.html">cheek spike colour</a>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.cheek_spikes"></div>
+
+<h2 id="dominant">One copy, either sex</h2>
+
+<p>
+    Dominant: <code>Chk/n</code> and <code>Chk/Chk</code> both grow spikes, so a spiked horse bred
+    to a plain one gives a spiked foal at least half the time. It is <strong>not</strong>
+    sex-limited. Foals grow none; the spikes come in when the horse grows up, and stay.
+</p>
+
+<h2 id="where">Where they sit</h2>
+
+<p>
+    In a row along the side of the head, below the eye and above the mouth, the same on both
+    sides. The spike nearest the neck is the longest and each one toward the muzzle is shorter.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Rare in the wild: about three horses in a thousand have cheek spikes, and because one copy is
+    enough, every horse that carries the gene shows it. The skeleton horses can grow them in bare
+    bone, as one of their horn-like parts.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Length</strong>: three classes, <em>short</em>, <em>medium</em> and <em>long</em>.
+        Short to medium in the wild; a line bred for length reaches long and stops.</li>
+    <li><strong>Girth</strong>: how thick each spike is for its length.</li>
+    <li><strong>Count</strong>: how many each cheek has, from the back forward, two to four in the
+        wild. A line can be bred down to a single spike per cheek, and the next one grows in
+        gradually.</li>
+</ul>
+
+<p>There is one shape. Everything stacks: a horse can wear cheek spikes with every other part.</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no damage to anything, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.cheek_spikes"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.cheek_spikes</dd></div>
+    <div><dt>Class</dt><dd><code>CheekSpikesGene</code></dd></div>
+    <div><dt>Priority</dt><dd>345 (magical band), with its colour locus at 346; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Chk</span> <span class="allele wild">n</span>, dominant</dd></div>
+    <div><dt>Founders</dt><dd><code>Chk/n</code> at 0.3% (<code>WILD_SPIKES_PERCENT</code>), the body plates&rsquo; share; no invisible carriers</dd></div>
+    <div><dt>Epigenome</dt><dd><code>length</code> (0&ndash;0.7, clamp 0&ndash;1), <code>girth</code> (0.8&ndash;1.25, clamp 0.6&ndash;1.5), <code>count</code> (2 to <code>CheekSpikeGenerator.MAX_SPIKES</code>, never under 1)</dd></div>
+    <div><dt>Part</dt><dd><code>CHEEK_SPIKE_RIGHT</code> / <code>CHEEK_SPIKE_LEFT</code> at <code>CHEEK_RIGHT</code> / <code>CHEEK_LEFT</code>; bases on <code>BONE</code>, points on <code>BONE_TIP</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong>; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">Slice B of the head parts</h2>
+
+<p>
+    One of three parts shipped together (issue #157), with the
+    <a href="gene-ear-fins.html">ear fins</a> and the <a href="gene-brow-ridge.html">brow
+    ridge</a>. No new render path: the client change is the anchor&rsquo;s case in
+    <code>AttachedPartLayer.anchor</code>, a translate. The anchors are on
+    <a href="model-parts.html#ear-cheek-brow">model parts</a>. It is two kinds (one per side),
+    <code>CheekSpikeGenerator</code> and <code>CheekSpikeSize</code>, and one line in
+    <code>GrownParts.of</code> dressed by <a href="gene-cheek-spike-colour.html">its colour
+    locus</a>. The granting locus is in <code>GrownParts.shapes</code>&rsquo;s every-part baseline.
+</p>
+
+<h2 id="mesh">The mesh: a row that scales per spike</h2>
+
+<p>
+    A spike is two boxes, a base and a narrower point, swept back about <code>x</code> and then
+    laid over a quarter turn about <code>z</code> so it points out from the head. Four are baked,
+    1.3 units apart along the cheek and centred on the anchor. Spike 0 is the rearmost and the
+    longest, so the count shows the big end of the row and grows the next one in toward the mouth.
+</p>
+<p>
+    The spikes point across the anchor&rsquo;s up, so the layer&rsquo;s whole-part stretch (which
+    is along that up) would move them apart and not lengthen them. The kind therefore scales per
+    element (<code>PartKind.scalesPerElement</code>), the spine row&rsquo;s rule and its first use
+    on the head: each spike is one tree rooted on the anchor, and <code>PartModel</code> puts the
+    length and girth on each root in its own frame. There is one style. Length, girth and count
+    are all applied at draw time, so the whole part is three meshes a side.
+    <code>CheekSpikesGeneTest</code> holds the numbering and the mirroring.
+</p>
+
+<h2 id="bone">The bone version</h2>
+
+<p>
+    <code>Bon/Bon</code> on <a href="gene-cheek-spike-colour.html">the colour locus</a>. A spike is
+    all bone, so nothing is left off. Both skeleton breeds carry <code>cheek_spikes</code> in their
+    horn count group as a slot of its own, with the colour pinned to bone (owner, 2026-10-09).
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No horse has cheek spikes. The look borrows from the spiny jaw fringe of a bearded dragon and
+    the cheek horns of horned lizards, and from the jugal bosses on some dinosaur skulls. This is
+    fantasy and makes no claim about any real gene. It is dominant (the treatment&rsquo;s call), so
+    it shows on every carrier.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The cheek spikes have been photographed standing still, in white, two-tone and bone; whether the row sits midway between the eye and the mouth as wanted, how it looks from the side and in motion, and long spikes against a bridle are still open.</p>
+</div>
+
+<h3 id="open-cheek-spikes-look">What a photo shoot showed, and the placement</h3>
+<p>
+    <strong>2026-10-09, <code>-PphotoShoot</code>, four still frames</strong>, re-rolled for a
+    count near four. A row of four spikes sits along the side of the head just below the eye,
+    largest at the back, pointing out. A <code>Red/Yel</code> horse has red bases and yellow
+    points. A skeleton&rsquo;s are bone.
+</p>
+<p>
+    For the owner to judge. The row sits <strong>close under the eye</strong>; the treatment asked
+    for midway between the eye and the mouth, and the anchor was placed from the head box without
+    knowing where the coat paints the eye. Moving it is one number
+    (<code>AttachedPartLayer.ADULT_CHEEK</code>). At wild sizes the spikes are stubby studs, and
+    seen from the front they point at the camera and read as cubes.
+</p>
+
+<h3 id="open-cheek-spikes-motion">In motion, long, and from the side</h3>
+<p>
+    Short and long spikes from the side and from the front while the horse walks, grazes and turns
+    its head. They should ride the head with no gap at their roots. A long row should not reach
+    the neck when the head turns.
+</p>
+
+<h3 id="open-cheek-spikes-tack">Against a bridle and horse armour</h3>
+<p>
+    Put a bridle, then horse armour, on a horse with long spikes. Nothing hides them today and
+    armour is drawn over whatever stands proud. Say whether that looks right.
+</p>
+
+<h3 id="open-cheek-spikes-count">Two counts in one frame</h3>
+<p>
+    Two spiked horses side by side with different counts (one and four per cheek). Each should
+    show its own; a horse wearing the other&rsquo;s is the deferred-submit trap.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

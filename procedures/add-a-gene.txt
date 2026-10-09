@@ -351,6 +351,25 @@ STEPS
        breeds' files (great_valley_skeleton_horse.json, blackened_skeleton_horse.json) when
        the owner says they carry it, extend UndeadBreedsTest's bone checks, and add the row
        to wiki/model-parts.html#bone-versions.
+   10c. A part the skeleton does NOT grow (ear fins: cartilage, owner 2026-10-09) is left
+       out of the count group AND pinned n/n in both breed files' genes block. Ungrouped
+       alone lets the wild frequency through. Extend UndeadBreedsTest to roll for it.
+   10d. Three traps the head parts found (2026-10-09), all caught only by a test or a
+       photo, so check them before the shoot:
+       - The box budget. PartGeneratorTest.theWholeSetOfMeshesIsSmall caps every
+         bakeable mesh in boxes, and it is nearly spent (model-parts.html#box-budget).
+         Count styles x size classes x boxes for the new kind first. A style that ignores
+         one of its buckets (a blade's spread, a plain ridge's bump) is ONE style, not one
+         per bucket. Raising the cap is the owner's call, never a quiet edit.
+       - Two-tone is by depth. PartModel.along is a box's depth over its branch's depth:
+         a root is the base colour, a leaf the tip, and a box one down a chain of two is
+         drawn as a half-blend of both. Anything that must be the base colour whole is a
+         ROOT (the plate's slab, the ear fin's ray), which makes the kind scalesPerElement.
+       - A box may be thinner across x than it is deep, never wider (width <= girth), and
+         a flat box needs its kind named in PartGeneratorTest's flat allowance. A bar wider
+         than it is tall is a box laid over a quarter turn (BrowRidgeGenerator).
+       A part whose elements point ACROSS the anchor's up (cheek spikes) must scale per
+       element, or the layer's stretch moves them apart instead of lengthening them.
    11. Update wiki/model-parts.html's Coding tab: its kind and region counts go stale
        with each part.
    12. Placement is computed from model boxes, so it is unverified until it is seen.

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ear fin colour &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> codominant <span class="sep">/</span> colours the ear fins, paints nothing</p>
+
+<h1>Ear fin colour</h1>
+
+<p class="lede">
+    What colour a horse&rsquo;s <a href="gene-ear-fins.html">ear fins</a> are. The same colours and rules as
+    <a href="gene-horn-colour.html">horn colour</a> (white, the rainbow, pink, black, grey or
+    chaos), on a locus of its own. Two different copies give every ray a point or a rod in the second colour. On a horse without ear fins it does nothing.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.ear_fin_colour"></div>
+
+<h2 id="colours">The colours, and two-tone fins</h2>
+
+<p>
+    Exactly the <a href="gene-horn-colour.html#colours">horn colour table</a>. Two copies of one
+    colour make both fins that colour. Two different ones make each <strong>ray</strong> one colour
+    and its <strong>point</strong> the other; on a frill the second colour is the rod down the
+    middle of each ray. The ray takes whichever colour comes earlier in the list, so
+    <code>Red/Blu</code> is red fins tipped in blue, either way round. Every copy carries a little
+    shade of its own, so no two red-finned horses are quite the same red.
+</p>
+
+<h2 id="bone">Bone is only a colour here</h2>
+
+<p>
+    Ear fins have no bone version: a fin is cartilage, like an ear, and no skeleton horse grows
+    one. The <code>Bon</code> allele is still on this gene, because every part&rsquo;s colour gene
+    shares one list, but no breed carries it here. Bred in by hand it gives warm ivory fins and
+    nothing else.
+</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing to the horse at all. It is only a colour.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.ear_fin_colour"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.ear_fin_colour</dd></div>
+    <div><dt>Class</dt><dd><code>EarFinColourGene extends AbstractPartColourGene</code></dd></div>
+    <div><dt>Priority</dt><dd>344 (magical band), beside its granting gene at 343</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd>Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha Bon, in base-before-tip order; <code>Bon</code> (bone) has no wild share</dd></div>
+    <div><dt>Outcomes</dt><dd><code>ear-fins-white</code> &hellip; <code>ear-fins-chaos</code>, plus <code>ear-fins-two-tone</code>; all wild types</dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong></dd></div>
+</dl>
+
+<h2 id="base">One short subclass, and the ray as the base</h2>
+
+<p>
+    A key, a name, a priority and the words its outcomes are written in. Everything else is
+    <code>AbstractPartColourGene</code>&rsquo;s. Its <code>Words</code> carry a <code>split</code>
+    sentence (&ldquo;each ray is one, the base, and its point or rod the other&rdquo;).
+    <code>GrownParts.of</code> puts one pair of tints on both sides. The split is the mesh&rsquo;s
+    shape and no extra code: a ray is a root, so it sits at 0 on <code>PartModel.along</code>, and
+    its point or rod hangs off it with nothing below, so it sits at 1.
+    <a href="gene-ear-fins.html#mesh">Why every ray is a root</a> is on the granting gene&rsquo;s
+    page. <code>boneOnly</code> is not read: there is nothing to leave off.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    Horses have no fins, so neither is their colour real. The contrasting rays echo the dark
+    spines in a pale fin membrane on many fish. It is a separate locus from every other
+    part&rsquo;s because the owner chose one colour gene per part; a shared one would force every
+    part on a horse to match.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The ray-and-point split is unit-tested and was seen in two still frames (2026-10-09); a two-tone blade and the chaos colour have not been looked at.</p>
+</div>
+
+<h3 id="open-ear-fin-colour-split">The ray in one colour, its point or rod in the other</h3>
+<p>
+    Still frames (2026-10-09) showed a <code>Red/Blu</code> fan as red slabs with blue points and a
+    <code>Vio/Yel</code> frill as yellow slabs with violet rods, the earlier colour on the slab
+    both times. Still to see: a two-tone blade, where the point is a small part of one slab, and a
+    chaos copy beside another chaos copy, which should not match.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>

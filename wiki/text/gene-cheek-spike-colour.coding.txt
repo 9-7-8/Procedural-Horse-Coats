@@ -1,0 +1,5 @@
+Cheek spike colour
+(Magical gene / codominant / colours the cheek spikes, paints nothing)
+What colour a horse’s cheek spikes are. The same colours and rules as horn colour (white, the rainbow, pink, black, grey or chaos), on a locus of its own. Two different copies make every spike two-tone from root to point. On a horse without cheek spikes it does nothing.
+
+Gene key horsegenetics.cheek_spike_colour Class CheekSpikeColourGene extends AbstractPartColourGene Priority 346 (magical band), beside its granting gene at 345 Family Grown parts Alleles Wht Red Org Yel Grn Blu Ind Vio Pnk Blk Gry Cha Bon, in base-before-tip order; Bon (bone) has no wild share Outcomes cheek-spikes-white … cheek-spikes-chaos , plus cheek-spikes-two-tone ; all wild types Coat effect none One short subclass A key, a name, a priority and the words its outcomes are written in. Everything else is AbstractPartColourGene ’s, and it uses the shared root-to-tip wording with no split . GrownParts.of puts one pair of tints on both cheeks. A spike’s base is a root and its point the last box of its branch, so a two-tone spike is exactly one box of each colour with no blend between.

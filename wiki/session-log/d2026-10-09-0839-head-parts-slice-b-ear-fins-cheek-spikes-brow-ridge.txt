@@ -1,0 +1,161 @@
+2026-10-09 08:39 - next-release: head parts slice B - ear fins, cheek spikes, brow ridge (#157)
+(The time is the END of the session. It started straight after the 07:27 session's clear.)
+
+ASKED
+-----
+1. "/next-release" - the owner ran the command with no arguments.
+   -> procedures/next-release.txt followed. Next release is v0.5.046. Every open issue
+      already had a milestone and v0.5.045's milestone was closed, so steps 1-2 changed
+      nothing. The milestone's three bugs (#10, #31, #36) are fixed and waiting on checks,
+      so they were skipped. The first buildable unit was #157, handed to process-intake.
+2. Three questions, asked with the question tool before any code (add-a-gene step 1, dd):
+   a. "Do the skeleton breeds' horn pool take the three new head parts?"
+      -> "Only the two bony ones" (owner).
+   b. "What is an ear fin's bone version on a skeleton horse?"
+      -> "No bone version" (owner).
+   c. "How do the new parts share the skeleton's horn count group?"
+      -> "One slot each" (owner).
+3. "I can't see the photos" - sent while the bakes ran.
+   -> SendUserFile had failed ("this session is not on a project thread, so it has nowhere
+      to place a file"). The fourteen frames were published as a private gallery artifact:
+      https://claude.ai/artifact/4xR5jhWknPSZopjrCNrL1p
+
+DONE
+----
+#157 Head parts - slice B. Code commit a4a00f0c ("Closes #157"); the docs commit follows it.
+Issue CLOSED, on milestone v0.5.046.
+
+What was missing: three of the five remaining head parts. Built as six Java genes (three
+granting, three colour on AbstractPartColourGene), five PartKinds, five PartAnchors, three
+generators and three size ladders in common/, and three translate-only cases in
+neoforge AttachedPartLayer.anchor. No renderer change.
+
+- Ear fins: horsegenetics.ear_fins (Efn, recessive, Hardy-Weinberg at 0.05), priority 343;
+  ear_fin_colour 344. EarFinGenerator: blade (one slab), fan (three), frill (five slabs,
+  each with a rod). EAR_FIN_RIGHT/LEFT on EAR_RIGHT/LEFT. Shows on a foal (the soft part),
+  so FOAL_EAR is a real offset read from BabyHorseModel.
+- Cheek spikes: horsegenetics.cheek_spikes (Chk, dominant, Chk/n at 0.3%), priority 345;
+  cheek_spike_colour 346. CheekSpikeGenerator: up to four two-box cones, numbered from the
+  back. One style. The kind scales per element.
+- Brow ridge: horsegenetics.brow_ridge (Brw, dominant, Brw/n at 0.3%), priority 347;
+  brow_ridge_colour 348. BrowRidgeGenerator: a bar laid over a quarter turn, with a step
+  (plain), three bumps (notched) or three two-box spines (spined).
+- Skeleton breeds (both JSON files): cheek_spikes Chk/Chk and brow_ridge Brw/Brw added to
+  the "horns" count group; cheek_spike_colour and brow_ridge_colour pinned Bon/Bon;
+  ear_fins pinned n/n.
+
+The treatment's UNVERIFIED line, resolved from the 26.1.2 sources jar
+(net/minecraft/client/model/animal/equine/AbstractEquineModel.java): left_ear and right_ear
+are PartPose.ZERO children of head and setupAnim never touches them. The ears do not
+animate. The fins anchor on the head bone.
+
+Proof, tests run by name (all green at the end):
+  EarFinsGeneTest, CheekSpikesGeneTest, BrowRidgeGeneTest (new), PartGeneratorTest,
+  SaddleZoneTest, UndeadBreedsTest, CoatBakeGoldenTest, CoatPipelineGoldenTest,
+  BreedFilesTest, BreedFounderTest, BreedClimateRuleTest, GeneDescriptionCoverageTest,
+  ResearchTopicTest, CommonPortabilityTest, PartColourGeneTest, GeneFamilyTest,
+  EditorRulesTest, GeneWikiCarryTest.
+  Two mutants went red and were reverted: EarFinsGene.shows as count > 0 (recessive read
+  as dominant), and CheekSpikeGenerator.rootZ reversed (row numbered from the front).
+  Goldens: coat-bake-golden.txt gained 45 rows, all at the baseline hash, none removed;
+  coat-golden.txt's hash column did not change (every key line is rewritten, as always).
+  :neoforge-26.1.2:build green; :web:bakeDesignerAssets, check-designer-boots (4 checks)
+  and check-parity (7163 checks) green.
+
+Pictures: two -PphotoShoot runs of fourteen frames. Gallery:
+https://claude.ai/artifact/4xR5jhWknPSZopjrCNrL1p (private). What the second run showed:
+  01-03 ear fins blade / fan Red-Blu / frill Vio-Yel: a fin at each ear in every form; the
+        fan red slabs with blue points, the frill yellow slabs with violet rods. From
+        three-quarters front they read as small spiky tufts, the far one edge-on.
+  04    frill, whole horse.   05 fan from behind: each fin a thin line (edge-on).
+  06    foal: wears a small fan.
+  07-09 cheek spikes: a row of four just under the eye, largest at the back; Red/Yel is
+        red bases and yellow points; from the muzzle they read as studs.
+  10-12 brow ridge plain / notched Wht-Blu / spined Blk-Red with a unicorn horn: a bar in
+        front of the eyes; the notched bumps read as one grooved block; the horn's root
+        touches the back of the ridge.
+  13    all three with dragon horns stack.   14 a Great Valley skeleton: both in bone.
+The first run is what found the two defects under FOUND ON THE WAY.
+
+DECIDED
+-------
+Owner (2026-10-09), recorded on wiki/model-parts.html#bone-versions, wiki/decisions.html
+and issue #157:
+- Cheek spikes and the brow ridge join the skeleton horn count group in bone, a slot each.
+- Ear fins have no bone version and no skeleton grows them.
+Calls made without the owner (wiki/decisions.html, the "Head parts, slice B" entry, and
+each gene page's Coding tab):
+- Founder shares: Efn 0.05 per allele; Chk/n and Brw/n 0.3% (the treatment's starting
+  points: "near the unicorn's", "near the antlers'"; the plates' figure was used).
+- ear_fins is PINNED n/n on both skeleton breeds, not merely left ungrouped, so the wild
+  frequency cannot give a skeleton fins. This is a breed-file change the treatment's "no
+  breed is changed" did not foresee; it follows from the owner's answer.
+- An ear fin lies in the plane holding the head's front-to-back axis, leaned outward 0.9
+  rad. It shows from the side and above and is edge-on from dead ahead and behind.
+- Rays are counted longest first; cheek spikes from the back.
+- Trimmed to fit the box budget rather than raise the cap: a blade and a plain ridge are
+  one style each; ear fins have two size classes (Small, Grand), not three.
+- Brow ridge ladder 0.7-1.7 units and bump shares 0.3/0.5/0.75, after the first shoot.
+- Anchors placed from the model boxes: ADULT_EAR (2.9,-10.4,3.4), FOAL_EAR (2.9,-3.35,0.7),
+  ADULT_CHEEK (2.7,-8.0,0.8), ADULT_BROW (0,-11.0,-1.2).
+- Priorities 343-348: the treatment's 241-247 run was taken by the body parts.
+
+FOUND ON THE WAY
+----------------
+- The part cache's box budget. PartGeneratorTest.theWholeSetOfMeshesIsSmall caps all
+  bakeable meshes at 32,000 boxes; the first build put it at 32,095. Trimmed (above) and
+  written up as an open owner call on wiki/model-parts.html#open-parts-box-budget. #158
+  (beard, ruff), #125 and #130 (two more ram horn shapes) will each go over it.
+  model-parts.html's "three tiers" section still says the bound needs no budget; the test
+  says otherwise. Left as written, with the new check beside it.
+- Mistake, put right: the first ear fin mesh hung every ray off a shared knuckle. A slab
+  one box down a chain sits at 0.5 on PartModel.along, so a two-tone fin's slabs were a
+  muddy half-blend (seen in the first shoot: a Vio/Yel frill came out peach). Every ray is
+  now its own root and the kind scales per element.
+- Mistake, put right: the first brow ridge's bumps stood as tall as the ears. Ladder and
+  bump shares reduced.
+- The same half-blend remains, knowingly, on a SPINED brow ridge's lower spine box
+  (wiki/gene-brow-ridge-colour.html#open-brow-ridge-colour-spines).
+- DebugPhotoShoot's HEAD framing shows the whole horse, not head and shoulders. A FACE
+  framing was added and kept; the temporary SHOTS list was reverted.
+- Long Bash heredocs failed three times ("unexpected EOF"); every patch script was then
+  written with the Write tool, as the standing memory says.
+- No bug issues filed.
+
+PROCEDURES
+----------
+- procedures/add-a-gene.txt: new 10c (a part the skeleton does not grow is pinned n/n) and
+  10d (the box budget, two-tone by depth, the flat-box rule, parts that point across the
+  anchor's up).
+- procedures/photograph-horses.txt: Framing.FACE, and clearing same-named older shots.
+- No new procedure was needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every test class not
+  named above; the ones most likely to notice six new genes are the registry-wide walks
+  (anything iterating Genes.codeOrder()), the gene-carrot and research-topic tables, and
+  the breed tests of breeds other than the two skeletons.
+- No gametest was run: the client change is three anchor offsets, which no gametest reads.
+- Nothing was seen in motion. Open checks added, by anchor:
+  gene-ear-fins.html#open-ear-fins-look, #open-ear-fins-motion, #open-ear-fins-stack,
+  #open-ear-fins-count; gene-ear-fin-colour.html#open-ear-fin-colour-split;
+  gene-cheek-spikes.html#open-cheek-spikes-look, #open-cheek-spikes-motion,
+  #open-cheek-spikes-tack, #open-cheek-spikes-count;
+  gene-cheek-spike-colour.html#open-cheek-spike-colour-table;
+  gene-brow-ridge.html#open-brow-ridge-look, #open-brow-ridge-motion, #open-brow-ridge-tack;
+  gene-brow-ridge-colour.html#open-brow-ridge-colour-spines;
+  model-parts.html#open-parts-box-budget.
+- The two editors (spawn screen and designer) were not opened by a person; the designer
+  boots and both read the registry.
+
+RELEASE
+-------
+Not offered. v0.5.046 still has #125 and #130 open and three bugs waiting on checks. #157's
+Release line is "rides with the parent (#156)", which does not count toward the bar.
+
+PICK UP FIRST
+-------------
+/next-release: the next unit on v0.5.046 is #125 (Mythical rams piece 1, the Hzt ram
+horn), by process-intake - but answer model-parts.html#open-parts-box-budget first, because
+#125 will go over the mesh cache's box cap.

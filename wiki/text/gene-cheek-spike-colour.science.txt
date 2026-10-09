@@ -1,0 +1,5 @@
+Cheek spike colour
+(Magical gene / codominant / colours the cheek spikes, paints nothing)
+What colour a horse’s cheek spikes are. The same colours and rules as horn colour (white, the rainbow, pink, black, grey or chaos), on a locus of its own. Two different copies make every spike two-tone from root to point. On a horse without cheek spikes it does nothing.
+
+Invented Horses have no cheek spikes, so neither is their colour real. It is a separate locus from every other part’s because the owner chose one colour gene per part; a shared one would force every part on a horse to match.

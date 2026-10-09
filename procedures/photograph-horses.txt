@@ -63,6 +63,10 @@ STEPS
    the flank (the plates' spikes, crystals) points at a side camera: use Framing.BACK,
    behind and above, which shows both flanks and the coat behind the part. Both framings
    are kept in stage(); a new one goes there too rather than in a throwaway edit.
+   A part on the skull or the cheek (fins, spikes, a ridge) is a dozen pixels across in
+   HEAD, which in practice frames the whole horse: use Framing.FACE, close on the head from
+   three-quarters front (added 2026-10-09). FACE and HEAD see a part that lies in the
+   head's front-to-back plane partly edge-on; add a WIDE or SIDE shot for one.
    A part of the mouth (tusks, fangs) is a few pixels across in HEAD: use Framing.MUZZLE,
    close on the muzzle from three-quarters front (added 2026-10-08, after a first shoot in
    HEAD had to be thrown away). Look at the first saved shot before the rest finish: a wrong
@@ -86,6 +90,8 @@ STEPS
 4. Watch run/logs/latest.log for "[photo] staged", "[photo] saved", "[photo] done",
    /ERROR] and Exception. The shoot starts 400 ticks after login and takes about four
    seconds a shot.
+   Remove this run's older photo-* files of the same names first: a glob over the folder
+   otherwise mixes earlier sessions' shots into a contact sheet.
 5. Look at every picture with Read before showing it. Say what each one actually shows,
    including what is too small or hidden to judge. A picture is not a pass.
 6. Show them. If a file cannot be attached in this session, publish one private gallery

@@ -126,6 +126,19 @@
 </p>
 
 <p>
+    And three more parts on the head. <a href="gene-ear-fins.html">Ear fins</a>: two copies of a
+    rare recessive grow a fin at the outer base of each ear, fanned out from the head and swept
+    back &mdash; a single blade, a fan of three or a frill of five rays. They are the soft head
+    part, so a foal wears them too. <a href="gene-cheek-spikes.html">Cheek spikes</a>: one copy
+    of a rare dominant grows a short row of bone spikes along each cheek, the longest at the
+    back. And a <a href="gene-brow-ridge.html">brow ridge</a>: one copy of a rare dominant grows
+    a low wide ridge of bone across the brow, plain, notched or spined, lower on the face than a
+    unicorn horn so the two stack. Each has <a href="gene-ear-fin-colour.html">a colour</a>
+    <a href="gene-cheek-spike-colour.html">gene</a> <a href="gene-brow-ridge-colour.html">of its
+    own</a>. Foals grow no cheek spikes and no brow ridge.
+</p>
+
+<p>
     What these parts are <em>not</em> is tack. Nothing here is put on a horse by a player, and
     nothing here can be taken off: a grown part is a piece of the animal, inherited like its
     coat. Things you buckle on are <a href="horse-gear.html">horse gear</a>, and they will
@@ -647,6 +660,58 @@
     the membrane and the plate&rsquo;s slab.
 </p>
 
+<h3 id="ear-cheek-brow">The ear, cheek and brow anchors: a fan, a row on the head, a bar on its side</h3>
+<p>
+    Shipped with the <a href="gene-ear-fins.html">ear fins</a>,
+    <a href="gene-cheek-spikes.html">cheek spikes</a> and <a href="gene-brow-ridge.html">brow
+    ridge</a>, 2026-10-09. Five more anchors on the head, all walking root &rarr;
+    <code>head_parts</code> &rarr; <code>head</code>, all read from the 26.1.2 sources and not
+    tuned by eye. The three cases in <code>AttachedPartLayer.anchor</code> are a translate and
+    nothing else.
+</p>
+<ul>
+    <li><code>EAR_RIGHT</code> / <code>EAR_LEFT</code>: head-local <code>(&plusmn;2.9, -10.4, 3.4)</code>
+        on the adult, just inside the side wall and outside the ear, a unit forward of the dragon
+        horn&rsquo;s <code>NAPE</code> root. On the <strong>head</strong>, not the ear bone. The
+        treatment left open whether vanilla ears animate. They do not: <code>left_ear</code> and
+        <code>right_ear</code> are <code>PartPose.ZERO</code> children of <code>head</code>, and
+        <code>AbstractEquineModel.setupAnim</code> never touches them. This is the first new
+        anchor a <strong>foal</strong> draws at since the forehead, so it has a real foal offset,
+        <code>(&plusmn;2.9, -3.35, 0.7)</code>, read from <code>BabyHorseModel</code>.</li>
+    <li><code>CHEEK_RIGHT</code> / <code>CHEEK_LEFT</code>: head-local <code>(&plusmn;2.7, -8.0, 0.8)</code>,
+        a little inside the side wall and below the middle of the head&rsquo;s depth. Where the
+        eye is painted is the coat&rsquo;s, so &ldquo;midway between the eye and the mouth&rdquo;
+        is for the owner&rsquo;s eyes.</li>
+    <li><code>BROW</code>: head-local <code>(0, -11.0, -1.2)</code>, on the top surface of the
+        skull two units further down the face than <code>FOREHEAD</code>, so a unicorn horn stands
+        behind the ridge.</li>
+</ul>
+<p>
+    Each part needed one thing the others had not. <strong>An ear fin is a fan off one
+    knuckle</strong> (<code>EarFinGenerator</code>): the root is a short box leaned out from
+    upright, and every ray is its child, turned about <code>x</code> alone. So the lean and the fan
+    angle are on different boxes, and the rays lie in one plane. A ray is the fourth kind of flat
+    box. A fan&rsquo;s or a frill&rsquo;s rays are counted groups, numbered longest first.
+    <strong>The cheek spikes are a row that scales per element</strong>
+    (<code>PartKind.scalesPerElement</code>), the first on the head: a spike points sideways,
+    across the anchor&rsquo;s up, so a whole-part stretch would move the spikes apart instead of
+    lengthening them. Each spike is one tree rooted on the anchor, numbered from the back.
+    <strong>The brow ridge is a bar laid on its side</strong> (<code>BrowRidgeGenerator</code>):
+    a box may be thinner across <code>x</code> than it is deep but never wider, so a bar wider than
+    it is tall is a box turned a quarter round <code>z</code>, rooted at the right end of the brow.
+    The part&rsquo;s stretch is then its height and its girth its width across the head. What
+    stands on the bar is turned a quarter back.
+</p>
+<p id="box-budget">
+    <strong>The box budget is nearly spent.</strong>
+    <code>PartGeneratorTest.theWholeSetOfMeshesIsSmall</code> caps every mesh the cache can ever
+    hold, in boxes. These three parts first went over it. They were trimmed to fit rather than the
+    cap raised: a blade and a plain ridge are one style each (they ignore their bucket), and the
+    ear fins have two size classes, not three. The next part with more than a few dozen boxes
+    meets the cap again, and that is the owner&rsquo;s call
+    (<a href="#open-parts-box-budget">Verification</a>).
+</p>
+
 <h3 id="row-span">A row can be drawn shorter: span</h3>
 <p>
     <code>AttachedPart.span</code> is a scale along a row, on the pose stack along its own
@@ -681,6 +746,9 @@
 <tr><td><a href="gene-body-plates.html">Shoulder and hip plates</a></td><td><code>Bon/Bon</code> on <a href="gene-body-plate-colour.html">body plate colour</a>; all bone, so nothing is left off</td><td>in the horn count group (owner, 2026-10-05)</td></tr>
 <tr><td><a href="gene-tusks.html">Narwhal horn, boar tusks, sabre fangs</a></td><td><code>Bon/Bon</code> on <a href="gene-tusk-colour.html">tusk colour</a>; a tusk is a tooth, all hard</td><td>one slot in the horn count group, which <a href="gene-tusks.html#skeletons">rolls one of the three forms</a> (owner, 2026-10-05 and 2026-10-08)</td></tr>
 <tr><td><a href="gene-back-crystals.html">Crystal growths</a></td><td>none: a crystal has no bone. <code>Bon/Bon</code> on <a href="gene-back-crystal-colour.html">crystal growth colour</a> is only a colour</td><td>in the horn count group, as ordinary crystals in any colour (owner, 2026-10-05)</td></tr>
+<tr><td><a href="gene-cheek-spikes.html">Cheek spikes</a></td><td><code>Bon/Bon</code> on <a href="gene-cheek-spike-colour.html">cheek spike colour</a>; all bone, so nothing is left off</td><td>in the horn count group, a slot of its own (owner, 2026-10-09)</td></tr>
+<tr><td><a href="gene-brow-ridge.html">Brow ridge</a></td><td><code>Bon/Bon</code> on <a href="gene-brow-ridge-colour.html">brow ridge colour</a>; all bone, so nothing is left off</td><td>in the horn count group, a slot of its own (owner, 2026-10-09)</td></tr>
+<tr><td><a href="gene-ear-fins.html">Ear fins</a></td><td>none: a fin is cartilage, like an ear (owner, 2026-10-09). <code>Bon/Bon</code> on <a href="gene-ear-fin-colour.html">ear fin colour</a> is only a colour</td><td>never: both skeleton breeds pin <code>ear_fins</code> to <code>n/n</code></td></tr>
 <tr><td>Wings (not built)</td><td>the bones alone, no membrane</td><td>to ask when the wing part is built</td></tr>
 </tbody>
 </table>
@@ -740,13 +808,12 @@
     <a href="#adding">the Coding tab</a> &mdash; and none of them needs a new layer.
 </p>
 <ul>
-    <li><strong>The rest of the head parts.</strong> Dragon horns shipped as the proof; five more
-        are scoped with the owner&rsquo;s calls: ear fins or frills (recessive), cheek spikes and a
-        brow ridge (dominant) &mdash; hard parts, new anchors on the head, the count-shown
-        machinery &mdash; then a goat beard (dominant) and a ruff round the neck (recessive), the
-        soft parts on <code>HAIR</code> that foals wear too. Each with its own colour locus on
-        <code>AbstractPartColourGene</code>. The treatment is in <code>intake/</code> until each
-        slice ships.</li>
+    <li><strong>The last two head parts.</strong> Dragon horns, ear fins, cheek spikes and the
+        brow ridge have shipped. Two are left, scoped with the owner&rsquo;s calls (issue #158): a
+        goat beard (dominant) and a ruff round the neck (recessive), the soft parts on
+        <code>HAIR</code> that foals wear too, each with its own colour locus on
+        <code>AbstractPartColourGene</code>. The ruff brings the only anchor off the head bone.
+        Both will meet <a href="#box-budget">the box budget</a>.</li>
     <li><strong>A translucent setting, if it costs.</strong> Every body part has shipped. Three kinds
         now draw a blended pass (crystal antlers, the sail, the crystal growths); a
         <code>parts.translucent</code> setting joins the config block if one is measured to cost,
@@ -956,6 +1023,18 @@
     <span class="label">What needs verifying here</span>
     <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack and the first body part's saddle zone, the antlers on screen, any cost against a herd, and the editors' new part rows and the designer's parts panel.</p>
 </div>
+
+<h3 id="open-parts-box-budget">The mesh cache&rsquo;s box budget needs a decision before the next part</h3>
+<p>
+    <code>PartGeneratorTest.theWholeSetOfMeshesIsSmall</code> holds the total of every bakeable
+    mesh under a fixed number of boxes, and its message says that past it the cache &ldquo;wants a
+    real eviction policy, not a bigger number here&rdquo;. The ear fins, cheek spikes and brow
+    ridge reached it (2026-10-09) and were trimmed to fit. The goat beard and ruff (#158) and the
+    two new ram horn shapes (#125, #130) will each go over. The owner&rsquo;s call, before the
+    next of them is built: raise the cap on a measurement (how much memory a full cache really
+    holds, which nobody has taken), build the eviction, or keep trimming. The cache fills lazily,
+    so a world only holds the meshes somebody bred.
+</p>
 
 <h3 id="open-parts-draw-order">Draw order has been argued, not observed</h3>
 <p>

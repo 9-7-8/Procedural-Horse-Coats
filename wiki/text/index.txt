@@ -628,6 +628,26 @@ wiki/gene-brindlelace.html#finding	gameplay	Finding one
 wiki/gene-brindlelace.html#inheritance	gameplay	Crossing two of them
 wiki/gene-brindlelace.html#layers	coding	What it paints
 wiki/gene-brindlelace.html#outcomes	gameplay	What it can come out as
+wiki/gene-brow-ridge-colour.html#base	coding	One short subclass, and the bar as the base
+wiki/gene-brow-ridge-colour.html#bone	gameplay	Bare bone
+wiki/gene-brow-ridge-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-brow-ridge-colour.html#colours	gameplay	The colours, and a two-tone ridge
+wiki/gene-brow-ridge-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-brow-ridge-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-brow-ridge-colour.html#invented	science	Invented
+wiki/gene-brow-ridge.html#bone	coding	The bone version
+wiki/gene-brow-ridge.html#carrot	gameplay	Its gene carrot
+wiki/gene-brow-ridge.html#dominant	gameplay	One copy, either sex
+wiki/gene-brow-ridge.html#finding	gameplay	Finding one
+wiki/gene-brow-ridge.html#first-shoot	coding	What the first photo shoot changed
+wiki/gene-brow-ridge.html#health	gameplay	Is it good for the horse?
+wiki/gene-brow-ridge.html#inheritance	gameplay	Crossing two of them
+wiki/gene-brow-ridge.html#invented	science	Invented
+wiki/gene-brow-ridge.html#mesh	coding	The mesh: a bar laid on its side
+wiki/gene-brow-ridge.html#numbers	coding	The epigenome, by cost
+wiki/gene-brow-ridge.html#pattern	coding	Slice B of the head parts
+wiki/gene-brow-ridge.html#what-varies	gameplay	What varies
+wiki/gene-brow-ridge.html#where	gameplay	Where it sits
 wiki/gene-burn.html#carrot	gameplay	Its gene carrot
 wiki/gene-burn.html#file	coding	The file
 wiki/gene-burn.html#finding	gameplay	Finding one
@@ -660,6 +680,24 @@ wiki/gene-champagne.html#mechanism	science	What the protein does, and where the 
 wiki/gene-champagne.html#real-inheritance	science	Inheritance and dosage
 wiki/gene-champagne.html#skin-eyes	science	Skin and eyes — often more diagnostic than the hair
 wiki/gene-champagne.html#tint	coding	The tint is what makes amber champagne work
+wiki/gene-cheek-spike-colour.html#base	coding	One short subclass
+wiki/gene-cheek-spike-colour.html#bone	gameplay	Bare bone
+wiki/gene-cheek-spike-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-cheek-spike-colour.html#colours	gameplay	The colours, and two-tone spikes
+wiki/gene-cheek-spike-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-cheek-spike-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cheek-spike-colour.html#invented	science	Invented
+wiki/gene-cheek-spikes.html#bone	coding	The bone version
+wiki/gene-cheek-spikes.html#carrot	gameplay	Its gene carrot
+wiki/gene-cheek-spikes.html#dominant	gameplay	One copy, either sex
+wiki/gene-cheek-spikes.html#finding	gameplay	Finding one
+wiki/gene-cheek-spikes.html#health	gameplay	Is it good for the horse?
+wiki/gene-cheek-spikes.html#inheritance	gameplay	Crossing two of them
+wiki/gene-cheek-spikes.html#invented	science	Invented
+wiki/gene-cheek-spikes.html#mesh	coding	The mesh: a row that scales per spike
+wiki/gene-cheek-spikes.html#pattern	coding	Slice B of the head parts
+wiki/gene-cheek-spikes.html#what-varies	gameplay	What varies
+wiki/gene-cheek-spikes.html#where	gameplay	Where they sit
 wiki/gene-circuit.html#carrot	gameplay	Its gene carrot
 wiki/gene-circuit.html#file	coding	The file
 wiki/gene-circuit.html#finding	gameplay	Finding one
@@ -958,6 +996,26 @@ wiki/gene-dutch.html#finding	gameplay	Finding one
 wiki/gene-dutch.html#inheritance	gameplay	Crossing two of them
 wiki/gene-dutch.html#layers	coding	What it paints
 wiki/gene-dutch.html#outcomes	gameplay	What it can come out as
+wiki/gene-ear-fin-colour.html#base	coding	One short subclass, and the ray as the base
+wiki/gene-ear-fin-colour.html#bone	gameplay	Bone is only a colour here
+wiki/gene-ear-fin-colour.html#carrot	gameplay	Its gene carrot
+wiki/gene-ear-fin-colour.html#colours	gameplay	The colours, and two-tone fins
+wiki/gene-ear-fin-colour.html#health	gameplay	Is it good for the horse?
+wiki/gene-ear-fin-colour.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ear-fin-colour.html#invented	science	Invented
+wiki/gene-ear-fins.html#carrot	gameplay	Its gene carrot
+wiki/gene-ear-fins.html#ears	coding	The ears do not animate, so the fins are on the head
+wiki/gene-ear-fins.html#finding	gameplay	Finding one
+wiki/gene-ear-fins.html#health	gameplay	Is it good for the horse?
+wiki/gene-ear-fins.html#inheritance	gameplay	Crossing two of them
+wiki/gene-ear-fins.html#invented	science	Invented
+wiki/gene-ear-fins.html#mesh	coding	The mesh: every ray rooted on the anchor
+wiki/gene-ear-fins.html#no-bone	coding	No bone version
+wiki/gene-ear-fins.html#numbers	coding	The epigenome, by cost
+wiki/gene-ear-fins.html#pattern	coding	Slice B of the head parts
+wiki/gene-ear-fins.html#recessive	gameplay	Two copies, either sex, foals too
+wiki/gene-ear-fins.html#what-varies	gameplay	What varies
+wiki/gene-ear-fins.html#where	gameplay	Where they sit
 wiki/gene-echolocate.html#health	gameplay	Health
 wiki/gene-echolocate.html#sense	science	A gene that changes what the player can see
 wiki/gene-echolocate.html#shared	coding	Two shared pieces, nothing of its own
@@ -3457,6 +3515,7 @@ wiki/model-parts.html#body-parts	coding	The body parts: an anchor off the head, 
 wiki/model-parts.html#bone-versions	coding	Every part with bone in it has a bone version
 wiki/model-parts.html#classes	coding	What each piece does
 wiki/model-parts.html#crystals	coding	Clusters as trees, and see-through prisms
+wiki/model-parts.html#ear-cheek-brow	coding	The ear, cheek and brow anchors: a fan, a row on the head, a bar on its side
 wiki/model-parts.html#jaw-lip	coding	The jaw and lip anchors, and a part that hangs
 wiki/model-parts.html#no-gameplay	gameplay	They do nothing
 wiki/model-parts.html#open-designer	coding	Shipped 2026-10-02: the designer names the parts it cannot draw

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brow ridge &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow magical">Magical gene <span class="sep">/</span> dominant <span class="sep">/</span> grows geometry, paints nothing</p>
+
+<h1>Brow ridge</h1>
+
+<p class="lede">
+    One copy and the horse grows a low wide ridge of bone across its brow, above and in front of
+    the eyes. Plain, notched into three bumps or set with three short spines, and how tall and
+    wide it is and how tall its bumps stand, is written on the allele. Its colour is a gene of its
+    own, <a href="gene-brow-ridge-colour.html">brow ridge colour</a>.
+</p>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="inheritance">Crossing two of them</h2>
+
+<div class="gene-inheritance" data-gene="horsegenetics.brow_ridge"></div>
+
+<h2 id="dominant">One copy, either sex</h2>
+
+<p>
+    Dominant: <code>Brw/n</code> and <code>Brw/Brw</code> both grow a ridge, so a ridged horse bred
+    to a plain one gives a ridged foal at least half the time. It is <strong>not</strong>
+    sex-limited. Foals grow none; the ridge comes in when the horse grows up, and stays.
+</p>
+
+<h2 id="where">Where it sits</h2>
+
+<p>
+    Across the top of the face, in front of the eyes. It is lower down the face than a
+    <a href="gene-unicorn-horn.html">unicorn horn</a>, so a horse with both wears the horn just
+    behind the ridge.
+</p>
+
+<h2 id="finding">Finding one</h2>
+
+<p>
+    Rare in the wild: about three horses in a thousand have a brow ridge, and because one copy is
+    enough, every horse that carries the gene shows it. The skeleton horses can grow one in bare
+    bone, as one of their horn-like parts.
+</p>
+
+<h2 id="what-varies">What varies</h2>
+
+<ul>
+    <li><strong>Form</strong>: <em>plain</em> (a bar with a narrower step along its top),
+        <em>notched</em> (three bumps) or <em>spined</em> (a row of three short spines).</li>
+    <li><strong>Height</strong>: three classes, <em>low</em>, <em>heavy</em> and <em>towering</em>.
+        Low to heavy in the wild; a line bred for height reaches towering and stops.</li>
+    <li><strong>Width</strong>: how far across the head it reaches. A wild ridge stays inside the
+        skull; the widest reaches its edges.</li>
+    <li><strong>Bump</strong>: how tall a notched ridge&rsquo;s bumps or a spined one&rsquo;s spines
+        stand.</li>
+</ul>
+
+<p>Everything stacks: a horse can wear a brow ridge with every other part.</p>
+
+<h2 id="health">Is it good for the horse?</h2>
+
+<p>It does nothing at all, for good or ill: no stat, no armour value, no hitbox. It is a look.</p>
+
+<h2 id="carrot">Its gene carrot</h2>
+
+<div class="gene-carrot" data-gene="horsegenetics.brow_ridge"></div>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<dl class="spec">
+    <div><dt>Gene key</dt><dd>horsegenetics.brow_ridge</dd></div>
+    <div><dt>Class</dt><dd><code>BrowRidgeGene</code></dd></div>
+    <div><dt>Priority</dt><dd>347 (magical band), with its colour locus at 348; only a code-order slot</dd></div>
+    <div><dt>Family</dt><dd><strong>Grown parts</strong></dd></div>
+    <div><dt>Alleles</dt><dd><span class="allele dom">Brw</span> <span class="allele wild">n</span>, dominant</dd></div>
+    <div><dt>Founders</dt><dd><code>Brw/n</code> at 0.3% (<code>WILD_RIDGE_PERCENT</code>), the body plates&rsquo; share; no invisible carriers</dd></div>
+    <div><dt>Epigenome</dt><dd><code>height</code> (0&ndash;0.7, clamp 0&ndash;1), <code>width</code> (0.8&ndash;1.1, clamp 0.6&ndash;1.2), <code>form</code> (one of three), <code>bump</code> (0&ndash;1)</dd></div>
+    <div><dt>Part</dt><dd><code>BROW_RIDGE</code> at <code>BROW</code>; the bar on <code>BONE</code>, what stands on it on <code>BONE_TIP</code></dd></div>
+    <div><dt>Coat effect</dt><dd><strong>none</strong>; every outcome is a wild type</dd></div>
+</dl>
+
+<h2 id="pattern">Slice B of the head parts</h2>
+
+<p>
+    One of three parts shipped together (issue #157), with the
+    <a href="gene-ear-fins.html">ear fins</a> and the <a href="gene-cheek-spikes.html">cheek
+    spikes</a>. No new render path: the client change is the anchor&rsquo;s case in
+    <code>AttachedPartLayer.anchor</code>, a translate. The anchors are on
+    <a href="model-parts.html#ear-cheek-brow">model parts</a>. It is one kind (centred),
+    <code>BrowRidgeGenerator</code> and <code>BrowRidgeSize</code>, and one line in
+    <code>GrownParts.of</code> dressed by <a href="gene-brow-ridge-colour.html">its colour
+    locus</a>. The granting locus is in <code>GrownParts.shapes</code>&rsquo;s every-part baseline.
+</p>
+
+<h2 id="mesh">The mesh: a bar laid on its side</h2>
+
+<p>
+    A box hangs along its own <code>-y</code> and may be thinner across <code>x</code> than it is
+    deep, never wider (<code>PartGeneratorTest</code> holds that). So a bar wider than it is tall
+    is a box turned a quarter round <code>z</code>: rooted at the right end of the brow, five
+    units long, running across to the left. Its square section is the ridge&rsquo;s height and its
+    depth front to back. It sinks a fifth of a unit into the skull so a stretched ridge shows no
+    gap.
+</p>
+<p>
+    At draw time the part&rsquo;s stretch is along the anchor&rsquo;s up, which is the ridge&rsquo;s
+    height, and its girth is across it, which is the bar&rsquo;s own length. That is why
+    <code>width</code> on the copy is the part&rsquo;s girth, and why a wider ridge is also a
+    little deeper. What stands on the bar is turned a quarter back to stand up: a plain
+    ridge&rsquo;s step lies along the top, a notched one&rsquo;s three bumps and a spined
+    one&rsquo;s three two-box spines stand at a fifth, a half and four fifths of the way across.
+</p>
+
+<h2 id="numbers">The epigenome, by cost</h2>
+
+<ul>
+    <li><code>height</code>: the class is the mesh&rsquo;s size bucket (three), the remainder a
+        stretch along the anchor&rsquo;s up.</li>
+    <li><code>width</code>: free, the part&rsquo;s girth.</li>
+    <li><code>form</code> and <code>bump</code>: baked, <code>BrowRidgeGenerator.style(form,
+        bump)</code>. A plain ridge has no bumps and is one style whatever its bucket, a trim to
+        fit the <a href="model-parts.html#box-budget">box budget</a>.</li>
+</ul>
+
+<h2 id="first-shoot">What the first photo shoot changed</h2>
+
+<p>
+    The first build&rsquo;s bumps stood as tall as the horse&rsquo;s ears at wild sizes, which is a
+    crest and not a low ridge. The ladder came down from 0.9&ndash;2.2 units to 0.7&ndash;1.7 and
+    the bump shares from 0.45&ndash;1.2 of the bar&rsquo;s height to 0.3&ndash;0.75 (2026-10-09).
+</p>
+
+<h2 id="bone">The bone version</h2>
+
+<p>
+    <code>Bon/Bon</code> on <a href="gene-brow-ridge-colour.html">the colour locus</a>. A ridge is
+    all bone, so nothing is left off. Both skeleton breeds carry <code>brow_ridge</code> in their
+    horn count group as a slot of its own, with the colour pinned to bone (owner, 2026-10-09).
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="invented">Invented</h2>
+
+<p>
+    No horse has a bony brow ridge that stands off the skull. The look borrows from the brow
+    bosses and horn cores of ceratopsians and pachycephalosaurs, the heavy brow of a gorilla, and
+    the notched frontal crests of some chameleons. This is fantasy and makes no claim about any
+    real gene. It is dominant (the treatment&rsquo;s call), so it shows on every carrier.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Open checks">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>The brow ridge has been photographed standing still in all three forms, under a unicorn horn and in bone; whether it sits where wanted against the eyes, how the horn meets it, and how it looks in motion and at towering size are still open.</p>
+</div>
+
+<h3 id="open-brow-ridge-look">What a photo shoot showed, and the placement</h3>
+<p>
+    <strong>2026-10-09, <code>-PphotoShoot</code>, five still frames</strong>, re-rolled for a
+    heavy ridge with tall bumps. A bar sits across the top of the face in front of the eyes, in
+    all three forms. A <code>Wht/Blu</code> notched ridge is a white bar with blue bumps, and a
+    <code>Blk/Red</code> spined one a red bar with dark spines. A unicorn horn stands directly
+    behind the ridge. A skeleton&rsquo;s is bone.
+</p>
+<p>
+    For the owner to judge. The horn&rsquo;s root <strong>touches the back of the ridge</strong>,
+    so the two read as one piece; the treatment wanted the horn able to stand on top of it, and
+    this may be that or may want a unit more gap (<code>AttachedPartLayer.ADULT_BROW</code>). A
+    notched ridge&rsquo;s three bumps stand close together and read as one grooved block. The
+    spines are square columns, not cones.
+</p>
+
+<h3 id="open-brow-ridge-motion">In motion, and towering</h3>
+<p>
+    Each form at low and at towering height, from the front and the side, while the horse walks,
+    grazes and rears. The ridge should ride the head with no gap under it. At the widest width it
+    should reach the edges of the skull and not hang past them.
+</p>
+
+<h3 id="open-brow-ridge-tack">Against a bridle and horse armour</h3>
+<p>
+    Put horse armour on a ridged horse. The armour&rsquo;s face plate covers the brow; say whether
+    the ridge should show through it, as it does today, or hide.
+</p>
+
+</section>
+
+</article>
+</main>
+<script defer src="gene-carrot/gene-carrot.js"></script>
+<script defer src="gene-inheritance/gene-inheritance.js"></script>
+</body>
+</html>
