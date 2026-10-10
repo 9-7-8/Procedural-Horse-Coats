@@ -1,0 +1,78 @@
+2026-10-09 20:30 - the arcane dealer stocked lycan far too often (#246)
+(The time is the start of the session. It ended about 23:25; most of that was waiting.)
+
+ASKED
+-----
+1. "the arcane cowboy appears to have lycan horses far too frequently. Like, the lycan
+   gene shows up with bizarre frequency"
+   -> Found, fixed, proven, filed as #246 and closed. Worked by procedures/fix-bug.txt,
+      though the owner did not run the command.
+2. "in the future, if the live server is up and there's someone on it, please don't run
+   any gradle tests: wait until it's either offline or there's no one on it"
+   -> Standing rule. Written into procedures/test-tiers.txt (NEVER) and a memory. Test
+      runs stopped at once; a 20-minute read-only check of the server's console.log
+      resumed the work when the last player left at 23:03.
+
+DONE
+----
+8f3eb625  Fix #246: the arcane dealer stocked lycan far too often.
+  What was wrong: ArcaneStock.takeOne drew flat from a family's showing PAIRS, so a gene
+  was weighted by how many showing pairs it has. A matched-pair locus has one per animal.
+  In MAGIC_BEHAVIOUR (24 genes, even share about 4%) lycan was on about 12% of his
+  horses, pack_leader 16% and spawner 38%; magic_sectoral_heterochromia took 13% of
+  MAGIC_CORE (even share 2%). With up to ten horses in a string, a lycan was in nearly
+  every string.
+  The fix: draw the gene first, then one of its free pairs, the way MagicalVariant.pick
+  already does for wild magical herds. The no-two-alike rule and the scarcest-first draw
+  order are unchanged; both still count pairs.
+  Proof: ArcaneStockTest.noGeneCrowdsOutItsFamily (300 fresh horses; each gene's share
+  against its family's even share; bound 3x even + 2%, and 2x even for lycan). Green with
+  the fix, red with ArcaneStock.java stashed, naming the four genes above. The other
+  thirteen ArcaneStockTest tests stayed green. :neoforge-26.1.2:build, check-parity and
+  check-designer-boots green.
+  Pictures: no pictures (a frequency, nothing to see on one horse).
+  Page: wiki/villagers.html#arcane-pools gained the paragraph on the draw.
+  Issue: #246, closed, with the proof comment.
+
+DECIDED
+-------
+- Gene first, then pair (made without the owner). Read as a defect, not a balance call:
+  the wild-herd version of the same draw already works this way and its comment says
+  "gene and pair are both drawn evenly". Recorded on wiki/villagers.html#arcane-pools.
+- No Gradle tests while a player is on the live server (owner). Recorded in
+  procedures/test-tiers.txt.
+
+FOUND ON THE WAY
+----------------
+- Mistake: the first version of the test rolled 4000 horses and held Gradle for 13.5
+  minutes, with four players on the live server. A roll is slow because ArcaneStock.pool
+  is rebuilt for every family on every horse (about 0.25 s a horse). The test now rolls
+  300. The pool rebuild itself was left alone: the registry can change under a data pack,
+  and a restock rolls ten horses, not thousands.
+- Mistake: one "still red after the fix" reading was a stale result file; the test source
+  had a broken string escape and had not compiled. Read the head of the Gradle log, not
+  only the XML.
+- 300 rolls is noisy: an even 3% gene (rainbow_drip) came out at 8% on one seed and 2% on
+  the next two. That is why the bound is wide. Not a bias; nothing filed.
+
+PROCEDURES
+----------
+- procedures/test-tiers.txt: NEVER gained the live-server rule, with the read-only check.
+- fix-bug.txt, end-session.txt, write-session-log.txt: followed, none needed changing.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run; it would still check that nothing else reads
+  ArcaneStock's draw sequence (a fixed-seed snapshot elsewhere would move).
+- No gametest was run. Nobody has looked at a restocked string in game; existing dealer
+  horses keep the genes they have, so the change shows only as his string turns over.
+- No Verification-tab anchor added.
+
+RELEASE
+-------
+Not offered. One fix; it rides the next release (v0.5.047).
+
+PICK UP FIRST
+-------------
+#245, the order_stay_walks_back gametest flake, by /next-release, which hands it to
+procedures/fix-bug.txt - after checking the live server is empty (test-tiers.txt, NEVER).

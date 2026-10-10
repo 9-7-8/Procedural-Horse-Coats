@@ -152,6 +152,10 @@ and what is left unchecked.
 NEVER
 -----
 - Never run the full suite outside a release, unless the owner asks.
+- Never run a Gradle test while the live server is up with a player on it: wait until
+  it is offline or empty. Read-only check: a java.exe with nogui that does not name this
+  repo, and the latest "There are N of a max" line in its run/console.log. (Owner,
+  2026-10-09.) Do the work that needs no test meanwhile, and say the test is owed.
 - Never skip the release set before a release.
 - Never call a check green from a piped exit code.
 - Never treat a test that has never failed as proof. Mutate it once.
