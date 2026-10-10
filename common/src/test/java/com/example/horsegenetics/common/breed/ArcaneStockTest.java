@@ -14,6 +14,7 @@ import com.example.horsegenetics.common.genetics.Genes;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
 import com.example.horsegenetics.common.genetics.genes.AggressionGene;
+import com.example.horsegenetics.common.genetics.genes.LycanGene;
 import com.example.horsegenetics.common.genetics.spec.GeneAbility;
 import com.example.horsegenetics.common.genetics.spec.HorseAbilities;
 import com.example.horsegenetics.common.horse.Sex;
@@ -21,9 +22,11 @@ import com.example.horsegenetics.common.trait.HealthContribution;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -308,5 +311,44 @@ class ArcaneStockTest {
             }
         }
         return n;
+    }
+
+    /**
+     * <b>A gene's share of his string does not grow with its allele count.</b>
+     * The pool used to be drawn flat by pair, so a matched-pair locus with a
+     * showing pair per animal - lycan - took most of its family and turned up on
+     * nearly every horse. The gene is drawn first, then one of its pairs, the
+     * way {@link MagicalVariant#pick} always has.
+     */
+    @Test
+    void noGeneCrowdsOutItsFamily() {
+        int rolls = 300;
+        Rng rng = rng("share");
+        Map<String, Integer> seen = new HashMap<>();
+        for (int i = 0; i < rolls; i++) {
+            for (AllelePair pair : ArcaneStock.rollHorse(rng, new LinkedHashSet<>())) {
+                seen.merge(pair.geneKey(), 1, Integer::sum);
+            }
+        }
+        List<String> crowded = new ArrayList<>();
+        for (GeneFamily family : ArcaneStock.REQUIRED_FAMILIES) {
+            Set<String> genes = new LinkedHashSet<>();
+            for (AllelePair pair : ArcaneStock.pool(family)) {
+                genes.add(pair.geneKey());
+            }
+            double even = 1.0 / genes.size();
+            for (String key : genes) {
+                double share = seen.getOrDefault(key, 0) / (double) rolls;
+                // Wide on purpose: 300 rolls is noisy (an even 3% gene has come out at 8%),
+                // and a flat pair draw is not subtle - it put spawner on a third of his horses.
+                // Lycan gets the tighter bound because it is the one the owner reported.
+                double most = LycanGene.KEY.equals(key) ? even * 2 : even * 3 + 0.02;
+                if (share >= most) {
+                    crowded.add(key + " is on " + Math.round(share * 100) + "% of his horses; an even share of "
+                            + family.name() + " (" + genes.size() + " genes) is " + Math.round(even * 100) + "%");
+                }
+            }
+        }
+        assertTrue(crowded.isEmpty(), String.join("; ", crowded));
     }
 }

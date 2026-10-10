@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -307,16 +308,25 @@ public final class ArcaneStock {
         return n;
     }
 
+    /**
+     * <b>The gene is drawn first, then one of its pairs</b> - the way
+     * {@link MagicalVariant#pick} does it. Drawing flat from the family's pairs
+     * weights a gene by how many showing pairs it has, and a matched-pair locus
+     * has one per animal: lycan alone was most of its family, and on nearly
+     * every horse he sold.
+     */
     private static void takeOne(GeneFamily family, Rng rng, Set<String> taken, List<AllelePair> out) {
-        List<AllelePair> free = new ArrayList<>();
+        Map<String, List<AllelePair>> byGene = new LinkedHashMap<>();
         for (AllelePair pair : pool(family)) {
             if (!taken.contains(token(pair))) {
-                free.add(pair);
+                byGene.computeIfAbsent(pair.geneKey(), k -> new ArrayList<>()).add(pair);
             }
         }
-        if (free.isEmpty()) {
+        if (byGene.isEmpty()) {
             return;
         }
+        List<List<AllelePair>> genes = new ArrayList<>(byGene.values());
+        List<AllelePair> free = genes.get(rng.nextInt(genes.size()));
         AllelePair picked = free.get(rng.nextInt(free.size()));
         taken.add(token(picked));
         out.add(picked);
