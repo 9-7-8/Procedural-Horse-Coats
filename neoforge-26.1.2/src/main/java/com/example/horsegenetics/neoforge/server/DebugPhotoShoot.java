@@ -122,6 +122,32 @@ public final class DebugPhotoShoot {
         slot.set(horse, stack);
     }
 
+    /**
+     * Put a suit of horse armour on, dyed {@code rgb} (leather only; -1 leaves it) and
+     * with an enchantment glint if {@code glint}. Pair a shot with a {@code -flat} twin
+     * to see the edged suit beside vanilla's drawing of it.
+     */
+    public static java.util.function.Consumer<Horse> armour(net.minecraft.world.item.Item armour, int rgb,
+                                                            boolean glint) {
+        return horse -> {
+            net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(armour);
+            if (rgb >= 0) {
+                stack.set(net.minecraft.core.component.DataComponents.DYED_COLOR,
+                        new net.minecraft.world.item.component.DyedItemColor(rgb));
+            }
+            if (glint) {
+                stack.set(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+            }
+            horse.setBodyArmorItem(stack);
+        };
+    }
+
+    /** Saddle the horse, so a shot shows the saddle over whatever else it wears. */
+    public static java.util.function.Consumer<Horse> saddled() {
+        return horse -> horse.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE,
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SADDLE));
+    }
+
     /** Turn the horse to face east, so the south-side cameras see its off flank. */
     public static java.util.function.Consumer<Horse> facingEast() {
         return horse -> {

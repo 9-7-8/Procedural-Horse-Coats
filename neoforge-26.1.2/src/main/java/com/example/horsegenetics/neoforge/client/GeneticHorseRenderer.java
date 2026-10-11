@@ -65,17 +65,10 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         this.addLayer(new AttachedPartLayer(this));
         this.addLayer(new HarnessLayer(this));
         this.addLayer(new PackLayer(this));
-        this.addLayer(
-            new SimpleEquipmentLayer<>(
-                this,
-                context.getEquipmentRenderer(),
-                EquipmentClientInfo.LayerType.HORSE_BODY,
-                state -> state.bodyArmorItem,
-                new HorseModel(context.bakeLayer(ModelLayers.HORSE_ARMOR)),
-                null,
-                2
-            )
-        );
+        // Armour is this mod's layer since "worn gear is 3D": edged, a quarter
+        // unit proud, and vanilla's own layer underneath it for every case
+        // BardingRule sends back.
+        this.addLayer(new com.example.horsegenetics.neoforge.client.gear.BardingLayer(this, context));
         this.addLayer(
             new SimpleEquipmentLayer<>(
                 this,
