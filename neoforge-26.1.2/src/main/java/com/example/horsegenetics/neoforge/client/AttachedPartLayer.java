@@ -303,8 +303,8 @@ public class AttachedPartLayer extends RenderLayer<HorseRenderState, HorseModel>
     public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords,
                        HorseRenderState state, float yRot, float xRot) {
         // The common case is a horse with no parts, which is almost every horse:
-        // one type check and one isEmpty, on the first line, the way BraidLayer
-        // returns on a horse wearing no braid.
+        // one type check and one isEmpty, on the first line, the way WornLayer
+        // skips a horse wearing no braid.
         if (!(state instanceof GeneticHorseRenderState genetic) || state.isInvisible
                 || genetic.parts.isEmpty() || !genetic.drawParts) {
             return;

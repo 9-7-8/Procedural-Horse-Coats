@@ -26,7 +26,7 @@ import net.minecraft.resources.Identifier;
  * butt and a metal frame around where the chests fit into".)
  *
  * <p>It is the first piece of gear here drawn as <b>geometry</b> rather than as
- * a mask over the horse's own mesh ({@link BraidLayer}): a frame stands off the
+ * a mask over the horse's own mesh ({@code gear.WornLayer}): a frame stands off the
  * flank, and a mask cannot stand off anything. Two small model parts, built
  * once from boxes in the body bone's own units, submitted on the body bone so
  * they rear with the horse - the leather in the dye's colour, the fittings in

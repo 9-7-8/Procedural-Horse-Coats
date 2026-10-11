@@ -148,6 +148,15 @@ public final class DebugPhotoShoot {
                 new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SADDLE));
     }
 
+    /**
+     * Stand the horse up on its hind legs and hold it there for the picture. A shot whose
+     * name has {@code -walk} in it is held mid-stride instead, by the client half; one
+     * with {@code boot} in it wears the debug test boot on its near fore and hind legs.
+     */
+    public static java.util.function.Consumer<Horse> rearing() {
+        return horse -> horse.setStanding(100000);
+    }
+
     /** Turn the horse to face east, so the south-side cameras see its off flank. */
     public static java.util.function.Consumer<Horse> facingEast() {
         return horse -> {
@@ -165,9 +174,10 @@ public final class DebugPhotoShoot {
      * the muzzle close up from three-quarters front (a part of the mouth: tusks, fangs,
      * which HEAD leaves a few pixels across), or the whole head close up from three-quarters
      * front (a part on the skull or the cheek: fins, spikes, a ridge - HEAD shows the whole
-     * horse and leaves them a dozen pixels across).
+     * horse and leaves them a dozen pixels across), or the legs close up from the near
+     * side, a little forward (a part on a leg: a boot, which SIDE leaves a few pixels tall).
      */
-    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE, FACE, FRONT, PROFILE }
+    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE, FACE, FRONT, PROFILE, LEGS }
 
     private static final String BAY = "horsegenetics.extension=E/E-horsegenetics.agouti=A/A";
     private static final String BLACK = "horsegenetics.extension=E/E-horsegenetics.agouti=a/a";
@@ -317,6 +327,15 @@ public final class DebugPhotoShoot {
             ex = tx;
             ey = ty + 0.15;
             ez = tz + 2.1;
+        } else if (shot.framing() == Framing.LEGS) {
+            // All four legs from the near side, a little forward of square and at knee
+            // height, close enough that a boot is a few dozen pixels tall.
+            tx = hx;
+            ty = origin.getY() + 0.5;
+            tz = hz;
+            ex = tx - 0.7;
+            ey = ty + 0.25;
+            ez = tz + 2.0;
         } else if (shot.framing() != Framing.HEAD) {
             // The whole horse from a little forward of side-on, for a look that is the
             // whole body (the skeleton's cut-outs). A foal is half the size, so half the way.

@@ -5,7 +5,7 @@ package com.example.horsegenetics.common.parts;
  * grid of 16x16 regions; every box of every attached part samples one region.
  *
  * <p>The sheet is <b>greyscale</b>. Colour is a per-horse tint applied at draw
- * time - the {@code BraidLayer} method - so one file serves an ivory horn, a
+ * time - the {@code WornLayer} method - so one file serves an ivory horn, a
  * gold one and a rose-pearl one, and a lineage whose horn colour drifts over
  * thirty generations needs no new art. What a region carries is <b>grain and
  * light</b>, not hue.

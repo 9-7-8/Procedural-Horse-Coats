@@ -49,9 +49,10 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         // The cutie-mark emblem, drawn last so it sits on top of the coat and
         // every white pattern (a no-op unless the horse is Cutmrk/Cutmrk).
         this.addLayer(new CutieMarkLayer(this));
-        // After the marks: a braid is worked into the hair and sits on top of
-        // everything the coat did, the same way the emissive pass does.
-        this.addLayer(new BraidLayer(this));
+        // After the marks: every lifted row of the worn-piece table, the braid
+        // first. A braid is worked into the hair and sits on top of everything
+        // the coat did, the same way the emissive pass does.
+        this.addLayer(new com.example.horsegenetics.neoforge.client.gear.WornLayer(this));
         // Grown parts - a unicorn's horn - after every pass that touches the coat
         // and before the tack. The position is a real choice and not an accident of
         // where the line was typed: a part is SEPARATE GEOMETRY rather than an

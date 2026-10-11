@@ -43,7 +43,7 @@ public class GeneticHorseRenderState extends HorseRenderState {
 
     /**
      * The colour of the <b>rescuing braid</b> worn in the mane, as opaque ARGB,
-     * or {@code 0} for none. Drawn by {@link BraidLayer}.
+     * or {@code 0} for none. Drawn by {@code gear.WornLayer}.
      *
      * <p>Zero rather than {@code -1} or a nullable Integer because it is read
      * every frame for every horse on screen and the overwhelmingly common

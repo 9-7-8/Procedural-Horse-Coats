@@ -25,7 +25,21 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 @EventBusSubscriber(value = Dist.CLIENT)
 public final class DebugPhotoShootClient {
 
-    static final String PROPERTY = "horsegenetics.photoShoot";
+    public static final String PROPERTY = "horsegenetics.photoShoot";
+
+    /** The colour the debug test boot is drawn in while a shot asks for it. */
+    private static final int BOOT_COLOUR = 0xFF2E6FD9;
+
+    /**
+     * The debug test boot ({@code WornPieces.TEST_BOOT_FORE} and {@code _HIND}): its
+     * colour as opaque ARGB while the shot on stage has {@code boot} in its name, and 0
+     * otherwise. Read by {@code gear.WornLayer}, which only has the boot rows at all when
+     * the client was started for a photo shoot. Not an item: nothing a player does sets it.
+     */
+    public static volatile int testBoot;
+
+    /** True while the shot on stage has {@code -walk} in its name: its horse is held mid-stride. */
+    private static boolean walking;
 
     /** Ticks after the player appears before anything happens - the test world's own setup first. */
     private static final int START_DELAY = 400;
@@ -51,6 +65,9 @@ public final class DebugPhotoShootClient {
         IntegratedServer server = mc.getSingleplayerServer();
         if (mc.player == null || server == null || mc.level == null) {
             return;
+        }
+        if (walking) {
+            stride(mc);
         }
         ticks++;
         if (ticks < START_DELAY) {
@@ -80,6 +97,8 @@ public final class DebugPhotoShootClient {
         shot++;
         if (shot >= DebugPhotoShoot.SHOTS.size()) {
             done = true;
+            testBoot = 0;
+            walking = false;
             mc.options.hideGui = false;
             if (edgesBefore != null) {
                 com.example.horsegenetics.neoforge.ClientConfig.GEAR_EDGES.set(edgesBefore);
@@ -92,6 +111,23 @@ public final class DebugPhotoShootClient {
         wait = SETTLE;
     }
 
+    /**
+     * Hold every horse in view at one fixed point of its stride. A staged horse has no AI
+     * and does not move, and the walk cycle is driven by distance covered, so a still of
+     * it "walking" has to put the cycle there by hand: after the entity's own tick has
+     * let the cycle decay, set it back to full speed, five steps in (legs near full swing).
+     */
+    private static void stride(Minecraft mc) {
+        for (net.minecraft.world.entity.Entity entity : mc.level.entitiesForRendering()) {
+            if (entity instanceof net.minecraft.world.entity.animal.equine.Horse horse) {
+                horse.walkAnimation.stop();
+                for (int step = 0; step < 5; step++) {
+                    horse.walkAnimation.update(1f, 1f, 1f);
+                }
+            }
+        }
+    }
+
     private static void stage(IntegratedServer server, java.util.UUID id, int i) {
         // A shot named "...-flat" is taken with worn gear's depth switched off, so a
         // lifted piece can be photographed beside its flat self in one launch. Set in
@@ -99,8 +135,10 @@ public final class DebugPhotoShootClient {
         if (edgesBefore == null) {
             edgesBefore = com.example.horsegenetics.neoforge.ClientConfig.gearEdges();
         }
-        com.example.horsegenetics.neoforge.ClientConfig.GEAR_EDGES.set(
-                !DebugPhotoShoot.SHOTS.get(i).name().endsWith("-flat"));
+        String name = DebugPhotoShoot.SHOTS.get(i).name();
+        com.example.horsegenetics.neoforge.ClientConfig.GEAR_EDGES.set(!name.endsWith("-flat"));
+        testBoot = name.contains("boot") ? BOOT_COLOUR : 0;
+        walking = name.contains("-walk");
         server.execute(() -> {
             ServerPlayer sp = server.getPlayerList().getPlayer(id);
             if (sp != null) {
