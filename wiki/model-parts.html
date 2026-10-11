@@ -444,7 +444,8 @@
         frame and straps are. The worn hook on <code>AttachedPartLayer</code>
         (<a href="#hooks">the two hooks</a>) is their route and is not built yet.</li>
     <li><strong>Soft pieces that wrap the horse are the horse&rsquo;s own mesh, lifted, with a
-        rim.</strong> This is built, and the rest of this section is how.</li>
+        rim.</strong> This is built, and the rest of this section is how. Each such piece is
+        a row of <a href="horse-gear.html#worn-table">the worn-piece table</a>.</li>
 </ul>
 <p>
     The owner&rsquo;s other calls, all 2026-10-09: the rim follows the painted outline texel by
@@ -537,8 +538,11 @@
 
 <h3 id="worn-braid">The first piece: the braid</h3>
 <p>
-    <code>BraidLayer</code> is the proof piece. With the switch on it asks
-    <code>WornMeshes</code> for the mesh its mask cuts from the parent model, at
+    The braid is the proof piece. It is drawn by <code>client/gear/WornLayer</code>, the one
+    layer for every soft piece, as the first two rows of
+    <a href="horse-gear.html#worn-table">the worn-piece table</a> (until 2026-10-10 by a layer
+    of its own, <code>BraidLayer</code>). With the switch on the layer asks
+    <code>WornMeshes</code> for the mesh the row&rsquo;s mask cuts from the parent model, at
     <code>WornRule.FLOOR</code>, and draws that in the dye&rsquo;s colour through the same
     <code>entityTranslucent</code> render type as before. Both masks cover whole boxes &mdash;
     every face of the mane&rsquo;s and of the tail&rsquo;s &mdash; so the braid&rsquo;s mesh is a
@@ -551,7 +555,9 @@
 <p>
     Tests: <code>RimOutlineTest</code> (the runs, and the floor), <code>RimMeshTest</code> (what
     is lifted, where the walls are and are not, which way they face, what they sample) and
-    <code>WornCacheTest</code>. What only a screen can show is on the
+    <code>WornCacheTest</code>; <code>WornPiecesTest</code> pins the table. A lifted piece on
+    an animated <strong>leg</strong> was proved with a debug boot:
+    <a href="horse-gear.html#worn-leg-proof">the leg proof</a>. What only a screen can show is on the
     <a href="#open-worn-braid">Verification tab</a>.
 </p>
 

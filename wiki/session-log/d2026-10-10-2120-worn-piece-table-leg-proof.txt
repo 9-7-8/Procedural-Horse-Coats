@@ -1,0 +1,122 @@
+2026-10-10 21:20 - next-release: worn gear is 3D, piece 3 (#241), the worn-piece table and a
+leg proof. (The time is the session's start, to the nearest ten minutes.)
+
+ASKED
+-----
+1. "/next-release" (the owner ran the command with no arguments).
+   -> procedures/next-release.txt was followed. Housekeeping found nothing to move: no open
+      issue without a milestone, v0.5.046's milestone closed, no NOT COMPILED commit newer
+      than the last local build. The three open bugs on v0.5.047 (#10, #31, #36) are fixed
+      and still wait on their checks, so the unit was the next piece in v0.5.047.1's order:
+      #241. It was built by procedures/process-intake.txt and the session ended by
+      procedures/end-session.txt.
+The owner said nothing else this session.
+
+DONE
+----
+#241, "Worn gear is 3D - piece 3: the worn-piece table and a leg proof". Code commit
+f01985fd; the docs commit follows it. Issue closed by the commit; evidence comment posted.
+Its tracking parent #223 was closed by hand, all three pieces (#239, #240, #241) built.
+
+What was missing: piece 1 gave the builder (WornMeshes) and the braid used it from a layer
+of its own, BraidLayer. Every later soft piece (boots, blanket, pad) would have needed
+another such layer, and nobody had proved that a lifted piece follows an animated leg.
+
+What was built:
+- common/gear/WornPieces: the table. A row (WornPieces.Piece) is a name, a kind (LIFTED or
+  BOXES), a lift, and for a lifted piece a Region of the horse's mesh and the file stem of
+  its mask. The constructor sends the lift through WornRule.lift, so a row under 0.25
+  cannot be written; table() refuses two rows with one name or one mask. Regions:
+  whole(part), and band(part, from, to), a sleeve round one box that leaves its top and
+  bottom faces out. Rows today: BRAID_MANE, BRAID_TAIL, and two debug rows TEST_BOOT_FORE
+  and TEST_BOOT_HIND (LEFT_FRONT_LEG and LEFT_HIND_LEG, 0.14 to 0.55 of the leg's height).
+  No BOXES row exists yet; the worn side of AttachedPartLayer (#140) will draw those.
+- common/coat/skin/HairMaskTool (:common:bakeHairMasks) now walks WornPieces.lifted() and
+  writes one mask per row. braid_mane.png and braid_tail.png came out byte-identical (git
+  showed no change); test_boot_fore.png and test_boot_hind.png are new, 288 texels each.
+- neoforge client/gear/WornLayer replaces client/BraidLayer (deleted). For each lifted row
+  it reads WornLayer.WORN, one line per row giving the colour a horse wears it in or 0,
+  fades it with the horse, and draws the row's mask through WornMeshes at the row's lift,
+  or flat through the parent model when gear.edges is off or no mesh can be built. Debug
+  rows are left out of the layer unless the client was started with
+  -Dhorsegenetics.photoShoot=true; a lifted row with no WORN line is logged as an error
+  when the renderer is made.
+- The photo shoot: DebugPhotoShootClient.testBoot (the boot's colour while the shot on
+  stage has "boot" in its name), a held stride for shots with "-walk" in the name,
+  DebugPhotoShoot.rearing(), and Framing.LEGS.
+
+Proof:
+- ./gradlew :common:test --tests '*WornPiecesTest' --tests '*CommonPortabilityTest': 5 and
+  4 tests, green. WornPiecesTest was broken on purpose once (BOOT_TO moved from 0.55 to
+  0.65 without a re-bake): the stale-mask test and the sleeve test both failed; restored,
+  green.
+- ./gradlew :neoforge-26.1.2:build green; check-parity OK; check-designer-boots OK.
+- The live server was up with 0 players for every Gradle test run (console.log read).
+
+Pictures (run/screenshots/photo-w*.png, sent to the owner; not committed):
+- w1-boot-stand, w2-boot-stand-legs: a chestnut mare standing, a blue sleeve on the near
+  fore and near hind cannon, hoof bare below, visibly proud of the leg with a wall at its
+  top and bottom edge.
+- w3-boot-stand-legs-flat: the same with gear.edges off; the blue is painted on the leg,
+  no thickness. The pair is plainly different close up.
+- w4-boot-walk, w5-boot-walk-legs: the horse held at full stride; both boots are on their
+  legs at the same place along them, tilted with the leg.
+- w6-boot-rear, w7-boot-rear-wide: rearing; the fore boot is on the raised fore leg, the
+  hind boot on the planted hind leg.
+- w8-braid-from-the-table: a bay with a red mane braid and a blue tail braid, drawn by
+  WornLayer from the table's first two rows, as before.
+A picture is not a pass: nothing was seen moving.
+
+DECIDED
+-------
+No owner call was needed or asked. Calls made without the owner (all building-session
+Opens or Recommended lines of #223 / #241):
+- Boots (#225) stay lifted pieces, not box-built: the leg proof held in stills. Recorded on
+  wiki/horse-gear.html#worn-leg-proof, wiki/decisions.html, and a comment on #225.
+- The region, not a hand-painted mask, is what a row carries, and the mask is baked from
+  it; the treatment said "which mask or texture paints it". A row keeps a mask name too.
+  Recorded on wiki/horse-gear.html#worn-table.
+- BraidLayer was deleted rather than kept as a shell: the treatment says the braid becomes
+  the generic layer's first row.
+- When a horse wears a row (WornLayer.WORN) stays in the NeoForge client, not in common/:
+  it reads render state. Recorded on the same section.
+- The test boot is blue (0xFF2E6FD9) and covers 0.14 to 0.55 of the leg.
+
+FOUND ON THE WAY
+----------------
+- The client log has "Recipe horsegenetics:stasis_chamber can't be placed due to empty
+  ingredients and will be ignored" (RecipeManager, WARN). It is also in the owner's last
+  play log, so it predates this session. Not investigated and no issue filed: the next
+  session that touches recipes should check whether the chamber is craftable.
+- #140's header still says "Depends on: Horse shoes (still a file in intake/)", while the
+  milestone and the release plan say #140 comes BEFORE shoes (owner, 2026-10-09). Left as
+  it is; the next run should correct the line when it claims #140.
+- Mistake: one long Bash heredoc holding Java and Python failed on quoting and wrote
+  nothing. Redone with the Write tool and scratchpad scripts, as the memory note says.
+
+PROCEDURES
+----------
+- procedures/rebake.txt: new row aa for the worn masks (a WornPieces row or the mesh under
+  it -> :common:bakeHairMasks, then WornPiecesTest). The mask bake had no row at all.
+- procedures/photograph-horses.txt: rearing(), the "-walk" held stride, the "boot" shot
+  name, and Framing.LEGS; and that a held pose is not motion.
+No new procedure was needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every coat golden, breed
+  pool and gene test; this change touched none of them (HairMaskTool's braid output is
+  byte-identical, and nothing under web/ reaches common/gear).
+- No gametest was run: nothing server-side changed.
+- Nothing was seen in play. Open checks: wiki/horse-gear.html#verify-worn-table (the braid
+  after the move, a real leg piece moving, the off side, a scaled horse), beside the older
+  wiki/model-parts.html#open-worn-braid and wiki/horse-gear.html#verify-barding.
+
+RELEASE
+-------
+Not offered. v0.5.047.1 (foundations and feet) still has #140 and #164 to build.
+
+PICK UP FIRST
+-------------
+#140, "Attached model parts - stage 5: the worn side", by procedures/next-release.txt
+(which hands it to procedures/process-intake.txt); then #164, horse shoes.

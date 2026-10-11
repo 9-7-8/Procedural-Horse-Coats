@@ -3187,6 +3187,8 @@ wiki/horse-gear.html#using	gameplay	Putting something on
 wiki/horse-gear.html#verified-yard-packs	coding	Seen in the yard, 2026-10-09
 wiki/horse-gear.html#verify	coding	The roster checks itself at boot
 wiki/horse-gear.html#where	gameplay	Where it is
+wiki/horse-gear.html#worn-leg-proof	coding	The leg proof: a lifted piece rides an animated leg
+wiki/horse-gear.html#worn-table	coding	Everything soft is a row: common/gear/WornPieces and client/gear/WornLayer
 wiki/horse-realm.html#arrival	coding	One exit, at the origin
 wiki/horse-realm.html#backup	coding	Back the realm up before changing it
 wiki/horse-realm.html#breeding	gameplay	They breed, slowly

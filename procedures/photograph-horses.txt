@@ -84,6 +84,12 @@ STEPS
    braids(maneRgb, tailRgb) works a rescuing braid into each (-1 undyed, -2 none).
    armour(item, rgb, glint) puts horse armour on (rgb dyes leather, -1 leaves it; glint
    adds an enchantment glint, which a still cannot show); saddled() adds a saddle.
+   A pose: rearing() stands the horse on its hind legs and holds it there; a shot with
+   "-walk" in its name is held at full stride by the client half (a staged horse has no
+   AI and covers no ground, so the walk cycle is set by hand each tick). A held pose is
+   not motion: it shows where a piece sits on a bent leg, never whether it swims.
+   A shot with "boot" in its name wears the debug test boot (WornPieces.TEST_BOOT_FORE
+   and _HIND) on its near fore and hind legs, edged, or flat with "-flat".
    A lifted worn piece beside its flat self: name a second shot the same but ending in
    "-flat". The client half takes any shot so named with gear.edges off (in memory
    only) and puts the setting back when the shoot ends, so one launch gives both. The
@@ -94,6 +100,9 @@ STEPS
    A part that lies in the head's front-to-back plane (a swept-back horn: the scimitar) is
    foreshortened by FACE and FRONT and a dozen pixels long in SIDE: use Framing.PROFILE,
    close and square to the head from the south (added 2026-10-09).
+   A part on a leg (a boot, a shoe) is a few pixels tall in SIDE: use Framing.LEGS, close
+   on all four legs from the near side at knee height (added 2026-10-10). A rearing
+   horse lifts its fore legs out of that frame: use SIDE or WIDE for a rear.
    A part's size is an epigenetic roll, and an unpinned one is often too small to judge:
    pin it with `want` on the first shoot (GrownParts.of(genotype, epigenome), then
    shape().size()), and keep one unpinned shot for what a typical roll looks like. Put a

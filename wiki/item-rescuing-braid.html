@@ -238,7 +238,9 @@
 
 <h2 id="the-streak">The streak is a mask, and the mask is baked</h2>
 <p>
-    <code>BraidLayer</code> is the structural twin of
+    The braid is drawn by <code>client/gear/WornLayer</code>, as the first two rows of
+    <a href="horse-gear.html#worn-table">the worn-piece table</a> (it had a layer of its own,
+    <code>BraidLayer</code>, until 2026-10-10). Its flat path is the structural twin of
     <a href="pipeline.html">EmissiveCoatLayer</a>: one <code>submitModel</code> of the whole
     horse through a texture that is transparent everywhere it must not paint. What differs is
     that the texture is a <strong>mask</strong> &mdash; flat white where the mane or the tail is
@@ -258,7 +260,7 @@
     <strong>Since 2026-10-10 the mask is cut into a mesh of its own</strong>, a quarter of a
     model unit proud of the hair, rather than drawn over the parent model &mdash; the braid is the
     first piece under <a href="model-parts.html#worn-geometry">worn geometry</a>, the rule that
-    nothing a horse wears is flat. <code>BraidLayer</code> asks <code>WornMeshes</code> for the
+    nothing a horse wears is flat. <code>WornLayer</code> asks <code>WornMeshes</code> for the
     mesh at <code>WornRule.FLOOR</code> and draws it on the mane&rsquo;s and the tail&rsquo;s own
     bones, the dye as the vertex colour. With the client&rsquo;s <code>gear.edges</code> off, or
     if no mesh can be built, it makes the one flat submit described above, unchanged.
@@ -323,13 +325,17 @@
     <td>The rule and the three sentences. No Minecraft in it &mdash;
         <code>RescuingBraidTest</code>.</td></tr>
 <tr><td><code>common/&hellip;/coat/skin/HairMaskTool.java</code></td>
-    <td>The two mask textures, off the mesh. <code>:common:bakeHairMasks</code>.</td></tr>
+    <td>The two mask textures, off the mesh, one per row of <code>WornPieces</code>.
+        <code>:common:bakeHairMasks</code>.</td></tr>
+<tr><td><code>common/&hellip;/gear/WornPieces.java</code></td>
+    <td>The braid&rsquo;s two rows: the whole mane and the whole tail, at the floor.</td></tr>
 <tr><td><code>neoforge/&hellip;/item/RescuingBraidItem.java</code></td>
     <td>The item. A tooltip and nothing else.</td></tr>
 <tr><td><code>neoforge/&hellip;/server/RescuingBraidHandler.java</code></td>
     <td>The trigger, the destination, the move, the rider, the refusal.</td></tr>
-<tr><td><code>neoforge/&hellip;/client/BraidLayer.java</code></td>
-    <td>The streak, tinted, through the baked masks.</td></tr>
+<tr><td><code>neoforge/&hellip;/client/gear/WornLayer.java</code></td>
+    <td>The streak, tinted, through the baked masks. Not the braid&rsquo;s own: it draws every
+        lifted row.</td></tr>
 <tr><td><code>neoforge/&hellip;/client/gear/WornMeshes.java</code></td>
     <td>The mask as a lifted mesh. Not the braid&rsquo;s own: every soft worn piece uses it.</td></tr>
 <tr><td><code>data/&hellip;/tags/item/gear/{mane,tail}.json</code></td>

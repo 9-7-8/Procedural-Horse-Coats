@@ -881,6 +881,71 @@
     switch restores vanilla&rsquo;s drawing.
 </p>
 
+<h2 id="worn-table">Everything soft is a row: <code>common/gear/WornPieces</code> and <code>client/gear/WornLayer</code></h2>
+<p>
+    Since 2026-10-10 (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/241">#241</a>, piece 3 of
+    <a href="model-parts.html#worn-geometry">worn geometry</a>) a soft worn piece is a row in a
+    table, not a render layer. This is the plan that used to sit on the Roadmap tab as
+    &ldquo;deriving the models instead of drawing them&rdquo;, built, with one change: a piece
+    is not a skin-tight cutout of the horse inflated a little, it is the horse&rsquo;s own mesh
+    <strong>lifted and rimmed</strong>, at least a quarter unit proud.
+</p>
+<ul>
+    <li><strong>A row</strong> (<code>WornPieces.Piece</code>) is a name, a kind
+        (<code>LIFTED</code> or <code>BOXES</code>), a lift, and for a lifted piece the
+        <strong>region</strong> of the horse&rsquo;s mesh it covers and the file stem of its
+        mask. The constructor sends the lift through <code>WornRule.lift</code>, so a row under
+        the floor cannot be written; the table refuses two rows with one name or one mask.
+        A box-built row carries neither mask nor region: boxes are drawn by the worn side of
+        <code>AttachedPartLayer</code>, which is not built yet, and no such row exists.</li>
+    <li><strong>The region is the whole shape.</strong> <code>WornPieces.whole(part)</code> is
+        every texel of one box (the braid&rsquo;s mane and tail); <code>WornPieces.band(part,
+        from, to)</code> is a sleeve round one box between two heights, open at both ends. A
+        region is asked about each texel of the adult sheet with the texel&rsquo;s place in its
+        part (<code>HorseSkinGeometry.local</code>), so it is written in fractions of a leg,
+        never in sheet coordinates.</li>
+    <li><strong>The mask is baked from the row.</strong> <code>HairMaskTool</code>
+        (<code>:common:bakeHairMasks</code>) now walks <code>WornPieces.lifted()</code> and
+        writes one white-on-transparent sheet per row. The braid&rsquo;s two came out
+        byte-identical when they became rows.</li>
+    <li><strong>One layer draws them all.</strong> <code>WornLayer</code> replaced
+        <code>BraidLayer</code> in <code>GeneticHorseRenderer</code>. For each lifted row it
+        asks <code>WornLayer.WORN</code> &mdash; one line per row &mdash; whether this horse
+        wears it and in what colour (0 is no), fades that colour with the horse, and draws the
+        row&rsquo;s mask through <code>WornMeshes</code> at the row&rsquo;s lift, or flat through
+        the parent model when <code>gear.edges</code> is off or no mesh can be built. A lifted
+        row with no line in <code>WORN</code> is never drawn and is reported in the log when the
+        renderer is made.</li>
+</ul>
+<p>
+    So a new soft piece &mdash; a boot, a blanket, a pad &mdash; is a row, a re-bake, and one
+    line saying when it is worn. <code>WornPiecesTest</code> pins the table: every row obeys the
+    floor, no two share a name, a row is one kind or the other, and <strong>every lifted
+    row&rsquo;s checked-in mask paints exactly the texels its region covers</strong>, so a row
+    changed without a re-bake fails rather than drawing the old shape.
+</p>
+
+<h3 id="worn-leg-proof">The leg proof: a lifted piece rides an animated leg</h3>
+<p>
+    The Roadmap asked for one thing to be proved before boots were committed to as soft
+    pieces: that a piece cut from a leg follows the leg. Two debug rows,
+    <code>TEST_BOOT_FORE</code> and <code>TEST_BOOT_HIND</code>, are a sleeve on the near fore
+    and near hind leg from 0.14 to 0.55 of the leg&rsquo;s height, clear of the hoof.
+    They are not items and no player can wear them: <code>WornLayer</code> leaves debug rows
+    out altogether unless the client was started for a photo shoot, and then draws them only
+    while the shot on stage has <code>boot</code> in its name.
+</p>
+<p>
+    <strong>It holds, in stills.</strong> Photographed on 2026-10-10 standing, held at full
+    stride, and rearing, from the side and close on the legs: the boot is on the leg in every
+    pose, at the same place along it, with the hoof bare below and a visible wall at its top
+    and bottom edge, and beside its <code>gear.edges</code>-off twin it is plainly thicker.
+    <code>WornMeshes</code> keeps each bone&rsquo;s share of a mesh on that bone&rsquo;s own
+    chain, so there was nothing leg-specific to write. On that evidence boots stay lifted
+    pieces (rows) rather than becoming box-built; what a still cannot show is on the
+    <a href="#verify-worn-table">Verification tab</a>.
+</p>
+
 <h3 id="gear-leaves">What the other slots do when a horse leaves</h3>
 <p>
     Fixed 2026-10-08 (#218). A horse <strong>sold</strong> to a cowboy or the trader, or
@@ -942,14 +1007,14 @@
         gear slots, because there is nothing to render. The saddle and the barding
         draw as they always have, through vanilla, the two packs are drawn by
         <code>PackLayer</code> as above, and the mane and tail are drawn
-        by <code>BraidLayer</code> &mdash; the first of these, and the worked
+        by <code>WornLayer</code>, as the first rows of
+        <a href="#worn-table">the worn-piece table</a> &mdash; the first of these, and the worked
         example of the shape: a mask baked from the mesh, tinted, and since
         2026-10-10 cut into a mesh that stands a quarter unit off the hair
         (<a href="model-parts.html#worn-geometry">worn geometry</a>: nothing a
-        horse wears is flat). Every piece past those needs a
-        render layer of our own &mdash; the pattern this mod already has ten
-        instances of &mdash; and the plan for deriving that geometry rather than
-        modelling it by hand is on the Roadmap tab.
+        horse wears is flat). A soft piece past those is a row in that table
+        and a hard one is boxes on the worn side of the attached parts; none
+        gets a render layer of its own.
     </p>
 </div>
 
@@ -962,7 +1027,7 @@
     <span class="label">What is still planned here</span>
     <p>
         Nineteen slots ship with <strong>almost nothing to put in them</strong>, so the
-        whole accessories system is the plan: derived models rather than drawn ones, a
+        whole accessories system is the plan: a
         tack bench, dye and pattern, enchanted tack, hoof equipment, native tack, panniers that
         are modelled rather than squeezed blocks, and
         the saddle pad &mdash; with the armour materials the one piece that is only data.
@@ -1267,36 +1332,6 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
     <code>CutieMarkLayer</code> is the worked precedent for geometry riding an animated bone.
 </p>
 
-<h3 id="accessories-geometry">Deriving the models instead of drawing them</h3>
-
-<p>
-    <strong>Suggested implementation:</strong> create a single shared geometry helper that takes a
-    named piece, a source model and an inflation value, then returns a renderable subset of the
-    horse body or saddle mesh. The first proof should be one leg boot or one saddle pad on a
-    single horse pose; once that passes, the rest of the roster is a table of model names and
-    inflation values rather than a new file per item. In code terms, this should live near the
-    existing render-layer plumbing rather than in the item classes themselves: a utility such as
-    <code>HorseGearGeometry.fromHorsePart()</code> with a tiny material list and a preserve-alpha
-    rule is the right shape.
-</p>
-<p>
-    The owner's proposal, and it is the difference between this being affordable and not:
-    <strong>clone the existing horse model and erase every part the piece does not touch</strong>,
-    rather than modelling fourteen pieces by hand. That is exactly what the
-    <a href="#native-tack">alpha-cutout finding</a> already establishes for equipment &mdash; a
-    cube whose texels are transparent does not appear, so one mesh is many pieces purely by
-    which part of the sheet is painted &mdash; and generalising it from &ldquo;three pieces off
-    the saddle mesh&rdquo; to &ldquo;a piece is a named subset of the horse's own parts&rdquo; is
-    the actual feature.
-</p>
-<p>
-    <strong>The open question is inflation, not erasure.</strong> A piece derived from
-    <code>HORSE_BODY</code> has to clear the skin or it z-fights, which the saddle-pad research
-    already found the hard way; a per-piece inflation value is probably the whole of what the
-    derivation needs to take as a parameter. Worth proving on one leg boot before any of the
-    roster is committed to.
-</p>
-
 <h3 id="accessories-bench">The tack bench, and what a bench buys</h3>
 
 <p>
@@ -1362,7 +1397,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         unanswered and gates all of it.</li>
     <li><strong>A 3D preview in the bench, on any horse you own.</strong> The horse browser
         already renders live horses, so the renderer exists; what does not is a preview that
-        shows an <em>unmade</em> piece, which means the model derivation above has to run
+        shows an <em>unmade</em> piece, which means <a href="#worn-table">the worn-piece table</a> has to draw
         client-side on a configuration that no item carries yet.</li>
 </ul>
 
@@ -1596,7 +1631,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         halved and squeezed flat against the flank. That is honest and it works for any
         mod's block, but it is still a box clipped to a horse &mdash; the complaint about
         vanilla's donkey. Panniers that sit on the animal are the same feature as
-        <a href="#accessories-geometry">deriving equipment geometry from the horse's own
+        <a href="#worn-table">deriving equipment geometry from the horse's own
         parts</a> and should be built with it.</li>
     <li><strong>Other mods' interdimensional storage weighs what it holds.</strong> It
         opens as its own block now, so it works; but only the ender chest is weightless by
@@ -1627,7 +1662,9 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         horse carries a <strong>chest on each flank</strong>, proven by a gametest and a
         photo shoot and never opened, loaded or ridden by a player. Since 2026-10-10
         <strong>horse armour is drawn edged</strong>, photographed standing still and
-        never seen moving, fading, glinting or on another mod&rsquo;s armour.
+        never seen moving, fading, glinting or on another mod&rsquo;s armour. The same day
+        the braid moved into <strong>the worn-piece table</strong> and a debug boot was
+        photographed on a leg in three held poses; neither has been seen in play.
     </p>
 </div>
 
@@ -1666,6 +1703,29 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         <code>gear.edges</code> off.</li>
     <li><strong><code>gear.edges</code> off</strong> looks exactly like the last
         release.</li>
+</ul>
+
+<h3 id="verify-worn-table">The worn-piece table and the leg proof (2026-10-10, NOT played)</h3>
+<p>
+    The braid is now drawn as the first rows of <a href="#worn-table">the worn-piece table</a>,
+    and a debug boot proved a lifted piece on a leg in a photo shoot: standing, held
+    mid-stride and rearing, the boot stayed on the leg with the hoof bare. A picture is not a
+    pass, and a held stride is not a walk. Still to look at:
+</p>
+<ul>
+    <li><strong>The braid in play</strong>, after the move from its own layer: a dyed braid in
+        a mane and a tail still shows, still fades under a rider, and
+        <code>gear.edges</code> off still looks like the last release.</li>
+    <li><strong>The boot moving.</strong> There is no way to wear it in play; a photo shoot
+        only holds poses. When the first real leg piece exists
+        (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/225">#225</a>), watch it at a walk, a gallop and a
+        rear: it must not swim along the leg or flicker against the coat, and the fore and
+        hind boots must not cut into each other or the belly at full stride.</li>
+    <li><strong>The off side.</strong> Only the near legs wore a boot. The off legs are
+        mirrored boxes with their own patch of the sheet; a four-boot piece should be
+        photographed from both sides.</li>
+    <li><strong>A scaled horse and a foal.</strong> A foal wears no gear; a large or small
+        adult should carry its boot at the same place on the leg.</li>
 </ul>
 
 <h3 id="verify-packs">Chests on a horse (2026-10-08, NOT played)</h3>

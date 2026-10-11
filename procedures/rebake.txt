@@ -234,6 +234,14 @@ STEPS
              in THIRD_PARTY_NOTICES.md in the same change.
       COMMIT the regenerated textures/entity/horse/*.png, THIRD_PARTY_NOTICES.md
 
+   aa. A row of common/gear/WornPieces (added, removed, or its region changed), or a
+      box of the adult mesh in HorseSkinGeometry that a row's region lies on
+      RUN    ./gradlew :common:bakeHairMasks (one white mask per lifted row), then
+             --tests '*WornPiecesTest': it fails on a checked-in mask that is not the
+             one its row bakes, and on a row whose mask is missing. A removed row's
+             PNG is deleted by hand; the bake does not prune.
+      COMMIT N/assets/horsegenetics/textures/entity/horse/<mask>.png
+
    A row is missing if a derived, checked-in file has no row. Add the row here in the
    same change, never to CLAUDE.md.
 

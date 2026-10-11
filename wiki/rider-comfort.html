@@ -861,7 +861,7 @@
 <h3 id="ride-fade-braid-bug">A braid that had never been drawn</h3>
 
 <p>
-    Wiring the braid into the fade turned up a defect in <code>BraidLayer</code> that had
+    Wiring the braid into the fade turned up a defect in <code>BraidLayer</code> (since 2026-10-10 <code>gear/WornLayer</code>) that had
     been there since the braid shipped. The ten-argument <code>submitModel</code> is
     <code>(model, state, pose, renderType, light, overlay, <b>tintedColor</b>, sprite,
     <b>outlineColor</b>, crumbling)</code>, and the call had those two <code>int</code>s the
