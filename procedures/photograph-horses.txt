@@ -90,6 +90,8 @@ STEPS
    not motion: it shows where a piece sits on a bent leg, never whether it swims.
    A shot with "boot" in its name wears the debug test boot (WornPieces.TEST_BOOT_FORE
    and _HIND) on its near fore and hind legs, edged, or flat with "-flat".
+   A shot with "block" in its name wears the debug test block (WornPieces.TEST_BLOCK) on
+   all four hooves: the box-built twin of the boot, for the worn side of the part layer.
    A lifted worn piece beside its flat self: name a second shot the same but ending in
    "-flat". The client half takes any shot so named with gear.edges off (in memory
    only) and puts the setting back when the shoot ends, so one launch gives both. The

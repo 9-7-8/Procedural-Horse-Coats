@@ -441,8 +441,9 @@
 </p>
 <ul>
     <li><strong>Hard pieces are boxes built in code</strong>, as <code>HarnessLayer</code>&rsquo;s
-        frame and straps are. The worn hook on <code>AttachedPartLayer</code>
-        (<a href="#hooks">the two hooks</a>) is their route and is not built yet.</li>
+        frame and straps are. Their route is <a href="#worn-side">the worn side</a> of
+        <code>AttachedPartLayer</code>, built 2026-10-11 and proved with a debug block on the
+        hooves; no real piece uses it yet.</li>
     <li><strong>Soft pieces that wrap the horse are the horse&rsquo;s own mesh, lifted, with a
         rim.</strong> This is built, and the rest of this section is how. Each such piece is
         a row of <a href="horse-gear.html#worn-table">the worn-piece table</a>.</li>
@@ -559,6 +560,58 @@
     an animated <strong>leg</strong> was proved with a debug boot:
     <a href="horse-gear.html#worn-leg-proof">the leg proof</a>. What only a screen can show is on the
     <a href="#open-worn-braid">Verification tab</a>.
+</p>
+
+<h3 id="worn-side">The worn side: a box-built piece is an attached part, hung on an anchor</h3>
+<p>
+    Built 2026-10-11 (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/140">#140</a>,
+    stage 5 of the attached parts). This was the Roadmap&rsquo;s second hook. It is the route for
+    every <strong>hard</strong> worn piece, and horse shoes are the first to need it.
+</p>
+<ul>
+    <li><strong>The same object, a second list.</strong> A box-built piece reaches the layer as a
+        <code>common/gear/WornPart</code>: the row of
+        <a href="horse-gear.html#worn-table">the worn-piece table</a> it is (always
+        <code>Kind.BOXES</code>), an ordinary <code>AttachedPart</code>, and the anchor it hangs
+        on. The record refuses a lifted row and refuses a grown kind. The render state carries
+        them as <code>GeneticHorseRenderState.worn</code>, beside <code>parts</code>, and
+        <code>AttachedPartLayer.draw</code> is one method called for both lists, grown first.
+        So a worn box gets the fade under a rider, the tint, the mesh cache and the draw order
+        of a grown part with no code of its own.</li>
+    <li><strong>The anchor is the wearer&rsquo;s, not the kind&rsquo;s.</strong> A gene grows a
+        horn in one place, so a grown part is drawn at <code>PartKind.anchor()</code>. Gear is
+        hung where its slot is, and one shoe mesh goes on four feet, so a worn part names its
+        anchor itself. <code>PartKind.worn()</code> says which kinds are gear: no gene grants
+        one, and none shows on a foal, which wears no gear.</li>
+    <li><strong>Four hoof anchors.</strong> <code>PartAnchor.HOOF_FRONT_LEFT</code>,
+        <code>_FRONT_RIGHT</code>, <code>_HIND_LEFT</code> and <code>_HIND_RIGHT</code>
+        (<code>PartAnchor.hooves()</code>) are the middle of the sole of each foot. They are the
+        first anchors on a leg: the layer walks root, then that leg&rsquo;s own bone, so the
+        stride and the rear carry the part. The offsets are read from the leg boxes
+        (<code>ADULT_HOOF_FRONT</code>, <code>ADULT_HOOF_HIND</code>): each leg box is hung
+        off-centre toward the midline, and the fore and hind boxes start at different
+        <code>z</code>. There is no foal offset, because nothing reaches the anchor for a
+        foal.</li>
+    <li><strong>Not behind <code>parts.enabled</code>.</strong> That switch is for grown parts.
+        A player who turns horns off still sees a shod horse&rsquo;s shoes. Box-built pieces do
+        not read <code>gear.edges</code> either: a box has depth already.</li>
+    <li><strong>The proof piece is a debug block.</strong> <code>WornPieces.TEST_BLOCK</code> is
+        the first box-built row, and <code>PartKind.TEST_BLOCK</code> its kind:
+        <code>WornBlockGenerator</code> builds a plain block round the foot, the worn
+        floor proud of its four walls and its sole, two units up the leg. It is two half-boxes
+        because one box that wide would unwrap past its sheet region. It is not an item:
+        <code>WornPart.testBlocks</code> hangs one on every hoof, and only a photo shoot whose
+        shot has <code>block</code> in its name asks for it.</li>
+</ul>
+<p>
+    <strong>It holds, in stills.</strong> Photographed on 2026-10-11 on a chestnut and a grey,
+    standing, held at full stride and rearing, from the near side, the off side and the front
+    quarter: a blue block is on each of the four feet in every pose, turned with its leg at
+    full swing and lifted with the fore legs in the rear, a little wider than the leg, with
+    nothing in the log. Tests: <code>WornPartTest</code> (one block per hoof; what may be hung;
+    the block stands its row&rsquo;s lift off the foot on every side; a worn kind unwraps inside
+    its region). What a still cannot show is on the
+    <a href="#open-worn-side">Verification tab</a>.
 </p>
 
 <h2 id="sheet">One greyscale sheet, and why its regions are featureless</h2>
@@ -928,8 +981,8 @@
         The parts the built machinery has no generator for yet &mdash; the five head parts
         after the dragon horns, then hoof feathering, tufted tails and wings,
         and the horns the antlered beasts of the bestiaries lack &mdash; plus the
-        two hooks that would let something other than one gene ask for a part: a breed file, and
-        the worn side, so a horse shoe draws through this layer rather than a bespoke one.
+        hook that would let a breed file ask for a part with no gene behind it, and one question
+        the worn side left open: whether a worn piece may ever replace a grown part.
     </p>
 </div>
 
@@ -1020,7 +1073,7 @@
         Hippalektryon wait on. Its lion tail is the tufted-tail item above.</li>
 </ul>
 
-<h2 id="hooks">The two hooks</h2>
+<h2 id="hooks">The breed hook, and what the worn side left open</h2>
 <ul>
     <li><strong>A breed may declare parts.</strong> Touches the breed format,
         <code>BreedSpecWriter</code>, the breed-file bakes and the breed designer, which is why
@@ -1029,10 +1082,9 @@
         <code>bands</code> on the gene's numbers &mdash; the <a href="breed-book.html#rimehart">Rimehart</a>
         is antlered and brow-tined that way, with no new format. This hook is for a
         part with no gene behind it.</li>
-    <li><strong>The worn side.</strong> Point <a href="item-horse-shoes.html">horse shoes</a> at
-        this layer rather than a bespoke one; gear stacks resolve to the same
-        <code>AttachedPart</code> list. Saddle pads follow. Not settled: whether a worn item may
-        ever replace a grown part &mdash; a helmet over a horn.</li>
+    <li><strong>A worn piece replacing a grown part.</strong> Not settled: whether a worn item
+        may ever hide or replace a grown part &mdash; a helmet over a horn. Today both are drawn,
+        the grown part first, and a grown part pokes through whatever is worn.</li>
 </ul>
 
 <div class="note" id="bone-wings">
@@ -1184,8 +1236,31 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; the lifted braid, the first worn piece with depth, has been photographed standing still and never seen moving; what is still unwatched is the draw order against the tack and the first body part's saddle zone, the antlers on screen, any cost against a herd, and the editors' new part rows and the designer's parts panel.</p>
+    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; the lifted braid, the first worn piece with depth, has been photographed standing still and never seen moving, and so has the worn side's debug block on the hooves; what is still unwatched is the draw order against the tack and the first body part's saddle zone, the antlers on screen, any cost against a herd, and the editors' new part rows and the designer's parts panel.</p>
 </div>
+
+<h3 id="open-worn-side">The worn side: a block on each hoof in stills, never seen moving</h3>
+<p>
+    <a href="#worn-side">The worn side</a> shipped on 2026-10-11 with a debug block as its only
+    piece, photographed that day standing, held at full stride and rearing. A picture is not a
+    pass, and no player can wear the block, so these are looked at with the first real piece
+    (<a href="item-horse-shoes.html">horse shoes</a>) or in a photo shoot:
+</p>
+<ul>
+    <li><strong>It moves with the leg.</strong> The shoot&rsquo;s stride was one held frame.
+        Walking, galloping, rearing and swimming: each block stays on its own foot and does not
+        swim along it.</li>
+    <li><strong>Which foot is which.</strong> The four blocks were one colour, so the stills
+        show a block on every foot but not that <code>HOOF_FRONT_LEFT</code> is the near fore.
+        The first piece worn on one foot only settles it.</li>
+    <li><strong>The sole against the ground.</strong> The block reaches a quarter unit under the
+        sole, so it sinks that far into a flat floor. Look for flicker on slabs, paths and
+        carpet, and at what shows under a lifted foot.</li>
+    <li><strong>Fading under a rider</strong> fades the block with the horse, and a glowing
+        horse&rsquo;s outline includes it.</li>
+    <li><strong>Small and large horses.</strong> The render scale is on the pose stack before
+        the layer runs, so the block should scale with the leg; read, not seen.</li>
+</ul>
 
 <h3 id="open-worn-braid">The lifted braid: photographed standing still, never seen moving</h3>
 <p>

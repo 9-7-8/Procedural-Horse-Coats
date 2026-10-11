@@ -1,0 +1,118 @@
+2026-10-11 00:49 - next-release: attached parts stage 5, the worn side and four hoof anchors (#140)
+(The time is the session's end.)
+
+ASKED
+-----
+1. "/next-release" - the only request. It ran procedures/next-release.txt: found the
+   next release (v0.5.047, the equipment release, milestone 44), found every open issue
+   already on a milestone, and built one unit, #140, by procedures/process-intake.txt.
+   The owner was not asked anything: the unit had no open call.
+
+DONE
+----
+#140 "Attached model parts - stage 5: the worn side" - commit a06ceb39. Closed.
+
+What was missing. Hard worn pieces (horse shoes first) are box-built and were to be drawn
+through a worn hook on AttachedPartLayer, which did not exist, and there was no anchor on
+a leg. The owner decided on 2026-10-09 that this is its own piece, built before horse
+shoes (#164): the hook and four hoof anchors, proved with a plain test box on a hoof.
+
+What was built.
+- common/gear/WornPart: one box-built piece on one horse, resolved - a Kind.BOXES row of
+  WornPieces, an ordinary AttachedPart, and the PartAnchor it hangs on. It refuses a
+  lifted row and a grown kind. WornPart.on(piece, part, anchors) hangs one part on
+  several anchors.
+- AttachedPartLayer: the per-part loop body became draw(part, anchor, ...), called for
+  the grown list (anchor = part.kind().anchor()) and then for the new
+  GeneticHorseRenderState.worn list (anchor = the WornPart's). Worn parts are not behind
+  parts.enabled. A foal draws none (PartKind.showsOnFoal is false for a worn kind).
+- PartAnchor: HOOF_FRONT_LEFT, HOOF_FRONT_RIGHT, HOOF_HIND_LEFT, HOOF_HIND_RIGHT, and
+  PartAnchor.hooves(). In the layer each walks root, then its leg bone, to the middle of
+  the sole (ADULT_HOOF_FRONT {-1, 9.99, 0.1}, ADULT_HOOF_HIND {-1, 9.99, 1.0}, x negated
+  on the right), read from the leg boxes in HdHorseModel.
+- PartKind.worn(), true for the one worn kind.
+- The proof piece, debug only: WornPieces.TEST_BLOCK (the first Kind.BOXES row) and
+  PartKind.TEST_BLOCK, built by parts/WornBlockGenerator: a block round the foot, the
+  worn floor (0.25) proud of the four walls and the sole, two units up the leg, as two
+  half-boxes so each unwraps inside its 16-texel sheet region. DebugPhotoShootClient
+  .testBlocks holds WornPart.testBlocks(colour) while the shot on stage has "block" in
+  its name; GeneticHorseRenderer copies it to the render state. Not an item.
+
+Proof.
+- Tests by name, all green: WornPartTest (new), WornPiecesTest, PartGeneratorTest,
+  GrownPartsListedTest, UndeadBreedsTest, BackSailGeneTest, CommonPortabilityTest.
+  WornPartTest was broken on purpose (PROUD 0.2 and the second half moved a unit): it
+  failed on "the block stands its lift off the foot", then the generator was restored.
+- :neoforge-26.1.2:build green; check-parity OK; :web:bakeDesignerAssets rebuilt
+  web.wasm (PartKind is reachable from the designer) and check-designer-boots OK.
+- Wiki bakes: verification and roadmap indexes, search index, agent text; check-links
+  and check-roadmap-execution OK.
+
+Pictures (a photo shoot, -PphotoShoot; six shots, shown to the owner, stills only):
+- 01-block-legs (chestnut, LEGS): a blue block on the near fore and both hind feet in
+  view, at the ground, a little wider than the leg.
+- 02-block-walk (LEGS, held at full stride): all four legs swung, a block on each foot,
+  turned with its leg.
+- 03-block-rear (SIDE, rearing): blocks on both lifted fore feet and on the hind feet.
+- 04-block-wide (WIDE): the whole horse, a block at each visible foot.
+- 05-block-offside-legs (grey, facing east, LEGS): the off side, blocks on its feet.
+- 06-block-walk-side (grey, SIDE, full stride): four blocks, one per foot.
+The live server was up with 0 players each time tests ran (checked read-only).
+
+DECIDED
+-------
+Calls made without the owner (all recorded on wiki/model-parts.html#worn-side):
+- A worn part names its own anchor (on WornPart), and a kind's anchor() stays the grown
+  part's place. One shoe mesh goes on four feet; four kinds per piece was the alternative.
+- A worn piece is still a PartKind and an AttachedPart, so it shares the mesh cache and
+  the draw code, as the treatment's P1 says (two sources, one renderer).
+- Worn parts ignore parts.enabled (the grown parts' switch) and gear.edges (a box has
+  depth already).
+- The block reaches the worn floor under the sole as well as round the walls.
+- There is no foal offset for a hoof anchor: nothing reaches it for a foal.
+Owner's earlier decisions this built on (2026-10-09, on #140): its own piece, before
+shoes, after #239; hard pieces are box-built.
+
+FOUND ON THE WAY
+----------------
+- No bug filed.
+- wiki/item-horse-shoes.html's "Suggested implementation" tab still shows an
+  illustrative HorseShoeLayer. Left alone: rewriting it is #164's, and a comment on #164
+  says so.
+- A mistake of this session: a long Bash heredoc holding Python with apostrophes failed
+  to parse and applied nothing. The patch was rewritten as a scratchpad file and run
+  from there (the existing bash-heredocs memory already says to).
+- Stills cannot tell which hoof anchor is which foot: the four blocks were one colour.
+  It is a check on the Verification tab, not a known fault.
+
+PROCEDURES
+----------
+- procedures/photograph-horses.txt: a shot with "block" in its name wears the debug test
+  block on all four hooves.
+- procedures/rebake.txt, row aa: a box-built WornPieces row has no mask, so its only
+  check is the tests.
+- Asked the three review questions of next-release, process-intake, end-session,
+  launch-game and close-a-check: nothing else was wrong or missing.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every gene, breed and
+  coat test not named above; the change adds an enum value to PartAnchor and PartKind,
+  and the tests that walk those enums were run by name.
+- No gametest was run: nothing server-side changed.
+- Nothing was seen in motion or in play. New Verification entry:
+  wiki/model-parts.html#open-worn-side (moves with the leg; which foot is which; the
+  sole against the ground; fade and outline; small and large horses).
+- The vanilla (non-HD) horse model was not photographed; its leg boxes are the same
+  numbers, read not seen.
+
+RELEASE
+-------
+Not offered. v0.5.047.1 (foundations and feet) still has #164 open, and #140 adds
+nothing a player can see.
+
+PICK UP FIRST
+-------------
+#164 Horse shoes, the last piece of v0.5.047.1, by procedures/next-release.txt (it hands
+to process-intake). It is size L and its treatment predates the worn side: read the
+comment on #164 dated 2026-10-11 first. The bugs #10, #31 and #36 still wait on checks.
