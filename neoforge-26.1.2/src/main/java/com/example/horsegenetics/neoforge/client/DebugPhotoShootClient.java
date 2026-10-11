@@ -38,6 +38,15 @@ public final class DebugPhotoShootClient {
      */
     public static volatile int testBoot;
 
+    /**
+     * The debug test block ({@code WornPieces.TEST_BLOCK}): one on each hoof while the
+     * shot on stage has {@code block} in its name, and none otherwise. Read by
+     * {@code GeneticHorseRenderer} into every horse's render state, so it is the whole of
+     * who "wears" it. Not an item: nothing a player does sets it.
+     */
+    public static volatile java.util.List<com.example.horsegenetics.common.gear.WornPart> testBlocks =
+            java.util.List.of();
+
     /** True while the shot on stage has {@code -walk} in its name: its horse is held mid-stride. */
     private static boolean walking;
 
@@ -98,6 +107,7 @@ public final class DebugPhotoShootClient {
         if (shot >= DebugPhotoShoot.SHOTS.size()) {
             done = true;
             testBoot = 0;
+            testBlocks = java.util.List.of();
             walking = false;
             mc.options.hideGui = false;
             if (edgesBefore != null) {
@@ -138,6 +148,9 @@ public final class DebugPhotoShootClient {
         String name = DebugPhotoShoot.SHOTS.get(i).name();
         com.example.horsegenetics.neoforge.ClientConfig.GEAR_EDGES.set(!name.endsWith("-flat"));
         testBoot = name.contains("boot") ? BOOT_COLOUR : 0;
+        testBlocks = name.contains("block")
+                ? com.example.horsegenetics.common.gear.WornPart.testBlocks(BOOT_COLOUR)
+                : java.util.List.of();
         walking = name.contains("-walk");
         server.execute(() -> {
             ServerPlayer sp = server.getPlayerList().getPlayer(id);

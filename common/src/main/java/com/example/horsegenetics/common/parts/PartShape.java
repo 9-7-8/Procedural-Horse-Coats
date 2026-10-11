@@ -104,6 +104,8 @@ public record PartShape(PartKind kind, int style, int size) {
             case EAR_FIN_RIGHT, EAR_FIN_LEFT -> EarFinSize.lengthFor(position);
             case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeSize.lengthFor(position);
             case BROW_RIDGE -> BrowRidgeSize.lengthFor(position);
+            // No ladder: a block is one height.
+            case TEST_BLOCK -> WornBlockGenerator.HEIGHT;
         };
     }
 

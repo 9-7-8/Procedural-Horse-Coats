@@ -418,6 +418,16 @@ public record AttachedPart(PartShape shape, float stretch, float girth, float ti
         return new AttachedPart(shape, shape.stretchTo(height), (float) width, 0f, UNDYED, UNDYED, false);
     }
 
+    /**
+     * The debug block the worn side is proved with ({@link PartKind#TEST_BLOCK}), in one
+     * colour. Not grown: {@code common/gear/WornPart} hangs it on a hoof.
+     *
+     * @param tint opaque ARGB
+     */
+    public static AttachedPart testBlock(int tint) {
+        return new AttachedPart(new PartShape(PartKind.TEST_BLOCK, 0, 0), 1f, 1f, 0f, tint, tint, false);
+    }
+
     /** {@code x} in {@code [0,1]}, clamped, to one of {@code n} equal buckets. */
     private static int bucket(double x, int n) {
         double c = x < 0.0 ? 0.0 : (x > 1.0 ? 1.0 : x);

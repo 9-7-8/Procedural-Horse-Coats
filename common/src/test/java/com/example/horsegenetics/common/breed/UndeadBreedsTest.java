@@ -398,6 +398,7 @@ class UndeadBreedsTest {
                         breed.id() + " grew ear fins");
             }
         }
-        assertEquals(PartKind.values().length, 22, "a new part kind: decide whether the skeleton grows it");
+        // 22 grown kinds, and one worn (TEST_BLOCK, #140): gear is not grown, so no pool takes it.
+        assertEquals(PartKind.values().length, 23, "a new part kind: decide whether the skeleton grows it");
     }
 }

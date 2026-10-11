@@ -71,6 +71,14 @@ public class GeneticHorseRenderState extends HorseRenderState {
     public List<AttachedPart> parts = List.of();
 
     /**
+     * <b>The box-built gear this horse wears</b>, each piece resolved to a part and the
+     * anchor it hangs on. Drawn by {@link AttachedPartLayer} after {@link #parts}, by
+     * the same code. Empty for a horse wearing none, which today is every horse outside
+     * a photo shoot: the debug block is the only box-built piece until horse shoes.
+     */
+    public List<com.example.horsegenetics.common.gear.WornPart> worn = List.of();
+
+    /**
      * <b>Whether grown parts are drawn at all</b> - {@code parts.enabled}, resolved
      * once per horse rather than read inside the per-part loop.
      *

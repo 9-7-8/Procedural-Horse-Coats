@@ -70,6 +70,8 @@ class PartGeneratorTest {
                 assertTrue(node.width() == node.girth() || node.tex() == PartSheet.MEMBRANE
                                 || (shape.kind().plates() && node.isRoot())
                                 || shape.kind().sabre() || shape.kind().earFin()
+                                // A worn block is two flat halves: one box that wide leaves its sheet region.
+                                || shape.kind().worn()
                                 || (shape.kind().ramHorn()
                                         && (shape.style() / RamHornGenerator.CURLS == RamHornGenerator.HORIZONTAL
                                         || shape.style() / RamHornGenerator.CURLS == RamHornGenerator.SCIMITAR)),

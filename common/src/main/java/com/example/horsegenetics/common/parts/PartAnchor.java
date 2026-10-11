@@ -1,5 +1,9 @@
 package com.example.horsegenetics.common.parts;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * <b>Where on the horse a part is rooted.</b>
  *
@@ -121,10 +125,35 @@ public enum PartAnchor {
      * further down the face than {@link #FOREHEAD}, so a unicorn horn still stands
      * behind whatever is here. It rides the head. The brow ridge (head-parts treatment).
      */
-    BROW
+    BROW,
 
-    // The next anchors, named here only so the shape of the enum is obvious and
-    // NOT declared until something draws them: WITHERS_PAIR (wings), HOOF_x4
-    // (feathering, shoes). Each is one row in the client's offset table and one
-    // entry here.
+    /**
+     * The middle of the sole of the <b>near fore</b> hoof - the left front leg, model
+     * {@code +x}. The first anchor on a leg: it rides that leg's own bone, so the stride
+     * and the rear carry it as the head carries a horn. A part here stands up from the
+     * ground round the foot. Nothing grows here; it is where a horse is shod, and the
+     * first of the anchors the worn side hangs things on ({@code common/gear/WornPart}).
+     */
+    HOOF_FRONT_LEFT,
+
+    /** The off fore hoof, model {@code -x}. */
+    HOOF_FRONT_RIGHT,
+
+    /** The near hind hoof, model {@code +x}. */
+    HOOF_HIND_LEFT,
+
+    /** The off hind hoof, model {@code -x}. */
+    HOOF_HIND_RIGHT;
+
+    // The next anchor, named here only so the shape of the enum is obvious and NOT
+    // declared until something draws it: WITHERS_PAIR (wings). Each is one row in
+    // the client's offset table and one entry here.
+
+    private static final List<PartAnchor> HOOVES = Collections.unmodifiableList(Arrays.asList(
+            HOOF_FRONT_LEFT, HOOF_FRONT_RIGHT, HOOF_HIND_LEFT, HOOF_HIND_RIGHT));
+
+    /** The four hoof anchors: near fore, off fore, near hind, off hind. */
+    public static List<PartAnchor> hooves() {
+        return HOOVES;
+    }
 }

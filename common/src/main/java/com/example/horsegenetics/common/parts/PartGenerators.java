@@ -57,6 +57,7 @@ public final class PartGenerators {
             case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeGenerator.generate(
                     shape.size(), shape.kind() == PartKind.CHEEK_SPIKE_LEFT);
             case BROW_RIDGE -> BrowRidgeGenerator.generate(shape.style(), shape.size());
+            case TEST_BLOCK -> WornBlockGenerator.generate();
         };
     }
 

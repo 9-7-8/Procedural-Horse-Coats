@@ -151,7 +151,8 @@ public final class DebugPhotoShoot {
     /**
      * Stand the horse up on its hind legs and hold it there for the picture. A shot whose
      * name has {@code -walk} in it is held mid-stride instead, by the client half; one
-     * with {@code boot} in it wears the debug test boot on its near fore and hind legs.
+     * with {@code boot} in it wears the debug test boot on its near fore and hind legs, and
+     * one with {@code block} in it the debug test block on all four hooves.
      */
     public static java.util.function.Consumer<Horse> rearing() {
         return horse -> horse.setStanding(100000);

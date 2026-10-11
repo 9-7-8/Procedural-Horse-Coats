@@ -38,7 +38,7 @@ public final class WornPieces {
     public enum Kind {
         /** A region of the horse's own mesh, lifted off the skin, with a rim round its painted outline. */
         LIFTED,
-        /** Boxes built in code and hung on an anchor. Drawn by the worn side of the attached parts, not from a mask. */
+        /** Boxes built in code and hung on an anchor ({@link WornPart}). Drawn by the worn side of the attached parts, not from a mask. */
         BOXES
     }
 
@@ -98,7 +98,16 @@ public final class WornPieces {
     public static final Piece TEST_BOOT_HIND =
             lifted("test_boot_hind", WornRule.FLOOR, band(Part.LEFT_HIND_LEG, BOOT_FROM, BOOT_TO), true);
 
-    private static final List<Piece> ALL = table(BRAID_MANE, BRAID_TAIL, TEST_BOOT_FORE, TEST_BOOT_HIND);
+    /**
+     * Debug only, and the first box-built row: a plain block round each foot, to
+     * prove that boxes hung on a hoof anchor ride the leg before horse shoes are
+     * built on that drawing. Its boxes are {@code parts.WornBlockGenerator}'s, and
+     * {@link WornPart#testBlocks} hangs one on every hoof.
+     */
+    public static final Piece TEST_BLOCK = new Piece("test_block", Kind.BOXES, WornRule.FLOOR, null, null, true);
+
+    private static final List<Piece> ALL =
+            table(BRAID_MANE, BRAID_TAIL, TEST_BOOT_FORE, TEST_BOOT_HIND, TEST_BLOCK);
 
     private WornPieces() {
     }

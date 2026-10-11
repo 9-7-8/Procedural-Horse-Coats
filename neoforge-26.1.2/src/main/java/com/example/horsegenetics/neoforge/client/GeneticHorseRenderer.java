@@ -191,6 +191,9 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             geneticState.drawParts = ClientConfig.parts()
                     && withinPartsDistance(renderState);
             geneticState.drawPartGlow = ClientConfig.partsGlow();
+            // Box-built gear, resolved here like the parts. Only the photo shoot's
+            // debug block so far; horse shoes resolve from the hoof slots here.
+            geneticState.worn = DebugPhotoShootClient.testBlocks;
         }
     }
 

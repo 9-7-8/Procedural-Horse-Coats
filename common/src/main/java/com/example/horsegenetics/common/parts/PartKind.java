@@ -1,8 +1,9 @@
 package com.example.horsegenetics.common.parts;
 
 /**
- * <b>What a gene or a breed asks for.</b> One value per kind of grown part; the
- * client maps a kind to a render pass, and {@code common/} never sees a mesh.
+ * <b>What a gene or a breed asks for</b> - or, since the worn side, a piece of gear
+ * ({@link #worn()}). One value per kind of part; the client maps a kind to a render
+ * pass, and {@code common/} never sees a mesh.
  *
  * <p>A kind nothing draws would be a promise the game does not keep, so kinds
  * arrive with their geometry, not ahead of it. The antlers were the first test of
@@ -123,7 +124,16 @@ public enum PartKind {
      * A brow ridge - the brow ridge locus. One low wide bar of bone across the front
      * of the skull ({@link BrowRidgeGenerator}). Centred, so one kind.
      */
-    BROW_RIDGE(PartAnchor.BROW, PartSheet.BONE);
+    BROW_RIDGE(PartAnchor.BROW, PartSheet.BONE),
+
+    /**
+     * Debug only, and <b>worn, not grown</b>: a plain block round the foot
+     * ({@link WornBlockGenerator}), the piece that proves the worn side - that a box
+     * hung on a hoof anchor rides the leg. No gene grants it and no player can wear it.
+     * Its anchor here is only the first hoof: a worn piece is hung wherever its wearer
+     * says ({@code common/gear/WornPart}), so one kind serves all four feet.
+     */
+    TEST_BLOCK(PartAnchor.HOOF_FRONT_LEFT, PartSheet.BONE);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -173,6 +183,8 @@ public enum PartKind {
             case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeGenerator.styles();
             // The plain ridge, and form x bump size.
             case BROW_RIDGE -> BrowRidgeGenerator.styles();
+            // One: a block is a block.
+            case TEST_BLOCK -> 1;
         };
     }
 
@@ -198,6 +210,7 @@ public enum PartKind {
             case EAR_FIN_RIGHT, EAR_FIN_LEFT -> EarFinSize.classes();
             case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeSize.classes();
             case BROW_RIDGE -> BrowRidgeSize.classes();
+            case TEST_BLOCK -> 1;
         };
     }
 
@@ -215,6 +228,17 @@ public enum PartKind {
      */
     public boolean showsOnFoal() {
         return this == HORN || earFin();
+    }
+
+    /**
+     * Is this a piece a horse <b>wears</b> rather than grows? A worn kind is never
+     * granted by a gene ({@code GrownParts} does not know it), is hung by
+     * {@code common/gear/WornPart} on whichever anchor its wearer names, and stands off
+     * the horse by the worn rule ({@code common/gear/WornRule}) rather than by anything
+     * a grown part obeys. A foal wears no gear, so no worn kind shows on one.
+     */
+    public boolean worn() {
+        return this == TEST_BLOCK;
     }
 
     /**
@@ -237,6 +261,8 @@ public enum PartKind {
             case TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT -> PartSheet.SOLID;
             // Nor the ear fins, the cheek spikes or the brow ridge.
             case EAR_FIN_RIGHT, EAR_FIN_LEFT, CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT, BROW_RIDGE -> PartSheet.SOLID;
+            // Nothing worn glows yet.
+            case TEST_BLOCK -> PartSheet.SOLID;
         };
     }
 
@@ -260,7 +286,8 @@ public enum PartKind {
             case HORN, RAM_HORN_RIGHT, RAM_HORN_LEFT, DRAGON_HORN_RIGHT, DRAGON_HORN_LEFT, SPINES,
                  PLATES_RIGHT, PLATES_LEFT, NARWHAL, TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT,
                  // An ear fin has no membrane between its rays yet (head-parts treatment).
-                 EAR_FIN_RIGHT, EAR_FIN_LEFT, CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT, BROW_RIDGE -> 0;
+                 EAR_FIN_RIGHT, EAR_FIN_LEFT, CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT, BROW_RIDGE,
+                 TEST_BLOCK -> 0;
         };
     }
 
@@ -350,6 +377,7 @@ public enum PartKind {
             case EAR_FIN_RIGHT, EAR_FIN_LEFT -> "Ear fins";
             case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> "Cheek spikes";
             case BROW_RIDGE -> "Brow ridge";
+            case TEST_BLOCK -> "Test block";
         };
     }
 }
