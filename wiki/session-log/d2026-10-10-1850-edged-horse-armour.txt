@@ -1,0 +1,96 @@
+2026-10-10 18:50 - next-release: worn gear is 3D, piece 2 - horse armour is drawn edged (#240)
+(the time is about when the session started)
+
+ASKED
+-----
+1. "/next-release" (the owner's only message). Came to: the milestones checked, #240
+   picked and built by process-intake, closed, and the session ended.
+
+DONE
+----
+Housekeeping (next-release steps 1-2). Last tag v0.5.046; the next release is the open
+milestone v0.5.047 (the equipment release). Every open issue already had a milestone and
+v0.5.046's milestone was closed, so nothing moved. The two NOT COMPILED commits since the
+tag (79aff1cb, 4d6e089c) are older than several local builds. #10, #31 and #36 are fixed
+and waiting on their checks (their last comments say so) and were skipped.
+
+#240, Worn gear is 3D - piece 2: edged horse armour. Commit 33933253. Closed.
+- What was missing: horse armour on our horses was vanilla's shell, the body mesh
+  inflated 0.1 with nothing at its edge.
+- What changed: client/gear/BardingLayer replaces the SimpleEquipmentLayer that
+  GeneticHorseRenderer registered for HORSE_BODY. It reads the item's equipment asset
+  layers, ClientHooks.getArmorTexture and IClientItemExtensions.getArmorLayerTintColor
+  exactly as EquipmentLayerRenderer.renderLayers does (read in the 26.1.2 sources), and
+  draws each layer as a WornMeshes mesh. The mesh is cut from the body mesh baked with NO
+  inflation (createBodyMesh(CubeDeformation.NONE), 64x64, MeshTransformer.scaling(1.1F),
+  as LayerDefinitions builds HORSE_ARMOR) at WornRule.FLOOR, so the rim reaches the coat
+  and the lift passes the 0.25 rule; lifting vanilla's inflated model would have needed
+  0.15. The layer owns that model and calls setupAnim on it before walking its bones.
+  The glint is the same quads submitted through RenderTypes.armorEntityGlint (the GLINT
+  pipeline draws at depth EQUAL). A fading horse fades the armour here (entityTranslucent
+  plus RiderFade.fade), as HarnessLayer does.
+- client/gear/BardingRule is the pure fallback decision: gear.edges off, a per-item model
+  swap (getGenericArmorModel), a trim, no drawn layer, or any layer whose mesh is flat
+  sends the WHOLE item to the vanilla layer kept inside BardingLayer.
+- Proof: :neoforge-26.1.2:test --tests '*BardingRuleTest' 5 green; broken on purpose
+  (flatLayers > 99) and "one layer with no mesh sends the whole item to vanilla" went
+  red; restored. :neoforge-26.1.2:build green; check-parity OK.
+- Pictures (photo shoot, 12 shots, shown to the owner): iron, gold, diamond, blue-dyed
+  leather each beside a -flat twin; diamond with a glint; iron with saddle and storage
+  harness; gold over dorsal spines; iron from behind. Every suit sits on the body, neck,
+  head and legs; leather's three colours are right; saddle and harness are clear of the
+  armour; spines poke through; no "drawn flat" line was logged, so no vanilla sheet trips
+  RimMesh.QUAD_LIMIT. A 2x zoom of the diamond pair shows the edged suit thicker with
+  walls at the chest and ear bands. At whole-horse distance edged and flat are hard to
+  tell apart. The glint cannot be judged from a still. Nothing was seen moving.
+- Docs: wiki/horse-gear.html#barding-edged (Coding), #verify-barding (Verification),
+  wiki/compatibility.html#armour, wiki/decisions.html, wiki/model-parts.html.
+
+DECIDED
+-------
+Calls made without the owner (all recorded on wiki/horse-gear.html#barding-edged):
+- The mesh is cut from an uninflated body mesh baked by the layer, not from vanilla's
+  HORSE_ARMOR layer definition. Cost: a pack or mod that replaces that layer definition
+  is not followed.
+- An item with an armour trim, or whose item swaps the armour model, is drawn by
+  vanilla's path (the treatment's Recommended fallback named only unreadable textures
+  and the face limit).
+- The fallback is per item, never per layer.
+- Edged armour adds nothing to a glowing horse's outline (custom geometry carries no
+  outline colour). Left as a Verification question for the owner.
+- The treatment's Open on the glint: it is drawn on the rim too, by resubmitting the mesh.
+The owner's standing decisions (#223) were followed as written: 0.25, horses only, all
+armour, one switch.
+
+FOUND ON THE WAY
+----------------
+- Long bash heredocs holding apostrophes failed to parse, twice; the files were written
+  with the Write tool instead (the existing memory says to).
+- Where the neck and chest boxes meet, the two lifted shells overlap and show a ridge in
+  the close-up. Not filed: it is on the Verification list to judge in motion.
+- No bug filed.
+
+PROCEDURES
+----------
+- procedures/photograph-horses.txt: the dresser list gains armour(item, rgb, glint) and
+  saddled(), both now in server/DebugPhotoShoot.
+- Asked the three review questions; nothing else was wrong, missing or made untrue.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite (common/ did not change; it would re-check the coat goldens,
+  RimMeshTest and RimOutlineTest among everything else). Gametests were not run.
+- Nothing in game beyond stills. wiki/horse-gear.html#verify-barding lists: motion,
+  whether the edge reads at riding distance, the glint, fading under a rider, a generated
+  metal's armour and another mod's (ATM11), model-swap and trim fallback, armour over body
+  plates, a resource-pack retexture, a glowing horse, frame rate in a pasture, and the
+  switch off.
+
+RELEASE
+-------
+Not offered. v0.5.047.1 (foundations and feet) still needs #241, #140 and #164.
+
+PICK UP FIRST
+-------------
+#241 (worn gear is 3D, piece 3: the worn-piece table and a leg proof), by /next-release,
+which hands it to process-intake. No owner call is needed before it.

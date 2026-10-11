@@ -1123,6 +1123,16 @@
     be a design mistake on their part, but it is the thing to check first if an
     armour-only mod somehow breaks coats.
 </p>
+<p>
+    <strong>Since 2026-10-10 their armour is redrawn on our horses.</strong> The layer is
+    now this mod&rsquo;s <a href="horse-gear.html#barding-edged"><code>BardingLayer</code></a>:
+    it reads the other mod&rsquo;s equipment asset, texture and tint exactly as vanilla
+    would, then draws the armour a quarter unit off the coat with an edge. An item that
+    swaps the armour model (<code>getGenericArmorModel</code>), carries a trim, or has a
+    texture that cannot be read or is too noisy to edge is drawn by vanilla&rsquo;s path
+    untouched. The client option <code>gear.edges</code> turns the redraw off for
+    everything.
+</p>
 
 <h2 id="bales">Bale mods &mdash; a horse eats any hay bale</h2>
 

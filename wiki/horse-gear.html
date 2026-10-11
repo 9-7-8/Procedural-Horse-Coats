@@ -827,6 +827,60 @@
             the journal empty.</td></tr>
 </table>
 
+<h2 id="barding-edged">Barding is drawn edged: <code>client/gear/BardingLayer</code></h2>
+<p>
+    Since 2026-10-10 (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/240">#240</a>,
+    piece 2 of <a href="model-parts.html#worn-geometry">worn geometry</a>) horse armour on a
+    horse this mod draws is not vanilla&rsquo;s shell. <code>GeneticHorseRenderer</code>
+    registers <code>BardingLayer</code> where it used to register a
+    <code>SimpleEquipmentLayer</code> for <code>HORSE_BODY</code>, and that layer draws
+    every suit &mdash; vanilla&rsquo;s, another mod&rsquo;s, a generated metal&rsquo;s
+    &mdash; a quarter unit proud of the coat with a wall where the painted plate ends.
+    Donkeys, mules and the vanilla undead horses are not drawn by this mod and keep
+    vanilla&rsquo;s armour.
+</p>
+<ul>
+    <li><strong>It reads the armour as vanilla does.</strong> The layers come from the
+        item&rsquo;s equipment asset, each texture through
+        <code>ClientHooks.getArmorTexture</code>, each colour through
+        <code>IClientItemExtensions.getArmorLayerTintColor</code> with the dye as the
+        fallback, and a colour of zero skips the layer: the body of
+        <code>EquipmentLayerRenderer.renderLayers</code>. So the three-colour leather
+        and a generated metal&rsquo;s <code>color_when_undyed</code> arrive unchanged.
+        Each layer is then its own <code>WornMeshes</code> mesh at the same lift.</li>
+    <li><strong>The mesh is cut from the bare horse.</strong> Vanilla&rsquo;s
+        <code>HORSE_ARMOR</code> model is the body mesh inflated by 0.1; a rim on that
+        would stop short of the coat. The layer bakes the same mesh with no inflation
+        (<code>createBodyMesh(CubeDeformation.NONE)</code>, 64 by 64, scaled 1.1 as
+        <code>LayerDefinitions</code> scales it) and lifts it the whole
+        <code>WornRule.FLOOR</code>. Inflation moves no UV, so every armour texture fits.
+        The model is the layer&rsquo;s own and is posed there (<code>setupAnim</code>)
+        before its bones are walked.</li>
+    <li><strong>The glint is the same quads a second time</strong> through
+        <code>RenderTypes.armorEntityGlint()</code>, whose pipeline draws where depth is
+        equal, so it lies on the faces and the walls alike. Once per suit, as vanilla.</li>
+    <li><strong>A fading horse fades its armour here</strong>, as
+        <code>HarnessLayer</code> does: <code>entityTranslucent</code> and the alpha on
+        the tint. <code>FadingGearMixin</code> still covers the saddle, and armour on the
+        fallback path.</li>
+    <li><strong>When it steps aside</strong> is one pure rule,
+        <code>client/gear/BardingRule</code>, pinned by <code>BardingRuleTest</code>:
+        the <code>gear.edges</code> switch is off, another mod swapped the armour model
+        for that item, the stack carries a trim, or any drawn layer has no mesh (an
+        unreadable texture, or an edge over <code>RimMesh.QUAD_LIMIT</code>). The whole
+        item then goes to the vanilla layer the mod used to register, kept inside this
+        one. Never layer by layer.</li>
+    <li><strong>Known differences from vanilla&rsquo;s draw.</strong> Custom geometry
+        carries no outline colour, so edged armour adds nothing to a glowing
+        horse&rsquo;s outline. A pack or mod that replaces the <code>HORSE_ARMOR</code>
+        layer definition itself is not followed.</li>
+</ul>
+<p>
+    This is a deliberate, looks-only exception to &ldquo;vanilla mechanics stay
+    intact&rdquo; (owner, 2026-10-09). No behaviour of armour changes, and the client
+    switch restores vanilla&rsquo;s drawing.
+</p>
+
 <h3 id="gear-leaves">What the other slots do when a horse leaves</h3>
 <p>
     Fixed 2026-10-08 (#218). A horse <strong>sold</strong> to a cowboy or the trader, or
@@ -1571,9 +1625,48 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         <strong>Dress</strong> window, a real container menu with the player's inventory
         beside the doll, and nothing about it has been opened in a game. Since 2026-10-08 a
         horse carries a <strong>chest on each flank</strong>, proven by a gametest and a
-        photo shoot and never opened, loaded or ridden by a player.
+        photo shoot and never opened, loaded or ridden by a player. Since 2026-10-10
+        <strong>horse armour is drawn edged</strong>, photographed standing still and
+        never seen moving, fading, glinting or on another mod&rsquo;s armour.
     </p>
 </div>
+
+<h3 id="verify-barding">Edged horse armour (2026-10-10, NOT played)</h3>
+<p>
+    Horse armour is redrawn a quarter unit proud with an edge; see
+    <a href="#barding-edged">the Coding tab</a>. A photo shoot the same day showed iron,
+    gold, diamond and blue-dyed leather on standing horses: every suit in place on the
+    body, neck, head and legs, leather&rsquo;s three colours right, the saddle and the
+    storage harness clear of the armour, dorsal spines poking through, and no
+    &ldquo;drawn flat&rdquo; line in the log for any vanilla texture. Beside its
+    <code>-flat</code> twin the edged suit is visibly thicker close up (the chest, the
+    ear bands); from a whole-horse distance the two are hard to tell apart. A picture is
+    not a pass. Still to look at:
+</p>
+<ul>
+    <li><strong>Moving.</strong> Walk, gallop, rear and graze: the armour stays on the
+        bones and nothing shimmers against the coat or between the neck and chest
+        shells, where the two boxes&rsquo; lifted faces overlap.</li>
+    <li><strong>Does the edge read at all</strong> at riding distance, or does 0.25 want
+        raising for armour? (Owner&rsquo;s eye.)</li>
+    <li><strong>The enchantment glint</strong> on an enchanted suit: a still showed no
+        glint that could be judged. It should shimmer on faces and walls alike.</li>
+    <li><strong>Fading under a rider</strong> looking down: the armour fades with the
+        horse and does not vanish or stay solid.</li>
+    <li><strong>A generated modded-metal armour</strong>, and one other mod&rsquo;s
+        armour from the ATM11 instance; and an item that swaps the model or carries a
+        trim falls back to vanilla&rsquo;s look without an error.</li>
+    <li><strong>Armour over body plates</strong> (spines were photographed; plates were
+        not).</li>
+    <li><strong>A resource pack that retextures armour:</strong> the edge follows the new
+        texture after F3+T.</li>
+    <li><strong>A glowing horse</strong> (spectral arrow): the outline is the
+        horse&rsquo;s alone; decide whether that is acceptable.</li>
+    <li><strong>A pasture of armoured horses:</strong> frame rate against
+        <code>gear.edges</code> off.</li>
+    <li><strong><code>gear.edges</code> off</strong> looks exactly like the last
+        release.</li>
+</ul>
 
 <h3 id="verify-packs">Chests on a horse (2026-10-08, NOT played)</h3>
 <p>

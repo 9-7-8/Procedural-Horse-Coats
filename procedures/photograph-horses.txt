@@ -82,6 +82,8 @@ STEPS
    flank; facingEast() turns the horse round, so a SIDE camera sees its off side;
    harness(item, rgb) puts a storage harness on, dyed, or undyed for -1;
    braids(maneRgb, tailRgb) works a rescuing braid into each (-1 undyed, -2 none).
+   armour(item, rgb, glint) puts horse armour on (rgb dyes leather, -1 leaves it; glint
+   adds an enchantment glint, which a still cannot show); saddled() adds a saddle.
    A lifted worn piece beside its flat self: name a second shot the same but ending in
    "-flat". The client half takes any shot so named with gear.edges off (in memory
    only) and puts the setting back when the shoot ends, so one launch gives both. The
