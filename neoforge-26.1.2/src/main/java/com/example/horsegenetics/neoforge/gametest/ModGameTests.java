@@ -2309,7 +2309,8 @@ public final class ModGameTests {
         register(event, environment, UNDEAD_KEEP_VANILLA, 100);
         register(event, environment, UNDEAD_OFF_BY_DEFAULT, 100);
         register(event, environment, UNDEAD_TEST_COMMAND, 300);
-        registerAlone(event, ORDER_STAY_WALKS_BACK, 300);
+        // Its own 300 ticks, after the wait for the field's forced chunks (issues #70, #245).
+        registerAlone(event, ORDER_STAY_WALKS_BACK, 1300);
         register(event, environment, ORDER_YIELDS_TO_NEEDS, 100);
         register(event, environment, ORDER_CLEARS, 100);
         // Twenty-five ticks to be founded, then the gate is read once.
@@ -2877,32 +2878,47 @@ public final class ModGameTests {
     }
 
     private static void orderStayWalksBack(GameTestHelper helper) {
-        aloneOnClearGround(helper);
+        keepTicking(helper);
         net.minecraft.world.entity.player.Player owner = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
-        // Beside the structure, not on it: the harness stands each test on a one-block
-        // pedestal (its test-instance block), and a horse ordered up there and pushed off
-        // can never climb back - which is right, and not what this test is about.
-        net.minecraft.world.entity.animal.equine.Horse horse =
-                orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.STAY, new BlockPos(2, 0, 2));
-        BlockPos anchor = com.example.horsegenetics.neoforge.server.HorseOrdering.groundAt(helper.getLevel(), horse
-                .getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get()).anchor().orElseThrow());
-        // Three blocks, and toward the structure rather than away: a test that succeeds
-        // discards every entity within one block of its structure (GameTestInfo.succeed),
-        // and the grid puts the next one six blocks along - a horse moved five landed in
-        // that sweep.
-        horse.snapTo(horse.getX(), horse.getY(), horse.getZ() - 3, horse.getYRot(), 0F);
+        net.minecraft.world.entity.animal.equine.Horse[] spawned = {null};
+        BlockPos[] spot = {null};
         int[] stayTicks = {0};
-        helper.runAfterDelay(2L, () -> {
-            double dx0 = horse.getX() - (anchor.getX() + 0.5);
-            double dz0 = horse.getZ() - (anchor.getZ() + 0.5);
-            if (dx0 * dx0 + dz0 * dz0 < 2.5 * 2.5) {
-                throw new GameTestAssertException(Component.literal("the horse did not stay moved ("
-                        + Math.sqrt(dx0 * dx0 + dz0 * dz0) + " from its spot) - the premise is broken"), 0);
-            }
-        });
+        boolean[] moved = {false};
         boolean[] headedHome = {false};
         boolean[] plain = {false};
         helper.succeedWhen(() -> {
+            if (spawned[0] == null) {
+                // Nothing is spawned until the field's chunks tick (issue #245): the horse
+                // stands two blocks from the structure and is moved three more, so it is
+                // often in a neighbour chunk, and one not ticking yet held it frozen at
+                // age 1 for the whole budget.
+                fieldTicks(helper);
+                aloneOnClearGround(helper);
+                // Beside the structure, not on it: the harness stands each test on a one-block
+                // pedestal (its test-instance block), and a horse ordered up there and pushed off
+                // can never climb back - which is right, and not what this test is about.
+                spawned[0] = orderedHorse(helper, owner, com.example.horsegenetics.common.care.HorseOrder.STAY,
+                        new BlockPos(2, 0, 2));
+                spot[0] = com.example.horsegenetics.neoforge.server.HorseOrdering.groundAt(helper.getLevel(), spawned[0]
+                        .getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get()).anchor().orElseThrow());
+                // Three blocks, and toward the structure rather than away: a test that succeeds
+                // discards every entity within one block of its structure (GameTestInfo.succeed),
+                // and the grid puts the next one six blocks along - a horse moved five landed in
+                // that sweep.
+                spawned[0].snapTo(spawned[0].getX(), spawned[0].getY(), spawned[0].getZ() - 3, spawned[0].getYRot(), 0F);
+            }
+            net.minecraft.world.entity.animal.equine.Horse horse = spawned[0];
+            BlockPos anchor = spot[0];
+            // The premise, read once the horse has ticked twice where it was put.
+            if (!moved[0] && horse.tickCount >= 2) {
+                moved[0] = true;
+                double dx0 = horse.getX() - (anchor.getX() + 0.5);
+                double dz0 = horse.getZ() - (anchor.getZ() + 0.5);
+                if (dx0 * dx0 + dz0 * dz0 < 2.5 * 2.5) {
+                    helper.fail("the horse did not stay moved (" + Math.sqrt(dx0 * dx0 + dz0 * dz0)
+                            + " from its spot) - the premise is broken");
+                }
+            }
             // A plain horse, once founded (issue #40): a founding roll that hunts horses
             // (Ade/Ade, Aae/Aae, ...) takes any horse within sixteen blocks, and a fight
             // out-ranks Stay by design - so it never stood long enough, or never came
@@ -2934,7 +2950,9 @@ public final class ModGameTests {
                         + ", target " + nav.getTargetPos() + ", anchor " + anchor
                         + ", at " + horse.blockPosition() + String.format(" (%.2f across, dy %.2f)",
                                 Math.sqrt(hx * hx + hz * hz), horse.getY() - anchor.getY())
-                        + ", onGround " + horse.onGround() + ", navDone " + nav.isDone()
+                        + ", onGround " + horse.onGround() + ", chunkTicking "
+                        + helper.getLevel().areEntitiesActuallyLoadedAndTicking(horse.chunkPosition())
+                        + ", navDone " + nav.isDone()
                         + ", path " + (nav.getPath() == null ? "none" : nav.getPath().getTarget()
                                 + " " + nav.getPath().getNextNodeIndex() + "/" + nav.getPath().getNodeCount())
                         + ", order " + horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_ORDER.get())
