@@ -9,6 +9,7 @@ wiki/ai-setup.html#what	all	What it does
 wiki/api-notes.html#at-overrides	all	An access transformer widens a declaration, not its overrides
 wiki/api-notes.html#block-models	all	Custom block models — everything older than 1.21.4 is wrong
 wiki/api-notes.html#createpath-is-not-a-probe	all	createPath is not a clean probe: it can answer with the path the mob is already on, or with null
+wiki/api-notes.html#custom-geometry-on-a-bone	all	Geometry that is not a model: submitCustomGeometry
 wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
 wiki/api-notes.html#cutout-no-blend	all	A cutout pipeline ignores your alpha, so a tint cannot fade anything
 wiki/api-notes.html#deferred-submit-setupanim	all	A submitted model is drawn later, and setupAnim runs then — not at the submit
@@ -3535,6 +3536,13 @@ wiki/model-parts.html#spine-anchor	coding	The spine anchor
 wiki/model-parts.html#three-tiers	coding	The rule that keeps a herd cheap
 wiki/model-parts.html#translucent-regions	coding	See-through regions are data on the kind
 wiki/model-parts.html#what-you-see	gameplay	What a player sees
+wiki/model-parts.html#worn-braid	coding	The first piece: the braid
+wiki/model-parts.html#worn-cache	coding	Its own cache, with a cap
+wiki/model-parts.html#worn-draw	coding	Drawn by hand, on the model’s own bones
+wiki/model-parts.html#worn-edges	gameplay	Gear a horse wears has depth
+wiki/model-parts.html#worn-geometry	coding	Worn geometry: nothing a horse wears is flat
+wiki/model-parts.html#worn-rim	coding	The rim builder
+wiki/model-parts.html#worn-switch	coding	The switch
 wiki/paint-order.html#exception	coding	The one gene the order does not describe
 wiki/paint-order.html#icons	coding	Where the pictures come from
 wiki/paint-order.html#one-order	coding	There is one order, and it is derived

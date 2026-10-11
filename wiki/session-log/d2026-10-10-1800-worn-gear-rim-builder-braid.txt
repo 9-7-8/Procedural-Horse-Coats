@@ -1,0 +1,143 @@
+2026-10-10 18:00 - next-release: worn gear is 3D, piece 1 - the rim builder and a lifted braid (#239)
+(The time is the session's start, to the nearest few minutes.)
+
+ASKED
+-----
+1. "/next-release" (the owner ran the command with no arguments).
+   -> procedures/next-release.txt was followed. Housekeeping found nothing to do: every
+      open issue had a milestone, the last tag's milestone (v0.5.046) was closed, and the
+      two NOT COMPILED commits (79aff1cb, 4d6e089c) were already older than a local build
+      (84bf3803). The next release is v0.5.047, the equipment release. No bug on it had
+      work left (#10, #31 and #36 are fixed and wait on their checks), so the unit was the
+      first piece of v0.5.047.1: #239, built by procedures/process-intake.txt.
+No other request was made, and no question was put to the owner.
+
+DONE
+----
+#239 "Worn gear is 3D - piece 1: the rim builder, the rule and the braid" (size L, parent
+#223). Code commit 5663de85. Closed by that commit.
+
+What was missing: everything a horse wears that "wraps" it was the horse's own mesh
+drawn a second time through a mask, exactly coincident with the coat. The owner ruled on
+2026-10-09 that nothing worn may be paper-thin. There was no code that gave a texture
+thickness.
+
+What was built:
+- common/gear/RimOutline: the boundary between painted and unpainted texels on one face,
+  merged into straight runs. It is also asked about the texel just beyond the face on
+  each side, which is how a caller says what lies past the face's end.
+- common/gear/RimMesh: one baked box (its faces as plain floats) plus a texture's painted
+  texels -> quads. Each touched face is moved out by the lift and grown sideways by the
+  same amount, so a box's lifted faces still meet at its corners. One wall per run goes
+  from the lifted face down to the skin, textured along the middle of the texels it
+  borders (so it takes their colour). No wall is built where the piece carries on round
+  a corner of the box: the neighbouring face is found geometrically on the box, not by
+  position on the sheet.
+- common/gear/WornRule: FLOOR = 0.25 model units; lift() refuses anything under it.
+- common/gear/WornCache: a capped least-recently-used cache.
+- neoforge client/gear/WornMeshes: walks any baked ModelPart tree (ModelPart.visit),
+  reads any pack texture's pixels, caches per (texture, model root by identity, lift),
+  cap 64, and draws through submitCustomGeometry after walking the pose stack down the
+  bone chain. Falls back to "flat" (the caller draws the old way) for an unreadable
+  texture or a mesh over RimMesh.QUAD_LIMIT (4096), with one log line. Cleared in
+  CoatAssetReload beside the coats.
+- BraidLayer: draws the lifted mesh at WornRule.FLOOR when ClientConfig gear.edges is on,
+  and its old flat submitModel when it is off or no mesh exists.
+- ClientConfig: gear.edges, boolean, default true, safe accessor gearEdges().
+- Photo shoot tool: DebugPhotoShoot.braids(maneRgb, tailRgb); DebugPhotoShootClient takes
+  a shot whose name ends "-flat" with gear.edges off (in memory) and restores it.
+
+Proof:
+- ./gradlew :common:test --tests '*RimOutlineTest' --tests '*RimMeshTest'
+  --tests '*WornCacheTest' --tests '*CommonPortabilityTest' --tests '*PartGeneratorTest'
+  green (8, 8, 4, 4 and 23 tests).
+- RimMeshTest was broken on purpose (the neighbour lookup made to answer "unpainted", and
+  the wall winding flipped): 4 of its 8 tests failed. Restored from a copy.
+- ./gradlew :neoforge-26.1.2:build green; check-parity OK; check-designer-boots OK;
+  check-links OK; bake-config-keys wrote the key with HOME model-parts.html#worn-edges.
+- The dev client booted with the new key (it was written into run/phc/client.toml) and
+  the shoot's log had no /ERROR] line. No dedicated-server boot was run: the key is in
+  ClientConfig, which a dedicated server does not load.
+- #223's UNVERIFIED list: 1 and 2 answered by reading the 26.1.2 sources
+  (ModelPart.Cube.polygons is replaceable but was not used; LivingEntityRenderer.submit
+  calls model.setupAnim(state) before the layers; CustomFeatureRenderer.Storage.add copies
+  the pose). 7 answered: HorseTackSlot.usableOn is !horse.isBaby() for the hair slots, so
+  no foal is drawn through the braid. 3, 4, 5, 6 belong to #240 and 8 to #241.
+
+Pictures (run/screenshots/photo-braid-*.png, nine shots, sent to the owner as a contact
+sheet, a 4x zoom of the mane, and the undyed shot):
+- A bay mare, mane braid red, tail braid blue, in SIDE, WIDE, BACK and PROFILE, each
+  lifted and "-flat". The lifted braid is on the mane and the tail, at the tail's resting
+  angle, lit like the horse. It covers 15 to 25 percent more red pixels than the flat
+  one. By eye the two are nearly the same: slightly fuller hair, no visible edge.
+- BACK, lifted: the top of the tail shows a notch where the rump meets it. Its flat twin
+  had the horse at another angle, so they could not be compared. Written up as a check.
+- A grey with undyed braids, SIDE: both drawn in the undyed hair colour.
+- The horses had no AI and stood still. Nothing here shows the braid moving.
+
+DECIDED
+-------
+None by the owner this session. Calls made without her, all within "Recommended" or
+"Open (building session)" lines of #239, recorded on wiki/model-parts.html#worn-geometry:
+- The mesh is drawn with submitCustomGeometry, not by putting polygons into baked cubes.
+  Reason: a cube with foreign polygons is something no other code expects. Cost: a lifted
+  piece adds nothing to a glowing horse's outline.
+- The mesh geometry (RimMesh) lives in common/, not only the outline, so a plain test pins
+  it. The treatment put only the outline there.
+- The cache (WornCache) is in common/gear and tested there, because the NeoForge module's
+  test classpath carries no Minecraft. The treatment asked for a NeoForge unit test.
+- Lifted faces are grown sideways by the lift, and walls are suppressed across a box
+  corner the piece wraps.
+- The face limit is 4096 quads per mesh. Measured: vanilla's seven horse armour sheets
+  have 138 to 330 boundary runs each over the whole 64 px sheet.
+- The braid's lift stays at the 0.25 floor. Raising it would only fatten the hair,
+  because the masks have no edge. The owner's eye decides (Verification tab).
+- The cache cap is the constant 64, not a config key.
+- The config key is gear.edges, as recommended.
+
+FOUND ON THE WAY
+----------------
+- Both braid masks (braid_mane.png, braid_tail.png) cover every face of their box, so the
+  braid's mesh is a closed shell with no wall in it. The proof piece therefore proves the
+  lift, the bone chain and the cache in a picture, but not a wall. Walls are pinned by
+  RimMeshTest and will first be drawn by #240 (armour) or #241 (the leg proof). Said on
+  #239 and on the Verification tab. No issue filed: it is not a defect.
+- wiki/model-parts.html said PartGeneratorTest holds "only a MEMBRANE box or a plate's
+  slab is flat"; the test lists more. Reworded to point at the test rather than list them.
+- A long Bash heredoc failed to parse (a known trap, memory "Long Bash heredocs
+  truncate"); the wiki patches were rewritten as script files in the scratchpad.
+- A PowerShell command that copied files out of a scratchpad folder was refused by the
+  harness as a "Remove-Item on system path"; the restore was done with cp in Bash.
+- The photo shoot rewrote run/phc/client.toml (new key) and rotated its .bak files. They
+  were copied aside before the launch and put back, with run/config and the two logs.
+
+PROCEDURES
+----------
+- procedures/photograph-horses.txt: step 1 now names braids() and the "-flat" naming for
+  a lifted-versus-flat pair; step 3 now says to copy run/phc/ and run/config/ aside when
+  the tree adds a ClientConfig key, because the launch rewrites client.toml.
+- No new procedure. next-release and process-intake were followed as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other test class
+  against the three new common/ classes being on the classpath; nothing existing was
+  edited in common/.
+- No gametest was run: nothing here is server behaviour.
+- :web:bakeDesignerAssets was not run: nothing under web/ reaches common/gear, so the
+  wasm cannot move (rebake row b); check-designer-boots was run.
+- Never seen in a game: the lifted braid on a moving horse, shimmer, the switch against
+  0.5.046, fading under a rider, a resource reload, and any wall at all.
+  Anchors: wiki/model-parts.html#open-worn-braid (new);
+  wiki/item-rescuing-braid.html#verify-drawn (a "photographed" paragraph added).
+
+RELEASE
+-------
+Not offered. #239's Release line counts it toward the next interim version, v0.5.047.1,
+whose stage still has #240, #241, #140 and #164 open.
+
+PICK UP FIRST
+-------------
+#240 "Worn gear is 3D - piece 2: edged horse armour", by procedures/next-release.txt
+(which hands it to process-intake). It has no owner call. #241 may go before it instead;
+the parent allows either order.

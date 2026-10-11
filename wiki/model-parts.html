@@ -177,6 +177,23 @@
     disagree about all three settings and still be looking at the same horses.
 </p>
 
+<h2 id="worn-edges">Gear a horse wears has depth</h2>
+
+<p>
+    Nothing a horse wears is painted onto it. A soft piece &mdash; the first is the
+    <a href="item-rescuing-braid.html">rescuing braid</a> &mdash; stands a little proud of the
+    horse, with an edge wherever it ends; a hard piece, like the
+    <a href="horse-gear.html">storage harness</a>, is built from boxes. One setting in this
+    client&rsquo;s config file turns the first kind off:
+</p>
+
+<ul>
+    <li><code>gear.edges</code> &mdash; on by default. Off, every lifted piece is drawn flat, as
+        it was in earlier versions. Gear built from boxes keeps its depth either way, and nothing
+        about the gear itself changes: it is a drawing setting, and two players on one server may
+        disagree about it.</li>
+</ul>
+
 </section>
 
 <section class="tab-panel" data-tab="coding">
@@ -408,6 +425,135 @@
     <a href="api-notes.html">API notes</a>.
 </p>
 
+<h2 id="worn-geometry">Worn geometry: nothing a horse wears is flat</h2>
+
+<p>
+    Grown parts are one half of what hangs on a horse; what it <em>wears</em> is the other, and
+    it has a rule of its own (owner, 2026-10-09): <strong>a worn piece stands at least a quarter of a model unit off the
+    horse</strong>, and each piece chooses its own depth above that. The floor is
+    <code>WornRule.FLOOR</code> in <code>common/gear/</code>, and every lift a piece declares goes
+    through <code>WornRule.lift</code>, which refuses one under it. Grown parts are not worn and
+    are untouched: they keep the floor <code>PartGeneratorTest</code> holds.
+</p>
+<p>
+    There are two builders, by kind of piece, and a new worn piece uses one of them &mdash; never a
+    layer of its own and never a flat repaint:
+</p>
+<ul>
+    <li><strong>Hard pieces are boxes built in code</strong>, as <code>HarnessLayer</code>&rsquo;s
+        frame and straps are. The worn hook on <code>AttachedPartLayer</code>
+        (<a href="#hooks">the two hooks</a>) is their route and is not built yet.</li>
+    <li><strong>Soft pieces that wrap the horse are the horse&rsquo;s own mesh, lifted, with a
+        rim.</strong> This is built, and the rest of this section is how.</li>
+</ul>
+<p>
+    The owner&rsquo;s other calls, all 2026-10-09: the rim follows the painted outline texel by
+    texel, the way a held item gets its thickness, not as straight slabs; it takes the colour of
+    the texel it borders and ordinary lighting shades it; one client switch covers every rim;
+    worn meshes have their own cache and cap; and <strong>grown parts poke through worn
+    pieces</strong> &mdash; there is no new zone machinery, and the
+    <a href="#saddle-zone">saddle zone</a> stays as it is, for the saddle only.
+</p>
+
+<h3 id="worn-rim">The rim builder</h3>
+<p>
+    A soft piece is a texture that is transparent wherever the piece is not &mdash; a mask, or an
+    armour sheet &mdash; over a model whose boxes it paints. The flat way to draw it is to submit
+    the model again through that texture, exactly coincident with the coat. The builder turns the
+    same two things into geometry, in three steps that each live where they can be tested:
+</p>
+<ul>
+    <li><code>common/gear/RimOutline</code> finds where a painted region ends on one face: the
+        boundary between painted and unpainted texels, merged into straight runs, so a filled
+        rectangle is four runs and not one per texel. It is asked about the texel just
+        <em>beyond</em> the face on every side as well, which is how its caller says what lies
+        past the face&rsquo;s end.</li>
+    <li><code>common/gear/RimMesh</code> takes one box &mdash; its faces as they were baked, as
+        plain numbers &mdash; and a texture&rsquo;s painted texels, and returns quads: each face
+        the piece touches moved out by the lift and grown sideways by the same amount (so the
+        lifted faces of a box still meet at its corners, as a deformed armour cube&rsquo;s do), and
+        one wall per run from the lifted face straight down to the skin. A wall is textured along
+        the middle of the row or column of texels it borders, so it takes their colour with no
+        extra art, and a dye or a pattern carries onto the edge. <strong>No wall is built where
+        the piece carries on round a corner of the box</strong>: the texel beyond a face&rsquo;s
+        end is looked up on the neighbouring face, found on the box itself rather than on the
+        sheet, because a wall there would lie in the neighbour&rsquo;s lifted plane and flicker
+        against it.</li>
+    <li><code>neoforge/client/gear/WornMeshes</code> is the game side, and deliberately thin. It
+        walks any baked <code>ModelPart</code> tree with <code>ModelPart.visit</code>, reads each
+        cube&rsquo;s polygons into <code>RimMesh.Face</code>s, reads the texture&rsquo;s pixels
+        from the resource manager, and keeps the quads per bone. Nothing in it names the horse, so
+        the same call serves vanilla&rsquo;s 64-pixel armour mesh.</li>
+</ul>
+<p>
+    A texel counts as painted at the alpha the translucent entity shader keeps
+    (<code>RimMesh.PAINTED_ALPHA</code>). Texel positions come from the texture&rsquo;s real size,
+    not the model&rsquo;s nominal one, so a resource pack that doubles a sheet gets a finer edge
+    for free.
+</p>
+
+<h3 id="worn-draw">Drawn by hand, on the model&rsquo;s own bones</h3>
+<p>
+    The quads are not put back into a baked cube, though they could be:
+    <code>ModelPart.Cube.polygons</code> is a public array of public records. A cube carrying
+    foreign polygons is something no other code expects, and a renderer that replaces
+    <code>ModelPart</code>&rsquo;s draw loop reads a cube&rsquo;s box rather than its polygons.
+    Instead <code>WornMeshes.submit</code> walks the pose stack down each bone&rsquo;s chain of
+    parts with <code>translateAndRotate</code> and hands the quads to
+    <code>submitCustomGeometry</code>. That is the pose of this frame for the same reason an
+    attached part&rsquo;s is: <code>LivingEntityRenderer.submit</code> calls
+    <code>setupAnim</code> before it runs the layers, and the custom-geometry store copies the
+    pose when it is given. A bone hidden this frame hides its share. The colour is the vertex
+    colour, so a tint and a rider&rsquo;s fade need nothing more. One thing is lost against a
+    <code>submitModel</code>: custom geometry carries no outline colour, so a lifted piece adds
+    nothing to a glowing horse&rsquo;s outline.
+</p>
+
+<h3 id="worn-cache">Its own cache, with a cap</h3>
+<p>
+    Worn meshes do not go in <code>PartMeshes</code>. That cache has no eviction because the
+    genes bound it; a worn mesh is keyed on a texture, and a modpack brings any number of those.
+    <code>WornCache</code> (in <code>common/gear/</code>, so a plain test pins it) is capped at
+    <code>WornMeshes.CAP</code> and drops the least recently used. The key is the texture, the
+    model root it was cut from &mdash; by identity, since the adult and the foal are different
+    trees &mdash; and the lift. <code>CoatAssetReload</code> empties it on a resource reload,
+    beside the coats.
+</p>
+<p>
+    A mesh that would need more than <code>RimMesh.QUAD_LIMIT</code> quads is not built: the
+    piece is drawn flat and one log line names the texture. Only a dithered or noisy sheet,
+    with an edge at every other texel, comes near it &mdash; the limit is about a dozen times
+    what the busiest of vanilla&rsquo;s horse armour sheets needs. The same fallback covers a
+    texture that is not a readable pack resource.
+</p>
+
+<h3 id="worn-switch">The switch</h3>
+<p>
+    <code>gear.edges</code> in <code>ClientConfig</code> (default on, read through
+    <code>ClientConfig.gearEdges()</code>) is one switch for every lifted piece. Off, a layer
+    takes its flat path, which for the braid is the submit it has always made. Box-built pieces
+    do not read it.
+</p>
+
+<h3 id="worn-braid">The first piece: the braid</h3>
+<p>
+    <code>BraidLayer</code> is the proof piece. With the switch on it asks
+    <code>WornMeshes</code> for the mesh its mask cuts from the parent model, at
+    <code>WornRule.FLOOR</code>, and draws that in the dye&rsquo;s colour through the same
+    <code>entityTranslucent</code> render type as before. Both masks cover whole boxes &mdash;
+    every face of the mane&rsquo;s and of the tail&rsquo;s &mdash; so the braid&rsquo;s mesh is a
+    closed shell a quarter unit proud of the hair, with no wall in it. The walls are pinned by
+    <code>RimMeshTest</code> and are first <em>drawn</em> by a piece that ends part-way across a
+    face. A foal is never drawn through it: a foal wears no gear
+    (<code>HorseTackSlot.usableOn</code>).
+</p>
+<p>
+    Tests: <code>RimOutlineTest</code> (the runs, and the floor), <code>RimMeshTest</code> (what
+    is lifted, where the walls are and are not, which way they face, what they sample) and
+    <code>WornCacheTest</code>. What only a screen can show is on the
+    <a href="#open-worn-braid">Verification tab</a>.
+</p>
+
 <h2 id="sheet">One greyscale sheet, and why its regions are featureless</h2>
 
 <p>
@@ -564,8 +710,11 @@
 <p>
     A membrane is the first <strong>flat box</strong>: <code>PartNode.width</code> is its extent
     across <code>x</code>, and is the girth for every square box. <code>PartGeneratorTest</code> holds
-    that only a <code>MEMBRANE</code> box or a plate&rsquo;s slab (<a href="#plates">below</a>) is
-    flat, and nothing is thinner than a quarter unit.
+    the list of grown boxes that may be flat &mdash; the membrane, the plate&rsquo;s slab
+    (<a href="#plates">below</a>) and the few named after them in that test &mdash; and that nothing
+    is thinner than a quarter unit. Those are grown parts and stay flat on purpose; the rule that
+    nothing a horse <em>wears</em> is flat is <a href="#worn-geometry">worn geometry</a>, and it does
+    not reach them.
 </p>
 
 <h3 id="plates">Two rows to a mesh, and the flank anchors</h3>
@@ -1028,8 +1177,43 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; what is still unwatched is the draw order against the tack and the first body part's saddle zone, the antlers on screen, any cost against a herd, and the editors' new part rows and the designer's parts panel.</p>
+    <p>The machinery has drawn one part, a horn, and it follows the head and sits right on an adult; the lifted braid, the first worn piece with depth, has been photographed standing still and never seen moving; what is still unwatched is the draw order against the tack and the first body part's saddle zone, the antlers on screen, any cost against a herd, and the editors' new part rows and the designer's parts panel.</p>
 </div>
+
+<h3 id="open-worn-braid">The lifted braid: photographed standing still, never seen moving</h3>
+<p>
+    <a href="#worn-geometry">Worn geometry</a> shipped on 2026-10-10 with the braid as its first
+    piece. A photo shoot that day (a bay mare, mane braid dyed red and tail braid blue, in side,
+    wide, back and profile framings, each beside the same shot with <code>gear.edges</code> off)
+    showed the lifted braid drawn on the mane and on the tail, in the right place and at the
+    tail&rsquo;s resting angle, lit like the horse, with nothing in the log. It was measurably
+    larger than the flat one &mdash; about a fifth more red on screen &mdash; and at those
+    distances a person would be hard put to tell the two apart: the masks cover whole boxes, so
+    there is no edge to see, only slightly fuller hair. A picture is not a pass. Still to watch,
+    in a game:
+</p>
+<ul>
+    <li><strong>It moves with the horse.</strong> A braided horse walking, rearing and grazing:
+        the mane braid stays on the neck and the tail braid follows the tail&rsquo;s swing. The
+        shoot&rsquo;s horses had no AI and stood still, so the claim that the bone chain holds
+        this frame&rsquo;s pose has been read in the sources and not seen.</li>
+    <li><strong>Nothing shimmers</strong> against the hair or the neck, close up and from across
+        a field.</li>
+    <li><strong>The top of the lifted tail, from behind.</strong> In the shoot&rsquo;s back
+        framing the lifted tail&rsquo;s top showed a notch where the rump meets it. It is most
+        likely the rump&rsquo;s corner in front of a tail that is now a quarter unit fuller, but
+        the flat twin of that shot had the horse at another angle, so the two could not be
+        compared. Look at it from behind and above, switch on and off.</li>
+    <li><strong>The switch off looks exactly like 0.5.046.</strong></li>
+    <li><strong>A braided horse fading under a rider fades the braid with it</strong>, and two
+        braided horses in one frame each keep their own colour.</li>
+    <li><strong>A resource reload</strong> (F3+T) leaves the braid drawn.</li>
+    <li><strong>A wall has never been drawn in a game.</strong> The first piece that ends
+        part-way across a face (edged armour, #240; the leg proof, #241) is the first time one
+        is on screen: look for a wall facing the wrong way or lit wrongly there.</li>
+    <li><strong>Is a quarter unit enough for the braid?</strong> It is the floor, and raising it
+        only fattens the hair further. The owner&rsquo;s eye decides.</li>
+</ul>
 
 <h3 id="open-parts-box-budget">The mesh cache&rsquo;s box budget needs a decision before the next part</h3>
 <p>

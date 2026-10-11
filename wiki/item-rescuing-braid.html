@@ -254,6 +254,15 @@
     through is a braid nobody can see and it would ship green. Re-run
     <code>:common:bakeHairMasks</code> when the mesh moves.
 </p>
+<p id="lifted">
+    <strong>Since 2026-10-10 the mask is cut into a mesh of its own</strong>, a quarter of a
+    model unit proud of the hair, rather than drawn over the parent model &mdash; the braid is the
+    first piece under <a href="model-parts.html#worn-geometry">worn geometry</a>, the rule that
+    nothing a horse wears is flat. <code>BraidLayer</code> asks <code>WornMeshes</code> for the
+    mesh at <code>WornRule.FLOOR</code> and draws it on the mane&rsquo;s and the tail&rsquo;s own
+    bones, the dye as the vertex colour. With the client&rsquo;s <code>gear.edges</code> off, or
+    if no mesh can be built, it makes the one flat submit described above, unchanged.
+</p>
 <p>
     Gear is a synced attachment, so <code>extractRenderState</code> reads the worn stacks off the
     horse with no packet of this layer&rsquo;s own, and the two colours land on
@@ -321,6 +330,8 @@
     <td>The trigger, the destination, the move, the rider, the refusal.</td></tr>
 <tr><td><code>neoforge/&hellip;/client/BraidLayer.java</code></td>
     <td>The streak, tinted, through the baked masks.</td></tr>
+<tr><td><code>neoforge/&hellip;/client/gear/WornMeshes.java</code></td>
+    <td>The mask as a lifted mesh. Not the braid&rsquo;s own: every soft worn piece uses it.</td></tr>
 <tr><td><code>data/&hellip;/tags/item/gear/{mane,tail}.json</code></td>
     <td>How the two slots come to accept it &mdash; the first entries either has ever had.</td></tr>
 <tr><td><code>data/minecraft/tags/item/dyeable.json</code></td>
@@ -368,6 +379,15 @@
     <li><strong>It fades with the horse you are riding</strong>, along with the coat and the
         tack &mdash; see <a href="rider-comfort.html#ride-fade-verify">the ride fade</a>.</li>
 </ul>
+
+<p>
+    <strong>Photographed, 2026-10-10.</strong> A photo shoot put a red braid in a bay mare&rsquo;s
+    mane and a blue one in her tail, and an undyed pair on a grey: each drew over the whole mane
+    and the whole tail in its dye, both lifted and with <code>gear.edges</code> off. That is a
+    horse on a stage, dressed by a debug tool; the item going into the slot by hand, and the look
+    of it on a moving horse, are still unplayed. The lifted look has its own checks on
+    <a href="model-parts.html#open-worn-braid">the model parts page</a>.
+</p>
 
 <h3 id="verify-fires">It fires at all, and at the right moment (NOT played)</h3>
 <p>

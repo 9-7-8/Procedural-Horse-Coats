@@ -773,6 +773,39 @@ STREAM_CODEC = StreamCodec.unit(new MyRecipe());  // a DIFFERENT object</code></
     the cheaper route where it is available, and it is worth reaching for first.
 </p>
 
+<p id="layers-see-this-frames-pose">
+    <strong>A layer does see this entity&rsquo;s pose, though.</strong>
+    <code>LivingEntityRenderer.submit</code> submits the body and then, before it runs the
+    layers, calls <code>this.model.setupAnim(state)</code> itself. So inside a layer&rsquo;s
+    <code>submit</code> the parent model&rsquo;s parts hold this entity&rsquo;s rotations, and
+    <code>part.translateAndRotate(poseStack)</code> down a chain of bones lands where that bone
+    will be drawn. <code>AttachedPartLayer</code> anchors on it and <code>WornMeshes</code> hangs
+    worn geometry on it. Reading the pose is safe; <em>writing</em> one is the bug above.
+</p>
+
+<h3 id="custom-geometry-on-a-bone">Geometry that is not a model: <code>submitCustomGeometry</code></h3>
+<p>
+    <code>submitCustomGeometry(poseStack, renderType, (pose, buffer) -&gt; ...)</code> stores a
+    copy of the pose with the callback (<code>CustomFeatureRenderer.Storage.add</code>) and
+    calls it later with a <code>VertexConsumer</code> for that render type. The callback emits
+    vertices exactly as <code>ModelPart.Cube.compile</code> does:
+    <code>pose.pose().transformPosition</code> on positions already divided by 16,
+    <code>pose.transformNormal</code> on the normal, then the eleven-argument
+    <code>addVertex(x, y, z, colour, u, v, overlay, light, nx, ny, nz)</code>. The colour is
+    per vertex, so a tint needs no argument of its own. There is no outline colour: custom
+    geometry does not join a glowing entity&rsquo;s outline.
+</p>
+<p>
+    The alternative that was read and not taken: <code>ModelPart.Cube.polygons</code> is a
+    <code>public final</code> array of public <code>Polygon</code> and <code>Vertex</code>
+    records with public constructors, so an entry can be replaced on a baked cube; and
+    <code>ModelPart.visit</code> is the one public walk that hands out a baked tree&rsquo;s
+    cubes, with a <code>"/child/grandchild"</code> path for each. <code>WornMeshes</code> uses
+    the walk to <em>read</em> a model and leaves its cubes alone. A baked polygon&rsquo;s four
+    vertices are ordered so that vertex 1 is the uv origin, vertex 0 differs from it in u only
+    and vertex 2 in v only, mirrored cubes included; <code>RimMesh.Face</code> leans on that.
+</p>
+
 <p>
     <strong><code>ModelPart</code> has per-part scale, and two ways to hide a box.</strong>
     <code>xScale</code>, <code>yScale</code> and <code>zScale</code> are public fields in 26.1.2

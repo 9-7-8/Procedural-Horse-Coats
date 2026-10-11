@@ -140,6 +140,7 @@ const HOME = {
     'parts.enabled': 'model-parts.html#settings',
     'parts.glow': 'model-parts.html#settings',
     'parts.detailDistance': 'model-parts.html#settings',
+    'gear.edges': 'model-parts.html#worn-edges',
     'visual.rideFade': 'rider-comfort.html#ride-fade',
     'visual.rideFadeMinOpacity': 'rider-comfort.html#ride-fade',
     'visual.rideFadeStartPitch': 'rider-comfort.html#ride-fade',
