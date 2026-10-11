@@ -115,6 +115,11 @@ STEPS
      the genome, place the intruder) for a red/green that is not a matter of chance.
      Example: #40, 734 random cells green; then a forced Aae/Aae roll with a horse
      overhead failed 100 of 100 before the fix and passed 100 of 100 after.
+     A red that will not come back even in the copies (#245: 0 in 190 cells) is proven
+     by its precondition instead: log the state the failure hinges on at the moment it
+     is set (which chunks tick when the horse is spawned), count the cells that have it
+     on stock code, and show none have it after. Say in the commit and the issue that
+     the red itself was not reproduced.
      Copy mechanics: register each copy as a lambda that captures its index
      (`final int n = i; () -> h -> { if (n >= 0) test(h); }`). A plain method
      reference is one shared object, and the registry refuses it as a duplicate, so the

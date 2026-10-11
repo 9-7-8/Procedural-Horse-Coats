@@ -1,0 +1,103 @@
+2026-10-10 17:20 - next-release: order_stay_walks_back waits for its field's chunks (#245)
+(The time is the end of the session.)
+
+ASKED
+-----
+1. "/next-release" (the owner ran the command, with no argument).
+   -> procedures/next-release.txt was followed. The next release is v0.5.047 (the
+      equipment release). Its only bug with work left was #245, built by
+      procedures/fix-bug.txt. Fixed, closed with its proof.
+No other request was made.
+
+DONE
+----
+1. Housekeeping (next-release steps 1-2). The last tag is v0.5.046 and its milestone is
+   closed. Every open issue already had a milestone and none was unlabelled, so nothing
+   moved. The two NOT COMPILED commits (79aff1cb, 4d6e089c) are older than the last
+   local build (8f3eb625 built on top of them), so no extra compile was needed.
+   Units of v0.5.047, bugs first: #245 only. #10 and #36 (in-game look) and #31 (the
+   live server's log) are fixed and wait on their checks, and were skipped.
+
+2. Fix #245, commit aba25435. Issue CLOSED, with the proof in a comment.
+   What was wrong: ModGameTests.orderStayWalksBack forced the 3x3 chunks round its 1x1
+   structure (aloneOnClearGround -> keepTicking) and, in the same tick, spawned its
+   horse two blocks out and moved it three more. The harness waits only for the
+   structure's own chunk, and the grid lands at a different place against the chunk
+   borders every run, so the horse was often in a neighbour chunk whose forcing had not
+   taken effect. Gametest ticks are unpaced (0.4 to 6 a millisecond), so now and then
+   the whole 300-tick budget went by before that chunk ticked. The horse was still age
+   1 and falling at the timeout, which is the state the issue's failure line prints.
+   It is the mechanism of #70 and #150; this test had never been given their wait.
+   The fix (test code only; nothing a player runs changed):
+   - The test calls keepTicking, then spawns nothing until fieldTicks says all nine
+     chunks tick, from inside its own succeedWhen, as order_hunt_picks_a_monster and
+     order_guard_holds_its_reach do. aloneOnClearGround and the spawn follow the wait.
+   - Its budget went from 300 to 1300 ticks, so the paced wait has room.
+   - The "did not stay moved" premise check moved from runAfterDelay(2) into the wait
+     (read once the horse's tickCount reaches 2; helper.fail, so it is not retried).
+   - The failure message now prints chunkTicking for the horse's chunk.
+   Proof (20 temporary copies of the test, each in its own batch by registerAlone, with
+   temporary [temp245] log lines; all deleted before the commit):
+   - Stock code, the red: it did NOT come back. 0 red in 190 cells (9 runs of
+     ./gradlew :neoforge-26.1.2:runGameTest, 80 tests each).
+   - Stock code, the precondition: in one logged run, the horse was spawned with a
+     field chunk not ticking in 14 of 21 cells (its own chunk in 2 of them, the
+     anchor's chunk in the other 12). Every horse thawed within 2 ticks that run.
+   - With the wait: 168 of 168 cells spawned with both chunks ticking, and all 168
+     passed (8 runs). Longest field wait logged: 7 ticks, 372 ms.
+   - Copies removed: ./gradlew :neoforge-26.1.2:build green; check-parity OK (7163
+     checks, 60 cases); two plain runGameTest runs, "All 60 required tests passed".
+   The live server was checked before the runs (up, 0 players each time).
+   Pictures: no pictures. Nothing about this bug can be seen.
+
+3. GitHub: the v0.5.047 milestone description and the release-plan issue (#196) now
+   list #245 as fixed and closed, and say no bug on the release has work left.
+
+DECIDED
+-------
+- (Not the owner; made in this session.) #245 was closed on its precondition being
+  removed, not on a red-to-green of the failure, because the red would not reproduce.
+  The commit and the issue comment both say so, and say to reopen with the new
+  chunkTicking field if it flakes again.
+- (Not the owner.) #245 was judged small by fix-bug step 4: test-only, the cause
+  matches a known mechanism, and the fix is the pattern two sibling tests already use.
+
+FOUND ON THE WAY
+----------------
+- The gametest grid's world position changes every run (x -24049 in the issue,
+  -8060080 and -701000-odd in this session's runs), which is why a chunk-border flake
+  comes and goes. Written into procedures/test-tiers.txt.
+- A mistake, put right: a temporary log line used new ChunkPos(BlockPos), which this
+  version does not have; the compile failed and it became ChunkPos(x >> 4, z >> 4).
+- Eight other tests call keepTicking with no fieldTicks wait (the four wild_* single-
+  horse tests, whistle_sees_the_owner, were_animal_death_kills_the_horse,
+  order_graze_tether, hay_is_still_a_bale). Where each spawns was not checked, and none
+  was changed: none has flaked, and they share a batch, which fieldTicks' 50 ms sleep
+  would slow. No issue filed.
+- No bugs filed.
+
+PROCEDURES
+----------
+- procedures/fix-bug.txt, step 5: a flake whose red will not come back even in the
+  copies is proven by counting its precondition before and after, and the commit and
+  issue say the red was not reproduced (#245).
+- procedures/test-tiers.txt, tier 2 "Writing one": the grid lands differently against
+  the chunk borders every run, so a test that spawns off its structure waits with
+  fieldTicks first.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. No common/ file changed.
+- The failure itself was never seen red in this session (see DONE 2).
+- Nothing here is visible in game. No Verification-tab anchors were added.
+
+RELEASE
+-------
+Not offered. One test fix is below the bar, and v0.5.047 ships as interim versions once
+a stage is built.
+
+PICK UP FIRST
+-------------
+#239, worn gear is 3D - piece 1: the rim builder, the rule and the braid (size L, the
+first feature of v0.5.047.1), by /next-release, which hands it to
+procedures/process-intake.txt.

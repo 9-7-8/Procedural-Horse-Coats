@@ -65,6 +65,9 @@ STEPS
        Gametest ticks are unpaced (GameTestServer.waitUntilNextTick never sleeps; 0.4-6
        ticks a ms), so a wait on asynchronous work - a chunk or entity load - is wall-clock
        and no tick budget covers it: pace the waiting ticks (fieldTicks sleeps 50 ms, #150).
+       The grid lands at a different place against the chunk borders every run, so a
+       test that spawns two blocks off its structure is in a neighbour chunk on some
+       runs only: such a test waits with fieldTicks before it spawns (#245).
        Tests sit six blocks apart,
        so a test that looks further (a hunt, a guard, a walk) runs alone: registerAlone
        plus aloneOnClearGround (#37). Herd founding reaches 32 blocks and joins whatever
