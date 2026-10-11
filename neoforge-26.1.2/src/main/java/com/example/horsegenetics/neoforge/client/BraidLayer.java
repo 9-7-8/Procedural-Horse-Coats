@@ -1,6 +1,9 @@
 package com.example.horsegenetics.neoforge.client;
 
+import com.example.horsegenetics.common.gear.WornRule;
+import com.example.horsegenetics.neoforge.ClientConfig;
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.client.gear.WornMeshes;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.animal.equine.HorseModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -30,6 +33,16 @@ import net.minecraft.resources.Identifier;
  * and they can be different colours. Neither costs anything on a horse wearing
  * none: the state fields are zero and this returns on the first line.
  *
+ * <h2>It stands off the hair</h2>
+ * The first piece under "worn gear is 3D" (owner, 2026-10-09). With
+ * {@code gear.edges} on, the mask is not drawn over the parent model: it is cut
+ * into a mesh of its own by {@link WornMeshes}, {@link #LIFT} proud of the hair,
+ * and drawn on the mane's and the tail's own bones. Off, or when no mesh can be
+ * built, it is the flat submit described above, exactly as before.
+ *
+ * <p>Both masks cover whole boxes, so the braid's mesh is a shell with no wall
+ * in it - the walls are first seen on a piece that ends part-way across a face.
+ *
  * <p><b>Not seen in a running game.</b>
  */
 public class BraidLayer extends RenderLayer<HorseRenderState, HorseModel> {
@@ -38,6 +51,9 @@ public class BraidLayer extends RenderLayer<HorseRenderState, HorseModel> {
             Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "textures/entity/horse/braid_mane.png");
     private static final Identifier TAIL =
             Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID, "textures/entity/horse/braid_tail.png");
+
+    /** How far a braid stands off the hair: the floor every worn piece obeys. */
+    static final float LIFT = WornRule.lift(WornRule.FLOOR);
 
     public BraidLayer(RenderLayerParent<HorseRenderState, HorseModel> renderer) {
         super(renderer);
@@ -64,6 +80,16 @@ public class BraidLayer extends RenderLayer<HorseRenderState, HorseModel> {
                       HorseRenderState state, Identifier mask, int colour) {
         if (colour == 0) {
             return;     // nothing worn in that slot - see GeneticHorseRenderState
+        }
+        if (ClientConfig.gearEdges()) {
+            WornMeshes.WornMesh mesh = WornMeshes.get(mask, this.getParentModel().root(), LIFT);
+            if (!mesh.flat()) {
+                // The tint is the vertex colour here, so there is no argument
+                // order to get wrong.
+                WornMeshes.submit(mesh, poseStack, collector.order(1),
+                        RenderTypes.entityTranslucent(mask), lightCoords, colour);
+                return;
+            }
         }
         // ARGUMENT ORDER, and it was wrong here until 2026-09-29. The ten-arg
         // submitModel is

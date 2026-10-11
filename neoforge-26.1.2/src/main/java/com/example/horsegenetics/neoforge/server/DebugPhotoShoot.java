@@ -96,6 +96,32 @@ public final class DebugPhotoShoot {
         };
     }
 
+    /**
+     * Work a rescuing braid into the mane and the tail, dyed {@code maneRgb} and
+     * {@code tailRgb} - undyed for -1, none for -2. A shot whose name ends in
+     * {@code -flat} is taken with {@code gear.edges} off (see the client half), which
+     * is how a lifted piece is photographed beside its flat self.
+     */
+    public static java.util.function.Consumer<Horse> braids(int maneRgb, int tailRgb) {
+        return horse -> {
+            braid(horse, com.example.horsegenetics.neoforge.entity.HorseTackSlot.MANE, maneRgb);
+            braid(horse, com.example.horsegenetics.neoforge.entity.HorseTackSlot.TAIL, tailRgb);
+        };
+    }
+
+    private static void braid(Horse horse, com.example.horsegenetics.neoforge.entity.HorseTackSlot slot, int rgb) {
+        if (rgb < -1) {
+            return;
+        }
+        net.minecraft.world.item.ItemStack stack = new net.minecraft.world.item.ItemStack(
+                com.example.horsegenetics.neoforge.item.ModItems.RESCUING_BRAID.get());
+        if (rgb >= 0) {
+            stack.set(net.minecraft.core.component.DataComponents.DYED_COLOR,
+                    new net.minecraft.world.item.component.DyedItemColor(rgb));
+        }
+        slot.set(horse, stack);
+    }
+
     /** Turn the horse to face east, so the south-side cameras see its off flank. */
     public static java.util.function.Consumer<Horse> facingEast() {
         return horse -> {

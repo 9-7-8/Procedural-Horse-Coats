@@ -36,6 +36,8 @@ public final class DebugPhotoShootClient {
     private static int shot = -1;
     private static int wait;
     private static boolean done;
+    /** {@code gear.edges} as it was before the shoot, put back when it ends. */
+    private static Boolean edgesBefore;
 
     private DebugPhotoShootClient() {
     }
@@ -79,6 +81,9 @@ public final class DebugPhotoShootClient {
         if (shot >= DebugPhotoShoot.SHOTS.size()) {
             done = true;
             mc.options.hideGui = false;
+            if (edgesBefore != null) {
+                com.example.horsegenetics.neoforge.ClientConfig.GEAR_EDGES.set(edgesBefore);
+            }
             server.execute(DebugPhotoShoot::finish);
             HorseGenetics.LOGGER.info("[photo] done - {} shots", DebugPhotoShoot.SHOTS.size());
             return;
@@ -88,6 +93,14 @@ public final class DebugPhotoShootClient {
     }
 
     private static void stage(IntegratedServer server, java.util.UUID id, int i) {
+        // A shot named "...-flat" is taken with worn gear's depth switched off, so a
+        // lifted piece can be photographed beside its flat self in one launch. Set in
+        // memory only: nothing is saved to client.toml.
+        if (edgesBefore == null) {
+            edgesBefore = com.example.horsegenetics.neoforge.ClientConfig.gearEdges();
+        }
+        com.example.horsegenetics.neoforge.ClientConfig.GEAR_EDGES.set(
+                !DebugPhotoShoot.SHOTS.get(i).name().endsWith("-flat"));
         server.execute(() -> {
             ServerPlayer sp = server.getPlayerList().getPlayer(id);
             if (sp != null) {

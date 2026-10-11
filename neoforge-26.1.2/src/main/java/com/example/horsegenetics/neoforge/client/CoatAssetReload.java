@@ -1,6 +1,7 @@
 package com.example.horsegenetics.neoforge.client;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
+import com.example.horsegenetics.neoforge.client.gear.WornMeshes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -22,6 +23,9 @@ import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
  * reloads the templates and recomposes, which is the same work a fresh login
  * does and is why it does not need to be any cleverer than this.
  *
+ * <p>The worn meshes go with them ({@link WornMeshes}): each is cut from a
+ * texture's painted outline, so a pack that repaints a piece changes its edge.
+ *
  * <p>Registered in {@link ClientSetup} through
  * {@code AddClientReloadListenersEvent}, which by default sorts mod listeners
  * after every vanilla one - the ordering this wants, since the vanilla
@@ -35,5 +39,6 @@ public final class CoatAssetReload implements ResourceManagerReloadListener {
     @Override
     public void onResourceManagerReload(ResourceManager resourceManager) {
         GeneticCoatTextureFactory.clear();
+        WornMeshes.clear();
     }
 }

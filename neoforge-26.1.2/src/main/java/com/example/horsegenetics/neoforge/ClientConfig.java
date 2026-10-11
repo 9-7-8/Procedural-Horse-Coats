@@ -175,6 +175,18 @@ public final class ClientConfig {
     public static final ModConfigSpec.BooleanValue PARTS_GLOW;
 
     /**
+     * <b>Give worn gear its depth</b> - draw each soft piece a horse wears lifted
+     * off the coat with an edge round its outline, rather than painted on. One
+     * switch for every such piece (owner, 2026-10-09). See
+     * {@code client/gear/WornMeshes}.
+     *
+     * <p>Render-only: off, every lifted piece is drawn flat, as it was before the
+     * rule existed. Gear built from boxes - the storage harness, the saddle - has
+     * its depth either way.
+     */
+    public static final ModConfigSpec.BooleanValue GEAR_EDGES;
+
+    /**
      * <b>How close a horse must be for its grown parts to be drawn.</b> In blocks.
      * A horn is about as much geometry again as the horse carrying it, so a herd of
      * unicorns is the case this exists for; past the line the horse draws and the
@@ -190,6 +202,7 @@ public final class ClientConfig {
     private static final int DEFAULT_COAT_BAKE_BUDGET_MS = 4;
     private static final boolean DEFAULT_PARTS = true;
     private static final boolean DEFAULT_PARTS_GLOW = true;
+    private static final boolean DEFAULT_GEAR_EDGES = true;
     /**
      * Further than a coat's, on purpose: a coat is a texture swap that has to happen
      * before you can see the horse properly, and a horn is a silhouette you notice
@@ -287,6 +300,13 @@ public final class ClientConfig {
                         "Saves one draw per glowing part, and is the first thing to try if a",
                         "shader pack makes them look wrong.")
                 .define("parts.glow", DEFAULT_PARTS_GLOW);
+        GEAR_EDGES = builder
+                .comment("Draw the gear a horse wears with depth: lifted off the coat, with an",
+                        "edge round its outline. (default: true) Client-side.",
+                        "False: those pieces are drawn flat, painted onto the horse, as they",
+                        "were in earlier versions. Nothing about the gear itself changes.",
+                        "Gear built from boxes, like the storage harness, is unaffected.")
+                .define("gear.edges", DEFAULT_GEAR_EDGES);
         PARTS_DETAIL_DISTANCE = builder
                 .comment("How close, in blocks, a horse must be for its grown parts to be drawn.",
                         "A horn is roughly as much geometry again as the horse wearing it, so",
@@ -628,6 +648,15 @@ public final class ClientConfig {
             return PARTS_GLOW.get();
         } catch (IllegalStateException notLoaded) {
             return DEFAULT_PARTS_GLOW;
+        }
+    }
+
+    /** Safe read. @see #GEAR_EDGES */
+    public static boolean gearEdges() {
+        try {
+            return GEAR_EDGES.get();
+        } catch (IllegalStateException notLoaded) {
+            return DEFAULT_GEAR_EDGES;
         }
     }
 
