@@ -106,6 +106,7 @@ public record PartShape(PartKind kind, int style, int size) {
             case BROW_RIDGE -> BrowRidgeSize.lengthFor(position);
             // No ladder: a block is one height.
             case TEST_BLOCK -> WornBlockGenerator.HEIGHT;
+            case SHOE -> ShoeGenerator.thickness();
         };
     }
 

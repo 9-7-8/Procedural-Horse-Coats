@@ -7,6 +7,7 @@ import com.example.horsegenetics.common.parts.PartKind;
 import com.example.horsegenetics.common.parts.PartNode;
 import com.example.horsegenetics.common.parts.PartShape;
 import com.example.horsegenetics.common.parts.PartSheet;
+import com.example.horsegenetics.common.parts.ShoeGenerator;
 import com.example.horsegenetics.common.parts.WornBlockGenerator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,6 +104,81 @@ class WornPartTest {
         assertEquals(half + lift, maxZ, 1e-5f);
         assertEquals(lift, bottom, 1e-5f, "under the sole by the lift");
         assertEquals(-WornBlockGenerator.HEIGHT, top, 1e-5f);
+    }
+
+    /** {min x, max x, min y, max y, min z, max z} of every box, in the anchor's frame; a box is square to it or a quarter turned about y. */
+    private static float[][] boxes(List<PartNode> nodes) {
+        float[][] out = new float[nodes.size()][];
+        float[] x = new float[nodes.size()];
+        float[] y = new float[nodes.size()];
+        float[] z = new float[nodes.size()];
+        for (int i = 0; i < nodes.size(); i++) {
+            PartNode node = nodes.get(i);
+            boolean root = node.isRoot();
+            assertTrue(root || (nodes.get(node.parent()).ry() == 0f && node.t() == 0f), "hung at the base of an unturned box");
+            assertEquals(0f, Math.abs(node.rx()) + Math.abs(node.rz()));
+            boolean turned = Math.abs(Math.abs(node.ry()) - (float) (Math.PI / 2)) < 1e-6f;
+            assertTrue(turned || node.ry() == 0f);
+            x[i] = (root ? 0f : x[node.parent()]) + node.ox();
+            y[i] = (root ? 0f : y[node.parent()]) + node.oy();
+            z[i] = (root ? 0f : z[node.parent()]) + node.oz();
+            float acrossX = (turned ? node.girth() : node.width()) / 2f;
+            float alongZ = (turned ? node.width() : node.girth()) / 2f;
+            out[i] = new float[] {x[i] - acrossX, x[i] + acrossX, y[i] - node.len(), y[i], z[i] - alongZ, z[i] + alongZ};
+        }
+        return out;
+    }
+
+    private static boolean covers(float[][] boxes, float px, float pz) {
+        for (float[] b : boxes) {
+            if (px > b[0] && px < b[1] && pz > b[4] && pz < b[5]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Test
+    @DisplayName("a shoe is a U under the foot: toe and sides, open at the heel, the frog bare, a bare edge on the wall")
+    void aShoeIsAUOpenAtTheHeel() {
+        WornPieces.Piece row = WornPieces.HORSE_SHOE;
+        assertSame(WornPieces.Kind.BOXES, row.kind());
+        assertFalse(row.debug());
+        assertEquals(row.lift(), WornRule.lift(ShoeGenerator.PROUD));
+        float[][] shoe = boxes(PartGenerators.build(AttachedPart.shoe(0xFFC8C8C8).shape()));
+        float half = WornBlockGenerator.HOOF / 2f;
+        float lift = row.lift();
+        float minX = 9f, maxX = -9f, minZ = 9f, maxZ = -9f, top = 9f, bottom = -9f;
+        for (float[] b : shoe) {
+            minX = Math.min(minX, b[0]);
+            maxX = Math.max(maxX, b[1]);
+            top = Math.min(top, b[2]);
+            bottom = Math.max(bottom, b[3]);
+            minZ = Math.min(minZ, b[4]);
+            maxZ = Math.max(maxZ, b[5]);
+        }
+        // Proud of the toe and both side walls by the lift, and under the sole by it.
+        assertEquals(-half - lift, minX, 1e-5f);
+        assertEquals(half + lift, maxX, 1e-5f);
+        assertEquals(-half - lift, minZ, 1e-5f, "front is -z");
+        assertEquals(lift, bottom, 1e-5f);
+        // Nothing across the back: the shoe stops short of the heel wall.
+        assertTrue(maxZ < half, "the shoe reaches the back wall at z " + maxZ);
+        // Only the barest bit up the hoof wall.
+        assertTrue(-top <= 0.25f + 1e-5f, "the shoe climbs " + -top + " up the wall");
+        // The toe and both sides are shod; the frog and the heel between the bars are bare.
+        assertTrue(covers(shoe, 0f, -half), "no toe bar");
+        assertTrue(covers(shoe, -half, 0f) && covers(shoe, half, 0f), "a side bar is missing");
+        assertFalse(covers(shoe, 0f, 0f), "the frog is covered");
+        assertFalse(covers(shoe, 0f, half - 0.3f), "the heel is closed");
+        // The bars do not overlap each other anywhere (they would flicker).
+        for (int i = 0; i < shoe.length; i++) {
+            for (int j = i + 1; j < shoe.length; j++) {
+                boolean apart = shoe[i][1] <= shoe[j][0] + 1e-5f || shoe[j][1] <= shoe[i][0] + 1e-5f
+                        || shoe[i][5] <= shoe[j][4] + 1e-5f || shoe[j][5] <= shoe[i][4] + 1e-5f;
+                assertTrue(apart, "bars " + i + " and " + j + " overlap");
+            }
+        }
     }
 
     @Test

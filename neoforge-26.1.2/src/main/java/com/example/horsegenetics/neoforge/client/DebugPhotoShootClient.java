@@ -30,6 +30,9 @@ public final class DebugPhotoShootClient {
     /** The colour the debug test boot is drawn in while a shot asks for it. */
     private static final int BOOT_COLOUR = 0xFF2E6FD9;
 
+    /** Plain iron, for the shoes a shot named {@code shoe} is shod with. */
+    private static final int SHOE_IRON = 0xFFD0D0D4;
+
     /**
      * The debug test boot ({@code WornPieces.TEST_BOOT_FORE} and {@code _HIND}): its
      * colour as opaque ARGB while the shot on stage has {@code boot} in its name, and 0
@@ -148,8 +151,15 @@ public final class DebugPhotoShootClient {
         String name = DebugPhotoShoot.SHOTS.get(i).name();
         com.example.horsegenetics.neoforge.ClientConfig.GEAR_EDGES.set(!name.endsWith("-flat"));
         testBoot = name.contains("boot") ? BOOT_COLOUR : 0;
+        // A shot with "shoe" in its name is shod on all four feet in plain iron: the shoe's
+        // geometry before any item can put one on (#164).
         testBlocks = name.contains("block")
                 ? com.example.horsegenetics.common.gear.WornPart.testBlocks(BOOT_COLOUR)
+                : name.contains("shoe")
+                ? com.example.horsegenetics.common.gear.WornPart.on(
+                        com.example.horsegenetics.common.gear.WornPieces.HORSE_SHOE,
+                        com.example.horsegenetics.common.parts.AttachedPart.shoe(SHOE_IRON),
+                        com.example.horsegenetics.common.parts.PartAnchor.hooves())
                 : java.util.List.of();
         walking = name.contains("-walk");
         server.execute(() -> {

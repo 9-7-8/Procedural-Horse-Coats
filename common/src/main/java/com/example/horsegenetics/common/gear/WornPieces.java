@@ -106,8 +106,14 @@ public final class WornPieces {
      */
     public static final Piece TEST_BLOCK = new Piece("test_block", Kind.BOXES, WornRule.FLOOR, null, null, true);
 
+    /**
+     * A horse shoe: box-built, a U under the foot ({@code parts.ShoeGenerator}), hung on
+     * the hoof it is nailed to. Its geometry is built; no item puts one on a horse yet.
+     */
+    public static final Piece HORSE_SHOE = new Piece("horse_shoe", Kind.BOXES, WornRule.FLOOR, null, null, false);
+
     private static final List<Piece> ALL =
-            table(BRAID_MANE, BRAID_TAIL, TEST_BOOT_FORE, TEST_BOOT_HIND, TEST_BLOCK);
+            table(BRAID_MANE, BRAID_TAIL, TEST_BOOT_FORE, TEST_BOOT_HIND, TEST_BLOCK, HORSE_SHOE);
 
     private WornPieces() {
     }

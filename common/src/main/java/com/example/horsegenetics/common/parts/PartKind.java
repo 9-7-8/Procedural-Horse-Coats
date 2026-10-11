@@ -133,7 +133,15 @@ public enum PartKind {
      * Its anchor here is only the first hoof: a worn piece is hung wherever its wearer
      * says ({@code common/gear/WornPart}), so one kind serves all four feet.
      */
-    TEST_BLOCK(PartAnchor.HOOF_FRONT_LEFT, PartSheet.BONE);
+    TEST_BLOCK(PartAnchor.HOOF_FRONT_LEFT, PartSheet.BONE),
+
+    /**
+     * A horse shoe, <b>worn</b>: a U of three bars under the foot, open at the heel,
+     * with only its edge showing on the hoof wall ({@link ShoeGenerator}). One kind for
+     * all four feet and every metal: its wearer names the hoof, and the metal is the
+     * part's tint.
+     */
+    SHOE(PartAnchor.HOOF_FRONT_LEFT, PartSheet.BONE);
 
     private final PartAnchor anchor;
     private final int texture;
@@ -184,7 +192,8 @@ public enum PartKind {
             // The plain ridge, and form x bump size.
             case BROW_RIDGE -> BrowRidgeGenerator.styles();
             // One: a block is a block.
-            case TEST_BLOCK -> 1;
+            // One: a shoe is a shoe; the metal is a tint.
+            case TEST_BLOCK, SHOE -> 1;
         };
     }
 
@@ -210,7 +219,7 @@ public enum PartKind {
             case EAR_FIN_RIGHT, EAR_FIN_LEFT -> EarFinSize.classes();
             case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> CheekSpikeSize.classes();
             case BROW_RIDGE -> BrowRidgeSize.classes();
-            case TEST_BLOCK -> 1;
+            case TEST_BLOCK, SHOE -> 1;
         };
     }
 
@@ -238,7 +247,7 @@ public enum PartKind {
      * a grown part obeys. A foal wears no gear, so no worn kind shows on one.
      */
     public boolean worn() {
-        return this == TEST_BLOCK;
+        return this == TEST_BLOCK || this == SHOE;
     }
 
     /**
@@ -262,7 +271,7 @@ public enum PartKind {
             // Nor the ear fins, the cheek spikes or the brow ridge.
             case EAR_FIN_RIGHT, EAR_FIN_LEFT, CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT, BROW_RIDGE -> PartSheet.SOLID;
             // Nothing worn glows yet.
-            case TEST_BLOCK -> PartSheet.SOLID;
+            case TEST_BLOCK, SHOE -> PartSheet.SOLID;
         };
     }
 
@@ -287,7 +296,7 @@ public enum PartKind {
                  PLATES_RIGHT, PLATES_LEFT, NARWHAL, TUSK_RIGHT, TUSK_LEFT, SABRE_RIGHT, SABRE_LEFT,
                  // An ear fin has no membrane between its rays yet (head-parts treatment).
                  EAR_FIN_RIGHT, EAR_FIN_LEFT, CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT, BROW_RIDGE,
-                 TEST_BLOCK -> 0;
+                 TEST_BLOCK, SHOE -> 0;
         };
     }
 
@@ -378,6 +387,7 @@ public enum PartKind {
             case CHEEK_SPIKE_RIGHT, CHEEK_SPIKE_LEFT -> "Cheek spikes";
             case BROW_RIDGE -> "Brow ridge";
             case TEST_BLOCK -> "Test block";
+            case SHOE -> "Horse shoes";
         };
     }
 }

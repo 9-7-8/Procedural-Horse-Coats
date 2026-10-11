@@ -152,7 +152,8 @@ public final class DebugPhotoShoot {
      * Stand the horse up on its hind legs and hold it there for the picture. A shot whose
      * name has {@code -walk} in it is held mid-stride instead, by the client half; one
      * with {@code boot} in it wears the debug test boot on its near fore and hind legs, and
-     * one with {@code block} in it the debug test block on all four hooves.
+     * one with {@code block} in it the debug test block on all four hooves, and one with
+     * {@code shoe} in it a plain iron shoe on each.
      */
     public static java.util.function.Consumer<Horse> rearing() {
         return horse -> horse.setStanding(100000);
@@ -176,9 +177,12 @@ public final class DebugPhotoShoot {
      * which HEAD leaves a few pixels across), or the whole head close up from three-quarters
      * front (a part on the skull or the cheek: fins, spikes, a ridge - HEAD shows the whole
      * horse and leaves them a dozen pixels across), or the legs close up from the near
-     * side, a little forward (a part on a leg: a boot, which SIDE leaves a few pixels tall).
+     * side, a little forward (a part on a leg: a boot, which SIDE leaves a few pixels tall),
+     * or the underside of the feet: the lifted fore feet of a rearing horse from low in
+     * front (SOLE), and the feet from ground level behind (HEEL) - a shoe, which is under
+     * the foot and hidden by the ground in every other framing.
      */
-    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE, FACE, FRONT, PROFILE, LEGS }
+    public enum Framing { HEAD, WIDE, FOAL, SIDE, BACK, MUZZLE, FACE, FRONT, PROFILE, LEGS, SOLE, HEEL }
 
     private static final String BAY = "horsegenetics.extension=E/E-horsegenetics.agouti=A/A";
     private static final String BLACK = "horsegenetics.extension=E/E-horsegenetics.agouti=a/a";
@@ -337,6 +341,24 @@ public final class DebugPhotoShoot {
             ex = tx - 0.7;
             ey = ty + 0.25;
             ez = tz + 2.0;
+        } else if (shot.framing() == Framing.SOLE) {
+            // Under the lifted fore feet of a rearing horse: low in front (west) and a
+            // little to the south, looking up at the soles.
+            tx = hx - 0.75;
+            ty = origin.getY() + 1.15;
+            tz = hz;
+            ex = tx - 0.9;
+            ey = origin.getY() + 0.35;
+            ez = tz + 0.7;
+        } else if (shot.framing() == Framing.HEEL) {
+            // The feet from behind (east) at ground level, a little to the south: what a
+            // shoe shows of itself on a standing horse, and the hind soles at full stride.
+            tx = hx + 0.3;
+            ty = origin.getY() + 0.3;
+            tz = hz;
+            ex = tx + 1.6;
+            ey = origin.getY() + 0.2;
+            ez = tz + 0.9;
         } else if (shot.framing() != Framing.HEAD) {
             // The whole horse from a little forward of side-on, for a look that is the
             // whole body (the skeleton's cut-outs). A foal is half the size, so half the way.

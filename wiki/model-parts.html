@@ -443,7 +443,7 @@
     <li><strong>Hard pieces are boxes built in code</strong>, as <code>HarnessLayer</code>&rsquo;s
         frame and straps are. Their route is <a href="#worn-side">the worn side</a> of
         <code>AttachedPartLayer</code>, built 2026-10-11 and proved with a debug block on the
-        hooves; no real piece uses it yet.</li>
+        hooves. The horse shoe&rsquo;s geometry is the first real piece on it.</li>
     <li><strong>Soft pieces that wrap the horse are the horse&rsquo;s own mesh, lifted, with a
         rim.</strong> This is built, and the rest of this section is how. Each such piece is
         a row of <a href="horse-gear.html#worn-table">the worn-piece table</a>.</li>
@@ -602,6 +602,18 @@
         because one box that wide would unwrap past its sheet region. It is not an item:
         <code>WornPart.testBlocks</code> hangs one on every hoof, and only a photo shoot whose
         shot has <code>block</code> in its name asks for it.</li>
+    <li><strong>The first real shape is the horse shoe</strong> (2026-10-11, towards
+        <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/164">#164</a>; the
+        owner&rsquo;s shape, the same day). <code>PartKind.SHOE</code>, built by
+        <code>ShoeGenerator</code>, is a U of three bars <strong>under</strong> the foot: one
+        under each side wall and one across the toe, none across the heel, so the middle of
+        the sole (the frog) shows inside it. Its outer edge is the worn floor outside the wall,
+        and it reaches the floor under the sole and a quarter unit up the wall, which is all
+        a standing horse shows of it. The side bars stop a quarter unit short of the back wall.
+        One kind serves four feet and every metal: the hoof is the <code>WornPart</code>&rsquo;s
+        anchor and the metal is the tint. <code>WornPieces.HORSE_SHOE</code> is its row.
+        <strong>Geometry only:</strong> no item, slot or stat is wired to it, and only a photo
+        shoot whose shot has <code>shoe</code> in its name shoes a horse.</li>
 </ul>
 <p>
     <strong>It holds, in stills.</strong> Photographed on 2026-10-11 on a chestnut and a grey,
@@ -610,7 +622,12 @@
     full swing and lifted with the fore legs in the rear, a little wider than the leg, with
     nothing in the log. Tests: <code>WornPartTest</code> (one block per hoof; what may be hung;
     the block stands its row&rsquo;s lift off the foot on every side; a worn kind unwraps inside
-    its region). What a still cannot show is on the
+    its region; a shoe is a U open at the heel with the frog bare and a bare edge on the wall).
+    The shoe was photographed the same day in iron, on a bay and a black: from under a
+    rearing horse the toe and both sides are shod, the heel is open and the sole shows
+    inside the U; from behind at full stride the hind soles show the same; standing, from
+    the side and from behind, only a thin pale line shows at the ground, and nothing across
+    the heel. What a still cannot show is on the
     <a href="#open-worn-side">Verification tab</a>.
 </p>
 
@@ -1260,6 +1277,11 @@
         horse&rsquo;s outline includes it.</li>
     <li><strong>Small and large horses.</strong> The render scale is on the pose stack before
         the layer runs, so the block should scale with the leg; read, not seen.</li>
+    <li><strong>The shoe, in play.</strong> Its stills are from two angles a player rarely
+        has. Look at a shod horse walking away, galloping and rearing: the U under each
+        lifted foot, the thin edge on the wall, and whether that edge reads as a shoe or is
+        too slight to notice at ordinary distance. The shoe reaches a quarter unit under the
+        sole, so on flat ground its underside is in the floor.</li>
 </ul>
 
 <h3 id="open-worn-braid">The lifted braid: photographed standing still, never seen moving</h3>

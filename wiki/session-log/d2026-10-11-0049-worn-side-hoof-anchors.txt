@@ -7,6 +7,13 @@ ASKED
    next release (v0.5.047, the equipment release, milestone 44), found every open issue
    already on a milestone, and built one unit, #140, by procedures/process-intake.txt.
    The owner was not asked anything: the unit had no open call.
+2. After the summary: "Horse shoes shouldn't cover the whole foot, only the front and
+   sides, not the back" - recorded as an owner decision on #164.
+3. "Can you give me a photo of the horse shoes then, where they look correct? And shoes
+   should basically only be visible on the underside of the foot, with only the barest
+   bit visible on the hoof wall. It should also be a U shape on the underside too, so
+   you can see the frog under the shoe" - the shoe's geometry was built and
+   photographed (below); the decisions are on #164.
 
 DONE
 ----
@@ -59,8 +66,32 @@ Pictures (a photo shoot, -PphotoShoot; six shots, shown to the owner, stills onl
 - 06-block-walk-side (grey, SIDE, full stride): four blocks, one per foot.
 The live server was up with 0 players each time tests ran (checked read-only).
 
+The horse shoe's shape, towards #164 (owner's request 3) - the commit after this log's
+first version, "Horse shoes: the shape, as a U under the foot". #164 stays open.
+- PartKind.SHOE (worn), built by parts/ShoeGenerator: a bar under each side wall and one
+  across the toe, 1 unit wide, the worn floor (0.25) outside the wall and under the
+  sole, 0.25 up the wall, the side bars stopping 0.25 short of the back wall. The toe
+  bar is turned a quarter about y, because a box may not be wider than it is deep.
+  WornPieces.HORSE_SHOE is its row; AttachedPart.shoe(tint) the part.
+- Geometry only: no item, slot, stat or enchantment. DebugPhotoShootClient shoes a horse
+  in plain iron while the shot on stage has "shoe" in its name.
+- DebugPhotoShoot gained Framing.SOLE and Framing.HEEL.
+- Proof: WornPartTest.aShoeIsAUOpenAtTheHeel (new) with the classes named above, the
+  build, parity, the wasm rebuild and check-designer-boots, all green.
+- Pictures (six shots, five shown): 01-shoe-sole-rear, from under a rearing bay - a grey
+  U on each lifted fore sole, toe and sides shod, heel open, the dark sole inside;
+  02-shoe-heel-walk, from behind at full stride - the same U under the hind feet;
+  03-shoe-legs-stand and 04-shoe-legs-walk - a thin pale edge at the bottom of each
+  foot and nothing up the leg; 05-shoe-side-rear - too far to judge; 06-shoe-heel-stand,
+  standing from behind - nothing across the heel, the shoe all but invisible.
+
 DECIDED
 -------
+Owner, 2026-10-11 (recorded on #164): a shoe covers the front and sides of the foot and
+not the back; it is seen on the underside, with only the barest bit on the hoof wall; it
+is a U underneath too, so the frog shows.
+Without the owner, for the shoe: the bar is 1 unit wide, the edge on the wall 0.25 high,
+and the shoe is in the floor by 0.25 on flat ground rather than lifting the horse.
 Calls made without the owner (all recorded on wiki/model-parts.html#worn-side):
 - A worn part names its own anchor (on WornPart), and a kind's anchor() stays the grown
   part's place. One shoe mesh goes on four feet; four kinds per piece was the alternative.
@@ -115,4 +146,6 @@ PICK UP FIRST
 -------------
 #164 Horse shoes, the last piece of v0.5.047.1, by procedures/next-release.txt (it hands
 to process-intake). It is size L and its treatment predates the worn side: read the
-comment on #164 dated 2026-10-11 first. The bugs #10, #31 and #36 still wait on checks.
+comments on #164 dated 2026-10-11 first. The shoe's shape is already built
+(PartKind.SHOE); what is left is the items, the hoof slots' tags, resolving the worn
+stacks into GeneticHorseRenderState.worn, the stats and the enchantments. The bugs #10, #31 and #36 still wait on checks.

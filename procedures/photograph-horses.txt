@@ -92,6 +92,10 @@ STEPS
    and _HIND) on its near fore and hind legs, edged, or flat with "-flat".
    A shot with "block" in its name wears the debug test block (WornPieces.TEST_BLOCK) on
    all four hooves: the box-built twin of the boot, for the worn side of the part layer.
+   A shot with "shoe" in its name is shod on all four feet in plain iron (PartKind.SHOE).
+   A shoe is UNDER the foot and the ground hides it: use Framing.SOLE with rearing() (low
+   in front, looking up at the lifted fore soles) and Framing.HEEL (ground level behind;
+   with "-walk" the hind soles show) (both added 2026-10-11). LEGS shows only its edge.
    A lifted worn piece beside its flat self: name a second shot the same but ending in
    "-flat". The client half takes any shot so named with gear.edges off (in memory
    only) and puts the setting back when the shoot ends, so one launch gives both. The
