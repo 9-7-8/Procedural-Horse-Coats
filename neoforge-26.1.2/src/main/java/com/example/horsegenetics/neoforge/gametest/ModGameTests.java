@@ -2283,7 +2283,7 @@ public final class ModGameTests {
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
         // Alone: two horses ten blocks apart on a field of their own. The wait for the
         // field's forced chunks (#70), then 400 ticks of riding.
-        registerAlone(event, UNTAMED_RIDDEN_HORSE_BUCKS, 1500);
+        registerAlone(event, UNTAMED_RIDDEN_HORSE_BUCKS, 1600);
         // A small scratch box filled and read, all inside one tick.
         register(event, environment, NO_HORSE_STANDS_IN_POWDER_SNOW, 100);
         // Five stalls built and read, all inside one tick.
@@ -2794,27 +2794,33 @@ public final class ModGameTests {
     private static void untamedRiddenHorseBucks(GameTestHelper helper) {
         keepTicking(helper);
         ServerLevel level = helper.getLevel();
-        // A scratch field in the air, snow block under a snow layer, as a snowy biome's ground is.
+        // A scratch field in the air, snowy grass under a snow layer, as a snowy biome's ground
+        // is - and grass because a natural horse spawn is refused on anything else.
         BlockPos floor = helper.absolutePos(BlockPos.ZERO).above(29);
-        for (int x = -9; x <= 9; x++) {
-            for (int z = -6; z <= 6; z++) {
-                level.setBlock(floor.offset(x, 0, z), Blocks.SNOW_BLOCK.defaultBlockState(), 2);
+        for (int x = -14; x <= 14; x++) {
+            for (int z = -6; z <= 24; z++) {
+                level.setBlock(floor.offset(x, 0, z), Blocks.GRASS_BLOCK.defaultBlockState()
+                        .setValue(BlockStateProperties.SNOWY, true), 2);
                 level.setBlock(floor.offset(x, 1, z), Blocks.SNOW.defaultBlockState(), 2);
             }
         }
         // And the biome itself: the cold_biome flag (MagicColdGene) reads coldEnoughToSnow where
         // the horse stands, and every Rimehart is Ctol/Ctol.
-        BlockPos lo = floor.offset(-9, -2, -6);
-        BlockPos hi = floor.offset(9, 8, 6);
+        // snowy_beach, because the Rimehart is the only breed that lives there: the wild pack
+        // below is founded by HerdManager from the biome, and must come out a Rimehart herd.
+        BlockPos lo = floor.offset(-14, -2, -6);
+        BlockPos hi = floor.offset(14, 8, 24);
         level.getServer().getCommands().performPrefixedCommand(
                 level.getServer().createCommandSourceStack().withLevel(level).withSuppressedOutput(),
                 "fillbiome " + lo.getX() + " " + lo.getY() + " " + lo.getZ() + " "
-                        + hi.getX() + " " + hi.getY() + " " + hi.getZ() + " minecraft:snowy_plains");
+                        + hi.getX() + " " + hi.getY() + " " + hi.getZ() + " minecraft:snowy_beach");
         if (!level.getBiome(floor.above()).value().coldEnoughToSnow(floor.above(), level.getSeaLevel())) {
             throw new GameTestAssertException(Component.literal(
                     "the field is not a cold biome - fillbiome did not take, so the test proves nothing about cold"), 0);
         }
-        String[] breeds = {"rimehart", "quarter_horse"};
+        // Two spawn-egg founders, and one member of a pack placed the way the wild top-up places one.
+        String[] breeds = {"rimehart", "quarter_horse", "wild rimehart"};
+        java.util.List<net.minecraft.world.entity.animal.equine.Horse> pack = new java.util.ArrayList<>();
         net.minecraft.world.entity.animal.equine.Horse[] horses =
                 new net.minecraft.world.entity.animal.equine.Horse[breeds.length];
         net.minecraft.world.entity.player.Player[] riders =
@@ -2824,13 +2830,35 @@ public final class ModGameTests {
         boolean[] mounted = new boolean[breeds.length];
         long[] started = {-1L};
         helper.succeedWhen(() -> {
-            if (started[0] < 0) {
+            if (horses[0] == null) {
                 fieldTicks(helper);
-                for (int i = 0; i < breeds.length; i++) {
+                clearHerdReach(helper);
+                for (int i = 0; i < 2; i++) {
                     BlockPos at = floor.offset(i == 0 ? -5 : 5, 1, 0);
                     horses[i] = com.example.horsegenetics.neoforge.server.HorseEggSpawner.spawnFounder(level,
                             net.minecraft.world.phys.Vec3.atBottomCenterOf(at), 0.0F,
                             com.example.horsegenetics.common.breed.Breeds.get(breeds[i]));
+                }
+                pack.addAll(com.example.horsegenetics.neoforge.server.WildTopUp.spawnPack(level,
+                        floor.offset(0, 1, 14), 4, level.getRandom()));
+                if (pack.isEmpty()) {
+                    throw new GameTestAssertException(Component.literal("the top-up placed no wild pack on the field"), 0);
+                }
+            }
+            if (started[0] < 0) {
+                var wild = pack.get(0);
+                if (!wild.isAlive() || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(wild)
+                        || !wild.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get()).inWildHerd()) {
+                    throw new GameTestAssertException(Component.literal("waiting for the wild pack to be founded"), 0);
+                }
+                String token = com.example.horsegenetics.neoforge.server.HorseRecords.of(wild).breed().orElse("");
+                HorseGenetics.LOGGER.info("[buck] wild pack of {} founded as {}", pack.size(), token);
+                if (!token.contains("rimehart")) {
+                    throw new GameTestAssertException(Component.literal("the wild pack on a snowy beach was founded as "
+                            + token + ", not a Rimehart herd - the test's premise is broken"), 0);
+                }
+                horses[2] = wild;
+                for (int i = 0; i < breeds.length; i++) {
                     riders[i] = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
                 }
                 started[0] = level.getGameTime();
@@ -2893,6 +2921,16 @@ public final class ModGameTests {
                             + " was ridden for 380 ticks and never ran RunAroundLikeCrazyGoal, never threw its"
                             + " rider and was never tamed - it cannot be tamed from its back"), 0);
                 }
+            }
+            // The field goes, and everything on it: left standing it is the "surface" for
+            // every later test whose own ground search runs under it.
+            for (var left : level.getEntitiesOfClass(net.minecraft.world.entity.animal.equine.Horse.class,
+                    new net.minecraft.world.phys.AABB(floor).inflate(40, 12, 40))) {
+                left.ejectPassengers();
+                left.discard();
+            }
+            for (BlockPos p : BlockPos.betweenClosed(floor.offset(-14, 0, -6), floor.offset(14, 1, 24))) {
+                level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
             }
         });
     }
