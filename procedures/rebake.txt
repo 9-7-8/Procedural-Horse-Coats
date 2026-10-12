@@ -244,6 +244,18 @@ STEPS
              --tests '*WornPartTest' with '*WornPiecesTest' instead.
       COMMIT N/assets/horsegenetics/textures/entity/horse/<mask>.png
 
+   ab. A NATURAL gene's facts (alleles, which pair gives which outcome, a lethal or
+      nonviable pair, a condition, its wild founder table), or one of the five body-stat
+      genes (#250)
+      RUN    Nothing in this repo. The data repo github.com/9-7-8/open-equine-genetics
+             (a sibling folder of this one) holds a copy that nothing regenerates: it
+             is a mirror until the mod reads it (#254, #255). Carry the change there
+             by ITS procedures/re-export-from-the-mod.txt, which exports to a scratch
+             folder and merges by hand. Never run the exporter over that folder: it
+             overwrites corrections made there. A painter, a priority or a magical gene
+             is not mirrored and needs nothing.
+      COMMIT in the data repo, not here. Pushing there is the owner's call.
+
    A row is missing if a derived, checked-in file has no row. Add the row here in the
    same change, never to CLAUDE.md.
 

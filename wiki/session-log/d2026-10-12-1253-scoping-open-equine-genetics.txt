@@ -1,6 +1,8 @@
-2026-10-12 12:53 - Scoping: the open equine genetics data repo (#250)
-(The time is the END of the session. No code, wiki page or asset was touched; only GitHub
-issues, two milestones and this log.)
+2026-10-12 12:53 - Scoping: the open equine genetics data repo (#250), then its first export
+(12:53 is when the scoping ended and this log was first written; the session went on and
+the log was rewritten at its end, about 13:55. No code, wiki page or asset of the mod was
+touched: only GitHub issues, milestones, procedures/rebake.txt and this log. The data repo
+itself was created in a sibling folder.)
 
 ASKED
 -----
@@ -17,25 +19,56 @@ ASKED
    keep outside additions usable in the MIT mod. Nothing was changed.
 2. Asked with the question tool what to do next, the owner chose "Scope it as an issue".
    -> procedures/write-intake-document.txt was run. Six rounds of questions; the
-   treatment is #250 with pieces #251-#255, and the audit is the idea issue #256.
+   treatment is #250 with five pieces, and the audit as an idea issue.
+3. "Make a new folder. Go to the root of where this is, then make a new folder named after
+   the repo. create a /procedures/ folder in there ... create a knowledge folder. Copy the
+   science tab from each gene into a new folder in this knowledge folder. Also create new
+   files with any context you think the new maintainer will need ... create a session-logs
+   file ... copy over all the genes into this new folder. Remember, their formatting should
+   be platforming and language agnostic."
+   -> Done in C:\Users\Isabel\open-equine-genetics, beside this repo. See DONE.
+4. "Make a big note of everything left to do, then bring a claude instance up that is
+   remote controlled in this folder, then go back to your PCH folder"
+   -> TODO.txt written there; a Claude Code window started in that folder with
+   --remote-control. That instance has since made the folder a git repository, public at
+   github.com/9-7-8/open-equine-genetics.
+5. "end session", and before it ran: "there's now a git repo in that folder. Move all your
+   issues that were pertaining to CREATING (not adapting back) open-equine-genetics over
+   to that repo for me"
+   -> Three issues transferred, then the session ended. See DONE.
 
 DONE
 ----
-- No commit but this log. Issues only.
-- #250 "Open equine genetics data repo": tracking parent, scoped, on v0.6.4. Holds the
-  request, scope, what already exists, every decision, the UNVERIFIED list, order and the
-  implications sweep. Open.
-- #251 piece 1, the repo, the schema and the natural breeds (v0.5.062, size:L). Open.
-- #252 piece 2, the gene facts export (v0.5.062, size:L). Open.
-- #253 piece 3, the mod reads its breeds from the repo (v0.6.4, size:L). Open, waits on
-  #251, #142, #146.
-- #254 piece 4, the mod reads the table-shaped genes (v0.6.4, size:L). Open.
-- #255 piece 5, the mod reads the complex genes (v0.6.4, size:L). Open.
-- #256 the accuracy audit against UC Davis VGL, OMIA and the papers: `idea`, Backlog.
-- Milestones v0.5.062 and v0.6.4 created, with descriptions; both added to the release
-  plan issue #196 in the same edit.
-- Proof: every "what already exists" path in #250 was checked to exist at 93af89d9. The
-  code survey behind it was a read-only Explore agent; nothing was built or run.
+- One docs commit besides the first version of this log. No code.
+- SCOPING. #250 "Open equine genetics data repo": tracking parent, scoped, on v0.6.4.
+  Holds the request, scope, what already exists in the code, every decision, the
+  UNVERIFIED list, order and the implications sweep. Open. Its pieces as filed:
+    piece 1  the repo, the schema and the natural breeds     filed as #251
+    piece 2  the gene facts export                            filed as #252
+    piece 3  the mod reads its breeds from the repo           #253  (v0.6.4, size:L)
+    piece 4  the mod reads the table-shaped genes             #254  (v0.6.4, size:L)
+    piece 5  the mod reads the complex genes                  #255  (v0.6.4, size:L)
+    the accuracy audit (UC Davis VGL, OMIA, the papers)       filed as #256, an idea
+- THE MOVE (request 5). #251, #252 and #256 were TRANSFERRED to the data repo and are now
+  9-7-8/open-equine-genetics#1, #2 and #3. Labels scoped, idea, size:L and impact:unblocks
+  were created there first, so they carried over. References inside them to this repo's
+  issues were rewritten to name this repo. #250, #253, #254 and #255 stay here.
+  Milestone v0.5.062 held only the two moved pieces and was deleted. #250 (body and a
+  comment), the release plan #196 and milestone v0.6.4's description all say so.
+  GitHub itself rewrote the mentions of the moved issues in #253, #254 and #196.
+- THE FIRST EXPORT (request 3), in the sibling folder, nothing in this repo: 68 locus files
+  in a plain JSON format (43 published, 25 abstracted), mod-map.json, 53 science notes
+  copied from the wiki Science tabs with their link addresses, six context files, twelve
+  procedures, a session log, a TODO.txt, and tools/validate.mjs. Made by a throwaway Java
+  program compiled against common/build/classes (javac and java directly; no Gradle run),
+  kept in that folder under knowledge/how-this-was-exported/. Proof: its validator prints
+  "OK - 68 gene files and mod-map.json pass every check", and failed both times the data
+  was broken on purpose. It is a hand-run first version of what piece 2 scoped, NOT the
+  permanent exporter that piece describes.
+- procedures/rebake.txt gained row ab: a natural gene whose facts change must be carried
+  to the data repo by that repo's own procedure, since nothing regenerates the mirror.
+- Proof for the scoping: every "what already exists" path in #250 was checked to exist at
+  93af89d9. The code survey behind it was a read-only Explore agent.
 - No pictures.
 
 DECIDED
@@ -56,12 +89,16 @@ All recorded in #250 (section 5 and the decision comment on it). All (owner) unl
 - Equids only. Repo name open-equine-genetics. GPL 3, a relicensing clause in
   CONTRIBUTING, and the data stays GPL 3 inside the jar.
 - Delivery by a pinned git submodule.
-- Release: rides with other releases. Repo and export in v0.5.062 (after v0.5.061); the
-  mod-reads pieces in v0.6.4, after the rename and the four-jar split, before the ports.
+- Release: rides with other releases. The mod-reads pieces are on v0.6.4, after the rename
+  and the four-jar split, before the ports. (The repo-and-export pieces were first placed
+  on a new v0.5.062; they then left this repo, and that milestone with them.)
 - The audit is its own issue. Science tabs are not generated from the data for now.
+- The issues about creating the data repo live in the data repo; the ones about adapting
+  the mod back stay here.
 - Scoping session's calls, marked Recommended in the issues and not asked: the exact
-  five display strings; the stat genes keep isNatural() == false; the file layout and
-  field names; the breed overlay split; the parity-snapshot tests.
+  five display strings; the stat genes keep isNatural() == false; the breed overlay split;
+  the parity-snapshot tests. Exporting session's calls, not asked: the data format and
+  every field name; the folder sitting beside this repo; adding a validator there.
 
 FOUND ON THE WAY
 ----------------
@@ -73,20 +110,34 @@ FOUND ON THE WAY
 - A comment in Genes.java calls leopard the only gene that reads another locus; agouti
   and flaxen do too. #255 corrects it.
 - The breed heights on the wiki are derived from stats.size; no cited real height is
-  stored anywhere. Written in #250 and #251.
+  stored anywhere. Written in #250.
 - wiki/text/*.science.txt drops link URLs, so citations must be harvested from the HTML.
+- The export's own validator caught one thing worth knowing here: MetGene declares an
+  outcome that only its nonviable pair reaches.
+- Mistake put right: the first attempt to rewrite the moved issues' references failed (a
+  sed delimiter clashed with the repo name) after the transfer had already gone through.
+  The bodies were corrected in the next step; nothing was lost.
 
 PROCEDURES
 ----------
-None written or changed.
+procedures/rebake.txt: new row ab (the data repo is a mirror nothing regenerates). The
+review asked the three questions. write-intake-document ran as written. Nothing else was
+made untrue. The data repo has its own twelve procedures, written this session, none run.
 
 NOT RUN / NOT CHECKED
 ---------------------
-- No test, build or game launch: nothing was changed that one could check.
+- No test and no Gradle build: no Java, resource or Gradle file of this repo changed.
+  check-parity was run at the end and is OK.
 - The counts and line references in #250 section 3 come from static reading by an agent.
 - #250 section 6 lists seven UNVERIFIED facts, the submodule build first.
 - The rename's treatment (#142) was not read; #253 says to read it before starting.
 - No Verification-tab anchors were added (scoping writes no wiki page).
+- The exported data is unaudited: no source was opened, every frequency is an estimate,
+  and the gene symbols are from memory. That repo's knowledge/known-issues.txt lists it.
+- The owner has not reviewed the data format.
+- Files inside the data repo still call the moved issues by their old numbers; the
+  instance working there was left to fix its own files.
+- Whether the remote-controlled instance connected was not confirmed from here.
 
 RELEASE
 -------
@@ -94,7 +145,6 @@ Not offered: nothing shippable was built.
 
 PICK UP FIRST
 -------------
-#251, the data repo and the natural breeds, by procedures/process-intake.txt - but it sits
-on v0.5.062, so by the release plan the next unit is still #73 on v0.5.047
-(procedures/next-release.txt) unless the owner asks for #251 first. Creating the public
-repo needs her yes in that session.
+In THIS repo nothing changed the order: the next unit is #73 on v0.5.047, by
+procedures/next-release.txt. The data repo has its own TODO.txt and its own sessions; the
+mod-side pieces (#253 to #255) wait on the rename and the four-jar split.
