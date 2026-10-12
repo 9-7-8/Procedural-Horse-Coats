@@ -56,6 +56,12 @@ const NOT_AN_ITEM = {
     why: 'the base sprite compat/GeneratedArmour tints per metal, for armour made of '
        + 'another mod\'s ingot. No model file exists until the game writes one.',
   },
+  horse_shoe: {
+    name: 'Horse Shoe (tinted per metal)',
+    why: 'the one grey sprite, and the one model, every horse shoe wears: the five shipped '
+       + 'ones and compat/GeneratedShoes\' alike, tinted by client/MetalTintSource. It has a '
+       + 'model file but no item of its own id, so no lang key to read a name from.',
+  },
 };
 
 /** Item ids deliberately on no page, and why. Anything else uncovered is an error. */

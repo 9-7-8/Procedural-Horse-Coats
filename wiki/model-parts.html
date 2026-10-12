@@ -612,8 +612,9 @@
         a standing horse shows of it. The side bars stop a quarter unit short of the back wall.
         One kind serves four feet and every metal: the hoof is the <code>WornPart</code>&rsquo;s
         anchor and the metal is the tint. <code>WornPieces.HORSE_SHOE</code> is its row.
-        <strong>Geometry only:</strong> no item, slot or stat is wired to it, and only a photo
-        shoot whose shot has <code>shoe</code> in its name shoes a horse.</li>
+        Since 2026-10-12 it is worn: a shoe item in a hoof slot puts one on that foot
+        (<a href="item-horse-shoes.html#render-layer">horse shoes</a>;
+        <code>HorseShoes.worn</code> resolves the four slots).</li>
 </ul>
 <p>
     <strong>It holds, in stills.</strong> Photographed on 2026-10-11 on a chestnut and a grey,
@@ -627,7 +628,11 @@
     rearing horse the toe and both sides are shod, the heel is open and the sole shows
     inside the U; from behind at full stride the hind soles show the same; standing, from
     the side and from behind, only a thin pale line shows at the ground, and nothing across
-    the heel. What a still cannot show is on the
+    the heel. <strong>Which anchor is which foot</strong> was settled on 2026-10-12 with real
+    shoes put in real slots: one gold shoe in <code>SHOE_FRONT_LEFT</code> showed on the near
+    fore alone, and copper, gold, iron and diamond in the four slots showed copper near fore,
+    gold off fore, iron near hind and diamond off hind. So <code>HOOF_FRONT_LEFT</code> is the
+    near fore, and the other three follow. What a still cannot show is on the
     <a href="#open-worn-side">Verification tab</a>.
 </p>
 
@@ -1267,9 +1272,6 @@
     <li><strong>It moves with the leg.</strong> The shoot&rsquo;s stride was one held frame.
         Walking, galloping, rearing and swimming: each block stays on its own foot and does not
         swim along it.</li>
-    <li><strong>Which foot is which.</strong> The four blocks were one colour, so the stills
-        show a block on every foot but not that <code>HOOF_FRONT_LEFT</code> is the near fore.
-        The first piece worn on one foot only settles it.</li>
     <li><strong>The sole against the ground.</strong> The block reaches a quarter unit under the
         sole, so it sinks that far into a flat floor. Look for flicker on slabs, paths and
         carpet, and at what shows under a lifted foot.</li>

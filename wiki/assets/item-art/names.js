@@ -27,6 +27,7 @@ window.HG_ITEM_NAMES = {
   "holding_pen_sign": "Holding Pen Sign",
   "holding_pen_ticket": "Holding Pen Ticket",
   "horse_hair": "Horse Hair",
+  "horse_shoe": "Horse Shoe (tinted per metal)",
   "interdimensional_ticket": "Interdimensional Ticket",
   "intermediate_stasis_chamber": "Intermediate Horse Stasis Chamber",
   "iron_storage_harness": "Iron Storage Harness",

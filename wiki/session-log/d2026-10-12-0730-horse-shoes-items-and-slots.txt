@@ -1,0 +1,144 @@
+2026-10-12 07:30 - next-release: horse shoes can be bought, worn and seen (#164); what they do is #247
+(The time is the session's end.)
+
+ASKED
+-----
+1. "/next-release" - the only request. It ran procedures/next-release.txt: the next
+   release is v0.5.047 (the equipment release, milestone 44); every open issue already
+   had a milestone; the milestone's three bugs (#10, #31, #36) are fixed and waiting on
+   their checks, so the unit was #164, Horse shoes, built by procedures/process-intake.txt
+   as a tier 3 unit (size L: one slice that stands alone).
+2. Two questions were put to the owner with the question tool before any code:
+   - "How should a player get horse shoes until [the tack bench]?" - she chose
+     "Metalsmith trades only" over the recommended interim crafting recipe.
+   - "Which materials get a shoe in this first pass?" - she chose "Iron, copper, gold,
+     diamond, netherite", plus every modded metal.
+
+DONE
+----
+#164 "Horse shoes" - commit 52dd3a92. Closed. What it left is #247 (open).
+
+What was missing. The shoe's geometry existed (PartKind.SHOE, caaa18f3) and the four hoof
+slots, their tags and the gear sync existed, but the tags were empty, there was no shoe
+item, and a horse was shod only in a photo shoot whose shot had "shoe" in its name.
+
+What was built.
+- common/gear/HorseShoes: the shipped metals (HorseShoes.Metal: copper, iron, gold,
+  diamond, netherite, with their ids and colours); ships(material), which stops another
+  mod's copper or gold getting a second shoe; and worn(frontLeft, frontRight, hindLeft,
+  hindRight), which turns four hoof tints (0 = bare) into one WornPart per shod hoof on
+  that hoof's PartAnchor. An unshod horse allocates nothing.
+- item/HorseShoeItem: one class, an item per metal, stacking to 1. The colour is a
+  constant of the item (tint()), read by both the icon and the worn shoe.
+  ModItems.HORSE_SHOES registers the five.
+- compat/ModdedShoes: a shoe per material out of ModdedMaterials.armourMetals(), the list
+  generated horse armour uses. A shoe whose mod was removed is aliased to the iron shoe.
+- compat/GeneratedShoes: each modded shoe's item definition, name, entry in the four
+  gear/shoe_* tags and metalsmith trade. No texture, no model, no recipe.
+- compat/MetalsmithTrades: the trade-set writing moved out of GeneratedArmour so that
+  armour and shoes add to each level's file through one writer.
+- MaterialScan.fingerprint: "rules|3" became "rules|4", so a generated pack from an older
+  jar is rebuilt and gains the shoe files.
+- Resources: five items/*.json on one model (models/item/horse_shoe.json) and one
+  greyscale sprite (textures/item/horse_shoe.png, from tools/bake-drawn-items.mjs),
+  tinted by client/MetalTintSource; five lang names; the four gear/shoe_* tags; five
+  trades, one a level, and each trade_set's "amount" raised from 3 to 4.
+- client/GeneticHorseRenderer: the four hoof slots are resolved into
+  GeneticHorseRenderState.worn through HorseShoes.worn. The photo shoot's debug list
+  still wins when it is not empty.
+- DebugPhotoShoot.shod(...): shoes a staged horse through the real slots. The client
+  half's "shoe" name hook is gone.
+
+Proof.
+- :common:test --tests '*HorseShoesTest' (new, 5 tests) green. Broken on purpose
+  (hooves.get(3 - i)): two tests failed; restored.
+- Gametest shoes_fit_their_hooves (new): every shipped shoe is accepted by all four hoof
+  slots and fits no other slot, four metals read back as put on, one comes off without
+  disturbing three, a foal refuses. :neoforge-26.1.2:runGameTest: all 61 passed. Broken
+  on purpose (iron removed from gear/shoe_hind_left): "iron_horse_shoe is refused by
+  SHOE_HIND_LEFT"; restored.
+- :neoforge-26.1.2:test and :neoforge-26.1.2:build green. check-duplicate-item-art,
+  check-recipes, check-parity (7163 checks), check-designer-boots, check-links,
+  check-roadmap-execution OK. web.wasm not rebuilt: nothing under web/ reaches
+  HorseShoes.
+- One dedicated-server boot beside the synthetic compat mod (compat-test's boot 1 only):
+  fingerprint 09587eb6952a55d9, 71 files for 1 wood and 5 metals, reached "Done (". Four
+  shoes generated (entro, hellforged, ruby, tin), each with an item definition, a name
+  and an entry in all four tags; each logged "not sold", correctly, because the fake mod
+  registers no items. The only errors were the fake mod's own five c: tags. The jar was
+  removed and run/ restored from a copy.
+
+Pictures (photo shoot, -PphotoShoot, shod through the real slots; shown to the owner):
+- photo-11-shod-mixed-sole (bay, rearing, SOLE): a copper U on the near fore and a gold U
+  on the off fore, open at the heel, the sole dark inside.
+- photo-12-shod-mixed-heel-walk (bay, HEEL): diamond under the off hind, clear; iron on
+  the near hind is a thin pale edge; the copper near-fore shoe shows beyond it.
+- photo-13-shod-near-fore-only-legs (bay, LEGS): one thin gold edge at the ground under
+  the near fore; the other three feet bare.
+- photo-14-shod-netherite-heel (grey, HEEL): netherite on all four is almost the hoof's
+  own dark colour and cannot be told from a bare hoof at this distance.
+- The icon: textures/item/horse_shoe.png, the greyscale placeholder.
+The temporary shots were removed from DebugPhotoShoot.SHOTS afterwards; shod() stays.
+
+DECIDED
+-------
+- (owner) Shoes are got from the equestrian metalsmith only, until the tack bench (#226).
+  No crafting recipe. Recorded on #164 and wiki/item-horse-shoes.html#getting-them.
+- (owner) Iron, copper, gold, diamond and netherite ship, plus every modded metal.
+  Recorded on #164.
+- Calls made without the owner (listed on #164's closing comment to confirm):
+  - this run's slice was "bought, worn, seen"; the effects became #247, kept on v0.5.047
+    in stage .1 rather than moved to a later release;
+  - ids use vanilla's spelling (golden_horse_shoe); a shoe stacks to 1;
+  - prices 2, 3, 5, 7, 10 emeralds, copper at level 1 up to netherite at level 5;
+  - each metalsmith level offers 4 trades, not 3, so a shoe never displaces a trade;
+  - any shoe fits any hoof (all four tags list every shoe);
+  - a modded shoe is sold at its armour's level, and only where its armour is;
+  - the "which anchor is which foot" check on wiki/model-parts.html was moved to that
+    page's Coding tab on the photos above: a shoe in one slot showed on one named foot.
+
+FOUND ON THE WAY
+----------------
+- No bugs filed.
+- Mistake, put right: GeneratedArmour.java is CRLF, and a scripted replace written for LF
+  matched nothing. The script asserted its match counts, so it stopped before writing.
+  It was rerun reading CRLF as LF and writing CRLF back.
+- Mistake, put right: a long patch script passed as a bash heredoc was cut short; it was
+  written with the Write tool instead.
+- wiki/tools/bake-item-art.mjs keys on item MODELS. Five items sharing one model had no
+  name to show, so the shared sprite is named in its NOT_AN_ITEM table and the page
+  shows the one grey sprite, not five tinted ones.
+- The stop script listed a "LEFT ALONE" java process during the session. It was a Gradle
+  daemon, not the live server, which was offline all session (its console log ends
+  "Stopping server" at 23:59 on 2026-10-11).
+
+PROCEDURES
+----------
+- photograph-horses.txt: the "shoe in the shot's name" line became shod(...), the real
+  slots.
+- add-an-item.txt: step 13c says a model shared by several items is named in
+  bake-item-art's NOT_AN_ITEM; step 15 lists shoes among the generated families, says to
+  bump MaterialScan's "rules|N" when what is generated changes, and names
+  compat/MetalsmithTrades as the one writer of a trade set.
+- next-release.txt: step 5 says where the remainder of a split unit goes when the release
+  is a themed one cut in interim versions (same milestone, same stage).
+
+NOT RUN / NOT CHECKED
+---------------------
+- A full :common:test was not run. It would re-check the coat goldens and every other
+  common suite; this change adds one class to common/ and edits one comment.
+- compat-test's boots 2 and 3 (short-circuit and wipe) were not re-run.
+- Nobody has bought, worn or ridden with a shoe: wiki/item-horse-shoes.html#verify-shoes.
+- No modded shoe has been seen, sold or worn beside a real mod, and the removed-mod alias
+  has not met a real save: wiki/item-horse-shoes.html#verify-modded-shoes.
+- A worn shoe in motion is still wiki/model-parts.html#open-worn-side.
+
+RELEASE
+-------
+Not offered. v0.5.047.1's stage still has #247 open, and a shoe that does nothing is not
+a release.
+
+PICK UP FIRST
+-------------
+#247, Horse shoes - piece 2 (the stat bonus, powder snow, the two enchantments), by
+procedures/next-release.txt; spike powder snow first.

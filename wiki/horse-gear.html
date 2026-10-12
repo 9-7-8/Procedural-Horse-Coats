@@ -104,8 +104,8 @@
     <tr><td><strong>Legs</strong></td><td>Boot &times; 4</td>
         <td>One per leg.</td></tr>
     <tr><td><strong>Hooves</strong></td><td>Hoof equipment &times; 4</td>
-        <td>Four independent hoof slots. See the <a href="item-horse-shoes.html">horse-shoe page</a>
-            for the first planned occupant.</td></tr>
+        <td>Four independent hoof slots, filled by <a href="item-horse-shoes.html">horse shoes</a>
+            (2026-10-12): one shoe to a hoof, any metal on any foot.</td></tr>
     <tr><td><strong>Storage</strong></td><td>Harness, Pack &times; 2</td>
         <td>A <a href="item-storage-harness.html">storage harness</a>, and then a chest, a
             barrel, a shulker box &mdash; anything that stores items &mdash; near side and off
@@ -900,7 +900,8 @@
         on an anchor by <code>WornPart</code> and drawn by
         <a href="model-parts.html#worn-side">the worn side</a> of <code>AttachedPartLayer</code>
         (2026-10-11). There are two: the debug <code>TEST_BLOCK</code>, and
-        <code>HORSE_SHOE</code>, whose geometry is built and which no item wears yet.</li>
+        <code>HORSE_SHOE</code>, worn through the four hoof slots
+        (<a href="item-horse-shoes.html#render-layer">horse shoes</a>, 2026-10-12).</li>
     <li><strong>The region is the whole shape.</strong> <code>WornPieces.whole(part)</code> is
         every texel of one box (the braid&rsquo;s mane and tail); <code>WornPieces.band(part,
         from, to)</code> is a sleeve round one box between two heights, open at both ends. A

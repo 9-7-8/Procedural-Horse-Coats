@@ -484,14 +484,18 @@
     <td>A <code>DoubleFenceGateBlock</code> and its item, beside vanilla&rsquo;s twelve in
         <code>block/DoubleGates</code>.</td>
     <td>One <code>Item</code> with <code>Properties.horseArmor(...)</code>, in
-        <code>compat/ModdedArmour</code>.</td>
+        <code>compat/ModdedArmour</code>, and one
+        <a href="item-horse-shoes.html#item-layer">horse shoe</a>, in
+        <code>compat/ModdedShoes</code> (2026-10-12).</td>
 </tr>
 <tr>
     <td><strong>Written into the pack</strong></td>
     <td>Eight re-parented models, a 32-variant blockstate, an item definition, a block loot
         table, a shapeless recipe, two vanilla tag entries and a language key.</td>
     <td>An equipment asset, an item model, an item definition carrying our tint source, a
-        shapeless recipe, a language key and a metalsmith trade.</td>
+        shapeless recipe, a language key and a metalsmith trade. For the shoe: an item
+        definition, a language key, an entry in the four <code>gear/shoe_*</code> tags and a
+        metalsmith trade, and no recipe.</td>
 </tr>
 <tr>
     <td><strong>Textures</strong></td>
@@ -1924,6 +1928,19 @@
     <strong>synthetic</strong> test mod &mdash; <code>tools/compat/build-test-mod.mjs</code>
     builds a fake mod with one wood and two metals, because doing nothing correctly is
     indistinguishable from being broken and there was no other way to tell them apart.
+</p>
+
+<p>
+    <strong>Horse shoes, 2026-10-12.</strong> One boot of a dedicated server beside the
+    synthetic mod, on the generate state only (fingerprint <code>09587eb6952a55d9</code>,
+    71 files for 1 wood and 5 metals): four shoes were written, entro (one for the colliding
+    pair), hellforged, ruby and tin, each an item definition on the shared
+    <code>item/horse_shoe</code> model with the tint source, a name, and an entry in all four
+    hoof tags; each was logged "not sold", correctly, since the fake mod registers no items.
+    The only errors were the fake mod's own five <code>c:</code> tags. Not shown: a modded
+    shoe's trade, its tint, or one on a hoof
+    (<a href="item-horse-shoes.html#verify-modded-shoes">the shoes' own checks</a>). The
+    short-circuit and wipe states were not re-run.
 </p>
 
 <p><strong>Confirmed by that run:</strong></p>

@@ -3330,17 +3330,20 @@ wiki/item-horse-hair.html#removal	coding	The bundle, the rope and the cloth were
 wiki/item-horse-hair.html#shearing	coding	Shearing
 wiki/item-horse-hair.html#uses	gameplay	What needs hair
 wiki/item-horse-hair.html#verified	coding	Verified
-wiki/item-horse-shoes.html#bench	coding	Bench and crafting path
 wiki/item-horse-shoes.html#design-reasoning	science	Design reasoning
-wiki/item-horse-shoes.html#effect-layer	coding	Effect layer
-wiki/item-horse-shoes.html#effects	coding	First effects to implement
-wiki/item-horse-shoes.html#enchanting	coding	Enchanting rules
-wiki/item-horse-shoes.html#item-layer	coding	Item layer
-wiki/item-horse-shoes.html#metal-tiers	gameplay	Metal tiers and stat bonuses
-wiki/item-horse-shoes.html#render-layer	coding	Render layer
-wiki/item-horse-shoes.html#shared-architecture	coding	Shared architecture
-wiki/item-horse-shoes.html#slot-layer	coding	Slot layer
+wiki/item-horse-shoes.html#getting-them	gameplay	Getting them
+wiki/item-horse-shoes.html#icon	coding	One icon, tinted
+wiki/item-horse-shoes.html#item-layer	coding	The items
+wiki/item-horse-shoes.html#render-layer	coding	Drawing them
+wiki/item-horse-shoes.html#shape-reasoning	science	Why a U under the foot
+wiki/item-horse-shoes.html#shared-architecture	coding	How it is built
+wiki/item-horse-shoes.html#slot-layer	coding	The slots and the tags
+wiki/item-horse-shoes.html#tests	coding	What is tested
+wiki/item-horse-shoes.html#trades	coding	The trades
+wiki/item-horse-shoes.html#wearing-them	gameplay	Putting them on
 wiki/item-horse-shoes.html#what-they-are	gameplay	What they are
+wiki/item-horse-shoes.html#what-they-do	gameplay	What they do
+wiki/item-horse-shoes.html#what-they-look-like	gameplay	What they look like
 wiki/item-horse-shoes.html#why-they-are-different	gameplay	Why they are different from boots
 wiki/item-jockey-passes.html#command	gameplay	The command — /horsejockey
 wiki/item-jockey-passes.html#deadlines	coding	A map of deadlines, not a set of names

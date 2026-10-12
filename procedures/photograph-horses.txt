@@ -92,7 +92,9 @@ STEPS
    and _HIND) on its near fore and hind legs, edged, or flat with "-flat".
    A shot with "block" in its name wears the debug test block (WornPieces.TEST_BLOCK) on
    all four hooves: the box-built twin of the boot, for the worn side of the part layer.
-   A shot with "shoe" in its name is shod on all four feet in plain iron (PartKind.SHOE).
+   Horse shoes are real gear: shod(nearFore, offFore, nearHind, offHind) puts a shoe
+   item in each hoof slot (ModItems.HORSE_SHOES; null leaves a hoof bare). One metal per
+   foot shows which slot draws on which foot. Not in a shot with "block" in its name.
    A shoe is UNDER the foot and the ground hides it: use Framing.SOLE with rearing() (low
    in front, looking up at the lifted fore soles) and Framing.HEEL (ground level behind;
    with "-walk" the hind soles show) (both added 2026-10-11). LEGS shows only its edge.

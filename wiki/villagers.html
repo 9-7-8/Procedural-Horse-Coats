@@ -1590,7 +1590,8 @@
     <td>Buys carrots. Vet kit, stabilizer, magnifier.</td>
     <td>Buys horse hair at 16 to the emerald, and sells it back 4 at a time. Leads,
         carrots.</td>
-    <td>Buys coal and iron. Iron horse armour.</td>
+    <td>Buys coal and iron. Iron horse armour. A copper
+        <a href="item-horse-shoes.html">horse shoe</a>.</td>
 </tr>
 <tr>
     <td><strong>2 Apprentice</strong></td>
@@ -1599,7 +1600,7 @@
     <td>Buys seed jars. The unknown gene and epigenetic splices, the dilution splice.</td>
     <td>Buys horse hair, 14 to the emerald. Basic whistle, blank tickets, empty seed
         jar.</td>
-    <td>Buys coal and copper. Iron horse armour, cheaper.</td>
+    <td>Buys coal and copper. Iron horse armour, cheaper. An iron horse shoe.</td>
 </tr>
 <tr>
     <td><strong>3 Journeyman</strong></td>
@@ -1608,7 +1609,7 @@
         <a href="item-spawn-eggs.html#breed">breed egg</a>.</td>
     <td>Buys horse hair, 12 to the emerald. Golden whistle, blank transfer paper,
         golden carrots.</td>
-    <td>Buys gold. Golden horse armour, iron horse armour.</td>
+    <td>Buys gold. Golden horse armour, iron horse armour. A golden horse shoe.</td>
 </tr>
 <tr>
     <td><strong>4 Expert</strong></td>
@@ -1618,7 +1619,7 @@
     <td>Buys horse hair, 10 to the emerald. A random common/uncommon research paper
         &mdash; one <a href="item-research-papers.html#pair">allele pair</a>, carrier or
         true-breeding &mdash; echo whistle, stall sign.</td>
-    <td>Buys diamonds. Golden and diamond horse armour.</td>
+    <td>Buys diamonds. Golden and diamond horse armour. A diamond horse shoe.</td>
 </tr>
 <tr>
     <td><strong>5 Master</strong></td>
@@ -1627,7 +1628,8 @@
         breed egg.</td>
     <td>Buys horse hair at double. A random rare/epic paper, ender whistle, holding pen
         sign.</td>
-    <td>Buys diamonds at double. Diamond and golden horse armour.</td>
+    <td>Buys diamonds at double. Diamond and golden horse armour. A netherite horse
+        shoe.</td>
 </tr>
 </tbody>
 </table>
@@ -1647,6 +1649,13 @@
     he rises, against ingots and diamonds getting dearer to sell him &mdash; a smith who gets
     better at his trade rather than one who learns new tricks. The alternative was giving him
     someone else's stock to pad him out, which is the thing the split was for.
+</p>
+
+<p>
+    <strong>He also shoes horses</strong> (2026-10-12): one
+    <a href="item-horse-shoes.html#getting-them">horse shoe</a> a level, copper to netherite, at
+    2 to 10 emeralds each. Until the tack bench is built he is the only way to get one. Each of
+    his levels now offers four trades, so the shoe never pushes another trade out.
 </p>
 
 <h3 id="metalsmith-modded">What fills him out: other mods' metals</h3>
@@ -1683,6 +1692,9 @@
         it. It therefore has to carry the shipped trades as well as the new ones.
     </p>
     <p>
+        Modded armours and modded <a href="item-horse-shoes.html#trades">horse shoes</a> are
+        both added, by one collector (<code>compat/MetalsmithTrades</code>), so each tier file
+        is written once.
         It gets them by <strong>reading the shipped file off our own classpath</strong> rather
         than by keeping a second copy of the list in Java. Edit a tier in
         <code>data/horsegenetics/trade_set/equestrian_metalsmith/</code> and the generated one

@@ -146,7 +146,9 @@ STEPS
     b. Write wiki/item-<slug>.html by add-a-wiki-page: Gameplay and Coding tabs (Science
        if there is design reasoning), plus a Verification tab saying what to try in
        game. Include <div class="item-art" data-items="<id>"></div>.
-    c. Run wiki/tools/bake-item-art.mjs. It fails on any item no page shows.
+    c. Run wiki/tools/bake-item-art.mjs. It fails on any item no page shows. It keys on
+       item MODELS: several items sharing one model (the horse shoes) are shown as that
+       model's id, named in the tool's NOT_AN_ITEM table.
     d. Then rebake rows s, j, k and i.
 
 14. Boot a server to "Done (" and grep its log for ERROR, Couldn't parse, Invalid and
@@ -158,8 +160,11 @@ STEPS
 15. Variant: a per-wood or per-material family. It is written TWICE:
     - author time, for vanilla's materials: T/bake-carts.mjs, bake-jumps.mjs and
       bake-double-gates.mjs (rebake, rows n, o and p);
-    - run time, for other mods: NF/compat/Generated* (carts, gates, jumps, armour),
-      MaterialScan and ModdedMaterials.
+    - run time, for other mods: NF/compat/Generated* (carts, gates, jumps, armour,
+      shoes), MaterialScan and ModdedMaterials. A change to what is generated bumps
+      the "rules|N" number in MaterialScan.fingerprint, or packs already generated
+      never gain the new files. Two families that sell through the metalsmith share
+      compat/MetalsmithTrades: a trade_set file has one writer.
     Change both halves. check-block-models.mjs sees only the author-time half, and a
     drift is a purple cube, or an item that will not craft, logging nothing. Family
     members are exempt from the wiki art bake (NOT_ON_A_PAGE).

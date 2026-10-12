@@ -124,6 +124,10 @@ STEPS
    leave it on this milestone. If the unit turned out bigger and its remainder was
    split off, put the remainder on the NEXT release's milestone (the plan says the
    next release absorbs what slips), and edit both descriptions.
+   In a themed release cut in interim versions, a remainder the stage cannot ship
+   without stays on THIS milestone, in the same stage, as a new issue listed right after
+   the one it was split from (#247 from #164: a shoe that does nothing is not a stage).
+   Edit the milestone description and the release-plan issue in the same step.
 
 6. The milestone is finished, or only blocked units remain on it.
    Finished -> the release bar is met (owner). Read procedures/release.txt and OFFER
