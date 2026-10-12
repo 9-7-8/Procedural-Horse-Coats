@@ -19,7 +19,8 @@
     "CartHorseMixin",
     "HostedMenuPlayerMixin",
     "HostedMenuPacketMixin",
-    "CartEntityInvoker"
+    "CartEntityInvoker",
+    "PowderSnowShoesMixin"
   ],
   "client": [
     "CartClientLevelMixin",

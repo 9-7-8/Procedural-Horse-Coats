@@ -2292,6 +2292,8 @@ public final class ModGameTests {
         // Four horses spawned and seven interact events posted, all in one tick.
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
         register(event, environment, SHOES_FIT_THEIR_HOOVES, 100);
+        register(event, environment, SHOES_ADD_THEIR_BONUS, 100);
+        register(event, environment, A_SHOD_HORSE_STANDS_ON_POWDER_SNOW, 100);
         // One horse, a dozen registry probes, four interact events and a drops event; one tick.
         register(event, environment, HORSE_CARRIES_CHESTS, 100);
         // One horse and one unjoined player; a chest stood at the bottom of the world for four ticks.
@@ -3836,6 +3838,152 @@ public final class ModGameTests {
         }
 
         helper.succeed();
+    }
+
+    private static final java.util.List<com.example.horsegenetics.neoforge.entity.HorseTackSlot> HOOF_SLOTS =
+            java.util.List.of(
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_LEFT,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_RIGHT,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_LEFT,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_RIGHT);
+
+    private static com.example.horsegenetics.common.gear.HorseShoes.Rates shoeRatesOrFail() {
+        var rates = com.example.horsegenetics.neoforge.ServerConfig.shoeRates();
+        if (!rates.enabled()) {
+            throw new GameTestAssertException(Component.literal(
+                    "shoes.enabled is off in this run's server config, so this test asserts the"
+                            + " wrong branch - turn it back on rather than deleting the test"), 0);
+        }
+        return rates;
+    }
+
+    /**
+     * <b>A worn shoe moves the horse's speed and jump, by its own metal's amount</b> (#247).
+     * The sum is {@code HorseShoesTest}'s; what only a real horse can show is that
+     * writing a hoof slot reaches the two attributes at all, that four metals are four
+     * amounts on one modifier each, and that a shoe taken off takes its share with it
+     * and the last one off leaves no modifier behind.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SHOES_ADD_THEIR_BONUS =
+            TEST_FUNCTIONS.register("shoes_add_their_bonus",
+                    () -> ModGameTests::shoesAddTheirBonus);
+
+    private static void shoesAddTheirBonus(GameTestHelper helper) {
+        var rates = shoeRatesOrFail();
+        var shoes = com.example.horsegenetics.neoforge.item.ModItems.HORSE_SHOES;
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        var speedAttribute = net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+        var jumpAttribute = net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH;
+        double speed = horse.getAttributeValue(speedAttribute);
+        double jump = horse.getAttributeValue(jumpAttribute);
+
+        // Four feet, four metals (copper, iron, gold, diamond): each adds its own.
+        double wantSpeed = speed;
+        double wantJump = jump;
+        for (int i = 0; i < HOOF_SLOTS.size(); i++) {
+            var shoe = shoes.get(i).get();
+            HOOF_SLOTS.get(i).set(horse, new ItemStack(shoe));
+            wantSpeed += rates.perShoe(shoe.tier()).speed();
+            wantJump += rates.perShoe(shoe.tier()).jump();
+            shoeStats(horse, wantSpeed, wantJump, "after shoeing " + HOOF_SLOTS.get(i));
+        }
+        if (wantSpeed <= speed || wantJump <= jump) {
+            throw new GameTestAssertException(Component.literal(
+                    "every shoes.* number is 0 in this run's config, so four shoes proved nothing"), 0);
+        }
+
+        // One comes off: its share goes and the other three stay.
+        var off = shoes.get(1).get();
+        HOOF_SLOTS.get(1).takeOff(horse);
+        wantSpeed -= rates.perShoe(off.tier()).speed();
+        wantJump -= rates.perShoe(off.tier()).jump();
+        shoeStats(horse, wantSpeed, wantJump, "after taking the off fore shoe off");
+
+        // What a horse loading back into a level gets: the modifiers are transient,
+        // so a loaded horse has none until its join re-reads the hooves.
+        horse.getAttribute(speedAttribute).removeModifier(
+                com.example.horsegenetics.neoforge.server.HorseShoeEffects.SPEED_ID);
+        horse.getAttribute(jumpAttribute).removeModifier(
+                com.example.horsegenetics.neoforge.server.HorseShoeEffects.JUMP_ID);
+        com.example.horsegenetics.neoforge.server.HorseShoeEffects.refresh(horse);
+        shoeStats(horse, wantSpeed, wantJump, "after a refresh from bare modifiers");
+
+        // All off: the horse is exactly what it was, with no modifier left on it.
+        for (var hoof : HOOF_SLOTS) {
+            hoof.set(horse, ItemStack.EMPTY);
+        }
+        shoeStats(horse, speed, jump, "after taking every shoe off");
+        if (horse.getAttribute(speedAttribute).getModifier(
+                com.example.horsegenetics.neoforge.server.HorseShoeEffects.SPEED_ID) != null
+                || horse.getAttribute(jumpAttribute).getModifier(
+                com.example.horsegenetics.neoforge.server.HorseShoeEffects.JUMP_ID) != null) {
+            throw new GameTestAssertException(Component.literal(
+                    "an unshod horse still carries a shoe modifier"), 0);
+        }
+        helper.succeed();
+    }
+
+    private static void shoeStats(net.minecraft.world.entity.animal.equine.Horse horse,
+                                  double wantSpeed, double wantJump, String when) {
+        double speed = horse.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        double jump = horse.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH);
+        if (Math.abs(speed - wantSpeed) > 1e-9 || Math.abs(jump - wantJump) > 1e-9) {
+            throw new GameTestAssertException(Component.literal(
+                    when + ": speed " + speed + " (want " + wantSpeed + "), jump " + jump
+                            + " (want " + wantJump + ")"), 0);
+        }
+    }
+
+    /**
+     * <b>One plain shoe is enough for powder snow, and none is not</b> (#247). Asked the way
+     * the block asks: its own static question, and then the collision shape it hands a horse
+     * standing over it, which is what actually holds the horse up. {@code PowderSnowShoesMixin}
+     * is the only thing that can make either say yes for a horse, so a mixin that did not
+     * apply is a red test here and not a horse quietly sinking in a played game.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>>
+            A_SHOD_HORSE_STANDS_ON_POWDER_SNOW = TEST_FUNCTIONS.register("a_shod_horse_stands_on_powder_snow",
+                    () -> ModGameTests::aShodHorseStandsOnPowderSnow);
+
+    private static void aShodHorseStandsOnPowderSnow(GameTestHelper helper) {
+        shoeRatesOrFail();
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        if (powderSnowHolds(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "an unshod horse stands on powder snow - is the horse in powder_snow_walkable_mobs?"), 0);
+        }
+        // The cheapest shoe, on one hoof.
+        var copper = com.example.horsegenetics.neoforge.item.ModItems.HORSE_SHOES.get(0).get();
+        HOOF_SLOTS.get(2).set(horse, new ItemStack(copper));
+        if (!powderSnowHolds(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse with one shoe on sinks into powder snow - did PowderSnowShoesMixin apply?"), 0);
+        }
+        HOOF_SLOTS.get(2).takeOff(horse);
+        if (powderSnowHolds(horse)) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse whose only shoe came off still stands on powder snow"), 0);
+        }
+        helper.succeed();
+    }
+
+    /** Whether a powder snow block under {@code horse} would be solid to it. No block is placed. */
+    private static boolean powderSnowHolds(net.minecraft.world.entity.animal.equine.Horse horse) {
+        boolean asked = net.minecraft.world.level.block.PowderSnowBlock.canEntityWalkOnPowderSnow(horse);
+        // Two below its feet, so the horse is wholly above the block's top whatever
+        // fraction of a block it has settled by.
+        BlockPos under = horse.blockPosition().below(2);
+        boolean solid = !net.minecraft.world.level.block.Blocks.POWDER_SNOW.defaultBlockState()
+                .getCollisionShape(horse.level(), under,
+                        net.minecraft.world.phys.shapes.CollisionContext.of(horse)).isEmpty();
+        if (asked != solid) {
+            throw new GameTestAssertException(Component.literal(
+                    "powder snow says a horse may walk on it (" + asked + ") and hands it a "
+                            + (solid ? "solid" : "empty") + " shape: the two must agree"), 0);
+        }
+        return solid;
     }
 
     /**

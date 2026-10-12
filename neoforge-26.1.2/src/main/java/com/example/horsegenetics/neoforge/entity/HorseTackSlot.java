@@ -242,6 +242,10 @@ public enum HorseTackSlot {
         if ((isStorage() || this == HARNESS) && !horse.level().isClientSide()) {
             HorsePackHandler.refresh(horse);
         }
+        if (zone == Zone.HOOVES) {
+            // A shoe went on or came off: its share of speed and jump with it.
+            com.example.horsegenetics.neoforge.server.HorseShoeEffects.refresh(horse);
+        }
     }
 
     /**

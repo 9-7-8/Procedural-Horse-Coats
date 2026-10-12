@@ -56,8 +56,11 @@ public final class ModdedShoes {
                 continue;
             }
             int rgb = metal.colour();
+            // Where its armour stands (ModdedArmour.protectionFor): pure, because
+            // nothing about their item can be asked this early.
+            HorseShoes.Metal tier = HorseShoes.tierOf(metal.gem());
             DeferredItem<HorseShoeItem> item = ModItems.ITEMS.registerItem(id,
-                    properties -> new HorseShoeItem(rgb, properties.stacksTo(1)));
+                    properties -> new HorseShoeItem(rgb, tier, properties.stacksTo(1)));
             ModItems.TAB_ITEMS.add(item);
             SHOES.add(new Shoe(metal, item));
         }

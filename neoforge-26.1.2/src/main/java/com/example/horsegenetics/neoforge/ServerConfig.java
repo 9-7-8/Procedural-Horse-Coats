@@ -292,6 +292,23 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue PACK_HARNESS_BEST_REDUCTION;
 
     /**
+     * <b>Horse shoes</b> (#247): the family's one switch, and what one shoe of
+     * each metal adds to speed and to jump, in the attributes' own units. Read
+     * together, through {@link #shoeRates()}. See {@code common.gear.HorseShoes}.
+     */
+    public static final ModConfigSpec.BooleanValue SHOES_ENABLED;
+    public static final ModConfigSpec.DoubleValue SHOES_COPPER_SPEED;
+    public static final ModConfigSpec.DoubleValue SHOES_COPPER_JUMP;
+    public static final ModConfigSpec.DoubleValue SHOES_IRON_SPEED;
+    public static final ModConfigSpec.DoubleValue SHOES_IRON_JUMP;
+    public static final ModConfigSpec.DoubleValue SHOES_GOLD_SPEED;
+    public static final ModConfigSpec.DoubleValue SHOES_GOLD_JUMP;
+    public static final ModConfigSpec.DoubleValue SHOES_DIAMOND_SPEED;
+    public static final ModConfigSpec.DoubleValue SHOES_DIAMOND_JUMP;
+    public static final ModConfigSpec.DoubleValue SHOES_NETHERITE_SPEED;
+    public static final ModConfigSpec.DoubleValue SHOES_NETHERITE_JUMP;
+
+    /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
      * the decay off. See {@code common.care.Bond}.
      */
@@ -939,6 +956,107 @@ public final class ServerConfig {
                 .defineInRange("packs.harness_best_reduction",
                         com.example.horsegenetics.common.pack.PackLoad.DEFAULT_HARNESS_BEST, 0.0,
                         com.example.horsegenetics.common.pack.PackLoad.MAX_HARNESS_BEST);
+        SHOES_ENABLED = builder
+                .comment("Whether worn horse shoes do anything. (default: true)",
+                        "On, each shoe adds its metal's speed and jump below, and a horse with",
+                        "at least one shoe on stands on powder snow. Off, shoes are still",
+                        "bought, worn and drawn, and change nothing. Server-side.")
+                .define("shoes.enabled", com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_ENABLED);
+        SHOES_COPPER_SPEED = builder
+                .comment("How much movement speed ONE copper horse shoe adds. (default: 0.002)",
+                        "The cheapest shoe. A flat amount, in the attribute's own units, where a",
+                        "horse is roughly 0.11 to 0.34 and 0.01 is about 0.43 m/s. Each shod hoof",
+                        "adds its own, so four shoes add four times this. 0 turns it off for",
+                        "this metal. Range 0 to 0.05. A changed number reaches a horse when it",
+                        "next loads or is next shod. Server-side.")
+                .defineInRange("shoes.copper_speed",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_COPPER_SPEED, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_SPEED);
+        SHOES_COPPER_JUMP = builder
+                .comment("How much jump strength ONE copper horse shoe adds. (default: 0.004)",
+                        "A flat amount, in the attribute's own units, where a horse is roughly",
+                        "0.4 to 1.0 and 0.01 is about 7 cm of jump for an average horse. Each",
+                        "shod hoof adds its own. 0 turns it off for this metal. Range 0 to 0.15.",
+                        "Server-side.")
+                .defineInRange("shoes.copper_jump",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_COPPER_JUMP, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_JUMP);
+        SHOES_IRON_SPEED = builder
+                .comment("How much movement speed ONE iron horse shoe adds. (default: 0.003)",
+                        "Also what another mod's ingot metals give. A flat amount, in the attribute's own units, where a",
+                        "horse is roughly 0.11 to 0.34 and 0.01 is about 0.43 m/s. Each shod hoof",
+                        "adds its own, so four shoes add four times this. 0 turns it off for",
+                        "this metal. Range 0 to 0.05. A changed number reaches a horse when it",
+                        "next loads or is next shod. Server-side.")
+                .defineInRange("shoes.iron_speed",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_IRON_SPEED, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_SPEED);
+        SHOES_IRON_JUMP = builder
+                .comment("How much jump strength ONE iron horse shoe adds. (default: 0.006)",
+                        "A flat amount, in the attribute's own units, where a horse is roughly",
+                        "0.4 to 1.0 and 0.01 is about 7 cm of jump for an average horse. Each",
+                        "shod hoof adds its own. 0 turns it off for this metal. Range 0 to 0.15.",
+                        "Server-side.")
+                .defineInRange("shoes.iron_jump",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_IRON_JUMP, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_JUMP);
+        SHOES_GOLD_SPEED = builder
+                .comment("How much movement speed ONE gold horse shoe adds. (default: 0.004)",
+                        "Between iron and diamond. A flat amount, in the attribute's own units, where a",
+                        "horse is roughly 0.11 to 0.34 and 0.01 is about 0.43 m/s. Each shod hoof",
+                        "adds its own, so four shoes add four times this. 0 turns it off for",
+                        "this metal. Range 0 to 0.05. A changed number reaches a horse when it",
+                        "next loads or is next shod. Server-side.")
+                .defineInRange("shoes.gold_speed",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_GOLD_SPEED, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_SPEED);
+        SHOES_GOLD_JUMP = builder
+                .comment("How much jump strength ONE gold horse shoe adds. (default: 0.008)",
+                        "A flat amount, in the attribute's own units, where a horse is roughly",
+                        "0.4 to 1.0 and 0.01 is about 7 cm of jump for an average horse. Each",
+                        "shod hoof adds its own. 0 turns it off for this metal. Range 0 to 0.15.",
+                        "Server-side.")
+                .defineInRange("shoes.gold_jump",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_GOLD_JUMP, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_JUMP);
+        SHOES_DIAMOND_SPEED = builder
+                .comment("How much movement speed ONE diamond horse shoe adds. (default: 0.005)",
+                        "Also what another mod's gems give. A flat amount, in the attribute's own units, where a",
+                        "horse is roughly 0.11 to 0.34 and 0.01 is about 0.43 m/s. Each shod hoof",
+                        "adds its own, so four shoes add four times this. 0 turns it off for",
+                        "this metal. Range 0 to 0.05. A changed number reaches a horse when it",
+                        "next loads or is next shod. Server-side.")
+                .defineInRange("shoes.diamond_speed",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_DIAMOND_SPEED, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_SPEED);
+        SHOES_DIAMOND_JUMP = builder
+                .comment("How much jump strength ONE diamond horse shoe adds. (default: 0.01)",
+                        "A flat amount, in the attribute's own units, where a horse is roughly",
+                        "0.4 to 1.0 and 0.01 is about 7 cm of jump for an average horse. Each",
+                        "shod hoof adds its own. 0 turns it off for this metal. Range 0 to 0.15.",
+                        "Server-side.")
+                .defineInRange("shoes.diamond_jump",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_DIAMOND_JUMP, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_JUMP);
+        SHOES_NETHERITE_SPEED = builder
+                .comment("How much movement speed ONE netherite horse shoe adds. (default: 0.006)",
+                        "The best shoe. A flat amount, in the attribute's own units, where a",
+                        "horse is roughly 0.11 to 0.34 and 0.01 is about 0.43 m/s. Each shod hoof",
+                        "adds its own, so four shoes add four times this. 0 turns it off for",
+                        "this metal. Range 0 to 0.05. A changed number reaches a horse when it",
+                        "next loads or is next shod. Server-side.")
+                .defineInRange("shoes.netherite_speed",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_NETHERITE_SPEED, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_SPEED);
+        SHOES_NETHERITE_JUMP = builder
+                .comment("How much jump strength ONE netherite horse shoe adds. (default: 0.012)",
+                        "A flat amount, in the attribute's own units, where a horse is roughly",
+                        "0.4 to 1.0 and 0.01 is about 7 cm of jump for an average horse. Each",
+                        "shod hoof adds its own. 0 turns it off for this metal. Range 0 to 0.15.",
+                        "Server-side.")
+                .defineInRange("shoes.netherite_jump",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_NETHERITE_JUMP, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_JUMP);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -1629,6 +1747,24 @@ public final class ServerConfig {
             return PACK_HARNESS_REQUIRED.get();
         } catch (IllegalStateException notLoaded) {
             return true;
+        }
+    }
+
+    /**
+     * The {@code shoes.*} keys as the one object {@code HorseShoes} takes, safely:
+     * the switch and every metal's two numbers leave this class together, and a
+     * client that has not been sent the server's config yet gets the defaults.
+     */
+    public static com.example.horsegenetics.common.gear.HorseShoes.Rates shoeRates() {
+        try {
+            return new com.example.horsegenetics.common.gear.HorseShoes.Rates(SHOES_ENABLED.get(),
+                    // In HorseShoes.Metal order.
+                    new double[] {SHOES_COPPER_SPEED.get(), SHOES_IRON_SPEED.get(), SHOES_GOLD_SPEED.get(), 
+                            SHOES_DIAMOND_SPEED.get(), SHOES_NETHERITE_SPEED.get()},
+                    new double[] {SHOES_COPPER_JUMP.get(), SHOES_IRON_JUMP.get(), SHOES_GOLD_JUMP.get(), 
+                            SHOES_DIAMOND_JUMP.get(), SHOES_NETHERITE_JUMP.get()});
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.gear.HorseShoes.Rates.DEFAULT;
         }
     }
 
