@@ -2294,6 +2294,11 @@ public final class ModGameTests {
         register(event, environment, SHOES_FIT_THEIR_HOOVES, 100);
         register(event, environment, SHOES_ADD_THEIR_BONUS, 100);
         register(event, environment, A_SHOD_HORSE_STANDS_ON_POWDER_SNOW, 100);
+        // One horse on a scratch floor; waits for the road tick twice, a few ticks each.
+        register(event, environment, SHOE_ENCHANTMENTS_FOLD_INTO_THE_TOTAL, 200);
+        // Two horses pushed down an ice lane and left to stop; alone, because the lane
+        // is wider than a test's cell.
+        registerAlone(event, GRIP_SHOES_SLIDE_LESS_ON_ICE, 300);
         // One horse, a dozen registry probes, four interact events and a drops event; one tick.
         register(event, environment, HORSE_CARRIES_CHESTS, 100);
         // One horse and one unjoined player; a chest stood at the bottom of the world for four ticks.
@@ -3984,6 +3989,235 @@ public final class ModGameTests {
                             + (solid ? "solid" : "empty") + " shape: the two must agree"), 0);
         }
         return solid;
+    }
+
+    private static void shoeFail(String what) {
+        throw new GameTestAssertException(Component.literal(what), 0);
+    }
+
+    /** A horse with nothing to do, on a 3x3 floor of {@code floor} high above the test's cell. */
+    private static net.minecraft.world.entity.animal.equine.Horse idleHorseOn(
+            GameTestHelper helper, int up, int dx, net.minecraft.world.level.block.Block floor) {
+        ServerLevel level = helper.getLevel();
+        BlockPos under = helper.absolutePos(BlockPos.ZERO).offset(dx, up - 1, 0);
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                level.setBlock(under.offset(x, 0, z), floor.defaultBlockState(), 2);
+            }
+        }
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, new BlockPos(dx, up, 0));
+        // No goals rather than NoAi: a mob with no AI is not moved at all
+        // (LivingEntity.aiStep travels only when isEffectiveAi), and these tests
+        // are about how it moves.
+        horse.goalSelector.removeAllGoals(goal -> true);
+        return horse;
+    }
+
+    /**
+     * <b>Each shoe's enchantment is its own stack's, and all of it lands in the one total</b> (#248).
+     *
+     * <p>The two enchantments are data, so what is asserted first is that the data
+     * loaded and says what the page says: both exist, both go on every shipped shoe
+     * and on nothing else, a shoe can be enchanted at a table, and the two refuse to
+     * share a shoe. Then four shoes with four different loads go on one horse and are
+     * read back hoof by hoof, once straight off the horse and once through the gear
+     * attachment's own save codec. Then the total: off a road the speed modifier is
+     * the metals' alone, and standing on a path the roadsters' share joins the SAME
+     * modifier - with no call from here, so what moves it is the handler's own tick -
+     * and leaves again when the path is taken away.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>>
+            SHOE_ENCHANTMENTS_FOLD_INTO_THE_TOTAL = TEST_FUNCTIONS.register("shoe_enchantments_fold_into_the_total",
+                    () -> ModGameTests::shoeEnchantmentsFoldIntoTheTotal);
+
+    private static void shoeEnchantmentsFoldIntoTheTotal(GameTestHelper helper) {
+        var rates = shoeRatesOrFail();
+        if (rates.grip(1) <= 0.0 || rates.roadSpeed(1) <= 0.0) {
+            shoeFail("shoes.grip_per_level or shoes.road_speed_per_level is 0 in this run's server config,"
+                    + " so this test asserts the wrong branch - put it back rather than deleting the test");
+        }
+        ServerLevel level = helper.getLevel();
+        var registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        var grip = registry.get(com.example.horsegenetics.neoforge.item.ShoeEnchantments.GRIP).orElse(null);
+        var road = registry.get(com.example.horsegenetics.neoforge.item.ShoeEnchantments.ROADSTER).orElse(null);
+        if (grip == null || road == null) {
+            shoeFail("horsegenetics:grip or horsegenetics:roadster is not a registered enchantment - did"
+                    + " data/horsegenetics/enchantment/*.json fail to parse? The log names the file");
+            return;
+        }
+        if (net.minecraft.world.item.enchantment.Enchantment.areCompatible(grip, road)) {
+            shoeFail("grip and roadster may share one shoe - the exclusive_set tag did not load");
+        }
+        if (!grip.is(net.minecraft.tags.EnchantmentTags.IN_ENCHANTING_TABLE)
+                || !road.is(net.minecraft.tags.EnchantmentTags.IN_ENCHANTING_TABLE)) {
+            shoeFail("a shoe enchantment is not offered at the enchanting table - is it in minecraft:non_treasure?");
+        }
+        var shoes = ModItems.HORSE_SHOES;
+        for (var shoe : shoes) {
+            ItemStack stack = new ItemStack(shoe.get());
+            if (!grip.value().canEnchant(stack) || !road.value().canEnchant(stack)) {
+                shoeFail(shoe.getId() + " cannot take a shoe enchantment - is enchantable/horse_shoe empty?");
+            }
+            if (!stack.isEnchantable()) {
+                shoeFail(shoe.getId() + " cannot go in an enchanting table - it lost its enchantable component");
+            }
+        }
+        for (var other : List.of(Items.IRON_BOOTS, Items.SADDLE, Items.IRON_HORSE_ARMOR, Items.DIAMOND_SWORD)) {
+            if (grip.value().canEnchant(new ItemStack(other)) || road.value().canEnchant(new ItemStack(other))) {
+                shoeFail("a shoe enchantment goes on " + other + ", which is not a horse shoe");
+            }
+        }
+
+        // Four shoes, four loads: {grip, road} per hoof, on four different metals.
+        int[][] loads = {{2, 0}, {0, 3}, {0, 1}, {0, 0}};
+        var horse = idleHorseOn(helper, 24, 0, Blocks.STONE);
+        double metals = 0.0;
+        double roads = 0.0;
+        for (int i = 0; i < HOOF_SLOTS.size(); i++) {
+            var shoe = shoes.get(i).get();
+            ItemStack stack = new ItemStack(shoe);
+            if (loads[i][0] > 0) {
+                stack.enchant(grip, loads[i][0]);
+            }
+            if (loads[i][1] > 0) {
+                stack.enchant(road, loads[i][1]);
+            }
+            HOOF_SLOTS.get(i).set(horse, stack);
+            metals += rates.perShoe(shoe.tier()).speed();
+            roads += rates.roadSpeed(loads[i][1]);
+        }
+        var gear = horse.getData(com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_GEAR);
+        var ops = level.registryAccess().createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
+        var saved = com.example.horsegenetics.neoforge.data.HorseGear.CODEC.encodeStart(ops, gear).getOrThrow();
+        var loaded = com.example.horsegenetics.neoforge.data.HorseGear.CODEC.parse(ops, saved).getOrThrow();
+        for (int i = 0; i < HOOF_SLOTS.size(); i++) {
+            for (ItemStack stack : List.of(HOOF_SLOTS.get(i).on(horse), loaded.get(HOOF_SLOTS.get(i).name()))) {
+                int g = com.example.horsegenetics.neoforge.item.ShoeEnchantments.level(stack,
+                        com.example.horsegenetics.neoforge.item.ShoeEnchantments.GRIP);
+                int r = com.example.horsegenetics.neoforge.item.ShoeEnchantments.level(stack,
+                        com.example.horsegenetics.neoforge.item.ShoeEnchantments.ROADSTER);
+                if (!stack.is(shoes.get(i).get()) || g != loads[i][0] || r != loads[i][1]) {
+                    shoeFail(HOOF_SLOTS.get(i) + " reads back as " + stack + " with grip " + g + " and roadster "
+                            + r + ", not the grip " + loads[i][0] + " and roadster " + loads[i][1]
+                            + " put on it - one shoe's enchantment reached another, or was lost in the save");
+                }
+            }
+        }
+
+        // Grip is not an attribute: it is asked for by the movement code.
+        float ice = Blocks.ICE.defaultBlockState().getBlock().getFriction();
+        float want = com.example.horsegenetics.common.gear.HorseShoes.friction(ice, rates.grip(2));
+        float got = com.example.horsegenetics.neoforge.server.HorseShoeEffects.friction(horse, ice);
+        if (Math.abs(got - want) > 1e-6F || got >= ice) {
+            shoeFail("one Grip II shoe makes ice " + got + " to this horse (want " + want + ", ice is " + ice + ")");
+        }
+
+        // Off a road: the metals alone, and the roadsters nothing.
+        shoeSpeedModifier(horse, metals, "standing on stone");
+        final double offRoad = metals;
+        final double onRoad = metals + roads;
+        BlockPos under = helper.absolutePos(BlockPos.ZERO).above(23);
+        int[] phase = {0};
+        helper.succeedWhen(() -> {
+            if (phase[0] == 0) {
+                // A path under it, and nothing else: only the handler's own tick can notice.
+                for (int x = -1; x <= 1; x++) {
+                    for (int z = -1; z <= 1; z++) {
+                        level.setBlock(under.offset(x, 0, z), Blocks.DIRT_PATH.defaultBlockState(), 2);
+                    }
+                }
+                phase[0] = 1;
+            }
+            if (phase[0] == 1) {
+                shoeSpeedModifier(horse, onRoad, "standing on a dirt path");
+                for (int x = -1; x <= 1; x++) {
+                    for (int z = -1; z <= 1; z++) {
+                        level.setBlock(under.offset(x, 0, z), Blocks.STONE.defaultBlockState(), 2);
+                    }
+                }
+                phase[0] = 2;
+            }
+            shoeSpeedModifier(horse, offRoad, "back on stone");
+        });
+    }
+
+    private static void shoeSpeedModifier(net.minecraft.world.entity.animal.equine.Horse horse, double want,
+                                          String when) {
+        var on = horse.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED)
+                .getModifier(com.example.horsegenetics.neoforge.server.HorseShoeEffects.SPEED_ID);
+        double got = on == null ? 0.0 : on.amount();
+        if (Math.abs(got - want) > 1e-9) {
+            shoeFail(when + ": the shoes' speed modifier is " + got + ", want " + want);
+        }
+    }
+
+    /**
+     * <b>A horse in grip shoes really does slide less</b> (#248). Two horses stand on one
+     * sheet of ice and are given the same shove; the one in four Grip III shoes must stop
+     * well short of the other. Nothing but {@code ShoeGripMixin} can make that so - the
+     * friction is read inside {@code LivingEntity.travelInAir} - so a mixin that applied to
+     * the wrong local, or to none, is a red test here and not a horse skating in a played game.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>>
+            GRIP_SHOES_SLIDE_LESS_ON_ICE = TEST_FUNCTIONS.register("grip_shoes_slide_less_on_ice",
+                    () -> ModGameTests::gripShoesSlideLessOnIce);
+
+    private static void gripShoesSlideLessOnIce(GameTestHelper helper) {
+        var rates = shoeRatesOrFail();
+        if (rates.grip(1) <= 0.0) {
+            shoeFail("shoes.grip_per_level is 0 in this run's server config, so this test asserts the wrong"
+                    + " branch - put it back rather than deleting the test");
+        }
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        var grip = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(com.example.horsegenetics.neoforge.item.ShoeEnchantments.GRIP);
+        // One sheet, two lanes four blocks apart, eight blocks of run.
+        BlockPos sheet = helper.absolutePos(BlockPos.ZERO).above(23);
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -2; z <= 8; z++) {
+                level.setBlock(sheet.offset(x, 0, z), Blocks.PACKED_ICE.defaultBlockState(), 2);
+            }
+        }
+        var bare = idleHorseOn(helper, 24, -2, Blocks.PACKED_ICE);
+        var shod = idleHorseOn(helper, 24, 2, Blocks.PACKED_ICE);
+        for (var hoof : HOOF_SLOTS) {
+            ItemStack shoe = new ItemStack(ModItems.HORSE_SHOES.get(1).get());
+            shoe.enchant(grip, com.example.horsegenetics.common.gear.HorseShoes.MAX_ENCHANT_LEVEL);
+            hoof.set(shod, shoe);
+        }
+        double[] start = new double[2];
+        int[] pushedAt = {-1};
+        helper.succeedWhen(() -> {
+            if (pushedAt[0] < 0) {
+                // The lanes may lie in a neighbour chunk that is not ticking yet (#245).
+                fieldTicks(helper);
+                // Both settled on the ice and both really ticking, then one shove each.
+                if (!bare.onGround() || !shod.onGround() || bare.tickCount < 10 || shod.tickCount < 10) {
+                    shoeFail("waiting for both horses to settle on the ice");
+                }
+                start[0] = bare.getZ();
+                start[1] = shod.getZ();
+                bare.setDeltaMovement(0.0, 0.0, 0.3);
+                shod.setDeltaMovement(0.0, 0.0, 0.3);
+                pushedAt[0] = bare.tickCount;
+            }
+            if (bare.tickCount - pushedAt[0] < 60) {
+                shoeFail("sliding");
+            }
+            double bareSlid = bare.getZ() - start[0];
+            double shodSlid = shod.getZ() - start[1];
+            // The same shove on ordinary ground carries about a quarter as far as on ice.
+            if (bareSlid < 1.5) {
+                shoeFail("the unshod horse slid only " + bareSlid + " blocks on packed ice - the test's own"
+                        + " shove did not take, so it proves nothing about grip");
+            }
+            if (shodSlid > bareSlid * 0.5) {
+                shoeFail("a horse in four Grip III shoes slid " + shodSlid + " blocks and an unshod one "
+                        + bareSlid + " from the same shove - did ShoeGripMixin apply?");
+            }
+        });
     }
 
     /**

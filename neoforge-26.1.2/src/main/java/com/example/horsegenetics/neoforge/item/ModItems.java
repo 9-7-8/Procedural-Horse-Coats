@@ -447,7 +447,8 @@ public final class ModItems {
         for (com.example.horsegenetics.common.gear.HorseShoes.Metal metal
                 : com.example.horsegenetics.common.gear.HorseShoes.Metal.values()) {
             shoes.add(register(metal.id(),
-                    properties -> new HorseShoeItem(metal.rgb(), metal, properties.stacksTo(1))));
+                    properties -> new HorseShoeItem(metal.rgb(), metal,
+                            properties.stacksTo(1).enchantable(ShoeEnchantments.ENCHANTABILITY))));
         }
         return List.copyOf(shoes);
     }

@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:dirt_path",
+    "minecraft:cobblestone",
+    "minecraft:cobblestone_slab",
+    "minecraft:mossy_cobblestone",
+    "minecraft:mossy_cobblestone_slab",
+    "#minecraft:stone_bricks",
+    "minecraft:stone_brick_slab",
+    "minecraft:mossy_stone_brick_slab",
+    "minecraft:bricks",
+    "minecraft:brick_slab",
+    "minecraft:smooth_sandstone",
+    "minecraft:smooth_sandstone_slab"
+  ]
+}

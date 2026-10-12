@@ -60,7 +60,8 @@ public final class ModdedShoes {
             // nothing about their item can be asked this early.
             HorseShoes.Metal tier = HorseShoes.tierOf(metal.gem());
             DeferredItem<HorseShoeItem> item = ModItems.ITEMS.registerItem(id,
-                    properties -> new HorseShoeItem(rgb, tier, properties.stacksTo(1)));
+                    properties -> new HorseShoeItem(rgb, tier, properties.stacksTo(1)
+                            .enchantable(com.example.horsegenetics.neoforge.item.ShoeEnchantments.ENCHANTABILITY)));
             ModItems.TAB_ITEMS.add(item);
             SHOES.add(new Shoe(metal, item));
         }

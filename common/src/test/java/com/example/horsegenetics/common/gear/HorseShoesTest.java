@@ -168,6 +168,75 @@ class HorseShoesTest {
     }
 
     @Test
+    @DisplayName("each shoe's enchantment is its own: grip and roadster fold into the one total with the metal")
+    void enchantmentsFoldIntoTheOneTotal() {
+        HorseShoes.Rates rates = HorseShoes.Rates.DEFAULT;
+        HorseShoes.Shoe grip2 = new HorseShoes.Shoe(HorseShoes.Metal.IRON, 2, 0);
+        HorseShoes.Shoe road3 = new HorseShoes.Shoe(HorseShoes.Metal.GOLD, 0, 3);
+        HorseShoes.Shoe plain = HorseShoes.Shoe.plain(HorseShoes.Metal.COPPER);
+        double metals = HorseShoes.DEFAULT_IRON_SPEED + HorseShoes.DEFAULT_GOLD_SPEED
+                + HorseShoes.DEFAULT_COPPER_SPEED;
+
+        HorseShoes.Bonus offRoad = HorseShoes.bonus(rates, false, grip2, road3, plain, null);
+        assertEquals(metals, offRoad.speed(), EPS, "off a road the roadster adds nothing");
+        assertEquals(2 * HorseShoes.DEFAULT_GRIP_PER_LEVEL, offRoad.grip(), EPS);
+
+        HorseShoes.Bonus onRoad = HorseShoes.bonus(rates, true, grip2, road3, plain, null);
+        assertEquals(metals + 3 * HorseShoes.DEFAULT_ROAD_SPEED_PER_LEVEL, onRoad.speed(), EPS);
+        assertEquals(offRoad.jump(), onRoad.jump(), EPS, "a road changes speed only");
+        assertEquals(offRoad.grip(), onRoad.grip(), EPS);
+
+        // The same enchantment moved to another hoof is the same total, and a
+        // second one adds its own share rather than replacing the first.
+        HorseShoes.Bonus moved = HorseShoes.bonus(rates, true, null, plain, road3, grip2);
+        assertEquals(onRoad.speed(), moved.speed(), EPS);
+        assertEquals(onRoad.jump(), moved.jump(), EPS);
+        assertEquals(onRoad.grip(), moved.grip(), EPS);
+        HorseShoes.Bonus two = HorseShoes.bonus(rates, true, road3, road3, null, null);
+        assertEquals(2 * HorseShoes.DEFAULT_GOLD_SPEED + 6 * HorseShoes.DEFAULT_ROAD_SPEED_PER_LEVEL,
+                two.speed(), EPS);
+
+        // Only a horse some roadster would speed up has its ground watched.
+        assertTrue(HorseShoes.watchesRoad(rates, null, null, road3, null));
+        assertFalse(HorseShoes.watchesRoad(rates, grip2, plain, null, null));
+
+        // A level past the top counts as the top.
+        assertEquals(new HorseShoes.Shoe(HorseShoes.Metal.IRON, HorseShoes.MAX_ENCHANT_LEVEL, 0),
+                new HorseShoes.Shoe(HorseShoes.Metal.IRON, 99, -4));
+    }
+
+    @Test
+    @DisplayName("grip takes its share of the slide out of ice, never past ordinary ground, and never touches it")
+    void gripTakesTheSlideOutOfIce() {
+        float ice = 0.98F;
+        assertEquals(ice, HorseShoes.friction(ice, 0.0), 0.0F, "no grip: ice is ice");
+        assertEquals(HorseShoes.ORDINARY_FRICTION, HorseShoes.friction(ice, 1.0), 1e-6F);
+        assertEquals(HorseShoes.ORDINARY_FRICTION, HorseShoes.friction(ice, 7.0), 1e-6F, "never better than ground");
+        float half = HorseShoes.friction(ice, 0.5);
+        assertEquals((ice + HorseShoes.ORDINARY_FRICTION) / 2, half, 1e-6F);
+        // Ordinary ground and anything stickier is left exactly alone.
+        assertEquals(HorseShoes.ORDINARY_FRICTION, HorseShoes.friction(HorseShoes.ORDINARY_FRICTION, 1.0), 0.0F);
+        assertEquals(0.4F, HorseShoes.friction(0.4F, 1.0), 0.0F);
+
+        // Four shoes at the top level stop short of 1, and the total never passes it.
+        HorseShoes.Shoe top = new HorseShoes.Shoe(HorseShoes.Metal.IRON, HorseShoes.MAX_ENCHANT_LEVEL, 0);
+        double four = HorseShoes.bonus(HorseShoes.Rates.DEFAULT, false, top, top, top, top).grip();
+        assertEquals(4 * HorseShoes.MAX_ENCHANT_LEVEL * HorseShoes.DEFAULT_GRIP_PER_LEVEL, four, EPS);
+        assertTrue(four < 1.0);
+        int n = HorseShoes.Metal.values().length;
+        HorseShoes.Rates steep = new HorseShoes.Rates(true, new double[n], new double[n], 99.0, 99.0);
+        assertEquals(HorseShoes.MAX_GRIP_PER_LEVEL, steep.grip(1), EPS, "a server's number is capped per level");
+        assertEquals(HorseShoes.MAX_ROAD_SPEED_PER_LEVEL, steep.roadSpeed(1), EPS);
+        assertEquals(1.0, HorseShoes.bonus(steep, false, top, top, top, top).grip(), EPS);
+
+        // The family's switch turns the enchantments off with everything else.
+        HorseShoes.Rates off = new HorseShoes.Rates(false, null, null, 0.2, 0.01);
+        HorseShoes.Shoe both = new HorseShoes.Shoe(HorseShoes.Metal.IRON, 3, 3);
+        assertTrue(HorseShoes.bonus(off, true, both, both, both, both).isNone());
+        assertFalse(HorseShoes.watchesRoad(off, both, both, both, both));
+    }
+
+    @Test
     @DisplayName("another mod's gem stands where diamond does and its ingot where iron does")
     void aModdedMetalTakesItsArmoursRung() {
         assertEquals(HorseShoes.Metal.DIAMOND, HorseShoes.tierOf(true));

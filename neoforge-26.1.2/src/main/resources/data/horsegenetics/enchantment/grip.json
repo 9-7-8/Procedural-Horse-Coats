@@ -1,0 +1,21 @@
+{
+  "anvil_cost": 2,
+  "description": {
+    "translate": "enchantment.horsegenetics.grip"
+  },
+  "exclusive_set": "#horsegenetics:exclusive_set/horse_shoe",
+  "max_cost": {
+    "base": 25,
+    "per_level_above_first": 10
+  },
+  "max_level": 3,
+  "min_cost": {
+    "base": 5,
+    "per_level_above_first": 10
+  },
+  "slots": [
+    "any"
+  ],
+  "supported_items": "#horsegenetics:enchantable/horse_shoe",
+  "weight": 5
+}

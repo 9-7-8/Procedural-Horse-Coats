@@ -24,8 +24,9 @@ import org.jspecify.annotations.Nullable;
  * ({@code GeneticHorseRenderer}) both ask this for it, and cannot disagree.
  *
  * <p>What it does once worn is {@code server/HorseShoeEffects}: its
- * {@link #tier}'s flat speed and jump, and powder snow. The tooltip states the
- * server's own numbers. The enchantments are not built (#248).
+ * {@link #tier}'s flat speed and jump, powder snow, and whichever of the two
+ * enchantments its own stack carries ({@link ShoeEnchantments}). The tooltip
+ * states the server's own numbers.
  */
 public class HorseShoeItem extends Item {
 
@@ -95,5 +96,20 @@ public class HorseShoeItem extends Item {
         }
         adder.accept(Component.literal("One shoe keeps a horse on top of powder snow.")
                 .withStyle(ChatFormatting.BLUE));
+        // What this stack's own enchantment is worth, under the name vanilla has
+        // already listed above. Nothing for a level a server has zeroed.
+        double grip = rates.grip(ShoeEnchantments.level(stack, ShoeEnchantments.GRIP));
+        if (grip > 0.0) {
+            adder.accept(Component.literal(String.format(java.util.Locale.ROOT,
+                            "Grip: this shoe takes %.0f%% of the slide out of ice.", Math.min(1.0, grip) * 100))
+                    .withStyle(ChatFormatting.BLUE));
+        }
+        double road = rates.roadSpeed(ShoeEnchantments.level(stack, ShoeEnchantments.ROADSTER));
+        if (road > 0.0) {
+            adder.accept(Component.literal(String.format(java.util.Locale.ROOT,
+                            "Roadster: this shoe adds +%.2f m/s on a path or a road.",
+                            HorseUnits.metresPerSecond(road)))
+                    .withStyle(ChatFormatting.BLUE));
+        }
     }
 }

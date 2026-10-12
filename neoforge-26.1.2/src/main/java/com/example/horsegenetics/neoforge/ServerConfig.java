@@ -307,6 +307,8 @@ public final class ServerConfig {
     public static final ModConfigSpec.DoubleValue SHOES_DIAMOND_JUMP;
     public static final ModConfigSpec.DoubleValue SHOES_NETHERITE_SPEED;
     public static final ModConfigSpec.DoubleValue SHOES_NETHERITE_JUMP;
+    public static final ModConfigSpec.DoubleValue SHOES_GRIP_PER_LEVEL;
+    public static final ModConfigSpec.DoubleValue SHOES_ROAD_SPEED_PER_LEVEL;
 
     /**
      * <b>How much bond a neglected horse loses per Minecraft day</b>; zero turns
@@ -1057,6 +1059,30 @@ public final class ServerConfig {
                 .defineInRange("shoes.netherite_jump",
                         com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_NETHERITE_JUMP, 0.0,
                         com.example.horsegenetics.common.gear.HorseShoes.MAX_JUMP);
+        SHOES_GRIP_PER_LEVEL = builder
+                .comment("How much of the slide on ice ONE level of the Grip enchantment on ONE",
+                        "horse shoe takes away. (default: 0.08)",
+                        "A share, where 1 makes ice behave like ordinary ground. Every shod hoof",
+                        "adds its own and the enchantment has three levels, so four shoes of",
+                        "Grip III are 12 times this. The total stops at 1: grip never makes ice",
+                        "better than ground. 0 turns the enchantment off. Range 0 to 0.34.",
+                        "Read live, on both sides. Server-side.")
+                .defineInRange("shoes.grip_per_level",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_GRIP_PER_LEVEL, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_GRIP_PER_LEVEL);
+        SHOES_ROAD_SPEED_PER_LEVEL = builder
+                .comment("How much movement speed ONE level of the Roadster enchantment on ONE",
+                        "horse shoe adds while the horse is on a path or a road. (default: 0.002)",
+                        "A flat amount, in the attribute's own units, where a horse is roughly",
+                        "0.11 to 0.34 and 0.01 is about 0.43 m/s. Every shod hoof adds its own",
+                        "and the enchantment has three levels, so four shoes of Roadster III",
+                        "are 12 times this. What counts as a road is the block tag",
+                        "horsegenetics:shoe_roads. 0 turns the enchantment off. Range 0 to",
+                        "0.015. A changed number reaches a horse when it next loads, is next",
+                        "shod, or next steps on or off a road. Server-side.")
+                .defineInRange("shoes.road_speed_per_level",
+                        com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_ROAD_SPEED_PER_LEVEL, 0.0,
+                        com.example.horsegenetics.common.gear.HorseShoes.MAX_ROAD_SPEED_PER_LEVEL);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -1752,7 +1778,7 @@ public final class ServerConfig {
 
     /**
      * The {@code shoes.*} keys as the one object {@code HorseShoes} takes, safely:
-     * the switch and every metal's two numbers leave this class together, and a
+     * the switch, every metal's two numbers and both enchantments' leave this class together, and a
      * client that has not been sent the server's config yet gets the defaults.
      */
     public static com.example.horsegenetics.common.gear.HorseShoes.Rates shoeRates() {
@@ -1762,7 +1788,8 @@ public final class ServerConfig {
                     new double[] {SHOES_COPPER_SPEED.get(), SHOES_IRON_SPEED.get(), SHOES_GOLD_SPEED.get(), 
                             SHOES_DIAMOND_SPEED.get(), SHOES_NETHERITE_SPEED.get()},
                     new double[] {SHOES_COPPER_JUMP.get(), SHOES_IRON_JUMP.get(), SHOES_GOLD_JUMP.get(), 
-                            SHOES_DIAMOND_JUMP.get(), SHOES_NETHERITE_JUMP.get()});
+                            SHOES_DIAMOND_JUMP.get(), SHOES_NETHERITE_JUMP.get()},
+                    SHOES_GRIP_PER_LEVEL.get(), SHOES_ROAD_SPEED_PER_LEVEL.get());
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.gear.HorseShoes.Rates.DEFAULT;
         }

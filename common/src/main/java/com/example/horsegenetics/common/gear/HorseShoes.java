@@ -18,8 +18,13 @@ import java.util.List;
  *
  * <p>What a worn shoe does is here too: each one adds its own metal's flat
  * amount to speed and jump ({@link #bonus}), summed over the four hooves, and
- * any one of them is enough to stand on powder snow ({@link #shod}). The two
- * enchantments are not built (#248).
+ * any one of them is enough to stand on powder snow ({@link #shod}).
+ *
+ * <p>A shoe may also carry one of two enchantments (#248), read off its own
+ * stack and folded into the same total: <b>grip</b>, which takes a share of the
+ * slide out of ice ({@link #friction}), and <b>roadster</b>, which adds speed
+ * while the horse is on a path or a road. One shoe carries one of the two; the
+ * four hooves may mix them.
  */
 public final class HorseShoes {
 
@@ -38,6 +43,31 @@ public final class HorseShoes {
     public static final double DEFAULT_DIAMOND_JUMP = 0.010;
     public static final double DEFAULT_NETHERITE_SPEED = 0.006;
     public static final double DEFAULT_NETHERITE_JUMP = 0.012;
+
+    /** The top level of either shoe enchantment; a higher one on a stack counts as this. */
+    public static final int MAX_ENCHANT_LEVEL = 3;
+
+    // One level of an enchantment on ONE shoe (the building session's numbers,
+    // #248). Grip is a share of the slide taken away: four shoes at the top
+    // level are 0.96, so ice is very nearly ordinary ground. Roadster is in
+    // movement speed's units: four shoes at the top level are 0.024, about a
+    // block a second, and only on a path.
+    public static final double DEFAULT_GRIP_PER_LEVEL = 0.08;
+    public static final double DEFAULT_ROAD_SPEED_PER_LEVEL = 0.002;
+
+    /**
+     * The most one level on one shoe may be, whatever a server writes. At the
+     * grip cap one shoe at the top level is all the grip there is; the roadster
+     * cap keeps one shoe's road speed under {@link #MAX_SPEED}.
+     */
+    public static final double MAX_GRIP_PER_LEVEL = 0.34;
+    public static final double MAX_ROAD_SPEED_PER_LEVEL = 0.015;
+
+    /**
+     * What ordinary ground's slipperiness is, and so what full grip makes of
+     * ice. Vanilla's default block friction; ice is 0.98 and slime 0.8.
+     */
+    public static final float ORDINARY_FRICTION = 0.6F;
 
     /** Whether shoes do anything at all, unless a server says otherwise. */
     public static final boolean DEFAULT_ENABLED = true;
@@ -102,17 +132,40 @@ public final class HorseShoes {
     private static final String SUFFIX = "_horse_shoe";
 
     /**
-     * What shoes add to a horse: flat amounts, in the attributes' own units.
+     * One worn shoe: the rung its metal stands on, and the level of each
+     * enchantment on its own stack ({@code 0} for none).
+     */
+    public record Shoe(Metal metal, int grip, int road) {
+
+        public Shoe {
+            grip = Math.max(0, Math.min(MAX_ENCHANT_LEVEL, grip));
+            road = Math.max(0, Math.min(MAX_ENCHANT_LEVEL, road));
+        }
+
+        /** An unenchanted shoe of {@code metal}, or {@code null} for a bare hoof. */
+        public static Shoe plain(Metal metal) {
+            return metal == null ? null : new Shoe(metal, 0, 0);
+        }
+    }
+
+    /**
+     * What shoes add to a horse: flat amounts, in the attributes' own units,
+     * and the grip.
      *
      * @param speed added to movement speed
      * @param jump  added to jump strength
+     * @param grip  the share of a slick block's slide taken away, 0 to 1
      */
-    public record Bonus(double speed, double jump) {
+    public record Bonus(double speed, double jump, double grip) {
 
-        public static final Bonus NONE = new Bonus(0.0, 0.0);
+        public static final Bonus NONE = new Bonus(0.0, 0.0, 0.0);
+
+        public Bonus(double speed, double jump) {
+            this(speed, jump, 0.0);
+        }
 
         public boolean isNone() {
-            return speed == 0.0 && jump == 0.0;
+            return speed == 0.0 && jump == 0.0 && grip == 0.0;
         }
     }
 
@@ -128,14 +181,28 @@ public final class HorseShoes {
 
         private final boolean enabled;
         private final Bonus[] perShoe = new Bonus[Metal.values().length];
+        private final double gripPerLevel;
+        private final double roadSpeedPerLevel;
+
+        /** The metals' numbers, with both enchantments at their defaults. */
+        public Rates(boolean enabled, double[] speed, double[] jump) {
+            this(enabled, speed, jump, Double.NaN, Double.NaN);
+        }
 
         /**
-         * @param speed one number per {@link Metal}, in its order; a missing or
-         *              unreadable one is that metal's default
-         * @param jump  likewise
+         * @param speed             one number per {@link Metal}, in its order; a missing or
+         *                          unreadable one is that metal's default
+         * @param jump              likewise
+         * @param gripPerLevel      what one level of grip on one shoe takes off the slide;
+         *                          unreadable is the default
+         * @param roadSpeedPerLevel what one level of roadster on one shoe adds on a road;
+         *                          unreadable is the default
          */
-        public Rates(boolean enabled, double[] speed, double[] jump) {
+        public Rates(boolean enabled, double[] speed, double[] jump, double gripPerLevel, double roadSpeedPerLevel) {
             this.enabled = enabled;
+            this.gripPerLevel = capped(new double[] {gripPerLevel}, 0, DEFAULT_GRIP_PER_LEVEL, MAX_GRIP_PER_LEVEL);
+            this.roadSpeedPerLevel = capped(new double[] {roadSpeedPerLevel}, 0,
+                    DEFAULT_ROAD_SPEED_PER_LEVEL, MAX_ROAD_SPEED_PER_LEVEL);
             for (Metal metal : Metal.values()) {
                 int i = metal.ordinal();
                 perShoe[i] = new Bonus(
@@ -159,6 +226,16 @@ public final class HorseShoes {
         public Bonus perShoe(Metal metal) {
             return enabled ? perShoe[metal.ordinal()] : Bonus.NONE;
         }
+
+        /** The share of the slide a shoe with {@code level} of grip takes away - 0 with the family off. */
+        public double grip(int level) {
+            return enabled ? level * gripPerLevel : 0.0;
+        }
+
+        /** What a shoe with {@code level} of roadster adds on a road - 0 with the family off. */
+        public double roadSpeed(int level) {
+            return enabled ? level * roadSpeedPerLevel : 0.0;
+        }
     }
 
     /**
@@ -180,19 +257,72 @@ public final class HorseShoes {
      *                  the other three likewise
      */
     public static Bonus bonus(Rates rates, Metal frontLeft, Metal frontRight, Metal hindLeft, Metal hindRight) {
+        return bonus(rates, false,
+                Shoe.plain(frontLeft), Shoe.plain(frontRight), Shoe.plain(hindLeft), Shoe.plain(hindRight));
+    }
+
+    /**
+     * The one total, enchantments included: each shoe's metal, each shoe's
+     * roadster while the horse is {@code onRoad}, and each shoe's grip, all
+     * summed over the four hooves. Nothing else may add a shoe's effect to a
+     * horse - a second route is two totals that drift.
+     *
+     * @param onRoad    whether the horse is standing on a path or a road
+     * @param frontLeft the near fore shoe, or {@code null} for a bare hoof; the
+     *                  other three likewise
+     */
+    public static Bonus bonus(Rates rates, boolean onRoad, Shoe frontLeft, Shoe frontRight, Shoe hindLeft,
+                              Shoe hindRight) {
         if (!rates.enabled()) {
             return Bonus.NONE;
         }
         double speed = 0.0;
         double jump = 0.0;
-        for (Metal metal : new Metal[] {frontLeft, frontRight, hindLeft, hindRight}) {
-            if (metal != null) {
-                Bonus one = rates.perShoe(metal);
+        double grip = 0.0;
+        for (Shoe shoe : new Shoe[] {frontLeft, frontRight, hindLeft, hindRight}) {
+            if (shoe != null) {
+                Bonus one = rates.perShoe(shoe.metal());
                 speed += one.speed();
                 jump += one.jump();
+                grip += rates.grip(shoe.grip());
+                if (onRoad) {
+                    speed += rates.roadSpeed(shoe.road());
+                }
             }
         }
-        return speed == 0.0 && jump == 0.0 ? Bonus.NONE : new Bonus(speed, jump);
+        // Past 1 there is no slide left to take: ice is ordinary ground, never better.
+        grip = Math.min(1.0, grip);
+        return speed == 0.0 && jump == 0.0 && grip == 0.0 ? Bonus.NONE : new Bonus(speed, jump, grip);
+    }
+
+    /**
+     * Whether the ground under the horse has to be watched: some shoe's
+     * roadster would add something on a road. False for every horse without
+     * that enchantment, which is what keeps the watching off them.
+     */
+    public static boolean watchesRoad(Rates rates, Shoe frontLeft, Shoe frontRight, Shoe hindLeft, Shoe hindRight) {
+        for (Shoe shoe : new Shoe[] {frontLeft, frontRight, hindLeft, hindRight}) {
+            if (shoe != null && rates.roadSpeed(shoe.road()) > 0.0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * What a block's slipperiness is to a horse with this much grip. A block
+     * no slicker than ordinary ground is untouched, so grip never slows a
+     * horse on grass or speeds one on soul sand; a slicker one is brought that
+     * share of the way down to {@link #ORDINARY_FRICTION}.
+     *
+     * @param blockFriction the block's own friction (ice is 0.98)
+     * @param grip          {@link Bonus#grip()}
+     */
+    public static float friction(float blockFriction, double grip) {
+        if (grip <= 0.0 || blockFriction <= ORDINARY_FRICTION) {
+            return blockFriction;
+        }
+        return (float) (blockFriction - (blockFriction - ORDINARY_FRICTION) * Math.min(1.0, grip));
     }
 
     /**
