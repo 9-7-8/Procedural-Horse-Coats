@@ -2281,6 +2281,9 @@ public final class ModGameTests {
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
         // One horse spawned and three events posted, all inside a single tick.
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
+        // Alone: two horses ten blocks apart on a field of their own. The wait for the
+        // field's forced chunks (#70), then 400 ticks of riding.
+        registerAlone(event, UNTAMED_RIDDEN_HORSE_BUCKS, 1500);
         // A small scratch box filled and read, all inside one tick.
         register(event, environment, NO_HORSE_STANDS_IN_POWDER_SNOW, 100);
         // Five stalls built and read, all inside one tick.
@@ -2773,6 +2776,125 @@ public final class ModGameTests {
                 "the penalty was removed for a rider whose horse was itself off the ground");
 
         helper.succeed();
+    }
+
+    /**
+     * <b>An untamed horse somebody is sitting on tries to throw them, whatever its breed.</b>
+     *
+     * <p>Tester, 2026-10-12: <i>"the rimeharts kinda just stand there when you try and ride
+     * them. i tried 4 ones and they didnt do the walk around/kick off loop"</i>. That loop is
+     * vanilla's {@code RunAroundLikeCrazyGoal}, and it is the only way a horse is tamed from
+     * its back, so a breed it never runs for cannot be tamed by riding at all. A Rimehart
+     * and an ordinary breed stand on one snow field with a rider each; within the window
+     * each must have run the goal, thrown its rider or been tamed.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNTAMED_RIDDEN_HORSE_BUCKS =
+            TEST_FUNCTIONS.register("untamed_ridden_horse_bucks", () -> ModGameTests::untamedRiddenHorseBucks);
+
+    private static void untamedRiddenHorseBucks(GameTestHelper helper) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        // A scratch field in the air, snow block under a snow layer, as a snowy biome's ground is.
+        BlockPos floor = helper.absolutePos(BlockPos.ZERO).above(29);
+        for (int x = -9; x <= 9; x++) {
+            for (int z = -6; z <= 6; z++) {
+                level.setBlock(floor.offset(x, 0, z), Blocks.SNOW_BLOCK.defaultBlockState(), 2);
+                level.setBlock(floor.offset(x, 1, z), Blocks.SNOW.defaultBlockState(), 2);
+            }
+        }
+        // And the biome itself: the cold_biome flag (MagicColdGene) reads coldEnoughToSnow where
+        // the horse stands, and every Rimehart is Ctol/Ctol.
+        BlockPos lo = floor.offset(-9, -2, -6);
+        BlockPos hi = floor.offset(9, 8, 6);
+        level.getServer().getCommands().performPrefixedCommand(
+                level.getServer().createCommandSourceStack().withLevel(level).withSuppressedOutput(),
+                "fillbiome " + lo.getX() + " " + lo.getY() + " " + lo.getZ() + " "
+                        + hi.getX() + " " + hi.getY() + " " + hi.getZ() + " minecraft:snowy_plains");
+        if (!level.getBiome(floor.above()).value().coldEnoughToSnow(floor.above(), level.getSeaLevel())) {
+            throw new GameTestAssertException(Component.literal(
+                    "the field is not a cold biome - fillbiome did not take, so the test proves nothing about cold"), 0);
+        }
+        String[] breeds = {"rimehart", "quarter_horse"};
+        net.minecraft.world.entity.animal.equine.Horse[] horses =
+                new net.minecraft.world.entity.animal.equine.Horse[breeds.length];
+        net.minecraft.world.entity.player.Player[] riders =
+                new net.minecraft.world.entity.player.Player[breeds.length];
+        int[] ran = new int[breeds.length];
+        int[] thrown = new int[breeds.length];
+        boolean[] mounted = new boolean[breeds.length];
+        long[] started = {-1L};
+        helper.succeedWhen(() -> {
+            if (started[0] < 0) {
+                fieldTicks(helper);
+                for (int i = 0; i < breeds.length; i++) {
+                    BlockPos at = floor.offset(i == 0 ? -5 : 5, 1, 0);
+                    horses[i] = com.example.horsegenetics.neoforge.server.HorseEggSpawner.spawnFounder(level,
+                            net.minecraft.world.phys.Vec3.atBottomCenterOf(at), 0.0F,
+                            com.example.horsegenetics.common.breed.Breeds.get(breeds[i]));
+                    riders[i] = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+                }
+                started[0] = level.getGameTime();
+            }
+            long t = level.getGameTime() - started[0];
+            for (int i = 0; i < breeds.length; i++) {
+                var horse = horses[i];
+                if (t >= 20 && !horse.isTamed() && riders[i].getVehicle() != horse) {
+                    if (mounted[i]) {
+                        thrown[i]++;
+                    }
+                    if (!mounted[i]) {
+                        // The first time by the click a player makes, empty-handed, so every
+                        // EntityInteract subscriber has its say before vanilla's doPlayerRide.
+                        var result = riders[i].interactOn(horse, net.minecraft.world.InteractionHand.MAIN_HAND,
+                                horse.position());
+                        if (riders[i].getVehicle() != horse) {
+                            throw new GameTestAssertException(Component.literal("an empty-handed click on an untamed "
+                                    + breeds[i] + " did not seat the player (" + result
+                                    + ") - something took the click before vanilla's mount"), 0);
+                        }
+                    } else {
+                        // Thrown riders go back by force: a mock player never ticks, so its
+                        // boarding cooldown never runs down.
+                        riders[i].startRiding(horse, true, false);
+                    }
+                    mounted[i] = true;
+                }
+                for (var wrapped : horse.goalSelector.getAvailableGoals()) {
+                    if (wrapped.isRunning()
+                            && wrapped.getGoal() instanceof net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal) {
+                        ran[i]++;
+                    }
+                }
+                if (t == 40 || t == 400) {
+                    StringBuilder running = new StringBuilder();
+                    for (var wrapped : horse.goalSelector.getAvailableGoals()) {
+                        if (wrapped.isRunning()) {
+                            running.append(wrapped.getPriority()).append(':')
+                                    .append(wrapped.getGoal().getClass().getSimpleName()).append(' ');
+                        }
+                    }
+                    HorseGenetics.LOGGER.info("[buck] t={} {} tamed={} saddled={} vehicle={} controller={} effectiveAi={}"
+                                    + " immobile={} eating={} standing={} temper={} bb={}x{} onGround={} speed={}"
+                                    + " ran={} thrown={} running=[{}] at {}",
+                            t, breeds[i], horse.isTamed(), horse.isSaddled(), horse.isVehicle(),
+                            horse.getControllingPassenger(), horse.isEffectiveAi(), horse.isImmobile(),
+                            horse.isEating(), horse.isStanding(), horse.getTemper(),
+                            horse.getBbWidth(), horse.getBbHeight(), horse.onGround(),
+                            horse.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED),
+                            ran[i], thrown[i], running.toString().trim(), horse.position());
+                }
+            }
+            if (t < 400) {
+                throw new GameTestAssertException(Component.literal("riding"), 0);
+            }
+            for (int i = 0; i < breeds.length; i++) {
+                if (ran[i] == 0 && thrown[i] == 0 && !horses[i].isTamed()) {
+                    throw new GameTestAssertException(Component.literal("an untamed " + breeds[i]
+                            + " was ridden for 380 ticks and never ran RunAroundLikeCrazyGoal, never threw its"
+                            + " rider and was never tamed - it cannot be tamed from its back"), 0);
+                }
+            }
+        });
     }
 
     /**
