@@ -1,0 +1,126 @@
+2026-10-12 07:38 - next-release: a worn horse shoe adds speed and jump, and holds a horse
+up on powder snow (#247). The time is the session's END.
+
+ASKED
+-----
+1. "/next-release" (the owner ran the command with no arguments).
+   -> procedures/next-release.txt, which handed its unit to procedures/process-intake.txt.
+   The next release is v0.5.047 (the equipment release), stage v0.5.047.1. The unit was
+   #247, built as the slice that stands alone; its remainder is #248. No other request.
+
+DONE
+----
+Housekeeping (next-release steps 1-2). Last tag v0.5.046; its milestone is closed. No
+open issue was without a milestone. The three open bugs on v0.5.047 (#10, #31, #36) are
+fixed and each one's last comment says it waits on its check, so none was a unit. Two
+"NOT COMPILED" cloud commits since the tag (4d6e089c, 79aff1cb) are older than many local
+builds, so nothing was owed there.
+
+#247 Horse shoes - piece 2: the stat bonus and powder snow. Commit 05b69991. CLOSED.
+  What was missing: after #164 a shoe could be bought, worn and seen and did nothing.
+  What it does now:
+  - Each worn shoe adds a flat amount to movement speed and jump strength from its own
+    metal, summed over the four hooves. The rule is pure, in common/gear/HorseShoes:
+    bonus(rates, fl, fr, hl, hr) -> Bonus(speed, jump); Rates carries the family's switch
+    and every metal's two numbers, capped per shoe (MAX_SPEED, MAX_JUMP).
+  - server/HorseShoeEffects reads the four hoof slots and holds the sum as two transient
+    ADD_VALUE modifiers (horsegenetics:shoes/speed, shoes/jump). It runs when a hoof slot
+    is written (HorseTackSlot.set, Zone.HOOVES) and on EntityJoinLevelEvent for a shod
+    horse. It does not tick. Nothing new is saved, so hard rule 10 is untouched.
+  - HorseShoeItem carries a tier (a HorseShoes.Metal): itself for a shipped shoe,
+    HorseShoes.tierOf(gem) for a modded one (gem -> diamond, ingot -> iron).
+  - mixin/PowderSnowShoesMixin: one shoe of any metal holds a horse up on powder snow.
+  - ServerConfig: shoes.enabled, and shoes.<metal>_speed / _jump for copper, iron, gold,
+    diamond, netherite; read together through ServerConfig.shoeRates().
+  - The tooltip states the server's own numbers for one shoe, and the powder snow line.
+  Proof:
+  - :common:test --tests '*HorseShoesTest' green (five new cases). Mutation: replacing
+    "speed += one.speed()" with an assignment turned two cases red; restored, green.
+  - :common:test --tests '*CommonPortabilityTest' green.
+  - :neoforge-26.1.2:runGameTest: 63 of 63 green, with the two new tests
+    shoes_add_their_bonus and a_shod_horse_stands_on_powder_snow. Mutation: removing the
+    refresh call in HorseTackSlot.set and making the mixin answer false turned exactly
+    those two red; restored.
+  - A dedicated server boot (:neoforge-26.1.2:runServer) reached Done with no /ERROR]
+    line; the [shoes] section was written into phc/server.toml. The 17 WARN lines were
+    vanilla command ambiguities, offline mode, the known stasis_chamber recipe line (see
+    d2026-10-05-1955-stasis-recipe-warn-not-a-defect.txt), and "server.toml is not
+    correct. Correcting", which is the new keys being added to an existing file.
+    run/phc, run/config and the owner's latest.log and debug.log were copied aside before
+    the boot and put back exactly after it.
+  - :neoforge-26.1.2:build green; check-parity OK; check-designer-boots OK (nothing under
+    web/ reaches HorseShoes, so the wasm was not rebaked).
+  Pictures: no pictures. This piece changes two numbers and a tooltip; the worn shoe
+  itself was photographed in #164 and its drawing did not change.
+
+#248 Horse shoes - piece 3: the two enchantments (grip, and speed on paths). OPENED,
+  scoped, size M, on the v0.5.047 milestone as the last piece of v0.5.047.1. It is what
+  #247 did not build. The milestone description and the release-plan issue (#196) were
+  edited in the same step: #247 marked built, #248 listed after it, 30 -> 32 points.
+
+Docs (the second commit): wiki/item-horse-shoes.html (Gameplay #what-they-do with the
+table; Coding #effects, #powder-snow, #shoe-config, #tests; Verification
+#verify-shoe-effects; the Roadmap tab now starts at the enchantments), wiki/config.html
+(generated; eleven new keys, HOME item-horse-shoes.html#shoe-config), the verification
+and roadmap indexes, the search index and wiki/text/.
+
+DECIDED
+-------
+All made without the owner. The issue said "names and numbers are the building
+session's". Each is recorded on #247's closing comment and on the page's Coding tab.
+- Scope: #247 is size L, so this run built the bonus, powder snow, config, tooltip and
+  page, and split the enchantments off (process-intake tier 3; next-release step 5 keeps
+  a remainder the stage cannot ship without on the same milestone).
+- The default numbers, per shoe: copper 0.002 speed / 0.004 jump, iron 0.003 / 0.006,
+  gold 0.004 / 0.008, diamond 0.005 / 0.010, netherite 0.006 / 0.012. Four netherite
+  shoes are about +1.0 m/s and +0.3 m for an average horse: small, so that speed stays a
+  matter of breeding.
+- The per-shoe caps: 0.05 speed, 0.15 jump. No cap across shoes (owner, 2026-10-09).
+- Event-driven, not per tick: the modifiers are refreshed on a gear change and on load,
+  as HorsePackHandler.refresh does. The price is that a changed shoes.* number reaches a
+  horse when it next loads or is next shod.
+- shoes.enabled off turns off powder snow as well as the bonus. A metal set to 0 still
+  holds a horse up.
+- Config key names: shoes.enabled, shoes.<metal>_speed, shoes.<metal>_jump.
+
+FOUND ON THE WAY
+----------------
+- The treatment's UNVERIFIED line was wrong. It named Entity.canStandOnPowderSnow() and
+  proposed an override on the horse. 26.1.2 has no such method: the gate is the static
+  PowderSnowBlock.canEntityWalkOnPowderSnow(Entity) (the powder_snow_walkable_mobs type
+  tag, or the FEET-slot item), called from the block's collision shape and from
+  LivingEntity. So the fix is an @Inject at RETURN on that static method. Written on
+  wiki/item-horse-shoes.html#powder-snow.
+- A long Bash heredoc truncated once (a known trap); the patch scripts were written with
+  the Write tool instead. Nothing was half-applied.
+- No bug was filed.
+
+PROCEDURES
+----------
+None needed. Asked the three questions: next-release, process-intake, add-a-config-option,
+launch-game step 8, rebake and end-session were followed as written and none was wrong;
+nothing new was done that lacks a procedure; no procedure's steps became untrue.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other common
+  test against the HorseShoes change; only *HorseShoesTest and *CommonPortabilityTest ran.
+- Nobody has played it. Waiting on wiki/item-horse-shoes.html#verify-shoe-effects: the
+  numbers move on the horse screen; the bonus is felt when ridden (the rider's client
+  moves the horse); it survives a relog and a restart (only the rebuild itself is
+  tested, not the join event); powder snow ridden and unridden; the tooltip; the
+  settings; a shod horse with a loaded pack. And one line added under
+  #verify-modded-shoes: a modded ingot's shoe states iron's numbers, a gem's diamond's.
+- The live-edit half of add-a-config-option step 8 was not run: the design is that a
+  changed number waits for the horse's next load, so there was nothing to see at once.
+- The compat-test (a real second mod's metal) was not run.
+
+RELEASE
+-------
+Not offered. v0.5.047.1 still has #248 open.
+
+PICK UP FIRST
+-------------
+#248, the two shoe enchantments, by /next-release (procedures/next-release.txt, which
+hands it to process-intake). It is owner-free; its first step is the grip spike (where a
+mob's slide on ice is decided in 26.1.2). After it, #73 (the bridle) opens v0.5.047.2.

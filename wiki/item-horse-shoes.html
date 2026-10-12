@@ -23,8 +23,9 @@
     A horse shoe is <strong>one item to a hoof</strong>: four separate stacks in four separate gear
     slots, each in its own metal, drawn under the foot it is on. Five ship (copper, iron, golden,
     diamond and netherite) and every metal another mod brings gets one of its own. They are bought
-    from the equestrian metalsmith. A shoe does not change how the horse moves yet: the stat bonus,
-    powder snow and the enchantments are on the Roadmap tab.
+    from the equestrian metalsmith. Each worn shoe adds a little speed and jump from its own metal, and
+    a horse with at least one shoe on stands on powder snow. The two enchantments are on the Roadmap
+    tab.
 </p>
 
 <div class="item-art" data-items="horse_shoe"></div>
@@ -85,9 +86,40 @@
 
 <h2 id="what-they-do">What they do</h2>
 <p>
-    <strong>Nothing yet beyond being worn and seen.</strong> A flat speed and jump bonus from the
-    metal, walking on powder snow, and two enchantments (grip, and speed on paths) are planned and
-    not built. See the Roadmap tab.
+    <strong>Each shoe adds a little speed and a little jump, from its own metal.</strong> The four
+    hooves are added up, so three shoes are three quarters of four, and four different metals are four
+    different amounts. There is no bonus for a matching set. A shoe taken off takes its share with it.
+</p>
+<table>
+    <thead><tr><th>Metal</th><th>Speed, one shoe</th><th>Speed, four</th><th>Jump, four (about)</th></tr></thead>
+    <tbody>
+        <tr><td>Copper</td><td>+0.09 m/s</td><td>+0.35 m/s</td><td>+0.11 m</td></tr>
+        <tr><td>Iron</td><td>+0.13 m/s</td><td>+0.52 m/s</td><td>+0.17 m</td></tr>
+        <tr><td>Golden</td><td>+0.17 m/s</td><td>+0.69 m/s</td><td>+0.23 m</td></tr>
+        <tr><td>Diamond</td><td>+0.22 m/s</td><td>+0.86 m/s</td><td>+0.28 m</td></tr>
+        <tr><td>Netherite</td><td>+0.26 m/s</td><td>+1.04 m/s</td><td>+0.34 m</td></tr>
+    </tbody>
+</table>
+<p>
+    Those are the defaults, and they are small on purpose: an ordinary horse runs at about 5 to 14 m/s,
+    so the best four shoes are worth roughly a tenth of an average horse and how fast a horse is stays a
+    matter of breeding. Jump height is not a straight line in the number behind it, so the jump column
+    is for an average jumper; a strong jumper gets a little more from the same shoe. A shoe's tooltip
+    states what one of it adds on the server you are on, and the horse's own screen shows the total in
+    its Speed and Jump lines.
+</p>
+<p>
+    <strong>One shoe is enough for powder snow.</strong> A horse with a shoe on any hoof, of any metal,
+    stands on top of powder snow the way a player in leather boots does. An unshod horse sinks.
+</p>
+<p>
+    <strong>Another mod's metal</strong> gives what iron gives if it is an ingot and what diamond gives
+    if it is a gem, the same rung its horse armour stands on.
+</p>
+<p>
+    A server can change every one of those numbers, or switch shoes off altogether
+    (<a href="#shoe-config">the settings</a>). Two enchantments, grip and speed on paths, are planned
+    and not built: see the Roadmap tab.
 </p>
 
 <h2 id="why-they-are-different">Why they are different from boots</h2>
@@ -170,8 +202,89 @@
     rebuilt on the first launch.
 </p>
 
+<h3 id="effects">What a worn shoe does</h3>
+<p>
+    Built 2026-10-12 (#247). The rule is pure and lives in <code>common/gear/HorseShoes</code>:
+    <code>bonus(rates, frontLeft, frontRight, hindLeft, hindRight)</code> takes each hoof's
+    <code>Metal</code> (or <code>null</code> for a bare one) and returns a <code>Bonus(speed, jump)</code>,
+    the plain sum of what each metal adds. <code>shod(rates, shoes)</code> is the powder snow rule: any
+    one shoe, and it does not depend on a metal's numbers, so a metal set to zero still carries it.
+</p>
+<ul>
+    <li><strong>The rung.</strong> <code>HorseShoeItem.tier()</code> is the <code>Metal</code> the bonus
+        is read from: itself for a shipped shoe, and <code>HorseShoes.tierOf(gem)</code> for a modded
+        one (a gem where diamond is, an ingot where iron is). That is the answer
+        <code>ModdedArmour.protectionFor</code> gives and it is pure for the same reason: nothing about
+        another mod's item can be read when ours is registered.</li>
+    <li><strong>The modifiers.</strong> <code>server/HorseShoeEffects.refresh</code> reads the four hoof
+        slots and holds the sum as one transient <code>ADD_VALUE</code> modifier on each attribute,
+        <code>horsegenetics:shoes/speed</code> on <code>MOVEMENT_SPEED</code> and
+        <code>shoes/jump</code> on <code>JUMP_STRENGTH</code>. A modifier is replaced only when its
+        number differs and removed when the sum is zero, so an unshod horse carries none.</li>
+    <li><strong>When it runs.</strong> Not every tick. Shoes change only when a hoof slot is written, so
+        <code>HorseTackSlot.set</code> calls it for a slot in <code>Zone.HOOVES</code>, and
+        <code>EntityJoinLevelEvent</code> calls it once for a shod horse, because a transient modifier
+        is never in the save. This is <code>HorsePackHandler.refresh</code>'s shape and not
+        <code>GeneAbilityHandler</code>'s per-tick reconcile. The price: a changed
+        <code>shoes.*</code> number reaches a horse when it next loads or is next shod.</li>
+    <li><strong>Saves.</strong> Nothing new is saved. The shoes are the stacks already in the gear
+        attachment and the modifiers are rebuilt from them.</li>
+    <li><strong>The pack's slowdown</strong> is <code>ADD_MULTIPLIED_TOTAL</code>, so it scales the
+        shod speed: a loaded horse loses the same share of its shoes' speed as of its own.</li>
+</ul>
+
+<h3 id="powder-snow">Powder snow</h3>
+<p>
+    Vanilla asks one static question, <code>PowderSnowBlock.canEntityWalkOnPowderSnow(Entity)</code>,
+    from the block's collision shape and from <code>LivingEntity</code>'s climb out of it. It answers
+    yes for the <code>powder_snow_walkable_mobs</code> entity-type tag or for the item in the
+    <code>FEET</code> slot. Neither fits: the tag would float every horse, shod or not, and a horse has
+    no feet slot. There is no method on the entity to override (26.1.2 has no
+    <code>Entity.canStandOnPowderSnow()</code>, which the treatment expected), so
+    <code>mixin/PowderSnowShoesMixin</code> injects at <code>RETURN</code> of that static method and
+    says yes for an <code>AbstractHorse</code> that <code>HorseShoeEffects.shod</code>, only when
+    vanilla said no. It runs on both sides, because a ridden horse is moved by its rider's client; the
+    gear attachment it reads is synced.
+</p>
+
+<h3 id="shoe-config">The settings</h3>
+<p>
+    Server-side, in <code>phc/server.toml</code>, read together through
+    <code>ServerConfig.shoeRates()</code>, which is the only thing that builds a
+    <code>HorseShoes.Rates</code>.
+</p>
+<ul>
+    <li><code>shoes.enabled</code> (default on): the family's one switch. Off, shoes are still bought,
+        worn and drawn, add nothing, and do not hold a horse up on powder snow.</li>
+    <li><code>shoes.&lt;metal&gt;_speed</code> and <code>shoes.&lt;metal&gt;_jump</code>, for copper, iron,
+        gold, diamond and netherite: what <strong>one</strong> shoe of that metal adds, in the
+        attribute's own units. The defaults are the <code>DEFAULT_*</code> constants in
+        <code>HorseShoes</code>. Each is capped per shoe (<code>MAX_SPEED</code>,
+        <code>MAX_JUMP</code>) and there is no cap across shoes (owner, 2026-10-09).</li>
+    <li>The iron pair is also what another mod's ingot metals give, and the diamond pair its gems.</li>
+</ul>
+<p>
+    The tooltip reads the same <code>Rates</code>, so it states the server's numbers and not the
+    defaults; with the family off it says shoes change nothing on this server.
+</p>
+
 <h3 id="tests">What is tested</h3>
 <ul>
+    <li><code>HorseShoesTest</code> (common), the bonus: four metals each add their own amount and
+        taking any one off loses exactly its share; a bare horse gets nothing and each better metal
+        gives more, inside the cap; a server's numbers are capped per shoe and not across shoes, an
+        unreadable one falls back to the default, and the switch turns off both the bonus and powder
+        snow; one shoe is enough for powder snow even when its metal adds nothing; a modded gem takes
+        diamond's rung and an ingot iron's. Replacing the sum with an assignment turns two red.</li>
+    <li>Gametest <code>shoes_add_their_bonus</code>: on a real horse, four metals put on one at a time
+        each move both attributes by their own amount; one taken off takes its share; a refresh from
+        bare modifiers puts them back (what a loading horse gets); all four off leaves the horse
+        exactly what it was with no modifier on it. Removing the call in <code>HorseTackSlot.set</code>
+        turns it red.</li>
+    <li>Gametest <code>a_shod_horse_stands_on_powder_snow</code>: an unshod horse is refused by
+        <code>canEntityWalkOnPowderSnow</code> and handed an empty collision shape; with one copper shoe
+        it is accepted and handed a solid one; with the shoe off, refused again. Making the mixin answer
+        no turns it red.</li>
     <li><code>HorseShoesTest</code> (common): an unshod horse draws nothing; one shoe is drawn on its
         own hoof; four metals stay apart, in hoof order; a black metal is still a shoe; shipped ids
         are unique and a mod's copy of a shipped metal gets no second shoe. Reversing the hoof order
@@ -216,9 +329,9 @@
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
     <p>
-        Horse shoes were built on 2026-10-12 with their slots covered by a gametest and their look by a
-        photo shoot, and no player has bought, worn or ridden with one; the modded-metal half has not
-        been run beside a real mod.
+        Horse shoes were built on 2026-10-12 with their slots, their speed and jump bonus and their
+        powder snow rule covered by gametests and their look by a photo shoot, and no player has
+        bought, worn or ridden with one; the modded-metal half has not been run beside a real mod.
     </p>
 </div>
 
@@ -238,11 +351,35 @@
     <li><strong>Another player</strong> on a server should see your horse's shoes.</li>
 </ul>
 
+<h3 id="verify-shoe-effects">What a shoe does (2026-10-12, NOT played)</h3>
+<ul>
+    <li><strong>The numbers move.</strong> Open a horse's screen, note Speed and Jump, shoe all four
+        feet in netherite: Speed should rise by about 1.0 m/s and Jump by about 0.3 m. Take one off
+        and a quarter of that goes.</li>
+    <li><strong>It is felt.</strong> Ride the same horse bare and shod along a measured line. The
+        ridden horse is moved by the rider's client, so this is the check that the modifier reaches
+        it.</li>
+    <li><strong>After a relog</strong> and after a server restart the shod horse still has its bonus
+        (the modifiers are rebuilt when it joins the level; only the rebuild itself is tested).</li>
+    <li><strong>Powder snow.</strong> Lead or ride an unshod horse onto powder snow: it sinks. Put one
+        copper shoe on: it stands on top, ridden and unridden, and can walk off the edge and back on.
+        Take the shoe off while it stands there: it sinks.</li>
+    <li><strong>The tooltip</strong> on each shoe states its own speed and jump and the powder snow
+        line; with <code>shoes.enabled</code> off it says shoes change nothing on this server.</li>
+    <li><strong>The settings.</strong> Set <code>shoes.iron_speed</code> to 0.05, reload the horse: an
+        iron shoe is now plainly fast. Set <code>shoes.enabled</code> to false: no bonus after the
+        horse reloads, and it sinks in powder snow at once.</li>
+    <li><strong>With a loaded pack</strong> the shod horse is still slowed, and still faster than the
+        same horse unshod with the same load.</li>
+</ul>
+
 <h3 id="verify-modded-shoes">Shoes for another mod's metals (2026-10-12)</h3>
 <ul>
     <li><strong>Beside a real mod</strong> with a tin or steel ingot: a Tin Horse Shoe in the creative
         tab, tinted, wearable on a hoof, and sold by the metalsmith at the level its armour is.</li>
     <li><strong>A mod with its own copper ingot</strong> should add no second Copper Horse Shoe.</li>
+    <li><strong>The rung.</strong> A tin shoe's tooltip should state iron's numbers, and a modded gem's
+        shoe diamond's.</li>
     <li><strong>The alias.</strong> Shoe a horse in a modded metal, remove the mod, load the world:
         the shoe should load as an iron one. Not tried against a real save.</li>
 </ul>
@@ -255,35 +392,23 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        A worn shoe is to give a flat speed and jump bonus from its metal, let the horse walk on powder
-        snow, and take two enchantments (grip, and speed on paths); shoes are to be made at the tack
-        bench.
+        A worn shoe is to take two enchantments (grip, and speed on paths), and shoes are to be made
+        at the tack bench, wear out with distance and turn up in loot.
     </p>
 </div>
 
 <h2 id="implementation-plan">What is left</h2>
 <p>
-    The first three are one scoped piece,
-    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/247">#247</a>, and are what
-    makes a shoe worth buying.
+    The stat bonus and powder snow shipped on 2026-10-12 (<a href="#effects">what a worn shoe
+    does</a>). The first piece below, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/248">#248</a>, is the last of the shoes' own stage.
 </p>
 <ol>
-    <li><strong>The flat stat bonus.</strong> Each worn shoe adds a flat amount to speed and jump from
-        its metal's tier, summed over the four stacks actually worn, never a percentage and never a
-        change to the horse's own stats. One shoe-owned attribute modifier per attribute, added while
-        shoes are worn and removed when the last comes off, the way <code>GeneAbilityHandler</code>
-        holds a gene's. The rule that turns four metals into a total belongs in
-        <code>common/gear/HorseShoes</code>. Config (owner, 2026-10-09): one switch for the family, a
-        number for every bonus, capped per piece only.</li>
-    <li><strong>Powder snow.</strong> Any worn shoe, of any metal, lets the horse stand on powder snow;
-        an unshod horse still sinks. Vanilla decides this by an entity-type tag, so it needs an
-        override on the horse and not a tag entry, which would shoe every horse. Spike this first: it
-        is the one part with no precedent in the code.</li>
-    <li><strong>Two enchantments</strong> (owner, 2026-10-02): <em>grip</em>, less slipping on ice and
-        slick ground, and a <em>speed</em> one, a small bonus on paths and roads. Names, numbers and
-        their conflict are the building session's. Each belongs to its own shoe, legal only on shoes,
-        and is folded into the same total as the metal's bonus. No custom enchantment exists in the mod
-        yet.</li>
+    <li><strong>Two enchantments</strong> (owner, 2026-10-02; <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/248">#248</a>): <em>grip</em>, less
+        slipping on ice and slick ground, and a <em>speed</em> one, a small bonus on paths and roads.
+        Names, numbers and their conflict are the building session's. Each belongs to its own shoe,
+        legal only on shoes, and is folded into the same total as the metal's bonus
+        (<code>HorseShoes.bonus</code>). The speed one depends on the ground under the horse, so it
+        needs a tick the metal's bonus does not have. No custom enchantment exists in the mod yet.</li>
     <li><strong>Made at the tack bench</strong> (#226): a shoe from a shape and a metal, replacing
         "bought only".</li>
     <li><strong>Durability</strong> (#236): shoes wear with distance, off by default in config.</li>
@@ -292,10 +417,10 @@
 
 <h2 id="implementation-tests">Checks those pieces owe</h2>
 <ul>
-    <li>Four different metals each add their own bonus; taking one off leaves the other three.</li>
-    <li>One plain shoe is enough for powder snow, and none is not.</li>
     <li>Different enchantments on four shoes stay on their own stacks through a save and reload.</li>
     <li>An enchanted worn shoe shows it is enchanted.</li>
+    <li>Grip and speed fold into one total with the metal's bonus, and their conflict is what the page
+        says it is.</li>
 </ul>
 
 </section>
@@ -307,7 +432,8 @@
         <a href="villagers.html">Villagers</a>
         <a href="items.html">Items &amp; recipes</a>
     </div>
-    Source: <code>common/gear/HorseShoes</code>, <code>item/HorseShoeItem</code>, <code>compat/ModdedShoes</code>,
+    Source: <code>common/gear/HorseShoes</code>, <code>item/HorseShoeItem</code>,
+    <code>server/HorseShoeEffects</code>, <code>mixin/PowderSnowShoesMixin</code>, <code>compat/ModdedShoes</code>,
     <code>compat/GeneratedShoes</code>, <code>compat/MetalsmithTrades</code>.
 </div>
 

@@ -3331,12 +3331,15 @@ wiki/item-horse-hair.html#shearing	coding	Shearing
 wiki/item-horse-hair.html#uses	gameplay	What needs hair
 wiki/item-horse-hair.html#verified	coding	Verified
 wiki/item-horse-shoes.html#design-reasoning	science	Design reasoning
+wiki/item-horse-shoes.html#effects	coding	What a worn shoe does
 wiki/item-horse-shoes.html#getting-them	gameplay	Getting them
 wiki/item-horse-shoes.html#icon	coding	One icon, tinted
 wiki/item-horse-shoes.html#item-layer	coding	The items
+wiki/item-horse-shoes.html#powder-snow	coding	Powder snow
 wiki/item-horse-shoes.html#render-layer	coding	Drawing them
 wiki/item-horse-shoes.html#shape-reasoning	science	Why a U under the foot
 wiki/item-horse-shoes.html#shared-architecture	coding	How it is built
+wiki/item-horse-shoes.html#shoe-config	coding	The settings
 wiki/item-horse-shoes.html#slot-layer	coding	The slots and the tags
 wiki/item-horse-shoes.html#tests	coding	What is tested
 wiki/item-horse-shoes.html#trades	coding	The trades
