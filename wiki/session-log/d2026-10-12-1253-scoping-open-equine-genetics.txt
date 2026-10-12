@@ -1,0 +1,100 @@
+2026-10-12 12:53 - Scoping: the open equine genetics data repo (#250)
+(The time is the END of the session. No code, wiki page or asset was touched; only GitHub
+issues, two milestones and this log.)
+
+ASKED
+-----
+1. "WITHOUT CHANGING ANYTHING YET: I want to move all of our NATURAL breed definitions and
+   gene definitions out into another repo that I maintain that I can use in other
+   projects. Could we do that, turning this database into like jsons or something that's
+   language-agnostic? How much work would that be? I want this to be released under GPL 3
+   so anyone else can use it in their projects, and it maintains the most accurate list of
+   genes and breeds for real life horses, up to date with uc davis findings as much as I
+   can."
+   -> Answered from a read of the code: breeds are already JSON and are about a session;
+   genes are the real work, because every natural gene is a Java class and the JSON gene
+   files are all magical; accuracy is an ongoing audit; GPL 3 needs a contributor term to
+   keep outside additions usable in the MIT mod. Nothing was changed.
+2. Asked with the question tool what to do next, the owner chose "Scope it as an issue".
+   -> procedures/write-intake-document.txt was run. Six rounds of questions; the
+   treatment is #250 with pieces #251-#255, and the audit is the idea issue #256.
+
+DONE
+----
+- No commit but this log. Issues only.
+- #250 "Open equine genetics data repo": tracking parent, scoped, on v0.6.4. Holds the
+  request, scope, what already exists, every decision, the UNVERIFIED list, order and the
+  implications sweep. Open.
+- #251 piece 1, the repo, the schema and the natural breeds (v0.5.062, size:L). Open.
+- #252 piece 2, the gene facts export (v0.5.062, size:L). Open.
+- #253 piece 3, the mod reads its breeds from the repo (v0.6.4, size:L). Open, waits on
+  #251, #142, #146.
+- #254 piece 4, the mod reads the table-shaped genes (v0.6.4, size:L). Open.
+- #255 piece 5, the mod reads the complex genes (v0.6.4, size:L). Open.
+- #256 the accuracy audit against UC Davis VGL, OMIA and the papers: `idea`, Backlog.
+- Milestones v0.5.062 and v0.6.4 created, with descriptions; both added to the release
+  plan issue #196 in the same edit.
+- Proof: every "what already exists" path in #250 was checked to exist at 93af89d9. The
+  code survey behind it was a read-only Explore agent; nothing was built or run.
+- No pictures.
+
+DECIDED
+-------
+All recorded in #250 (section 5 and the decision comment on it). All (owner) unless said.
+- The mod READS the data repo as its source of truth; it is not a one-way mirror.
+- The repo holds real science plus the mod's abstractions, each labelled, with a mod map.
+  An abstraction is named "abstracted ...", not "magical ...".
+- Natural-flagged inventions move only if they stand in for a real phenomenon not yet
+  understood: flaxen, shade, sooty, markings, pangare, rabicano, manchado, cvm,
+  megaesophagus, patn2, the eight eye loci, fertility, natural zebra (as a horse locus).
+  Diet stays in the mod.
+- From the magical side only the five body-stat genes move, as abstracted height, speed,
+  jump, hardiness and draft power. Climate, temperament and yields stay magical.
+- Names only: saved keys and tokens do not change; the mod map translates.
+- Breed pools: cited where known, flagged estimated otherwise. Breed body: real
+  measurements, and the 1-10 scores marked as abstracted estimates.
+- Equids only. Repo name open-equine-genetics. GPL 3, a relicensing clause in
+  CONTRIBUTING, and the data stays GPL 3 inside the jar.
+- Delivery by a pinned git submodule.
+- Release: rides with other releases. Repo and export in v0.5.062 (after v0.5.061); the
+  mod-reads pieces in v0.6.4, after the rename and the four-jar split, before the ports.
+- The audit is its own issue. Science tabs are not generated from the data for now.
+- Scoping session's calls, marked Recommended in the issues and not asked: the exact
+  five display strings; the stat genes keep isNatural() == false; the file layout and
+  field names; the breed overlay split; the parity-snapshot tests.
+
+FOUND ON THE WAY
+----------------
+- Six natural disorder genes (gbe1, megaesophagus, slc5a3, lamc2, lama3, ryr1) have a
+  priority in the magical band, and ryr1 ties magic_white. Nothing warns, because
+  Genes.checkBand runs only for registered genes, not built-ins. Not filed: it is the
+  survey agent's reading and was not confirmed by a run. Written in #250 section 3 as a
+  trap. Worth a look before anyone relies on the band.
+- A comment in Genes.java calls leopard the only gene that reads another locus; agouti
+  and flaxen do too. #255 corrects it.
+- The breed heights on the wiki are derived from stats.size; no cited real height is
+  stored anywhere. Written in #250 and #251.
+- wiki/text/*.science.txt drops link URLs, so citations must be harvested from the HTML.
+
+PROCEDURES
+----------
+None written or changed.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No test, build or game launch: nothing was changed that one could check.
+- The counts and line references in #250 section 3 come from static reading by an agent.
+- #250 section 6 lists seven UNVERIFIED facts, the submodule build first.
+- The rename's treatment (#142) was not read; #253 says to read it before starting.
+- No Verification-tab anchors were added (scoping writes no wiki page).
+
+RELEASE
+-------
+Not offered: nothing shippable was built.
+
+PICK UP FIRST
+-------------
+#251, the data repo and the natural breeds, by procedures/process-intake.txt - but it sits
+on v0.5.062, so by the release plan the next unit is still #73 on v0.5.047
+(procedures/next-release.txt) unless the owner asks for #251 first. Creating the public
+repo needs her yes in that session.
