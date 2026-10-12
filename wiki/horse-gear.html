@@ -1423,14 +1423,17 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
     before the first one is built.
 </p>
 <p class="muted">
-    <strong>Nothing in this mod is enchantable today, and one near-miss is worth knowing
-    about.</strong> There is no enchantment registered, no <code>enchantable</code> component on
-    any item, and no <code>enchantable/</code> item tag shipped. <code>compat/ModdedArmour</code>
+    <strong>Only horse shoes are enchantable today, and one near-miss is worth knowing
+    about.</strong> Shoes take Grip and Roadster
+    (<a href="item-horse-shoes.html#enchantment-code">the first two enchantments</a>, 2026-10-12): two
+    data files with no vanilla effect, an <code>enchantable</code> component on the item, one
+    <code>enchantable/</code> item tag, and a read of the worn stack in Java. No other piece has any
+    of that. <code>compat/ModdedArmour</code>
     does build each generated armour as a real <code>ArmorMaterial</code> carrying iron's
     <code>enchantmentValue()</code> &mdash; but with no <code>enchantable</code> component
     <strong>that value is inert</strong>, so a generated barding is not enchantable either. The
     mod's only enchantment code runs the other way: <code>GeneDeathHandler.enchantedSword()</code>
-    rolls one onto a dropped sword. So the first enchantable piece pays for the whole path.
+    rolls one onto a dropped sword. The shoes paid for the path; the next piece copies it.
 </p>
 
 <div class="note">

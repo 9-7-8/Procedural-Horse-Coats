@@ -12,6 +12,7 @@ wiki/api-notes.html#createpath-is-not-a-probe	all	createPath is not a clean prob
 wiki/api-notes.html#custom-geometry-on-a-bone	all	Geometry that is not a model: submitCustomGeometry
 wiki/api-notes.html#custom-ingredient-names	all	A custom ingredient has two names, and both are easy to get wrong
 wiki/api-notes.html#cutout-no-blend	all	A cutout pipeline ignores your alpha, so a tint cannot fade anything
+wiki/api-notes.html#data-enchantment-without-effects	all	A data enchantment needs no effects , and slots only matter to effects
 wiki/api-notes.html#deferred-submit-setupanim	all	A submitted model is drawn later, and setupAnim runs then — not at the submit
 wiki/api-notes.html#forced-chunk-ticks-later	all	A forced chunk starts ticking some ticks later, and a gametest waits only for its own structure’s chunks
 wiki/api-notes.html#interface-private-static	all	An interface’s private static method is unreachable, and vanilla hides real behaviour in them
@@ -22,6 +23,7 @@ wiki/api-notes.html#recipe-priority-hint	all	A recipe priority does not decide w
 wiki/api-notes.html#recipe-visibility	all	Three flags decide whether a recipe can be shown, and only two are on CustomRecipe
 wiki/api-notes.html#runtime-bake	all	A LayerDefinition can be baked at run time, outside the registration event
 wiki/api-notes.html#saved-attributes	all	A saved entity’s attributes list is often empty
+wiki/api-notes.html#slide-is-one-local	all	How far a mob slides is one local in LivingEntity.travelInAir , and a mob with no AI does not travel at all
 wiki/api-notes.html#slot-position-final	all	A Slot ’s position is final , and read as a field
 wiki/api-notes.html#source-permission	all	A command source no longer has hasPermission(int)
 wiki/api-notes.html#verified	all	Verified
@@ -3332,6 +3334,8 @@ wiki/item-horse-hair.html#uses	gameplay	What needs hair
 wiki/item-horse-hair.html#verified	coding	Verified
 wiki/item-horse-shoes.html#design-reasoning	science	Design reasoning
 wiki/item-horse-shoes.html#effects	coding	What a worn shoe does
+wiki/item-horse-shoes.html#enchantment-code	coding	The enchantments
+wiki/item-horse-shoes.html#enchantments	gameplay	Enchanting them
 wiki/item-horse-shoes.html#getting-them	gameplay	Getting them
 wiki/item-horse-shoes.html#icon	coding	One icon, tinted
 wiki/item-horse-shoes.html#item-layer	coding	The items

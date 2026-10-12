@@ -1,0 +1,135 @@
+2026-10-12 08:12 - next-release: horse shoes take two enchantments, Grip and Roadster
+(#248). The time is the session's END.
+
+ASKED
+-----
+1. "/next-release" (the owner ran the command with no arguments).
+   -> procedures/next-release.txt, which handed its unit to procedures/process-intake.txt.
+   The next release is v0.5.047 (the equipment release), stage v0.5.047.1. No open issue
+   lacked a milestone and v0.5.046's milestone was already closed. The milestone's three
+   open bugs (#10, #31, #36) are fixed and waiting on their checks, and none of the checks
+   has come back failed, so the unit was #248, the last piece of the stage. No other
+   request.
+
+DONE
+----
+1. #248, Horse shoes - piece 3: the two enchantments. Code commit 28e11242.
+   What was missing: a worn shoe added its metal's speed and jump and held a horse up on
+   powder snow (#247), and the two enchantments the owner asked for on 2026-10-02 did not
+   exist. The mod had no enchantment of its own at all.
+   What was built:
+   - Two data enchantments, horsegenetics:grip and horsegenetics:roadster
+     (data/horsegenetics/enchantment/*.json), three levels each, with NO effects block: a
+     shoe sits in a gear slot of this mod's that no vanilla equipment slot reaches, so
+     nothing vanilla would run one. supported_items is the item tag
+     horsegenetics:enchantable/horse_shoe, whose one entry is #horsegenetics:gear/shoe_front_left,
+     so every shoe (generated ones for another mod's metal included) is covered with no
+     change to the generated pack. Both are in minecraft:non_treasure. Both name the
+     enchantment tag horsegenetics:exclusive_set/horse_shoe, so one shoe takes one of them.
+   - Shoes are registered enchantable (ShoeEnchantments.ENCHANTABILITY = 9), shipped ones in
+     ModItems and modded ones in compat/ModdedShoes.
+   - item/ShoeEnchantments: the two keys, the road block tag, and shoeOf(stack), the only
+     place a shoe's enchantments are read.
+   - common/gear/HorseShoes: Shoe(metal, grip, road); bonus(rates, onRoad, four shoes)
+     returns one Bonus(speed, jump, grip); friction(blockFriction, grip); watchesRoad;
+     Rates gained gripPerLevel and roadSpeedPerLevel. The older bonus(rates, four metals) is
+     now four plain shoes off a road.
+   - server/HorseShoeEffects: refresh puts a horse some roadster would speed up in a weak
+     map with what its ground last was; EntityTickEvent.Post looks at the block under those
+     horses every 4 ticks and calls the same refresh when it changed. Roadster's speed is
+     part of the shoes/speed modifier. With the map empty the tick is one isEmpty().
+   - mixin/ShoeGripMixin: a @ModifyVariable on the blockFriction local of
+     LivingEntity.travelInAir, for an AbstractHorse on a block slicker than 0.6.
+   - Config shoes.grip_per_level (0.08, 0 to 0.34) and shoes.road_speed_per_level (0.002,
+     0 to 0.015), through ServerConfig.shoeRates(). The tooltip gained a line per
+     enchantment; lang has both names and .desc keys.
+   - The road is the block tag horsegenetics:shoe_roads: dirt path, cobblestone and mossy
+     cobblestone, #minecraft:stone_bricks, bricks, smooth sandstone, and their slabs.
+   Proof:
+   - ./gradlew :common:test --tests '*HorseShoesTest': green. Mutated: adding roadster
+     off a road turned one test red.
+   - ./gradlew :neoforge-26.1.2:runGameTest: "All 65 required tests passed" (63 before
+     this session, plus shoe_enchantments_fold_into_the_total and
+     grip_shoes_slide_less_on_ice). Mutated in one run: ShoeGripMixin returning the block's
+     own friction (both horses slid 2.79 blocks) and the tick's refresh disabled (the speed
+     modifier stayed 0.014 on a dirt path where 0.022 was wanted). Both red, both restored.
+   - A dev server boot (:neoforge-26.1.2:runServer, detached) reached "Done (" and wrote
+     both new keys into run/phc/server.toml. Its WARN lines were vanilla's command
+     ambiguities, the offline-mode notice, the known stasis_chamber recipe line
+     (wiki/api-notes.html) and "server.toml is not correct. Correcting", which is the two
+     new keys being added to an older file. run/phc, run/config, latest.log and debug.log
+     were copied aside first and put back; an md5 list of phc/ and config/ matched after.
+   - ./gradlew :neoforge-26.1.2:build green; check-parity OK (7163 checks, 60 cases);
+     check-designer-boots OK (nothing under web/src reaches common/gear, so the wasm was
+     not rebuilt).
+   Pictures: no pictures. Nothing new is drawn on the horse; the item's glint and tooltip
+   are checks on the Verification tab.
+   Issue: #248 closed by the commit, with the evidence in its last comment.
+
+DECIDED
+-------
+All of these were made WITHOUT the owner; #248's Open line said the names, the numbers and
+the conflict were the building session's. Recorded on wiki/decisions.html (pointing at
+wiki/item-horse-shoes.html#enchantment-code) and in #248's closing comment.
+- Names: Grip and Roadster. Three levels each.
+- The conflict: one shoe carries one of the two (vanilla's exclusive_set); the four hooves
+  may mix them. A stack given both by a command gets both.
+- Numbers: one level on one shoe takes 8% of the slide out of ice, or adds 0.002 movement
+  speed on a road. Four shoes at III: 96% of the slide, or about 1.04 m/s.
+- Grip pulls a slick block's friction toward ordinary ground (0.6) and never past it.
+- What a road is: the block tag above, a tag so a pack can add to it.
+- How one is got: the enchanting table, a book on an anvil, and wherever ordinary
+  enchanted books come from (minecraft:non_treasure).
+- The caps are constants in HorseShoes, as the metals' are; the config has the per-level
+  number only. The issue's "a number for each enchantment's effect per level and its cap"
+  can also be read as a config key for the cap: not built.
+- The shoe drawn on the hoof does not glint. The issue's check "an enchanted worn shoe
+  shows it is enchanted" is met only by the item (inventory, Gear tab, tooltip). A glint
+  pass in AttachedPartLayer is on the page's Roadmap tab, for #228.
+
+FOUND ON THE WAY
+----------------
+- A mob with setNoAi(true) is never moved: LivingEntity.aiStep travels only when
+  isEffectiveAi(). A movement gametest clears the mob's goals instead. Written on
+  wiki/api-notes.html#slide-is-one-local and in procedures/test-tiers.txt.
+- wiki/horse-gear.html still said nothing in the mod was enchantable. Corrected.
+- A long Bash heredoc holding a Python patch was truncated by the shell, as the memory
+  note says it would be; the patch scripts were written with the Write tool instead.
+- One assertion in the new unit test compared two Bonus records for equality and failed
+  on the order of the floating-point sums. The test was wrong, not the rule; it compares
+  field by field now.
+- No bug was filed.
+
+PROCEDURES
+----------
+- procedures/test-tiers.txt: the gametest-writing notes gained the NoAi line above.
+- #249 filed (procedure, idea, size:S, on Backlog): add-an-enchantment, wanted before
+  #228 adds more of them. Not written now: one case is not yet a routine.
+- No procedure followed this session was wrong.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite. It would still check every other common test class; only
+  HorseShoesTest was run, and no other test reads HorseShoes.
+- Nothing was played. Newly waiting: wiki/item-horse-shoes.html#verify-shoe-enchantments
+  (the table, the anvil, the glint and tooltip, grip and roadster felt while RIDDEN, a
+  mixed set, the settings). The ridden horse is moved by its rider's client; the gametests
+  move an unridden one, so the client side of ShoeGripMixin is unproven.
+- The enchanting table and the anvil themselves: the gametest asks the registries the
+  questions they ask (canEnchant, isEnchantable, in_enchanting_table, areCompatible) and
+  opens neither menu.
+- Modded shoes with the enchantments: the compat test (the synthetic mod) was not run.
+  They are covered by the same tag in principle.
+- Librarian trades and loot books for the two enchantments.
+
+RELEASE
+-------
+Every piece of stage v0.5.047.1 (Foundations and feet) is now built. The interim release
+was offered to the owner at the end of this session; her answer is in the session's
+closing message, not here.
+
+PICK UP FIRST
+-------------
+/next-release (procedures/next-release.txt): the next unit is #73, Bridle and saddle split
+- piece 1: the bridle, the first piece of v0.5.047.2; scope-check it against #223's worn
+gear rule before building.

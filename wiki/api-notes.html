@@ -999,6 +999,53 @@ boolean operator = Commands.LEVEL_GAMEMASTERS.check(source.permissions());</code
     in the 26.1.2 sources.
 </p>
 
+<h2 id="slide-is-one-local">How far a mob slides is one local in
+    <code>LivingEntity.travelInAir</code>, and a mob with no AI does not travel at all</h2>
+
+<p>
+    A mob's slide on ice is not an attribute and has no event. <code>LivingEntity.travelInAir</code>
+    reads <code>getBlockState(posBelow).getFriction(level, posBelow, this)</code> once a tick into
+    the local <code>blockFriction</code> (1.0 off the ground), and both the push from the mob's own
+    speed (<code>getFrictionInfluencedSpeed</code>, which divides by its cube) and the drag on what it
+    already had (times 0.91) come from that one number. NeoForge's entity-aware
+    <code>getFriction</code> is a hook for a mod's own blocks; it cannot answer for vanilla ice. So a
+    per-entity grip is a <code>@ModifyVariable(method = "travelInAir", at = @At("STORE"), ordinal = 0)</code>
+    on the method's first <code>float</code> local (<code>mixin/ShoeGripMixin</code>). Ordinary
+    ground is 0.6, slime 0.8, ice and packed ice 0.98.
+</p>
+<p>
+    To test movement, do not use <code>setNoAi(true)</code>: <code>LivingEntity.aiStep</code> calls
+    <code>travel</code> only when <code>canSimulateMovement() &amp;&amp; isEffectiveAi()</code>, and a
+    mob with no AI is not effective, so it is never moved and a shove given with
+    <code>setDeltaMovement</code> does nothing. Clear its goals instead
+    (<code>goalSelector.removeAllGoals(g -&gt; true)</code>): it stands still and still travels.
+    Read 2026-10-12 in the 26.1.2 sources; proved by the gametest
+    <code>grip_shoes_slide_less_on_ice</code>, where an unshod horse slides 2.79 blocks from a push
+    of 0.3 on packed ice.
+</p>
+
+<h2 id="data-enchantment-without-effects">A data enchantment needs no <code>effects</code>, and
+    <code>slots</code> only matter to effects</h2>
+
+<p>
+    An enchantment is a datapack registry entry (<code>data/&lt;ns&gt;/enchantment/&lt;name&gt;.json</code>).
+    <code>effects</code> and <code>exclusive_set</code> are optional; <code>supported_items</code>,
+    <code>weight</code>, <code>max_level</code>, <code>min_cost</code>, <code>max_cost</code>,
+    <code>anvil_cost</code> and <code>slots</code> are required. With no effects the enchantment
+    does nothing by itself and <code>slots</code> is never consulted, so a piece worn in a slot of
+    this mod's own can carry one and have its level read in Java off the stack's
+    <code>ENCHANTMENTS</code> component (compare <code>holder.is(key)</code> over
+    <code>entrySet()</code>; no registry lookup is needed, and it works on a client). An anvil asks
+    only <code>supported_items</code>. An enchanting table also needs the item's
+    <code>enchantable</code> component (<code>Item.Properties.enchantable(int)</code>) and the
+    enchantment in <code>minecraft:in_enchanting_table</code>, which, like
+    <code>tradeable</code> and <code>on_random_loot</code>, includes
+    <code>#minecraft:non_treasure</code>. Two enchantments conflict when either one's
+    <code>exclusive_set</code> contains the other (<code>Enchantment.areCompatible</code>). Read
+    2026-10-12 in the 26.1.2 sources; proved by the gametest
+    <code>shoe_enchantments_fold_into_the_total</code>.
+</p>
+
 <h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
 
 <p>

@@ -119,6 +119,8 @@ const HOME = {
     'shoes.diamond_jump': 'item-horse-shoes.html#shoe-config',
     'shoes.netherite_speed': 'item-horse-shoes.html#shoe-config',
     'shoes.netherite_jump': 'item-horse-shoes.html#shoe-config',
+    'shoes.grip_per_level': 'item-horse-shoes.html#shoe-config',
+    'shoes.road_speed_per_level': 'item-horse-shoes.html#shoe-config',
     'behaviour.bond_decay_per_day': 'horse-care.html#bond-decay',
     'behaviour.bond_floor': 'horse-care.html#bond-decay',
     'behaviour.owner_only_riding': 'horse-care.html#riding',

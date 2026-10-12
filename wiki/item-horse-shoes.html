@@ -24,8 +24,8 @@
     slots, each in its own metal, drawn under the foot it is on. Five ship (copper, iron, golden,
     diamond and netherite) and every metal another mod brings gets one of its own. They are bought
     from the equestrian metalsmith. Each worn shoe adds a little speed and jump from its own metal, and
-    a horse with at least one shoe on stands on powder snow. The two enchantments are on the Roadmap
-    tab.
+    a horse with at least one shoe on stands on powder snow. A shoe can take one of two enchantments:
+    Grip, for ice, or Roadster, for paths and roads.
 </p>
 
 <div class="item-art" data-items="horse_shoe"></div>
@@ -118,9 +118,42 @@
 </p>
 <p>
     A server can change every one of those numbers, or switch shoes off altogether
-    (<a href="#shoe-config">the settings</a>). Two enchantments, grip and speed on paths, are planned
-    and not built: see the Roadmap tab.
+    (<a href="#shoe-config">the settings</a>).
 </p>
+
+<h2 id="enchantments">Enchanting them</h2>
+<p>
+    A horse shoe takes one of two enchantments, each with three levels. They are the only enchantments
+    that go on a shoe, and they go on nothing else.
+</p>
+<table>
+    <thead><tr><th>Enchantment</th><th>What it does</th><th>One shoe, per level</th><th>Four shoes at III</th></tr></thead>
+    <tbody>
+        <tr><td><strong>Grip</strong></td><td>The horse slides less on ice, packed ice, blue ice and
+            anything else slippery.</td><td>8% of the slide gone</td><td>96%: ice is very nearly ordinary
+            ground</td></tr>
+        <tr><td><strong>Roadster</strong></td><td>The horse is faster while it is on a path or a
+            road.</td><td>+0.09 m/s</td><td>+1.04 m/s</td></tr>
+    </tbody>
+</table>
+<ul>
+    <li><strong>Each shoe carries its own.</strong> The four hooves are added up, like the metals: two
+        shoes of Grip II are the same as one of Grip III and one of Grip I.</li>
+    <li><strong>One shoe, one enchantment.</strong> Grip and Roadster will not go on the same shoe. A
+        horse can still wear both, on different feet: two Grip shoes and two Roadster shoes is a horse
+        for a road that crosses a frozen river.</li>
+    <li><strong>Grip never makes ice better than ground.</strong> It only takes the slide away, so a
+        horse on grass is exactly as it was.</li>
+    <li><strong>What counts as a road</strong> for Roadster: dirt paths (the paths a village is built
+        on, and any grass you have run a shovel over), cobblestone and mossy cobblestone, stone bricks of
+        every kind, bricks and smooth sandstone, and the slabs of those. The speed arrives within a
+        stride of stepping on and leaves within a stride of stepping off; a jump does not lose it.</li>
+    <li><strong>Getting one.</strong> Put a shoe in an enchanting table, or put a Grip or Roadster book
+        on a shoe at an anvil. The books turn up wherever ordinary enchanted books do: the table,
+        librarians and loot.</li>
+    <li>An enchanted shoe glints in your inventory and in the Gear tab, and its tooltip says what its
+        enchantment is worth on the server you are on. The shoe drawn under the hoof does not glint.</li>
+</ul>
 
 <h2 id="why-they-are-different">Why they are different from boots</h2>
 <p>
@@ -206,9 +239,12 @@
 <p>
     Built 2026-10-12 (#247). The rule is pure and lives in <code>common/gear/HorseShoes</code>:
     <code>bonus(rates, frontLeft, frontRight, hindLeft, hindRight)</code> takes each hoof's
-    <code>Metal</code> (or <code>null</code> for a bare one) and returns a <code>Bonus(speed, jump)</code>,
+    <code>Metal</code> (or <code>null</code> for a bare one) and returns a <code>Bonus</code>,
     the plain sum of what each metal adds. <code>shod(rates, shoes)</code> is the powder snow rule: any
     one shoe, and it does not depend on a metal's numbers, so a metal set to zero still carries it.
+    Since #248 the full form is <code>bonus(rates, onRoad, Shoe, Shoe, Shoe, Shoe)</code>
+    (<a href="#enchantment-code">the enchantments</a>); the form that takes metals is four plain shoes
+    off a road.
 </p>
 <ul>
     <li><strong>The rung.</strong> <code>HorseShoeItem.tier()</code> is the <code>Metal</code> the bonus
@@ -247,6 +283,65 @@
     gear attachment it reads is synced.
 </p>
 
+<h3 id="enchantment-code">The enchantments</h3>
+<p>
+    Built 2026-10-12 (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/248">#248</a>), the mod's first. <strong>Grip</strong>
+    (<code>horsegenetics:grip</code>) and <strong>Roadster</strong> (<code>horsegenetics:roadster</code>)
+    are data, <code>data/horsegenetics/enchantment/*.json</code>, with no <code>effects</code> block at
+    all: a horse's shoes are four gear slots of this mod's, which no vanilla equipment slot reaches, so
+    nothing vanilla would ever run an effect component. The files only make the enchantment exist,
+    say what it goes on and what it costs. What it does is read in Java.
+</p>
+<ul>
+    <li><strong>What they go on.</strong> <code>supported_items</code> is the item tag
+        <code>horsegenetics:enchantable/horse_shoe</code>, whose one entry is
+        <code>#horsegenetics:gear/shoe_front_left</code>. Every shoe, shipped or generated for another
+        mod's metal, is already in that tag, so the generated pack needed no change and its fingerprint
+        did not move. Every shoe is registered <code>enchantable</code>
+        (<code>ShoeEnchantments.ENCHANTABILITY</code>, iron armour's), which is what an enchanting
+        table asks for.</li>
+    <li><strong>Where they come from.</strong> Both are in <code>minecraft:non_treasure</code>
+        (<code>data/minecraft/tags/enchantment/non_treasure.json</code>, <code>replace: false</code>),
+        the one tag vanilla's table, librarian and loot tags all include.</li>
+    <li><strong>The conflict.</strong> Both name the enchantment tag
+        <code>horsegenetics:exclusive_set/horse_shoe</code> as their <code>exclusive_set</code>, so a
+        table or an anvil puts one of the two on a shoe and never both. That is the whole conflict: it
+        is per shoe, and the four hooves may mix them. A stack given both by a command gets both;
+        nothing in Java second-guesses it.</li>
+    <li><strong>The read.</strong> <code>item/ShoeEnchantments.shoeOf(stack)</code> turns a worn stack
+        into a <code>HorseShoes.Shoe(metal, grip, road)</code>, the two levels read off that stack's own
+        <code>ENCHANTMENTS</code> component. It is the only place a shoe's enchantments are read, on
+        both sides. A level above three counts as three.</li>
+    <li><strong>One total.</strong> <code>HorseShoes.bonus(rates, onRoad, ...)</code> sums each shoe's
+        metal, each shoe's roadster when <code>onRoad</code>, and each shoe's grip, into one
+        <code>Bonus(speed, jump, grip)</code>. Roadster's speed is part of the same
+        <code>shoes/speed</code> modifier as the metal's; there is no second modifier. Grip is a share
+        from 0 to 1 and stops at 1.</li>
+    <li><strong>The road tick.</strong> The metal's bonus needs no tick, but Roadster depends on the
+        block under the horse, which no event reports. <code>HorseShoeEffects.refresh</code> asks
+        <code>HorseShoes.watchesRoad</code>, and only a horse some roadster would speed up is put in a
+        weak map with what its ground last was. <code>EntityTickEvent.Post</code> looks at the block
+        under those horses every <code>ROAD_CHECK_TICKS</code> (4), and calls the same
+        <code>refresh</code> when the answer changed. With the map empty the handler is one
+        <code>isEmpty()</code> per entity. Air underfoot (a jump, a ledge) is no answer, so the horse
+        keeps what it had. A road is the block tag <code>horsegenetics:shoe_roads</code>, which a pack
+        can add to.</li>
+    <li><strong>Grip.</strong> How far a mob slides is decided in one line of
+        <code>LivingEntity.travelInAir</code>:
+        <code>getBlockState(posBelow).getFriction(level, posBelow, this)</code>, stored in the local
+        <code>blockFriction</code>. There is no event, and NeoForge's <code>getFriction</code> hook is
+        for a mod's own blocks. <code>mixin/ShoeGripMixin</code> is a <code>@ModifyVariable</code> on
+        that store (the method's first <code>float</code> local): for a block slicker than ordinary
+        ground (0.6) under an <code>AbstractHorse</code> it returns
+        <code>HorseShoes.friction(blockFriction, grip)</code>, the block's friction brought that share
+        of the way down to 0.6. Everything else returns at the first comparison. It is a
+        <code>ModifyVariable</code> and not a <code>Redirect</code> so another mod changing the same
+        number composes with it. Both sides, as powder snow is.</li>
+    <li><strong>The worn shoe has no glint.</strong> The stack glints wherever an item is drawn
+        (vanilla's foil); the box-built shoe on the hoof is drawn by <code>AttachedPartLayer</code>,
+        which has no glint pass. That is on the Roadmap tab.</li>
+</ul>
+
 <h3 id="shoe-config">The settings</h3>
 <p>
     Server-side, in <code>phc/server.toml</code>, read together through
@@ -262,6 +357,16 @@
         <code>HorseShoes</code>. Each is capped per shoe (<code>MAX_SPEED</code>,
         <code>MAX_JUMP</code>) and there is no cap across shoes (owner, 2026-10-09).</li>
     <li>The iron pair is also what another mod's ingot metals give, and the diamond pair its gems.</li>
+    <li><code>shoes.grip_per_level</code> (default 0.08, range 0 to 0.34): the share of the slide one
+        level of Grip on one shoe takes away. It is read live, on both sides, so a change is felt at
+        once. 0 turns Grip off.</li>
+    <li><code>shoes.road_speed_per_level</code> (default 0.002, range 0 to 0.015): the movement speed
+        one level of Roadster on one shoe adds on a road. A change reaches a horse when it next loads,
+        is next shod, or next steps on or off a road. 0 turns Roadster off, and then no horse's ground
+        is watched.</li>
+    <li>The top of each range is a constant in <code>HorseShoes</code>
+        (<code>MAX_GRIP_PER_LEVEL</code>, <code>MAX_ROAD_SPEED_PER_LEVEL</code>), as the metals' caps
+        are. <code>shoes.enabled</code> turns both enchantments off with everything else.</li>
 </ul>
 <p>
     The tooltip reads the same <code>Rates</code>, so it states the server's numbers and not the
@@ -285,6 +390,25 @@
         <code>canEntityWalkOnPowderSnow</code> and handed an empty collision shape; with one copper shoe
         it is accepted and handed a solid one; with the shoe off, refused again. Making the mixin answer
         no turns it red.</li>
+    <li><code>HorseShoesTest</code> (common), the enchantments (#248): grip and roadster on different
+        shoes fold into one total with the metals, roadster only on a road and speed only; the same
+        shoes on other hooves are the same total and two roadsters add; only a roadster horse has its
+        ground watched; a level past three counts as three; grip takes its share of ice's slide, never
+        past ordinary ground, and leaves ordinary ground exactly alone; a server's number is capped
+        per level and the total stops at 1; the switch turns both off. Adding roadster off a road
+        turns one red.</li>
+    <li>Gametest <code>shoe_enchantments_fold_into_the_total</code>: both enchantments are registered,
+        refuse to share a shoe, are offered at the enchanting table, go on every shipped shoe and not
+        on boots, a saddle, horse armour or a sword, and every shoe is enchantable. Four shoes with
+        four different loads read back hoof by hoof, off the horse and again through the gear
+        attachment's own save codec. One Grip II shoe makes ice less slick by exactly its share. On
+        stone the speed modifier is the metals' alone; with a dirt path put under the horse and no
+        call from the test it becomes metals plus roadsters, and on stone again it goes back.
+        Disabling the tick's refresh turns it red (0.014 where 0.022 was wanted).</li>
+    <li>Gametest <code>grip_shoes_slide_less_on_ice</code>: two horses on one sheet of packed ice get
+        the same shove; the unshod one must slide at least a block and a half and the one in four
+        Grip III shoes at most half as far. Making the mixin return the block's own friction turns
+        it red (both slid 2.79 blocks).</li>
     <li><code>HorseShoesTest</code> (common): an unshod horse draws nothing; one shoe is drawn on its
         own hoof; four metals stay apart, in hoof order; a black metal is still a shoe; shipped ids
         are unique and a mod's copy of a shipped metal gets no second shoe. Reversing the hoof order
@@ -304,13 +428,13 @@
     Shoes are a good fit for the mod because they are a piece of utility gear that is real and visible but still
     anchored to the horse rather than to a chest or a ride mode. They also create a clean dividing line between
     purely cosmetic tack and useful wearable items: a shoe is not decoration, it changes how the horse interacts with
-    the world. That matches the mod's utility-over-decoration rule, and it is why the shoes built so far, which only
-    show, are half a feature: the effects on the Roadmap tab are what make a shoe worth buying.
+    the world. That matches the mod's utility-over-decoration rule: what a shoe does (its metal's speed and jump,
+    powder snow, grip on ice, speed on a road) is what makes it worth buying, and how it looks comes second.
 </p>
 
 <p>
     The design keeps each shoe as a separate stack on a separate hoof, because a horse can throw one shoe and wear
-    unevenly, and a single "shod" flag could never say that. It is also why the bonus is planned as a flat amount per
+    unevenly, and a single "shod" flag could never say that. It is also why the bonus is a flat amount per
     shoe and not a percentage: four shoes are four additions, and a horse with three is exactly three quarters shod.
 </p>
 
@@ -329,9 +453,10 @@
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
     <p>
-        Horse shoes were built on 2026-10-12 with their slots, their speed and jump bonus and their
-        powder snow rule covered by gametests and their look by a photo shoot, and no player has
-        bought, worn or ridden with one; the modded-metal half has not been run beside a real mod.
+        Horse shoes were built on 2026-10-12 with their slots, their speed and jump bonus, their
+        powder snow rule and their two enchantments covered by gametests and their look by a photo
+        shoot, and no player has bought, worn, enchanted or ridden with one; the modded-metal half has
+        not been run beside a real mod.
     </p>
 </div>
 
@@ -373,6 +498,28 @@
         same horse unshod with the same load.</li>
 </ul>
 
+<h3 id="verify-shoe-enchantments">The two enchantments (2026-10-12, NOT played)</h3>
+<ul>
+    <li><strong>The table.</strong> Put a shoe in an enchanting table with bookshelves round it: it
+        should offer Grip or Roadster and nothing else, and never both on one shoe.</li>
+    <li><strong>The anvil.</strong> A Grip book goes on a shoe; a Roadster book is then refused by that
+        shoe; neither book goes on boots or horse armour. Two Grip I shoes combine to Grip II.</li>
+    <li><strong>It shows.</strong> An enchanted shoe glints in the inventory and in its Gear tab slot,
+        lists its enchantment, and its last tooltip line states the percentage or the m/s.</li>
+    <li><strong>Grip is felt.</strong> Ride a horse across a frozen lake bare, then in four Grip III
+        shoes: it should turn and stop about as it does on grass. This is the ridden case, moved by
+        the rider's client, which the gametest does not cover.</li>
+    <li><strong>Roadster is felt.</strong> Ride a horse in four Roadster III shoes along a village
+        path and off it: the Speed line on its screen should read about 1.0 m/s more on the path, and
+        it should not stutter where path and grass alternate.</li>
+    <li><strong>Mixed.</strong> Two Grip and two Roadster shoes on one horse: both work, each at half.</li>
+    <li><strong>The settings.</strong> Set <code>shoes.grip_per_level</code> to 0: Grip shoes do nothing
+        at once, and their tooltip loses its line.</li>
+    <li><strong>Other mods' enchanting.</strong> Not looked at: a mod that lists or applies
+        enchantments by its own rules (an enchantment-description mod reads the
+        <code>.desc</code> lang keys, which are written).</li>
+</ul>
+
 <h3 id="verify-modded-shoes">Shoes for another mod's metals (2026-10-12)</h3>
 <ul>
     <li><strong>Beside a real mod</strong> with a tin or steel ingot: a Tin Horse Shoe in the creative
@@ -392,35 +539,32 @@
 <div class="note roadmap-summary">
     <span class="label">What is still planned here</span>
     <p>
-        A worn shoe is to take two enchantments (grip, and speed on paths), and shoes are to be made
-        at the tack bench, wear out with distance and turn up in loot.
+        Shoes are to be made at the tack bench, wear out with distance and turn up in loot, and an
+        enchanted shoe is to glint on the hoof as it does in the hand.
     </p>
 </div>
 
 <h2 id="implementation-plan">What is left</h2>
 <p>
-    The stat bonus and powder snow shipped on 2026-10-12 (<a href="#effects">what a worn shoe
-    does</a>). The first piece below, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/248">#248</a>, is the last of the shoes' own stage.
+    The stat bonus, powder snow and the two enchantments shipped on 2026-10-12
+    (<a href="#effects">what a worn shoe does</a>, <a href="#enchantment-code">the enchantments</a>),
+    which finishes the shoes' own stage. What is left belongs to later pieces of the equipment release.
 </p>
 <ol>
-    <li><strong>Two enchantments</strong> (owner, 2026-10-02; <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/248">#248</a>): <em>grip</em>, less
-        slipping on ice and slick ground, and a <em>speed</em> one, a small bonus on paths and roads.
-        Names, numbers and their conflict are the building session's. Each belongs to its own shoe,
-        legal only on shoes, and is folded into the same total as the metal's bonus
-        (<code>HorseShoes.bonus</code>). The speed one depends on the ground under the horse, so it
-        needs a tick the metal's bonus does not have. No custom enchantment exists in the mod yet.</li>
     <li><strong>Made at the tack bench</strong> (#226): a shoe from a shape and a metal, replacing
         "bought only".</li>
     <li><strong>Durability</strong> (#236): shoes wear with distance, off by default in config.</li>
     <li><strong>Loot</strong> (#238): shoes in chests and on stable and villager horses.</li>
+    <li><strong>A glint on the worn shoe</strong> (with #228, enchanted tack): a glint pass in
+        <code>AttachedPartLayer</code> for a worn part whose stack is enchanted. Today only the item
+        glints. A shoe shows little more than an edge on a standing horse, so this was left for the
+        piece that makes every worn piece enchantable.</li>
 </ol>
 
 <h2 id="implementation-tests">Checks those pieces owe</h2>
 <ul>
-    <li>Different enchantments on four shoes stay on their own stacks through a save and reload.</li>
-    <li>An enchanted worn shoe shows it is enchanted.</li>
-    <li>Grip and speed fold into one total with the metal's bonus, and their conflict is what the page
-        says it is.</li>
+    <li>An enchanted shoe on a hoof shows a glint, and an unenchanted one beside it does not.</li>
+    <li>A shoe made at the bench takes an enchantment exactly as a bought one does.</li>
 </ul>
 
 </section>
@@ -433,7 +577,8 @@
         <a href="items.html">Items &amp; recipes</a>
     </div>
     Source: <code>common/gear/HorseShoes</code>, <code>item/HorseShoeItem</code>,
-    <code>server/HorseShoeEffects</code>, <code>mixin/PowderSnowShoesMixin</code>, <code>compat/ModdedShoes</code>,
+    <code>item/ShoeEnchantments</code>, <code>server/HorseShoeEffects</code>,
+    <code>mixin/PowderSnowShoesMixin</code>, <code>mixin/ShoeGripMixin</code>, <code>compat/ModdedShoes</code>,
     <code>compat/GeneratedShoes</code>, <code>compat/MetalsmithTrades</code>.
 </div>
 
