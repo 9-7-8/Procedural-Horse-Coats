@@ -108,7 +108,7 @@ public final class WornPieces {
 
     /**
      * A horse shoe: box-built, a U under the foot ({@code parts.ShoeGenerator}), hung on
-     * the hoof it is nailed to. Its geometry is built; no item puts one on a horse yet.
+     * the hoof it is nailed to. Worn through the four hoof slots: {@link HorseShoes#worn}.
      */
     public static final Piece HORSE_SHOE = new Piece("horse_shoe", Kind.BOXES, WornRule.FLOOR, null, null, false);
 

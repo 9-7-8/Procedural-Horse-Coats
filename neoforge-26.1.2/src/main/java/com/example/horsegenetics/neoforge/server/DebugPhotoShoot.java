@@ -97,6 +97,26 @@ public final class DebugPhotoShoot {
     }
 
     /**
+     * Shoe the horse through its four hoof slots, as a player would: near fore, off
+     * fore, near hind, off hind. {@code null} leaves that hoof bare. Do not put
+     * {@code block} in the shot's name: the debug block is drawn instead of real gear.
+     */
+    public static java.util.function.Consumer<Horse> shod(net.minecraft.world.item.Item... shoes) {
+        return horse -> {
+            com.example.horsegenetics.neoforge.entity.HorseTackSlot[] hooves = {
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_LEFT,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_RIGHT,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_LEFT,
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_RIGHT};
+            for (int i = 0; i < hooves.length && i < shoes.length; i++) {
+                if (shoes[i] != null) {
+                    hooves[i].set(horse, new net.minecraft.world.item.ItemStack(shoes[i]));
+                }
+            }
+        };
+    }
+
+    /**
      * Work a rescuing braid into the mane and the tail, dyed {@code maneRgb} and
      * {@code tailRgb} - undyed for -1, none for -2. A shot whose name ends in
      * {@code -flat} is taken with {@code gear.edges} off (see the client half), which
@@ -152,8 +172,7 @@ public final class DebugPhotoShoot {
      * Stand the horse up on its hind legs and hold it there for the picture. A shot whose
      * name has {@code -walk} in it is held mid-stride instead, by the client half; one
      * with {@code boot} in it wears the debug test boot on its near fore and hind legs, and
-     * one with {@code block} in it the debug test block on all four hooves, and one with
-     * {@code shoe} in it a plain iron shoe on each.
+     * one with {@code block} in it the debug test block on all four hooves.
      */
     public static java.util.function.Consumer<Horse> rearing() {
         return horse -> horse.setStanding(100000);

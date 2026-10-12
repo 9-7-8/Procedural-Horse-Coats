@@ -73,8 +73,8 @@ public class GeneticHorseRenderState extends HorseRenderState {
     /**
      * <b>The box-built gear this horse wears</b>, each piece resolved to a part and the
      * anchor it hangs on. Drawn by {@link AttachedPartLayer} after {@link #parts}, by
-     * the same code. Empty for a horse wearing none, which today is every horse outside
-     * a photo shoot: the debug block is the only box-built piece until horse shoes.
+     * the same code. Empty for a horse wearing none. Horse shoes are the first such
+     * piece ({@code HorseShoes.worn}); a photo shoot's debug block is the other.
      */
     public List<com.example.horsegenetics.common.gear.WornPart> worn = List.of();
 

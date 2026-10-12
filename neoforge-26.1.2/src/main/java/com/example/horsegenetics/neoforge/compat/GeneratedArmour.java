@@ -2,12 +2,8 @@ package com.example.horsegenetics.neoforge.compat;
 
 import com.example.horsegenetics.neoforge.HorseGenetics;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -39,17 +35,12 @@ import java.util.Map;
  * textures and may not even have vanilla's client assets to read.
  *
  * <h2>The trades are rewritten, not appended to</h2>
- * {@code minecraft:trade_set} is a datapack <i>registry</i>, so two packs
- * declaring the same tier do not merge - the higher one wins outright. The
- * generated tier file therefore has to carry the shipped trades as well as the
- * new ones, and it gets them by <b>reading the shipped file off our own
- * classpath</b> rather than by keeping a second copy of the list here. Edit the
- * metalsmith's tiers and this follows; it cannot go stale.
+ * See {@link MetalsmithTrades}, which the generated horse shoes sell through
+ * as well: two writers of one tier file would be one overwriting the other.
  */
 final class GeneratedArmour {
 
     private static final String NS = HorseGenetics.MOD_ID;
-    private static final String METALSMITH = "equestrian_metalsmith";
 
     /** The shipped plate, and the item icon that goes with it. */
     static final String PLATE_TEXTURE = NS + ":plate";
@@ -57,16 +48,13 @@ final class GeneratedArmour {
     private GeneratedArmour() {
     }
 
-    static void emit(Map<String, byte[]> files, JsonObject lang) {
+    static void emit(Map<String, byte[]> files, JsonObject lang, MetalsmithTrades trades) {
         // One armour per material name. Every ingot that shares the name still
         // forges it - see the recipe block below.
         List<ModdedMaterials.Metal> metals = ModdedMaterials.armourMetals();
         if (metals.isEmpty()) {
             return;
         }
-        // Which tier each armour is sold at, so the trade files below can be
-        // grouped: the cheap end of the ladder early, the expensive end late.
-        JsonObject[] tierTrades = new JsonObject[6];
 
         for (ModdedMaterials.Metal metal : metals) {
             String id = metal.armourId();
@@ -155,69 +143,8 @@ final class GeneratedArmour {
 
             // ---- and the metalsmith stocks it -------------------------------
             int tier = tierFor(metal);
-            JsonObject trade = new JsonObject();
-            JsonObject wants = new JsonObject();
-            wants.addProperty("id", "minecraft:emerald");
-            wants.addProperty("count", priceFor(tier));
-            JsonObject gives = new JsonObject();
-            gives.addProperty("id", NS + ":" + id);
-            trade.add("wants", wants);
-            trade.add("gives", gives);
-            trade.addProperty("max_uses", tier >= 4 ? 2 : 4);
-            trade.addProperty("xp", tier * 5);
-            GeneratedGates.put(files,
-                    "data/" + NS + "/villager_trade/" + METALSMITH + "/level_" + tier + "/sell_" + id + ".json",
-                    trade);
-            if (tierTrades[tier] == null) {
-                tierTrades[tier] = new JsonObject();
-                tierTrades[tier].add("ids", new JsonArray());
-            }
-            tierTrades[tier].getAsJsonArray("ids")
-                    .add(NS + ":" + METALSMITH + "/level_" + tier + "/sell_" + id);
+            trades.sell(files, tier, id, priceFor(tier), tier >= 4 ? 2 : 4, tier * 5);
         }
-
-        for (int tier = 1; tier <= 5; tier++) {
-            if (tierTrades[tier] != null) {
-                emitTradeSet(files, tier, tierTrades[tier].getAsJsonArray("ids"));
-            }
-        }
-    }
-
-    /**
-     * The tier file, shipped trades plus generated ones.
-     *
-     * <p>Read off our own classpath rather than restated here - see the class
-     * note. If the shipped file cannot be read the generated trades are written
-     * on their own, which loses the vanilla armours from that tier but keeps the
-     * modded ones; the alternative is a tier that is empty for everybody.
-     */
-    private static void emitTradeSet(Map<String, byte[]> files, int tier, JsonArray added) {
-        String path = "/data/" + NS + "/trade_set/" + METALSMITH + "/level_" + tier + ".json";
-        JsonObject tierFile = null;
-        try (InputStream in = GeneratedArmour.class.getResourceAsStream(path)) {
-            if (in != null) {
-                JsonElement parsed = JsonParser.parseString(
-                        new String(in.readAllBytes(), StandardCharsets.UTF_8));
-                if (parsed.isJsonObject()) {
-                    tierFile = parsed.getAsJsonObject();
-                }
-            }
-        } catch (Exception unreadable) {
-            HorseGenetics.LOGGER.warn("compat: could not read the shipped {} - "
-                    + "its modded armours will be the only trades in that tier", path, unreadable);
-        }
-        if (tierFile == null) {
-            tierFile = new JsonObject();
-            tierFile.addProperty("amount", 3.0);
-            tierFile.add("trades", new JsonArray());
-            tierFile.addProperty("random_sequence", NS + ":trade_set/" + METALSMITH + "/level_" + tier);
-        }
-        JsonArray trades = tierFile.getAsJsonArray("trades");
-        for (JsonElement id : added) {
-            trades.add(id);
-        }
-        GeneratedGates.put(files,
-                "data/" + NS + "/trade_set/" + METALSMITH + "/level_" + tier + ".json", tierFile);
     }
 
     private static JsonObject recipe(ModdedMaterials.Metal metal, String id) {
@@ -251,7 +178,7 @@ final class GeneratedArmour {
      * has to level him up for the good stuff should find that the good stuff is
      * good.
      */
-    private static int tierFor(ModdedMaterials.Metal metal) {
+    static int tierFor(ModdedMaterials.Metal metal) {
         int defense = ModdedArmour.protectionFor(metal);
         if (defense <= 3) {
             return 1;
@@ -277,7 +204,7 @@ final class GeneratedArmour {
     }
 
     /** "rose_gold" becomes "Rose Gold". See GeneratedGates.label for why the mod is not named. */
-    private static String label(ModdedMaterials.Metal metal) {
+    static String label(ModdedMaterials.Metal metal) {
         StringBuilder out = new StringBuilder();
         for (String word : metal.material().split("_")) {
             if (word.isEmpty()) {

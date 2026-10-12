@@ -283,7 +283,7 @@ public enum HorseTackSlot {
 
     /**
      * Will this horse take {@code stack} here at all? A vanilla slot asks
-     * vanilla; a gear slot asks the tag, which is empty for every slot today.
+     * vanilla; a gear slot asks the tag, which is empty until its pieces exist.
      */
     public boolean accepts(AbstractHorse horse, ItemStack stack) {
         if (stack.isEmpty() || !usableOn(horse)) {

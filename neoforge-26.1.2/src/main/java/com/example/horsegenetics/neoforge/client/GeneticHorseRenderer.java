@@ -191,9 +191,17 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
             geneticState.drawParts = ClientConfig.parts()
                     && withinPartsDistance(renderState);
             geneticState.drawPartGlow = ClientConfig.partsGlow();
-            // Box-built gear, resolved here like the parts. Only the photo shoot's
-            // debug block so far; horse shoes resolve from the hoof slots here.
-            geneticState.worn = DebugPhotoShootClient.testBlocks;
+            // Box-built gear, resolved here like the parts: a shoe for each shod
+            // hoof, in its own metal (common.gear.HorseShoes). A photo shoot's
+            // debug pieces, when it has any, are drawn instead.
+            java.util.List<com.example.horsegenetics.common.gear.WornPart> staged =
+                    DebugPhotoShootClient.testBlocks;
+            geneticState.worn = !staged.isEmpty() ? staged
+                    : com.example.horsegenetics.common.gear.HorseShoes.worn(
+                            shoeTint(horse, com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_LEFT),
+                            shoeTint(horse, com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_RIGHT),
+                            shoeTint(horse, com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_LEFT),
+                            shoeTint(horse, com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_RIGHT));
         }
     }
 
@@ -255,6 +263,12 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
         }
         return 0xFF000000 | (net.minecraft.world.item.component.DyedItemColor.getOrDefault(
                 worn, BRAID_UNDYED) & 0x00FFFFFF);
+    }
+
+    /** The tint of the shoe on this hoof, or {@code 0} for a bare one - what {@code HorseShoes.worn} takes. */
+    private static int shoeTint(Horse horse,
+                                com.example.horsegenetics.neoforge.entity.HorseTackSlot slot) {
+        return com.example.horsegenetics.neoforge.item.HorseShoeItem.tintOf(slot.on(horse));
     }
 
     /**

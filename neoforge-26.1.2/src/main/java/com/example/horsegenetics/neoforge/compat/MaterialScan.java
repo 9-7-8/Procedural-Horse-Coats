@@ -533,8 +533,9 @@ public final class MaterialScan {
         // stale silently, which is the failure mode this whole folder exists to
         // avoid. Bumped for 0.5.013: armour ids collapse by material name and
         // an ingot_ prefix comes off. Bumped again for the planks rule: a pack
-        // generated before it holds files for woods that no longer exist.
-        sb.append("rules|3\n");
+        // generated before it holds files for woods that no longer exist. And
+        // for horse shoes: a pack from before them has no shoe files at all.
+        sb.append("rules|4\n");
         for (ModdedMaterials.Wood wood : woods) {
             sb.append("w|").append(wood.namespace()).append(':').append(wood.name())
                     .append('|').append(wood.plankTexture())

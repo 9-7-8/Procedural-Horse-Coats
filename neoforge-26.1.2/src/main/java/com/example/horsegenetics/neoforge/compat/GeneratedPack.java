@@ -122,7 +122,12 @@ public final class GeneratedPack {
         // the first's keys rather than adding to them.
         com.google.gson.JsonObject lang = new com.google.gson.JsonObject();
         GeneratedGates.emit(files, lang);
-        GeneratedArmour.emit(files, lang);
+        // Armour and shoes sell through one collector, written once after both:
+        // a tier file has a single writer or the second replaces the first.
+        MetalsmithTrades trades = new MetalsmithTrades();
+        GeneratedArmour.emit(files, lang, trades);
+        GeneratedShoes.emit(files, lang, trades);
+        trades.emit(files);
         GeneratedCarts.emit(files, lang);
         GeneratedJumps.emit(files, lang);
         if (!lang.isEmpty()) {

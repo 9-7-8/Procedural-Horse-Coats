@@ -50,6 +50,12 @@ public final class MetalTintSource implements ItemTintSource {
 
     @Override
     public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity owner) {
+        // A horse shoe carries its own colour, shipped or generated, and the
+        // shoe on the hoof is drawn from the same number.
+        int shoe = com.example.horsegenetics.neoforge.item.HorseShoeItem.tintOf(stack);
+        if (shoe != 0) {
+            return shoe;
+        }
         if (colours == null) {
             Map<String, Integer> built = new HashMap<>();
             for (ModdedArmour.Armour armour : ModdedArmour.armours()) {

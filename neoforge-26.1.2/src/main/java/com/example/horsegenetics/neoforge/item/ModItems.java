@@ -434,6 +434,24 @@ public final class ModItems {
                 properties -> new StorageHarnessItem(tier, properties.stacksTo(1)));
     }
 
+    // --- horse shoes - one to a hoof --------------------------------------
+    // One per material horse armour is made of (owner, 2026-10-12); a metal
+    // another mod brings gets its own from compat/ModdedShoes. The ids and the
+    // colours are common.gear.HorseShoes.Metal's. stacksTo(1): each hoof slot
+    // holds one, and a shoe that later takes damage could not stack anyway.
+    // No recipe until the tack bench (#226): the metalsmith sells them.
+    public static final List<DeferredItem<HorseShoeItem>> HORSE_SHOES = shoes();
+
+    private static List<DeferredItem<HorseShoeItem>> shoes() {
+        List<DeferredItem<HorseShoeItem>> shoes = new ArrayList<>();
+        for (com.example.horsegenetics.common.gear.HorseShoes.Metal metal
+                : com.example.horsegenetics.common.gear.HorseShoes.Metal.values()) {
+            shoes.add(register(metal.id(),
+                    properties -> new HorseShoeItem(metal.rgb(), properties.stacksTo(1))));
+        }
+        return List.copyOf(shoes);
+    }
+
     // --- transfer papers - how a horse changes hands --------------------
     // A blank is bound to whoever crafted it and can only be signed against a
     // horse that player currently owns; signing it produces a signed paper,

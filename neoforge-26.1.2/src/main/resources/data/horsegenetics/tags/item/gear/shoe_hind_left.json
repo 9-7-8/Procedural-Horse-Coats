@@ -1,4 +1,10 @@
 {
   "replace": false,
-  "values": []
+  "values": [
+    "horsegenetics:copper_horse_shoe",
+    "horsegenetics:iron_horse_shoe",
+    "horsegenetics:golden_horse_shoe",
+    "horsegenetics:diamond_horse_shoe",
+    "horsegenetics:netherite_horse_shoe"
+  ]
 }

@@ -2291,6 +2291,7 @@ public final class ModGameTests {
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
         // Four horses spawned and seven interact events posted, all in one tick.
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
+        register(event, environment, SHOES_FIT_THEIR_HOOVES, 100);
         // One horse, a dozen registry probes, four interact events and a drops event; one tick.
         register(event, environment, HORSE_CARRIES_CHESTS, 100);
         // One horse and one unjoined player; a chest stood at the bottom of the world for four ticks.
@@ -3755,6 +3756,84 @@ public final class ModGameTests {
                     "an untamed horse was tacked up"), 0);
         }
         assertHeld(helper, player, 1, "a braid was spent on an untamed horse");
+
+        helper.succeed();
+    }
+
+    /**
+     * <b>Horse shoes go on hooves, one to a foot, and only there.</b>
+     *
+     * <p>What is proved is the part that fails silently: the four
+     * {@code gear/shoe_*} tags are data, and a tag that did not load or a shoe
+     * left out of one makes a slot refuse a shoe with no log line at all. Every
+     * shipped shoe must fit every hoof, fit nothing else, and each hoof must
+     * hold its own shoe without touching the other three (#164).
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SHOES_FIT_THEIR_HOOVES =
+            TEST_FUNCTIONS.register("shoes_fit_their_hooves",
+                    () -> ModGameTests::shoesFitTheirHooves);
+
+    private static void shoesFitTheirHooves(GameTestHelper helper) {
+        var hooves = java.util.List.of(
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_LEFT,
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_FRONT_RIGHT,
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_LEFT,
+                com.example.horsegenetics.neoforge.entity.HorseTackSlot.SHOE_HIND_RIGHT);
+        var shoes = com.example.horsegenetics.neoforge.item.ModItems.HORSE_SHOES;
+        if (shoes.size() != com.example.horsegenetics.common.gear.HorseShoes.Metal.values().length) {
+            throw new GameTestAssertException(Component.literal(
+                    "not every shipped metal has a registered shoe: " + shoes.size()), 0);
+        }
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+
+        for (var shoe : shoes) {
+            ItemStack stack = new ItemStack(shoe.get());
+            for (var slot : com.example.horsegenetics.neoforge.entity.HorseTackSlot.values()) {
+                boolean hoof = hooves.contains(slot);
+                if (hoof && !slot.accepts(horse, stack)) {
+                    throw new GameTestAssertException(Component.literal(
+                            shoe.getId() + " is refused by " + slot + " - is it in gear/"
+                                    + slot.name().toLowerCase(java.util.Locale.ROOT) + "?"), 0);
+                }
+                if (!hoof && slot.fits(horse, stack)) {
+                    throw new GameTestAssertException(Component.literal(
+                            shoe.getId() + " fits " + slot + ", which is not a hoof"), 0);
+                }
+            }
+        }
+
+        // Four feet, four metals: each slot keeps its own.
+        for (int i = 0; i < hooves.size(); i++) {
+            hooves.get(i).set(horse, new ItemStack(shoes.get(i).get()));
+        }
+        for (int i = 0; i < hooves.size(); i++) {
+            if (!hooves.get(i).on(horse).is(shoes.get(i).get())) {
+                throw new GameTestAssertException(Component.literal(
+                        hooves.get(i) + " holds " + hooves.get(i).on(horse)
+                                + ", not the " + shoes.get(i).getId() + " put on it"), 0);
+            }
+        }
+        // One shoe comes off and is handed back; the other three stay on.
+        ItemStack thrown = hooves.get(1).takeOff(horse);
+        if (!thrown.is(shoes.get(1).get()) || !hooves.get(1).on(horse).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "taking one shoe off did not hand that shoe back and leave its hoof bare"), 0);
+        }
+        for (int i : new int[] {0, 2, 3}) {
+            if (!hooves.get(i).on(horse).is(shoes.get(i).get())) {
+                throw new GameTestAssertException(Component.literal(
+                        "taking the off fore shoe off disturbed " + hooves.get(i)), 0);
+            }
+        }
+
+        // A foal is not shod: foals wear nothing.
+        net.minecraft.world.entity.animal.equine.Horse foal =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        foal.setBaby(true);
+        if (hooves.get(0).accepts(foal, new ItemStack(shoes.get(0).get()))) {
+            throw new GameTestAssertException(Component.literal("a foal accepted a shoe"), 0);
+        }
 
         helper.succeed();
     }

@@ -1,9 +1,10 @@
 {
-  "amount": 3,
+  "amount": 4,
   "trades": [
     "horsegenetics:equestrian_metalsmith/level_5/buy_diamond",
     "horsegenetics:equestrian_metalsmith/level_5/sell_diamond_horse_armor",
-    "horsegenetics:equestrian_metalsmith/level_5/sell_golden_horse_armor"
+    "horsegenetics:equestrian_metalsmith/level_5/sell_golden_horse_armor",
+    "horsegenetics:equestrian_metalsmith/level_5/sell_netherite_horse_shoe"
   ],
   "random_sequence": "horsegenetics:trade_set/equestrian_metalsmith/level_5"
 }

@@ -1,0 +1,11 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "horsegenetics:item/horse_shoe",
+    "tints": [
+      {
+        "type": "horsegenetics:metal_tint"
+      }
+    ]
+  }
+}

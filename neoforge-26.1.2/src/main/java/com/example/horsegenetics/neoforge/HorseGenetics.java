@@ -61,6 +61,8 @@ public final class HorseGenetics {
         // is attached to the bus. The models, recipes and trades all of this
         // needs are written later, by compat/GeneratedPack.
         com.example.horsegenetics.neoforge.compat.ModdedArmour.init();
+        // And a horse shoe per modded ingot, by the same list and the same rule.
+        com.example.horsegenetics.neoforge.compat.ModdedShoes.init();
         // The double gates register themselves into ModBlocks.BLOCKS and
         // ModItems.ITEMS as this class loads, so it has to be touched before
         // either register is attached to the bus below - and after the scan

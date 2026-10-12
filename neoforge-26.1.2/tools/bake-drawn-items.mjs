@@ -230,6 +230,32 @@ const ITEMS = [
       '................',
     ],
   },
+  {
+    id: 'horse_shoe',
+    // ONE sprite for every horse shoe, in greys: the metal is a tint laid over
+    // it (client/MetalTintSource), so a shoe for a modded metal needs no art.
+    // A placeholder for the owner to repaint (2026-10-09: generated first).
+    // k is a nail hole.
+    palette: { h: 'ffffff', m: 'd9d9d9', d: '9a9a9a', k: '4d4d4d' },
+    map: [
+      '................',
+      '....hhhhhhhh....',
+      '...hmmmmmmmmh...',
+      '..hmmddddddmmd..',
+      '..hmd......dmd..',
+      '.hmmk......kmmd.',
+      '.hmd........dmd.',
+      '.hmd........dmd.',
+      '.hmk........kmd.',
+      '.hmd........dmd.',
+      '.hmd........dmd.',
+      '.hmmk......kmmd.',
+      '..hmd......dmd..',
+      '..hmmd....dmmd..',
+      '..hddd....dddd..',
+      '................',
+    ],
+  },
 ];
 
 let wrote = 0;
