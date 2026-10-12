@@ -110,10 +110,10 @@ STEPS
      "could" move it. Say in the summary which tests a full run would still need to
      check, and why.
    - The slowest classes, measured on the last full run (the release procedure fills
-     this in). 2026-10-09, for 0.5.046, 15m 49s wall clock: CoatTextureIdTest 193s,
-     CoatTextureComposerTest 111s, UndeadBreedsTest 94s, RimehartBreedTest 64s,
-     DeadLayerTest 58s, GenotypeCatalogTest 54s, ArcaneStockTest 38s, ReproRulesTest
-     29s. Those are about two thirds of
+     this in). 2026-10-12, for 0.5.047.1, 16m 29s wall clock: CoatTextureIdTest 191s,
+     CoatTextureComposerTest 110s, UndeadBreedsTest 95s, ArcaneStockTest 83s (it grew
+     with #246's share test), RimehartBreedTest 65s, DeadLayerTest 57s. Those are about
+     two thirds of
      the run; a change that
      touches none of them is cheap to prove by name.
    - Its full run has found that checks had drifted from the code, not mod bugs, so

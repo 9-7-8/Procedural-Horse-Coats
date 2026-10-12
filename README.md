@@ -52,6 +52,13 @@ the Gear tab shows everything it can wear on a picture of the horse. The saddle,
 body armour and braids you can put on today, and you can dye saddles and armour
 colour by colour at the Tack Dyeing Bench - with any dye, ingot or gem, including
 ones from other mods. Right-click your horse holding a piece of tack and it goes on.
+Armour and braids are drawn with real depth, standing a little off the coat.
+
+**Shoe them.** The equestrian metalsmith sells horse shoes - copper, iron, golden,
+diamond and netherite, and one for every metal another mod adds. Each hoof takes its
+own shoe. Every shoe adds a little speed and jump, one shoe is enough to keep a horse
+on top of powder snow, and a shoe can be enchanted: Grip for ice, or Roadster for
+speed on paths and roads.
 
 **Load them up.** Put a storage harness on your horse - copper, iron, golden or
 netherite, with leather you can dye - then hang a chest, a barrel, a shulker box or an
@@ -129,7 +136,7 @@ Everything is explained in depth on **[the wiki](https://9-7-8.github.io/Procedu
 which is the full guide to every gene, breed, item and rule, and is kept up to date as the
 mod grows.
 
-**Still being built:** better tack (pads, bridles, boots, shoes), feeding
+**Still being built:** better tack (pads, bridles, boots), feeding
 troughs, a lasso, and more fantasy breeds. The wiki's roadmap pages list what is planned.
 
 ---
