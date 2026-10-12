@@ -124,9 +124,35 @@ NOT RUN / NOT CHECKED
 
 RELEASE
 -------
-Every piece of stage v0.5.047.1 (Foundations and feet) is now built. The interim release
-was offered to the owner at the end of this session; her answer is in the session's
-closing message, not here.
+Every piece of stage v0.5.047.1 (Foundations and feet) was built, so the interim release
+was offered with the question tool and the owner chose "Cut v0.5.047.1" (owner). It was
+cut in this same session by procedures/release.txt: tag v0.5.047.1 on commit 4832159c,
+"0.5.047.1 - horse shoes, and gear drawn with depth", with horsegenetics-0.5.047.1.jar
+on the GitHub release and the same note on wiki/releases.html#v0-5-047-1.
+- Release set, all green: the nine tier-0 node checks; the full :common:test (1768 tests,
+  0 failures, 16m 29s); :neoforge-26.1.2:test (--rerun, since it first reported
+  UP-TO-DATE); runGameTest (65 passed); the seven headless browser checks; a dev server
+  boot on the bumped version to "Done (", whose only WARN lines were the known ones plus
+  "version differences that were not resolved" (the dev world was saved by 0.5.046).
+- The first full :common:test run was started as a harness background task and was
+  stopped by Claude Code for low memory. The owner chose "Run it again now"; the second
+  run was started detached (Start-Process, as launch-game does for a client) and finished.
+- The note was written from the whole range v0.5.046..HEAD (the lang, recipe, class and
+  config diffs, the issues closed since the tag, and a subagent's read of the thirteen
+  in-range session logs). Dev-only work was left out (#245, #241, #140, the planning).
+- Photos: no new shoot. Six shots the range's own sessions took were cropped into
+  release-photos/v0.5.047.1/ (shoes x3 from the #164 shoot, armour x2 from #240's, the
+  braid from #239's); the drawing code had not changed since each. The enchantments
+  have no photo: they change how a horse moves.
+- README.md: a "Shoe them" paragraph, a line on edged gear, and shoes out of "Still
+  being built".
+- release-photos/v0.5.047.1/discord-post.md is written for the owner or the bot to post;
+  a session cannot post to Discord.
+- Milestone v0.5.047 stays open (an interim version does not finish it); #246, closed
+  with no milestone, was put on it.
+- procedures/test-tiers.txt: this run's slowest classes recorded.
+- Not checked for the release: a brand-new world (the boot loaded the dev world), and
+  anything played by hand.
 
 PICK UP FIRST
 -------------

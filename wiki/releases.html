@@ -86,6 +86,81 @@
     </p>
 </div>
 
+<h2 id="v0-5-047-1">0.5.047.1 &mdash; horse shoes, and gear drawn with depth</h2>
+
+<p>The first part of the equipment release. Horses can wear <strong>horse shoes</strong>: one on each hoof, bought from the equestrian metalsmith, each adding a little speed and jump, keeping a horse on top of powder snow, and able to carry one of the mod&rsquo;s first two enchantments. The gear horses already wear is now <strong>drawn with depth</strong>: horse armour and braids stand a little off the coat with a real edge. Three bugs are fixed.</p>
+<p><strong>Update the server and every client together.</strong> This release adds items and enchantments, so a 0.5.047.1 client cannot join a 0.5.046 server, or the other way round.</p>
+<p>This is an interim version. 0.5.047 is one big release about everything a horse wears, and it ships in stages; riding tack (the bridle and the saddle) is next.</p>
+<h3 id="v0-5-047-1-horse-shoes">Horse shoes</h3>
+<ul>
+    <li><strong>One shoe to a hoof.</strong> Each of the four hooves has its own slot at the bottom of the Gear tab. A horse can be shod on one foot, or in four different metals. Any shoe fits any hoof. Foals are not shod.</li>
+    <li><strong>Five metals:</strong> copper, iron, golden, diamond and netherite. A metal or gem another mod adds gets a shoe of its own, in that metal&rsquo;s colour.</li>
+    <li><strong>Bought, not crafted.</strong> The equestrian metalsmith sells one metal at each of his five levels: copper for 2 emeralds, iron 3, golden 5, diamond 7, netherite 10. He now offers four trades a level where he offered three, so a shoe never pushes another trade out. Making tack comes with the tack bench, later in this release.</li>
+    <li><strong>Putting one on.</strong> Put it in a hoof slot in the Gear tab, or right-click your own horse with a shoe in hand: it goes on the first bare hoof.</li>
+    <li><strong>What it looks like.</strong> A U of metal under the foot, open at the heel. On a standing horse only a thin edge shows at the ground; the whole shoe shows under a lifted foot.</li>
+</ul>
+<p><img src="../release-photos/v0.5.047.1/shoes-under-the-feet.png" alt="A rearing horse seen from below, a golden shoe and a copper shoe under its front hooves" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Each hoof has its own shoe, in its own metal: golden on one fore foot, copper on the other.</em></p>
+<p><img src="../release-photos/v0.5.047.1/shoes-at-a-walk.png" alt="A walking horse from behind, a diamond shoe under a lifted hind hoof" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>The shoe is open at the heel, so the middle of the sole shows inside it.</em></p>
+<p><img src="../release-photos/v0.5.047.1/shoe-edge-standing.png" alt="A standing grey horse from behind, a dark edge at the bottom of each hoof" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Standing, a shoe is only a thin edge at the ground. These are netherite.</em></p>
+<h4 id="v0-5-047-1-what-a-shoe-does">What a shoe does</h4>
+<ul>
+    <li><strong>A little speed and a little jump, from its own metal.</strong> The four hooves are added up: three shoes are three quarters of four, and there is no bonus for a matching set. Four copper shoes add about 0.35 m/s and four netherite about 1.04 m/s, where an ordinary horse runs at 5 to 14 m/s. How fast a horse is stays a matter of breeding.</li>
+    <li><strong>One shoe is enough for powder snow.</strong> A horse with a shoe on any hoof, of any metal, stands on top of powder snow. An unshod horse still sinks.</li>
+    <li>Another mod&rsquo;s ingot gives what iron gives, and another mod&rsquo;s gem what diamond gives.</li>
+    <li>A shoe&rsquo;s tooltip states what it adds on the server you are on.</li>
+</ul>
+<h4 id="v0-5-047-1-two-enchantments">Two enchantments</h4>
+<p>A shoe can take one of two enchantments, each with three levels. They go on nothing but horse shoes.</p>
+<ul>
+    <li><strong>Grip.</strong> The horse slides less on ice. Each level on each shoe takes 8% of the slide away, so four shoes of Grip III make ice very nearly ordinary ground. Grip never makes ice better than ground.</li>
+    <li><strong>Roadster.</strong> The horse is faster while it is on a path or a road: dirt paths, cobblestone, stone bricks, bricks, smooth sandstone, and their slabs. Each level on each shoe adds about 0.09 m/s, so four shoes of Roadster III add about 1 m/s.</li>
+    <li><strong>One shoe, one enchantment.</strong> Grip and Roadster will not go on the same shoe, but a horse can wear both on different feet.</li>
+    <li><strong>Getting one.</strong> Put a shoe in an enchanting table, or put a Grip or Roadster book on a shoe at an anvil. The books turn up where ordinary enchanted books do.</li>
+    <li>An enchanted shoe glints in your inventory and in the Gear tab. The shoe drawn under the hoof does not glint yet.</li>
+</ul>
+<p>No photo: an enchantment changes how a horse moves, not how it looks.</p>
+<h3 id="v0-5-047-1-gear-drawn-with-depth">Gear drawn with depth</h3>
+<ul>
+    <li><strong>Horse armour has an edge.</strong> Vanilla horse armour on this mod&rsquo;s horses is drawn a little prouder of the coat, with a rim round its outline, so it reads as something worn and not as paint. It is a small change: clear up close, at the chest and the ear bands, and hard to tell from the old look across a field.</li>
+    <li><strong>The rescuing braid is lifted too.</strong> The braid in the mane and tail stands off the hair it is plaited into. By eye it is slightly fuller.</li>
+    <li><strong>It is only how they are drawn.</strong> Nothing about the armour or the braid itself changed. Armour with a trim, or one a resource pack swaps the model of, is drawn the vanilla way as before.</li>
+    <li>If you prefer the old flat look, or a shader pack disagrees with the new one, set <code>gear.edges</code> to <code>false</code> in <code>client.toml</code>.</li>
+</ul>
+<p><img src="../release-photos/v0.5.047.1/edged-diamond-armour.png" alt="A horse in diamond horse armour and a yellow saddle, the armour standing off the coat" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Diamond armour, with its edge. Look at where the armour stops on the neck and the legs.</em></p>
+<p><img src="../release-photos/v0.5.047.1/edged-iron-armour.png" alt="A horse in iron horse armour" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Iron armour.</em></p>
+<p><img src="../release-photos/v0.5.047.1/lifted-braid.png" alt="A bay horse with a red braid in its mane and a blue one in its tail" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>A rescuing braid, dyed red in the mane and blue in the tail.</em></p>
+<h3 id="v0-5-047-1-fixes">Fixes</h3>
+<ul>
+    <li><strong>A horse that shifted into a strider died in rain or water</strong> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/243">#243</a>). Two named horses were lost this way on a live server. A horse no longer shifts into a body that water hurts, and another mod&rsquo;s water-shy mob leaves the list of forms the same way.</li>
+    <li><strong>A shifted horse could outlive its animal form</strong> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/244">#244</a>). When the animal a shifted horse had become was killed, the horse survived at 1 health and shifted again. It now dies with its form, and its death message names what killed it.</li>
+    <li><strong>The arcane dealer sold lycan horses far too often</strong> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/246">#246</a>). About one horse in eight carried it, and other genes with many forms were over-stocked the same way. Each magical gene now gets an even share of his stock.</li>
+</ul>
+<h3 id="v0-5-047-1-for-server-owners">For server owners</h3>
+<ul>
+    <li>New settings in <code>phc/server.toml</code>, all under <code>shoes</code>: <code>shoes.enabled</code> switches the whole family off (shoes are still worn and drawn, and do nothing); <code>shoes.&lt;metal&gt;_speed</code> and <code>shoes.&lt;metal&gt;_jump</code> set what one shoe of each metal adds; <code>shoes.grip_per_level</code> and <code>shoes.road_speed_per_level</code> set the two enchantments. Every one has a range, and the defaults are small on purpose.</li>
+    <li>What counts as a road for Roadster is a block tag, <code>horsegenetics:shoe_roads</code>, so a datapack can add your own paving.</li>
+    <li>The server log has new lines that all start <code>[phc-live]</code>, so one search lifts them out: every lycan shift and revert, a horse found inside blocks, a dealer who founded with fewer horses than he wanted, the time the F6 corridor took to build, and each command-whistle order. They change nothing in play.</li>
+</ul>
+<h3 id="v0-5-047-1-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<div class="note warn"><p><strong>Update server and clients together.</strong> A 0.5.047.1 client and a 0.5.046 server cannot connect to each other.</p></div>
+<ul>
+    <li><strong>No world needs converting.</strong> Nothing about how a horse is saved changed. A world made under 0.5.037 or any later 0.5 release loads.</li>
+    <li><strong>Horse armour and braids look different</strong> on every horse that already wears them: edged, not flat. <code>gear.edges</code> in <code>client.toml</code> puts the old look back.</li>
+    <li><strong>A horse whose animal form is the strider no longer shifts.</strong> It keeps its genes and passes them on, and stays a horse. A horse that is already a strider at the moment the server updates stays one until dawn, so keep it out of the rain that one night.</li>
+    <li><strong>A shifted horse now dies when its animal form is killed.</strong> Before, it survived at 1 health.</li>
+    <li><strong>The equestrian metalsmith offers four trades a level,</strong> where he offered three.</li>
+    <li><strong>Your settings files gain keys.</strong> <code>server.toml</code> and <code>client.toml</code> are rewritten once with the new settings; the log says a file "is not correct. Correcting", which is only that.</li>
+    <li><strong>If you play with another mod&rsquo;s metals,</strong> the mod rebuilds its generated files for them once on the first launch, to add their shoes.</li>
+    <li>An existing arcane dealer keeps the horses he already has; the fix shows as his string turns over.</li>
+    <li>Shoes are still drawn when <code>parts.enabled</code> is off: that switch hides what a horse grows, not what it wears.</li>
+</ul>
+<h3 id="v0-5-047-1-not-played-yet-known-rough-edges">Not played yet / known rough edges</h3>
+<p>Open bugs: the command whistle&rsquo;s wheel only opens while sneaking (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/36">#36</a>), pressing F6 on a server stalls everyone for a few seconds (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a>), and the stasis bank shows a saved-searches arrow on the wrong tab (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a>). A fix for each is in this jar and waiting to be confirmed in play. Horses ending up inside blocks on one live server (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/35">#35</a>) is still open.</p>
+<p><strong>Nothing in this release has been played by a person.</strong> The three fixes and the new look of armour and braids were checked by tests and still pictures only: nobody has watched edged armour on a moving horse, under a shader pack, or beside another mod&rsquo;s armour.</p>
+<p><strong>The same is true of the horse shoes.</strong> They are covered by automated tests on a real horse in a test server: the slots, the bonus, powder snow, the enchantments, and a horse sliding on ice with and without Grip. Not yet tried by hand: buying a shoe, riding a shod horse (a ridden horse is moved by its rider&rsquo;s game, which the tests do not cover), the enchanting table and the anvil, and shoes for another mod&rsquo;s metals beside a real mod. The full list is on the <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/verification.html">verification page</a>.</p>
+<p>The shoe&rsquo;s inventory icon is a placeholder, one grey sprite tinted to each metal.</p>
+
+
 <h2 id="v0-5-046">0.5.046 &mdash; chests on horses, a storage harness, and eight new things to grow</h2>
 
 <p>A feature release. Horses can now carry chests, on a new storage harness. Eight new things can grow on a horse: crystals along the back, boar tusks, sabre fangs, ear fins, cheek spikes, a brow ridge, and two new shapes of ram horn. Horses far from every player now cost a server much less. A handful of bugs are fixed.</p>

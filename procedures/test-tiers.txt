@@ -133,8 +133,11 @@ STEPS
 2. How to run a long tier safely.
    - Free memory first: `./gradlew --stop`, and close what you started. A full run has
      been killed twice by low memory with a server cycling beside it.
-   - Run it in the background, logging to a file, and do other work. Never poll it with
-     sleep.
+   - Run it DETACHED, logging to a file, and do other work: Start-Process gradlew.bat
+     with -RedirectStandardOutput, the form launch-game step 5 gives for a client. A
+     harness background task is stopped when free memory dips, and the full suite is
+     long enough to meet that: the 0.5.047.1 run was stopped that way and had to be
+     started again. Wait on the log for BUILD SUCCESSFUL or BUILD FAILED.
    - Read the real exit code from the log. Never trust a piped command's exit code.
    - Check the log says "> Task :common:test" with no UP-TO-DATE after it. When nothing
      under common/ changed since the last run, Gradle skips the task, exits 0 in under a
