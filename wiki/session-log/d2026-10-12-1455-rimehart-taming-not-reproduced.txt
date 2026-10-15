@@ -1,0 +1,85 @@
+2026-10-12 14:55 (start; ended 2026-10-14 22:20) - Wild Rimeharts never buck a rider: investigated, not reproduced (#257)
+
+ASKED
+- "A tester wasn't able to tame a rimehart: 'the rimeharts kinda just stand there when you
+  try and ride them. i tried 4 ones and they didnt do the walk around/kick off loop'".
+  Investigated; not reproduced in the mod alone; filed as #257.
+- Question-tool answers (owner): run the reproduction gametest now even with one player on
+  the live server; the tester DID get on, the horse did nothing; after no reproduction,
+  "File issue, wait for Meg".
+- Relayed the server manager's research (live NBT: four Rimeharts, Tame 0, Temper 0,
+  wild_touched set; size and "magical" ruled out by them). Answered in chat; the gametest
+  already carried a control breed for their "every breed on 0.5.047.1?" question.
+- Relayed: horse_wild_spawn_stamp.js writes wild_spawn_time 0. Answered: that is the
+  operator's KubeJS script on the live server, not the mod; the mod never reads the key
+  (its own stamp is horsegenetics:wild_born). Left alone; suggested they delete it.
+- Relayed: "claude egg one worked" - the server manager's table, egg Rimehart tames,
+  wild magical breeds never (37 at Temper 0). Extended the test to a wild-spawned
+  Rimehart herd: still not reproduced. Commented on #257.
+- "End session".
+
+DONE
+- 1e7cd241 - gametest untamed_ridden_horse_bucks (ModGameTests). A spawn-egg Rimehart and
+  a Quarter Horse on a scratch snow field filled to a cold biome, each mounted by a mock
+  player's empty-handed interactOn (so every EntityInteract subscriber runs), ridden 380
+  ticks; each must run RunAroundLikeCrazyGoal, throw its rider or be tamed. Logs a
+  "[buck]" diagnostic line per horse at t=40 and t=400 (tamed, saddled, controller,
+  effectiveAi, immobile, eating, standing, temper, hitbox, speed, running goals).
+- b30f87c5 - the same test also places a pack through WildTopUp.spawnPack in
+  snowy_beach (the Rimehart is that biome's only breed), asserts HerdManager founded it
+  as a Rimehart herd, and rides one member. The field is cleared at the end.
+- Proof: :neoforge-26.1.2:runGameTest five times. Runs 1-3 (egg founders; plain field,
+  then snowy_plains, then the click mount): the Rimehart ran the goal 208-330 ticks, threw
+  its rider 3-6 times, was tamed in two of three. Run 4 failed the new test (pack refused
+  on snow block, one member placed and never founded) and broke
+  wild_pack_founds_one_herd (my platform was its "surface"). Run 5, grass floor and
+  cleanup: the wild Rimehart ran the goal 357 of 380 ticks, threw 6 times, temper 30;
+  "All 66 required tests passed". Run 1 also failed undead_horses_convert once ("not
+  converted yet ... on tick 0"); it passed in runs 2-5, so a flake, not filed.
+  :neoforge-26.1.2:build and check-parity green at the end.
+- No pictures.
+- Issue #257 (bug, from-server, needs-owner), open: waiting on what block the wild herd
+  at about 291/100/-1321 stands on, and where the egg Rimehart was ridden.
+
+DECIDED
+- Run the gametest with a player on the live server (owner, this session only; the
+  standing rule in memory no-gradle-tests-while-players-are-on is unchanged).
+- File and wait rather than survey the server's other horse mods or launch the dev
+  client (owner). Recorded on #257.
+- Not filed: the operator's horse_wild_spawn_stamp.js (theirs, by review-server-logs'
+  rule). Made without the owner.
+
+FOUND ON THE WAY
+- Ruled out by reading (written on #257): no mod goal at priority 0-1 holds MOVE on a
+  ridden horse; HorseRiding.mayRide passes untamed horses; the bareback phantom saddle
+  needs a tamed horse; dormancy never sleeps a ridden horse; HerdManager has no branch
+  on a breed's kind.
+- Vanilla 26.1.2 fact worth keeping: a horse's server AI runs only while
+  isEffectiveAi(), which is false whenever getControllingPassenger() is a player - and
+  AbstractHorse hands a player control only when isSaddled(). Read in Entity.java and
+  AbstractHorse.java of the patched sources.
+- Open lead (unconfirmed): RunAroundLikeCrazyGoal.canUse needs a spot within 5 blocks
+  whose block below isSolidRender and whose path type has no malus; plain ice fails, and
+  Rimeharts spawn in frozen_river.
+- The server manager's "37 wild magical at Temper 0" counts unridden horses too.
+- Mistake put right: the first wild-pack run left a scratch platform that broke a later
+  test; the test now clears its field.
+
+PROCEDURES
+- test-tiers.txt, TIER 2 gametest notes: a platform left standing is a later test's
+  "surface", so clear it; a NATURAL horse spawn is refused on snow block, build grass;
+  fillbiome through the command dispatcher sets the biome a herd's breed is drawn from.
+- end-session, write-session-log, review-server-logs: followed, nothing wrong.
+
+NOT RUN / NOT CHECKED
+- The full :common:test suite (no common/ code changed; it would check nothing new).
+- Nothing seen in game. The live-server cause is unknown; no Verification-tab anchors
+  added, since the defect is #257, not a check.
+
+RELEASE
+- Not offered: two test commits, nothing player-facing.
+
+PICK UP FIRST
+- #257 once the server manager reports the ground under the wild Rimehart herd: if it is
+  ice or another surface RunAroundLikeCrazyGoal.canUse rejects, reproduce it on that
+  floor in untamed_ridden_horse_bucks and fix it (fix-bug).

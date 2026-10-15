@@ -83,6 +83,13 @@ STEPS
        A scratch platform built in the air (origin.above(40)) has the harness floor
        40 blocks under it: a heightmap read just past the platform's edge lands there,
        so a search that takes "the surface" must be bounded in height (#30).
+       The reverse holds too: a platform left standing becomes "the surface" for every
+       later test whose ground search runs under it (a WildTopUp pack placed 1 of 4 on
+       one), so a test that builds one clears it, and its horses, before it succeeds.
+       A NATURAL horse spawn (WildTopUp.spawnPack, naturalHorse) is refused on anything
+       a horse cannot naturally spawn on, snow block included: build the floor of grass
+       (snowy grass under a snow layer for a cold field). fillbiome through the server's
+       command dispatcher sets the biome HerdManager draws the breed from (#257).
        The harness HAS the Nether and the End (no realm): a cross-world move can be
        tested Overworld to Nether. Assert on the entity the teleport returned, never
        otherLevel.getEntity(id): a just-forced chunk's entity section loads
