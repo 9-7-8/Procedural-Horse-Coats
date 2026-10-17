@@ -2334,6 +2334,7 @@ public final class ModGameTests {
         register(event, environment, JUKEBOX_PAYS_ONLY_WHILE_PLAYING, 20);
         // Synchronous: one cross-world move, checked in the same tick.
         register(event, environment, TURNOUT_RELEASES_THE_HORSE_THAT_ARRIVED, 20);
+        register(event, environment, TURNOUT_TAKES_A_WILD_HORSE_FOR_NOTHING, 20);
         // Founded at 25, then a combat scan once a second - after the wait for the
         // field's forced chunks to tick (issue #70: up to 369 ticks seen in 120 tries,
         // most of them one), so a thousand ticks on top of what the test itself needs.
@@ -3544,6 +3545,54 @@ public final class ModGameTests {
             if (!bare || handed != 1) {
                 helper.fail("saddles: " + (bare ? 0 : 1) + " on the arrived horse, " + handed
                         + " in the pack - there must be exactly one, in the pack");
+                return;
+            }
+        } finally {
+            other.setChunkForced(0, 0, false);
+        }
+        helper.succeed();
+    }
+
+    /**
+     * <b>A turnout ticket takes an untamed horse, and pays nothing for it</b> (owner,
+     * 2026-10-16). The ticket is how a wild horse is got out of a house without hitting
+     * it; one that paid the realm fee would sell wild horses for emeralds. The same Nether
+     * stand-in as {@code turnout_releases_the_horse_that_arrived}.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> TURNOUT_TAKES_A_WILD_HORSE_FOR_NOTHING =
+            TEST_FUNCTIONS.register("turnout_takes_a_wild_horse_for_nothing",
+                    () -> ModGameTests::turnoutTakesAWildHorseForNothing);
+
+    private static void turnoutTakesAWildHorseForNothing(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ServerLevel other = level.getServer().getLevel(net.minecraft.world.level.Level.NETHER);
+        if (other == null || other == level) {
+            helper.fail("the harness has no Nether, so there is no second world to turn a horse out into");
+            return;
+        }
+        net.minecraft.world.entity.player.Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        player.getInventory().clearContent();
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, new BlockPos(2, 0, 2));
+
+        other.setChunkForced(0, 0, true);
+        try {
+            net.minecraft.world.entity.animal.equine.Horse arrived =
+                    com.example.horsegenetics.neoforge.server.TicketHandler.turnOutTo(
+                            level, other, new net.minecraft.world.phys.Vec3(0.5, 200.0, 0.5), horse, player);
+            if (arrived == null) {
+                helper.fail("the turnout did not move the untamed horse at all");
+                return;
+            }
+            boolean wild = !arrived.isTamed() && arrived.getOwnerReference() == null;
+            int paid = player.getInventory().countItem(Items.EMERALD);
+            arrived.discard();
+            if (!wild) {
+                helper.fail("the untamed horse arrived tamed or owned");
+                return;
+            }
+            if (paid != 0) {
+                helper.fail(paid + " emeralds paid for a horse that was never the player's");
                 return;
             }
         } finally {

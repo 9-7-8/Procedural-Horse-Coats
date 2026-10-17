@@ -137,8 +137,11 @@
         breed, pedigree, generation and bond all stay, which is what makes turning one out
         into a shared field a gift rather than a deletion - whoever tames it next gets the
         animal <em>and</em> its papers.</li>
-    <li>One use, and it refuses - unspent - when the horse is not yours, when it is being
-        ridden, or when the realm is not loaded.</li>
+    <li><strong>It takes an untamed horse too.</strong> A wild horse that has wandered into
+        your house can be ticketed out of it without being hit. It earns no realm fee - it
+        was never yours to give - and arrives in the realm as wild as it left.</li>
+    <li>One use, and it refuses - unspent - when the horse belongs to someone else, when it
+        is being ridden, or when the realm is not loaded.</li>
 </ul>
 </section>
 
@@ -255,8 +258,13 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Only the awkward cases are left open &mdash; a ticket spent on a horse whose bound stall is in an <strong>unloaded chunk</strong>, and an interdimensional one used from the horse dimension &mdash; where the failure is a ticket that is consumed and delivers nothing rather than refusing out loud.</p>
+    <p>Only the awkward cases are left open &mdash; a ticket spent on a horse whose bound stall is in an <strong>unloaded chunk</strong>, and an interdimensional one used from the horse dimension &mdash; where the failure is a ticket that is consumed and delivers nothing rather than refusing out loud &mdash; plus the new gametest for a turnout ticket on an <strong>untamed horse</strong>, which has not run yet.</p>
 </div>
+
+<h3 id="open-1016-wild-turnout">A turnout ticket on an untamed horse (2026-10-16, gametest not run)</h3>
+<ul>
+    <li><strong>The gametest <code>turnout_takes_a_wild_horse_for_nothing</code> has not run</strong> &mdash; the live server had players on when it was written. Pass: the horse arrives untamed and unowned and no emeralds are paid. In-game: right-click a wild horse with a turnout ticket; it vanishes to the realm, the ticket is spent, and there is no &ldquo;emeralds for the trouble&rdquo; line.</li>
+</ul>
 
 <h3 id="open-0913-holding-pen">The holding pen (still open after 2026-09-13)</h3>
 

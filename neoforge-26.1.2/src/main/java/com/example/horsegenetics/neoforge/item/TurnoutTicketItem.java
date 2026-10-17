@@ -33,6 +33,12 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * is a gift to whoever tames it next, not a deletion - but <i>you</i> lose it,
  * its stall binding is cleared, and an ender whistle bound to it stops
  * answering. There is no ticket that fetches it back.
+ *
+ * <h2>An untamed horse goes too, and earns nothing</h2>
+ * A wild horse that has wandered into your house can be ticketed out without
+ * being hit (owner, 2026-10-16). It pays no realm fee - it was never yours to
+ * give - so a stack of tickets is not a way to sell the countryside. Somebody
+ * else's tamed horse is still refused.
  */
 public class TurnoutTicketItem extends Item {
 
@@ -48,6 +54,8 @@ public class TurnoutTicketItem extends Item {
                 .withStyle(ChatFormatting.GRAY));
         adder.accept(Component.literal("It stops being yours. Its tack comes back to you, "
                         + "its stall is freed, and nothing brings it home.")
+                .withStyle(ChatFormatting.DARK_GRAY));
+        adder.accept(Component.literal("Works on an untamed horse too, for no fee.")
                 .withStyle(ChatFormatting.DARK_GRAY));
         adder.accept(Component.literal("Single use. Works from any world.")
                 .withStyle(ChatFormatting.DARK_GRAY));

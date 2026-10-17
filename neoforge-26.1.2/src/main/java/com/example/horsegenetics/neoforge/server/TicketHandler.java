@@ -210,7 +210,10 @@ public final class TicketHandler {
         if (server == null) {
             return;
         }
-        if (!ownedBy(horse, player.getUUID())) {
+        // An untamed horse is fair game too: the ticket is also the way to get a
+        // wild horse out of your house without hitting it (owner, 2026-10-16).
+        // Somebody else's horse is still refused.
+        if (horse.isTamed() && !ownedBy(horse, player.getUUID())) {
             say(player, notYours(horse));
             return;
         }
@@ -228,6 +231,7 @@ public final class TicketHandler {
                 ? HorseRecords.of(horse).displayName()
                 : (horse.hasCustomName() ? horse.getCustomName().getString() : "The horse");
 
+        boolean wasWild = !horse.isTamed();
         Horse arrived = turnOutTo(level, realm, HorseRealm.arrivalSpot(), horse, player);
         if (arrived == null) {
             // Nothing spent, nothing released: the horse is still where it was.
@@ -238,7 +242,7 @@ public final class TicketHandler {
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
-        say(player, name + " is loose in the horse realm, and is nobody's now.");
+        say(player, name + (wasWild ? " is loose in the horse realm." : " is loose in the horse realm, and is nobody's now."));
         ActionTrace.log("ticket", player.getGameProfile().name() + " turned out "
                 + ActionTrace.describeShort(arrived) + " into the realm - unowned, stall binding cleared");
     }
@@ -260,11 +264,16 @@ public final class TicketHandler {
      */
     public static @org.jspecify.annotations.Nullable Horse turnOutTo(ServerLevel from, ServerLevel realm,
                                                                      Vec3 at, Horse horse, Player player) {
+        // Read before the move: a horse that was never anybody's earns no realm
+        // fee, or a ticket would be a way to sell the countryside's wild horses.
+        // makeWild pays only when handed a player, so it is handed none - an
+        // untamed horse wears no tack for that player to be given back.
+        boolean wasWild = !horse.isTamed();
         Horse arrived = arrive(from, realm, horse, at, player);
         if (arrived == null) {
             return null;
         }
-        HorseRelease.makeWild(realm, arrived, player);
+        HorseRelease.makeWild(realm, arrived, wasWild ? null : player);
         // A stall bound to a horse that is no longer yours is a sign nobody can
         // rebind. Neither existing release path clears one, because neither can
         // reach a horse that HAS one: the freedom stick only works inside the
