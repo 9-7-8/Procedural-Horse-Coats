@@ -1250,6 +1250,15 @@ public final class HorseBrowserScreen extends Screen {
         // tab they would offer the genes of horses that are not on screen.
         boolean roster = mine || tab == Tab.REALM;
         int refreshW = buttonW("Refresh");
+        if (roster && horseFilterBox != null) {
+            // The filter row reads box, Gene..., Allele..., Saved... from the left and
+            // Refresh pinned to the right. On a narrow window (427 px) the box's half-width
+            // pushed Saved... over Refresh, and Saved..., added first, took every press
+            // aimed at Refresh (the menu crawler found it). The box gives up the room.
+            int wanted = Math.max(160, (fsRight() - fsLeft()) / 2);
+            int room = fsRight() - refreshW - 4 - buttonW("Saved...") - 148 - horseFilterBox.getX();
+            horseFilterBox.setWidth(Math.max(60, Math.min(wanted, room)));
+        }
         if (genePickButton != null && allelePickButton != null) {
             genePickButton.visible = mine;
             genePickButton.active = mine;
@@ -1304,9 +1313,16 @@ public final class HorseBrowserScreen extends Screen {
                 savedSearchButton.setRectangle(w, 16,
                         horseFilterBox.getX() + horseFilterBox.getWidth() + 148, contentTop());
             } else if (breeding) {
-                savedSearchButton.setRectangle(w, 16, listX() + 1, contentTop() + 36);
+                // Beside the picker's filter box, on its row. It used to sit under the box,
+                // at contentTop()+36 - inside the Mares heading's hit area (listTop() is
+                // contentTop()+34), which mouseClicked reads first, so a press on Saved...
+                // stepped the mares' sort instead (the menu crawler found it).
+                savedSearchButton.setRectangle(w, 16, listX() + listW() - 1 - w, contentTop() + 18);
             }
-            if (!show) {
+            // The Query tab's Save... opens the same menu with no Saved... button on
+            // screen: closing it here whenever the button is hidden shut that menu on the
+            // frame after it opened, so Save... never did anything (the crawler again).
+            if (!show && tab != Tab.QUERY) {
                 savedSearches.close();
             }
         }
@@ -1320,7 +1336,8 @@ public final class HorseBrowserScreen extends Screen {
         if (breedingFilterBox != null) {
             breedingFilterBox.visible = breeding;
             breedingFilterBox.active = breeding;
-            breedingFilterBox.setRectangle(listW() - 2, 16, listX() + 1, contentTop() + 18);
+            // Short of the column by Saved..., which shares its row.
+            breedingFilterBox.setRectangle(listW() - 2 - buttonW("Saved...") - 3, 16, listX() + 1, contentTop() + 18);
             if (!breeding) {
                 breedingFilterBox.setFocused(false);
             }
@@ -2582,10 +2599,15 @@ public final class HorseBrowserScreen extends Screen {
     private int drawContentsRow(GuiGraphicsExtractor g, int x, int cy, int w, int top, int bottom,
                                 int mouseX, int mouseY, boolean pinned, int lineH,
                                 int index, int active, boolean done) {
-        if (!pinned || (cy + lineH > top && cy < bottom)) {
-            boolean hover = mouseX >= x - 3 && mouseX < x + w + 2
+        // Where the row can be seen. Pinned, that is the contents column; inline, the
+        // article's own window - `top` is then where the scrolled article STARTS, which
+        // is above the window once the reader has scrolled, so it cannot be the bound.
+        int seenTop = pinned ? top : contentTop();
+        boolean seen = cy + lineH - 2 > seenTop && cy - 1 < bottom;
+        if (!pinned || seen) {
+            boolean hover = seen && mouseX >= x - 3 && mouseX < x + w + 2
                     && mouseY >= cy - 1 && mouseY < cy + lineH - 2
-                    && (!pinned || (mouseY >= top && mouseY < bottom));
+                    && mouseY >= seenTop && mouseY < bottom;
             if (done) {
                 g.fill(x - 3, cy - 1, x + w + 2, cy + lineH - 2, ROW_DONE);
             }
@@ -2597,7 +2619,14 @@ public final class HorseBrowserScreen extends Screen {
             int colour = index == active ? NAME
                     : (hover ? HEADING : (done ? ROW_DONE_TEXT : NAME_DIM));
             drawFitted(g, sectionLabel(index), x + 8, cy, w - 8, colour);
-            tocEntries.add(new TocEntry(x - 3, cy - 1, x + w + 2, cy + lineH - 2, index));
+            // Only a row that can be seen takes a click, and only on the part that can.
+            // An inline row scrolled up out of the article used to keep its hit box -
+            // under the tab strip, where it ate the press on every tab above it (the
+            // menu crawler found it: Getting started, 427-px window, a section opened).
+            if (seen) {
+                tocEntries.add(new TocEntry(x - 3, Math.max(cy - 1, seenTop), x + w + 2,
+                        Math.min(cy + lineH - 2, bottom), index));
+            }
         }
         return cy + lineH;
     }

@@ -30,14 +30,19 @@ public class WagonMenu extends AbstractContainerMenu {
         int slotSize = 18;
         this.addChestGrid(container, 8, slotSize);
         int j = this.containerRows < 12 ? slotSize + this.containerRows * slotSize + 13 : slotSize + 9 * slotSize + 13;
-        this.addStandardInventorySlots(playerInventory, 8 + 27, j);
+        // The 12-wide (three-chest) window is 54 px wider and draws the inventory 27 px in;
+        // the 9-wide ones draw it at the usual 8 (WagonScreen.extractBackground). #260.
+        this.addStandardInventorySlots(playerInventory, this.containerRows < 12 ? 8 : 8 + 27, j);
     }
 
     private void addChestGrid(Container container, int xOffset, int yOffset) {
         if (this.containerRows < 12) {
             for(int i = 0; i < this.containerRows; ++i) {
                 for(int j = 0; j < 9; ++j) {
-                    this.addSlot(new Slot(container, j + i * 9, xOffset + j + 27 * 18, yOffset + i * 18));
+                    // Was xOffset + j + 27 * 18: every column 486 px off the window and one
+                    // pixel apart, so a one- or two-chest wagon's cargo could not be clicked
+                    // (#260, found by the menu crawler).
+                    this.addSlot(new Slot(container, j + i * 9, xOffset + j * 18, yOffset + i * 18));
                 }
             }
         } else {
