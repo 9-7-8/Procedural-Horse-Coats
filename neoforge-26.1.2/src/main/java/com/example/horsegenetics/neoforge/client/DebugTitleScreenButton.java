@@ -94,7 +94,10 @@ public final class DebugTitleScreenButton {
 
         if (!autoLaunched && Boolean.getBoolean(AUTO_PROPERTY)) {
             autoLaunched = true;
-            DebugTestWorldHandler.pendingHorseRealm = true;
+            // The menu crawler builds its own yard in the overworld; the realm hop would
+            // carry the player away from it mid-setup.
+            DebugTestWorldHandler.pendingHorseRealm =
+                    !com.example.horsegenetics.neoforge.client.crawl.MenuCrawlClient.enabled();
             // Queued rather than called: opening a world replaces the very screen that is
             // still being initialised here.
             Minecraft.getInstance().execute(DebugTitleScreenButton::spawnTestHorseWorld);

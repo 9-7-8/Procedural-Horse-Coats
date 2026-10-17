@@ -106,6 +106,9 @@ STEPS
      page's code changed.
    - A server boot to "Done (", with the log grepped for errors, when anything that runs
      at mod load changed (launch-game, step 8).
+   - The menu crawler, a few minutes, when a screen, its menu, or a payload one of its
+     buttons sends changed: every mod screen opened and every control pressed at its
+     screen coordinates, one [crawl] PASS/FAIL line per check (crawl-the-menus).
 
    TIER 3 - about twenty minutes. ONLY when it truly matters:
    - The FULL :common:test suite (`./gradlew :common:test`, over a thousand tests). It
@@ -133,6 +136,7 @@ STEPS
    - :neoforge-26.1.2:test;
    - :neoforge-26.1.2:runGameTest;
    - every headless browser check;
+   - the menu crawler (crawl-the-menus);
    - the server boot, with its log grepped.
    Run them in that order, cheapest first, so a cheap failure stops the expensive ones.
    A red result blocks the release until it is fixed or the owner waives it.
@@ -178,4 +182,5 @@ NEVER
 
 SEE ALSO
 --------
-release; rebake; run-tests (the yard - a different thing); launch-game; end-session.
+release; rebake; run-tests (the yard - a different thing); crawl-the-menus; launch-game;
+end-session.

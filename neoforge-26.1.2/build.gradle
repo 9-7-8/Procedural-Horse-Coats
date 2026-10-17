@@ -49,6 +49,13 @@ neoForge {
             if (project.hasProperty('photoShoot')) {
                 systemProperty 'horsegenetics.photoShoot', 'true'
             }
+            // Dev-only menu crawler (client/crawl/MenuCrawlClient): -PmenuCrawl opens every mod screen,
+            // presses every control and logs a "[crawl] PASS/FAIL" line per check, then closes the client;
+            // -PmenuCrawl=stay leaves it open. Stays in the overworld (no yard hop).
+            if (project.hasProperty('menuCrawl')) {
+                def v = project.property('menuCrawl').toString()
+                systemProperty 'horsegenetics.menuCrawl', v.isEmpty() ? 'true' : v
+            }
             // Dev-only render bench (#205, DebugRenderBenchClient): -PrenderBench=50 stages that many
             // horses in view and logs one "[bench]" line of per-horse extraction cost and FPS.
             if (project.hasProperty('renderBench')) {

@@ -1,0 +1,85 @@
+PROCEDURE  : Crawl the menus
+COMMAND    : /crawl-the-menus
+SAY        : "crawl the menus", "test the menus", "click every button", "menu crawler",
+             "test the screens"
+RUNS       : local only (it drives a real client)
+TAKES      : a built tree, no client of this checkout running, the live server empty
+LEAVES     : one [crawl] line per check in the client log, every FAIL filed or fixed, the
+             client closed again
+==============================================================================
+
+WHEN TO USE
+-----------
+After any change to one of this mod's screens (anything under client/ that extends Screen
+or AbstractContainerScreen, its menu, or the payload a button sends), and in the release
+set. The crawler opens every mod screen, presses every control at its screen coordinates
+through the screen's own mouseClicked, and checks that the press did what the control is
+for - reading the effect off the screen's state or off the server. It does not judge how
+a screen looks: that is photograph-horses. It does not test gameplay a screen merely
+starts (a recall, a breeding): those are gametests (test-tiers, tier 2).
+
+BEFORE YOU START
+----------------
+1. Read test-tiers' NEVER list: no Gradle run while the live server has a player on it.
+   If it does, write the cases, compile, and say the run is owed.
+2. launch-game's BEFORE YOU START: nothing of this checkout may be running. The crawl
+   starts its own throwaway test world; it does not need the owner's game.
+3. The code is client/crawl/ (Crawl is the toolkit, MenuCrawlCases the order, one *Crawl
+   class per screen family) and server/DebugMenuCrawl (the yard, and opening menus).
+
+STEPS
+-----
+1. If a screen changed, update its case first.
+   - A widget the case does not name is a FAIL ("unspecified control ... no case presses
+     it"), on purpose: a button nobody tests is what this exists to catch. Add a press and
+     a check of what it should do, or, for a control that must not be pressed in a crawl
+     (one that opens a desktop window), a skip(...) with the reason.
+   - Find a drawn region (a tab, a row, a chip) with scan(...) over the screen's own private
+     hit-test, or by reading the hit-box list the screen builds while drawing. Never copy
+     the screen's layout numbers into the case: a layout change should move the point, not
+     break the test.
+   - State is read by field name through Crawl.get/call. A rename makes the check FAIL with
+     "no field x on Y"; fix the name in the case.
+2. Compile: `./gradlew :neoforge-26.1.2:compileJava`.
+3. Launch it detached, as launch-game step 5, with the task
+   `:neoforge-26.1.2:runClientTestWorld` and the extra argument `-PmenuCrawl`
+   (`-PmenuCrawl=stay` keeps the client open afterwards). Set pauseOnLostFocus:false in
+   neoforge-26.1.2/run/options.txt first (launch-game step 6): an unfocused client pauses
+   and the crawl stops.
+4. Wait for `[crawl] done` in neoforge-26.1.2/run/logs/latest.log. It takes a few
+   minutes. The client closes itself. If the line count stops growing for two minutes, the
+   run is dead: read the last [crawl] lines and the crash report, and stop it with
+   tools/stop-dev-java.ps1.
+5. Read the result: `grep "\[crawl\]" latest.log`. The done line has the tally, and every
+   FAIL is repeated under it as "[crawl] failed: ...".
+6. Each FAIL is one of three things. Tell them apart before acting:
+   a. The case is wrong (a renamed field, a press aimed at the wrong place, an effect the
+      control was never meant to have). Fix the case.
+   b. The screen is wrong (a covered button, a slot off its window, a press that changes
+      nothing). That is a bug: report-bug's issue shape, label `bug`, with the [crawl]
+      line in it. Fix it now if it is small (fix-bug's rules).
+   c. A setup failure (the yard did not build, a record never reached the client). Every
+      later check fails after it; fix the setup and run again.
+7. Run again after a fix, until the only FAILs left are filed issues.
+
+DONE WHEN
+---------
+`[crawl] done` was reached, every FAIL is fixed or has an issue, and the client is closed.
+Report the tally (passed / failed / skipped), each issue filed, and what the skips are.
+Nothing visible changes, so there is no pictures step.
+
+NEVER
+-----
+- Never press a widget through its onPress. A covered button passes that and fails a
+  player: the "Make egg does nothing" bug was exactly that.
+- Never let a case pass on a state it could not read. A missing field is a FAIL.
+- Never run it on the owner's own world. The crawl spends items, spawns horses and
+  ejects chambers; it is safe only in the throwaway test world it creates.
+- Never leave the client config changed. The crawl saves and puts back the saved
+  searches, the gene filter, the tutorial flag and the clipboard; a crash mid-run skips
+  that, so check neoforge-26.1.2/run/phc/client.toml after one.
+
+SEE ALSO
+--------
+test-tiers (where this sits); launch-game; photograph-horses (how screens look); fix-bug;
+report-bug; client/ClientActionTrace (why a click is a click).
