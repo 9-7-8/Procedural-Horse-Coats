@@ -1041,6 +1041,7 @@ wiki/gene-ednrb.html#variable	science	A carrier does not have to look like one
 wiki/gene-ednrb.html#verified	coding	Verified in the test yard
 wiki/gene-ednrb.html#why-lethal	science	Why white hair and a fatal gut disease are the same gene
 wiki/gene-ednrb.html#why-own-locus	science	Why frame has a locus to itself
+wiki/gene-egg-layer.html#fed	gameplay	Feeding it makes it lay
 wiki/gene-egg-layer.html#ground	coding	On the ground, not into a chest
 wiki/gene-egg-layer.html#health	gameplay	Health
 wiki/gene-egg-layer.html#open	science	Opening the vocabulary

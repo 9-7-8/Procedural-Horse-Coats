@@ -23,7 +23,7 @@
     The horse lays. An egg, at first &mdash; but the locus is built to take an
     allele for any item in the game, and the egg is only the one everybody
     thinks of first. It drops on the ground where the horse is standing, on a
-    timer.
+    timer &mdash; and at once, whenever the horse is fed.
 </p>
 
 <section class="tab-panel" data-tab="gameplay">
@@ -45,7 +45,7 @@
 <table class="data">
     <thead><tr><th>Combination</th><th>Outcome</th></tr></thead>
     <tbody>
-        <tr><td>two copies of one allele</td><td>that item, dropped on an interval</td></tr>
+        <tr><td>two copies of one allele</td><td>that item, dropped on an interval and every time it eats from your hand</td></tr>
         <tr><td>two different alleles</td><td>nothing</td></tr>
         <tr><td>anything with an <code>n</code></td><td>nothing</td></tr>
     </tbody>
@@ -72,6 +72,17 @@
     <a href="gene-potion-milk.html">potion milk</a> are what it gives when you
     ask. This is what it produces while you are not watching, and it is the only
     one of the three that needs nothing from you at all.
+</p>
+
+<h2 id="fed">Feeding it makes it lay</h2>
+
+<p>
+    Every meal a layer eats from your hand &mdash; its favourite, what its diet
+    allows, or plain horse food &mdash; makes it lay one of its item on the spot,
+    and restarts its timer. A meal it refuses lays nothing. The food is the price:
+    a handful of wheat buys an Enderpony's pearl. The one limit is the same as the
+    timer's &mdash; a horse with eight of its item already on the ground nearby
+    lays no more until some is picked up. (Owner, 2026-10-16.)
 </p>
 
 <h2 id="health">Health</h2>
@@ -191,8 +202,16 @@
     <p>Egg layer is confirmed across the locus in the pens &mdash; mismatched pairs and carriers lay
     nothing, leather and the ender pearl lay their own item &mdash; but nobody has checked what the
     spawn egg&rsquo;s gene row calls those horses, that no wild horse lays while every Enderpony does,
-    or that two layers keep their own clocks.</p>
+    or that two layers keep their own clocks &mdash; and laying when fed (2026-10-16) has not run at all.</p>
 </div>
+
+<h3 id="open-1016-lays-when-fed">Laying when fed (2026-10-16, gametest not run)</h3>
+<ul>
+    <li><strong>The gametest <code>layer_lays_when_fed</code> has not run</strong> &mdash; the live
+        server had players on when it was written. <strong>Pass:</strong> one more egg on the ground
+        after one meal. In-game: hand-feed a layer wheat; its item drops at once, and a horse at full
+        health that refuses the wheat drops nothing.</li>
+</ul>
 
 <h3 id="open-gene-egg-layer">Still open (NOT played)</h3>
 

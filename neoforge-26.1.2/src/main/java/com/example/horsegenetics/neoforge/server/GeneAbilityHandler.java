@@ -2542,6 +2542,25 @@ public final class GeneAbilityHandler {
         if (!offCooldown(horse, geneKey, "produce", pr.intervalTicks())) {
             return;
         }
+        produce(pr, horse, level, geneKey);
+    }
+
+    /**
+     * <b>A meal makes a layer lay, now</b> (owner, 2026-10-16: "every meal lays").
+     * Every meal the horse actually eats, like the spawner's fed summon - the food
+     * is the cost, even when it buys an ender pearl. The ground cap still holds,
+     * and the timer restarts, so feeding brings the next lay forward rather than
+     * stacking a fed one on top of a timed one due a tick later.
+     */
+    private static void produceOnFeed(GeneAbility.Produce pr, Horse horse, ServerLevel level,
+                                      String geneKey) {
+        Map<CooldownKey, Long> mine = LAST_FIRED.computeIfAbsent(horse.getUUID(), k -> new HashMap<>(4));
+        mine.put(new CooldownKey(geneKey, "produce"), level.getGameTime());
+        produce(pr, horse, level, geneKey);
+    }
+
+    /** Drop the item, unless enough of it is already lying about. No clock - the callers own that. */
+    private static void produce(GeneAbility.Produce pr, Horse horse, ServerLevel level, String geneKey) {
         Identifier rl = Identifier.tryParse(pr.item());
         Item item = rl == null ? null : BuiltInRegistries.ITEM.getValue(rl);
         if (item == null || item == Items.AIR) {
@@ -2843,8 +2862,8 @@ public final class GeneAbilityHandler {
     }
 
     /**
-     * <b>Feeding fires the {@code on_feed} abilities</b> - today, only the
-     * spawner. Anything the horse eats from a hand counts: its favourite, what a
+     * <b>Feeding fires the {@code on_feed} abilities</b> - the spawner, and
+     * every {@code produce} (a layer lays when fed - see {@link #produceOnFeed}). Anything the horse eats from a hand counts: its favourite, what a
      * special diet accepts, or vanilla horse food for an ordinary horse - the
      * same split {@link CrouchFeedGoal} tempts with.
      *
@@ -2926,6 +2945,9 @@ public final class GeneAbilityHandler {
                         && su.trigger() instanceof GeneAbility.Trigger.OnFeed
                         && conditionHolds(su.when(), horse, record)) {
                     summon(su, horse, level, active.geneKey());
+                } else if (active.ability() instanceof GeneAbility.Produce pr
+                        && conditionHolds(pr.when(), horse, record)) {
+                    produceOnFeed(pr, horse, level, active.geneKey());
                 }
             }
         }

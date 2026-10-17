@@ -2335,6 +2335,7 @@ public final class ModGameTests {
         // Synchronous: one cross-world move, checked in the same tick.
         register(event, environment, TURNOUT_RELEASES_THE_HORSE_THAT_ARRIVED, 20);
         register(event, environment, TURNOUT_TAKES_A_WILD_HORSE_FOR_NOTHING, 20);
+        register(event, environment, LAYER_LAYS_WHEN_FED, 80);
         // Founded at 25, then a combat scan once a second - after the wait for the
         // field's forced chunks to tick (issue #70: up to 369 ticks seen in 120 tries,
         // most of them one), so a thousand ticks on top of what the test itself needs.
@@ -3599,6 +3600,55 @@ public final class ModGameTests {
             other.setChunkForced(0, 0, false);
         }
         helper.succeed();
+    }
+
+    /**
+     * <b>A layer lays when it is fed</b> (owner, 2026-10-16: "every meal lays"). An
+     * Egg/Egg horse is left to tick until its timer has had its first say, then fed
+     * wheat by a creative player (creative always counts as eaten); one more egg must
+     * be on the ground within a few ticks - far sooner than the 4000-tick timer could.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> LAYER_LAYS_WHEN_FED =
+            TEST_FUNCTIONS.register("layer_lays_when_fed", () -> ModGameTests::layerLaysWhenFed);
+
+    private static void layerLaysWhenFed(GameTestHelper helper) {
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, new BlockPos(2, 0, 2));
+        horse.setNoAi(true);
+        var gene = com.example.horsegenetics.common.genetics.Genes.byKey(
+                com.example.horsegenetics.common.genetics.genes.EggLayerGene.KEY);
+        var egg = gene.alleles().stream().filter(a -> a.token().equals("Egg")).findFirst().orElseThrow();
+        refound(horse, com.example.horsegenetics.common.genetics.Genotype.wildType()
+                .with(new com.example.horsegenetics.common.genetics.AllelePair(egg, egg)));
+        net.minecraft.world.entity.player.Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.CREATIVE);
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT));
+        int[] before = new int[1];
+        helper.runAfterDelay(40, () -> {
+            before[0] = eggsNear(helper, horse);
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                    new net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract(
+                            player, net.minecraft.world.InteractionHand.MAIN_HAND, horse));
+        });
+        helper.runAfterDelay(50, () -> {
+            int after = eggsNear(helper, horse);
+            if (after != before[0] + 1) {
+                helper.fail("eggs on the ground: " + before[0] + " before the meal, " + after
+                        + " after - a meal must lay exactly one");
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
+    private static int eggsNear(GameTestHelper helper, net.minecraft.world.entity.animal.equine.Horse horse) {
+        int n = 0;
+        for (var e : helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                horse.getBoundingBox().inflate(8))) {
+            if (e.getItem().is(Items.EGG)) {
+                n += e.getItem().getCount();
+            }
+        }
+        return n;
     }
 
     /**
