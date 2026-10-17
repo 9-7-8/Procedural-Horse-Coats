@@ -1,0 +1,72 @@
+2026-10-16 18:10 (end time) - Turnout ticket takes wild horses; a layer lays when fed
+
+ASKED
+- "a turnout ticket should send an untamed horse / wizard horse to the horse dimension. It
+  doesn't give any money, it jst serves as a way to get wild horses out of your house
+  without attacking them" - built (7cee6b76). "Wizard horse" matched nothing in the code
+  (the only "wizard" is the cowboy's name tables), so it was read as "wild horse".
+- "queue: when you feed a layer horse, it drops its item" - built after the first (1b32e6a6),
+  issue #258 filed, after one design question (below).
+- /end-session.
+
+DONE
+- 7cee6b76 Turnout ticket on an untamed horse. TicketHandler.turnOut refused any horse not
+  owned by the player, so a wild horse in a house could only be fought out. It now refuses
+  only somebody else's TAMED horse. turnOutTo reads isTamed() before the move and hands
+  HorseRelease.makeWild a null player for a horse that was wild, which skips the realm fee
+  (pay() pays only a non-null player) - otherwise tickets would sell wild horses for
+  emeralds. The chat line drops "and is nobody's now" for a wild one. Tooltip and class
+  doc in TurnoutTicketItem; wiki/item-tickets.html gameplay bullet. New gametest
+  turnout_takes_a_wild_horse_for_nothing (Nether stand-in, like
+  turnout_releases_the_horse_that_arrived). Proof: compileJava and :neoforge-26.1.2:build
+  green; the gametest NOT run. No pictures. No issue.
+- 1b32e6a6 A layer lays when fed (#258, open). Laying (GeneAbility.Produce, the egg-layer
+  gene) was timer-only. GeneAbilityHandler.drainPendingFeeds - which already decides
+  whether a hand-fed meal was really eaten, for the spawner's fed summon - now also calls
+  the new produceOnFeed for every active Produce whose condition holds: it restarts the
+  "produce" cooldown and lays through the new produce() (the old maybeProduce body minus
+  the clock), so the 8-nearby ground cap still applies. wiki/gene-egg-layer.html: lede,
+  table row, new section #fed. New gametest layer_lays_when_fed (Egg/Egg horse, creative
+  mock player posts an EntityInteract with wheat, expects exactly one more egg). Proof:
+  build green; the gametest NOT run. No pictures. #258 open, waiting on that PASS.
+
+DECIDED
+- Every hand-fed meal a layer eats lays one item at once and restarts its timer; the
+  ground cap stays; a refused meal lays nothing (owner, question tool - chosen over "only
+  if hungry" and "hurry the timer"). Recorded on #258 and wiki/gene-egg-layer.html#fed.
+- An untamed horse turned out pays no realm fee (owner: "It doesn't give any money").
+  Recorded in TurnoutTicketItem's doc and wiki/item-tickets.html.
+- Somebody else's tamed horse is still refused by the turnout ticket (made without the
+  owner; the request named only untamed horses). Same places.
+
+FOUND ON THE WAY
+- /horsebounty (RealmBountyCommand) pays for unsettled realm horses by tamedBy/bredBy. A
+  player-bred, never-tamed foal turned out by ticket earns no fee now, but a later
+  /horsebounty run would pay its breeder. Left alone: operator one-off, and paying a
+  breeder for an untamed foal is that command's stated rule. Not filed.
+- A fresh horse lays on its first ability tick after any server start (offCooldown fires
+  when it has no last-fired entry, and LAST_FIRED is in memory). Pre-existing, not filed;
+  layer_lays_when_fed waits 40 ticks for it before counting.
+- wiki/gene-egg-layer.html still has the "Built, and not yet seen in game" banner while its
+  Verification summary says the pens confirmed laying. Left alone; not this session's.
+- No mistakes needing repair.
+
+PROCEDURES
+- None needed. Asked all three: nothing followed went wrong (the live-server player check
+  in test-tiers.txt held the gametests back, as written); nothing repeatable without a
+  procedure; nothing renamed.
+
+NOT RUN / NOT CHECKED
+- Gametests turnout_takes_a_wild_horse_for_nothing and layer_lays_when_fed: two players were
+  on the live server all session (console.log, 17:40). No other gametests run.
+- Full :common:test not run; common/ was not touched, so it could not move.
+- Nothing seen in game.
+- Verification anchors added: wiki/item-tickets.html#open-1016-wild-turnout,
+  wiki/gene-egg-layer.html#open-1016-lays-when-fed.
+
+RELEASE
+- Not offered: two small changes, below the bar.
+
+PICK UP FIRST
+- With the live server empty, run the two new gametests (procedures/test-tiers.txt, tier 2)
+  and close #258 and both checks on a PASS (procedures/close-a-check.txt).
