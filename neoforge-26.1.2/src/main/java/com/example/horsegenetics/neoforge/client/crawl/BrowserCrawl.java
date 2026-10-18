@@ -29,8 +29,8 @@ final class BrowserCrawl {
 
     private static final String W = "HorseBrowserScreen";
 
-    private static final List<String> ROSTER = List.of("horseFilterBox", "genePickButton", "allelePickButton",
-            "savedSearchButton", "refreshRosterButton");
+    private static final List<String> ROSTER = List.of("horseFilterBox", "buildButton", "genePickButton",
+            "allelePickButton", "savedSearchButton", "refreshRosterButton");
 
     private BrowserCrawl() {
     }
@@ -95,7 +95,10 @@ final class BrowserCrawl {
             return n > 0 && n < all[0] ? null : n + " of " + all[0] + " genes shown";
         });
         then(() -> box("searchBox").setValue(""));
-        pause(SETTLE);
+        // The box is read into the list once a frame: wait for the whole list again, or the
+        // row pressed is a row of the filtered one.
+        eventually(W, "clearing the search box brings every gene back", 40,
+                () -> same("genes shown", all[0], ((List<?>) Objects.requireNonNull(field("filtered"))).size()));
         pressAt(W, "gene list row 3", () -> listRow(2));
         expect(W, "a gene row selects that gene", () -> {
             Object gene = ((List<?>) Objects.requireNonNull(field("filtered"))).get(2);
@@ -249,8 +252,8 @@ final class BrowserCrawl {
     private static void breeding() {
         pressTab("BREEDING_PREVIEW");
         pause(SETTLE);
-        sweep(W + " Breeding preview", List.of("breedingFilterBox", "savedSearchButton", "refreshRosterButton",
-                "settledToggle"), List.of());
+        sweep(W + " Breeding preview", List.of("breedingFilterBox", "buildButton", "savedSearchButton",
+                "refreshRosterButton", "settledToggle"), List.of());
         boolean[] settled = {false};
         then(() -> settled[0] = (Boolean) field("showSettled"));
         pressField(W, "settledToggle");
@@ -352,7 +355,7 @@ final class BrowserCrawl {
             double[] p = scan(s, hitTest(s, "tabAt"), t -> t == want);
             for (int i = 0; p == null && i < 60; i++) {
                 // Wheel over the strip: first towards its start, then towards its end.
-                s.mouseScrolled(s.width / 2.0, 12, 0, i < 30 ? 1 : -1);
+                wheel(s, s.width / 2.0, 12, 0, i < 30 ? 1 : -1);
                 if (i == 29) {
                     set(HorseBrowserScreen.class, "tabScroll", 0);
                 }
@@ -413,12 +416,12 @@ final class BrowserCrawl {
         Screen s = Objects.requireNonNull(screen());
         double[] at = wheelAt.get();
         for (int i = 0; i < 40; i++) {
-            s.mouseScrolled(at[0], at[1], 0, 1);
+            wheel(s, at[0], at[1], 0, 1);
         }
         for (int i = 0; i < 60 && p == null; i++) {
             p = find.get();
             if (p == null) {
-                s.mouseScrolled(at[0], at[1], 0, -1);
+                wheel(s, at[0], at[1], 0, -1);
             }
         }
         return p;

@@ -61,6 +61,10 @@ final class ContainerCrawl {
     static void queue() {
         serverDo("containers", s -> {
             var inv = MenuCrawlCases.player(s).getInventory();
+            // From empty: the test world's kit fills the inventory, and an item given to a full
+            // one - or handed back by a menu as it closes - is dropped and lost to the crawl.
+            inv.clearContent();
+            inv.add(new ItemStack(Items.SADDLE));
             for (Item item : List.of(Items.BOOK, Items.SPRUCE_PLANKS, Items.RED_DYE, Items.SADDLE, Items.STICK,
                     Items.WHEAT_SEEDS, Items.WATER_BUCKET, Items.WHEAT, Items.COBBLESTONE, Items.OAK_LOG, Items.STONE)) {
                 inv.add(new ItemStack(item, item.getDefaultMaxStackSize() > 1 ? 16 : 1));
@@ -163,6 +167,8 @@ final class ContainerCrawl {
 
     private static void bench() {
         String w = "EquestrianBenchScreen";
+        int[] saddles = {0};
+        serverDo(w, s -> saddles[0] = count(s, Items.SADDLE));
         openBlock(w, EquestrianBenchScreen.class, () -> DebugMenuCrawl.bench);
         layout(w);
         sweep(w, List.of("nameBox"), List.of());
@@ -176,6 +182,9 @@ final class ContainerCrawl {
         shiftIn(w, Items.SADDLE, s -> serverSlot(s, 0).is(Items.SADDLE) ? null : "no saddle in the tack slot");
         shiftIn(w, Items.RED_DYE, s -> serverSlot(s, 4).isEmpty() ? "no dyed saddle in the result" : null);
         close();
+        // Closing without taking the result hands every input back: nothing is spent.
+        eventuallyServer(w, "closing the bench gives the saddle back", 40,
+                s -> same("saddles in the inventory", saddles[0], count(s, Items.SADDLE)));
     }
 
     // ------------------------------------------------------------------ the stasis bank
@@ -188,7 +197,7 @@ final class ContainerCrawl {
             expect(w, "the " + t + " tab opens", () -> same("tab", t, name(get(Objects.requireNonNull(screen()), "tab"))));
             layout(w + " " + t);
             if (t.equals("BROWSE")) {
-                sweep(w + " Browse", List.of("filterBox", "savedSearchButton"), List.of());
+                sweep(w + " Browse", List.of("filterBox", "buildButton", "savedSearchButton"), List.of());
             } else if (t.equals("CHAMBERS")) {
                 sweep(w + " Chambers", List.of("ejectButton"), List.of());
             } else {
@@ -339,6 +348,17 @@ final class ContainerCrawl {
             return null;
         }, 0, SHIFT);
         eventuallyServer(w, "a shift-clicked " + item + " goes where it belongs", 40, landed);
+    }
+
+    private static int count(IntegratedServer s, Item item) {
+        var inv = MenuCrawlCases.player(s).getInventory();
+        int n = 0;
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            if (inv.getItem(i).is(item)) {
+                n += inv.getItem(i).getCount();
+            }
+        }
+        return n;
     }
 
     private static AbstractContainerScreen<?> cs() {

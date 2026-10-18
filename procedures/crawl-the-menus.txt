@@ -14,7 +14,24 @@ After any change to one of this mod's screens (anything under client/ that exten
 or AbstractContainerScreen, its menu, or the payload a button sends), and in the release
 set. The crawler opens every mod screen, presses every control at its screen coordinates
 through the screen's own mouseClicked, and checks that the press did what the control is
-for - reading the effect off the screen's state or off the server. It does not judge how
+for - reading the effect off the screen's state or off the server. Its last case, the
+query crawl (QueryCrawl), builds queries in the builder by hand, saves each by name,
+applies it through the saved-search menu of every place a query works (My horses, both
+Breeding preview pickers, the stasis bank's Browse tab, the cowboy's counter) and builds
+two of them again in each place's Build popup, checking that each place shows exactly the
+horses the query means - against a predicate written in the case, not against HorseQuery.
+Then the vocabulary pass (VocabularyCrawl) builds one query per key and per flag
+HorseQuery knows, each with a value off a real horse, on My horses and at the counter; a
+term with no case there FAILs, and so does one that found no horse anywhere (the yard
+stages a lethal colt and a gelding with a condition in a herd so every flag can match).
+`-PmenuCrawl=queries` runs both alone. The layout audit (LayoutAudit, with
+mixin/GuiCaptureMixin recording one drawn frame) runs alongside when the value has
+"layout" in it (`-PmenuCrawl=layout`, `-PmenuCrawl=queries,layout`): at every sweep, open
+menu, saved-search menu and filled-in Build popup it checks that no two widgets overlap or
+run off the screen, and that every string is on screen, not cut off at the side, drawn at
+70% size or more, not on top of other text (unless an opaque box between them hides it),
+and at least 3:1 contrast against the solid box under it. A textured background is not
+judged. Each distinct finding is one FAIL per run. It does not judge how
 a screen looks: that is photograph-horses. It does not test gameplay a screen merely
 starts (a recall, a breeding): those are gametests (test-tiers, tier 2).
 

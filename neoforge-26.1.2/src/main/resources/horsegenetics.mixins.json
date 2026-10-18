@@ -29,7 +29,8 @@
     "JumpBarCooldownMixin",
     "FadingGearMixin",
     "CartModelManagerMixin",
-    "CartModelPartMixin"
+    "CartModelPartMixin",
+    "GuiCaptureMixin"
   ],
   "injectors": {
     "defaultRequire": 1

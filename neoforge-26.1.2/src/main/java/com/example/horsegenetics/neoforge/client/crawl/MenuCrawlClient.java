@@ -78,6 +78,32 @@ public final class MenuCrawlClient {
         }
     }
 
+    /**
+     * Which code closed a screen, while a crawl runs: a screen that vanishes between two
+     * steps is otherwise a mystery in the log. The first frames outside the event bus say.
+     */
+    @SubscribeEvent
+    static void onScreenClosing(net.neoforged.neoforge.client.event.ScreenEvent.Closing event) {
+        if (!enabled() || !started || finished) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        int shown = 0;
+        for (StackTraceElement e : new Throwable().getStackTrace()) {
+            String c = e.getClassName();
+            if (c.startsWith("net.neoforged.bus") || c.contains("MenuCrawlClient") || c.startsWith("java.")
+                    || c.startsWith("jdk.")) {
+                continue;
+            }
+            sb.append(" < ").append(c.substring(c.lastIndexOf('.') + 1)).append('.').append(e.getMethodName())
+                    .append(':').append(e.getLineNumber());
+            if (++shown == 8) {
+                break;
+            }
+        }
+        HorseGenetics.LOGGER.info("[crawl] screen closing: {}{}", event.getScreen().getClass().getSimpleName(), sb);
+    }
+
     private static void begin() {
         HorseGenetics.LOGGER.info("[crawl] start");
         snapshot();
@@ -102,7 +128,7 @@ public final class MenuCrawlClient {
         for (String f : Crawl.failures) {
             HorseGenetics.LOGGER.info("[crawl] failed: {}", f);
         }
-        if (!"stay".equals(System.getProperty(PROPERTY))) {
+        if (!String.valueOf(System.getProperty(PROPERTY)).contains("stay")) {
             mc.stop();
         }
     }

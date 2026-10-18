@@ -26,7 +26,19 @@ final class MenuCrawlCases {
     }
 
     static void queueAll() {
+        if (LayoutAudit.enabled()) {
+            // The audit's own arithmetic, once: black on white is WCAG's 21:1.
+            then(() -> check("layout", "the contrast sum is right (white on black is 21:1)",
+                    Math.abs(LayoutAudit.contrast(0xFFFFFF, 0x000000) - 21.0) < 0.01 ? null
+                            : "it says " + LayoutAudit.contrast(0xFFFFFF, 0x000000)));
+        }
         setUp();
+        // -PmenuCrawl=queries runs the query crawl alone (it needs nothing the others leave).
+        if (String.valueOf(System.getProperty(MenuCrawlClient.PROPERTY)).contains("queries")) {
+            QueryCrawl.queue();
+            then(() -> pass("crawler", "every case ran to the end"));
+            return;
+        }
         SpawnScreenCrawl.queue();
         RenameCrawl.queue();
         InfoScreenCrawl.queue();
@@ -34,6 +46,7 @@ final class MenuCrawlCases {
         WheelCrawl.queue();
         BrowserCrawl.queue();
         ContainerCrawl.queue();
+        QueryCrawl.queue();
         then(() -> pass("crawler", "every case ran to the end"));
     }
 

@@ -62,10 +62,16 @@ public final class DebugMenuCrawl {
     public static @Nullable UUID mare;
     public static @Nullable UUID stallion;
     public static @Nullable UUID foal;
+    /** A colt carrying a lethal, and a gelding with a condition, in a herd - the rarer query flags. */
+    public static @Nullable UUID colt;
+    public static @Nullable UUID gelding;
     public static @Nullable UUID plow;
     public static @Nullable UUID drill;
     public static @Nullable UUID wagonSmall;
     public static @Nullable UUID wagonBig;
+    /** A cowboy, and the string of untamed horses he sells (for the query crawl's counter). */
+    public static @Nullable UUID cowboy;
+    public static final java.util.List<UUID> stock = new java.util.ArrayList<>();
 
     /** The research paper filed on the shelf, and a second one the crawl files by hand. */
     public static String shelfTopic = "";
@@ -113,11 +119,30 @@ public final class DebugMenuCrawl {
         Horse baby = spawnHorse(level, at.offset(2, 0, -2));
         baby.setAge(-24000);
         foal = baby.getUUID();
+        Horse youngster = spawnHorse(level, at.offset(-2, 0, -2));
+        youngster.setAge(-24000);
+        colt = youngster.getUUID();
+        gelding = spawnHorse(level, at.offset(4, 0, -4)).getUUID();
 
         plow = spawnCart(level, HorseCarts.PLOW_ENTITY, at.offset(6, 0, 6)).getUUID();
         drill = spawnCart(level, HorseCarts.SEED_DRILL_ENTITY, at.offset(-6, 0, 6)).getUUID();
         wagonSmall = spawnWagon(level, at.offset(6, 0, -6), 1).getUUID();
         wagonBig = spawnWagon(level, at.offset(-6, 0, -6), 3).getUUID();
+        var dealer = com.example.horsegenetics.neoforge.entity.ModEntities.COWBOY.get()
+                .create(level, EntitySpawnReason.COMMAND);
+        if (dealer != null) {
+            // Within reach of the player at the yard's centre: the merchant menu is only
+            // valid while the customer can touch him, and eight blocks off the server shut
+            // the counter the tick after it opened.
+            dealer.setPos(at.getX() - 1.0, at.getY(), at.getZ() + 0.5);
+            dealer.setNoAi(true);
+            level.addFreshEntity(dealer);
+            cowboy = dealer.getUUID();
+        }
+        stock.clear();
+        for (int i = 0; i < 3; i++) {
+            stock.add(spawnHorse(level, at.offset(9, 0, -3 + 3 * i)).getUUID());
+        }
         HorseGenetics.LOGGER.info("[crawl] yard built at {}", at);
     }
 
@@ -137,9 +162,81 @@ public final class DebugMenuCrawl {
         own(player, m, Sex.FEMALE);
         own(player, s, Sex.MALE);
         own(player, f, Sex.FEMALE);
+        Horse c = horse(player, colt);
+        Horse g = horse(player, gelding);
+        if (c == null || g == null || !HorseRecords.hasRealRecord(c) || !HorseRecords.hasRealRecord(g)) {
+            return false;
+        }
+        // Rolled until the query vocabulary has something to find: a lethal carrier, and a
+        // horse with any condition at all - flags no founder is sure to have.
+        if (!HorseRecords.of(c).sex().equals(Sex.MALE) || !hasCondition(HorseRecords.of(c), true)) {
+            HorseRecords.apply(c, rollUntil(c, Sex.MALE, true));
+        }
+        own(player, c, Sex.MALE);
+        if (!HorseRecords.of(g).sex().equals(Sex.MALE) || !hasCondition(HorseRecords.of(g), false)) {
+            HorseRecords.apply(g, rollUntil(g, Sex.MALE, false));
+        }
+        own(player, g, Sex.MALE);
+        if (!HorseRecords.of(g).gelded()) {
+            HorseRecords.apply(g, HorseRecords.of(g).withGelded(true));
+        }
+        var care = ModAttachments.HORSE_CARE.get();
+        g.setData(care, g.getData(care).withHerd(java.util.Optional.of(g.getUUID())));
+        Horse mareHorse = m;
+        HorseRecords.setBarnName(mareHorse, "Crawl Barn");
+        // The cowboy's string: two mares and a stallion, wild, founded, his to sell.
+        if (!(entity(player, cowboy) instanceof com.example.horsegenetics.neoforge.entity.Cowboy dealer)) {
+            return false;
+        }
+        Sex[] sexes = {Sex.FEMALE, Sex.FEMALE, Sex.MALE};
+        for (int i = 0; i < stock.size(); i++) {
+            Horse h = horse(player, stock.get(i));
+            if (h == null || !HorseRecords.hasRealRecord(h)) {
+                return false;
+            }
+            if (HorseRecords.of(h).sex() != sexes[i]) {
+                HorseRecords.apply(h, HorseRecords.newFounder(h, new NeoRng(h.getRandom()), Breeds.FERAL_MIXED, sexes[i]));
+            }
+            if (!dealer.herdIds().contains(h.getUUID())) {
+                dealer.addToHerd(h.getUUID());
+            }
+        }
         // The foal is the mare's and the stallion's, so the family tree has a node to click.
         HorseRecords.apply(f, HorseRecords.of(f).withParents(m.getUUID(), s.getUUID()));
         return true;
+    }
+
+    /** Does this record's horse have a condition - a lethal one, if {@code lethal}? */
+    private static boolean hasCondition(com.example.horsegenetics.common.horse.HorseRecord record, boolean lethal) {
+        var traits = com.example.horsegenetics.common.trait.HorseTraits.resolve(record.genome().genotype(), null, true);
+        for (var condition : traits.conditions()) {
+            if (!lethal || condition.severity().lethal()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** A founder of this sex with a (lethal) condition, or the last roll if none turns up. */
+    private static com.example.horsegenetics.common.horse.HorseRecord rollUntil(Horse horse, Sex sex, boolean lethal) {
+        com.example.horsegenetics.common.horse.HorseRecord rec = HorseRecords.of(horse);
+        if (lethal) {
+            // A founder almost never carries a lethal (4000 rolls found none): give it one.
+            // Milk's water and lava copies together are an embryonic lethal (MilkGene).
+            rec = HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), sex,
+                    com.example.horsegenetics.common.genetics.Genotype.parse("horsegenetics.milk=Watr/Lava"));
+            if (hasCondition(rec, true)) {
+                return rec;
+            }
+        }
+        for (int i = 0; i < 4000; i++) {
+            rec = HorseRecords.newFounder(horse, new NeoRng(horse.getRandom()), Breeds.FERAL_MIXED, sex);
+            if (hasCondition(rec, lethal)) {
+                return rec;
+            }
+        }
+        HorseGenetics.LOGGER.warn("[crawl] no founder with a{} condition in 4000 rolls", lethal ? " lethal" : "");
+        return rec;
     }
 
     private static void own(ServerPlayer player, Horse horse, Sex sex) {
@@ -195,15 +292,55 @@ public final class DebugMenuCrawl {
 
     /** Right-click a menu block with an empty hand, as a player would. */
     public static void openBlock(ServerPlayer player, BlockPos pos) {
-        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        emptyHand(player);
+        // Stand beside it first: a menu is only valid within reach, and the last thing the
+        // crawl opened (the cowboy) may have walked the player away.
+        player.teleportTo(player.level(), pos.getX() + 0.5, pos.getY(), pos.getZ() + 1.5, Set.of(), 180f, 0f, false);
         player.level().getBlockState(pos).useWithoutItem(player.level(), player,
                 new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
+    }
+
+    /**
+     * An empty hand for a right-click, without losing what was in it: the held stack goes to
+     * the first free backpack slot. (Clearing the hand used to delete it - the container
+     * crawl's saddle, the one the gear menu needed, among them.)
+     */
+    private static void emptyHand(ServerPlayer player) {
+        ItemStack held = player.getMainHandItem().copy();
+        player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        if (held.isEmpty()) {
+            return;
+        }
+        var inv = player.getInventory();
+        for (int i = 9; i < 36; i++) {
+            if (inv.getItem(i).isEmpty()) {
+                inv.setItem(i, held);
+                return;
+            }
+        }
+        inv.add(held);
     }
 
     /** A cart's own inventory - the sneak-right-click path. */
     public static void openCart(ServerPlayer player, @Nullable UUID id) {
         if (id != null && player.level().getEntity(id) instanceof AbstractDrawnInventoryEntity cart) {
+            // Beside it: a cart's inventory, like any menu, is only open while it is in reach.
+            player.teleportTo(player.level(), cart.getX() + 1.5, cart.getY(), cart.getZ(), Set.of(), 90f, 0f, false);
             cart.openCustomInventoryScreen(player);
+        }
+    }
+
+    /** Walk up to the cowboy with an empty hand: his counter opens on the whole string. */
+    public static void openCowboy(ServerPlayer player) {
+        emptyHand(player);
+        if (entity(player, cowboy) instanceof com.example.horsegenetics.neoforge.entity.Cowboy dealer) {
+            // Walk up to him first, the way a customer does, facing him.
+            player.teleportTo(player.level(), dealer.getX() + 1.5, dealer.getY(), dealer.getZ(),
+                    Set.of(), 90f, 0f, false);
+            dealer.mobInteract(player, InteractionHand.MAIN_HAND);
+            HorseGenetics.LOGGER.info("[crawl] cowboy counter: trading {}, alive {}, in reach {}, still valid {}",
+                    dealer.getTradingPlayer() == player, dealer.isAlive(),
+                    player.isWithinEntityInteractionRange(dealer, 4.0), dealer.stillValid(player));
         }
     }
 

@@ -94,10 +94,10 @@ final class FamilyCrawl {
         then(() -> fitted[0] = (Float) field("zoom"));
         then(() -> {
             Screen s = Objects.requireNonNull(screen());
-            s.mouseScrolled(s.width / 2.0, s.height / 2.0, 0, 3);
+            wheel(s, s.width / 2.0, s.height / 2.0, 0, 3);
             if (Objects.equals(fitted[0], get(s, "zoom"))) {
                 // Already fitted at the most zoomed-in it goes: the other way, then.
-                s.mouseScrolled(s.width / 2.0, s.height / 2.0, 0, -6);
+                wheel(s, s.width / 2.0, s.height / 2.0, 0, -6);
             }
         });
         pause(SETTLE);

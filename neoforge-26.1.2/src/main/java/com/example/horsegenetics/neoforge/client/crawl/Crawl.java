@@ -108,22 +108,22 @@ final class Crawl {
         }
         int budget = 200;
         while (!queue.isEmpty() && budget-- > 0) {
-            Step step = queue.peekFirst();
+            // Taken off before it runs, so a step may drop the ones after it (skipUntil).
+            Step step = queue.pollFirst();
             int r;
             try {
                 r = step.run();
             } catch (Throwable t) {
-                queue.pollFirst();
                 fail("crawler", "a step threw " + t);
                 HorseGenetics.LOGGER.warn("[crawl] the step that threw", t);
                 againFor = 0;
                 continue;
             }
             if (r == AGAIN) {
+                queue.addFirst(step);
                 againFor++;
                 return;
             }
-            queue.pollFirst();
             againFor = 0;
             if (r > 0) {
                 wait = r;
@@ -173,14 +173,65 @@ final class Crawl {
     static void click(double x, double y, int button, int modifiers) {
         Screen s = Objects.requireNonNull(screen(), "no screen to click");
         MouseButtonEvent e = event(x, y, button, modifiers);
-        s.mouseClicked(e, false);
+        // The way MouseHandler.onButton hands a press to a screen: NeoForge's Pre event,
+        // the screen, then Post. Mods hang click handlers off those events (the cowboy's
+        // saved-search menu does), so calling mouseClicked alone would miss them.
+        if (!net.neoforged.neoforge.client.ClientHooks.onScreenMouseClickedPre(s, e, false)) {
+            boolean handled = s.mouseClicked(e, false);
+            net.neoforged.neoforge.client.ClientHooks.onScreenMouseClickedPost(s, e, false, handled);
+        }
         // The press may have replaced the screen; the release goes to whatever is up now,
         // as it would for a real mouse.
         Screen after = screen();
-        if (after != null) {
-            after.mouseReleased(e);
+        if (after != null && !net.neoforged.neoforge.client.ClientHooks.onScreenMouseReleasedPre(after, e)) {
+            boolean handled = after.mouseReleased(e);
+            net.neoforged.neoforge.client.ClientHooks.onScreenMouseReleasedPost(after, e, handled);
         }
     }
+
+    /** Type {@code text} into whatever has the keyboard, a character at a time, as the keyboard would. */
+    static void type(String text) {
+        text.codePoints().forEach(cp -> {
+            Screen s = Objects.requireNonNull(screen(), "no screen to type on");
+            var e = new net.minecraft.client.input.CharacterEvent(cp);
+            if (!net.neoforged.neoforge.client.ClientHooks.onScreenCharTypedPre(s, e)) {
+                s.charTyped(e);
+                net.neoforged.neoforge.client.ClientHooks.onScreenCharTypedPost(s, e);
+            }
+        });
+    }
+
+    /** Press and let go of one key (a GLFW key code), as the keyboard would. */
+    static void key(int glfwKey) {
+        Screen s = Objects.requireNonNull(screen(), "no screen for a key");
+        var e = new net.minecraft.client.input.KeyEvent(glfwKey, 0, 0);
+        if (!net.neoforged.neoforge.client.ClientHooks.onScreenKeyPressedPre(s, e)) {
+            boolean handled = s.keyPressed(e);
+            if (!handled) {
+                net.neoforged.neoforge.client.ClientHooks.onScreenKeyPressedPost(s, e);
+            }
+        }
+    }
+
+    /**
+     * Turn the wheel at (x, y), as MouseHandler.onScroll would: NeoForge's MouseScrolled.Pre
+     * event, the screen, then Post. Its own hook reads the position off the physical mouse,
+     * so the event is posted here with the crawler's point instead. Mods scroll their
+     * overlays off that event (the cowboy's builder does); mouseScrolled alone misses them.
+     */
+    static void wheel(Screen s, double x, double y, double dx, double dy) {
+        var pre = new net.neoforged.neoforge.client.event.ScreenEvent.MouseScrolled.Pre(s, x, y, dx, dy);
+        if (net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(pre).isCanceled()) {
+            return;
+        }
+        if (!s.mouseScrolled(x, y, dx, dy)) {
+            net.neoforged.neoforge.common.NeoForge.EVENT_BUS.post(
+                    new net.neoforged.neoforge.client.event.ScreenEvent.MouseScrolled.Post(s, x, y, dx, dy));
+        }
+    }
+
+    static final int ENTER = 257;
+    static final int ESCAPE = 256;
 
     /** Press at (x, y), drag by (dx, dy), release there - a turn of a portrait, a pan. */
     static void drag(double x, double y, double dx, double dy) {
@@ -506,6 +557,35 @@ final class Crawl {
 
     // ------------------------------------------------------------------ step builders
 
+    /** A place in the queue that {@link #skipUnless} can skip to. */
+    static Step marker() {
+        Step m = () -> 0;
+        return m;
+    }
+
+    /**
+     * If {@code ok} is false when this step's turn comes, drop every step after it up to
+     * and including {@code until} - the rest of a case that cannot mean anything now (a
+     * query that could not be built has nothing to save or apply), logged as one SKIP
+     * rather than a cascade of FAILs.
+     */
+    static void skipUnless(java.util.function.BooleanSupplier ok, Step until, String where, String why) {
+        queue.add(() -> {
+            if (!ok.getAsBoolean()) {
+                skip(where, why);
+                while (!queue.isEmpty() && queue.pollFirst() != until) {
+                    // dropped
+                }
+            }
+            return 0;
+        });
+    }
+
+    /** Put a marker made by {@link #marker} into the queue here. */
+    static void place(Step marker) {
+        queue.add(marker);
+    }
+
     /** Do {@code job} and go straight on. */
     static void then(Runnable job) {
         queue.add(() -> {
@@ -716,6 +796,7 @@ final class Crawl {
 
     /** {@link #sweep}, with {@code also} naming widgets no field or prefix can (a gene row's allele). */
     static void sweep(String where, List<String> fields, List<String> prefixes, Predicate<AbstractWidget> also) {
+        LayoutAudit.audit(where);
         queue.add(() -> {
             Screen s = screen();
             if (s == null) {
@@ -766,10 +847,24 @@ final class Crawl {
 
     static void close() {
         queue.add(() -> {
+            // The way Escape closes: onClose, which for a container also tells the server
+            // (setScreen(null) alone leaves the menu open there, and the next menu the
+            // server opens is refused or shut). A screen with a parent goes back to it,
+            // so it is pressed until nothing is up.
+            for (int i = 0; i < 5 && screen() != null; i++) {
+                Objects.requireNonNull(screen()).onClose();
+            }
             if (screen() != null) {
                 mc().setScreen(null);
             }
             return SETTLE;
+        });
+        // A container's close reaches the server as a packet, and the server closes
+        // whatever menu is open when it lands - so a menu opened before it arrives is shut
+        // by it. Wait for the server to be back on the player's own inventory.
+        eventuallyServer("crawler", "the last menu has closed on the server", 60, s -> {
+            var p = s.getPlayerList().getPlayer(java.util.Objects.requireNonNull(mc().player).getUUID());
+            return p == null || p.containerMenu == p.inventoryMenu ? null : "still open";
         });
     }
 
