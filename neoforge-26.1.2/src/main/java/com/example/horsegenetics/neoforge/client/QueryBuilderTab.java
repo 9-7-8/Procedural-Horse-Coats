@@ -24,10 +24,13 @@ import java.util.Locale;
  * a row of dropdowns per clause, the query written out as you build it, and a
  * live count of what it would match. (Owner, 2026-09-26.)
  *
- * <p>It exists <b>here and nowhere else</b> on purpose. The stasis bank and the
- * cowboy's counter are vanilla-sized panels with no room for it, so those get
- * the other two ways in - type it, or pick one you saved here. That is the whole
- * shape of the feature: build in the roomy screen, use anywhere.
+ * <p><b>One builder, everywhere a query is typed.</b> The Query tab draws it full
+ * page; every filter box (My horses, the realm, Breeding preview, the stasis bank,
+ * the cowboy's counter) opens the same thing as a {@link QueryBuilderPopup} under
+ * its Build button, filled from what is in the box and writing back into it as it
+ * changes. (Owner, 2026-10-17. It used to live on the Query tab alone - "build in
+ * the roomy screen, use anywhere" - so a search had to be saved there before the
+ * bank or the counter could use it.) The rows narrow to fit a vanilla-sized panel.
  *
  * <h2>Why it writes text rather than holding a tree</h2>
  * The builder's output is a <b>string in the same language a player could have
@@ -48,6 +51,15 @@ public final class QueryBuilderTab {
     private static final int COL_W = 132;
     private static final int OP_W = 44;
     private static final int VAL_W = 150;
+    /** The narrowest a column or value cell goes before the row stops fitting at all. */
+    private static final int MIN_FREE_W = 64;
+
+    /** This frame's column and value widths: the full ones, or less on a narrow panel. */
+    private int colW = COL_W;
+    private int valW = VAL_W;
+
+    /** What the third action says: "Use it" on the Query tab, "Done" in a popup. */
+    private String useLabel = "Use it";
     private static final int KILL_W = 14;
     private static final int PAD = 4;
 
@@ -93,6 +105,13 @@ public final class QueryBuilderTab {
      */
     private final TypeAhead typeAhead = new TypeAhead();
 
+    /**
+     * What has been typed into an open VALUE menu, in full. The type-ahead only jumps
+     * through a list, and a number or a name has no list: this is the value Enter takes
+     * when nothing listed is it.
+     */
+    private final StringBuilder typedValue = new StringBuilder();
+
     /** Which entry the type-ahead last landed on, so it is drawn as chosen. */
     private int menuCursor;
 
@@ -109,6 +128,128 @@ public final class QueryBuilderTab {
 
     public QueryBuilderTab() {
         clauses.add(new Clause());
+    }
+
+    /** "Use it" on the Query tab; a popup says "Done". */
+    public void setUseLabel(String label) {
+        this.useLabel = label;
+    }
+
+    /** Back to one empty clause, no menu open. */
+    public void reset() {
+        clauses.clear();
+        clauses.add(new Clause());
+        closeMenu();
+    }
+
+    /**
+     * <b>Fill the rows from a query as typed</b>, so a popup opens on what is already in
+     * its box. It reads the flat shape the builder itself writes - clauses joined by AND
+     * or OR, each optionally NOT, each a bare word or {@code column op value} - and the
+     * old space-separated terms as AND. A shape that cannot be rows (brackets, a
+     * {@code key:value} term) leaves the builder empty and returns false; the caller says
+     * so rather than show the player a different query from the one in their box.
+     */
+    public boolean load(String text) {
+        List<String> tokens = tokens(text);
+        if (tokens == null || tokens.isEmpty()) {
+            reset();
+            return tokens != null;
+        }
+        List<Clause> out = new ArrayList<>();
+        String joiner = "AND";
+        int i = 0;
+        while (i < tokens.size()) {
+            Clause clause = new Clause();
+            clause.joiner = joiner;
+            if (tokens.get(i).equalsIgnoreCase("NOT")) {
+                clause.not = true;
+                i++;
+            }
+            if (i >= tokens.size() || isWord(tokens.get(i), "AND", "OR", "NOT")
+                    || OPS.contains(upper(tokens.get(i)))) {
+                reset();
+                return false;
+            }
+            String column = unquote(tokens.get(i++));
+            if (column.indexOf(':') >= 0) {
+                reset();
+                return false;
+            }
+            clause.column = column;
+            if (i < tokens.size() && OPS.contains(upper(tokens.get(i)))) {
+                clause.op = upper(tokens.get(i++));
+                if (i >= tokens.size()) {
+                    reset();
+                    return false;
+                }
+                clause.value = unquote(tokens.get(i++));
+            }
+            out.add(clause);
+            joiner = "AND";
+            if (i < tokens.size() && isWord(tokens.get(i), "AND", "OR")) {
+                joiner = upper(tokens.get(i++));
+            }
+        }
+        clauses.clear();
+        clauses.addAll(out);
+        closeMenu();
+        return true;
+    }
+
+    /** Words, operators and 'quoted strings'; null on a bracket or an unclosed quote. */
+    private static List<String> tokens(String text) {
+        List<String> out = new ArrayList<>();
+        int i = 0;
+        while (i < text.length()) {
+            char c = text.charAt(i);
+            if (Character.isWhitespace(c)) {
+                i++;
+            } else if (c == '(' || c == ')') {
+                return null;
+            } else if (c == '\'') {
+                int end = text.indexOf('\'', i + 1);
+                if (end < 0) {
+                    return null;
+                }
+                out.add(text.substring(i, end + 1));
+                i = end + 1;
+            } else if ("=!<>".indexOf(c) >= 0) {
+                int j = i + 1;
+                if (j < text.length() && text.charAt(j) == '=') {
+                    j++;
+                }
+                out.add(text.substring(i, j));
+                i = j;
+            } else {
+                int j = i;
+                while (j < text.length() && !Character.isWhitespace(text.charAt(j))
+                        && "=!<>()'".indexOf(text.charAt(j)) < 0) {
+                    j++;
+                }
+                out.add(text.substring(i, j));
+                i = j;
+            }
+        }
+        return out;
+    }
+
+    private static String unquote(String token) {
+        return token.length() >= 2 && token.startsWith("'") && token.endsWith("'")
+                ? token.substring(1, token.length() - 1) : token;
+    }
+
+    private static String upper(String token) {
+        return token.toUpperCase(Locale.ROOT);
+    }
+
+    private static boolean isWord(String token, String... words) {
+        for (String w : words) {
+            if (token.equalsIgnoreCase(w)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** The query as it stands, in the language the filter boxes take. */
@@ -152,7 +293,15 @@ public final class QueryBuilderTab {
         String lower = word.toLowerCase(Locale.ROOT);
         boolean keyword = lower.equals("and") || lower.equals("or") || lower.equals("not")
                 || lower.equals("in") || lower.equals("like");
-        if (word.indexOf(' ') >= 0 || keyword) {
+        // Quoted when the parser would otherwise split it: a space, a comma (an IN list),
+        // a bracket or an operator character. A coat reads "Bay, primitive markings", and
+        // its first word picked as a value was written bare as "Bay," and matched nothing
+        // (the query crawl's vocabulary pass, 2026-10-18).
+        boolean breaks = false;
+        for (char c : word.toCharArray()) {
+            breaks |= Character.isWhitespace(c) || ",()=<>!".indexOf(c) >= 0;
+        }
+        if (breaks || keyword) {
             return "'" + word + "'";
         }
         return word;
@@ -170,6 +319,11 @@ public final class QueryBuilderTab {
         hits.clear();
         actions.clear();
         int y = top;
+        // Join, NOT, operator and delete keep their size; the column and the value share
+        // what is left, so a row fits the cowboy's counter as well as the browser.
+        int free = width - (JOIN_W + NOT_W + OP_W + KILL_W + 5 * PAD);
+        colW = Math.max(MIN_FREE_W, Math.min(COL_W, free * 47 / 100));
+        valW = Math.max(MIN_FREE_W, Math.min(VAL_W, free - colW));
 
         for (int i = 0; i < clauses.size(); i++) {
             drawRow(g, font, clauses.get(i), i, left, y, mouseX, mouseY);
@@ -195,7 +349,7 @@ public final class QueryBuilderTab {
         y += 12;
 
         x = left;
-        x += drawAction(g, font, "Use it", -3, x, y, mouseX, mouseY,
+        x += drawAction(g, font, useLabel, -3, x, y, mouseX, mouseY,
                 text.isEmpty() ? DIM : GOOD) + PAD;
         x += drawAction(g, font, "Save...", -4, x, y, mouseX, mouseY,
                 text.isEmpty() ? DIM : TEXT) + PAD;
@@ -215,20 +369,20 @@ public final class QueryBuilderTab {
                 clause.not ? GOOD : DIM);
         x += NOT_W + PAD;
         cell(g, font, clause.column.isEmpty() ? "column..." : clause.column,
-                index, Menu.COLUMN, x, y, COL_W, mouseX, mouseY,
+                index, Menu.COLUMN, x, y, colW, mouseX, mouseY,
                 clause.column.isEmpty() ? DIM : TEXT);
-        x += COL_W + PAD;
+        x += colW + PAD;
         // No operator on a flag - "mare = something" is not a thing to offer.
         boolean wantsValue = !clause.column.isEmpty() && !isFlag(clause.column);
         if (wantsValue) {
             cell(g, font, clause.op, index, Menu.OP, x, y, OP_W, mouseX, mouseY, TEXT);
             x += OP_W + PAD;
             cell(g, font, clause.value.isEmpty() ? "value..." : clause.value,
-                    index, Menu.VALUE, x, y, VAL_W, mouseX, mouseY,
+                    index, Menu.VALUE, x, y, valW, mouseX, mouseY,
                     clause.value.isEmpty() ? DIM : TEXT);
-            x += VAL_W + PAD;
+            x += valW + PAD;
         } else {
-            x += OP_W + PAD + VAL_W + PAD;
+            x += OP_W + PAD + valW + PAD;
         }
         cell(g, font, "x", index, Menu.NONE, x, y, KILL_W, mouseX, mouseY, DIM);
         // The two Menu.NONE cells above are the NOT toggle and the delete; they
@@ -266,8 +420,11 @@ public final class QueryBuilderTab {
         g.fill(menuX - 1, menuY - 1, menuX + MENU_W + 1, menuY + h + 1, EDGE);
         g.fill(menuX, menuY, menuX + MENU_W, menuY + h, WELL);
 
-        String typed = typeAhead.typed();
-        fitted(g, font, typed.isEmpty() ? "type to jump" : typed,
+        String typed = menu == Menu.VALUE ? typedValue.toString() : typeAhead.typed();
+        String hint = menu == Menu.VALUE
+                ? (options.isEmpty() ? "type a value, Enter to use it" : "pick, or type a value + Enter")
+                : "type to jump";
+        fitted(g, font, typed.isEmpty() ? hint : typed + (menu == Menu.VALUE ? "  - Enter" : ""),
                 menuX + 4, menuY + 2, MENU_W - 8, typed.isEmpty() ? DIM : ACCENT);
 
         for (int i = 0; i < shown && menuScroll + i < options.size(); i++) {
@@ -305,7 +462,10 @@ public final class QueryBuilderTab {
                 List<String> out = new ArrayList<>(HorseQuery.keys());
                 out.addAll(HorseQuery.flags());
                 for (Gene gene : Genes.codeOrder()) {
-                    out.add(gene.name());
+                    // Not twice: a gene named like a key or a flag (Sex) is that key here.
+                    if (!isKey(gene.name()) && !isFlag(gene.name())) {
+                        out.add(gene.name());
+                    }
                 }
                 // Alphabetical, because the type-ahead below is only navigable
                 // if the entries it walks past are in an order you can predict.
@@ -325,7 +485,11 @@ public final class QueryBuilderTab {
      */
     private static List<String> valuesFor(String column) {
         List<String> out = new ArrayList<>();
-        Gene gene = geneNamed(column);
+        // A key before a gene. There is a gene called Sex, and while the gene came first
+        // the sex column offered hom/het and two alleles and never the sexes, so
+        // "sex = stallion" could not be built (the query crawl, 2026-10-17). HorseQuery
+        // reads the key first as well, so the gene was never reachable by that name.
+        Gene gene = isKey(column) ? null : geneNamed(column);
         if (gene != null) {
             out.addAll(HorseQuery.zygosities());
             for (Allele allele : gene.alleles()) {
@@ -361,6 +525,15 @@ public final class QueryBuilderTab {
             }
         }
         return null;
+    }
+
+    private static boolean isKey(String column) {
+        for (String key : HorseQuery.keys()) {
+            if (key.equalsIgnoreCase(column)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isFlag(String column) {
@@ -436,12 +609,14 @@ public final class QueryBuilderTab {
         menuScroll = 0;
         menuCursor = 0;
         typeAhead.reset();
+        typedValue.setLength(0);
     }
 
     private void closeMenu() {
         menu = Menu.NONE;
         menuRow = -1;
         typeAhead.reset();
+        typedValue.setLength(0);
     }
 
     private void pickFromMenu(double mx, double my) {
@@ -488,6 +663,9 @@ public final class QueryBuilderTab {
         if (menu == Menu.NONE) {
             return false;
         }
+        if (menu == Menu.VALUE && codepoint >= ' ') {
+            typedValue.appendCodePoint(codepoint);
+        }
         List<String> options = options();
         int found = typeAhead.accept(codepoint, options, menuCursor);
         if (found >= 0) {
@@ -517,6 +695,9 @@ public final class QueryBuilderTab {
         }
         if (key == 259) {                       // Backspace
             typeAhead.reset();
+            if (typedValue.length() > 0) {
+                typedValue.setLength(typedValue.length() - 1);
+            }
             return true;
         }
         if (key == 264) {                       // Down
@@ -529,7 +710,21 @@ public final class QueryBuilderTab {
         }
         if (key == 257 || key == 335) {         // Enter
             List<String> options = options();
-            if (menuCursor >= 0 && menuCursor < options.size()) {
+            String typed = typedValue.toString().strip();
+            String listed = null;
+            for (String option : options) {
+                if (option.equalsIgnoreCase(typed)) {
+                    listed = option;
+                }
+            }
+            if (!typed.isEmpty() && listed == null) {
+                // A number, a name, anything the list does not hold: take it as typed.
+                // The comment above always promised this; until 2026-10-17 Enter took
+                // only a listed row, so no numeric or text value could be built.
+                apply(typed);
+            } else if (listed != null) {
+                apply(listed);
+            } else if (menuCursor >= 0 && menuCursor < options.size()) {
                 apply(options.get(menuCursor));
             }
             closeMenu();

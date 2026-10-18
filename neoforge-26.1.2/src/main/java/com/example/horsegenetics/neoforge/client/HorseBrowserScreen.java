@@ -520,6 +520,9 @@ public final class HorseBrowserScreen extends Screen {
 
     /** The saved-search menu, shared with the stasis bank - see SavedSearchPicker. */
     private final SavedSearchPicker savedSearches = new SavedSearchPicker();
+    /** The query builder, opened by Build beside whichever filter box is showing. */
+    private final QueryBuilderPopup queryPopup = new QueryBuilderPopup();
+    private Button buildButton;
 
     /**
      * The Query tab's model. Static, like the tab and the scroll positions, so
@@ -828,6 +831,19 @@ public final class HorseBrowserScreen extends Screen {
                         + "boxes - and where you save this one.")));
         savedSearchButton.visible = false;
         addRenderableWidget(savedSearchButton);
+
+        buildButton = Button.builder(Component.literal("Build"), b -> {
+                    EditBox box = tab == Tab.BREEDING_PREVIEW ? breedingFilterBox : horseFilterBox;
+                    savedSearches.close();
+                    queryPopup.open(box, this.width, this.height, query -> savedSearches.open(
+                            buildButton.getX(), buildButton.getY() + buildButton.getHeight(),
+                            query, this.width, this.height));
+                })
+                .bounds(0, 0, buttonW("Build"), 16).build();
+        buildButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+                Component.literal("Build this filter from dropdowns - the same builder as the Query tab.")));
+        buildButton.visible = false;
+        addRenderableWidget(buildButton);
 
         refreshRosterButton = Button.builder(Component.literal("Refresh"), b -> refresh())
                 .bounds(listX(), contentTop() - 1, buttonW("Refresh"), 18).build();
@@ -1256,7 +1272,8 @@ public final class HorseBrowserScreen extends Screen {
             // pushed Saved... over Refresh, and Saved..., added first, took every press
             // aimed at Refresh (the menu crawler found it). The box gives up the room.
             int wanted = Math.max(160, (fsRight() - fsLeft()) / 2);
-            int room = fsRight() - refreshW - 4 - buttonW("Saved...") - 148 - horseFilterBox.getX();
+            int room = fsRight() - refreshW - 4 - buttonW("Saved...") - 148 - (buttonW("Build") + 3)
+                    - horseFilterBox.getX();
             horseFilterBox.setWidth(Math.max(60, Math.min(wanted, room)));
         }
         if (genePickButton != null && allelePickButton != null) {
@@ -1265,7 +1282,7 @@ public final class HorseBrowserScreen extends Screen {
             allelePickButton.visible = mine;
             allelePickButton.active = mine;
             if (mine && horseFilterBox != null) {
-                int pickX = horseFilterBox.getX() + horseFilterBox.getWidth() + 4;
+                int pickX = horseFilterBox.getX() + horseFilterBox.getWidth() + 4 + buttonW("Build") + 3;
                 genePickButton.setRectangle(68, 16, pickX, contentTop());
                 allelePickButton.setRectangle(72, 16, pickX + 71, contentTop());
                 genePickButton.setMessage(Component.literal(
@@ -1311,7 +1328,7 @@ public final class HorseBrowserScreen extends Screen {
             int w = buttonW("Saved...");
             if (roster && horseFilterBox != null) {
                 savedSearchButton.setRectangle(w, 16,
-                        horseFilterBox.getX() + horseFilterBox.getWidth() + 148, contentTop());
+                        horseFilterBox.getX() + horseFilterBox.getWidth() + 148 + buttonW("Build") + 3, contentTop());
             } else if (breeding) {
                 // Beside the picker's filter box, on its row. It used to sit under the box,
                 // at contentTop()+36 - inside the Mares heading's hit area (listTop() is
@@ -1326,6 +1343,23 @@ public final class HorseBrowserScreen extends Screen {
                 savedSearches.close();
             }
         }
+        if (buildButton != null && horseFilterBox != null) {
+            // Beside the box it fills: after the box on the roster tabs, before Saved...
+            // on Breeding preview, where the box shares one row with both.
+            boolean show = roster || breeding;
+            buildButton.visible = show;
+            buildButton.active = show;
+            int bw = buttonW("Build");
+            if (roster) {
+                buildButton.setRectangle(bw, 16, horseFilterBox.getX() + horseFilterBox.getWidth() + 4, contentTop());
+            } else if (breeding) {
+                buildButton.setRectangle(bw, 16,
+                        listX() + listW() - 1 - buttonW("Saved...") - 3 - bw, contentTop() + 18);
+            }
+            if (!show) {
+                queryPopup.close();
+            }
+        }
         if (horseFilterBox != null) {
             horseFilterBox.visible = roster;
             horseFilterBox.active = roster;
@@ -1337,7 +1371,8 @@ public final class HorseBrowserScreen extends Screen {
             breedingFilterBox.visible = breeding;
             breedingFilterBox.active = breeding;
             // Short of the column by Saved..., which shares its row.
-            breedingFilterBox.setRectangle(listW() - 2 - buttonW("Saved...") - 3, 16, listX() + 1, contentTop() + 18);
+            breedingFilterBox.setRectangle(Math.max(40, listW() - 2 - buttonW("Saved...") - 3 - buttonW("Build") - 3), 16,
+                    listX() + 1, contentTop() + 18);
             if (!breeding) {
                 breedingFilterBox.setFocused(false);
             }
@@ -1371,6 +1406,9 @@ public final class HorseBrowserScreen extends Screen {
         // it, and a letter reaches the tab strip.
         // Whenever it is open, not only while naming: the list takes the
         // arrows and Escape so type-to-jump can be finished from the keyboard.
+        if (queryPopup.keyPressed(event.key())) {
+            return true;
+        }
         if (savedSearches.isOpen() && savedSearches.keyPressed(event.key())) {
             return true;
         }
@@ -1388,6 +1426,9 @@ public final class HorseBrowserScreen extends Screen {
 
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+        if (queryPopup.charTyped(event.codepoint())) {
+            return true;
+        }
         if (savedSearches.isOpen() && savedSearches.charTyped(event.codepoint())) {
             return true;
         }
@@ -1459,6 +1500,9 @@ public final class HorseBrowserScreen extends Screen {
         // An open picker owns the next click, wherever it lands - picking an
         // entry or dismissing itself. Before everything else, or the table
         // underneath takes a click aimed at a menu drawn over it.
+        if (queryPopup.isOpen()) {
+            return queryPopup.click(event.x(), event.y());
+        }
         if (savedSearches.isOpen()) {
             SavedSearchPicker.Pick pick = savedSearches.click(event.x(), event.y());
             if (pick != null) {
@@ -1736,6 +1780,9 @@ public final class HorseBrowserScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
         // An open picker takes the wheel, so a long list is reachable.
+        if (queryPopup.isOpen()) {
+            return queryPopup.scroll(sy);
+        }
         if (savedSearches.isOpen() && sy != 0 && savedSearches.scroll(sy)) {
             return true;
         }
@@ -1898,6 +1945,7 @@ public final class HorseBrowserScreen extends Screen {
         if (tab == Tab.QUERY) {
             builder.drawMenu(g, this.font, mouseX, mouseY);
         }
+        queryPopup.draw(g, this.font, mouseX, mouseY);
         savedSearches.draw(g, this.font, mouseX, mouseY);
     }
 

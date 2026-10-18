@@ -113,6 +113,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     /** Width of the "▾" that opens the saved searches, taken out of the filter well. */
     private static final int SAVED_BUTTON_W = 14;
+    /** The Build button beside it, which opens the query builder over the panel. */
+    private static final int BUILD_BUTTON_W = 30;
 
     private net.minecraft.client.gui.components.Button savedSearchButton;
 
@@ -127,6 +129,9 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     /** Shared with the browser, reading one saved list - see SavedSearchPicker. */
     private final SavedSearchPicker savedSearches = new SavedSearchPicker();
+    /** The browser's query builder, opened from this box (QueryBuilderPopup). */
+    private final QueryBuilderPopup queryPopup = new QueryBuilderPopup();
+    private net.minecraft.client.gui.components.Button buildButton;
     private int scroll;
 
     /**
@@ -171,7 +176,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         // box is that much narrower than the frame drawn behind it.
         this.filterBox = new EditBox(this.font,
                 leftPos + HorseStasisBankMenu.MARGIN + 2, topPos + HorseStasisBankMenu.FILTER_Y + 3,
-                HorseStasisBankMenu.LIST_W - 4 - SAVED_BUTTON_W, HorseStasisBankMenu.FILTER_H - 5,
+                HorseStasisBankMenu.LIST_W - 4 - SAVED_BUTTON_W - BUILD_BUTTON_W - 2, HorseStasisBankMenu.FILTER_H - 5,
                 Component.literal("Filter"));
         this.filterBox.setBordered(false);
         // Dark text, because this panel is light. An EditBox defaults to the
@@ -197,6 +202,25 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         this.savedSearchButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
                 Component.literal("Saved searches - shared with every other filter box in the mod.")));
         this.addRenderableWidget(this.savedSearchButton);
+
+        // Build, left of the arrow: the same builder as the browser's Query tab, filling
+        // this box as it goes (owner, 2026-10-17 - one builder wherever a query is typed).
+        this.buildButton = net.minecraft.client.gui.components.Button.builder(
+                        Component.literal("Build"), b -> {
+                            this.savedSearches.close();
+                            this.queryPopup.open(this.filterBox, this.width, this.height,
+                                    query -> this.savedSearches.open(this.buildButton.getX(),
+                                            this.buildButton.getY() + this.buildButton.getHeight(),
+                                            query, this.width, this.height));
+                        })
+                .bounds(leftPos + HorseStasisBankMenu.MARGIN + HorseStasisBankMenu.LIST_W
+                                - SAVED_BUTTON_W - BUILD_BUTTON_W - 1,
+                        topPos + HorseStasisBankMenu.FILTER_Y + 1,
+                        BUILD_BUTTON_W, HorseStasisBankMenu.FILTER_H - 2)
+                .build();
+        this.buildButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(
+                Component.literal("Build this filter from dropdowns - the same builder as the horse browser's.")));
+        this.addRenderableWidget(this.buildButton);
 
         // Right of the "Inventory" caption, the one stretch of the Chambers tab
         // the grid does not use. Sized for the widest count the bank can hold, so
@@ -228,6 +252,9 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         // An open menu eats the next click wherever it lands, exactly as the
         // browser's does - and before the tab strip, or clicking away from it
         // changes tab as well as dismissing.
+        if (this.queryPopup.isOpen()) {
+            return this.queryPopup.click(event.x(), event.y());
+        }
         if (this.savedSearches.isOpen()) {
             SavedSearchPicker.Pick pick = this.savedSearches.click(event.x(), event.y());
             if (pick != null && this.filterBox != null) {
@@ -309,6 +336,9 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     @Override
     public boolean mouseScrolled(double mx, double my, double sx, double sy) {
+        if (this.queryPopup.isOpen()) {
+            return this.queryPopup.scroll(sy);
+        }
         if (this.savedSearches.isOpen() && sy != 0 && this.savedSearches.scroll(sy)) {
             return true;
         }
@@ -347,6 +377,9 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     public boolean keyPressed(KeyEvent event) {
         // While the name field is up it owns the keyboard, or Escape closes the
         // whole bank instead of the little menu on top of it.
+        if (this.queryPopup.keyPressed(event.key())) {
+            return true;
+        }
         if (this.savedSearches.isOpen() && this.savedSearches.keyPressed(event.key())) {
             return true;
         }
@@ -378,6 +411,13 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         if (this.savedSearchButton != null) {
             this.savedSearchButton.visible = browsing;
             this.savedSearchButton.active = browsing;
+        }
+        if (this.buildButton != null) {
+            this.buildButton.visible = browsing;
+            this.buildButton.active = browsing;
+        }
+        if (!browsing && this.queryPopup.isOpen()) {
+            this.queryPopup.close();
         }
         // An open menu takes clicks first (mouseClicked); left open over Chambers
         // it would swallow the slot clicks under it.
@@ -916,11 +956,15 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(g, mouseX, mouseY, partialTick);
+        this.queryPopup.draw(g, this.font, mouseX, mouseY);
         this.savedSearches.draw(g, this.font, mouseX, mouseY);
     }
 
     @Override
     public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+        if (this.queryPopup.charTyped(event.codepoint())) {
+            return true;
+        }
         if (this.savedSearches.isOpen() && this.savedSearches.charTyped(event.codepoint())) {
             return true;
         }

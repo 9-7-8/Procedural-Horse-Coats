@@ -533,6 +533,11 @@ public class Cowboy extends AbstractVillager {
                 com.example.horsegenetics.neoforge.server.CowboySale
                         .quote(this, serverLevel, seller);
             }
+            // A new customer starts on the whole string, never on whatever the last one
+            // was looking for - and BEFORE the sold-out check: the offers are built through
+            // the filter, so a last customer's search that matched nothing used to make a
+            // cowboy with horses to sell say he was sold out (found by the query crawl).
+            setOfferFilter("");
             this.offers = null; // the herd may have changed since the last look
             if (getOffers().isEmpty()) {
                 if (player instanceof ServerPlayer serverPlayer) {
@@ -541,9 +546,6 @@ public class Cowboy extends AbstractVillager {
                 }
                 return InteractionResult.CONSUME;
             }
-            // A new customer starts on the whole string, never on whatever the
-            // last one was looking for.
-            setOfferFilter("");
             setTradingPlayer(player);
             com.example.horsegenetics.neoforge.server.HorseProgress.complete(player,
                     com.example.horsegenetics.common.progress.ProgressTask.MEET_COWBOY);

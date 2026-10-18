@@ -84,6 +84,11 @@ public final class CowboyTradeFilterHooks {
 
     private static @Nullable Button savedButton;
 
+    /** The query builder, opened by Build beside the box (owner, 2026-10-17). */
+    private static final QueryBuilderPopup POPUP = new QueryBuilderPopup();
+    private static final int BUILD_W = 30;
+    private static @Nullable Button buildButton;
+
     private CowboyTradeFilterHooks() {
     }
 
@@ -91,9 +96,11 @@ public final class CowboyTradeFilterHooks {
     static void onScreenInit(ScreenEvent.Init.Post event) {
         filterBox = null;
         savedButton = null;
+        buildButton = null;
         owner = null;
         confirmed = false;
         SAVED.close();
+        POPUP.close();
         if (!(event.getScreen() instanceof MerchantScreen screen)) {
             return;
         }
@@ -113,8 +120,9 @@ public final class CowboyTradeFilterHooks {
         filterBox = box;
         event.addListener(box);
 
-        // No room here for a query builder, so this window gets the other two
-        // ways in: type it, or pick one you saved somewhere roomier.
+        // The saved searches, and Build beside them: the same builder as the browser's
+        // Query tab, as a panel over the window, filling the box as it goes. (It used to
+        // say there was no room here for one; the builder now narrows to fit.)
         Button saved = Button.builder(Component.literal("▾"), b -> SAVED.open(
                         left + BOX_W + GAP, top - GAP, box.getValue(),
                         screen.width, screen.height))
@@ -126,6 +134,19 @@ public final class CowboyTradeFilterHooks {
         saved.active = false;
         savedButton = saved;
         event.addListener(saved);
+        Button build = Button.builder(Component.literal("Build"), b -> {
+                    SAVED.close();
+                    POPUP.open(box, screen.width, screen.height, query -> SAVED.open(
+                            left + BOX_W + GAP, top - GAP, query, screen.width, screen.height));
+                })
+                .bounds(left + BOX_W + GAP + SAVED_W + 2, top - BOX_H - GAP, BUILD_W, BOX_H)
+                .tooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                        "Build this filter from dropdowns - the same builder as the horse browser's.")))
+                .build();
+        build.visible = false;
+        build.active = false;
+        buildButton = build;
+        event.addListener(build);
         owner = screen;
     }
 
@@ -150,12 +171,19 @@ public final class CowboyTradeFilterHooks {
                 savedButton.visible = true;
                 savedButton.active = true;
             }
+            if (buildButton != null) {
+                buildButton.visible = true;
+                buildButton.active = true;
+            }
         }
     }
 
     /** The saved-search menu is drawn over the window, so it goes on last. */
     @SubscribeEvent
     static void onRender(ScreenEvent.Render.Post event) {
+        if (owner != null && POPUP.isOpen() && event.getScreen() == owner) {
+            POPUP.draw(event.getGuiGraphics(), owner.getMinecraft().font, event.getMouseX(), event.getMouseY());
+        }
         if (owner != null && SAVED.isOpen()
                 && event.getScreen() == owner
                 && event.getGuiGraphics() instanceof GuiGraphicsExtractor g) {
@@ -166,6 +194,11 @@ public final class CowboyTradeFilterHooks {
     /** An open menu eats the next click, wherever it lands. */
     @SubscribeEvent
     static void onClick(ScreenEvent.MouseButtonPressed.Pre event) {
+        if (owner != null && POPUP.isOpen() && event.getScreen() == owner) {
+            POPUP.click(event.getMouseX(), event.getMouseY());
+            event.setCanceled(true);
+            return;
+        }
         if (owner == null || !SAVED.isOpen() || event.getScreen() != owner) {
             return;
         }
@@ -195,6 +228,11 @@ public final class CowboyTradeFilterHooks {
     /** The saved menu takes the keyboard while it is open - arrows, Escape, type-to-jump. */
     @SubscribeEvent
     static void onKeyPressedPre(ScreenEvent.KeyPressed.Pre event) {
+        if (owner != null && POPUP.isOpen() && event.getScreen() == owner) {
+            POPUP.keyPressed(event.getKeyCode());
+            event.setCanceled(true);
+            return;
+        }
         if (owner != null && SAVED.isOpen() && event.getScreen() == owner
                 && SAVED.keyPressed(event.getKeyCode())) {
             event.setCanceled(true);
@@ -203,6 +241,11 @@ public final class CowboyTradeFilterHooks {
 
     @SubscribeEvent
     static void onCharTyped(ScreenEvent.CharacterTyped.Pre event) {
+        if (owner != null && POPUP.isOpen() && event.getScreen() == owner) {
+            POPUP.charTyped(event.getCodePoint());
+            event.setCanceled(true);
+            return;
+        }
         if (owner != null && SAVED.isOpen() && event.getScreen() == owner
                 && SAVED.charTyped(event.getCodePoint())) {
             event.setCanceled(true);
@@ -220,15 +263,26 @@ public final class CowboyTradeFilterHooks {
         }
     }
 
+    /** The wheel over an open builder scrolls its menu, not the offers under it. */
+    @SubscribeEvent
+    static void onScroll(ScreenEvent.MouseScrolled.Pre event) {
+        if (owner != null && POPUP.isOpen() && event.getScreen() == owner) {
+            POPUP.scroll(event.getScrollDeltaY());
+            event.setCanceled(true);
+        }
+    }
+
     /** Escape should leave the box before it leaves the shop. */
     @SubscribeEvent
     static void onScreenClosed(ScreenEvent.Closing event) {
         if (event.getScreen() instanceof MerchantScreen) {
             filterBox = null;
             savedButton = null;
+            buildButton = null;
             owner = null;
             confirmed = false;
             SAVED.close();
+            POPUP.close();
         }
     }
 
