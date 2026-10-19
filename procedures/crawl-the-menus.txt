@@ -90,6 +90,18 @@ NEVER
 - Never press a widget through its onPress. A covered button passes that and fails a
   player: the "Make egg does nothing" bug was exactly that.
 - Never let a case pass on a state it could not read. A missing field is a FAIL.
+- Never call a screen's mouseClicked, mouseScrolled, keyPressed or charTyped directly in
+  a case. Use Crawl.click, Crawl.wheel, Crawl.key and Crawl.type: they go through
+  NeoForge's screen events the way the real input does, and the cowboy's counter hangs
+  its builder and saved menu off those events (a direct wheel never scrolled it).
+- Never close a container with setScreen(null): Crawl.close presses it shut the way
+  Escape does. setScreen(null) leaves the menu open on the server, and a menu opened
+  next is refused or shut by the close that arrives late.
+- Never open a server menu from where the player happens to be. DebugMenuCrawl walks the
+  player up to the block, cart or cowboy first: a menu is only valid within reach, and
+  out of reach the server closes it the tick after it opens.
+- Never empty the player's hand to deliver a right-click: DebugMenuCrawl.emptyHand moves
+  the held stack to the backpack. Clearing the hand deleted a saddle a later case needed.
 - Never run it on the owner's own world. The crawl spends items, spawns horses and
   ejects chambers; it is safe only in the throwaway test world it creates.
 - Never leave the client config changed. The crawl saves and puts back the saved

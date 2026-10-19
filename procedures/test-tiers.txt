@@ -172,8 +172,10 @@ and what is left unchecked.
 NEVER
 -----
 - Never run the full suite outside a release, unless the owner asks.
-- Never run a Gradle test while the live server is up with a player on it: wait until
-  it is offline or empty. Read-only check: a java.exe with nogui that does not name this
+- Never run a Gradle test (a dev-client run like the menu crawl included) while the live
+  server is up with a player on it: wait until it is offline or empty. The owner on it
+  alone does not count (owner, 2026-10-18: "it's just me on it"). Read-only check: a
+  java.exe with nogui that does not name this
   repo, and the latest "There are N of a max" line in its run/console.log. (Owner,
   2026-10-09.) Do the work that needs no test meanwhile, and say the test is owed.
 - Never skip the release set before a release.
