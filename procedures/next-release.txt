@@ -58,6 +58,8 @@ STEPS
    - a `bug` or `tuning` issue -> the next release's milestone (a bug rides the next
      release), and add it to that milestone's description under "Bugs first";
    - an `idea`, `survey`, or the two queue documents -> `Backlog`;
+   - a `feature` or `enhancement` already built and waiting on its check (its last
+     comment names a commit) -> the next release, since the next jar ships it (#258);
    - a `scoped` issue with a size label -> a release, by the plan's method: after
      everything it depends on, in the release whose THEME it belongs to (owner,
      2026-10-09: a release centres on one feature or family, as v0.5.047 is

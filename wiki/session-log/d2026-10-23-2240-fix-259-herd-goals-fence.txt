@@ -1,0 +1,88 @@
+2026-10-23 22:40 (start) - next-release: milestone housekeeping, then #259 (horses press against fences)
+
+ASKED
+- "/next-release" (owner). Ran procedures/next-release.txt. The next release is v0.5.047
+  (the equipment release; the interim tag v0.5.047.1 is out). Its unit was #259, handed to
+  procedures/fix-bug.txt.
+
+DONE
+- Milestones (no commit; GitHub only). Seven open issues had no milestone. The bugs
+  #259, #266, #267, #268 and #257 went to v0.5.047, and so did #258 (an enhancement already
+  built and waiting on its gametest). #270 (an idea: a screenshot mode for the menu crawl)
+  went to Backlog. Both milestone descriptions and the release-plan issue #196 were edited
+  to match.
+- b4f4bc8e #259: herd goals walked a horse to a partner behind a fence and held it there.
+  Cause: no goal in server/HerdGoals (Spar, DamAndFoal, StallionGuard, Displace,
+  HeatAttraction, GroomAndRest) and not server/WildHerdGoal checked that the path reached
+  the partner. Each chose by distance, moveTo gave it the partial path that ends at the
+  rails, and the goal held MOVE while the partner stayed in range. The feeding and bond goals
+  have asked canReach() since 2026-09-24; these never did.
+  Fix: BondFollowGoal.ReachCheck became server/ReachCheck, with reset() for a goal whose
+  target changes and ReachCheck.approaching(). That form is strict within 12 blocks. Past
+  12, a short path still counts while its end is 2 or more blocks from the horse, because
+  createPath only searches about the follow range (16, vanilla's Mob default; not checked
+  against a horse's own attribute table, and flagged in the class). Without that, a foal
+  would stop following its dam across an open field. Every goal above asks the check when
+  it picks a partner and again in canContinueToUse. HeatAttraction tries the 3 nearest
+  candidates and takes the first one it can reach. WildHerdGoal resets the cache only when
+  its leader changes, because its canUse runs every tick. The bond goals keep the strict
+  form. DebugYardFertility (and inHeat) became public for the gametest.
+  Proof: new gametests in gametest/ModGameTests, heat_stops_at_a_fence (mare in heat,
+  entire stallion 8 blocks off, oak fence row between them) and its control
+  heat_crosses_open_ground (no fence).
+    On HEAD without the HerdGoals change: fenced RED, both horses ended against the fence
+    (mare z3, stallion z7, fence z5). The control was GREEN.
+    With the fix: both GREEN.
+  The full runGameTest suite ran each time. The only other red is #258's layer_lays_when_fed,
+  red on HEAD too.
+  Checks: :neoforge-26.1.2:build green; check-parity OK; check-links OK.
+  No pictures (a behaviour fix; the gametest positions are the evidence).
+  Issue #259: open, commented. It waits on the owner's look at her own pens. Fixed in
+  b4f4bc8e; F8's destination lines name the goal if anything still presses.
+- Docs: wiki/horse-care.html Coding tab, new #herd-reach-1023 (cause, fix, proof, what is
+  not covered). The hunger paragraph that named BondFollowGoal.ReachCheck now names
+  ReachCheck.
+
+DECIDED
+- (made without the owner) #258 went to the next release, not Backlog: it is built, so the
+  next jar ships it. Recorded in next-release.txt step 2.
+- (made without the owner) #259 is left open for the owner's look rather than closed on the
+  gametest. The test proves the heat case, but the report did not say which goal she saw.
+  Recorded on the issue.
+- (made without the owner) FoodTemptGoal and vanilla's tempt and follow-parent goals were
+  not changed. A horse walking to a player holding food at a fence is how vanilla animals
+  behave. Named on the issue and the Coding tab, so she can say if that is what she saw.
+- (made without the owner) The "approaching" leniency past 12 blocks. A horse may still walk
+  up to a fence when its target is far beyond it, but it stops there, because the next check
+  sees no progress. Recorded on the Coding tab.
+
+FOUND ON THE WAY
+- #258's gametest layer_lays_when_fed FAILS (4 runs of 4: "eggs on the ground: 1 before the
+  meal, 1 after", once 0/0). Commented on #258; it needs a fix-bug run.
+- #271 filed (bug, v0.5.047). wiki/tools/bake-behaviour-hierarchy.mjs exits 0 but writes the
+  page with 0 vanilla goals. Its output was reverted, not committed.
+- My own mistake, put right: the first control cell sat 12 blocks above the fenced one, and
+  the fenced mare chose the control's stallion through the air (past the strict range, so
+  the leniency let her approach). Found with a temporary trace in HeatAttraction, which was
+  removed. The cells are now 40 blocks apart.
+
+PROCEDURES
+- next-release.txt step 2: a built feature or enhancement with no milestone goes to the
+  next release (there was no rule; #258).
+- test-tiers.txt (gametest notes): cells within a goal's search range interact, vertically
+  too; place them further apart than the range (#259's control).
+- None other needed: fix-bug, end-session and rebake fit the run as written.
+
+NOT RUN / NOT CHECKED
+- No common/ code changed, so a full :common:test run would check nothing new.
+- Nobody has watched the change in game: the owner's pens; the other band goals (spar, dam
+  and foal, displacement, grooming, the band stallion), which have no gametest of their
+  own; and the wild-herd follow at a fence.
+- No Verification-tab anchors added: the open check is on issue #259.
+
+RELEASE
+- Not offered: one fix, below release.txt step 1's bar.
+
+PICK UP FIRST
+- /next-release: its next unit is #266 (query dropdowns run off a short window), by
+  fix-bug. #258's failing gametest and #271 are on the same milestone.

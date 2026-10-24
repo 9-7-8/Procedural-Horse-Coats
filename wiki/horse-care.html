@@ -779,7 +779,7 @@
 <p>
     <code>HungerFoodGoal.search</code> now asks <code>createPath</code>/<code>canReach</code>
     before it commits to a candidate &mdash; the same question
-    <code>BondFollowGoal.ReachCheck</code> asks of an
+    <code>ReachCheck</code> (then inside <code>BondFollowGoal</code>) asks of an
     <a href="#bond-reach-0924">owner behind a door</a>, at vanilla's own <code>moveTo</code>
     accuracy of 1. That number is the whole trick: a manhattan block still reaches a hay bale
     the horse stands beside, or the grass block under its feet, and is two short of a crop on
@@ -1327,6 +1327,38 @@
         longer promotes a member when the lead is missing &mdash; that promotion is what used
         to split a band into herds of one.</li>
 </ul>
+
+<h3 id="herd-reach-1023">A horse over the fence is not a partner (2026-10-23, #259)</h3>
+
+<p>
+    Reported by the owner: <em>the horses are STILL pressing right up against fences trying to
+    get to things on the other side of them</em>
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/259">#259</a>). The feeding
+    goals and the bond goals had asked <code>canReach()</code> since 2026-09-24, but nothing in
+    <code>HerdGoals</code> or <code>WildHerdGoal</code> did: each chose its partner by distance
+    alone, got the partial path that stops at the rails, and held <code>MOVE</code> for as long
+    as the partner stayed in range. A mare in heat with a stallion in the next pen leaned on the
+    fence for her whole heat, and he leaned on it from his side.
+</p>
+<p>
+    The bond goals' cached path check is now its own class, <code>server/ReachCheck</code>, and
+    all six band goals plus <code>WildHerdGoal</code> ask it when they pick a partner and again
+    while they walk; heat tries the three nearest candidates and takes the first one she can
+    walk to. They use <code>ReachCheck.approaching()</code>: inside twelve blocks a path that
+    stops short is a fence; past that the search may only have run out of room (it covers about
+    the follow range), so a short path still counts while it carries the horse two blocks or more,
+    and a foal still crosses an open field to its dam and stops at the first fence instead of
+    leaning on it. The bond goals keep the strict form.
+</p>
+<p>
+    Proved by the gametests <code>heat_stops_at_a_fence</code> (red on the old goals: both
+    horses ended pressed to the fence row from either side; green after) and its control
+    <code>heat_crosses_open_ground</code>, in which the same pair with no fence meet. The control
+    first sat twelve blocks above the fenced cell and the fenced mare chose <em>its</em> stallion
+    through the air, so the two cells are forty blocks apart. Not covered: vanilla's own goals
+    (tempting, following a parent) and <code>FoodTemptGoal</code>, which walks a horse to a player
+    holding food at the fence, as a cow does.
+</p>
 
 <div class="note warn">
     <span class="label">Every number is a first guess</span>

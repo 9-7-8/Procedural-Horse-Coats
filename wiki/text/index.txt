@@ -3116,6 +3116,7 @@ wiki/horse-care.html#escape-code	coding	Bolting at low health — why it is not 
 wiki/horse-care.html#food-tempt	gameplay	Horses come to food — and run for their favourite
 wiki/horse-care.html#ground-food	coding	What counts as dropped food — and why it is not the hand-feeding test
 wiki/horse-care.html#hand-taming	gameplay	Taming by hand
+wiki/horse-care.html#herd-reach-1023	coding	A horse over the fence is not a partner (2026-10-23, #259)
 wiki/horse-care.html#hunger	gameplay	1. Hunger and healing
 wiki/horse-care.html#hurt-notice	gameplay	4. When one of your horses is hurt
 wiki/horse-care.html#hurt-notice-code	coding	The hurt notice — whose chat, how often, and why sunlight is a special case

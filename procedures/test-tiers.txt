@@ -86,6 +86,10 @@ STEPS
        The reverse holds too: a platform left standing becomes "the surface" for every
        later test whose ground search runs under it (a WildTopUp pack placed 1 of 4 on
        one), so a test that builds one clears it, and its horses, before it succeeds.
+       Two tests' horses within a goal's search range of each other interact, in the
+       air too: inflate() searches up and down. Place cells further apart than the
+       goal's range plus its give-up margin. #259's fenced mare went for the open
+       control's stallion twelve blocks overhead until the cells were forty apart.
        A NATURAL horse spawn (WildTopUp.spawnPack, naturalHorse) is refused on anything
        a horse cannot naturally spawn on, snow block included: build the floor of grass
        (snowy grass under a snow layer for a cold field). fillbiome through the server's
