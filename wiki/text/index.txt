@@ -267,6 +267,7 @@ wiki/eye-colour.html#why	all	Why the eyes are loci and not a channel
 wiki/eye-colour.html#wild-sclera	all	The white sclera paints nothing
 wiki/eye-colour.html#writing	all	Writing a gene that has something to say about eyes
 wiki/fertility.html#after	gameplay	After the birth
+wiki/fertility.html#breeding-switches	gameplay	Every kind of breeding has a switch (#276)
 wiki/fertility.html#choices	science	Why it is built this way
 wiki/fertility.html#compression	science	Compressing 340 days
 wiki/fertility.html#compression-alternatives	science	Calendars considered and not built
