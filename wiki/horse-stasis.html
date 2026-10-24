@@ -283,6 +283,31 @@
     </p>
 </div>
 
+<h2 id="horsebank-gameplay">Filing every horse at once: <code>/horsebank</code></h2>
+<p>
+    Asked for from the friends' server (owner, 2026-10-24, #272). Stand near a stasis bank of
+    <em>your own</em> and type <code>/horsebank</code>: every horse of yours that is loaded in your
+    dimension and not being ridden goes into an empty chamber from your inventory and straight into
+    that bank, <strong>oldest first</strong> (the horse born longest ago), until your empties run
+    out. A horse being ridden stays out, and the chat line says how many were filed and how many
+    were left over. Someone else's bank is never used.
+</p>
+<p>
+    <strong>Which chambers go first is yours to set</strong>, in your client config:
+    <code id="setting-chamber-order">horsebank.chamber_order</code>, a list of
+    <code>basic</code>, <code>intermediate</code>, <code>advanced</code>, <code>spacer</code> and
+    <code>emergency</code>, cheapest first by default. A kind you leave out is never used; Emergency
+    chambers are left out by default, since an empty one is what saves a horse about to die. It is
+    sent to the server when you join.
+</p>
+<p>
+    On the server: <code id="setting-horsebank-non-op">horsebank.allow_non_op</code> (default
+    <code>true</code>) lets anyone run it; off, only operators may.
+    <code id="setting-horsebank-search">horsebank.search_chunks</code> (default 1, range 0&ndash;8)
+    is how far it looks for your bank, in chunks of sixteen blocks from where you stand. Both
+    server-side.
+</p>
+
 <h2 id="browse-gameplay">The Browse tab: the bank as a list of horses</h2>
 <p>
     The second tab is the same chambers read as <em>animals</em>. Every occupied chamber is a
@@ -688,6 +713,23 @@
             <strong>really releasing</strong> a horse whose tag <code>StasisCare</code> wrote to,
             which is the half no amount of tag-reading proves.</td></tr>
 </table>
+
+<h2 id="horsebank-coding"><code>/horsebank</code>: a plan in common, the hand capture in a loop</h2>
+<p>
+    <code>common/horse/HorseBankPlan</code> decides: candidates sorted by birth tick (an unknown
+    birth first, as the oldest; ties by id), each given the first kind in the player's cleaned order
+    that still has an empty, or a new Basic when the caller asked for it (the operator's
+    <code>force</code>, #275). <code>server/HorseBankCommand</code> gathers the facts &mdash; the
+    player's owned, alive, unridden horses from <code>level.getEntities</code> (loaded only, nothing
+    is force-loaded), the birth tick off <code>HORSE_SOCIAL</code>, the empties counted by kind
+    &mdash; and files each through <code>HorseStasisHandler.swallow</code>, the one capture path, into
+    <code>ChamberGrid.firstEmpty()</code> of the bank. A leashed horse drops its lead first, so the
+    lead comes back as an item. The bank is found through <code>StasisBankIndex.banksOf(owner)</code>,
+    nearest in the dimension within the radius and loaded, so no chunk is touched to look. The
+    client's order arrives in <code>ChamberOrderPayload</code> on join and is kept per player until
+    they leave; a player the server has heard nothing from gets the default. Pinned by
+    <code>HorseBankPlanTest</code>.
+</p>
 
 <h2 id="bank-coding">The bank is a filtered chest with a clock on it</h2>
 <p>
@@ -1789,7 +1831,7 @@
         <strong>The chamber recipes have been made visible to JEI and the recipe book twice now,
         the first attempt did not work, nobody has looked at the second, and a horse entering or
         leaving a chamber now swaps the item underneath it &mdash; which is unplayed at all four
-        swap sites</strong>; the grid growing past its old 207 (#273), untested and unplayed;
+        swap sites</strong>; the grid growing past its old 207 (#273) and <code>/horsebank</code> (#274), both untested and unplayed;
         beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
         gametests, and the unattended yard has watched a bank mend a horse, refuse every
@@ -2314,6 +2356,19 @@
         covered, and the bank's own feed and water should be what fixes that &mdash; which is
         the one place the two halves of the bank are supposed to meet.</li>
 </ul>
+
+<h3 id="verify-horsebank">/horsebank (#274): not tested, not played</h3>
+<p>
+    Written while the live server had a player on, so neither <code>HorseBankPlanTest</code> nor a
+    boot has run. In game: with three horses of different ages and two Basic chambers, the two
+    oldest are filed and the youngest stays out, and the chat line says so; a ridden horse stays
+    out; a leashed one is filed and its lead drops; a friend's bank beside you is ignored; with
+    <code>horsebank.chamber_order</code> set to <code>spacer, basic</code> a Spacer goes to the
+    oldest; with <code>horsebank.allow_non_op</code> off a non-operator is refused (the command may
+    still tab-complete until they rejoin, since the command tree is sent on join &mdash; the
+    execute re-checks). Unverified: that <code>Horse.dropLeash()</code> drops the lead item in
+    26.1.2, as the hand-held lead's gametest suggests.
+</p>
 
 <h3 id="verify-bank-scroll">The scrolling chamber grid (NOT played)</h3>
 <p>

@@ -3246,6 +3246,8 @@ wiki/horse-stasis.html#emergency-log-coding	coding	Why a rescue is a log row and
 wiki/horse-stasis.html#emergency-not-a-tier	coding	Why it is a subclass and not a fifth tier
 wiki/horse-stasis.html#files	coding	What is where
 wiki/horse-stasis.html#finding-the-jar	coding	Finding the jar is the index's second question
+wiki/horse-stasis.html#horsebank-coding	coding	/horsebank : a plan in common, the hand capture in a loop
+wiki/horse-stasis.html#horsebank-gameplay	gameplay	Filing every horse at once: /horsebank
 wiki/horse-stasis.html#jars-coding	coding	Drawing the horse in the jar
 wiki/horse-stasis.html#jars-gameplay	gameplay	You can see which horse is in which jar
 wiki/horse-stasis.html#measure-then-place	coding	Why the horse is built before the stall is measured
