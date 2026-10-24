@@ -81,7 +81,11 @@ LATER THE SAME SESSION
 ---------------------
 - Natural breeding now OFF by default (owner). Every yard pen that waits on a natural cover
   (DebugYardLong, DebugYardFertility, the cap and wall pens on fertility.html) cannot pass
-  on a default config; the owner was asked how the yard should handle that.
+  on a default config. Owner chose: pens stay, and run-tests turns breeding on for the run.
+  Built as -PyardBreeding on runClientTestWorld (system property horsegenetics.yardBreeding,
+  read by ServerConfig.yardBreeding; nothing written to server.toml), and a run-tests step 5
+  bullet saying when to add it. (I had offered "no code change": wrong, the yard cannot
+  type /horsebreeding, so it took this hook.)
 - wild.turnover off keeps stamping ages, so an overstayed band leaves soon after it is
   turned back on (call made without the owner; on breeds.html#turnover-switch).
 - Docs: fertility.html#setting-natural, breeds.html#turnover-switch and Verification

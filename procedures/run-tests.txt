@@ -95,6 +95,12 @@ STEPS
      A sprint has two artefacts that are not mod faults: block entities do not tick for
      roughly the first 180 sprinted ticks, and a "first poll" can land after the thing
      it meant to watch has already happened. Confirm either against an unsprinted run.
+   - Natural breeding is OFF by default (fertility.natural_breeding, owner 2026-10-23).
+     If any pen in the batch waits on a natural cover (the fertility pens, the long breeding
+     pens, anything reading a "natural cover" line), add -PyardBreeding as well: it turns
+     breeding on for that launch only and writes nothing to server.toml. Without it those
+     pens cannot pass, so never close a check on their silence. The yard's wild bands
+     breed during such a run too.
    - A ratio pen holds the client, and its memory, for thirty to sixty minutes even
      sprinted. Say so before launching, with the time it should answer. If the owner
      says stop: read the log, stop the client, and write each unanswered pen's tally
