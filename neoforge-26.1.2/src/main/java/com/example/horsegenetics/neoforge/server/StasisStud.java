@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.repro.BreedingSwitches;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.horse.HorseRecord;
 import com.example.horsegenetics.common.horse.StasisMating;
@@ -98,6 +99,9 @@ public final class StasisStud {
 
         if (repro.pregnant()) {
             return carry(level, pos, bank, slot, chamber, snapshot, repro, now);
+        }
+        if (!ServerConfig.breeding().allows(BreedingSwitches.Kind.STASIS_STUD)) {
+            return false;   // breeding.stasis_stud or the master is off (#276); a mare in foal still carries above
         }
         return cover(level, bank, chambers, slot, chamber, snapshot, record, repro, now);
     }

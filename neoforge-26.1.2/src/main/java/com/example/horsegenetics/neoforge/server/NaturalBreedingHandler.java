@@ -209,7 +209,8 @@ public final class NaturalBreedingHandler {
         if (!(mare.level() instanceof ServerLevel level)) {
             return;
         }
-        if ((mare.tickCount + mare.getId()) % SCAN != 0 || !ServerConfig.naturalBreeding()
+        if ((mare.tickCount + mare.getId()) % SCAN != 0
+                || !ServerConfig.breeding().naturalCoverIn(HorseRealm.isRealm(level))
                 || !HorseRecords.hasRealRecord(mare)) {
             return;
         }

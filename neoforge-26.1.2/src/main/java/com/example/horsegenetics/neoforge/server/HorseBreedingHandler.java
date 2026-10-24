@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.repro.BreedingSwitches;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.breed.BreedLineage;
 import com.example.horsegenetics.common.genetics.AllelePair;
@@ -100,6 +101,17 @@ public final class HorseBreedingHandler {
         if (!(event.getParentA() instanceof Horse parentA)) return;
         if (!(event.getParentB() instanceof Horse parentB)) return;
         if (!(event.getChild() instanceof Horse child)) return;
+
+        if (!ServerConfig.breeding().allows(BreedingSwitches.Kind.GOLDEN_CARROT)) {
+            // breeding.golden_carrot or the master is off (#276). Cancelling is the
+            // same exit the same-sex refusal below takes.
+            event.setCanceled(true);
+            if (event.getCausedByPlayer() != null) {
+                event.getCausedByPlayer().sendSystemMessage(net.minecraft.network.chat.Component.literal(
+                        "Golden-carrot breeding is switched off on this server; no foal."));
+            }
+            return;
+        }
 
         Rng rng = HorseRecords.rng(child);
 

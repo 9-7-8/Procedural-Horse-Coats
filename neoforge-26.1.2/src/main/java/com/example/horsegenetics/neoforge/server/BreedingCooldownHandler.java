@@ -1,5 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
+import com.example.horsegenetics.common.repro.BreedingSwitches;
 import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.EventPriority;
@@ -67,6 +69,13 @@ public final class BreedingCooldownHandler {
         }
         ItemStack stack = event.getItemStack();
         if (!isBreedingFood(stack)) {
+            return;
+        }
+        if (!ServerConfig.breeding().allows(BreedingSwitches.Kind.GOLDEN_CARROT)) {
+            // breeding.golden_carrot or the master is off (#276): the carrot is
+            // plain food, so neither the cooldown nor an untamed horse's love is
+            // touched. A tamed horse vanilla puts in love anyway is stopped at
+            // the birth, in HorseBreedingHandler.onBabySpawn.
             return;
         }
         // A foal's age is NEGATIVE and counts up to zero as it grows. Only a

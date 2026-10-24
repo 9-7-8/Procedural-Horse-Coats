@@ -1,5 +1,7 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
+import com.example.horsegenetics.common.repro.BreedingSwitches;
 import com.example.horsegenetics.common.Rng;
 import com.example.horsegenetics.common.genetics.Genome;
 import com.example.horsegenetics.common.genetics.Genotype;
@@ -112,6 +114,10 @@ public final class StallionSeedJarHandler {
 
     /** @return true if a sample was collected. */
     private static boolean collectFromStallion(Horse stallion, Player player, InteractionHand hand, ItemStack emptyJar) {
+        if (!ServerConfig.breeding().allows(BreedingSwitches.Kind.SEED_JAR)) {
+            message(player, SWITCHED_OFF);
+            return false;
+        }
         // YOUR stallion, not merely a tamed one, and creative is no exception.
         // Owner, 2026-09-13: "you shouldn't be able to make any kind of bound
         // item to a horse you don't own, even in creative mode." A jar carries
@@ -184,7 +190,14 @@ public final class StallionSeedJarHandler {
         return lines[horse.getRandom().nextInt(lines.length)];
     }
 
+    /** The one line both halves of the jar say when breeding.seed_jar (or the master) is off (#276). */
+    private static final String SWITCHED_OFF = "Seed-jar breeding is switched off on this server.";
+
     private static boolean impregnateMare(Horse mare, Player player, ItemStack jar) {
+        if (!ServerConfig.breeding().allows(BreedingSwitches.Kind.SEED_JAR)) {
+            message(player, SWITCHED_OFF);
+            return false;
+        }
         StoredGenome stored = jar.get(ModDataComponents.STORED_GENOME.get());
         if (stored == null) {
             message(player, "This seed jar is empty.");

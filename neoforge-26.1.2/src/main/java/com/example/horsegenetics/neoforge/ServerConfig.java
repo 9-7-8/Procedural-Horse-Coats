@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge;
 
+import com.example.horsegenetics.common.repro.BreedingSwitches;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
@@ -187,6 +188,17 @@ public final class ServerConfig {
      * births carry on. {@code /horsebreeding} turns it on and off.
      */
     public static final ModConfigSpec.BooleanValue NATURAL_BREEDING;
+
+    /**
+     * <b>The breeding switches</b> (issue #276): a master over every kind, and one per
+     * kind that had none - realm natural cover, stasis stud, golden-carrot foals, seed
+     * jars. Read together through {@link #breeding()}; {@code /horsebreeding} sets them.
+     */
+    public static final ModConfigSpec.BooleanValue BREEDING_ENABLED;
+    public static final ModConfigSpec.EnumValue<BreedingSwitches.RealmCover> REALM_NATURAL_COVER;
+    public static final ModConfigSpec.BooleanValue STASIS_STUD;
+    public static final ModConfigSpec.BooleanValue GOLDEN_CARROT_BREEDING;
+    public static final ModConfigSpec.BooleanValue SEED_JAR_BREEDING;
 
     /**
      * <b>Does an owner hear about their horse being hurt?</b> See
@@ -755,6 +767,35 @@ public final class ServerConfig {
                         "runs and save it here. Server-side.")
                 .define("fertility.natural_breeding",
                         com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_BREEDING);
+        BREEDING_ENABLED = builder
+                .comment("The master breeding switch. (default: true)",
+                        "Off, no horse is bred at all - natural cover, stasis-bank stud, golden",
+                        "carrots and seed jars all refuse - whatever their own switches say.",
+                        "Pregnancies already under way still foal. On, each kind follows its own",
+                        "switch. /horsebreeding all enable|disable changes it while the server runs.",
+                        "Server-side.")
+                .define("breeding.enabled", BreedingSwitches.DEFAULT_MASTER);
+        REALM_NATURAL_COVER = builder
+                .comment("Whether horses in the horse realm breed on their own. (default: FOLLOW)",
+                        "FOLLOW - the same as fertility.natural_breeding, as before this switch existed.",
+                        "ON     - realm stallions cover realm mares even while the Overworld is off.",
+                        "OFF    - no natural cover in the realm.",
+                        "/horsebreeding realm_cover enable|disable|follow. Server-side.")
+                .defineEnum("breeding.realm_natural_cover", BreedingSwitches.RealmCover.FOLLOW);
+        STASIS_STUD = builder
+                .comment("Whether a mare and a stallion turned out at stud in a stasis bank breed",
+                        "there. (default: true) Off, nothing new is conceived in a bank; a mare",
+                        "already in foal still comes out to foal. /horsebreeding stasis_stud. Server-side.")
+                .define("breeding.stasis_stud", BreedingSwitches.DEFAULT_STASIS_STUD);
+        GOLDEN_CARROT_BREEDING = builder
+                .comment("Whether two horses fed golden carrots (or another love food) make a foal.",
+                        "(default: true) Off, the carrot is still food, but no foal is born.",
+                        "/horsebreeding golden_carrot. Server-side.")
+                .define("breeding.golden_carrot", BreedingSwitches.DEFAULT_GOLDEN_CARROT);
+        SEED_JAR_BREEDING = builder
+                .comment("Whether a stallion seed jar can be filled and used on a mare. (default: true)",
+                        "/horsebreeding seed_jar. Server-side.")
+                .define("breeding.seed_jar", BreedingSwitches.DEFAULT_SEED_JAR);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -1497,6 +1538,60 @@ public final class ServerConfig {
         try {
             NATURAL_BREEDING.set(on);
             NATURAL_BREEDING.save();
+            return true;
+        } catch (IllegalStateException notLoaded) {
+            return false;
+        }
+    }
+
+    /**
+     * <b>Every breeding switch at once</b>, safely: the defaults until the config
+     * loads. Natural cover honours {@link #yardBreeding}, as {@link #naturalBreeding} does.
+     */
+    public static BreedingSwitches breeding() {
+        try {
+            return new BreedingSwitches(BREEDING_ENABLED.get(), naturalBreeding(), REALM_NATURAL_COVER.get(),
+                    STASIS_STUD.get(), GOLDEN_CARROT_BREEDING.get(), SEED_JAR_BREEDING.get());
+        } catch (IllegalStateException notLoaded) {
+            BreedingSwitches d = BreedingSwitches.defaults();
+            return new BreedingSwitches(d.master(), naturalBreeding(), d.realmCover(), d.stasisStud(),
+                    d.goldenCarrot(), d.seedJar());
+        }
+    }
+
+    /**
+     * Set one breeding switch (null = the master) and save it. REALM_COVER takes
+     * {@code realm}, the others {@code on}. Returns false when the config is not loaded.
+     */
+    public static boolean setBreeding(@org.jetbrains.annotations.Nullable BreedingSwitches.Kind kind, boolean on,
+                                      BreedingSwitches.RealmCover realm) {
+        try {
+            if (kind == null) {
+                BREEDING_ENABLED.set(on);
+                BREEDING_ENABLED.save();
+                return true;
+            }
+            switch (kind) {
+                case NATURAL_COVER -> {
+                    return setNaturalBreeding(on);
+                }
+                case REALM_COVER -> {
+                    REALM_NATURAL_COVER.set(realm);
+                    REALM_NATURAL_COVER.save();
+                }
+                case STASIS_STUD -> {
+                    STASIS_STUD.set(on);
+                    STASIS_STUD.save();
+                }
+                case GOLDEN_CARROT -> {
+                    GOLDEN_CARROT_BREEDING.set(on);
+                    GOLDEN_CARROT_BREEDING.save();
+                }
+                case SEED_JAR -> {
+                    SEED_JAR_BREEDING.set(on);
+                    SEED_JAR_BREEDING.save();
+                }
+            }
             return true;
         } catch (IllegalStateException notLoaded) {
             return false;

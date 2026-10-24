@@ -1,6 +1,10 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.repro.BreedingSwitches;
+import com.example.horsegenetics.common.repro.BreedingSwitches.Kind;
+import com.example.horsegenetics.common.repro.BreedingSwitches.RealmCover;
 import com.example.horsegenetics.neoforge.ServerConfig;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -10,15 +14,17 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 /**
- * <b>{@code /horsebreeding}</b> - whether horses breed on their own
- * ({@code fertility.natural_breeding}, read by {@link NaturalBreedingHandler}).
+ * <b>{@code /horsebreeding}</b> - every breeding switch, read and set while the
+ * server runs (issue #276). Each change is saved to the server config, so it holds
+ * over a restart.
  * <ul>
- *   <li>{@code /horsebreeding} - says whether it is on;</li>
- *   <li>{@code enable} / {@code disable} - turns it on or off and saves it to the
- *       server config, so it holds over a restart.</li>
+ *   <li>{@code /horsebreeding} - lists every switch and the master;</li>
+ *   <li>{@code /horsebreeding all enable|disable} - the master ({@code breeding.enabled});</li>
+ *   <li>{@code /horsebreeding <kind> enable|disable} - one kind; {@code realm_cover}
+ *       also takes {@code follow};</li>
+ *   <li>{@code /horsebreeding enable|disable} - natural cover, as it always meant.</li>
  * </ul>
- * Off stops natural covers only. A player still breeds horses the ordinary way,
- * and a mare already in foal still foals.
+ * Off stops new breedings only: a mare already in foal still foals.
  */
 @EventBusSubscriber
 public final class HorseBreedingCommand {
@@ -28,35 +34,64 @@ public final class HorseBreedingCommand {
 
     @SubscribeEvent
     static void onRegisterCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("horsebreeding")
+        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("horsebreeding")
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(c -> status(c.getSource()))
                 .then(Commands.literal("enable")
-                        .executes(c -> set(c.getSource(), true)))
+                        .executes(c -> set(c.getSource(), Kind.NATURAL_COVER, true, RealmCover.ON)))
                 .then(Commands.literal("disable")
-                        .executes(c -> set(c.getSource(), false))));
+                        .executes(c -> set(c.getSource(), Kind.NATURAL_COVER, false, RealmCover.OFF)))
+                .then(Commands.literal("all")
+                        .then(Commands.literal("enable").executes(c -> set(c.getSource(), null, true, RealmCover.ON)))
+                        .then(Commands.literal("disable").executes(c -> set(c.getSource(), null, false, RealmCover.OFF))));
+        for (Kind kind : Kind.values()) {
+            LiteralArgumentBuilder<CommandSourceStack> sub = Commands.literal(kind.id())
+                    .then(Commands.literal("enable").executes(c -> set(c.getSource(), kind, true, RealmCover.ON)))
+                    .then(Commands.literal("disable").executes(c -> set(c.getSource(), kind, false, RealmCover.OFF)));
+            if (kind == Kind.REALM_COVER) {
+                sub.then(Commands.literal("follow").executes(c -> set(c.getSource(), kind, true, RealmCover.FOLLOW)));
+            }
+            root.then(sub);
+        }
+        event.getDispatcher().register(root);
     }
 
     private static int status(CommandSourceStack source) {
-        boolean on = ServerConfig.naturalBreeding();
-        source.sendSuccess(() -> Component.literal("Horses breeding on their own is " + (on ? "ON" : "OFF")
-                + (ServerConfig.yardBreeding() ? " for this launch (-PyardBreeding; the config is not changed)."
-                        : " (fertility.natural_breeding). /horsebreeding " + (on ? "disable" : "enable")
-                        + " changes it.")), false);
-        return on ? 1 : 0;
+        BreedingSwitches s = ServerConfig.breeding();
+        StringBuilder text = new StringBuilder("Breeding switches - master (breeding.enabled): ")
+                .append(s.master() ? "ON" : "OFF - nothing breeds, whatever the lines below say");
+        for (Kind kind : Kind.values()) {
+            text.append("\n  ").append(kind.id()).append(": ").append(s.own(kind) ? "on" : "off");
+            if (kind == Kind.REALM_COVER && s.realmCover() == RealmCover.FOLLOW) {
+                text.append(" (follows natural_cover)");
+            }
+            if (kind == Kind.NATURAL_COVER && ServerConfig.yardBreeding()) {
+                text.append(" (forced on for this launch by -PyardBreeding; the config is not changed)");
+            }
+            text.append(" - ").append(kind.label());
+        }
+        text.append("\n/horsebreeding <kind> enable|disable, or all enable|disable for the master.");
+        source.sendSuccess(() -> Component.literal(text.toString()), false);
+        return s.master() ? 1 : 0;
     }
 
-    private static int set(CommandSourceStack source, boolean on) {
-        if (!ServerConfig.setNaturalBreeding(on)) {
+    /** {@code kind} null is the master. {@code realm} is only read for REALM_COVER. */
+    private static int set(CommandSourceStack source, Kind kind, boolean on, RealmCover realm) {
+        if (!ServerConfig.setBreeding(kind, on, realm)) {
             source.sendFailure(Component.literal("The server config is not loaded; nothing was changed."));
             return 0;
         }
-        source.sendSuccess(() -> Component.literal(on
-                ? "Horses now breed on their own: a stallion left with a mare in heat covers her. Saved to the server config."
-                : "Horses no longer breed on their own; a foal needs a player to breed it. Pregnancies already "
-                        + "under way carry on. Saved to the server config.")
-                .withStyle(ChatFormatting.GOLD), true);
-        DebugAnnounce.log("Breeding", "/horsebreeding " + (on ? "enable" : "disable"));
+        String what = kind == null ? "All breeding (the master switch)" : kind.label();
+        String state = kind == Kind.REALM_COVER && realm == RealmCover.FOLLOW
+                ? "now follows natural cover" : on ? "is now ON" : "is now OFF";
+        String tail = on ? "" : " Pregnancies already under way still foal.";
+        if (on && kind != null && !ServerConfig.breeding().master()) {
+            tail = " The master switch is OFF, so nothing breeds until /horsebreeding all enable.";
+        }
+        String line = what + " " + state + "." + tail + " Saved to the server config.";
+        source.sendSuccess(() -> Component.literal(line).withStyle(ChatFormatting.GOLD), true);
+        DebugAnnounce.log("Breeding", "/horsebreeding " + (kind == null ? "all" : kind.id()) + " "
+                + (kind == Kind.REALM_COVER && realm == RealmCover.FOLLOW ? "follow" : on ? "enable" : "disable"));
         return 1;
     }
 }

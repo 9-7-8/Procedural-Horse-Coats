@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.common.herd.HerdRules;
 import com.example.horsegenetics.common.herd.Relationship;
 import com.example.horsegenetics.common.horse.Sex;
@@ -640,6 +641,9 @@ public final class HerdGoals {
                 return false;
             }
             checkCooldown = 40;
+            if (!ServerConfig.breeding().naturalCoverIn(HorseRealm.isRealm(level))) {
+                return false;   // the cover it leads to is switched off (#276)
+            }
             Sex sex = HorseRecords.of(horse).sex();
             mareSide = sex == Sex.FEMALE;
             if (mareSide ? !ReproHandler.receptive(horse) : !HorseRecords.of(horse).entire()) {
