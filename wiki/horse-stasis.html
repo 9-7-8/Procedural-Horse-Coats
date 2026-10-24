@@ -232,8 +232,11 @@
     Craft one from <strong>five planks in a U, an ender pearl in the middle, an iron ingot in
     each top corner and a horse hair between them</strong> &mdash; any wood, so a plank you
     already have on hand will do. Place it, right-click it, and you get
-    <strong>two hundred and seven slots that take stasis chambers and nothing else</strong>
-    &mdash; a double chest's six rows on screen at a time, and twenty-three rows behind them.
+    <strong>a grid of slots that take stasis chambers and nothing else, and never runs out</strong>
+    &mdash; a double chest's six rows on screen at a time, at least twenty-three rows behind them,
+    and <span id="bank-grows">another row added whenever a chamber goes into the last one</span>, so
+    there is always an empty row at the bottom (#273, 2026-10-24). A row added while you have the
+    bank open shows the next time you open it.
     <strong>The grid scrolls</strong>: roll the wheel over it and the rows move, with a bar down
     the right-hand edge saying where in the cabinet you are.
 </p>
@@ -694,6 +697,25 @@
     slot sync fills in on the client, plus one number that advances with nobody looking.
     <strong>Nothing in the chamber grid ever unpacks a snapshot.</strong> A horse in stasis is a
     data component on an item, and the grid moves items; only the upkeep reads inside one.
+</p>
+<h3 id="bank-grid-grows">The grid grows, and saves past slot 255 (#273, 2026-10-24)</h3>
+<p>
+    The chamber grid is a <code>ChamberGrid</code>, not a <code>SimpleContainer</code>: a list that
+    adds a row of nine whenever <code>setItem</code> puts a chamber in its last row, by
+    <code>common/horse/StasisBankGrid</code> (<code>rowsFor</code>, <code>growsAt</code>,
+    <code>MIN_ROWS</code> = the old 23). It never shrinks while running, because a menu's slots
+    are made when it opens; the menu is built with the grid's size <em>at that moment</em>, and
+    the client learns it from the open buffer (<code>ModMenus.HORSE_STASIS_BANK</code> is an
+    extra-data menu now). Browse-row button ids are interleaved &mdash; eject is 0, then
+    <code>studButton(slot)</code> and <code>withdrawButton(slot)</code> &mdash; so they no longer
+    depend on the grid's size. <strong>The save is its own</strong>: vanilla's
+    <code>ContainerHelper.saveAllItems</code> writes each slot as an unsigned byte
+    (<code>ItemStackWithSlot.CODEC</code>, read from the 26.1.2 jar), so slots 256 and up go under
+    <code>chambers_wide</code> with an int slot, while 0&ndash;255 stay under vanilla's
+    <code>Items</code> &mdash; an older jar still reads the first 207. The depth is not saved; it is
+    rebuilt from the highest filled slot, which is also the migration from a fixed-size bank. The
+    tick's cursor walks the live size. Pinned by <code>StasisBankGridTest</code> and the
+    <code>stasis_bank_grid_grows</code> gametest.
 </p>
 <p>
     The shelf's <code>createTickerHelper</code> shape is copied exactly, and
@@ -1767,7 +1789,8 @@
         <strong>The chamber recipes have been made visible to JEI and the recipe book twice now,
         the first attempt did not work, nobody has looked at the second, and a horse entering or
         leaving a chamber now swaps the item underneath it &mdash; which is unplayed at all four
-        swap sites</strong>; beyond that,
+        swap sites</strong>; the grid growing past its old 207 (#273), untested and unplayed;
+        beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
         gametests, and the unattended yard has watched a bank mend a horse, refuse every
         hopper at its chambers, drop them all when broken and stand in fire and lava, but
@@ -2317,9 +2340,12 @@
         eye.</li>
     <li><strong>Break a bank that is holding horses below the visible rows.</strong> Every
         chamber should drop, not only the fifty-four that were on screen.</li>
-    <li><strong>The last row is full-width.</strong> Twenty-three rows of nine is
-        <code>HorseStasisBankBlockEntity.SLOTS</code> exactly, so the bottom row should have no
-        gap in it.</li>
+    <li><strong>The grid grows (#273).</strong> Put a chamber in the last row, close and reopen:
+        there is a new empty row under it, the scrollbar's thumb is shorter, and the chamber is
+        where it was put. Break a bank grown past 255 chambers: every one drops. Restart the server
+        with one: every one is still there. <code>StasisBankGridTest</code> and the
+        <code>stasis_bank_grid_grows</code> gametest cover the rule and the save, and neither has
+        run yet (written while the live server had a player on).</li>
 </ul>
 
 <h3 id="verify-bank-bandwidth">What a full bank costs on the wire (never measured, and now four times the question)</h3>
@@ -2331,6 +2357,8 @@
     fifty-four slots to twenty-three rows of nine and this check did not get easier</strong>
     &mdash; scrolling changes which rows are <em>drawn</em>, never which are <em>sent</em>, so
     the packet on open is now roughly four times what it was when nobody had measured it either.
+    And since #273 the grid has no ceiling at all, so a bank of a thousand horses sends a thousand
+    entity tags on open; the /horsebank command (#272) is what will fill banks that deep.
     This is the first thing to look at in the next play session.
 </p>
 <ul>
