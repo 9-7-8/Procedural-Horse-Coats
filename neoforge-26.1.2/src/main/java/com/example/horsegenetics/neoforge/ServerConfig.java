@@ -179,6 +179,15 @@ public final class ServerConfig {
     public static final ModConfigSpec.IntValue FREE_COVERS_PER_DAY;
 
     /**
+     * <b>{@code fertility.natural_breeding}</b> - whether a stallion left with a mare
+     * in heat covers her on his own ({@code server/NaturalBreedingHandler}). On by
+     * default, which is how every world has behaved since 2026-09-13. Off, no horse
+     * breeds unless a player breeds it; heat, pregnancies already under way and
+     * births carry on. {@code /horsebreeding} turns it on and off.
+     */
+    public static final ModConfigSpec.BooleanValue NATURAL_BREEDING;
+
+    /**
      * <b>Does an owner hear about their horse being hurt?</b> See
      * {@code server/HorseHurtNoticeHandler} for who is told and how often.
      */
@@ -720,6 +729,14 @@ public final class ServerConfig {
                 .defineInRange("fertility.free_covers_per_day",
                         com.example.horsegenetics.common.repro.ReproRules.DEFAULT_FREE_COVERS_PER_DAY, 0,
                         com.example.horsegenetics.common.repro.ReproRules.MAX_FREE_COVERS_PER_DAY);
+        NATURAL_BREEDING = builder
+                .comment("Whether horses breed on their own. (default: true)",
+                        "On, a stallion left with a mare in heat covers her - wild bands and owned",
+                        "paddocks alike. Off, a foal needs a player to breed it;",
+                        "heat, pregnancies already under way and births carry on as before.",
+                        "/horsebreeding enable and /horsebreeding disable change it while the server",
+                        "runs and save it here. Server-side.")
+                .define("fertility.natural_breeding", true);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -1430,6 +1447,29 @@ public final class ServerConfig {
             return WILD_DESPAWN_DAYS.get();
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_DAYS;
+        }
+    }
+
+    /** {@code fertility.natural_breeding}, safely. */
+    public static boolean naturalBreeding() {
+        try {
+            return NATURAL_BREEDING.get();
+        } catch (IllegalStateException notLoaded) {
+            return true;
+        }
+    }
+
+    /**
+     * Turn {@code fertility.natural_breeding} on or off and write it to the world's
+     * server config. Returns false when the config is not loaded, so nothing was changed.
+     */
+    public static boolean setNaturalBreeding(boolean on) {
+        try {
+            NATURAL_BREEDING.set(on);
+            NATURAL_BREEDING.save();
+            return true;
+        } catch (IllegalStateException notLoaded) {
+            return false;
         }
     }
 

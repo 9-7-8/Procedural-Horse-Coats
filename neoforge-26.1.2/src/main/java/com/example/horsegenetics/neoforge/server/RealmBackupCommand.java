@@ -9,15 +9,20 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,7 +32,9 @@ import java.util.Map;
  *   <li>{@code backups} - list what is kept;</li>
  *   <li>{@code restore [name]} - say what restoring would do (the newest, if
  *       no name);</li>
- *   <li>{@code restore <name> confirm} - do it.</li>
+ *   <li>{@code restore <name> confirm} - do it;</li>
+ *   <li>{@code send <horses>} - move horses into the realm ({@link RealmSend}).
+ *       Not a backup matter, but it is the operator's realm command.</li>
  * </ul>
  * The preview is worked out again on confirm rather than remembered, so a
  * horse that came back in between is not raised a second time.
@@ -58,7 +65,54 @@ public final class RealmBackupCommand {
                                         StringArgumentType.getString(c, "name"), false))
                                 .then(Commands.literal("confirm")
                                         .executes(c -> restore(c.getSource(),
-                                                StringArgumentType.getString(c, "name"), true))))));
+                                                StringArgumentType.getString(c, "name"), true)))))
+                .then(Commands.literal("send")
+                        .then(Commands.argument("horses", EntityArgument.entities())
+                                .executes(c -> send(c.getSource(), EntityArgument.getEntities(c, "horses"))))));
+    }
+
+    /**
+     * {@code /horserealm send <horses>}: every horse the selector names, to the
+     * realm's arrival field ({@link RealmSend}). Anything that is not a horse, a
+     * horse already there, one with somebody on it, and cowboy stock a player has
+     * bought are skipped and counted.
+     */
+    private static int send(CommandSourceStack source, Collection<? extends Entity> targets) {
+        ServerLevel realm = realm(source);
+        if (realm == null) {
+            return 0;
+        }
+        int sent = 0;
+        int owned = 0;
+        int skipped = 0;
+        for (Entity e : List.copyOf(targets)) {
+            if (!(e instanceof Horse horse) || !horse.isAlive() || horse.isVehicle()
+                    || !(horse.level() instanceof ServerLevel from) || HorseRealm.isRealm(from)
+                    || RealmSend.spokenFor(horse, from)) {
+                skipped++;
+                continue;
+            }
+            boolean keepsOwner = !RealmSend.releasedOnArrival(horse);
+            if (RealmSend.send(from, realm, horse, sent) == null) {
+                skipped++;
+                continue;
+            }
+            sent++;
+            if (keepsOwner) {
+                owned++;
+            }
+        }
+        if (sent == 0) {
+            fail(source, "No horse was sent" + (skipped > 0 ? " (" + skipped
+                    + " skipped: not a horse, already in the realm, ridden, or sold by a cowboy)." : "."));
+            return 0;
+        }
+        String text = "Sent " + sent + " horse" + (sent == 1 ? "" : "s") + " to the horse realm."
+                + (skipped > 0 ? " Skipped " + skipped + " (not a horse, already there, ridden, or sold by a cowboy)." : "")
+                + (owned > 0 ? " " + owned + " still owned: each goes wild within a few seconds unless "
+                        + "its owner is in the realm." : "");
+        source.sendSuccess(() -> Component.literal(text), true);
+        return sent;
     }
 
     private static ServerLevel realm(CommandSourceStack source) {
