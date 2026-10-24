@@ -641,8 +641,11 @@ public final class HerdGoals {
                 return false;
             }
             checkCooldown = 40;
-            if (!ServerConfig.breeding().naturalCoverIn(HorseRealm.isRealm(level))) {
-                return false;   // the cover it leads to is switched off (#276)
+            if (!ServerConfig.breeding().master()) {
+                // All breeding is off (#276). Only the master: the walk itself breeds
+                // nothing, and natural cover is off by default, so gating it on that
+                // switch would have changed every default world (heat_crosses_open_ground).
+                return false;
             }
             Sex sex = HorseRecords.of(horse).sex();
             mareSide = sex == Sex.FEMALE;

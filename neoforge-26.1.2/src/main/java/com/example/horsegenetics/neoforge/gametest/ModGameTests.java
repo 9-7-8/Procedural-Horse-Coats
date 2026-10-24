@@ -2381,6 +2381,7 @@ public final class ModGameTests {
         // One bank filled and one button pressed twice, then five ticks for the
         // dropped chamber to be findable on the ground.
         register(event, environment, STASIS_BANK_EJECTS_EMPTIES, 100);
+        register(event, environment, STASIS_BANK_GRID_GROWS, 100);
         // Two mock players and a dozen inventory reads, all inside one tick.
         register(event, environment, SEND_HOME_PAYMENT, 100);
         // A converted zombie and skeleton: one tick to convert, a few to settle.
