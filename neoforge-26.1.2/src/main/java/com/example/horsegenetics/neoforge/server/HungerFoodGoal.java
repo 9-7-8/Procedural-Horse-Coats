@@ -353,7 +353,7 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
      * ended at the fence, leaned on it for {@link #MAX_PURSUIT}, ignored that one block and
      * started again on the block beside it. So each candidate is now asked
      * {@link #reachable(BlockPos)} before the horse commits to it, the way
-     * {@code BondFollowGoal.ReachCheck} asks it of an owner behind a door.
+     * {@link ReachCheck} asks it of an owner behind a door.
      *
      * <p>That alone would starve the horse instead: the crop rung beats grass, so a pen of
      * grass beside a fenced farm would spend every search rejecting crops and never fall
@@ -475,7 +475,7 @@ public final class HungerFoodGoal extends Goal implements DebugDestination {
     /**
      * "Could this horse actually walk to it?" - one real {@code createPath} call, and a path
      * that exists but stops short ({@code !canReach()}) is a fence. The same question
-     * {@code BondFollowGoal.ReachCheck} asks of an owner; it needs no cache here because only
+     * {@link ReachCheck} asks of an owner; it needs no cache here because only
      * a hungry horse asks it, at most {@link #MAX_REACH_TESTS} times per
      * {@link #SEARCH_INTERVAL}, where the pursuit it replaces repathed every
      * {@link #REPATH_INTERVAL} ticks for up to {@link #MAX_PURSUIT}.

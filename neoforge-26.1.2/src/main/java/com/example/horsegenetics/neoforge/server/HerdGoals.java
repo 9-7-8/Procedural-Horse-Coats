@@ -46,6 +46,12 @@ import java.util.UUID;
  * <p>Nothing here does damage. Sparring is rearing, a push and a short chase; the
  * one real fight is a takeover, and that is {@link BandLife}'s.
  *
+ * <p><b>Every goal here walks to another horse only along a path that gets there</b>
+ * (#259). Each asks {@link ReachCheck} when it picks its partner and again while it
+ * walks, and a partner behind a fence counts as no partner: before that, a mare in
+ * heat with a stallion in the next pen stood pressed to the rails for her whole heat,
+ * and a dam leaned on the fence toward a foal she could see.
+ *
  * <p><b>Not verified in-game</b>, and every number below is a first guess at what
  * reads as a horse rather than a measurement.
  */
@@ -114,6 +120,7 @@ public final class HerdGoals {
      */
     public static final class Spar extends Goal {
         private final Horse horse;
+        private final ReachCheck reach = ReachCheck.approaching();
         private Horse partner;
         private int beat;
         private int checkCooldown;
@@ -132,7 +139,7 @@ public final class HerdGoals {
             Bout bout = BOUTS.get(horse.getUUID());
             if (bout != null) {
                 partner = loaded(horse, bout.a().equals(horse.getUUID()) ? bout.b() : bout.a());
-                return partner != null && level.getGameTime() < bout.ends();
+                return partner != null && level.getGameTime() < bout.ends() && reach.test(horse, partner);
             }
             if (--checkCooldown > 0) {
                 return false;
@@ -151,7 +158,8 @@ public final class HerdGoals {
                             && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).entire()
                             && h.isTamed() == horse.isTamed())) {
                 double familiarity = BandLife.relationship(horse, other).map(Relationship::familiarity).orElse(0.0);
-                if (familiarity >= 0.3) {
+                reach.reset();
+                if (familiarity >= 0.3 && reach.test(horse, other)) {
                     long ends = level.getGameTime() + 80 + horse.getRandom().nextInt(60);
                     Bout b = new Bout(horse.getUUID(), other.getUUID(), ends);
                     BOUTS.put(horse.getUUID(), b);
@@ -165,7 +173,8 @@ public final class HerdGoals {
 
         @Override
         public boolean canContinueToUse() {
-            return partner != null && partner.isAlive() && BOUTS.containsKey(horse.getUUID()) && free(horse);
+            return partner != null && partner.isAlive() && BOUTS.containsKey(horse.getUUID()) && free(horse)
+                    && reach.test(horse, partner);
         }
 
         @Override
@@ -236,6 +245,7 @@ public final class HerdGoals {
      */
     public static final class DamAndFoal extends Goal {
         private final Horse horse;
+        private final ReachCheck reach = ReachCheck.approaching();
         private Horse other;
         private int checkCooldown;
 
@@ -257,7 +267,8 @@ public final class HerdGoals {
                     return false;
                 }
                 Horse dam = loaded(horse, social.dam().get());
-                if (dam != null && horse.distanceToSqr(dam) > 36.0 && horse.distanceToSqr(dam) < 48.0 * 48.0) {
+                if (dam != null && horse.distanceToSqr(dam) > 36.0 && horse.distanceToSqr(dam) < 48.0 * 48.0
+                        && reachable(dam)) {
                     other = dam;
                     return true;
                 }
@@ -283,12 +294,18 @@ public final class HerdGoals {
                     horse.setTarget(attacker);      // the melee goal takes it from here
                     return false;
                 }
-                if (horse.distanceToSqr(foal) > 144.0) {
+                if (horse.distanceToSqr(foal) > 144.0 && reachable(foal)) {
                     other = foal;
                     return true;
                 }
             }
             return false;
+        }
+
+        /** A fresh answer for a newly chosen horse - the cache may hold the last one's. */
+        private boolean reachable(Horse to) {
+            reach.reset();
+            return reach.test(horse, to);
         }
 
         private void adoptDam(ServerLevel level, HorseSocialAttachment social) {
@@ -311,7 +328,8 @@ public final class HerdGoals {
 
         @Override
         public boolean canContinueToUse() {
-            return other != null && other.isAlive() && free(horse) && horse.distanceToSqr(other) > 9.0;
+            return other != null && other.isAlive() && free(horse) && horse.distanceToSqr(other) > 9.0
+                    && reach.test(horse, other);
         }
 
         @Override
@@ -350,6 +368,7 @@ public final class HerdGoals {
         private static final double INTRUDER = 16.0;
 
         private final Horse horse;
+        private final ReachCheck reach = ReachCheck.approaching();
         private Horse subject;
         private boolean herding;
         private int checkCooldown;
@@ -380,6 +399,10 @@ public final class HerdGoals {
                     h -> h != horse && h.isAlive() && !h.isTamed() && !h.isBaby() && YardPens.together(horse, h)
                             && HorseRecords.hasRealRecord(h) && HorseRecords.of(h).entire()
                             && !h.getData(ModAttachments.HORSE_CARE.get()).herd().map(herd::equals).orElse(false))) {
+                reach.reset();
+                if (!reach.test(horse, h)) {
+                    continue;   // a stallion over the fence is no threat to his mares
+                }
                 subject = h;
                 herding = false;
                 long now = level.getGameTime();
@@ -394,6 +417,10 @@ public final class HerdGoals {
             for (Horse m : band) {
                 if (m != horse && !m.isBaby() && HorseRecords.of(m).sex() == Sex.FEMALE
                         && m.position().distanceToSqr(centre) > STRAY * STRAY) {
+                    reach.reset();
+                    if (!reach.test(horse, m)) {
+                        continue;
+                    }
                     subject = m;
                     herding = true;
                     ActionTrace.log("herd", ActionTrace.describeShort(horse) + " went to herd "
@@ -408,7 +435,8 @@ public final class HerdGoals {
 
         @Override
         public boolean canContinueToUse() {
-            return subject != null && subject.isAlive() && free(horse) && horse.distanceToSqr(subject) < 48.0 * 48.0;
+            return subject != null && subject.isAlive() && free(horse) && horse.distanceToSqr(subject) < 48.0 * 48.0
+                    && reach.test(horse, subject);
         }
 
         @Override
@@ -492,6 +520,7 @@ public final class HerdGoals {
      */
     public static final class Displace extends Goal {
         private final Horse horse;
+        private final ReachCheck reach = ReachCheck.approaching();
         private Horse subject;
         private int checkCooldown;
 
@@ -515,6 +544,10 @@ public final class HerdGoals {
                             && YardPens.together(horse, h))) {
                 if (social.ledger().rankOver(other.getUUID()) >= HerdRules.DISPLACE_MARGIN
                         && atFoodOrWater(level, other.blockPosition())) {
+                    reach.reset();
+                    if (!reach.test(horse, other)) {
+                        continue;   // the next pen's hay is not this horse's to take
+                    }
                     subject = other;
                     return true;
                 }
@@ -524,7 +557,8 @@ public final class HerdGoals {
 
         @Override
         public boolean canContinueToUse() {
-            return subject != null && subject.isAlive() && free(horse) && horse.distanceToSqr(subject) < 100.0;
+            return subject != null && subject.isAlive() && free(horse) && horse.distanceToSqr(subject) < 100.0
+                    && reach.test(horse, subject);
         }
 
         @Override
@@ -589,6 +623,7 @@ public final class HerdGoals {
         private static final Map<UUID, UUID> ANSWERING = new HashMap<>();
 
         private final Horse horse;
+        private final ReachCheck reach = ReachCheck.approaching();
         private Horse partner;
         private boolean mareSide;
         private int checkCooldown;
@@ -616,19 +651,25 @@ public final class HerdGoals {
                 Horse current = claimed == null ? null : loaded(horse, claimed);
                 if (current != null && ReproHandler.receptive(current)
                         && current.distanceToSqr(horse) < RANGE * RANGE) {
-                    best = current;
+                    reach.reset();
+                    if (reach.test(horse, current)) {
+                        best = current;
+                    }
                 }
             }
             if (best == null) {
-                for (Horse h : level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(RANGE),
+                List<Horse> near = new java.util.ArrayList<>(level.getEntitiesOfClass(Horse.class, horse.getBoundingBox().inflate(RANGE),
                         h -> h != horse && !h.isBaby() && free(h) && HorseRecords.hasRealRecord(h) && YardPens.together(horse, h)
                                 && (mareSide ? HorseRecords.of(h).entire()
-                                        : HorseRecords.of(h).sex() == Sex.FEMALE))) {
-                    if (!mareSide && !ReproHandler.receptive(h)) {
-                        continue;
-                    }
-                    if (best == null || h.distanceToSqr(horse) < best.distanceToSqr(horse)) {
-                        best = h;
+                                        : HorseRecords.of(h).sex() == Sex.FEMALE)
+                                && (mareSide || ReproHandler.receptive(h))));
+                near.sort(java.util.Comparator.comparingDouble(h -> h.distanceToSqr(horse)));
+                // Nearest first, but only one she can walk to: the stud over the rails is passed over for the
+                // one in her own pen. A path search each, so at most three - a scan is every two seconds.
+                for (int i = 0; i < Math.min(3, near.size()) && best == null; i++) {
+                    reach.reset();
+                    if (reach.test(horse, near.get(i))) {
+                        best = near.get(i);
                     }
                 }
             }
@@ -649,7 +690,7 @@ public final class HerdGoals {
             }
             double d2 = horse.distanceToSqr(partner);
             return d2 > CLOSE * CLOSE && d2 < (RANGE + 8.0) * (RANGE + 8.0)
-                    && ReproHandler.receptive(mareSide ? horse : partner);
+                    && ReproHandler.receptive(mareSide ? horse : partner) && reach.test(horse, partner);
         }
 
         @Override
@@ -690,6 +731,7 @@ public final class HerdGoals {
      */
     public static final class GroomAndRest extends Goal {
         private final Horse horse;
+        private final ReachCheck reach = ReachCheck.approaching();
         private Horse partner;
         private int remaining;
         private int checkCooldown;
@@ -718,6 +760,10 @@ public final class HerdGoals {
             if (p == null || horse.distanceToSqr(p) > 144.0 || !free(p)) {
                 return false;
             }
+            reach.reset();
+            if (!reach.test(horse, p)) {
+                return false;   // a friend in the next pen is groomed over the rails by nobody
+            }
             partner = p;
             remaining = 120 + horse.getRandom().nextInt(120);
             settled = false;
@@ -729,7 +775,7 @@ public final class HerdGoals {
         @Override
         public boolean canContinueToUse() {
             return partner != null && partner.isAlive() && free(horse) && remaining > 0
-                    && horse.distanceToSqr(partner) < 196.0;
+                    && horse.distanceToSqr(partner) < 196.0 && reach.test(horse, partner);
         }
 
         @Override

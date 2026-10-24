@@ -2249,6 +2249,9 @@ public final class ModGameTests {
         // Founding (up to 20 ticks), a search every 40, a short walk and one mouthful.
         register(event, environment, HAY_UNDER_A_LOW_ROOF_IS_EATEN, 400);
         register(event, environment, STACKED_HAY_IS_EATEN, 400);
+        // Fifteen seconds of a mare in heat beside a fenced-off stallion, and the open control (#259).
+        register(event, environment, HEAT_STOPS_AT_A_FENCE, 500);
+        register(event, environment, HEAT_CROSSES_OPEN_GROUND, 500);
         // One horse spawned, saved and read back, all inside a single tick.
         register(event, environment, STASIS_TAG_IS_READABLE, 100);
         // Three codec round trips in one tick.
@@ -5223,6 +5226,158 @@ public final class ModGameTests {
                             + " Check data/horsegenetics/tags/item/hay_bales.json."), 0);
         }
         helper.succeed();
+    }
+
+    /**
+     * <b>A mare in heat does not lean on the fence toward a stallion she cannot reach</b>
+     * (#259). A walled cell in the air, nine wide, with a row of oak fence across its
+     * middle: a tamed mare in heat on one side, a tamed entire stallion eight blocks off
+     * on the other. {@code HerdGoals.HeatAttraction} used to choose him anyway, get a
+     * path that ends at the rails, and hold both horses there for the whole heat. Passes
+     * when neither horse has run the goal for {@value #HEAT_WATCH} ticks.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HEAT_STOPS_AT_A_FENCE =
+            TEST_FUNCTIONS.register("heat_stops_at_a_fence", () -> h -> heatCell(h, 110, true));
+
+    /**
+     * <b>The same pair with no fence walk to each other</b> - the control, so the test
+     * above is not green only because the mare never came into heat or the goal never
+     * runs in a gametest. Passes when the goal has run and the pair stand within four
+     * blocks. Forty blocks above the fenced cell, past the goal's reach: twelve was close
+     * enough for the fenced mare to choose this cell's stallion instead, through the air.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> HEAT_CROSSES_OPEN_GROUND =
+            TEST_FUNCTIONS.register("heat_crosses_open_ground", () -> h -> heatCell(h, 150, false));
+
+    private static final int HEAT_WATCH = 300;
+
+    private static boolean runningHeat(net.minecraft.world.entity.animal.equine.Horse horse) {
+        for (net.minecraft.world.entity.ai.goal.WrappedGoal w : horse.goalSelector.getAvailableGoals()) {
+            if (w.isRunning() && w.getGoal() instanceof com.example.horsegenetics.neoforge.server.HerdGoals.HeatAttraction) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void heatCell(GameTestHelper helper, int up, boolean fenced) {
+        keepTicking(helper);
+        ServerLevel level = helper.getLevel();
+        // Floor x -4..4, z -1..11, glass two high round it; the fence row at z 5.
+        BlockPos o = helper.absolutePos(BlockPos.ZERO).above(up);
+        for (int x = -4; x <= 4; x++) {
+            for (int z = -1; z <= 11; z++) {
+                level.setBlock(o.offset(x, -1, z), Blocks.STONE.defaultBlockState(), 2);
+                boolean wall = x == -4 || x == 4 || z == -1 || z == 11;
+                for (int y = 0; y <= 2; y++) {
+                    BlockState st = Blocks.AIR.defaultBlockState();
+                    if (wall && y <= 1) {
+                        st = Blocks.GLASS.defaultBlockState();
+                    } else if (fenced && z == 5 && y == 0) {
+                        st = Blocks.OAK_FENCE.defaultBlockState();
+                    }
+                    level.setBlock(o.offset(x, y, z), st, 2);
+                }
+            }
+        }
+        if (fenced) {
+            // Placing each post updates its neighbours' shapes, so the row joins into rails as it is laid;
+            // a gap a horse could slip through would make this a test of nothing. Checked, not assumed:
+            for (int x = -3; x <= 2; x++) {
+                if (!level.getBlockState(o.offset(x, 0, 5)).getValue(net.minecraft.world.level.block.FenceBlock.EAST)) {
+                    throw new GameTestAssertException(Component.literal("the fence row did not join at x " + x), 0);
+                }
+            }
+        }
+        net.minecraft.world.entity.animal.equine.Horse mare =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(up).offset(0, 0, 1));
+        net.minecraft.world.entity.animal.equine.Horse stud =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(up).offset(0, 0, 9));
+        boolean[] ready = {false};
+        boolean[] ran = {false};
+        String[] firstRun = {""};
+        int[] watched = {0};
+        helper.onEachTick(() -> {
+            if (!ready[0]) {
+                if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(mare)
+                        || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(stud)) {
+                    return;
+                }
+                Object[][] pair = {{mare, com.example.horsegenetics.common.horse.Sex.FEMALE, 1.5},
+                        {stud, com.example.horsegenetics.common.horse.Sex.MALE, 9.5}};
+                for (Object[] p : pair) {
+                    net.minecraft.world.entity.animal.equine.Horse h = (net.minecraft.world.entity.animal.equine.Horse) p[0];
+                    com.example.horsegenetics.neoforge.server.HorseRecords.apply(h,
+                            com.example.horsegenetics.neoforge.server.HorseRecords.newFounder(h,
+                                    new com.example.horsegenetics.neoforge.NeoRng(h.getRandom()),
+                                    (com.example.horsegenetics.common.horse.Sex) p[1],
+                                    com.example.horsegenetics.common.genetics.Genotype.wildType()));
+                    h.setTamed(true);
+                    h.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.SCALE).setBaseValue(1.0);
+                    h.snapTo(o.getX() + 0.5, o.getY(), o.getZ() + (double) p[2], 0.0F, 0.0F);
+                }
+                com.example.horsegenetics.neoforge.server.DebugYardFertility.inHeat(mare);
+                ready[0] = true;
+                return;
+            }
+            watched[0]++;
+            if (!ran[0] && (runningHeat(mare) || runningHeat(stud))) {
+                ran[0] = true;
+                net.minecraft.world.level.pathfinder.Path p = mare.getNavigation().createPath(stud, 0);
+                firstRun[0] = "first at watched tick " + watched[0] + " by " + (runningHeat(mare) ? "mare " : "")
+                        + (runningHeat(stud) ? "stallion " : "") + "- mare " + mare.blockPosition().subtract(o).toShortString()
+                        + " onGround " + mare.onGround() + ", stallion " + stud.blockPosition().subtract(o).toShortString()
+                        + ", path " + (p == null ? "null" : p.canReach() + " end "
+                        + (p.getEndNode() == null ? "?" : p.getEndNode().asBlockPos().subtract(o).toShortString()));
+                net.minecraft.world.level.pathfinder.Path sp = stud.getNavigation().createPath(mare, 0);
+                net.minecraft.world.level.pathfinder.Path cur = stud.getNavigation().getPath();
+                firstRun[0] += "; stallion's path to her " + (sp == null ? "null" : sp.canReach() + " end "
+                        + (sp.getEndNode() == null ? "?" : sp.getEndNode().asBlockPos().subtract(o).toShortString()))
+                        + ", walking " + (cur == null ? "nothing" : cur.canReach() + " to " + cur.getTarget().subtract(o).toShortString())
+                        + ", onGround " + stud.onGround() + ", tick " + helper.getTick();
+            }
+        });
+        Runnable clear = () -> {
+            for (int x = -4; x <= 4; x++) {
+                for (int z = -1; z <= 11; z++) {
+                    for (int y = -1; y <= 2; y++) {
+                        level.setBlock(o.offset(x, y, z), Blocks.AIR.defaultBlockState(), 2);
+                    }
+                }
+            }
+        };
+        if (fenced) {
+            helper.succeedWhen(() -> {
+                if (ran[0]) {
+                    net.minecraft.world.level.pathfinder.Path probe = mare.getNavigation().createPath(stud, 0);
+                    throw new GameTestAssertException(Component.literal("a mare in heat went for a stallion behind a"
+                            + " fence - HeatAttraction ran with no path that reaches him (#259); mare at "
+                            + mare.blockPosition().subtract(o).toShortString() + ", stallion at "
+                            + stud.blockPosition().subtract(o).toShortString() + "; her path to him now: "
+                            + (probe == null ? "none" : "canReach " + probe.canReach() + ", ends at "
+                            + (probe.getEndNode() == null ? "?" : probe.getEndNode().asBlockPos().subtract(o).toShortString())
+                            + ", " + probe.getNodeCount() + " nodes") + "; " + firstRun[0]), 0);
+                }
+                if (!com.example.horsegenetics.neoforge.server.ReproHandler.receptive(mare)) {
+                    throw new GameTestAssertException(Component.literal("the mare is not in heat - the test proves nothing"), 0);
+                }
+                if (watched[0] < HEAT_WATCH) {
+                    throw new GameTestAssertException(Component.literal("watched " + watched[0] + " of " + HEAT_WATCH
+                            + " ticks"), 0);
+                }
+                clear.run();
+            });
+        } else {
+            helper.succeedWhen(() -> {
+                if (!ran[0] || mare.distanceTo(stud) > 4.0) {
+                    throw new GameTestAssertException(Component.literal("with no fence the pair did not meet (heat goal "
+                            + (ran[0] ? "ran" : "never ran") + ", " + String.format("%.1f", mare.distanceTo(stud))
+                            + " blocks apart, mare " + (com.example.horsegenetics.neoforge.server.ReproHandler.receptive(mare)
+                            ? "in heat" : "NOT in heat") + ") - the fenced test is green for nothing"), 0);
+                }
+                clear.run();
+            });
+        }
     }
 
     /**

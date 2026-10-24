@@ -18,7 +18,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Timings assume {@code debug.tools} is on, the dev default: a reproductive day is one minute.
  */
-final class DebugYardFertility {
+public final class DebugYardFertility {
 
     private DebugYardFertility() {
     }
@@ -28,7 +28,7 @@ final class DebugYardFertility {
     // ------------------------------------------------------------------
 
     /** At the start of the better half of a heat, so a pair has time to meet. */
-    static void inHeat(@Nullable Horse mare) {
+    public static void inHeat(@Nullable Horse mare) {
         if (mare == null) {
             return;
         }

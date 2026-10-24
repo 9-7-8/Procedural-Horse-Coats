@@ -5,7 +5,6 @@ import com.example.horsegenetics.neoforge.data.ModAttachments;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
-import net.minecraft.world.level.pathfinder.Path;
 
 import java.util.EnumSet;
 
@@ -211,54 +210,6 @@ public final class BondFollowGoal extends Goal {
             if (this.owner != null) {
                 horse.getLookControl().setLookAt(this.owner, 10.0F, (float) horse.getMaxHeadXRot());
             }
-        }
-    }
-
-    /**
-     * "Could this horse actually walk there?" - a real
-     * {@link net.minecraft.world.entity.ai.navigation.PathNavigation#createPath}
-     * call, which is far too expensive for a <code>canUse</code> that runs every
-     * tick for every horse, so the answer is cached for {@link #EVERY} ticks.
-     * A path that exists but stops short ({@code !canReach()}) is a fence: it
-     * counts as no path.
-     */
-    static final class ReachCheck {
-
-        /** Two seconds - a fence does not move, and a gate opening is not urgent. */
-        private static final int EVERY = 40;
-
-        /**
-         * Checks in a row that may reuse the answer while neither end has moved a block
-         * (#201). A horse standing beside its standing owner has no current path, so every
-         * check was a fresh A* for an answer that could not have changed - on every bonded
-         * horse near its owner. A gate opening with nobody moving is noticed within
-         * {@code EVERY * MAX_STILL_REUSES} ticks instead of {@code EVERY}.
-         */
-        private static final int MAX_STILL_REUSES = 4;
-
-        private int cooldown;
-        private boolean reachable;
-        private long horseAt = Long.MIN_VALUE;
-        private long targetAt = Long.MIN_VALUE;
-        private int stillReuses;
-
-        boolean test(AbstractHorse horse, LivingEntity target) {
-            if (--this.cooldown > 0) {
-                return this.reachable;
-            }
-            this.cooldown = EVERY;
-            long h = horse.blockPosition().asLong();
-            long t = target.blockPosition().asLong();
-            if (h == this.horseAt && t == this.targetAt && this.stillReuses < MAX_STILL_REUSES) {
-                this.stillReuses++;
-                return this.reachable;
-            }
-            this.horseAt = h;
-            this.targetAt = t;
-            this.stillReuses = 0;
-            Path path = horse.getNavigation().createPath(target, 0);
-            this.reachable = path != null && path.canReach();
-            return this.reachable;
         }
     }
 }

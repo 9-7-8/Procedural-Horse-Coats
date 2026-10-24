@@ -31,7 +31,9 @@ import java.util.UUID;
  * about a missing lead is {@link HerdSocialHandler}'s, which can see the whole band.
  *
  * <p>Real pathfinding, re-pathed every ~15 ticks; a fence stops a follower just as it
- * stops {@link BondFollowGoal}.
+ * stops {@link BondFollowGoal}. That sentence was written before it was true: until
+ * #259 nothing here asked whether the path got there, and a follower leaned on the
+ * fence its lead was behind. {@link ReachCheck#approaching()} asks now.
  */
 public final class WildHerdGoal extends Goal {
 
@@ -43,7 +45,10 @@ public final class WildHerdGoal extends Goal {
     private static final double MAX_RANGE = 40.0;
 
     private final AbstractHorse horse;
+    private final ReachCheck reach = ReachCheck.approaching();
     private AbstractHorse target;
+    /** Whom {@link #reach} last answered for. */
+    private AbstractHorse asked;
     private double stopRange = STOP_RANGE;
     private int recalcCooldown;
 
@@ -98,6 +103,15 @@ public final class WildHerdGoal extends Goal {
         if (d2 < catchUp * catchUp || d2 > MAX_RANGE * MAX_RANGE) {
             return false;
         }
+        // A leader over a fence is followed no further than the open ground goes (#259). canUse runs every
+        // tick here, so the cached answer is kept while the leader is the same horse.
+        if (t != this.asked) {
+            this.asked = t;
+            reach.reset();
+        }
+        if (!reach.test(horse, t)) {
+            return false;
+        }
         this.target = t;
         this.stopRange = stallion ? STALLION_STOP : STOP_RANGE;
         return true;
@@ -109,7 +123,8 @@ public final class WildHerdGoal extends Goal {
             return false;
         }
         double d2 = horse.distanceToSqr(this.target);
-        return d2 > stopRange * stopRange && d2 < (MAX_RANGE + 6.0) * (MAX_RANGE + 6.0);
+        return d2 > stopRange * stopRange && d2 < (MAX_RANGE + 6.0) * (MAX_RANGE + 6.0)
+                && reach.test(horse, this.target);
     }
 
     @Override
