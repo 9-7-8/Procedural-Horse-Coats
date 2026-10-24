@@ -307,6 +307,17 @@
     is how far it looks for your bank, in chunks of sixteen blocks from where you stand. Both
     server-side.
 </p>
+<p id="horsebank-op">
+    <strong>Two operator versions</strong> (#275), each taking an optional player name (no name means
+    you). <code>/horsebank force [player]</code> files <em>every</em> one of that player's horses:
+    their own empties first, in their order, then a newly made Basic chamber for each horse left. With
+    no bank of theirs in range it places one first. <code>/horsebank new [player]</code> always places
+    a new bank, owned by that player, on the nearest free block on solid ground &mdash; preferring the
+    spot two blocks in front of them &mdash; within
+    <code id="setting-horsebank-place">horsebank.place_radius</code> blocks (default 10, range
+    1&ndash;16, server-side), then files every horse into it the same way. No free spot in range and
+    nothing happens at all. The player is told when an operator filed their horses for them.
+</p>
 
 <h2 id="browse-gameplay">The Browse tab: the bank as a list of horses</h2>
 <p>
@@ -729,6 +740,15 @@
     client's order arrives in <code>ChamberOrderPayload</code> on join and is kept per player until
     they leave; a player the server has heard nothing from gets the default. Pinned by
     <code>HorseBankPlanTest</code>.
+</p>
+<p>
+    <code>force</code> and <code>new</code> pass <code>makeBasics</code>. A new bank's spot comes from
+    <code>HorseBankPlan.placeOrder(radius, lookX, lookZ)</code>: every offset in the sphere except the
+    player's own two blocks, nearest the point two blocks along the horizontal look first, then
+    least height change, then nearest the player. <code>HorseBankCommand.placeBank</code> takes the
+    first that is loaded, replaceable, fluid-free, unobstructed by an entity and on a sturdy top
+    face, sets the block with <code>UPDATE_ALL</code> and records the target as its owner through
+    <code>setPlacedBy</code>, which also files it in <code>StasisBankIndex</code>.
 </p>
 
 <h2 id="bank-coding">The bank is a filtered chest with a clock on it</h2>
@@ -1831,7 +1851,7 @@
         <strong>The chamber recipes have been made visible to JEI and the recipe book twice now,
         the first attempt did not work, nobody has looked at the second, and a horse entering or
         leaving a chamber now swaps the item underneath it &mdash; which is unplayed at all four
-        swap sites</strong>; the grid growing past its old 207 (#273) and <code>/horsebank</code> (#274), both untested and unplayed;
+        swap sites</strong>; the grid growing past its old 207 (#273) and <code>/horsebank</code> with its operator versions (#274, #275), all untested and unplayed;
         beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
         gametests, and the unattended yard has watched a bank mend a horse, refuse every
@@ -2357,7 +2377,7 @@
         the one place the two halves of the bank are supposed to meet.</li>
 </ul>
 
-<h3 id="verify-horsebank">/horsebank (#274): not tested, not played</h3>
+<h3 id="verify-horsebank">/horsebank (#274, #275): not tested, not played</h3>
 <p>
     Written while the live server had a player on, so neither <code>HorseBankPlanTest</code> nor a
     boot has run. In game: with three horses of different ages and two Basic chambers, the two
@@ -2367,7 +2387,12 @@
     oldest; with <code>horsebank.allow_non_op</code> off a non-operator is refused (the command may
     still tab-complete until they rejoin, since the command tree is sent on join &mdash; the
     execute re-checks). Unverified: that <code>Horse.dropLeash()</code> drops the lead item in
-    26.1.2, as the hand-held lead's gametest suggests.
+    26.1.2, as the hand-held lead's gametest suggests. <strong>The operator versions (#275)</strong>:
+    <code>/horsebank force</code> with no empties files every horse in new Basics; with no bank in
+    range it places one in front of you; <code>/horsebank new</code> facing a wall puts the bank
+    beside you rather than in the wall; standing in deep water or mid-air with nothing solid
+    within <code>horsebank.place_radius</code> it says so and places nothing; <code>/horsebank force
+    &lt;friend&gt;</code> files the friend's horses into the friend's bank and tells them.
 </p>
 
 <h3 id="verify-bank-scroll">The scrolling chamber grid (NOT played)</h3>
