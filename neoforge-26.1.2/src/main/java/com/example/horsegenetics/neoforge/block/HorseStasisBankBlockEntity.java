@@ -36,7 +36,7 @@ import java.util.List;
  * <b>A Horse Stasis Bank: a filing cabinet for horses.</b>
  *
  * <h2>A chest with a filter on it, and a feed room behind it</h2>
- * {@link #SLOTS} slots that take nothing but a
+ * A grid of slots ({@link ChamberGrid}, which grows a row as it fills) that take nothing but a
  * {@link StasisChamberItem stasis chamber}, empty or full. Put chambers in, take
  * them out, break the block and they all drop. Nothing in <i>that</i> half knows
  * or cares what is inside a chamber - a horse in stasis is a data component on
@@ -103,11 +103,15 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
      * any one horse, not in what it costs the server. What it <i>does</i> cost is
      * bandwidth on open - see the page's Verification tab.
      */
-    public static final int COLS = 9;
-    public static final int ROWS = 23;
-    public static final int SLOTS = COLS * ROWS;
+    public static final int COLS = com.example.horsegenetics.common.horse.StasisBankGrid.COLS;
+    /**
+     * The <b>least</b> the grid is deep. Since #273 (2026-10-24) it grows a row
+     * whenever its last row takes a chamber - see {@link ChamberGrid} - so the
+     * live depth is {@code chambers().rows()} and this is only the floor.
+     */
+    public static final int ROWS = com.example.horsegenetics.common.horse.StasisBankGrid.MIN_ROWS;
 
-    private final SimpleContainer chambers = new SimpleContainer(SLOTS) {
+    private final ChamberGrid chambers = new ChamberGrid() {
         @Override
         public void setChanged() {
             super.setChanged();
@@ -406,7 +410,7 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
         publish();
     }
 
-    public SimpleContainer chambers() {
+    public ChamberGrid chambers() {
         return chambers;
     }
 
@@ -713,15 +717,16 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
      *         recomputed when a slot changes
      */
     private int nextTendableSlot() {
-        for (int step = 0; step < SLOTS; step++) {
-            int slot = (cursor + step) % SLOTS;
+        int size = chambers.getContainerSize();
+        for (int step = 0; step < size; step++) {
+            int slot = (cursor + step) % size;
             ItemStack stack = chambers.getItem(slot);
             StasisTier tier = tierOf(stack);
             if (tier == null || StasisChamberItem.snapshotOf(stack) == null) {
                 continue;
             }
             if (tier.heals() || tier.collectsDrops() || StasisStud.atStud(stack)) {
-                cursor = (slot + 1) % SLOTS;
+                cursor = (slot + 1) % size;
                 return slot;
             }
         }
@@ -803,7 +808,7 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
-        ContainerHelper.saveAllItems(output, chambers.getItems());
+        chambers.save(output);
         output.store("feed", ItemStack.OPTIONAL_CODEC, supplies.getItem(FEED_SLOT));
         output.store("water_in", ItemStack.OPTIONAL_CODEC, supplies.getItem(WATER_SLOT));
         output.store("empties", ItemStack.OPTIONAL_CODEC, supplies.getItem(EMPTIES_SLOT));
@@ -820,8 +825,7 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
-        chambers.getItems().replaceAll(s -> ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(input, chambers.getItems());
+        chambers.load(input);
         supplies.getItems().set(FEED_SLOT,
                 input.read("feed", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
         supplies.getItems().set(WATER_SLOT,
@@ -833,7 +837,7 @@ public class HorseStasisBankBlockEntity extends BlockEntity {
                     input.read("drop_" + i, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
         }
         water = input.getIntOr("water", 0);
-        cursor = Math.floorMod(input.getIntOr("cursor", 0), SLOTS);
+        cursor = Math.floorMod(input.getIntOr("cursor", 0), chambers.getContainerSize());
         placedBy = input.read("placed_by", net.minecraft.core.UUIDUtil.CODEC).orElse(null);
         // The gate is derived, not saved: loading the grid does not go through
         // the container's setChanged, so it is recomputed here or a reloaded

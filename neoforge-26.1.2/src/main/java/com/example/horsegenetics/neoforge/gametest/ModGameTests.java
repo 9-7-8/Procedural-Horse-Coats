@@ -1444,6 +1444,73 @@ public final class ModGameTests {
     }
 
     /**
+     * <b>A bank grows past 255 chambers and keeps them over a save</b> (#273).
+     * Vanilla's container save writes each slot number as an unsigned byte, so a
+     * chamber in slot 300 would not survive a plain {@code saveAllItems}; and a
+     * chamber in the last row must add a row. Also: a save from before the grid grew
+     * (only the {@code Items} list) loads at the old depth.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_BANK_GRID_GROWS =
+            TEST_FUNCTIONS.register("stasis_bank_grid_grows", () -> ModGameTests::stasisBankGridGrows);
+
+    private static void stasisBankGridGrows(GameTestHelper helper) {
+        var registries = helper.getLevel().registryAccess();
+        com.example.horsegenetics.neoforge.block.ChamberGrid grid = new com.example.horsegenetics.neoforge.block.ChamberGrid();
+        int floor = com.example.horsegenetics.common.horse.StasisBankGrid.MIN_ROWS;
+        if (grid.rows() != floor) {
+            helper.fail("a new grid is " + grid.rows() + " rows, not the old " + floor);
+            return;
+        }
+        int lastRowSlot = (floor - 1) * 9;
+        grid.setItem(lastRowSlot, new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get()));
+        if (grid.rows() != floor + 1) {
+            helper.fail("a chamber in the last row left the grid " + grid.rows() + " rows - no spare row");
+            return;
+        }
+        int far = grid.firstEmpty();
+        while (far < 300) {
+            grid.setItem(far, new ItemStack(ModItems.ADVANCED_STASIS_CHAMBER.get()));
+            far = grid.firstEmpty();
+        }
+        grid.setItem(300, new ItemStack(ModItems.SPACER_STASIS_CHAMBER.get()));
+
+        net.minecraft.world.level.storage.TagValueOutput out = net.minecraft.world.level.storage.TagValueOutput
+                .createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, registries);
+        grid.save(out);
+        net.minecraft.nbt.CompoundTag tag = out.buildResult();
+        com.example.horsegenetics.neoforge.block.ChamberGrid back = new com.example.horsegenetics.neoforge.block.ChamberGrid();
+        back.load(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, registries, tag));
+        if (!back.getItem(300).is(ModItems.SPACER_STASIS_CHAMBER.get())) {
+            helper.fail("the chamber in slot 300 did not survive a save and load - it would be a lost horse");
+            return;
+        }
+        if (!back.getItem(lastRowSlot).is(ModItems.BASIC_STASIS_CHAMBER.get())) {
+            helper.fail("slot " + lastRowSlot + " did not survive a save and load");
+            return;
+        }
+        if (back.getContainerSize() <= 300 || !back.getItem(back.getContainerSize() - 1).isEmpty()) {
+            helper.fail("a reloaded grid of " + back.getContainerSize() + " slots has no empty last row");
+            return;
+        }
+
+        // A bank saved before the grid grew: vanilla's Items list alone.
+        net.minecraft.world.level.storage.TagValueOutput old = net.minecraft.world.level.storage.TagValueOutput
+                .createWithContext(net.minecraft.util.ProblemReporter.DISCARDING, registries);
+        net.minecraft.core.NonNullList<ItemStack> items = net.minecraft.core.NonNullList.withSize(floor * 9, ItemStack.EMPTY);
+        items.set(5, new ItemStack(ModItems.BASIC_STASIS_CHAMBER.get()));
+        net.minecraft.world.ContainerHelper.saveAllItems(old, items);
+        com.example.horsegenetics.neoforge.block.ChamberGrid migrated = new com.example.horsegenetics.neoforge.block.ChamberGrid();
+        migrated.load(net.minecraft.world.level.storage.TagValueInput.create(
+                net.minecraft.util.ProblemReporter.DISCARDING, registries, old.buildResult()));
+        if (migrated.rows() != floor || !migrated.getItem(5).is(ModItems.BASIC_STASIS_CHAMBER.get())) {
+            helper.fail("an old 207-slot bank loaded as " + migrated.rows() + " rows, or lost its chamber");
+            return;
+        }
+        helper.succeed();
+    }
+
+    /**
      * <b>"Eject empties" takes out every empty chamber, and nothing else.</b>
      * The Chambers tab's one-press button, driven through the real
      * {@code clickMenuButton} id the screen sends.

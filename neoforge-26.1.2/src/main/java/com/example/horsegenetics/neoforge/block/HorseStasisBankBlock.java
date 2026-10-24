@@ -101,7 +101,9 @@ public class HorseStasisBankBlock extends BaseEntityBlock {
             bank.claimIfUnowned(serverPlayer.getUUID());
             serverPlayer.openMenu(new SimpleMenuProvider(
                     (id, inv, p) -> new HorseStasisBankMenu(id, inv, bank),
-                    Component.translatable("block.horsegenetics.horse_stasis_bank")));
+                    Component.translatable("block.horsegenetics.horse_stasis_bank")),
+                    // The grid's size now, so the client builds as many slots (#273).
+                    buf -> buf.writeVarInt(bank.chambers().getContainerSize()));
         }
         return InteractionResult.CONSUME;
     }

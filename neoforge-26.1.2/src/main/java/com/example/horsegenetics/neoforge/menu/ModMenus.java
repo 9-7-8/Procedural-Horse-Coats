@@ -46,7 +46,10 @@ public final class ModMenus {
      */
     public static final DeferredHolder<MenuType<?>, MenuType<HorseStasisBankMenu>> HORSE_STASIS_BANK =
             MENUS.register("horse_stasis_bank",
-                    () -> new MenuType<>(HorseStasisBankMenu::new, FeatureFlags.VANILLA_SET));
+                    // Extra-data since #273: the grid grows, so the client is told how
+                    // many chamber slots to build (HorseStasisBankBlock.useWithoutItem).
+                    () -> net.neoforged.neoforge.common.extensions.IMenuTypeExtension
+                            .create(HorseStasisBankMenu::new));
 
     /**
      * <b>A jump's</b> - two slots that take a plank or a dye, and three style

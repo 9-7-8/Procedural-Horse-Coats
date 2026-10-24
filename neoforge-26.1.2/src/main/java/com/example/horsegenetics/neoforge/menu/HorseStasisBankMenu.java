@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <b>The Horse Stasis Bank's menu.</b> Three tabs: a grid of
- * {@link HorseStasisBankBlockEntity#SLOTS} slots that takes stasis chambers and
+ * <b>The Horse Stasis Bank's menu.</b> Three tabs: a grid of chamber slots (as
+ * many as the bank's growing grid had when it opened) that takes stasis chambers and
  * refuses everything else, <b>Browse</b>, which is the same chambers read as
  * horses rather than as items, and <b>Supply</b>, the three slots the bank feeds
  * and waters them from.
@@ -46,7 +46,7 @@ import java.util.List;
  * <h2>Every chamber's whole horse is on the wire</h2>
  * A chamber's {@code stasis_snapshot} component carries the entire entity tag,
  * for the creative pick-block reason {@code StasisSnapshot} explains, and this
- * menu can hold {@link HorseStasisBankBlockEntity#SLOTS} of them. That is the
+ * menu can hold thousands of them now the grid grows (#273). That is the
  * one thing about the bank that is genuinely more expensive than the item it
  * stores, and it is on the page's Verification tab as a thing to measure with a
  * full bank rather than a thing to fix by sending less - sending less is how a
@@ -62,9 +62,14 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
 
     /** The chamber grid is the first block of slots; the supply slots and the player's follow it. */
     public static final int FIRST_CHAMBER_SLOT = 0;
-    public static final int FIRST_SUPPLY_SLOT = FIRST_CHAMBER_SLOT + HorseStasisBankBlockEntity.SLOTS;
-    private static final int SLOT_COUNT =
-            FIRST_SUPPLY_SLOT + HorseStasisBankBlockEntity.SUPPLY_SLOTS;
+    /**
+     * How many chamber slots this menu has - the grid's size <b>when it opened</b>.
+     * The grid grows (#273), so this is per menu, not a constant; the client is told
+     * it in the open buffer ({@code HorseStasisBankBlock.use}).
+     */
+    private final int gridSlots;
+    private final int firstSupplySlot;
+    private final int slotCount;
 
     // ------------------------------------------------------------------
     // The window's layout, in one place - addSlot needs it here and the screen
@@ -157,19 +162,35 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         }
     }
 
-    /** Client constructor - {@code MenuType} hands us no block entity. */
-    public HorseStasisBankMenu(int containerId, Inventory inventory) {
-        this(containerId, inventory, null);
+    /**
+     * Client constructor - the extra-data factory hands us the grid's size and no
+     * block entity. Clamped, because a packet is whatever somebody sent.
+     */
+    public HorseStasisBankMenu(int containerId, Inventory inventory,
+                               net.minecraft.network.RegistryFriendlyByteBuf buf) {
+        this(containerId, inventory, null, Math.max(HorseStasisBankBlockEntity.COLS * HorseStasisBankBlockEntity.ROWS,
+                Math.min(buf.readVarInt(), MAX_CLIENT_SLOTS)) / HorseStasisBankBlockEntity.COLS
+                * HorseStasisBankBlockEntity.COLS);
     }
 
-    public HorseStasisBankMenu(int containerId, Inventory inventory,
-                               @Nullable HorseStasisBankBlockEntity bank) {
+    /** A sanity ceiling on what a client will build from the open buffer: over a million chambers. */
+    private static final int MAX_CLIENT_SLOTS = 9 * 120_000;
+
+    public HorseStasisBankMenu(int containerId, Inventory inventory, HorseStasisBankBlockEntity bank) {
+        this(containerId, inventory, bank, bank.chambers().getContainerSize());
+    }
+
+    private HorseStasisBankMenu(int containerId, Inventory inventory,
+                                @Nullable HorseStasisBankBlockEntity bank, int gridSlots) {
         super(ModMenus.HORSE_STASIS_BANK.get(), containerId);
         this.player = inventory.player;
         this.bank = bank;
+        this.gridSlots = gridSlots;
+        this.firstSupplySlot = FIRST_CHAMBER_SLOT + gridSlots;
+        this.slotCount = firstSupplySlot + HorseStasisBankBlockEntity.SUPPLY_SLOTS;
         this.chambers = bank != null
                 ? bank.chambers()
-                : new SimpleContainer(HorseStasisBankBlockEntity.SLOTS);
+                : new SimpleContainer(gridSlots);
         this.supplies = bank != null
                 ? bank.supplies()
                 : new SimpleContainer(HorseStasisBankBlockEntity.SUPPLY_SLOTS);
@@ -182,7 +203,7 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         // rows past the sixth land below the window, and setChamberRow slides
         // them all up when the player scrolls. On the server these numbers are
         // written once and never read.
-        for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
+        for (int i = 0; i < gridSlots; i++) {
             addSlot(new ChamberSlot(chambers, i, chamberX(i), GRID_Y + (i / HorseStasisBankBlockEntity.COLS) * 18));
         }
         for (int i = 0; i < HorseStasisBankBlockEntity.SUPPLY_SLOTS; i++) {
@@ -248,9 +269,19 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         return chamberRow;
     }
 
+    /** How many chamber slots this menu holds - the grid's size when it opened. */
+    public int gridSlots() {
+        return gridSlots;
+    }
+
+    /** How many rows deep the grid was when this menu opened. */
+    public int gridRows() {
+        return gridSlots / HorseStasisBankBlockEntity.COLS;
+    }
+
     /** How far down the grid can be scrolled - the rows that do not fit. */
-    public static int maxChamberRow() {
-        return HorseStasisBankBlockEntity.ROWS - VISIBLE_ROWS;
+    public int maxChamberRow() {
+        return Math.max(0, gridRows() - VISIBLE_ROWS);
     }
 
     /**
@@ -273,7 +304,7 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
             return;
         }
         chamberRow = clamped;
-        for (int i = 0; i < HorseStasisBankBlockEntity.SLOTS; i++) {
+        for (int i = 0; i < gridSlots; i++) {
             Slot slot = slots.get(FIRST_CHAMBER_SLOT + i);
             slot.x = chamberX(i);
             slot.y = chamberY(i, chamberRow);
@@ -476,18 +507,18 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         }
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
-        if (index < SLOT_COUNT) {
-            if (!moveItemStackTo(stack, SLOT_COUNT, slots.size(), true)) {
+        if (index < slotCount) {
+            if (!moveItemStackTo(stack, slotCount, slots.size(), true)) {
                 return ItemStack.EMPTY;
             }
             slot.onQuickCraft(stack, original);
         } else if (HorseStasisBankBlockEntity.isChamber(stack)) {
-            if (!moveItemStackTo(stack, FIRST_CHAMBER_SLOT, FIRST_SUPPLY_SLOT, false)) {
+            if (!moveItemStackTo(stack, FIRST_CHAMBER_SLOT, firstSupplySlot, false)) {
                 return ItemStack.EMPTY;
             }
         } else if (HorseStasisBankBlockEntity.isWater(stack)
                 || HorseStasisBankBlockEntity.isFeed(stack)) {
-            if (!moveItemStackTo(stack, FIRST_SUPPLY_SLOT, SLOT_COUNT, false)) {
+            if (!moveItemStackTo(stack, firstSupplySlot, slotCount, false)) {
                 return ItemStack.EMPTY;
             }
         } else {
@@ -502,13 +533,13 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
     }
 
     /**
-     * <b>Two actions on a Browse row</b>, told apart by the button id: an id
-     * below {@link HorseStasisBankBlockEntity#SLOTS} turns that chamber out at
-     * stud or brings it back in, and an id {@code SLOTS} higher takes the whole
-     * chamber out of the bank and into the player's inventory. Nothing else needs
-     * to travel, because both the mark and the horse live on the item and sync
-     * with the slot. A third verb, {@link #EJECT_EMPTIES_BUTTON}, sits one past
-     * both ranges and belongs to the Chambers tab, not to a row.
+     * <b>Two actions on a Browse row</b>, told apart by the button id:
+     * {@link #studButton} turns that chamber out at stud or brings it back in, and
+     * {@link #withdrawButton} takes the whole chamber out of the bank and into the
+     * player's inventory. Nothing else needs to travel, because both the mark and
+     * the horse live on the item and sync with the slot. A third verb,
+     * {@link #EJECT_EMPTIES_BUTTON}, is id 0 and belongs to the Chambers tab, not
+     * to a row.
      *
      * <p>{@code clickMenuButton} rather than a payload of its own, which is the
      * rule {@code BenchNamePayload}'s comment states from the other side: an
@@ -526,13 +557,14 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
         if (id == EJECT_EMPTIES_BUTTON) {
             return ejectEmpties(who);
         }
-        if (id >= HorseStasisBankBlockEntity.SLOTS && id < 2 * HorseStasisBankBlockEntity.SLOTS) {
-            return withdrawChamber(who, id - HorseStasisBankBlockEntity.SLOTS);
-        }
-        if (id < 0 || id >= HorseStasisBankBlockEntity.SLOTS) {
+        if (id < 1 || id - 1 >= 2 * gridSlots) {
             return false;
         }
-        ItemStack chamber = chambers.getItem(id);
+        int slot = (id - 1) / 2;
+        if ((id - 1) % 2 == 1) {
+            return withdrawChamber(who, slot);
+        }
+        ItemStack chamber = chambers.getItem(slot);
         StasisTier tier = HorseStasisBankBlockEntity.tierOf(chamber);
         if (tier == null || !tier.breedsInBank() || StasisChamberItem.snapshotOf(chamber) == null) {
             // An empty chamber, or a rung that did not buy this. Refused rather
@@ -591,7 +623,22 @@ public final class HorseStasisBankMenu extends AbstractContainerMenu {
      * <b>The Chambers tab's "Eject empties" verb</b> - one past the two ranges
      * above, so it rides the same int and needs no payload of its own.
      */
-    public static final int EJECT_EMPTIES_BUTTON = 2 * HorseStasisBankBlockEntity.SLOTS;
+    public static final int EJECT_EMPTIES_BUTTON = 0;
+
+    /**
+     * The button id that turns slot {@code slot} out at stud or brings it in. Ids are
+     * interleaved - eject is 0, then stud and withdraw for each slot in turn - so they
+     * no longer depend on how deep the grid is (#273); the old scheme offset by the
+     * fixed slot count.
+     */
+    public static int studButton(int slot) {
+        return 1 + 2 * slot;
+    }
+
+    /** The button id that takes slot {@code slot}'s chamber out to the player. */
+    public static int withdrawButton(int slot) {
+        return 2 + 2 * slot;
+    }
 
     /** How many chambers here have no horse in them - what the eject button counts. */
     public int empties() {

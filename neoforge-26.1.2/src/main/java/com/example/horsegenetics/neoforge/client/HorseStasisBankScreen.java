@@ -28,7 +28,7 @@ import java.util.Map;
  * them; and <b>Supply</b>, the feed and water the bank mends them from.
  *
  * <h2>Two scrolling lists, one idiom</h2>
- * The Chambers grid is {@link HorseStasisBankBlockEntity#ROWS} rows deep behind
+ * The Chambers grid is at least {@link HorseStasisBankBlockEntity#ROWS} rows deep (it grows, #273) behind
  * a {@link HorseStasisBankMenu#VISIBLE_ROWS}-row window, and Browse is a list
  * longer than its four rows. Both are moved by the wheel and both draw the same
  * three-colour thumb; neither can be dragged, on purpose, because the thumb is
@@ -226,7 +226,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         // the grid does not use. Sized for the widest count the bank can hold, so
         // the button does not resize as the number goes down.
         int ejectW = this.font.width(Component.translatable("gui.horsegenetics.eject_empties",
-                HorseStasisBankBlockEntity.SLOTS)) + 8;
+                99_999)) + 8;
         this.ejectButton = net.minecraft.client.gui.components.Button.builder(
                         Component.translatable("gui.horsegenetics.eject_empties", 0),
                         b -> ejectEmpties())
@@ -307,7 +307,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         note = "";
         if (this.minecraft != null && this.minecraft.gameMode != null) {
             this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId,
-                    HorseStasisBankBlockEntity.SLOTS + row.slot());
+                    HorseStasisBankMenu.withdrawButton(row.slot()));
         }
     }
 
@@ -330,7 +330,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         }
         note = "";
         if (this.minecraft != null && this.minecraft.gameMode != null) {
-            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId, row.slot());
+            this.minecraft.gameMode.handleInventoryButtonClick(this.menu.containerId,
+                    HorseStasisBankMenu.studButton(row.slot()));
         }
     }
 
@@ -588,7 +589,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
 
     /**
      * <b>The Chambers tab</b>: six rows of a grid that is
-     * {@link HorseStasisBankBlockEntity#ROWS} deep, and the bar that says so.
+     * at least {@link HorseStasisBankBlockEntity#ROWS} deep, and the bar that says so.
      *
      * <p>Only the wells actually on screen are drawn - the slots for the rows
      * above and below have been moved out of the window by
@@ -599,7 +600,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     private void drawChambers(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int top = this.menu.chamberRow();
         int first = top * HorseStasisBankBlockEntity.COLS;
-        int last = Math.min(HorseStasisBankBlockEntity.SLOTS,
+        int last = Math.min(this.menu.gridSlots(),
                 first + HorseStasisBankMenu.VISIBLE_ROWS * HorseStasisBankBlockEntity.COLS);
         List<HorseListing> wanted = null;
         for (int i = first; i < last; i++) {
@@ -667,8 +668,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         int y = topPos + HorseStasisBankMenu.GRID_Y;
         int h = HorseStasisBankMenu.GRID_H;
         int w = HorseStasisBankMenu.SCROLL_W;
-        int thumbH = Math.max(6, h * HorseStasisBankMenu.VISIBLE_ROWS / HorseStasisBankBlockEntity.ROWS);
-        int thumbY = y + (h - thumbH) * top / HorseStasisBankMenu.maxChamberRow();
+        int thumbH = Math.max(6, h * HorseStasisBankMenu.VISIBLE_ROWS / Math.max(1, this.menu.gridRows()));
+        int thumbY = y + (h - thumbH) * top / Math.max(1, this.menu.maxChamberRow());
         g.fill(x, y, x + w, y + h, VanillaPanel.SHADOW);
         g.fill(x, thumbY, x + w, thumbY + thumbH, VanillaPanel.FACE);
     }
