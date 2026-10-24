@@ -96,6 +96,10 @@ public final class QueryBuilderTab {
     private int menuRow = -1;
     private int menuX;
     private int menuY;
+    /** The top of the cell the menu opened from, so it can open above it (#266). */
+    private int menuCellTop;
+    /** The screen's height, read each frame in {@link #draw}, for the menu's placement. */
+    private int screenH = 10_000;
     private int menuScroll;
 
     /**
@@ -318,6 +322,7 @@ public final class QueryBuilderTab {
                     int mouseX, int mouseY, int matched, int total) {
         hits.clear();
         actions.clear();
+        screenH = g.guiHeight();
         int y = top;
         // Join, NOT, operator and delete keep their size; the column and the value share
         // what is left, so a row fits the cowboy's counter as well as the browser.
@@ -415,8 +420,10 @@ public final class QueryBuilderTab {
             return;
         }
         List<String> options = options();
-        int shown = Math.min(MENU_VISIBLE, Math.max(1, options.size()));
-        int h = shown * MENU_ROW_H + MENU_ROW_H;
+        MenuPlacement place = placement(options.size());
+        menuY = place.top();
+        int shown = place.rows();
+        int h = place.height(MENU_ROW_H);
         g.fill(menuX - 1, menuY - 1, menuX + MENU_W + 1, menuY + h + 1, EDGE);
         g.fill(menuX, menuY, menuX + MENU_W, menuY + h, WELL);
 
@@ -438,9 +445,11 @@ public final class QueryBuilderTab {
             fitted(g, font, options.get(index), menuX + 4, ry + 2, MENU_W - 8,
                     index == menuCursor ? ACCENT : TEXT);
         }
-        if (options.size() > MENU_VISIBLE) {
-            fitted(g, font, (options.size() - MENU_VISIBLE) + " more - scroll, or type",
-                    menuX + 4, menuY + h + 2, MENU_W - 8, DIM);
+        if (place.hint()) {
+            // Inside the box, in its last row: drawn under it, it landed on whatever
+            // panel was behind and failed contrast there (#266).
+            fitted(g, font, (options.size() - shown) + " more - scroll, or type",
+                    menuX + 4, menuY + h - MENU_ROW_H + 2, MENU_W - 8, DIM);
         }
     }
 
@@ -595,17 +604,18 @@ public final class QueryBuilderTab {
                 }
                 return Action.NONE;
             }
-            openMenu(hit.what(), hit.row(), hit.x(), hit.y() + ROW_H);
+            openMenu(hit.what(), hit.row(), hit.x(), hit.y());
             return Action.NONE;
         }
         return Action.NONE;
     }
 
-    private void openMenu(Menu what, int row, int x, int y) {
+    private void openMenu(Menu what, int row, int x, int cellTop) {
         menu = what;
         menuRow = row;
         menuX = x;
-        menuY = y;
+        menuCellTop = cellTop;
+        menuY = placement(options().size()).top();
         menuScroll = 0;
         menuCursor = 0;
         typeAhead.reset();
@@ -619,9 +629,25 @@ public final class QueryBuilderTab {
         typedValue.setLength(0);
     }
 
+    /**
+     * Under the cell when the list fits there, else on the side with more room, capped
+     * to it: on a short window twelve rows ran off the screen (#266).
+     */
+    private MenuPlacement placement(int options) {
+        return MenuPlacement.of(menuCellTop, menuCellTop + ROW_H, screenH,
+                MENU_ROW_H, MENU_VISIBLE, options);
+    }
+
+    /** How many option rows the open menu shows, which is what scrolling keeps in view. */
+    private int visibleRows() {
+        return placement(options().size()).rows();
+    }
+
     private void pickFromMenu(double mx, double my) {
         List<String> options = options();
-        int shown = Math.min(MENU_VISIBLE, Math.max(1, options.size()));
+        MenuPlacement place = placement(options.size());
+        menuY = place.top();
+        int shown = place.rows();
         int index = -1;
         if (mx >= menuX && mx < menuX + MENU_W
                 && my >= menuY + MENU_ROW_H && my < menuY + MENU_ROW_H + shown * MENU_ROW_H) {
@@ -676,11 +702,11 @@ public final class QueryBuilderTab {
             // for.
             if (found < menuScroll) {
                 menuScroll = found;
-            } else if (found >= menuScroll + MENU_VISIBLE) {
-                menuScroll = found - MENU_VISIBLE + 1;
+            } else if (found >= menuScroll + visibleRows()) {
+                menuScroll = found - visibleRows() + 1;
             }
             menuScroll = Math.max(0, Math.min(menuScroll,
-                    Math.max(0, options.size() - MENU_VISIBLE)));
+                    Math.max(0, options.size() - visibleRows())));
         }
         return true;
     }
@@ -742,8 +768,8 @@ public final class QueryBuilderTab {
         menuCursor = Math.max(0, Math.min(options.size() - 1, menuCursor + by));
         if (menuCursor < menuScroll) {
             menuScroll = menuCursor;
-        } else if (menuCursor >= menuScroll + MENU_VISIBLE) {
-            menuScroll = menuCursor - MENU_VISIBLE + 1;
+        } else if (menuCursor >= menuScroll + visibleRows()) {
+            menuScroll = menuCursor - visibleRows() + 1;
         }
     }
 
@@ -751,7 +777,7 @@ public final class QueryBuilderTab {
         if (menu == Menu.NONE) {
             return false;
         }
-        int max = Math.max(0, options().size() - MENU_VISIBLE);
+        int max = Math.max(0, options().size() - visibleRows());
         menuScroll = Math.max(0, Math.min(menuScroll - (int) sy, max));
         return true;
     }

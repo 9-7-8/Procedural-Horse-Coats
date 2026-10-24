@@ -52,7 +52,8 @@ public final class SavedSearchPicker {
     private static final int FIELD = 0xFF0B0B10;
     private static final int TEXT = 0xFFE4E8F0;
     private static final int ACTION = 0xFF9BE08A;
-    private static final int DIM = 0xFF6E7686;
+    // The query builder's dim: #6E7686 was 2.7:1 on the hovered row (#266), this is 3.9:1.
+    private static final int DIM = 0xFF8890A8;
 
     /** How long a name may be. Long enough to be a phrase, short enough to read. */
     private static final int NAME_MAX = 40;
