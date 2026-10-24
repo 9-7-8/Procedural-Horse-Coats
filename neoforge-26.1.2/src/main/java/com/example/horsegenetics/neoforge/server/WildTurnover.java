@@ -208,6 +208,12 @@ public final class WildTurnover {
             touched = true;
         }
 
+        // wild.turnover off (/horsesweep turnover disable): stamps and touches are still kept
+        // above, so a horse's age is right when it comes back on - and one that overstayed
+        // while it was off moves on at the first scan after.
+        if (!ServerConfig.wildTurnover()) {
+            return;
+        }
         Verdict verdict = WildLifetime.judge(leadStamp(level, horse).orElse(born), now, ServerConfig.wildDespawnDays());
         if (verdict == Verdict.STAY) {
             return;

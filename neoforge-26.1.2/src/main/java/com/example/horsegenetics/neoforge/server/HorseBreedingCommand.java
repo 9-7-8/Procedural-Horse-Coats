@@ -51,7 +51,7 @@ public final class HorseBreedingCommand {
             return 0;
         }
         source.sendSuccess(() -> Component.literal(on
-                ? "Horses breed on their own again: a stallion left with a mare in heat covers her. Saved to the server config."
+                ? "Horses now breed on their own: a stallion left with a mare in heat covers her. Saved to the server config."
                 : "Horses no longer breed on their own; a foal needs a player to breed it. Pregnancies already "
                         + "under way carry on. Saved to the server config.")
                 .withStyle(ChatFormatting.GOLD), true);

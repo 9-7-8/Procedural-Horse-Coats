@@ -1,5 +1,6 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.neoforge.ServerConfig;
 import com.example.horsegenetics.neoforge.entity.Cowboy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -24,8 +25,12 @@ import java.util.List;
  *       changes nothing;</li>
  *   <li>{@code ... despawn} - removes them, records and all, as {@link WildTurnover}
  *       removes a wild horse whose time is up;</li>
- *   <li>{@code ... realm} - releases them into the horse realm ({@link RealmSend}).</li>
+ *   <li>{@code ... realm} - releases them into the horse realm ({@link RealmSend});</li>
+ *   <li>{@code turnover [enable|disable]} - the standing version of the same job:
+ *       {@code wild.turnover}, which gates {@link WildTurnover} moving old wild horses
+ *       on and {@link WildTopUp} refilling thin ground, saved to the server config.</li>
  * </ul>
+ * Every branch is operator-only: the root requires {@code LEVEL_GAMEMASTERS}.
  * <b>Wild</b> is an untamed horse with no brand; <b>cowboy</b> is a dealer's branded
  * stock. A tamed horse is never touched, nor one a player is handling at that moment -
  * ridden, or on a lead - nor stock a player has bought the papers for
@@ -80,7 +85,37 @@ public final class HorseSweepCommand {
                     .then(Commands.literal("realm")
                             .executes(c -> sweep(c.getSource(), which, Action.REALM))));
         }
+        root.then(Commands.literal("turnover")
+                .executes(c -> turnoverStatus(c.getSource()))
+                .then(Commands.literal("enable").executes(c -> setTurnover(c.getSource(), true)))
+                .then(Commands.literal("disable").executes(c -> setTurnover(c.getSource(), false))));
         event.getDispatcher().register(root);
+    }
+
+    private static int turnoverStatus(CommandSourceStack source) {
+        boolean on = ServerConfig.wildTurnover();
+        source.sendSuccess(() -> Component.literal("Wild turnover is " + (on ? "ON" : "OFF")
+                + " (wild.turnover): " + (on
+                        ? "old wild horses move on after " + ServerConfig.wildDespawnDays()
+                                + " days and thin ground is refilled."
+                        : "wild horses stay, and no new herds are added.")
+                + " /horsesweep turnover " + (on ? "disable" : "enable") + " changes it."), false);
+        return on ? 1 : 0;
+    }
+
+    private static int setTurnover(CommandSourceStack source, boolean on) {
+        if (!ServerConfig.setWildTurnover(on)) {
+            source.sendFailure(Component.literal("The server config is not loaded; nothing was changed."));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.literal(on
+                ? "Wild turnover is ON: old wild horses move on and thin ground is refilled. Any that "
+                        + "overstayed while it was off move on soon. Saved to the server config."
+                : "Wild turnover is OFF: wild horses stay where they are, and no new herds are added. "
+                        + "Saved to the server config.")
+                .withStyle(ChatFormatting.GOLD), true);
+        DebugAnnounce.log("Wild", "/horsesweep turnover " + (on ? "enable" : "disable"));
+        return 1;
     }
 
     private static int sweep(CommandSourceStack source, Which which, Action action) {

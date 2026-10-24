@@ -30,6 +30,12 @@ public final class WildLifetime {
     /** {@code wild.realm_handoff}'s default. */
     public static final boolean DEFAULT_REALM_HANDOFF = true;
 
+    /**
+     * {@code wild.turnover}'s default: wild horses move on and thin ground is refilled.
+     * Off stops both halves at once ({@code WildTurnover} and {@code WildTopUp}).
+     */
+    public static final boolean DEFAULT_TURNOVER = true;
+
     /** A horse waits while any player is within this many blocks of it. */
     public static final double WATCH_RADIUS = 32.0;
 

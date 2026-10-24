@@ -117,7 +117,7 @@ public final class WildTopUp {
             return;
         }
         Settings settings = ServerConfig.wildTopUp();
-        if (settings.off()) {
+        if (settings.off() || !ServerConfig.wildTurnover()) {
             return;
         }
         long sig = signature(settings);

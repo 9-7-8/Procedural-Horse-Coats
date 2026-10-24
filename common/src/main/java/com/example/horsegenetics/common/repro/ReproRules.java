@@ -35,6 +35,13 @@ public final class ReproRules {
      * {@code fertility.free_covers_per_day}; this is only the default.
      */
     public static final int DEFAULT_FREE_COVERS_PER_DAY = 3;
+
+    /**
+     * {@code fertility.natural_breeding}'s default: <b>off</b> (owner, 2026-10-23 -
+     * stallions covering on their own was "causing major population issues", and the
+     * wild turnover replacing old horses is enough to keep a countryside fresh).
+     */
+    public static final boolean DEFAULT_NATURAL_BREEDING = false;
     /**
      * The highest a server may set the allowance to. Not a balance number: past
      * any real day's covers it simply means "never tired".

@@ -180,8 +180,9 @@ public final class ServerConfig {
 
     /**
      * <b>{@code fertility.natural_breeding}</b> - whether a stallion left with a mare
-     * in heat covers her on his own ({@code server/NaturalBreedingHandler}). On by
-     * default, which is how every world has behaved since 2026-09-13. Off, no horse
+     * in heat covers her on his own ({@code server/NaturalBreedingHandler}). <b>Off by
+     * default</b> (owner, 2026-10-23: it was "causing major population issues"; every
+     * world bred on its own from 2026-09-13 until then). Off, no horse
      * breeds unless a player breeds it; heat, pregnancies already under way and
      * births carry on. {@code /horsebreeding} turns it on and off.
      */
@@ -374,6 +375,13 @@ public final class ServerConfig {
      */
     public static final ModConfigSpec.IntValue WILD_DESPAWN_DAYS;
     public static final ModConfigSpec.BooleanValue WILD_REALM_HANDOFF;
+
+    /**
+     * <b>{@code wild.turnover}</b> - the switch over both halves of wild replacement:
+     * {@code server/WildTurnover} moving old wild horses on, and {@code server/WildTopUp}
+     * refilling thin ground. On by default. {@code /horsesweep turnover} changes it.
+     */
+    public static final ModConfigSpec.BooleanValue WILD_TURNOVER;
     public static final ModConfigSpec.IntValue WILD_TOPUP_MINIMUM;
     public static final ModConfigSpec.IntValue WILD_TOPUP_CELL_CHUNKS;
     public static final ModConfigSpec.IntValue WILD_TOPUP_PLAYER_RADIUS;
@@ -649,6 +657,15 @@ public final class ServerConfig {
                         "Off: it vanishes like the rest. Server-side.")
                 .define("wild.realm_handoff",
                         com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_REALM_HANDOFF);
+        WILD_TURNOVER = builder
+                .comment("Whether wild horses are replaced over time. (default: true)",
+                        "On, a wild horse moves on after wild.despawn_days and thin ground near a",
+                        "player is refilled with a new herd (wild.topup_*). Off stops both: the wild",
+                        "horses already out there stay, and no new herds are added to keep the",
+                        "numbers up. /horsesweep turnover enable and /horsesweep turnover disable",
+                        "change it while the server runs and save it here. Server-side.")
+                .define("wild.turnover",
+                        com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_TURNOVER);
         WILD_TOPUP_MINIMUM = builder
                 .comment("The fewest wild horses a patch of ground near a player should have. (default: 5)",
                         "Once a Minecraft day, the first time a player comes near each patch (a square",
@@ -730,13 +747,14 @@ public final class ServerConfig {
                         com.example.horsegenetics.common.repro.ReproRules.DEFAULT_FREE_COVERS_PER_DAY, 0,
                         com.example.horsegenetics.common.repro.ReproRules.MAX_FREE_COVERS_PER_DAY);
         NATURAL_BREEDING = builder
-                .comment("Whether horses breed on their own. (default: true)",
+                .comment("Whether horses breed on their own. (default: false)",
                         "On, a stallion left with a mare in heat covers her - wild bands and owned",
                         "paddocks alike. Off, a foal needs a player to breed it;",
                         "heat, pregnancies already under way and births carry on as before.",
                         "/horsebreeding enable and /horsebreeding disable change it while the server",
                         "runs and save it here. Server-side.")
-                .define("fertility.natural_breeding", true);
+                .define("fertility.natural_breeding",
+                        com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_BREEDING);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -1455,7 +1473,7 @@ public final class ServerConfig {
         try {
             return NATURAL_BREEDING.get();
         } catch (IllegalStateException notLoaded) {
-            return true;
+            return com.example.horsegenetics.common.repro.ReproRules.DEFAULT_NATURAL_BREEDING;
         }
     }
 
@@ -1467,6 +1485,29 @@ public final class ServerConfig {
         try {
             NATURAL_BREEDING.set(on);
             NATURAL_BREEDING.save();
+            return true;
+        } catch (IllegalStateException notLoaded) {
+            return false;
+        }
+    }
+
+    /** {@code wild.turnover}, safely. */
+    public static boolean wildTurnover() {
+        try {
+            return WILD_TURNOVER.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.wild.WildLifetime.DEFAULT_TURNOVER;
+        }
+    }
+
+    /**
+     * Turn {@code wild.turnover} on or off and write it to the world's server config.
+     * Returns false when the config is not loaded, so nothing was changed.
+     */
+    public static boolean setWildTurnover(boolean on) {
+        try {
+            WILD_TURNOVER.set(on);
+            WILD_TURNOVER.save();
             return true;
         } catch (IllegalStateException notLoaded) {
             return false;
