@@ -1,0 +1,76 @@
+2026-10-23 21:32 (end time) - Three operator commands: realm send, sweep, natural breeding switch
+
+ASKED
+-----
+1. "create more utility commands: a command to teleport horses to the horse dimension, to
+   enable and disable autonomous breeding, a command to despawn all wild and/or cowboy
+   horses in loaded chunks OR send them to the horse dimension"
+   -> built all three (185b0e13), documented (4826836f). Compiled only; see NOT RUN.
+2. "end session" -> this log.
+
+DONE
+----
+- 185b0e13 Operator commands.
+  * /horserealm send <horses> (RealmBackupCommand, new server/RealmSend). Entity selector;
+    horses land on a grid south of HorseRealm.arrivalSpot(), 2 blocks apart, 8 a row,
+    x >= 2 to stay off the x 0-1 water-pool column. Unowned horses (untamed, or cowboy
+    branded) are released before the move as WildTurnover.toRealm does (brand cleared, out
+    of the dealer's herd, HorseRelease.makeWild with no player); owned horses arrive owned,
+    and HorseRealmFeral turns them out within ~5 s unless the owner is in the realm - the
+    command says so. Skips ridden, already-in-realm, and sold stock.
+  * /horsesweep <wild|cowboy|all> [despawn|realm] (new server/HorseSweepCommand). No action
+    = count per dimension, nothing changed. Every loaded level except the F6 debug corridor;
+    the realm is skipped by `realm`. Wild = untamed + unbranded; cowboy = untamed + branded.
+    Skips tamed, ridden or leashed horses, and RealmSend.spokenFor (stock a player bought
+    papers for - still untamed and branded until redeemed - or whose dealer is unloaded).
+    despawn = HorseRecords.forgetDeparting + discard, and removeFromHerd for stock.
+  * /horsebreeding [enable|disable] (new server/HorseBreedingCommand) and server config key
+    fertility.natural_breeding (default true; ServerConfig.naturalBreeding / setNaturalBreeding,
+    saved like undead.convert). NaturalBreedingHandler.onTick returns early when it is off.
+  Proof: :neoforge-26.1.2:compileJava green twice. No test, no boot, nothing played.
+  No pictures. No GitHub issue.
+- 4826836f Docs: fertility.html#setting-natural and Verification #natural-breeding-switch-1023;
+  horse-realm.html#operator-moves and Verification #verify-operator-moves; HOME for the key in
+  wiki/tools/bake-config-keys.mjs; config, verification, search and text bakes rerun.
+
+DECIDED (all without the owner; recorded in the class javadocs and the page sections above)
+-------
+- send lives under /horserealm; the sweep and breeding switch are their own top-level
+  commands, matching /horseundead and /horsebounty.
+- Owned horses sent by command keep their owner (as if led through a portal) rather than
+  being released; the realm's existing feral rule then applies.
+- Natural breeding switch is one global key, not split wild/owned.
+- Sweep never takes ridden/leashed/sold horses; an unloaded dealer counts as "sold" (safe side).
+- RealmSend.dealerOf reads the brand directly instead of CowboyHandler.ownerOf, which clears
+  the brand of a horse whose dealer is merely unloaded.
+
+FOUND ON THE WAY
+----------------
+- Bought cowboy stock is indistinguishable from sale stock without asking the dealer
+  (Cowboy.hasSold); a naive sweep would have taken paid-for horses. Handled, not a bug.
+- CowboyHandler.ownerOf clears a brand when the dealer is not loaded, not only when dead.
+  Possibly intended (its comment says "they are gone"); left alone, not filed - worth a look.
+
+PROCEDURES
+----------
+- end-session.txt step 2: with a player on the live server the build (which runs this
+  module's tests) waits; compileJava only, and say the build is owed.
+- add-a-config-option.txt step 8: same rule for the boot.
+  Both because this session had to skip those steps and neither file said what to do.
+
+NOT RUN / NOT CHECKED
+---------------------
+- :neoforge-26.1.2:build (its tests) and the runServer boot of the new config key: two
+  players on the live server all session. check-parity ran (OK).
+- Full :common:test not run; nothing in common/ changed, so it could not move.
+- Nothing seen in game. Verification anchors: fertility.html#natural-breeding-switch-1023,
+  horse-realm.html#verify-operator-moves.
+
+RELEASE
+-------
+Not offered: three commands are below the bar.
+
+PICK UP FIRST
+-------------
+With the live server empty, run the owed build and the config boot (add-a-config-option
+step 8, via launch-game), then try the three commands in a dev world (run-tests).

@@ -85,7 +85,8 @@ STEPS
      checks leadsReturn()). The gametest run has its own
      neoforge-26.1.2/run-gametest/phc/server.toml.
 
-8. Boot it (launch-game, step 8). Run `./gradlew :neoforge-26.1.2:runServer` with no
+8. Boot it (launch-game, step 8). Not while the live server has a player on it
+   (test-tiers' NEVER list): then the boot is owed, and the Verification check says so. Run `./gradlew :neoforge-26.1.2:runServer` with no
    client holding run/, wait for "Done (", and grep the WHOLE log for
    'ERROR|Couldn.t parse|Invalid|missing'. Then edit the new key in run/phc/server.toml
    while it runs, and check the change takes effect if step 1d asked for that. Stop the
