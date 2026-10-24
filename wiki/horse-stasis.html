@@ -1851,7 +1851,7 @@
         <strong>The chamber recipes have been made visible to JEI and the recipe book twice now,
         the first attempt did not work, nobody has looked at the second, and a horse entering or
         leaving a chamber now swaps the item underneath it &mdash; which is unplayed at all four
-        swap sites</strong>; the grid growing past its old 207 (#273) and <code>/horsebank</code> with its operator versions (#274, #275), all untested and unplayed;
+        swap sites</strong>; the grid growing past its old 207 (#273) and <code>/horsebank</code> with its operator versions (#274, #275), tested but unplayed;
         beyond that,
         the five chambers, the bank and everything it does compile, craft and pass the
         gametests, and the unattended yard has watched a bank mend a horse, refuse every
@@ -2379,8 +2379,8 @@
 
 <h3 id="verify-horsebank">/horsebank (#274, #275): not tested, not played</h3>
 <p>
-    Written while the live server had a player on, so neither <code>HorseBankPlanTest</code> nor a
-    boot has run. In game: with three horses of different ages and two Basic chambers, the two
+    <code>HorseBankPlanTest</code> is green (7 tests) and a dev server boot loads the three
+    <code>horsebank.*</code> server keys; nothing has run the command itself. In game: with three horses of different ages and two Basic chambers, the two
     oldest are filed and the youngest stays out, and the chat line says so; a ridden horse stays
     out; a leashed one is filed and its lead drops; a friend's bank beside you is ignored; with
     <code>horsebank.chamber_order</code> set to <code>spacer, basic</code> a Spacer goes to the
@@ -2424,8 +2424,8 @@
         there is a new empty row under it, the scrollbar's thumb is shorter, and the chamber is
         where it was put. Break a bank grown past 255 chambers: every one drops. Restart the server
         with one: every one is still there. <code>StasisBankGridTest</code> and the
-        <code>stasis_bank_grid_grows</code> gametest cover the rule and the save, and neither has
-        run yet (written while the live server had a player on).</li>
+        <code>stasis_bank_grid_grows</code> gametest cover the rule and the save, both green
+        (2026-10-24); the gametest went red when the wide-slot save was broken on purpose.</li>
 </ul>
 
 <h3 id="verify-bank-bandwidth">What a full bank costs on the wire (never measured, and now four times the question)</h3>
