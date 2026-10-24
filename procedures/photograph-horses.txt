@@ -30,6 +30,10 @@ pictures step that points here. Pick the cheapest picture that shows the change:
   Chrome screenshot with wiki/tools/chrome.mjs (the breed designer over http, not file://).
 - An item, a block or other art: the PNG itself, and if it is held or placed, a shot here.
 - A bug that shows: a picture of the broken look before the fix and the same picture after.
+- A mod screen or an open menu: no tool takes one yet (DebugPhotoShoot frames horses, and
+  the menu crawl's layout audit records draw calls, not pixels). Name the shots - the
+  screen, the window size, what is open - and say they are owed until #270 (a screenshot
+  mode for the crawl) is built.
 Look at every picture with Read before showing it, and say what it shows; send the files
 with SendUserFile (display render) or, where that is unavailable, the gallery artifact of
 step 6. A picture is never a pass (NEVER, below). Work nobody can see (a test, a measure,

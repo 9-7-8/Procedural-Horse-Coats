@@ -1,0 +1,63 @@
+2026-10-23 23:20 (start, approximate) - next-release: #266 (query dropdowns off a short window)
+
+ASKED
+- "/next-release" (owner). Ran procedures/next-release.txt. The next release is still
+  v0.5.047 (the equipment release; interim tag v0.5.047.1 out). No open issue lacked a
+  milestone. The two needs-owner bugs were put to the owner first (question tool), then
+  the unit was #266, handed to procedures/fix-bug.txt.
+
+DONE
+- e87c26d0 Fix #266: query dropdowns ran off a short window, their hint drawn outside
+  the menu.
+  What was wrong: QueryBuilderTab.drawMenu always opened a dropdown under its cell with
+  twelve rows and drew the "N more - scroll, or type" hint below the box. At 427x240 the
+  column list ran off the bottom of the screen and the hint landed on the panel behind it
+  (1.9:1 over the stasis bank, overlapping the bank's own text).
+  The fix: new client/MenuPlacement (no Minecraft imports, so plain-unit-testable) opens
+  the menu under the cell when the whole list fits, else on the side with more rows,
+  capped to what fits, with the hint as the box's last row. QueryBuilderTab reads the
+  screen height each frame (g.guiHeight()), places the menu on open, draw and click, and
+  its scroll window follows the rows actually shown. SavedSearchPicker's DIM goes from
+  #6E7686 (2.7:1 on a hovered row, the issue's second comment) to #8890A8 (3.9:1).
+  Proof: MenuPlacementTest, 4 tests green; with the old placement forced back in, 3 of 4
+  red. The menu crawl's layout audit (-PmenuCrawl=queries,layout, throwaway client,
+  23:32-23:36): 770 passed, 45 failed, 1 skipped; none of the 45 is #266's (no menu off
+  the screen, no hint overlap, no menu contrast). All 45 belong to #267 (bank tabs off the
+  top, bank contrast) and #268 (fitted text below 70%). :neoforge-26.1.2:build green,
+  check-parity OK.
+  Pictures: none. No tool screenshots an open menu (#270); the shots owed are the Query
+  tab and a Build popup at 427x240 with the column menu open from the bottom row, before
+  (stash e87c26d0) and after.
+  Issue #266: closed, with the proof comment.
+
+DECIDED
+- #257 (wild Rimeharts never buck on the live server): keep waiting (owner). The exact
+  question for the server manager (the blocks under and round the herd at about
+  291/100/-1321; where the egg Rimehart was ridden) is now a comment on #257.
+- #268 (fitted text unreadable): stop shrinking at about 70%, cut with an ellipsis, full
+  text in a tooltip, in the shared fitted/drawFitted helpers (owner). Recorded on #268;
+  needs-owner removed.
+- Menu placement rule (flip above only when the side has more rows; never cover the cell)
+  was mine, within the fix the issue itself prescribed.
+
+FOUND ON THE WAY
+- SavedSearchPicker also draws its "scroll for N more" hint under its box. Left alone: it
+  needs more than ten saved searches to appear, and the audit did not flag it.
+- A background log watcher was reaped by the harness for low memory while the crawl ran;
+  the detached client was unaffected.
+
+PROCEDURES
+- photograph-horses.txt, PICTURES FROM OTHER PROCEDURES: a line for a mod screen or open
+  menu - no tool yet, name the owed shots until #270 is built.
+
+NOT RUN / NOT CHECKED
+- Full :common:test not run (nothing in common/ changed).
+- Nobody has looked at the flipped menu in game; the audit checks positions and contrast,
+  not looks.
+- No Verification-tab anchors added (no page describes the dropdown placement).
+
+RELEASE
+- Not offered: v0.5.047 still has open bugs and most of its stages unbuilt.
+
+PICK UP FIRST
+- #267 (stasis bank tabs off a short window, and its contrast), by /next-release (fix-bug).
