@@ -196,6 +196,28 @@
         skipped and left for a later run.
     </p>
 </div>
+<div class="note" id="operator-moves">
+    <span class="label">Moving horses here by command</span>
+    <p>
+        <code>/horserealm send &lt;horses&gt;</code> (operator) sends the horses a selector names
+        &mdash; <code>@e[type=horse,distance=..20]</code>, a UUID, a name &mdash; to the arrival
+        field, put down on a grid south of the exit so they do not land in one block. A horse
+        nobody owns, wild or a cowboy&rsquo;s stock, is released on the way, brand and all. An
+        owned horse arrives still owned, exactly as if it had been led in, so unless its owner is
+        in the realm too <strong>it goes wild within a few seconds</strong>; the command says so.
+        A ridden horse, one already here, and cowboy stock a player has bought the papers for
+        are skipped.
+    </p>
+    <p>
+        <code>/horsesweep wild</code>, <code>/horsesweep cowboy</code> or <code>/horsesweep all</code>
+        counts the untamed horses in every loaded chunk; add <code>realm</code> to release them all
+        here, or <code>despawn</code> to remove them. Wild means untamed and unbranded; cowboy means
+        a dealer&rsquo;s branded stock, which leaves their herd, and they breed it back up later.
+        Tamed horses are never touched, nor one a player is riding or has on a lead, nor stock
+        already sold to a player (or whose cowboy is not loaded, so nobody can say). Only loaded chunks are swept, and the
+        F6 debug corridor never is.
+    </p>
+</div>
 <p>
     Horses standing <strong>near you when you step into the exit come home with you</strong>
     (about fifty blocks), so this only ever catches the ones you genuinely left. And it is
@@ -954,8 +976,25 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of every horse in the field</strong>, built from the census rather than from what is loaded, that you can buy any horse out of for a holding pen ticket &mdash; it drew nothing at all until 2026-09-26 and has still not been seen with rows in it; a horse now only goes through a portal when a player is <strong>taking it through</strong>; turning one out <strong>pays</strong>, with <code>/horsebounty</code> to settle up for the ones given away before it did; and <strong>the census itself starts empty on an existing world</strong>, which is the thing to read first. And <strong>wild horses a player worked with now arrive here by themselves</strong>, which no test could show, because the gametest harness has no realm.</p>
+    <p>The whole realm is <strong>unplayed</strong>, and it has now been <strong>reshaped as well as rebuilt</strong>: it is a growing circle round a single exit at the origin, so an existing realm's horses are all outside it until something loads them and carries them in &mdash; it boots and its geometry passes a gametest, but nobody has walked into it, released a horse, come back for one, or watched a foal born in it &mdash; and it has just been <strong>rebuilt underneath</strong>: the floor moved to y&nbsp;64, the frame became cobblestone, every portal now lands in one place, horses go wild on their own, and <strong>a migration rewrites the terrain of any world that already generated it</strong>. Newest on top of all that: <kbd>H</kbd> in there opens a <strong>table of every horse in the field</strong>, built from the census rather than from what is loaded, that you can buy any horse out of for a holding pen ticket &mdash; it drew nothing at all until 2026-09-26 and has still not been seen with rows in it; a horse now only goes through a portal when a player is <strong>taking it through</strong>; turning one out <strong>pays</strong>, with <code>/horsebounty</code> to settle up for the ones given away before it did; and <strong>the census itself starts empty on an existing world</strong>, which is the thing to read first. And <strong>wild horses a player worked with now arrive here by themselves</strong>, which no test could show, because the gametest harness has no realm. Newest of all: <code>/horserealm send</code> and <code>/horsesweep</code> move or remove horses by command, compiled and not yet run.</p>
 </div>
+
+<h3 id="verify-operator-moves">Sending and sweeping horses by command (2026-10-23, NOT played)</h3>
+<p>
+    <a href="#operator-moves"><code>/horserealm send</code> and <code>/horsesweep</code></a> compile;
+    neither has been run. <strong>What to look at:</strong>
+</p>
+<ul>
+    <li><strong>Send.</strong> <code>/horserealm send @e[type=horse,distance=..10]</code> beside three
+        wild horses and one of your own. <strong>Pass:</strong> all four stand in rows south of the
+        exit, the wild three untamed, and yours goes wild within ten seconds while you are outside.
+        <strong>Fail:</strong> a horse stuck in the ground, two in one block, or one left behind.</li>
+    <li><strong>Sweep, counted first.</strong> Near a cowboy and a wild band, <code>/horsesweep all</code>.
+        <strong>Pass:</strong> a count per dimension and nothing moves. Then
+        <code>/horsesweep cowboy realm</code>: the stock arrives unbranded and the cowboy restocks
+        later; then <code>/horsesweep wild despawn</code>: the band is gone, and a horse you had on a
+        lead is still there.</li>
+</ul>
 
 <h3 id="verify-wild-arrivals">A touched wild horse arrives here (2026-10-02, NOT played)</h3>
 <p>
