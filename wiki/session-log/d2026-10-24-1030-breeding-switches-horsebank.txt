@@ -1,0 +1,122 @@
+2026-10-24 10:30 (start, approximate) - Breeding switches (#276) and /horsebank (#272: #273, #274, #275)
+
+ASKED
+-----
+1. "this next slash command is going to basically be like slash horse bank or horse store"
+   - file a player's horses not already banked into empty stasis chambers they carry and
+   into their bank, oldest first, until the chambers run out; non-op by default, config can
+   make it op-only; an elevated version that makes basic chambers; a third that places a
+   bank in front of the player (within ~10 blocks, else fail) when none is within a chunk
+   (configurable); "goes with the update that makes the stasis chamber [bank] have
+   functionally limitless space".
+   -> Scoped with the owner (two question rounds) into tracking issue #272 with pieces
+      #273, #274, #275; all three built and tested this session.
+2. (mid-turn) "the config needs to be able to turn off natural cover ... ways in the config
+   to disable every single kind of autonomous breeding ... each of these should be
+   disableable ... at runtime ... with a slash command" - highest priority, next thing.
+   -> Scoped (one question round) into #276 and built first.
+3. After #276: chose "Start /horsebank piece 1" from the question tool. -> #273, then #274
+   and #275 followed in the same session.
+4. "End session". -> this log.
+
+DONE
+----
+- #276 breeding switches - f2c89b9e (code), 1fff328b (docs); corrected e42967e3.
+  Before: only natural cover had a switch (fertility.natural_breeding); stasis-bank stud,
+  golden-carrot foals and seed jars had none. Now common/repro/BreedingSwitches holds a
+  master (breeding.enabled) and one switch per kind: natural cover (the old key, kept),
+  breeding.realm_natural_cover (FOLLOW/ON/OFF, default FOLLOW = today's behaviour),
+  breeding.stasis_stud, breeding.golden_carrot, breeding.seed_jar. Gated at
+  NaturalBreedingHandler.onTick, StasisStud.turn (before cover, after carry),
+  BreedingCooldownHandler + HorseBreedingHandler.onBabySpawn (birth cancelled), both halves
+  of StallionSeedJarHandler. Pregnancies already under way still foal. /horsebreeding now
+  lists every switch, takes <kind> enable|disable, realm_cover follow, all enable|disable;
+  plain enable|disable still means natural cover.
+  Correction e42967e3: HeatAttraction was first gated on natural cover; since that is off
+  by default it stopped the mare/stallion walk in every default world and turned the
+  gametest heat_crosses_open_ground red. It now stops only on the master.
+  Proof: BreedingSwitchesTest 5/5 green; runGameTest green except layer_lays_when_fed (#258,
+  red before this session); dev runServer boot wrote all keys at defaults, no ERROR lines.
+  No pictures. Issue #276 open, waiting on the in-game checks
+  (wiki/fertility.html#breeding-switches-check).
+- #273 the bank grid grows - 6ac5f09c (code), 428ef421 (docs); gametest registered e42967e3.
+  block/ChamberGrid replaces the fixed 207-slot SimpleContainer; rule in
+  common/horse/StasisBankGrid (MIN_ROWS 23, one empty row always). Menu is extra-data,
+  built with the grid size at open; Browse button ids interleaved (studButton/withdrawButton,
+  eject = 0). FOUND: vanilla's ContainerHelper.saveAllItems stores slot numbers as an
+  unsigned byte (ItemStackWithSlot.CODEC, read with javap on the 26.1.2 jar), so slots
+  256+ save under chambers_wide; 0-255 stay in Items. Depth rebuilt from the highest filled
+  slot on load, which is the migration from fixed-size banks.
+  Proof: StasisBankGridTest 4/4; gametest stasis_bank_grid_grows green, and red when the
+  wide-list write was commented out (mutated once, restored, no diff). No pictures.
+  Issue #273 open, waiting on in-game checks (wiki/horse-stasis.html#verify-bank-scroll).
+- #274 /horsebank - 1275541e (code), 0f1bd216 (docs). common/horse/HorseBankPlan (oldest
+  first, unknown birth first, chambers in the player's order), server/HorseBankCommand,
+  network/ChamberOrderPayload (sent on join from client config horsebank.chamber_order,
+  default basic, intermediate, advanced, spacer), StasisBankIndex.banksOf. Server keys
+  horsebank.allow_non_op, horsebank.search_chunks. bake-config-keys.mjs now reads a
+  List.of(...) constant default.
+- #275 /horsebank force [player] and new [player] - 8ddb66f4 (code), 12450d96 (docs).
+  HorseBankPlan.placeOrder; placeBank checks loaded, replaceable, no fluid, unobstructed,
+  sturdy top below; owner set through setPlacedBy. Key horsebank.place_radius (default 10).
+  Proof for #274/#275: HorseBankPlanTest 7/7; boot loads the three horsebank keys. Nothing
+  has run the command itself. No pictures. Issues open, waiting on
+  wiki/horse-stasis.html#verify-horsebank.
+- Docs 09370686: checks record their tests and boot; the heat-walk gate corrected on
+  fertility.html.
+
+DECIDED
+-------
+(owner) /horsebank names: /horsebank, /horsebank force [player], /horsebank new [player].
+(owner) Which horses: own, loaded, same dimension, not ridden; nothing force-loaded.
+(owner) Bank size grows on demand, no cap.
+(owner) Chamber order is a client config list, cheapest first by default.
+(owner) Only the player's own bank is used.
+(owner) force uses the player's empties first, then new Basics.
+(owner) Optional player target for the op versions.
+(owner) Both features ride the current patch (v0.5.047).
+(owner) Breeding switches cover autonomous and player breeding, a master plus one per kind;
+        realm cover has its own switch; switching off stops new pregnancies only; runtime via
+        /horsebreeding.
+(session) Emergency chambers out of the default order; order sent on join; op = level 2;
+        unknown birth sorts first; leashed horses drop their lead first; heat walk stops
+        only on the master (after the gametest). Recorded on #272, #276 and the pages' Coding
+        tabs.
+
+FOUND ON THE WAY
+----------------
+- The vanilla container save's one-byte slot (now wiki/api-notes.html#container-slot-is-a-byte).
+- A gametest registered in TEST_FUNCTIONS but not in onRegisterGameTests never runs; the first
+  green run of stasis_bank_grid_grows proved nothing. Caught by grepping the log; fixed.
+- My own mistake: gating HeatAttraction on natural cover; caught by heat_crosses_open_ground.
+- layer_lays_when_fed still red (#258, already known).
+
+PROCEDURES
+----------
+- test-tiers.txt: a new gametest needs a register(...) line in onRegisterGameTests; check it
+  ran by mutating once.
+- add-a-config-option.txt: a common/ constant default is fine, including List.of(...);
+  new ArrayList<>(CONSTANT) is not readable by the bake.
+- write-intake-document followed; the milestone v0.5.047 description and #196 were updated
+  in the same pass.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Nothing played in game. No pictures taken.
+- The full :common:test suite was not run; it would still check every other common class
+  against the new BreedingSwitches/StasisBankGrid/HorseBankPlan (none of them is imported
+  elsewhere in common/).
+- Tests were held while a player (axolotlwyvern) was on the live server, and run after they
+  left at 11:42.
+- New Verification checks: fertility.html#breeding-switches-check,
+  horse-stasis.html#verify-horsebank, the grid bullet under #verify-bank-scroll, and the
+  ceiling note under #verify-bank-bandwidth.
+
+RELEASE
+-------
+Not offered: v0.5.047.2's gear pieces are not built yet; these server asks ride it.
+
+PICK UP FIRST
+-------------
+Hand the owner the in-game checks for #276 and #272 (procedures/hand-over-a-test.txt), then
+fix #258's red gametest (procedures/fix-bug.txt).

@@ -59,7 +59,11 @@ STEPS
      handler, attachment, payload, registry or config path changed.
      - If it goes red, stash your diff and run HEAD before blaming the change:
        gametests depend on tick phase, and a moving failure is a flake to fix.
-     - Writing one: the harness forces only the chunk a test's 1x1 structure stands
+     - Writing one: registering its function in TEST_FUNCTIONS is not enough - it also
+       needs a register(...) line in ModGameTests.onRegisterGameTests, or it never runs
+       and the run stays green for nothing (stasis_bank_grid_grows, 2026-10-24). Grep the
+       run's log for a FAIL of it once, by mutating the code it guards.
+       The harness forces only the chunk a test's 1x1 structure stands
        in, so a horse a few blocks over may sit in a chunk that never ticks (no scan,
        no founding) - ModGameTests.keepTicking forces the 3x3, and fieldTicks waits for it.
        Gametest ticks are unpaced (GameTestServer.waitUntilNextTick never sleeps; 0.4-6

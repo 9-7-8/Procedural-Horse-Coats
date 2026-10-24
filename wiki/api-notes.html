@@ -1046,6 +1046,19 @@ boolean operator = Commands.LEVEL_GAMEMASTERS.check(source.permissions());</code
     <code>shoe_enchantments_fold_into_the_total</code>.
 </p>
 
+<h2 id="container-slot-is-a-byte"><code>ContainerHelper.saveAllItems</code> saves a slot number as one byte</h2>
+
+<p>
+    <code>ItemStackWithSlot.CODEC</code> writes <code>Slot</code> with
+    <code>ExtraCodecs.UNSIGNED_BYTE</code>, so the vanilla container save holds slots 0&ndash;255
+    and nothing past them: a container of more than 256 slots loses the rest at the next save,
+    with no error. <code>loadAllItems</code> also drops any slot past the list it is handed. A
+    big container saves its own list with an int slot &mdash; <code>block/ChamberGrid</code> keeps
+    0&ndash;255 under vanilla's <code>Items</code> and the rest under <code>chambers_wide</code>.
+    Read 2026-10-24 with <code>javap</code> on the 26.1.2 merged jar; proved by the gametest
+    <code>stasis_bank_grid_grows</code>, which goes red when the wide list is not written.
+</p>
+
 <h2 id="block-models">Custom block models &mdash; everything older than 1.21.4 is wrong</h2>
 
 <p>
