@@ -176,6 +176,16 @@ public final class ModNetworking {
         );
 
         registrar.playToServer(
+                ChamberOrderPayload.TYPE,
+                ChamberOrderPayload.STREAM_CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        com.example.horsegenetics.neoforge.server.HorseBankCommand.fileOrder(player, payload.order());
+                    }
+                })
+        );
+
+        registrar.playToServer(
                 CowboyFilterPayload.TYPE,
                 CowboyFilterPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> handleCowboyFilter(payload, context.player()))

@@ -93,6 +93,9 @@ const HOME = {
     'breeding.stasis_stud': 'fertility.html#setting-stasis-stud',
     'breeding.golden_carrot': 'fertility.html#setting-golden-carrot',
     'breeding.seed_jar': 'fertility.html#setting-seed-jar',
+    'horsebank.allow_non_op': 'horse-stasis.html#setting-horsebank-non-op',
+    'horsebank.search_chunks': 'horse-stasis.html#setting-horsebank-search',
+    'horsebank.chamber_order': 'horse-stasis.html#setting-chamber-order',
     'performance.dormancy_radius': 'horse-care.html#dormancy',
     'notices.owned_horse_damage': 'horse-care.html#hurt-notice',
     'notices.owned_horse_death': 'horse-care.html#death-notice',
@@ -336,7 +339,9 @@ function evaluate(expr, file) {
     }
     // A list built from string literals: Arrays.asList("a", "b") and the like.
     const literals = [...expr.matchAll(/"((?:[^"\\]|\\.)*)"/g)];
-    if (/^new ArrayList<\w*>\((java\.util\.)?Arrays\.asList\(/.test(expr) && literals.length) {
+    // Also a List.of("a", "b") constant in common/, as HorseBankPlan.DEFAULT_ORDER is.
+    if ((/^new ArrayList<\w*>\((java\.util\.)?Arrays\.asList\(/.test(expr)
+            || /^(java\.util\.)?List\.of\(/.test(expr)) && literals.length) {
         const list = literals.map(m => unescapeJava(`"${m[1]}"`));
         return { text: list.join(', '), html: list.map(v => `<code>${esc(v)}</code>`).join(', '), list };
     }

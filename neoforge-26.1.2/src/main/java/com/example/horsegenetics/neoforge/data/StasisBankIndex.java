@@ -182,6 +182,17 @@ public final class StasisBankIndex extends SavedData {
         return out;
     }
 
+    /** <b>Every bank this player owns</b>, in the order they were placed. */
+    public List<Bank> banksOf(UUID owner) {
+        List<Bank> out = new ArrayList<>();
+        for (Bank bank : banks.values()) {
+            if (owner.equals(bank.owner())) {
+                out.add(bank);
+            }
+        }
+        return out;
+    }
+
     /**
      * <b>Which of this player's banks has that horse filed in it</b>, or
      * {@code null} if none of them says so.

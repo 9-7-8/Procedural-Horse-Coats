@@ -201,6 +201,13 @@ public final class ServerConfig {
     public static final ModConfigSpec.BooleanValue SEED_JAR_BREEDING;
 
     /**
+     * <b>{@code /horsebank}</b> (issue #272): whether a player who is not an operator
+     * may run the plain command, and how far it looks for the player's own bank.
+     */
+    public static final ModConfigSpec.BooleanValue HORSEBANK_NON_OP;
+    public static final ModConfigSpec.IntValue HORSEBANK_SEARCH_CHUNKS;
+
+    /**
      * <b>Does an owner hear about their horse being hurt?</b> See
      * {@code server/HorseHurtNoticeHandler} for who is told and how often.
      */
@@ -796,6 +803,20 @@ public final class ServerConfig {
                 .comment("Whether a stallion seed jar can be filled and used on a mare. (default: true)",
                         "/horsebreeding seed_jar. Server-side.")
                 .define("breeding.seed_jar", BreedingSwitches.DEFAULT_SEED_JAR);
+        HORSEBANK_NON_OP = builder
+                .comment("Whether a player who is not an operator may run /horsebank, which files",
+                        "their own horses into their own nearest stasis bank using the empty",
+                        "chambers they carry. (default: true) Off, only operators may. The operator",
+                        "versions (/horsebank force, /horsebank new) are always operator-only. Server-side.")
+                .define("horsebank.allow_non_op",
+                        com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_ALLOW_NON_OP);
+        HORSEBANK_SEARCH_CHUNKS = builder
+                .comment("How far /horsebank looks for the player's own stasis bank, in chunks of",
+                        "16 blocks, measured from the player. (default: 1, range 0 to 8; 0 means",
+                        "the bank must be within a few blocks). Server-side.")
+                .defineInRange("horsebank.search_chunks",
+                        com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_SEARCH_CHUNKS, 0,
+                        com.example.horsegenetics.common.horse.HorseBankPlan.MAX_SEARCH_CHUNKS);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -1596,6 +1617,26 @@ public final class ServerConfig {
         } catch (IllegalStateException notLoaded) {
             return false;
         }
+    }
+
+    /** {@code horsebank.allow_non_op}, safely. */
+    public static boolean horseBankNonOp() {
+        try {
+            return HORSEBANK_NON_OP.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_ALLOW_NON_OP;
+        }
+    }
+
+    /** {@code horsebank.search_chunks} in blocks, safely: at least 4, so 0 still reaches a bank you stand beside. */
+    public static int horseBankSearchBlocks() {
+        int chunks;
+        try {
+            chunks = HORSEBANK_SEARCH_CHUNKS.get();
+        } catch (IllegalStateException notLoaded) {
+            chunks = com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_SEARCH_CHUNKS;
+        }
+        return Math.max(4, chunks * 16);
     }
 
     /** {@code wild.turnover}, safely. */

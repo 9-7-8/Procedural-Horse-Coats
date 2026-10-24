@@ -90,6 +90,14 @@ public final class ClientConfig {
      */
     public static final ModConfigSpec.ConfigValue<List<? extends String>> GENE_FILTER;
 
+    /**
+     * <b>{@code horsebank.chamber_order}</b> - which empty chambers {@code /horsebank}
+     * uses first (issue #272; owner, 2026-10-24: a client setting, cheapest first by
+     * default). The server cannot read this file, so it is sent on join
+     * ({@code ChamberOrderPayload}) and filed under the player's UUID.
+     */
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> CHAMBER_ORDER;
+
     public static final ModConfigSpec.BooleanValue TUTORIAL_SEEN;
 
     /**
@@ -268,6 +276,18 @@ public final class ClientConfig {
                 .defineList("genes.filter", new ArrayList<String>(),
                         () -> "horsegenetics.agouti",
                         entry -> entry instanceof String key && !key.isBlank());
+        CHAMBER_ORDER = builder
+                .comment("The order /horsebank uses your empty stasis chambers in, one per line.",
+                        "(default: basic, intermediate, advanced, spacer - cheapest first)",
+                        "The words are basic, intermediate, advanced, spacer and emergency. A kind",
+                        "left out is never used; emergency is left out by default, because an empty",
+                        "emergency chamber is what saves a horse that is about to die. An empty list",
+                        "means the default. Sent to the server when you join. Client-side.")
+                .defineList("horsebank.chamber_order",
+                        com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_ORDER,
+                        () -> "basic",
+                        entry -> entry instanceof String word
+                                && com.example.horsegenetics.common.horse.HorseBankPlan.KNOWN.contains(word));
         TUTORIAL_SEEN = builder
                 .comment("Whether the Horse Browser has already opened on its Getting Started",
                         "tab. It does that once, and sets this the first time you leave the tab.",
@@ -516,6 +536,15 @@ public final class ClientConfig {
      * dropped quietly or noticed, and {@code Genes.byKeyOrNull} is the way to
      * ask.
      */
+    /** {@code horsebank.chamber_order}, safely: the default until the config loads. */
+    public static List<String> chamberOrder() {
+        try {
+            return com.example.horsegenetics.common.horse.HorseBankPlan.cleanOrder(new ArrayList<>(CHAMBER_ORDER.get()));
+        } catch (IllegalStateException notLoaded) {
+            return new ArrayList<>(com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_ORDER);
+        }
+    }
+
     public static List<String> geneFilter() {
         List<String> out = new ArrayList<>();
         List<? extends String> keys;

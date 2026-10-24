@@ -31,6 +31,8 @@ public final class ClientLifecycleHandler {
     @SubscribeEvent
     static void onLoggingIn(ClientPlayerNetworkEvent.LoggingIn event) {
         ClientPacketDistributor.sendToServer(NamingPolicyPayload.of(ClientConfig.namingPolicy()));
+        ClientPacketDistributor.sendToServer(
+                new com.example.horsegenetics.neoforge.network.ChamberOrderPayload(ClientConfig.chamberOrder()));
     }
 
     @SubscribeEvent
