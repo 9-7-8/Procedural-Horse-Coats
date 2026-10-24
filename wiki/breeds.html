@@ -707,6 +707,7 @@
 <table>
 <thead><tr><th>Server setting</th><th>Default</th><th>What it does</th></tr></thead>
 <tbody>
+<tr id="turnover-switch"><td><code>wild.turnover</code></td><td>true</td><td>The switch over both: off, wild horses stay where they are and no new herds are added. An operator flips it with <code>/horsesweep turnover enable</code> or <code>disable</code>, which saves it; <code>/horsesweep turnover</code> alone says which it is. Ages keep counting while it is off, so a horse that overstayed moves on soon after it comes back on.</td></tr>
 <tr><td><code>wild.despawn_days</code></td><td>3</td><td>How many game days a wild horse stays (0 to 30). <code>0</code> switches the lifetime off, and the realm hand-off with it.</td></tr>
 <tr><td><code>wild.realm_handoff</code></td><td>true</td><td>Whether a horse a player worked with goes to the realm. Off: it vanishes like the rest.</td></tr>
 <tr><td><code>wild.topup_minimum</code></td><td>5</td><td>The fewest wild horses a square should have (0 to 64). <code>0</code> switches the top-up off.</td></tr>
@@ -1304,8 +1305,17 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Wild horses now move on after three days and thin ground refills with new herds, and no world has seen either - nor a touched horse arrive in the realm; beneath that, herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament or true flight at all, and the first that may now spawn wild somewhere with no grass, which has never once been seen happen &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, a harem that should cap at four mares, and herds in modded overworld, Nether and End biomes - the End's the first there ever - which no world has generated yet; and nine breeds whose climate genes the new spawn-biome rule moved, not yet read off a living horse.</p>
+    <p>Wild horses now move on after three days and thin ground refills with new herds (and one switch, <code>wild.turnover</code>, now stops both, not yet booted), and no world has seen either - nor a touched horse arrive in the realm; beneath that, herd founding was rewritten to assign sex over the whole clump from the lead&rsquo;s seed, and a disagreement would show as <strong>two herds where there should be one</strong>; beneath that sit the two Nether breeds &mdash; the first files to pin a temperament or true flight at all, and the first that may now spawn wild somewhere with no grass, which has never once been seen happen &mdash; the Enderpony, which was the first to band an eye colour, a Cloudtouched retiered to <code>rare</code> and still never seen at either tier, the breeds whose <code>spawn</code> checklist must keep them out of the wild entirely, a harem that should cap at four mares, and herds in modded overworld, Nether and End biomes - the End's the first there ever - which no world has generated yet; and nine breeds whose climate genes the new spawn-biome rule moved, not yet read off a living horse.</p>
 </div>
+
+<h3 id="turnover-switch-1023">The turnover can be switched off (2026-10-23, NOT played)</h3>
+<p>
+    <a href="#turnover-switch"><code>wild.turnover</code></a> and <code>/horsesweep turnover</code> compile and
+    have not been booted. <strong>Pass:</strong> with it disabled, a wild band past its days stays put and a thin
+    square gets no new herd for a whole day, with no <code>[Wild]</code> leaving line in the log; enabled again,
+    the overstayed band moves on within a minute once no player is within 32 blocks.
+    <strong>Fail:</strong> a horse leaves, or a herd is added, while it is off.
+</p>
 
 <h3 id="turnover-1002">Wild horses move on, and thin ground refills (2026-10-02, NOT played)</h3>
 <p>

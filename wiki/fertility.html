@@ -222,9 +222,12 @@
 </p>
 
 <p id="setting-natural">
-    <code>fertility.natural_breeding</code>, <strong>on by default</strong>. Off, no stallion
-    covers a mare on his own &mdash; wild bands, paddocks and the realm alike &mdash; so a foal
-    needs a player to breed it. Heat, pregnancies already under way and births carry on. An
+    <code>fertility.natural_breeding</code>, <strong>off by default</strong> (owner,
+    2026-10-23: covers on their own were &ldquo;causing major population issues&rdquo;, and the
+    <a href="breeds.html#turnover">wild turnover</a> replacing old horses keeps the countryside
+    changing without them). Off, no stallion covers a mare on his own &mdash; wild bands,
+    paddocks and the realm alike &mdash; so a foal needs a player to breed it. On, a stallion
+    left with a mare in heat covers her, which is what every world did from 2026-09-13. Heat, pregnancies already under way and births carry on. An
     operator turns it off and on with <code>/horsebreeding disable</code> and
     <code>/horsebreeding enable</code>, which take effect at once and save it to the server
     config; <code>/horsebreeding</code> alone says which it is. Server-side.
@@ -1026,7 +1029,7 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it the vet&rsquo;s wording for a stallion whose day is no longer capped (the paddock itself is seen), the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers refusing through walls: the yard has seen a wall and a fence refuse and, under the path test loosened on 2026-09-30, a gate, a corner and a one-wide stall breed, which leaves the touching fallback never yet needed and the cost of a crowded paddock; and the new switch that turns natural breeding off, not yet booted.</p>
+    <p>Ranking first is the crowding cap going from eight to a configurable fifty, because it is the brake on a world breeding itself flat: a packed pen is seen breeding again and refusing at exactly fifty, but nobody has turned the setting down to prove it is read, and nothing but a night's play can say whether fifty makes a wild band a herd or a plague; behind it the vet&rsquo;s wording for a stallion whose day is no longer capped (the paddock itself is seen), the chat line an owner gets when a mare is not covered, and one twin pregnancy in ten being a single genome drawn once, epigenetics included, with no pair yet compared side by side; and covers refusing through walls: the yard has seen a wall and a fence refuse and, under the path test loosened on 2026-09-30, a gate, a corner and a one-wide stall breed, which leaves the touching fallback never yet needed and the cost of a crowded paddock; and natural breeding now off by default behind a switch, not yet booted &mdash; which also leaves every yard pen that waits on a natural cover unable to pass until it is turned on.</p>
 </div>
 
 <h3 id="cover-wall-check-0925">Covers no longer reach through walls (2026-09-25; the wall, a gate, a corner and a stall seen in the yard, the rest NOT played)</h3>
@@ -1168,14 +1171,14 @@
 <h4>What to look at</h4>
 
 <ul>
-    <li><strong>Off stops covers.</strong> Pen a mare in heat with a stallion, run
-        <code>/horsebreeding disable</code>. <strong>Pass:</strong> no cover for a whole heat, and no
+    <li><strong>Off by default, and off stops covers.</strong> On a fresh config, pen a mare in
+        heat with a stallion; <code>/horsebreeding</code> should say OFF. <strong>Pass:</strong> no cover for a whole heat, and no
         <em>natural cover</em> line under <code>fertility</code> in the log.
         <strong>Fail:</strong> she is covered anyway.</li>
-    <li><strong>On again, and it survives a restart.</strong> Disable, restart the server, run
-        <code>/horsebreeding</code>. <strong>Pass:</strong> it says OFF, and
-        <code>server.toml</code> reads <code>natural_breeding = false</code>. Enable, and the pair
-        covers within the heat.</li>
+    <li><strong>On, and it survives a restart.</strong> <code>/horsebreeding enable</code>, restart
+        the server, run <code>/horsebreeding</code>. <strong>Pass:</strong> it says ON,
+        <code>server.toml</code> reads <code>natural_breeding = true</code>, and the pair covers
+        within the heat.</li>
 </ul>
 
 <h3 id="cover-notice-0924">Why she was not covered, in chat (2026-09-24, NOT played)</h3>

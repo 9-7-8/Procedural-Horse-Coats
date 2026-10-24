@@ -7,6 +7,13 @@ ASKED
    horses in loaded chunks OR send them to the horse dimension"
    -> built all three (185b0e13), documented (4826836f). Compiled only; see NOT RUN.
 2. "end session" -> this log.
+3. "make autonomous breeding off by default. it is causing major population issues in my
+   test world. the horse sweep replacing old horses is enough, but make sure that can also
+   be toggled by a command. Make sure all these commands are op-only"
+   -> fertility.natural_breeding defaults false (ReproRules.DEFAULT_NATURAL_BREEDING); new
+   wild.turnover (WildLifetime.DEFAULT_TURNOVER, true) gates WildTurnover and WildTopUp,
+   toggled by /horsesweep turnover [enable|disable]. All four roots already required
+   LEVEL_GAMEMASTERS (op level 2); confirmed. Compiled only, as before.
 
 DONE
 ----
@@ -69,6 +76,16 @@ NOT RUN / NOT CHECKED
 RELEASE
 -------
 Not offered: three commands are below the bar.
+
+LATER THE SAME SESSION
+---------------------
+- Natural breeding now OFF by default (owner). Every yard pen that waits on a natural cover
+  (DebugYardLong, DebugYardFertility, the cap and wall pens on fertility.html) cannot pass
+  on a default config; the owner was asked how the yard should handle that.
+- wild.turnover off keeps stamping ages, so an overstayed band leaves soon after it is
+  turned back on (call made without the owner; on breeds.html#turnover-switch).
+- Docs: fertility.html#setting-natural, breeds.html#turnover-switch and Verification
+  #turnover-switch-1023; config table rebaked.
 
 PICK UP FIRST
 -------------

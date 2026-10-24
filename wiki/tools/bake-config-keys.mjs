@@ -79,6 +79,7 @@ const HOME = {
     'realm.release_emeralds': 'horse-realm.html#releasing',
     'wild.despawn_days': 'breeds.html#turnover',
     'wild.realm_handoff': 'horse-realm.html#wild-arrivals',
+    'wild.turnover': 'breeds.html#turnover-switch',
     'wild.topup_minimum': 'breeds.html#turnover',
     'wild.topup_cell_chunks': 'breeds.html#turnover',
     'wild.topup_player_radius': 'breeds.html#turnover',
