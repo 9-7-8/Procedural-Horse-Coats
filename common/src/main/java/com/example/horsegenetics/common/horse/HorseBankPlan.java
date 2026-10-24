@@ -44,6 +44,11 @@ public final class HorseBankPlan {
     /** The most it may be: past this the bank is not "nearby" in any sense. */
     public static final int MAX_SEARCH_CHUNKS = 8;
 
+    /** {@code horsebank.place_radius}'s default: how far {@code /horsebank new} looks for a spot. */
+    public static final int DEFAULT_PLACE_RADIUS = 10;
+    /** The most it may be - every block in the sphere is looked at, so it is kept small. */
+    public static final int MAX_PLACE_RADIUS = 16;
+
     /** A horse's birth tick when it is not known; such a horse sorts first, as the oldest. */
     public static final long UNKNOWN_BIRTH = Long.MIN_VALUE;
 
@@ -123,6 +128,39 @@ public final class HorseBankPlan {
             }
         }
         return new Plan(Collections.unmodifiableList(filings), leftOut);
+    }
+
+    /**
+     * <b>Where to try putting a new bank</b>, best first (#275): every offset within
+     * {@code radius} of the player's feet, ordered by how close it is to the spot two
+     * blocks in front of them (along {@code lookX, lookZ}, the horizontal look), then
+     * by height difference, then by distance from the player. The game module takes
+     * the first one where a bank fits; none fitting means the command fails.
+     *
+     * @return offsets as {@code {dx, dy, dz}}
+     */
+    public static List<int[]> placeOrder(int radius, double lookX, double lookZ) {
+        double len = Math.sqrt(lookX * lookX + lookZ * lookZ);
+        double fx = len < 1e-6 ? 0 : 2 * lookX / len;
+        double fz = len < 1e-6 ? 0 : 2 * lookZ / len;
+        List<int[]> out = new ArrayList<>();
+        int r2 = radius * radius;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -radius; dy <= radius; dy++) {
+                for (int dz = -radius; dz <= radius; dz++) {
+                    if (dx * dx + dy * dy + dz * dz <= r2 && !(dx == 0 && dz == 0 && (dy == 0 || dy == 1))) {
+                        out.add(new int[] {dx, dy, dz});
+                    }
+                }
+            }
+        }
+        final double ffx = fx;
+        final double ffz = fz;
+        out.sort(Comparator.<int[]>comparingDouble(o -> (o[0] - ffx) * (o[0] - ffx) + (o[2] - ffz) * (o[2] - ffz))
+                .thenComparingInt(o -> Math.abs(o[1]))
+                .thenComparingInt(o -> o[0] * o[0] + o[1] * o[1] + o[2] * o[2])
+                .thenComparingInt(o -> o[0]).thenComparingInt(o -> o[1]).thenComparingInt(o -> o[2]));
+        return out;
     }
 
     /** For a chat line: "basic, intermediate, ...". */

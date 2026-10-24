@@ -206,6 +206,7 @@ public final class ServerConfig {
      */
     public static final ModConfigSpec.BooleanValue HORSEBANK_NON_OP;
     public static final ModConfigSpec.IntValue HORSEBANK_SEARCH_CHUNKS;
+    public static final ModConfigSpec.IntValue HORSEBANK_PLACE_RADIUS;
 
     /**
      * <b>Does an owner hear about their horse being hurt?</b> See
@@ -817,6 +818,15 @@ public final class ServerConfig {
                 .defineInRange("horsebank.search_chunks",
                         com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_SEARCH_CHUNKS, 0,
                         com.example.horsegenetics.common.horse.HorseBankPlan.MAX_SEARCH_CHUNKS);
+        HORSEBANK_PLACE_RADIUS = builder
+                .comment("How far /horsebank new (and /horsebank force with no bank in range) looks",
+                        "for a spot to put a new stasis bank, in blocks from the player: the nearest",
+                        "free block on solid ground, preferring the one in front of them.",
+                        "(default: 10, range 1 to 16) No spot in range and the command does nothing.",
+                        "Server-side.")
+                .defineInRange("horsebank.place_radius",
+                        com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_PLACE_RADIUS, 1,
+                        com.example.horsegenetics.common.horse.HorseBankPlan.MAX_PLACE_RADIUS);
         DAMAGE_NOTICES = builder
                 .comment("Whether a player is told in chat when one of their own horses is hurt. (default: true)",
                         "The line names the horse, what hurt it, and what to do about that -",
@@ -1637,6 +1647,15 @@ public final class ServerConfig {
             chunks = com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_SEARCH_CHUNKS;
         }
         return Math.max(4, chunks * 16);
+    }
+
+    /** {@code horsebank.place_radius}, safely. */
+    public static int horseBankPlaceRadius() {
+        try {
+            return HORSEBANK_PLACE_RADIUS.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.horse.HorseBankPlan.DEFAULT_PLACE_RADIUS;
+        }
     }
 
     /** {@code wild.turnover}, safely. */

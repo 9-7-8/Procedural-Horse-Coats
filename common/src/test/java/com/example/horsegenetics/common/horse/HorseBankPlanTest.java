@@ -83,6 +83,21 @@ class HorseBankPlanTest {
     }
 
     @Test
+    void aNewBankGoesInFrontOfThePlayer() {
+        List<int[]> east = HorseBankPlan.placeOrder(10, 1, 0);
+        int[] first = east.get(0);
+        assertEquals(2, first[0]);
+        assertEquals(0, first[1]);
+        assertEquals(0, first[2]);
+        List<int[]> north = HorseBankPlan.placeOrder(10, 0, -1);
+        assertEquals(-2, north.get(0)[2]);
+        for (int[] o : east) {
+            assertTrue(o[0] * o[0] + o[1] * o[1] + o[2] * o[2] <= 100, "inside the radius");
+            assertTrue(!(o[0] == 0 && o[2] == 0 && (o[1] == 0 || o[1] == 1)), "never where the player stands");
+        }
+    }
+
+    @Test
     void aBadOrderListFallsBackToTheDefault() {
         assertEquals(HorseBankPlan.DEFAULT_ORDER, HorseBankPlan.cleanOrder(List.of("gold", "")));
         assertEquals(HorseBankPlan.DEFAULT_ORDER, HorseBankPlan.cleanOrder(null));

@@ -11,6 +11,7 @@ import com.example.horsegenetics.neoforge.item.StasisChamberItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -75,7 +76,89 @@ public final class HorseBankCommand {
         event.getDispatcher().register(Commands.literal("horsebank")
                 .requires(source -> ServerConfig.horseBankNonOp()
                         || Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(source))
-                .executes(c -> plain(c.getSource())));
+                .executes(c -> plain(c.getSource()))
+                .then(Commands.literal("force")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .executes(c -> force(c.getSource(), c.getSource().getPlayerOrException(), false))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(c -> force(c.getSource(), EntityArgument.getPlayer(c, "player"), false))))
+                .then(Commands.literal("new")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .executes(c -> force(c.getSource(), c.getSource().getPlayerOrException(), true))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(c -> force(c.getSource(), EntityArgument.getPlayer(c, "player"), true)))));
+    }
+
+    /**
+     * <b>The operator's versions</b> (#275). {@code force}: the target's own empties
+     * first, then a new Basic chamber for every horse left, so all of them are filed;
+     * with no bank of theirs in range it falls through to {@code new}. {@code new}:
+     * a new bank, owned by the target, on the nearest free spot in front of them
+     * within {@code horsebank.place_radius} - none, and nothing happens.
+     */
+    private static int force(CommandSourceStack source, ServerPlayer target, boolean alwaysNew) {
+        ServerLevel level = target.level();
+        HorseStasisBankBlockEntity bank = alwaysNew ? null : nearestOwnBank(level, target);
+        boolean placed = false;
+        if (bank == null) {
+            bank = placeBank(level, target);
+            if (bank == null) {
+                source.sendFailure(Component.literal("No free spot on solid ground within "
+                        + ServerConfig.horseBankPlaceRadius() + " blocks of " + target.getGameProfile().name()
+                        + " for a new stasis bank; nothing was done."));
+                return 0;
+            }
+            placed = true;
+        }
+        if (placed) {
+            HorseStasisBankBlockEntity made = bank;
+            source.sendSuccess(() -> Component.literal("Placed a new stasis bank for "
+                    + target.getGameProfile().name() + " at " + made.getBlockPos().toShortString() + ".")
+                    .withStyle(ChatFormatting.GOLD), true);
+        }
+        int filed = file(source, target, level, bank, true);
+        if (source.getEntity() != target && filed > 0) {
+            target.sendSystemMessage(Component.literal("An operator filed " + filed + " of your horses into your "
+                    + "stasis bank at " + bank.getBlockPos().toShortString() + ".").withStyle(ChatFormatting.GOLD));
+        }
+        return filed;
+    }
+
+    /**
+     * A new bank, owned by {@code target}, at the first spot {@link HorseBankPlan#placeOrder}
+     * offers that is free (replaceable, no fluid, no entity in it) and stands on a block
+     * with a sturdy top. Null if there is none in range.
+     */
+    private static @Nullable HorseStasisBankBlockEntity placeBank(ServerLevel level, ServerPlayer target) {
+        BlockPos feet = target.blockPosition();
+        net.minecraft.world.phys.Vec3 look = target.getLookAngle();
+        net.minecraft.world.level.block.state.BlockState bankState =
+                com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_STASIS_BANK.get().defaultBlockState();
+        for (int[] o : HorseBankPlan.placeOrder(ServerConfig.horseBankPlaceRadius(), look.x, look.z)) {
+            BlockPos at = feet.offset(o[0], o[1], o[2]);
+            if (!level.isLoaded(at) || !level.isInWorldBounds(at)) {
+                continue;
+            }
+            net.minecraft.world.level.block.state.BlockState here = level.getBlockState(at);
+            if (!here.canBeReplaced() || !here.getFluidState().isEmpty()) {
+                continue;
+            }
+            BlockPos below = at.below();
+            if (!level.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)) {
+                continue;
+            }
+            if (!level.isUnobstructed(bankState, at, net.minecraft.world.phys.shapes.CollisionContext.empty())) {
+                continue;   // a horse, a player or an item frame is standing in it
+            }
+            level.setBlock(at, bankState, net.minecraft.world.level.block.Block.UPDATE_ALL);
+            if (level.getBlockEntity(at) instanceof HorseStasisBankBlockEntity bank) {
+                bank.setPlacedBy(target.getUUID());
+                ActionTrace.log("stasis", "/horsebank placed a bank for " + target.getGameProfile().name()
+                        + " at " + at.toShortString());
+                return bank;
+            }
+        }
+        return null;
     }
 
     private static int plain(CommandSourceStack source) {

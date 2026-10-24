@@ -96,6 +96,7 @@ const HOME = {
     'horsebank.allow_non_op': 'horse-stasis.html#setting-horsebank-non-op',
     'horsebank.search_chunks': 'horse-stasis.html#setting-horsebank-search',
     'horsebank.chamber_order': 'horse-stasis.html#setting-chamber-order',
+    'horsebank.place_radius': 'horse-stasis.html#setting-horsebank-place',
     'performance.dormancy_radius': 'horse-care.html#dormancy',
     'notices.owned_horse_damage': 'horse-care.html#hurt-notice',
     'notices.owned_horse_death': 'horse-care.html#death-notice',
