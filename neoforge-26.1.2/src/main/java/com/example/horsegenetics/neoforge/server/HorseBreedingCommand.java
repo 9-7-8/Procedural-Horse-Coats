@@ -40,8 +40,9 @@ public final class HorseBreedingCommand {
     private static int status(CommandSourceStack source) {
         boolean on = ServerConfig.naturalBreeding();
         source.sendSuccess(() -> Component.literal("Horses breeding on their own is " + (on ? "ON" : "OFF")
-                + " (fertility.natural_breeding). /horsebreeding " + (on ? "disable" : "enable")
-                + " changes it."), false);
+                + (ServerConfig.yardBreeding() ? " for this launch (-PyardBreeding; the config is not changed)."
+                        : " (fertility.natural_breeding). /horsebreeding " + (on ? "disable" : "enable")
+                        + " changes it.")), false);
         return on ? 1 : 0;
     }
 

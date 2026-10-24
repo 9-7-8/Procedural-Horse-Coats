@@ -44,6 +44,12 @@ neoForge {
             if (project.hasProperty('yardSprint')) {
                 systemProperty 'horsegenetics.yardSprint', project.property('yardSprint').toString()
             }
+            // Natural breeding on for this launch only (ServerConfig.yardBreeding): -PyardBreeding, for a
+            // run-tests batch whose pens wait on a natural cover. Nothing is written to server.toml, so
+            // the owner's own worlds keep fertility.natural_breeding as she set it (default off).
+            if (project.hasProperty('yardBreeding')) {
+                systemProperty 'horsegenetics.yardBreeding', 'true'
+            }
             // Dev-only photo stage for grown parts (DebugPhotoShootClient): -PphotoShoot saves one
             // screenshot per DebugPhotoShoot.SHOTS entry to run/screenshots/photo-*.png.
             if (project.hasProperty('photoShoot')) {

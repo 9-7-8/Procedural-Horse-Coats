@@ -1468,8 +1468,20 @@ public final class ServerConfig {
         }
     }
 
-    /** {@code fertility.natural_breeding}, safely. */
+    /**
+     * <b>This launch was started with {@code -PyardBreeding}</b> (runClientTestWorld only): natural
+     * breeding is on for the run whatever the config says, so the yard's natural-cover pens can
+     * answer while {@code fertility.natural_breeding} stays off on disk (owner, 2026-10-23).
+     */
+    public static boolean yardBreeding() {
+        return Boolean.getBoolean("horsegenetics.yardBreeding");
+    }
+
+    /** {@code fertility.natural_breeding}, safely - or on, for a {@link #yardBreeding} launch. */
     public static boolean naturalBreeding() {
+        if (yardBreeding()) {
+            return true;
+        }
         try {
             return NATURAL_BREEDING.get();
         } catch (IllegalStateException notLoaded) {
