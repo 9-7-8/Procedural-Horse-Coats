@@ -3692,6 +3692,10 @@ public final class ModGameTests {
         refound(horse, com.example.horsegenetics.common.genetics.Genotype.wildType()
                 .with(new com.example.horsegenetics.common.genetics.AllelePair(egg, egg)));
         net.minecraft.world.entity.player.Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.CREATIVE);
+        // makeMockPlayer overrides gameMode() only; the abilities stay survival's. Posting the
+        // event skips vanilla's mobInteract, so nothing eats the wheat either - without this
+        // drainPendingFeeds reads every meal as refused (#258).
+        player.getAbilities().instabuild = true;
         player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT));
         int[] before = new int[1];
         helper.runAfterDelay(40, () -> {
