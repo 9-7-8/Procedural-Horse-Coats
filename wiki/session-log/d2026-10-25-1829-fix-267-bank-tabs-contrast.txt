@@ -1,0 +1,61 @@
+2026-10-25 18:29 (end) - Stasis bank on a short window: tabs on screen, text above 3:1 (#267)
+
+ASKED
+- "/next-release" -> the next release is v0.5.047 (interim v0.5.047.1 is the last tag).
+  Every open issue already had a milestone; nothing NOT COMPILED since the tag. Units by
+  next-release step 3: bugs first, in the milestone's order - #267, #268, #271 (#257 is
+  needs-owner, waiting on the server manager; #10, #31, #36, #259 wait on checks). #267
+  taken by fix-bug.
+
+DONE
+- ec1015de "#267: bank and shelf tabs off a short window; Browse and tab text under 3:1".
+  What was wrong: vanilla centres a container window by its own height, so the 222-high
+  stasis bank and research shelf sat at y=9 in a 240-high screen, and their tab strips
+  (drawn at topPos - 16) started off the top. Several strings measured under the layout
+  audit's 3:1 bar.
+  The fix: VanillaPanel.topBelowTabs(centredTop, screenH, imageH, tabH) moves a tabbed
+  window down just far enough to show its tabs, never past the screen's bottom; called in
+  init() of HorseStasisBankScreen and ResearchShelfScreen before any widget is placed.
+  Colours, measured with LayoutAudit's WCAG formula: tab labels use TAB_TEXT (= TEXT,
+  3.7:1 on the inactive #9A9A9A face, was 1.8); TEXT_DIM #6E6E6E -> #555555 (4.4:1 on the
+  face, was 3.0) - this is global, every screen using TEXT_DIM gets darker hints; new
+  WELL_TEXT_DIM #303030 for the Browse rows' tier word, origin, detail and spare line (3.9:1
+  on the #8B8B8B well, was 2.6 / 3.1); "at stud" green #2F5F2F -> #143A14 (3.8:1).
+  Proof: compileJava green; check-parity OK. NOT the crawl: the live server had a player
+  on (axolotlwyvern, joined 18:19), so the -PmenuCrawl=queries,layout run at 427x240 is
+  owed.
+  Pictures: none taken (the client could not be launched for the same reason).
+  Issue: #267 open, commented "waiting on the layout-audit crawl".
+
+DECIDED
+- (session, not the owner) Move the window down rather than pull the tabs inside it: the
+  screens keep one layout, and a 240-high screen has 18 px spare, enough for a 16-px strip.
+- (session) Text on the well targets the audit's 3:1, not 4.5:1: 4.5 on #8B8B8B needs
+  near-black, which would erase the step between a row's name and its secondary lines.
+  Said on the issue, so the owner can overrule.
+- (session) The research shelf got the same fix, as the issue suspected it shared the
+  problem. Recorded in the commit and on #267.
+
+FOUND ON THE WAY
+- The previous session log is named 18:35 on this same date, but this session ended at
+  18:29 by the clock; that file's time is probably not its end time. Left alone.
+
+PROCEDURES
+- None needed. Asked all three questions: next-release and fix-bug fitted; crawl-the-menus
+  already says to write and compile then call the run owed when the live server has a
+  player on.
+
+NOT RUN / NOT CHECKED
+- The layout-audit crawl (crawl-the-menus, -PmenuCrawl=queries,layout) - the proof #267
+  closes on. It also checks no other screen regressed from the darker TEXT_DIM.
+- The full :neoforge-26.1.2:build (its tests) - owed for the same player-on reason.
+- Nothing seen in game. No Verification-tab anchors added (the check lives on the issue).
+- A full :common:test would check nothing this session touched (no common/ change).
+
+RELEASE
+- Not offered: v0.5.047 has many open units.
+
+PICK UP FIRST
+- When the live server is empty: run crawl-the-menus with -PmenuCrawl=queries,layout and
+  close #267 on it; then next-release takes #268 (fitted text: stop at ~70%, ellipsis +
+  tooltip, owner-ruled).
