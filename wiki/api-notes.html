@@ -230,10 +230,13 @@
         registered in two halves - see <code>ModGameTests</code>. Things that cost time:
         <ul>
             <li><code>GameTestHelper.makeMockPlayer(GameType.CREATIVE)</code> overrides
-                <code>isCreative()</code> and nothing else: its <code>getAbilities()</code> are a
+                <code>gameMode()</code> and nothing else: its <code>getAbilities()</code> are a
                 fresh survival set, so <code>abilities.instabuild</code> is false. Every spend in this
                 mod checks <code>instabuild</code>, so a test of the creative branch must set it on the mock
-                by hand (<code>send_home_payment</code>, 2026-10-02).</li>
+                by hand (<code>send_home_payment</code>, 2026-10-02). It caught a second test that
+                trusted the word CREATIVE: <code>layer_lays_when_fed</code> failed for two days with
+                the handler sound, because a meal counts only on <code>instabuild</code> or a shrunk
+                stack (#258, 2026-10-25).</li>
             <li><code>neoforge.enabledGameTestNamespaces</code> <strong>does not exist</strong> in this version -
                 nothing reads it. This build set it on all three runs for months. The live property is
                 <code>neoforge.enableGameTest</code>, which the <code>client</code> and <code>gameTestServer</code>

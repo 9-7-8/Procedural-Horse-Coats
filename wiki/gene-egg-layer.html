@@ -148,6 +148,16 @@
 </p>
 
 <h3 id="verified">Verified in the test yard</h3>
+<p id="verified-lays-when-fed">
+    <strong>A meal lays one at once</strong> (2026-10-25, gametest <code>layer_lays_when_fed</code>,
+    #258). An Egg/Egg horse fed wheat by a creative player has one more egg on the ground ten ticks
+    later. The test had failed four runs in four since 2026-10-23 because of the test itself, not the
+    handler: <code>makeMockPlayer(CREATIVE)</code> overrides only <code>gameMode()</code>, so
+    <code>abilities.instabuild</code> stayed false, and posting the event skips vanilla's
+    <code>mobInteract</code>, so nothing ate the wheat and <code>drainPendingFeeds</code> read the meal
+    as refused. With <code>instabuild</code> set it passes; with that one line removed it fails with
+    the original message. Not yet seen in a survival hand, where the stack really shrinks.
+</p>
 <p>
     <strong>The despawn timer bounds the eggs; <code>nearby_cap</code> never fires</strong> (overnight
     2026-09-14 to 15, unattended). The EGG LAYER pen packs four layers of one allele into a corner, so
@@ -202,15 +212,15 @@
     <p>Egg layer is confirmed across the locus in the pens &mdash; mismatched pairs and carriers lay
     nothing, leather and the ender pearl lay their own item &mdash; but nobody has checked what the
     spawn egg&rsquo;s gene row calls those horses, that no wild horse lays while every Enderpony does,
-    or that two layers keep their own clocks &mdash; and laying when fed (2026-10-16) has not run at all.</p>
+    or that two layers keep their own clocks &mdash; and laying when fed is proven by a gametest but not yet seen in a survival hand.</p>
 </div>
 
-<h3 id="open-1016-lays-when-fed">Laying when fed (2026-10-16, gametest not run)</h3>
+<h3 id="open-1016-lays-when-fed">Laying when fed, in a survival hand (2026-10-16)</h3>
 <ul>
-    <li><strong>The gametest <code>layer_lays_when_fed</code> has not run</strong> &mdash; the live
-        server had players on when it was written. <strong>Pass:</strong> one more egg on the ground
-        after one meal. In-game: hand-feed a layer wheat; its item drops at once, and a horse at full
-        health that refuses the wheat drops nothing.</li>
+    <li><strong>Not seen in play.</strong> The gametest proves the creative path
+        (<a href="#verified-lays-when-fed">Coding tab</a>); a survival meal counts only by the stack
+        shrinking. <strong>Pass:</strong> in survival, hand-feed a layer wheat; its item drops at once,
+        and a horse at full health that refuses the wheat drops nothing.</li>
 </ul>
 
 <h3 id="open-gene-egg-layer">Still open (NOT played)</h3>

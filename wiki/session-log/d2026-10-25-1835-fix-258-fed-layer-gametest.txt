@@ -1,0 +1,75 @@
+2026-10-25 18:35 (end) - Fix #258: the fed-layer gametest's creative mock was never creative
+
+ASKED
+-----
+- "Next" (after /clear). Read as /next-release, the routine the recent sessions ran. It
+  picked #258 on v0.5.047: the previous session's PICK UP FIRST, and a feature whose
+  gametest failed, ahead of #267/#268 (UI on a short window).
+- "Continue #258: when the live server is empty, run :neoforge-26.1.2:runGameTest, check
+  layer_lays_when_fed passes (mutate once), then close-a-check, commit, end-session." -
+  the /loop prompt that held the work from about 14:30 until the server emptied at 18:01.
+
+DONE
+----
+- 87d4ca41 Fix #258. layer_lays_when_fed had failed four runs in four since 2026-10-23
+  ("1 before the meal, 1 after"). The handler (GeneAbilityHandler.onFeed /
+  drainPendingFeeds / produceOnFeed) was sound. The test was wrong:
+  GameTestHelper.makeMockPlayer(CREATIVE) overrides gameMode() only (read in the 26.1.2
+  patched sources jar), so abilities.instabuild stayed false. The test posts
+  EntityInteract directly, skipping vanilla's mobInteract, so nothing ate the wheat either.
+  drainPendingFeeds counts a meal only on instabuild or a shrunk stack, so it read every
+  meal as refused. The test now sets instabuild, as the creative mock at ModGameTests line
+  1673 already did.
+  Proof: :neoforge-26.1.2:runGameTest, all 71 required tests pass. Mutation: with the one
+  line commented out, the run fails with the original message; line restored.
+  No pictures (nothing visible changed).
+  #258 closed by the commit, proof comment posted. Milestone v0.5.047's description and the
+  release-plan issue #196 updated.
+- Docs: gene-egg-layer.html Coding tab gains #verified-lays-when-fed. The Verification item
+  #open-1016-lays-when-fed is narrowed to the survival-hand look (the test proves only the
+  creative branch). Summary sentence reworded. The verification index, search index,
+  agent text and bakeUnverifiedGenes were rebaked; check-links OK.
+
+DECIDED
+-------
+- "Next" meant /next-release (my call, from the recent sessions' pattern).
+- #258 before #267/#268 (my call): a feature whose proof was red, and the last session's
+  pick-up-first, ranked above UI bugs on a short window.
+- Fixed the test, not the handler: the mock sets instabuild rather than shrinking the
+  stack by hand, because instabuild exercises a real branch of drainPendingFeeds with
+  no faked step. Recorded on the issue and the Coding tab.
+
+FOUND ON THE WAY
+----------------
+- The quirk was ALREADY on api-notes (GameTest section, from send_home_payment
+  2026-10-02), saying isCreative(); the 26.1.2 source overrides gameMode(). Corrected,
+  with #258 as the second case. test-tiers now points at it.
+- The live server logs "There are N ... players online" about hourly, not once a minute,
+  so a watcher reading only that line misses a leave. The replacement counted
+  joins and leaves; it was then reaped for low memory (2.6 GB free of 15.9), and the
+  checks went back to hand reads on a /loop wakeup.
+
+PROCEDURES
+----------
+- test-tiers.txt: a creative mock needs getAbilities().instabuild = true (second time it
+  cost a test).
+- next-release, fix-bug, close-a-check, end-session: followed; nothing wrong in them.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run; the change is one gametest line and touches no
+  common/ class, so it cannot move it.
+- Not seen in play: a survival hand feeding a layer (gene-egg-layer.html
+  #open-1016-lays-when-fed).
+- Tests waited from ~14:30 to 18:01 for the live server to empty (axolotlwyvern,
+  Demon_Killer455).
+
+RELEASE
+-------
+Not offered: one fix; v0.5.047.2's gear pieces are not built.
+
+PICK UP FIRST
+-------------
+#267, stasis bank tabs off a short window and low contrast (procedures/fix-bug.txt, via
+next-release); the in-game checks for #276 and #272 are still owed by
+procedures/hand-over-a-test.txt.
