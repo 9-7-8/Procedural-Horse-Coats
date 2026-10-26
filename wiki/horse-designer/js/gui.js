@@ -219,15 +219,38 @@ window.HG = window.HG || {};
 
     function widthOf(s) { return ctx.measureText(s).width; }
 
-    /** Left-aligned, scaled down (never up) so the whole string fits - the screen's drawFitted. */
+    /**
+     * Left-aligned, scaled down (never up) to fit - the screen's drawFitted, which is
+     * common/ui/FitText: squeezed only down to FIT_MIN_SCALE, past that cut with an
+     * ellipsis, the full text in a tooltip while the mouse is on it (#268). The game
+     * draws a vanilla tooltip; the page sets the canvas's title, the browser's own.
+     */
+    var FIT_MIN_SCALE = 0.7, ELLIPSIS = "…";
+    var cutTip = null;   // the full text of the cut line under the mouse, this frame
     function fitted(s, x, y, maxW, colour) {
       var w = widthOf(s);
       if (w <= maxW || w <= 0) { text(s, x, y, colour); return; }
+      var shown = s;
+      if (maxW / w < FIT_MIN_SCALE) {
+        var budget = maxW / FIT_MIN_SCALE, cps = Array.from(s), shownW;
+        shown = "";
+        for (var n = cps.length - 1; n > 0; n--) {
+          var prefix = cps.slice(0, n).join("").replace(/ +$/, "");
+          if (prefix && widthOf(prefix + ELLIPSIS) <= budget) { shown = prefix + ELLIPSIS; break; }
+        }
+        if (!shown && widthOf(ELLIPSIS) <= budget) shown = ELLIPSIS;
+        shownW = widthOf(shown);
+        if (mouse.inside && mouse.x >= x && mouse.x < x + Math.min(maxW, shownW || 1)
+            && mouse.y >= y && mouse.y < y + 9) cutTip = s;
+        if (!shown) return;
+        w = shownW;
+      }
+      var k = Math.min(1, maxW / w);
       ctx.save();
       ctx.translate(x, y + 7);
-      ctx.scale(maxW / w, maxW / w);
+      ctx.scale(k, k);
       ctx.fillStyle = colour;
-      ctx.fillText(s, 0, 0);
+      ctx.fillText(shown, 0, 0);
       ctx.restore();
     }
 
@@ -293,6 +316,7 @@ window.HG = window.HG || {};
     function draw() {
       resize();
       if (!vw || !genes.length || !state) return;
+      cutTip = null;
       widgets = [];
       scroll = Math.max(0, Math.min(scroll, maxScroll()));
 
@@ -341,6 +365,8 @@ window.HG = window.HG || {};
       // (hovered is already -1 while a dropdown is open.)
       if (hovered >= 0) drawGeneBlurb(genes[hovered], rowSlotAt(mouse.x, mouse.y));
       if (dd) drawDropdown();
+      var tip = cutTip || "";
+      if (canvas.title !== tip) canvas.title = tip;
     }
 
     /** The name, in two clickable halves. */

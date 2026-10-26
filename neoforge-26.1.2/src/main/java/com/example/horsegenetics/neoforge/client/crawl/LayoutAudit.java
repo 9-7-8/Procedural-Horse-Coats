@@ -34,7 +34,11 @@ import static com.example.horsegenetics.neoforge.client.crawl.Crawl.*;
  */
 final class LayoutAudit {
 
-    /** Below this text is drawn too small to read - QueryBuilderTab.fitted and friends shrink to fit. */
+    /**
+     * Below this text is drawn too small to read. {@code FitText.MIN_SCALE} is the same number
+     * and {@code GuiText.drawFitted} stops there (#268); kept a separate constant on purpose, so
+     * lowering the floor cannot also lower the bar that checks it.
+     */
     static final float MIN_SCALE = 0.7f;
     /** WCAG 2's contrast for large text and UI components. */
     static final double MIN_CONTRAST = 3.0;

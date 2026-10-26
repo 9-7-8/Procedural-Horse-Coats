@@ -454,19 +454,22 @@ public final class FamilyTreeScreen extends Screen {
         return player == null ? null : player.getGameProfile().name();
     }
 
-    /** Draw {@code text} left-aligned at {@code (x, y)}, scaled down (never up) so the WHOLE string fits {@code maxW}. */
+    /**
+     * Draw {@code text} left-aligned at {@code (x, y)} at the chart's {@code uiScale}, fitted
+     * to {@code maxW} by {@link GuiText#drawFitted} (squeezed, then cut with a tooltip, #268).
+     * The chart's own zoom still shrinks text below that floor on a crowded tree: that is the
+     * zoom, not the fit.
+     */
     private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int color) {
-        float w = this.font.width(text);
-        float scale = w > 0 ? Math.min(uiScale, maxW / w) : uiScale;
-        if (scale >= 0.999f) {
-            g.text(this.font, Component.literal(text), x, y, color);
+        if (uiScale >= 0.999f) {
+            GuiText.drawFitted(g, this.font, text, x, y, maxW, color, true);
             return;
         }
         var pose = g.pose();
         pose.pushMatrix();
         pose.translate(x, y);
-        pose.scale(scale);
-        g.text(this.font, Component.literal(text), 0, 0, color);
+        pose.scale(uiScale);
+        GuiText.drawFitted(g, this.font, text, 0, 0, (int) (maxW / uiScale), color, true);
         pose.popMatrix();
     }
 

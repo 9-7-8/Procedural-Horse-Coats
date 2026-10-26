@@ -2134,19 +2134,9 @@ public final class HorseInfoScreen extends Screen {
         }
     }
 
-    /** Text at {@code (x, y)}, squeezed rather than clipped when it will not fit. */
+    /** Text at {@code (x, y)}, squeezed, then cut with a tooltip, when it will not fit (#268). */
     private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int colour) {
-        float w = this.font.width(text);
-        if (w <= maxW || w <= 0) {
-            g.text(this.font, Component.literal(text), x, y, colour, false);
-            return;
-        }
-        var pose = g.pose();
-        pose.pushMatrix();
-        pose.translate(x, y);
-        pose.scale(maxW / w);
-        g.text(this.font, Component.literal(text), 0, 0, colour, false);
-        pose.popMatrix();
+        GuiText.drawFitted(g, this.font, text, x, y, maxW, colour);
     }
 
     private void epigenetics(Cursor c, Gene gene) {

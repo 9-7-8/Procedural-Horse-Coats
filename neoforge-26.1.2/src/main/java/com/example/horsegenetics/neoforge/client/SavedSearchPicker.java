@@ -368,19 +368,9 @@ public final class SavedSearchPicker {
         return true;
     }
 
-    /** Squeezed rather than clipped, so a long query still reads. */
+    /** Squeezed, then cut with the whole query in a tooltip (#268). */
     private static void fitted(GuiGraphicsExtractor g, Font font, String text,
                                int tx, int ty, int maxW, int colour) {
-        float w = font.width(text);
-        if (w <= maxW || w <= 0) {
-            g.text(font, Component.literal(text), tx, ty, colour, false);
-            return;
-        }
-        var pose = g.pose();
-        pose.pushMatrix();
-        pose.translate(tx, ty);
-        pose.scale(maxW / w);
-        g.text(font, Component.literal(text), 0, 0, colour, false);
-        pose.popMatrix();
+        GuiText.drawFitted(g, font, text, tx, ty, maxW, colour);
     }
 }

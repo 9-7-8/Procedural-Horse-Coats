@@ -4585,18 +4585,8 @@ public final class HorseBrowserScreen extends Screen {
         g.fill(x - 1, y - 1, x + 17, y + 17, colour);
     }
 
-    /** Draw text at (x,y) screen; if wider than maxW, scale it to fit. */
+    /** Draw text at (x,y) screen; if wider than maxW, squeeze it, then cut it with a tooltip (#268). */
     private void drawFitted(GuiGraphicsExtractor g, String text, int x, int y, int maxW, int color) {
-        float fw = this.font.width(text);
-        if (fw <= maxW || fw <= 0) {
-            g.text(this.font, Component.literal(text), x, y, color, false);
-            return;
-        }
-        var pose = g.pose();
-        pose.pushMatrix();
-        pose.translate(x, y);
-        pose.scale(maxW / fw);
-        g.text(this.font, Component.literal(text), 0, 0, color, false);
-        pose.popMatrix();
+        GuiText.drawFitted(g, this.font, text, x, y, maxW, color);
     }
 }

@@ -172,6 +172,22 @@
 
 <section class="tab-panel" data-tab="coding">
 
+<h2 id="fitted-text">Long text is cut, not shrunk (2026-10-25, #268)</h2>
+
+<p>
+Text too wide for its cell used to be squeezed until the whole string fitted, which on a
+narrow window drew it unreadably small: the layout audit measured the Where column at 26%, the
+breeding pickers at 22% and the stasis bank's Browse lines at 18%. The owner's call
+(2026-10-23): squeeze only down to 70%, then cut the text with an ellipsis and show the whole of
+it in a tooltip on hover. The rule is <code>common/ui/FitText</code> (pinned by
+<code>FitTextTest</code>), and <code>GuiText.drawFitted</code> draws it; the nine private copies
+every screen once had (the browser, the information screen, the family tree, the spawn egg, the
+stasis bank, the research shelf, the query tab and both pickers) now call it, so one rule covers
+every screen. The horse designer's <code>fitted</code> in <code>js/gui.js</code> mirrors it and
+shows the full text as the canvas's title. The family tree still shrinks its text below 70% when
+the chart is zoomed out to fit a crowded tree: that is the chart's zoom, not the fit.
+</p>
+
 <h2 id="barn-name-shown">A barn name is the name shown (2026-10-04, #34)</h2>
 
 <p>

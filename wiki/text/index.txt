@@ -3085,6 +3085,7 @@ wiki/horse-body.html#severity-stays-flat	all	Severity stays flat (owner, 2026-10
 wiki/horse-body.html#units	all	What those numbers are in metres
 wiki/horse-body.html#verified	all	Verified
 wiki/horse-browser.html#barn-name-shown	coding	A barn name is the name shown (2026-10-04, #34)
+wiki/horse-browser.html#fitted-text	coding	Long text is cut, not shrunk (2026-10-25, #268)
 wiki/horse-browser.html#log	gameplay	The Log tab — what has been happening to your horses
 wiki/horse-browser.html#log-bounds	gameplay	How much it keeps
 wiki/horse-browser.html#log-classes	coding	Where it lives
