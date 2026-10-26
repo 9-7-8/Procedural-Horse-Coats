@@ -164,6 +164,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     @Override
     protected void init() {
         super.init();
+        // Before anything is placed from topPos: every widget and slot hangs off it.
+        this.topPos = VanillaPanel.topBelowTabs(this.topPos, this.height, this.imageHeight, TAB_H);
         this.titleLabelX = HorseStasisBankMenu.MARGIN;
         this.titleLabelY = TITLE_Y;
         this.inventoryLabelX = HorseStasisBankMenu.MARGIN;
@@ -560,7 +562,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             int w = this.font.width(t.label()) + 18;
             VanillaPanel.tab(g, tx, topPos - TAB_H, w, TAB_H + 4, t == tab);
             g.text(this.font, Component.literal(t.label()), tx + 9, topPos - TAB_H + 5,
-                    t == tab ? VanillaPanel.TEXT : VanillaPanel.TEXT_DIM, false);
+                    VanillaPanel.TAB_TEXT, false);
             tx += w + 2;
         }
 
@@ -819,10 +821,10 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
             // has instead.
             boolean stud = row.atStud() && row.mayStud();
             int rightW = drawRight(g, stud ? "at stud" : capitalise(row.tier().id()),
-                    l + w - 4, ry + 3, stud ? 0xFF2F5F2F : 0xFF4A4A4A);
+                    l + w - 4, ry + 3, stud ? 0xFF143A14 : VanillaPanel.WELL_TEXT_DIM);
             drawFitted(g, row.displayName(), textL, ry + 3, textW - 7 - rightW, 0xFF202020);
-            rightW = drawRight(g, row.origin(), l + w - 4, ry + 3 + LINE_H, 0xFF4A4A4A);
-            drawFitted(g, row.detail(), textL, ry + 3 + LINE_H, textW - 7 - rightW, 0xFF3F3F3F);
+            rightW = drawRight(g, row.origin(), l + w - 4, ry + 3 + LINE_H, VanillaPanel.WELL_TEXT_DIM);
+            drawFitted(g, row.detail(), textL, ry + 3 + LINE_H, textW - 7 - rightW, VanillaPanel.WELL_TEXT_DIM);
         }
         if (wanted != null) {
             ClientHorseCoats.request(wanted);
@@ -836,7 +838,7 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
         if (drawn < HorseStasisBankMenu.LIST_ROWS) {
             String spare = spareLine();
             if (!spare.isEmpty()) {
-                drawFitted(g, spare, l + 3, t + drawn * HorseStasisBankMenu.ROW_H + 3, w - 6, 0xFF4A4A4A);
+                drawFitted(g, spare, l + 3, t + drawn * HorseStasisBankMenu.ROW_H + 3, w - 6, VanillaPanel.WELL_TEXT_DIM);
             }
         }
 

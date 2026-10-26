@@ -68,6 +68,7 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
     @Override
     protected void init() {
         super.init();
+        this.topPos = VanillaPanel.topBelowTabs(this.topPos, this.height, this.imageHeight, TAB_H);
         this.titleLabelX = ResearchShelfMenu.MARGIN;
         this.titleLabelY = TITLE_Y;
         this.inventoryLabelX = ResearchShelfMenu.MARGIN;
@@ -164,7 +165,7 @@ public final class ResearchShelfScreen extends AbstractContainerScreen<ResearchS
             int w = this.font.width(t.label) + 18;
             VanillaPanel.tab(g, tx, topPos - TAB_H, w, TAB_H + 4, t == tab);
             g.text(this.font, Component.literal(t.label), tx + 9, topPos - TAB_H + 5,
-                    t == tab ? VanillaPanel.TEXT : VanillaPanel.TEXT_DIM, false);
+                    VanillaPanel.TAB_TEXT, false);
             tx += w + 2;
         }
 

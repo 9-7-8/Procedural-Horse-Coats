@@ -35,8 +35,19 @@ public final class VanillaPanel {
 
     /** Vanilla's container label colour. Anything lighter is unreadable on {@link #FACE}. */
     public static final int TEXT = 0xFF404040;
-    /** The same, softened - for a hint rather than a label. */
-    public static final int TEXT_DIM = 0xFF6E6E6E;
+    /**
+     * The same, softened - for a hint rather than a label. Vanilla's shadow grey,
+     * 4.4:1 on {@link #FACE}; the {@code #6E6E6E} it was measured 3.0:1 (#267).
+     */
+    public static final int TEXT_DIM = 0xFF555555;
+    /**
+     * Secondary text inside a {@link #well} or a {@link #slot}. A mid-grey well
+     * leaves little room: {@code #4A4A4A} measured 2.6:1 there (#267), and this
+     * is 3.9:1, still a step lighter than a row's {@code #202020} name.
+     */
+    public static final int WELL_TEXT_DIM = 0xFF303030;
+    /** A tab's label, active or not: 3.7:1 even on an inactive tab's darker face. */
+    public static final int TAB_TEXT = TEXT;
     /** A row the player has selected. Vanilla's slot highlight. */
     public static final int SELECTED = 0x80FFFFFF;
     public static final int HOVER = 0x40FFFFFF;
@@ -84,6 +95,17 @@ public final class VanillaPanel {
      * so it reads as part of it; an inactive one is darker and set down a pixel,
      * which is how vanilla's creative-inventory tabs say the same thing.
      */
+    /**
+     * <b>Where a window with tabs above it goes.</b> Vanilla centres the window
+     * alone, so a 222-high one in a 240-high screen sits at 9 and its tabs start
+     * off the top (#267). This moves it down just far enough to show them, never
+     * so far that its own bottom leaves the screen; a screen too short for both
+     * keeps vanilla's centre, as nothing better fits.
+     */
+    public static int topBelowTabs(int centredTop, int screenH, int imageH, int tabH) {
+        return Math.max(centredTop, Math.min(tabH, screenH - imageH));
+    }
+
     public static void tab(GuiGraphicsExtractor g, int x, int y, int w, int h, boolean active) {
         int top = active ? y : y + 1;
         g.fill(x, top, x + w, y + h, active ? FACE : 0xFF9A9A9A);
