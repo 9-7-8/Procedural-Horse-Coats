@@ -1,0 +1,81 @@
+2026-10-25 18:30 (start; ended 2026-10-27 08:15) - Fix #268: fitted text cut, not shrunk
+
+ASKED
+-----
+- "/next-release" -> v0.5.047 is the next release (milestone open; last tag v0.5.047.1).
+  No open issue lacked a milestone. The first unit with work left was #268 (its design
+  call already answered by the owner on 2026-10-23: ellipsis + tooltip), handed to fix-bug.
+- Question tool, 2026-10-25 (the background wait for the live server to empty had been
+  stopped by the harness for low memory, with a player still on): "Commit untested now"
+  (owner). Committed as "#268:" with the owed tests listed on the issue.
+- "End session" (2026-10-27) -> the server was stopped and RAM free, so the owed tests
+  and the crawl ran first, then this procedure.
+
+DONE
+----
+- bcca4702 "#268: fitted text shrank to 18-26% on a narrow window".
+  What was wrong: nine screens each had a private drawFitted/fitted that scaled the WHOLE
+  string into its cell however small that made it (the layout audit measured 18-26%).
+  The issue said "one change in the shared helpers"; there was no shared helper.
+  Fix: common/ui/FitText (the rule: squeeze down to MIN_SCALE 0.7, then cut to the widest
+  prefix that fits with an ellipsis, never splitting a surrogate pair or leaving a space
+  before the ellipsis) and GuiText.drawFitted (draws it; when cut, tests the mouse against
+  the line's box mapped through g.pose() and the scissor, and calls
+  setTooltipForNextFrame). All nine copies (HorseBrowserScreen, HorseInfoScreen,
+  FamilyTreeScreen, CustomHorseSpawnScreen, HorseStasisBankScreen, ResearchShelfScreen,
+  QueryBuilderTab, SavedSearchPicker, GeneFilterPicker) now call it. FamilyTreeScreen keeps
+  its chart zoom (uiScale) on top. The designer's js/gui.js fitted() mirrors the rule
+  (hard rule 5), with the canvas title as its tooltip. LayoutAudit.MIN_SCALE kept as its
+  own constant on purpose, so lowering the floor cannot lower the bar.
+  Proof (2026-10-27): FitTextTest 6 green; with MIN_SCALE broken to 0.01, 3 red, then
+  restored. Layout crawl -PmenuCrawl=queries,layout: 770 passed, 1 failed, 1 skipped
+  (was 45 failed). The one FAIL is not this change (#277).
+  :neoforge-26.1.2:build green, check-parity OK, check-designer-boots OK.
+  Pictures: none taken. The crawl measured the result; the tooltip is unseen.
+  #268 closed.
+- #267 (ec1015de, from the previous session) closed on the same crawl, which was its
+  named check: no tab off the screen, none of its contrast findings back.
+- Docs: horse-browser.html Coding tab "#fitted-text"; Verification tab
+  "#fitted-text-tooltip"; api-notes "Scaling GUI text" learns that a tooltip can be set
+  from inside any draw call (deferred to extractDeferredElements), containsPointInScissor,
+  and MouseHandler.getScaledXPos/YPos.
+
+DECIDED
+-------
+- Ellipsis + tooltip at about 70% (owner, 2026-10-23, on #268).
+- Commit untested while the server had a player on (owner, 2026-10-25, question tool).
+- Cut text never leaves a trailing space before the ellipsis; a cell too narrow for the
+  ellipsis draws nothing and still offers the tooltip (made without her; FitText's
+  comment and FitTextTest).
+- Close #267 on the crawl that was its named check (made without her; the comment on #267).
+
+FOUND ON THE WAY
+----------------
+- #277 filed: the stasis bank's title and its "N horses of M" count overlap at 427x240;
+  both are raw g.text calls in extractLabels, untouched by #268. No milestone yet:
+  next-release step 2 places it.
+- The background shell waiting for the server to empty was stopped by Claude Code for low
+  memory (1.8 GB free); not restarted, the owner was asked instead.
+
+PROCEDURES
+----------
+- fix-bug.txt step 6: a new case for a proof that cannot run yet (a player on the live
+  server, or low memory): compile, ask whether to wait or commit, commit as "#N:" with the
+  owed tests on the issue; and do not restart a background wait the harness stopped.
+- Others reviewed (next-release, rebake, crawl-the-menus, end-session): nothing wrong.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite (only FitTextTest ran). Nothing else in common/ changed, so
+  a full run would only re-check unrelated code.
+- The hover tooltip, in game and in the designer: horse-browser.html#fitted-text-tooltip.
+- No pictures.
+
+RELEASE
+-------
+Not offered: two bug fixes is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#271 (bake-behaviour-hierarchy.mjs drops the vanilla goals), by /next-release, which
+also places #277 on v0.5.047.

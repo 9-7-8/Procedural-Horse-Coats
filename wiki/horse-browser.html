@@ -683,6 +683,27 @@ the chart is zoomed out to fit a crowded tree: that is the chart's zoom, not the
     <p>The whole Log tab is unplayed: it boots clean and its rules are unit-tested, but nothing has yet confirmed in game that a cover, a foal, a death, a taming and a transfer each land one correct row &mdash; and above all that the rows written while the owner was logged out are there when she comes back, which is the one thing the tab exists for and the one thing no test can reach; and the roster now re-asks on every open, which nothing but a real stable can show is neither stale nor chatty; and the <em>My horses</em> table has changed shape three times over, losing its dead, trading its coat column for a Send home button (free since 2026-10-02, with an optional price and a cooldown), and gaining a sortable <em>Pull</em> column.</p>
 </div>
 
+<h3 id="fitted-text-tooltip">A cut line shows its full text on hover (2026-10-27, NOT played)</h3>
+
+<p>
+    Since #268, text too wide for its cell stops shrinking at 70% and is cut with an
+    ellipsis (see <a href="#fitted-text">Long text is cut, not shrunk</a>). The layout crawl
+    proves the cut: no string below 70% across every screen. It does not hover, so the
+    tooltip is unseen. The mouse position is read in <code>GuiText.drawFitted</code> rather
+    than passed in, and the line's box is mapped through the pose, so the stasis bank and the
+    research shelf (drawn window-relative) are the screens most worth checking.
+</p>
+
+<ul>
+    <li><strong>The tooltip.</strong> On a small window (or GUI scale 4), open <kbd>H</kbd>
+        &rarr; My horses and hover a cut Where cell, then the stasis bank's Browse tab and a
+        cut horse line. <strong>Pass:</strong> the full text in a vanilla tooltip, only while
+        the mouse is on the cut line. <strong>Fail:</strong> no tooltip, or one that appears
+        beside the line rather than on it.</li>
+    <li><strong>The designer.</strong> The same on the horse designer page in a narrow
+        browser window: the browser's own tooltip over a cut gene name.</li>
+</ul>
+
 <h3 id="dead-leave-roster-0925">Dead horses leave the roster (2026-09-25, NOT played)</h3>
 
 <p>

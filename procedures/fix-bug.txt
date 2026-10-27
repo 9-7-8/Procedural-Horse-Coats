@@ -167,6 +167,13 @@ STEPS
    - Not a defect (the evidence shows the behaviour is correct, e.g. a vanilla WARN that
      drops nothing) -> write the quirk where the next reader meets it (api-notes, the
      class comment), commit as "#N:", and close as "not planned" with the proof (#208).
+   - The proof cannot run yet (a player on the live server, test-tiers' NEVER list, or
+     too little free memory) -> compile, ask the owner with the question tool whether
+     to wait or commit now, and on "commit" use "#N:" and comment on the issue with every
+     test still owed. Run them and close it in a later session when the server is empty
+     (#268: committed untested, proven two days later by its unit test and the crawl).
+     A background wait for the server to empty can be stopped by the harness when memory
+     runs low; do not start it again, ask.
    - Only the game can prove it -> leave the issue open, and comment "fixed in
      <commit>, waiting on <pen> / an in-game check: <what to look for>". run-tests
      closes it on the yard PASS. A fix that only the owner's eyes can confirm stays
