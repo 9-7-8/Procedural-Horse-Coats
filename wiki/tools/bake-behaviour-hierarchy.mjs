@@ -23,7 +23,7 @@
 import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, dirname, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { execFileSync } from "node:child_process";
+import { inflateRawSync } from "node:zlib";
 
 const ROOT = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 const SRC = join(ROOT, "neoforge-26.1.2", "src", "main", "java");
@@ -46,15 +46,52 @@ function walk(dir, out = []) {
 
 const files = walk(SRC).map((path) => ({ path, text: readFileSync(path, "utf8") }));
 
-function vanillaSource(path) {
+/*
+ * The jar is read here, not by shelling out to `unzip`: Git Bash has one and
+ * PowerShell does not, and the old catch turned "no unzip" into an empty file for
+ * every class - a page with no vanilla goals and exit 0 (#271).
+ */
+let jarEntries = null;
+function jarIndex() {
+    if (jarEntries) return jarEntries;
     if (!existsSync(JAR)) {
         throw new Error("no sources jar at " + JAR + " - run ./gradlew :neoforge-26.1.2:compileJava first");
     }
-    try {
-        return execFileSync("unzip", ["-p", JAR, path], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
-    } catch (e) {
-        return "";
+    const buf = readFileSync(JAR);
+    let eocd = -1;
+    for (let i = buf.length - 22; i >= Math.max(0, buf.length - 22 - 65535); i--) {
+        if (buf.readUInt32LE(i) === 0x06054b50) { eocd = i; break; }
     }
+    if (eocd < 0) throw new Error("not a zip (no end-of-central-directory record): " + JAR);
+    const count = buf.readUInt16LE(eocd + 10);
+    if (count === 0xffff) throw new Error("zip64 jar (65535+ entries) - this reader does not do zip64: " + JAR);
+    let p = buf.readUInt32LE(eocd + 16);
+    jarEntries = new Map();
+    for (let n = 0; n < count; n++) {
+        if (buf.readUInt32LE(p) !== 0x02014b50) throw new Error("bad central directory entry " + n + " in " + JAR);
+        const method = buf.readUInt16LE(p + 10);
+        const csize = buf.readUInt32LE(p + 20);
+        const nameLen = buf.readUInt16LE(p + 28);
+        const extraLen = buf.readUInt16LE(p + 30);
+        const commentLen = buf.readUInt16LE(p + 32);
+        const local = buf.readUInt32LE(p + 42);
+        const name = buf.toString("utf8", p + 46, p + 46 + nameLen);
+        jarEntries.set(name, { method, csize, local, buf });
+        p += 46 + nameLen + extraLen + commentLen;
+    }
+    return jarEntries;
+}
+
+/** One file out of the sources jar, or null when the jar has no such entry. */
+function vanillaSource(path) {
+    const e = jarIndex().get(path);
+    if (!e) return null;
+    const { buf, local } = e;
+    const start = local + 30 + buf.readUInt16LE(local + 26) + buf.readUInt16LE(local + 28);
+    const raw = buf.subarray(start, start + e.csize);
+    if (e.method === 0) return raw.toString("utf8");
+    if (e.method === 8) return inflateRawSync(raw).toString("utf8");
+    throw new Error("unsupported compression " + e.method + " for " + path + " in " + JAR);
 }
 
 /** `static final int NAME = 3;` everywhere, keyed "Class.NAME" and, per file, "NAME". */
@@ -141,7 +178,11 @@ const vanillaFlagCache = new Map();
 function vanillaFlags(name, depth = 0) {
     if (vanillaFlagCache.has(name)) return vanillaFlagCache.get(name);
     const path = VANILLA_PATHS[name] || "net/minecraft/world/entity/ai/goal/" + name + ".java";
-    const seg = classSegment(vanillaSource(path), name);
+    const text = vanillaSource(path);
+    if (text === null) {
+        throw new Error("vanilla goal " + name + " is not at " + path + " in the sources jar - add it to VANILLA_PATHS");
+    }
+    const seg = classSegment(text, name);
     let flags = flagsOf(seg);
     if (!flags.length && depth < 3) {
         const parent = superOf(seg);
@@ -151,7 +192,9 @@ function vanillaFlags(name, depth = 0) {
     return flags;
 }
 
-const abstractHorse = vanillaSource("net/minecraft/world/entity/animal/equine/AbstractHorse.java");
+const ABSTRACT_HORSE = "net/minecraft/world/entity/animal/equine/AbstractHorse.java";
+const abstractHorse = vanillaSource(ABSTRACT_HORSE);
+if (abstractHorse === null) throw new Error(ABSTRACT_HORSE + " is not in " + JAR + " - has the class moved?");
 const vanilla = [];
 for (const m of abstractHorse.matchAll(/this\.goalSelector\.addGoal\((\d+),\s*new\s+([\w.]+)\(/g)) {
     const cls = m[2].split(".").pop();
@@ -163,6 +206,12 @@ for (const m of abstractHorse.matchAll(/this\.goalSelector\.addGoal\((\d+),\s*ne
     }
     vanilla.push({ priority: Number(m[1]), name: cls, flags, words: VANILLA_WORDS[cls] || "",
         where: "vanilla AbstractHorse", kind: "vanilla", selector: "goal" });
+}
+
+// A horse with no vanilla goals is a scan that matched nothing, never the truth:
+// writing it would quietly delete vanilla's half of the page (#271).
+if (!vanilla.length) {
+    throw new Error("found no vanilla goals in " + ABSTRACT_HORSE + " - the addGoal pattern no longer matches; page not written");
 }
 
 // ---- this mod ---------------------------------------------------------------
