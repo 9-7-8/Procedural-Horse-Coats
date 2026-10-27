@@ -1,0 +1,67 @@
+2026-10-27 08:38 (start) - Fix #271: the behaviour bake wrote a page with no vanilla goals
+
+ASKED
+-----
+- "/next-release". Next release is v0.5.047 (last tag v0.5.047.1). Step 2 found #277 (the
+  stasis bank's title overlapping its count line, filed 2026-10-27 by the layout crawl)
+  with no milestone; it went on v0.5.047 under "Bugs first". The unit picked was #271,
+  handed to fix-bug.
+
+DONE
+----
+- bb1667c6 Fix #271. wiki/tools/bake-behaviour-hierarchy.mjs read vanilla's goals by
+  shelling out to `unzip -p` against the patched sources jar. `unzip` is on PATH in Git
+  Bash and not in PowerShell (node gets ENOENT), and vanillaSource's catch returned "" for
+  every file. So a PowerShell run scanned an empty AbstractHorse, found 0 vanilla goals
+  and wrote the page anyway, exit 0. The bake now reads the jar itself (the zip central
+  directory, then zlib.inflateRawSync) and throws before writing when a vanilla goal
+  class is missing from the jar, AbstractHorse is missing, or no vanilla goal is found.
+  It refuses a zip64 jar rather than misreading one.
+  Proof: run from PowerShell, it reports "9 vanilla + 24 mod goals, 2 target" and the
+  rewritten wiki/behaviour-hierarchy.html is byte-identical to the checked-in page.
+  Mutation: with the AbstractHorse addGoal pattern broken, it exits 1 with "found no
+  vanilla goals ... page not written" and the page is untouched; pattern restored.
+  No pictures (a build tool; nothing in game changed).
+  #271 closed by the commit, proof comment posted.
+- Docs: wiki/coding-notes.html#behaviour-bake-unzip-0925 (the 2026-09-25 write-up of this
+  exact trap, which said "run that tool from Bash" until fixed) now opens with the fix
+  and its proof. Milestone v0.5.047's description and release-plan issue #196 updated
+  (#277 joined, #271 fixed). Search index and agent text rebaked; check-links OK.
+
+DECIDED
+-------
+- #271 before #277 (my call): #271 silently deletes half a wiki page on any rebake from
+  PowerShell; #277 is cosmetic, which fix-bug ranks last. #257 is skipped, waiting on the
+  server manager (owner, 2026-10-23).
+- Read the jar in Node rather than switching to `tar -xOf` or requiring Bash (my call):
+  no dependency on the shell at all. Recorded in the commit and on coding-notes.
+
+FOUND ON THE WAY
+----------------
+- The cause was already written on coding-notes.html on 2026-09-25 as a trap, but never
+  filed as an issue, so it sat for a month and cost #259's rebake on 2026-10-23. Now
+  fixed. No other tool shells out to `unzip` (grep). neoforge-26.1.2/tools/
+  bake-advancements.mjs already has its own by-hand zip reader (names only); the two were
+  not merged, since that one lists entries and this one inflates them.
+- Milestone v0.5.047's description still listed #267 under "waiting on a check" though it
+  was closed 2026-10-27 on the crawl. Moved to "Fixed and closed" this session.
+
+PROCEDURES
+----------
+- None needed. next-release, fix-bug and end-session were followed as written and fitted.
+
+NOT RUN / NOT CHECKED
+---------------------
+- No Java, resource or Gradle file changed, so the Gradle build was skipped (end-session
+  step 2); check-parity ran (OK, 7163 checks). A full :common:test run would check
+  nothing this change could move.
+- Nothing to see in game. No Verification-tab anchors added.
+
+RELEASE
+-------
+- Not offered: one tooling fix, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+- #277 (the stasis bank's title overlaps "N horses of M" on a narrow window), by
+  /next-release, which hands it to fix-bug; after it, #73 (the bridle) by process-intake.

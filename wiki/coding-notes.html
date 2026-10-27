@@ -1440,7 +1440,17 @@ done</code></pre>
         box back at the wall where its path really ends.</li>
 </ul>
 
-<h3 id="behaviour-bake-unzip-0925">bake-behaviour-hierarchy.mjs guts its page from PowerShell (2026-09-25, found)</h3>
+<h3 id="behaviour-bake-unzip-0925">bake-behaviour-hierarchy.mjs guts its page from PowerShell (2026-09-25, found; fixed 2026-10-27, #271)</h3>
+
+<p>
+    <strong>Fixed (#271, 2026-10-27).</strong> The bake now reads the sources jar itself
+    (the central directory, then <code>zlib.inflateRawSync</code>), so it runs the same from
+    PowerShell and Bash, and it throws rather than writing when a vanilla class is missing
+    from the jar or <code>AbstractHorse</code> yields no goals. Proof: from PowerShell it
+    reports 9 vanilla goals and rewrites the page byte-identical; with its
+    <code>addGoal</code> pattern broken on purpose it exits 1 and leaves the page alone.
+    No other tool shells out to <code>unzip</code>. The record of the original find follows.
+</p>
 
 <p>
     <code>wiki/tools/bake-behaviour-hierarchy.mjs</code> reads vanilla's goals by shelling
