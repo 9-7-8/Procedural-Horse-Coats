@@ -1,0 +1,79 @@
+2026-10-30 07:54 (end) - A sheared were-mooshroom keeps its horse (#278)
+
+The session began on the evening of 2026-10-29 and finished the next morning.
+
+ASKED
+-----
+1. A relayed player report: "axolotlwyvern reported that horses sheared into mooshroom
+   form don't turn back". Filed as issue #278 (DAMAGE, label bug), after checking that
+   no earlier issue covered it.
+2. "Design a test and test it, and while that's going create a hypothetical fix". The
+   test and the fix were written that evening. The run waited because two players were on
+   the live server. A background wait for the server to empty was stopped by the harness
+   for low memory, and the owner chose to wait for her go rather than restart it.
+3. "Test it now". The test failed with the fix unsubscribed and passed with it.
+4. Answered with the question tool: "Finish it as fix-bug". The work was committed, the
+   wiki updated, and #278 closed.
+
+DONE
+----
+- a5677485 "Fix #278: a sheared were-mooshroom lost the horse inside it".
+  What was wrong: MushroomCow.shear converts the mooshroom into a cow and fires
+  LivingConversionEvent.Post. NeoForge's AttachmentInternals.onLivingConvert then copies
+  attachments with isDeath = true, so only copyOnDeath ones cross over. LYCAN_SHIFT is
+  not copyOnDeath on purpose, so the cow came out plain and the horse tag was discarded
+  with the mooshroom. Both call sites were read in the 26.1.2 sources.
+  Live evidence: the live server's console.log on 2026-10-29 has three mooshroom SHIFT
+  lines at 18:43 (9b4a940b, 9c84f266, ccf71b78) and no REVERT for any of them, while
+  every other form reverted at 18:53. The player reported it at 18:55.
+  The fix: LycanthropyHandler.onFormConverted moves the shift (and LAST_GROUND) onto the
+  outcome mob and makes it persistent. rewireOnJoin then registers the new body. An
+  outcome that is not a Mob reverts the horse at once. It logs
+  "lycan | CONVERTED <from> into <to>". Two test doors were added: isShifted and dawnFor.
+  Proof: gametest sheared_were_mooshroom_keeps_the_horse (ModGameTests). With the
+  listener's @SubscribeEvent removed it failed with "the cow out of the sheared mooshroom
+  carries no horse - the horse is lost". With it, all 72 required gametests passed, and
+  the log read "CONVERTED minecraft:mooshroom into minecraft:cow ... the horse goes with
+  it". No pictures (nothing visible changed).
+  #278 is closed, with a proof comment. The three horses lost on 2026-10-29 cannot be
+  recovered.
+- 82d5edf7 Docs: gene-lycan Coding tab #form-converted, plus one Gameplay line.
+
+DECIDED
+-------
+- Carry the horse into the converted body, rather than cancel the conversion or mark the
+  attachment copyOnDeath. Claude made this call; it is written in the onFormConverted
+  comment and on gene-lycan#form-converted. copyOnDeath would change what a death does.
+  The converted body is not run through isWearable, because refusing it would throw the
+  horse out mid-night.
+- Wait for the owner's go rather than restart the server watcher (owner).
+- Finish as fix-bug (owner).
+
+FOUND ON THE WAY
+----------------
+- #279 (bug): the undead_test_command gametest flaked once in two runs. The skeleton
+  horse converted in the same second the 10-second wait gave up.
+- At first the test compared a Cow with a MushroomCow using !=, which does not compile
+  (they are sibling classes). Caught by reading the source before the first compile.
+
+PROCEDURES
+----------
+None needed. I asked all three review questions. fix-bug step 6 already covers a proof
+that cannot run while players are on, and a background wait stopped for low memory.
+Both were followed as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. common/ was not touched, so it cannot move.
+- Not played in game: shearing by a player's right-click (the test calls shear()
+  directly), and every other conversion, such as lightning on a pig form. Both are
+  written on wiki/gene-lycan.html#converted-form-unplayed.
+
+RELEASE
+-------
+Not offered. One fix is below release step 1's bar.
+
+PICK UP FIRST
+-------------
+The next bug by fix-bug's ranking (procedures/fix-bug.txt). #279 is the new flake, and is
+cosmetic.

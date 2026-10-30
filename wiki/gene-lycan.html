@@ -616,8 +616,19 @@
 
 <div class="note verify-summary">
     <span class="label">What needs verifying here</span>
-    <p>Chaos (2026-10-01) has never met a real modded animal &mdash; nothing about it has been played; behind it the ground-only allele set of 2026-09-24 is unplayed too, then a shifted horse across a chunk unload, riders and dimensions, and what each form refuses.</p>
+    <p>A sheared or lightning-struck form keeping its horse (2026-10-30) is proven only by a gametest; Chaos (2026-10-01) has never met a real modded animal &mdash; nothing about it has been played; behind it the ground-only allele set of 2026-09-24 is unplayed too, then a shifted horse across a chunk unload, riders and dimensions, and what each form refuses.</p>
 </div>
+
+<h3 id="converted-form-unplayed">A converted form keeps its horse (2026-10-30, gametest only)</h3>
+<ul>
+    <li><strong>Shear one by hand.</strong> At night, shear a <code>Mshr/Mshr</code> horse&rsquo;s mooshroom
+        with real shears: the log has <code>lycan | CONVERTED minecraft:mooshroom into minecraft:cow</code>,
+        and at dawn the cow becomes the same horse. The gametest calls <code>shear</code> directly,
+        so the player's right-click path has not been played.</li>
+    <li><strong>Other conversions are assumed, not read.</strong> Lightning on a <code>Pig/Pig</code>
+        form makes a zombified piglin. That should log <code>CONVERTED</code> and revert at dawn too.
+        Only the mooshroom&rsquo;s call site was checked to fire <code>LivingConversionEvent.Post</code>.</li>
+</ul>
 
 <h3 id="chaos-unplayed">Chaos, the modded-animal allele (2026-10-01, not played)</h3>
 <ul>
