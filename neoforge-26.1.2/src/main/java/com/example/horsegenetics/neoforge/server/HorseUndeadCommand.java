@@ -191,8 +191,13 @@ public final class HorseUndeadCommand {
             return;
         }
         if (++run.waited > TIMEOUT_TICKS) {
+            // Whether the subject's spot ticks entities at all: a horse in a chunk that does
+            // not is never asked to convert (issue #279, a gametest's unforced neighbour).
+            BlockPos spot = e != null ? e.blockPosition() : run.at;
             finish(run, false, "Test FAILED: the " + s.what() + " did not convert within "
                     + TIMEOUT_TICKS / 20 + " seconds" + (e == null ? " and has vanished" : "")
+                    + (run.level.isPositionEntityTicking(spot) ? "" : "; entities do not tick at "
+                            + spot.toShortString() + ", so it was never asked")
                     + ". The server log has the converter's reason.");
         }
     }

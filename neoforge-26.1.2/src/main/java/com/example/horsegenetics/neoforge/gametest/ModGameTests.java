@@ -1840,25 +1840,44 @@ public final class ModGameTests {
      * is refused before a test has passed, and the test then converts its skeleton and
      * zombie subjects and reports a pass. {@code enable} is not run after it, because it
      * writes the config file.
+     *
+     * <p>The subjects stand two blocks either side of the structure, which is often in the
+     * next chunk over, and the harness forces only the structure's own (issue #279: the
+     * skeleton at x=5597584 stood in chunk 349849, the structure in 349848). A subject in a
+     * chunk whose entities do not tick yet never converts, while the command's 200 ticks
+     * run unpaced. So the 3x3 field is forced and waited for first (issues #70, #150), and
+     * the test runs alone because that wait sleeps.
      */
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_TEST_COMMAND =
             TEST_FUNCTIONS.register("undead_test_command", () -> ModGameTests::undeadTestCommand);
 
     private static void undeadTestCommand(GameTestHelper helper) {
+        keepTicking(helper);
         ServerLevel level = helper.getLevel();
         net.minecraft.commands.CommandSourceStack source = level.getServer().createCommandSourceStack()
                 .withSuppressedOutput().withLevel(level)
                 // At the structure itself: the subjects stand two blocks either side, inside
                 // this test's own ground (see order_stay_walks_back on the harness's sweep).
                 .withPosition(net.minecraft.world.phys.Vec3.atBottomCenterOf(helper.absolutePos(BlockPos.ZERO)));
-        com.example.horsegenetics.neoforge.ServerConfig.UNDEAD_CONVERT.set(false);
-        level.getServer().getCommands().performPrefixedCommand(source, "horseundead enable");
-        if (com.example.horsegenetics.neoforge.ServerConfig.undeadConvert()
-                && !com.example.horsegenetics.neoforge.server.HorseUndeadCommand.testPassed()) {
-            throw new GameTestAssertException(Component.literal("/horseundead enable was accepted before a test"), 0);
-        }
-        level.getServer().getCommands().performPrefixedCommand(source, "horseundead test");
+        // Inside succeedWhen a throw is only "not yet", so a wrong answer is kept and re-thrown.
+        String[] wrong = {null};
+        boolean[] started = {false};
         helper.succeedWhen(() -> {
+            if (wrong[0] != null) {
+                throw new GameTestAssertException(Component.literal(wrong[0]), 0);
+            }
+            if (!started[0]) {
+                fieldTicks(helper);
+                started[0] = true;
+                com.example.horsegenetics.neoforge.ServerConfig.UNDEAD_CONVERT.set(false);
+                level.getServer().getCommands().performPrefixedCommand(source, "horseundead enable");
+                if (com.example.horsegenetics.neoforge.ServerConfig.undeadConvert()
+                        && !com.example.horsegenetics.neoforge.server.HorseUndeadCommand.testPassed()) {
+                    wrong[0] = "/horseundead enable was accepted before a test";
+                    throw new GameTestAssertException(Component.literal(wrong[0]), 0);
+                }
+                level.getServer().getCommands().performPrefixedCommand(source, "horseundead test");
+            }
             if (!com.example.horsegenetics.neoforge.server.HorseUndeadCommand.testPassed()) {
                 throw new GameTestAssertException(Component.literal("/horseundead test has not passed yet"), 0);
             }
@@ -2390,7 +2409,8 @@ public final class ModGameTests {
         register(event, environment, UNDEAD_TRAP_WAITS, 100);
         register(event, environment, UNDEAD_KEEP_VANILLA, 100);
         register(event, environment, UNDEAD_OFF_BY_DEFAULT, 100);
-        register(event, environment, UNDEAD_TEST_COMMAND, 300);
+        // Its own 300 ticks, after the wait for the field's forced chunks (issue #279).
+        registerAlone(event, UNDEAD_TEST_COMMAND, 1300);
         // Its own 300 ticks, after the wait for the field's forced chunks (issues #70, #245).
         registerAlone(event, ORDER_STAY_WALKS_BACK, 1300);
         register(event, environment, ORDER_YIELDS_TO_NEEDS, 100);
