@@ -275,6 +275,8 @@
     (<a href="known-gaps.html#gap-243">gap 243</a>) &mdash; and it stays now that they are gone,
     because a walking animal still finds ledges, boats and a floor somebody mined out overnight.
     An animal that <em>dies</em> in the night still takes its horse with it, wherever it is.
+    One that turns into another animal does not lose it: shear a were-mooshroom and the cow it
+    becomes is a horse at dawn (<a href="#form-converted">#278</a>).
 </p>
 
 <h2 id="carrot">Its gene carrot</h2>
@@ -463,6 +465,27 @@
     20]&rdquo;; after it the horse is dead of <code>generic</code> and the log reads
     <code>FORM DIED ... horse died of the same blow</code>. The yard&rsquo;s LYCAN DOOMED pen never
     saw this, because it killed its wolf with <code>/kill</code>, which is exempt.
+</p>
+
+<p id="form-converted">
+    <strong>A form that turns into another animal takes the horse with it</strong> (issue #278,
+    2026-10-30). On the live server (2026-10-29) three were-mooshrooms were sheared and never came
+    back at dawn: the log has their <code>SHIFT</code> at 18:43 and no <code>REVERT</code>, while
+    every other shifter reverted at 18:53. Shearing a mooshroom converts it into a cow, and
+    NeoForge carries attachments across a conversion only when they are <code>copyOnDeath</code>
+    (<code>AttachmentInternals.onLivingConvert</code>). <code>LycanShift</code> is deliberately
+    not, so the cow came out plain and the horse was discarded with the mooshroom.
+    <code>onFormConverted</code> now moves the shift onto whatever the conversion makes, so a
+    sheared were-mooshroom is a were-cow for the rest of the night, a horse at dawn, and a
+    mooshroom again the next dusk. An outcome that is not a mob brings the horse back at once.
+    Proof: the <code>sheared_were_mooshroom_keeps_the_horse</code> gametest shuts a horse in a
+    mooshroom, shears it the way shears do, and forces dawn on the cow. With the listener
+    unsubscribed it failed with &ldquo;the cow out of the sheared mooshroom carries no horse - the
+    horse is lost&rdquo;; with it the same horse comes back and the log reads
+    <code>CONVERTED minecraft:mooshroom into minecraft:cow ... the horse goes with it</code>.
+    The three horses already lost cannot be recovered: their tags went with the mooshrooms.
+    Other vanilla conversions (lightning on a pig form) are assumed to fire the same event; only
+    the mooshroom&rsquo;s call site was read.
 </p>
 
 <p id="gap-243">
