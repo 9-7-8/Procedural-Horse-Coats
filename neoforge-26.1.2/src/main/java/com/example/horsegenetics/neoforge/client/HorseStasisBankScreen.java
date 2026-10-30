@@ -73,6 +73,8 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
     private static final HorseStasisBankMenu.Tab[] TABS = HorseStasisBankMenu.Tab.values();
 
     private static final int TITLE_Y = 6;
+    /** Clear space kept between the fitted title and the count on its right. */
+    private static final int TITLE_COUNT_GAP = 4;
     private static final int TAB_H = 16;
     private static final int LINE_H = 10;
 
@@ -970,13 +972,17 @@ public final class HorseStasisBankScreen extends AbstractContainerScreen<HorseSt
      */
     @Override
     protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        g.text(this.font, this.title, HorseStasisBankMenu.MARGIN, TITLE_Y, VanillaPanel.TEXT, false);
-        g.text(this.font, this.playerInventoryTitle, HorseStasisBankMenu.MARGIN,
-                HorseStasisBankMenu.INV_LABEL_Y, VanillaPanel.TEXT, false);
-
         Component count = Component.literal(countLine());
         int x = HorseStasisBankMenu.WIDTH - HorseStasisBankMenu.MARGIN - this.font.width(count);
         g.text(this.font, count, x, TITLE_Y, VanillaPanel.TEXT_DIM, false);
+
+        // The title gives way to the count, never the other way round: the count
+        // is what a glance at the bank is for, and drawn raw the two met in the
+        // middle once the count read "2 horses of 3" (#277).
+        drawFitted(g, this.title.getString(), HorseStasisBankMenu.MARGIN, TITLE_Y,
+                x - TITLE_COUNT_GAP - HorseStasisBankMenu.MARGIN, VanillaPanel.TEXT);
+        g.text(this.font, this.playerInventoryTitle, HorseStasisBankMenu.MARGIN,
+                HorseStasisBankMenu.INV_LABEL_Y, VanillaPanel.TEXT, false);
     }
 
     /**
