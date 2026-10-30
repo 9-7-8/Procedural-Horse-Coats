@@ -1,0 +1,69 @@
+2026-10-30 15:24 (time written, near the end) - #279: the undead_test_command gametest's
+subjects could stand in a chunk that never ticked
+
+ASKED
+-----
+- "/next-release" -> next-release found v0.5.047 the next release (last tag v0.5.047.1),
+  every open issue already on a milestone, and #279 the only buildable bug unit: #257 is
+  needs-owner and waiting on the server manager; #10, #31, #36, #259 are fixed and waiting
+  on checks. Handed to fix-bug.
+- Owner's answer (question tool), proof blocked by a player on the live server: "Commit
+  now, prove later".
+
+DONE
+----
+- 6020ba9b "#279: the undead_test_command subjects could stand in a chunk that never
+  ticked".
+  Cause: /horseundead test (server/HorseUndeadCommand) spawns its skeleton and zombie
+  subjects two blocks either side of the command's spot. In the gametest that spot is the
+  1x1 structure, and the harness forces only the structure's own chunk. In the failed run
+  the origin was x=5597582 (chunk 349848) and the skeleton spawned at x=5597584, in chunk
+  349849. UndeadHorseConverter converts on EntityTickEvent, so a horse in a chunk whose
+  entities do not tick is never asked, while the command's 200-tick wait runs unpaced
+  (#150). The passing run's two subjects were both in the origin's chunk.
+  Fix: gametest undead_test_command (gametest/ModGameTests) now calls keepTicking, waits
+  in fieldTicks before running the commands (the #70/#150 pattern), and is registered
+  with registerAlone at 1300 ticks because fieldTicks sleeps. The command's timeout line
+  adds "entities do not tick at <pos>, so it was never asked" when that is why. Players
+  are unaffected: the spot is their own, which always ticks.
+  Proof: compileJava only. The red was not reproduced; the cause is read off the failed
+  run's logged coordinates. No pictures (a test flake; nothing visible).
+  Issue #279: open, commented with the owed tests; v0.5.047's milestone description says
+  "fixed 6020ba9b, compiled only, waiting on a gametest tally".
+
+DECIDED
+-------
+- Commit untested and prove later, because axolotlwyvern was on the live server (owner,
+  question tool). Recorded on #279.
+- Fix in the gametest (force and wait for the field) rather than change the command's
+  wait to wall-clock: the command is right for players, whose spot always ticks; only the
+  test placed subjects outside a ticking chunk (made without the owner; on #279 and in
+  the ModGameTests comment).
+
+FOUND ON THE WAY
+----------------
+- The failed run's gametest log was already overwritten by the passing run, so the
+  coordinates came from #279's own evidence block. None filed.
+
+PROCEDURES
+----------
+None needed: next-release and fix-bug both fitted; fix-bug step 6's "the proof cannot
+run yet" branch covered the live-server block as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- :neoforge-26.1.2:build is owed (it runs this module's tests; a player was on the live
+  server). Only compileJava ran, green.
+- The #279 gametest tally: runGameTest about 6 times, undead_test_command green each time,
+  and its "[gametest] field at ... ticking after" line logged before the subjects spawn.
+- No :common:test (common/ untouched). No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: one test fix; v0.5.047 still has open units.
+
+PICK UP FIRST
+-------------
+When the live server is empty: run the #279 build and gametest tally and close #279
+(procedures/fix-bug.txt with #279 named); otherwise /next-release, whose next unit is #73
+the bridle (procedures/process-intake.txt).
