@@ -33,6 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.living.LivingConversionEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
@@ -276,6 +277,18 @@ public final class LycanthropyHandler {
         }
         wear(horse, level, animal, EntityType.getKey(type).toString(), 0xFFFFFF);
         return animal;
+    }
+
+    /** The gametest's other doors (#278): is a horse shut in this animal, and dawn for it now, whatever the sun says. */
+    public static boolean isShifted(Mob animal) {
+        return shiftOf(animal).active();
+    }
+
+    public static void dawnFor(Mob animal, ServerLevel level) {
+        LycanShift shift = shiftOf(animal);
+        if (shift.active()) {
+            revert(animal, level, shift);
+        }
     }
 
     /** The second half of {@link #shift}: the body is chosen, and the horse goes into it. */
@@ -605,6 +618,71 @@ public final class LycanthropyHandler {
                         : horse.isAlive() ? String.format("SURVIVED at %.1f/%.1f hp", horse.getHealth(),
                                 horse.getMaxHealth())
                         : "died of the fallback kill"));
+    }
+
+    /**
+     * <b>A form that turns into another animal takes the horse with it</b> (#278).
+     *
+     * <p>Shearing a mooshroom converts it into a cow, and NeoForge carries attachments across a
+     * conversion only when they are {@code copyOnDeath} ({@code AttachmentInternals.onLivingConvert}
+     * copies with {@code isDeath = true}). {@link LycanShift} is deliberately not, so the cow came
+     * out a plain cow and the horse was discarded with the mooshroom: three went that way on the
+     * live server on 2026-10-29. Marking the attachment {@code copyOnDeath} is not the fix - it
+     * would change what a death does - so the shift is moved here by hand.
+     *
+     * <p>The horse goes into whatever the conversion makes, the same as {@link #wear}: a sheared
+     * were-mooshroom spends the rest of the night as a were-cow and is a horse at dawn, and a
+     * mooshroom again the next dusk, because its genes did not change. That keeps "everything the
+     * game lets you do to the animal works" true. The new body is not put through
+     * {@link #isWearable}: refusing it now would mean throwing the horse out mid-night where it
+     * stands, and a body the horse is in for a few hours beats losing it. An outcome that is not a
+     * {@link Mob} cannot hold an attachment the tick reads, so the horse comes back at once.
+     *
+     * <p>{@code Post} fires inside the conversion's {@code finalizeConversion}, before the outcome
+     * joins the level ({@code MushroomCow.shear}, 26.1.2), so {@link #rewireOnJoin} registers the
+     * new body; it is also registered here in case another caller fires it after the join.
+     * API note, unverified in game: every other vanilla conversion (lightning on a pig, a drowned
+     * zombie) is assumed to fire the same event - only the mooshroom's call site was read.
+     */
+    @SubscribeEvent
+    static void onFormConverted(LivingConversionEvent.Post event) {
+        if (!(event.getEntity() instanceof Mob animal) || animal instanceof Horse
+                || !(animal.level() instanceof ServerLevel level)) {
+            return;
+        }
+        LycanShift shift = shiftOf(animal);
+        if (!shift.active()) {
+            return;
+        }
+        animal.setData(ModAttachments.LYCAN_SHIFT.get(), LycanShift.NONE);
+        SHIFTED.remove(animal);
+        net.minecraft.world.phys.Vec3 ground = LAST_GROUND.remove(animal);
+        LivingEntity outcome = event.getOutcome();
+        if (outcome instanceof Mob body && !(body instanceof Horse)) {
+            body.setPersistenceRequired();
+            body.setData(ModAttachments.LYCAN_SHIFT.get(), shift);
+            SHIFTED.add(body);
+            addTemper(body);
+            if (ground != null) {
+                LAST_GROUND.put(body, ground);
+            }
+            FieldLog.log("lycan", "CONVERTED " + shift.mob() + " into " + EntityType.getKey(body.getType())
+                    + " at " + FieldLog.where(animal) + " | the horse goes with it");
+            return;
+        }
+        // Nothing to hold it: dawn comes early, where the animal stood.
+        Horse horse = restore(animal, level, shift, true);
+        if (horse == null) {
+            return;
+        }
+        double healthLeft = animal.getHealth() / Math.max(1.0F, animal.getMaxHealth());
+        horse.setHealth((float) Math.max(1.0, healthLeft * horse.getMaxHealth()));
+        level.addFreshEntity(horse);
+        puff(level, horse);
+        FieldLog.log("lycan", "CONVERTED " + shift.mob() + " into "
+                + (outcome == null ? "nothing" : EntityType.getKey(outcome.getType()))
+                + ", which cannot hold a horse - REVERT " + horse.getUUID() + " (" + ActionTrace.describeShort(horse)
+                + ") early at " + FieldLog.where(horse));
     }
 
     // ------------------------------------------------------------------

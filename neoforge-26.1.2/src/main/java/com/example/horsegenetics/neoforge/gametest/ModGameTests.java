@@ -2401,6 +2401,8 @@ public final class ModGameTests {
         register(event, environment, WHISTLE_SEES_THE_OWNER, 300);
         // Founded at 25, then one blow and its answer inside one tick.
         register(event, environment, WERE_ANIMAL_DEATH_KILLS_THE_HORSE, 100);
+        // Founded at 25, then shear, convert and dawn inside one tick (#278).
+        register(event, environment, SHEARED_WERE_MOOSHROOM_KEEPS_THE_HORSE, 100);
         // Synchronous: one jukebox through four states inside one tick.
         register(event, environment, JUKEBOX_PAYS_ONLY_WHILE_PLAYING, 20);
         // Synchronous: one cross-world move, checked in the same tick.
@@ -3555,6 +3557,77 @@ public final class ModGameTests {
         if (cause == null || !cause.is(net.minecraft.world.damagesource.DamageTypes.GENERIC)) {
             return "the horse died, but of " + (cause == null ? "nothing" : cause.getMsgId())
                     + " rather than the blow that killed its form";
+        }
+        return null;
+    }
+
+    /**
+     * <b>A horse survives its form being converted</b> (issue #278). Shearing a mooshroom
+     * converts it to a cow, and NeoForge copies only {@code copyOnDeath} attachments across a
+     * conversion - so the cow came out plain and the horse went with the discarded mooshroom.
+     * Three were lost on the live server on 2026-10-29. The horse is shut in a mooshroom by the
+     * handler's own code, the mooshroom is sheared the way shears shear it, and the cow must
+     * be carrying the horse and give it back, the same UUID, at dawn.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SHEARED_WERE_MOOSHROOM_KEEPS_THE_HORSE =
+            TEST_FUNCTIONS.register("sheared_were_mooshroom_keeps_the_horse",
+                    () -> ModGameTests::shearedWereMooshroomKeepsTheHorse);
+
+    private static void shearedWereMooshroomKeepsTheHorse(GameTestHelper helper) {
+        keepTicking(helper);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, new BlockPos(2, 0, 2));
+        // Sheared once; a retry would shift a horse that is already gone.
+        String[] verdict = {null};
+        boolean[] sheared = {false};
+        helper.succeedWhen(() -> {
+            if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+                throw new GameTestAssertException(Component.literal("the horse is not founded yet"), 0);
+            }
+            if (!sheared[0]) {
+                sheared[0] = true;
+                verdict[0] = shearTheFormOf(horse, helper.getLevel());
+            }
+            if (verdict[0] != null) {
+                throw new GameTestAssertException(Component.literal(verdict[0]), 0);
+            }
+        });
+    }
+
+    /** Null when the sheared form's cow carried the horse and gave it back, else what went wrong. */
+    private static String shearTheFormOf(net.minecraft.world.entity.animal.equine.Horse horse, ServerLevel level) {
+        UUID id = horse.getUUID();
+        net.minecraft.world.entity.Mob form = com.example.horsegenetics.neoforge.server.LycanthropyHandler
+                .shiftInto(horse, level, net.minecraft.world.entity.EntityType.MOOSHROOM);
+        if (!(form instanceof net.minecraft.world.entity.animal.cow.MushroomCow mooshroom) || horse.isAlive()) {
+            return "the horse did not shift into a mooshroom";
+        }
+        if (!mooshroom.readyForShearing()) {
+            return "the mooshroom is not ready for shearing (baby " + mooshroom.isBaby() + "), so this would prove nothing";
+        }
+        mooshroom.shear(level, net.minecraft.sounds.SoundSource.PLAYERS, new ItemStack(Items.SHEARS));
+        if (mooshroom.isAlive()) {
+            return "shearing did not convert the mooshroom";
+        }
+        net.minecraft.world.entity.Mob cow = null;
+        for (net.minecraft.world.entity.animal.cow.Cow c : level.getEntitiesOfClass(
+                net.minecraft.world.entity.animal.cow.Cow.class, mooshroom.getBoundingBox().inflate(2.0))) {
+            if (c.isAlive()) {
+                cow = c;
+            }
+        }
+        if (cow == null) {
+            return "no cow came out of the sheared mooshroom";
+        }
+        if (!com.example.horsegenetics.neoforge.server.LycanthropyHandler.isShifted(cow)) {
+            return "the cow out of the sheared mooshroom carries no horse - the horse is lost";
+        }
+        com.example.horsegenetics.neoforge.server.LycanthropyHandler.dawnFor(cow, level);
+        if (!(level.getEntity(id) instanceof net.minecraft.world.entity.animal.equine.Horse back) || !back.isAlive()) {
+            return "no horse came back out of the cow at dawn: " + level.getEntity(id);
+        }
+        if (cow.isAlive()) {
+            return "the horse came back but the cow is still standing";
         }
         return null;
     }
