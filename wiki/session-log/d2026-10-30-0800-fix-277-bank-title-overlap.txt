@@ -1,0 +1,62 @@
+2026-10-30 08:00 (start, approximate) - Fix #277: the stasis bank's title ran into its count
+
+ASKED
+-----
+- "/next-release" - work on the next release. It found v0.5.047 (the equipment release,
+  after tag v0.5.047.1), put the one issue with no milestone on it (#279, a gametest
+  flake), and picked #277 as the unit: the only bug on the milestone that is not
+  fixed, not waiting on a check and not waiting on the owner. #257 waits on the server
+  manager's answer about terrain.
+
+DONE
+----
+- c1aa2f24 Fix #277. HorseStasisBankScreen.extractLabels drew the title (left) and
+  countLine() (right-aligned) raw on the same row, TITLE_Y. On the default 427x240 dev
+  window a long count ("2 horses of 3") met the title in the middle. The count is now
+  drawn first and the title is fitted into the space to its left, with
+  TITLE_COUNT_GAP = 4 px, through GuiText.drawFitted (squeeze, then ellipsis + tooltip,
+  #268). The count is the thing a glance is for, so the title is what gives way.
+  Proof: `-PmenuCrawl=queries,layout` via runClientTestWorld gave "[crawl] done - 770
+  passed, 0 failed, 1 skipped". The case that FAILed on 2026-10-27, `Queries "crawl 1
+  mares" Bank (saved searches open) | layout`, now reports 0 findings. That 10-27 run on
+  the old code is the red. The fix was not broken again on purpose for a second red.
+  :neoforge-26.1.2:build green; check-parity OK.
+  Pictures: none taken. A mod screen has no screenshot tool until #270. Owed shots:
+  the stasis bank on the 427x240 window, Browse tab, saved searches open, with a count
+  of "2 horses of 3", before and after.
+  Issue #277: closed by the commit, proof comment posted, left on milestone v0.5.047.
+- wiki/horse-stasis.html gameplay: one sentence saying the title shrinks to make room
+  for the count on a narrow window.
+- Milestone v0.5.047 description: #279 added under "Bugs first"; #277 moved to "Fixed
+  and closed".
+
+DECIDED
+-------
+- The title gives way, not the count. Made without the owner, as the issue proposed.
+  Recorded in the code comment and the commit.
+- #279 went on v0.5.047, by next-release step 2 (a bug rides the next release).
+
+FOUND ON THE WAY
+----------------
+None.
+
+PROCEDURES
+----------
+None needed. The three questions were asked. next-release, fix-bug and crawl-the-menus
+were followed as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. common/ was not touched, so nothing there
+  moved.
+- Nobody has looked at the fitted title in game. The crawl reads draw calls, not pixels.
+- No Verification-tab anchors were added.
+
+RELEASE
+-------
+Not offered. v0.5.047 still has open stages (v0.5.047.2 onwards).
+
+PICK UP FIRST
+-------------
+/next-release: the next unit is #279 (the undead_test_command gametest flake; tally it
+first, fix-bug step 5), then #73 the bridle (v0.5.047.2).
