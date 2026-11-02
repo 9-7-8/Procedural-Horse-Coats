@@ -254,7 +254,8 @@ public final class HorseEscapeGoal extends Goal {
     }
 
     /**
-     * <b>Take the saddle off, and account for it.</b> Into the rider's own
+     * <b>Take the reins off, and account for them</b> - the bridle on a horse,
+     * the saddle on a donkey or a mule. Into the rider's own
      * inventory where there is a rider and room, on the ground where there is
      * not, and destroyed where it was never theirs - a phantom saddle lent by
      * {@link BarebackSteeringHandler} is the one stack that must not be handed
@@ -270,13 +271,26 @@ public final class HorseEscapeGoal extends Goal {
      * re-saddling a bolting horse would get a line a tick.
      */
     private Escape.Saddle unsaddle() {
-        ItemStack saddle = horse.getItemBySlot(EquipmentSlot.SADDLE);
-        if (saddle.isEmpty() || !(horse.getFirstPassenger() instanceof Player rider)) {
-            return Escape.Saddle.NONE;      // bare, or nobody to take it from
+        if (!(horse.getFirstPassenger() instanceof Player rider)) {
+            return Escape.Saddle.NONE;      // nobody to take the reins from
         }
-        horse.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
+        ItemStack saddle = horse.getItemBySlot(EquipmentSlot.SADDLE);
         if (saddle.has(ModDataComponents.PHANTOM_SADDLE.get())) {
-            return Escape.Saddle.NONE;      // never the rider's; it simply goes
+            horse.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);   // never the rider's; it simply goes
+            saddle = ItemStack.EMPTY;
+        }
+        // On a horse the reins are the BRIDLE, in the Headstall (#73), and that is
+        // what it sheds; a saddle in the saddle slot stays on (owner, 2026-10-02).
+        // A donkey or a mule still steers by its saddle and still sheds that.
+        if (com.example.horsegenetics.neoforge.entity.HorseTackSlot.wearsBridles(horse)) {
+            saddle = com.example.horsegenetics.neoforge.entity.HorseTackSlot.bridled(horse)
+                    ? com.example.horsegenetics.neoforge.entity.HorseTackSlot.HEADSTALL.takeOff(horse)
+                    : ItemStack.EMPTY;
+        } else if (!saddle.isEmpty()) {
+            horse.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
+        }
+        if (saddle.isEmpty()) {
+            return Escape.Saddle.NONE;
         }
         // The same "into the pack, else the floor" as ModNetworking's tack swap,
         // so a saddle taken off a horse lands in one place whichever way it came

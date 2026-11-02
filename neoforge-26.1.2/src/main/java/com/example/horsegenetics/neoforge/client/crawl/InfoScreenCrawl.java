@@ -119,15 +119,16 @@ final class InfoScreenCrawl {
         pressTab("GEAR");
         sweep(W + " Gear", List.of("dressButton"), STANDING);
 
-        // A tack slot opens its picker; the picker's row puts the saddle on.
-        pressAt(W, "the saddle slot", () -> tackSlot(HorseTackSlot.SADDLE));
-        expect(W, "a tack slot opens its picker", () -> same("pickerSlot", "SADDLE", name(field("pickerSlot"))));
-        pressAt(W, "picker row 0 (the saddle in the inventory)", () -> pickerRowGear(0));
+        // A tack slot opens its picker; the picker's row puts the bridle on - the
+        // vanilla saddle item, worn in the Headstall on a horse since #73.
+        pressAt(W, "the headstall slot", () -> tackSlot(HorseTackSlot.HEADSTALL));
+        expect(W, "a tack slot opens its picker", () -> same("pickerSlot", "HEADSTALL", name(field("pickerSlot"))));
+        pressAt(W, "picker row 0 (the bridle in the inventory)", () -> pickerRowGear(0));
         expect(W, "a picker row closes the picker", () -> field("pickerSlot") == null ? null : "still open");
         eventuallyServer(W, "the picked saddle goes on the horse", 40,
                 s -> saddle(s).isEmpty() ? "she is not saddled" : null);
         pause(10);
-        pressAt(W, "the saddle slot again", () -> tackSlot(HorseTackSlot.SADDLE));
+        pressAt(W, "the headstall slot again", () -> tackSlot(HorseTackSlot.HEADSTALL));
         pressAt(W, "picker row 0 (Take off)", () -> pickerRowGear(0));
         eventuallyServer(W, "Take off takes the saddle off", 40,
                 s -> saddle(s).isEmpty() ? null : "still saddled");
@@ -249,6 +250,6 @@ final class InfoScreenCrawl {
 
     private static ItemStack saddle(net.minecraft.client.server.IntegratedServer s) {
         Horse h = DebugMenuCrawl.horse(MenuCrawlCases.player(s), DebugMenuCrawl.mare);
-        return h == null ? ItemStack.EMPTY : HorseTackSlot.SADDLE.on(h);
+        return h == null ? ItemStack.EMPTY : HorseTackSlot.HEADSTALL.on(h);
     }
 }

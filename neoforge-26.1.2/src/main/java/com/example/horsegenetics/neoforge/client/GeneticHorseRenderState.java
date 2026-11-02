@@ -120,6 +120,13 @@ public class GeneticHorseRenderState extends HorseRenderState {
     public int harnessMetal = 0;
 
     /**
+     * The bridle in the Headstall, as the render-only copy
+     * {@link com.example.horsegenetics.neoforge.client.gear.BridleDraw#of} makes -
+     * empty when the horse wears none (#73).
+     */
+    public net.minecraft.world.item.ItemStack bridle = net.minecraft.world.item.ItemStack.EMPTY;
+
+    /**
      * The chests on the near and off flanks, resolved to their item models -
      * empty when nothing hangs there. See {@link PackLayer}.
      */

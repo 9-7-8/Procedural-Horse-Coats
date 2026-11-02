@@ -248,7 +248,8 @@ final class ContainerCrawl {
         sweep(w, List.of(), List.of());
         shiftIn(w, Items.SADDLE, s -> {
             Horse h = DebugMenuCrawl.horse(MenuCrawlCases.player(s), DebugMenuCrawl.mare);
-            return h != null && !HorseTackSlot.SADDLE.on(h).isEmpty() ? null : "she is not saddled";
+            // The vanilla saddle item is her bridle and goes on her head (#73).
+            return h != null && HorseTackSlot.bridled(h) ? null : "she wears no bridle";
         });
         float[] yaw = {0};
         then(() -> yaw[0] = (Float) get(Objects.requireNonNull(screen()), "dollYaw"));

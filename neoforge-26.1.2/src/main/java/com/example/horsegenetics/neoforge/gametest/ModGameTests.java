@@ -1740,7 +1740,9 @@ public final class ModGameTests {
                 throw new GameTestAssertException(Component.literal(
                         "the converted zombie is called \"" + record.displayName() + "\", not Mortimer"), 0);
             }
-            if (!z.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.SADDLE).is(Items.SADDLE)) {
+            // On a horse the saddle is the bridle and moves to the Headstall (#73).
+            if (!z.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.SADDLE).is(Items.SADDLE)
+                    && !com.example.horsegenetics.neoforge.entity.HorseTackSlot.bridled(z)) {
                 throw new GameTestAssertException(Component.literal("the converted zombie lost its saddle"), 0);
             }
             float fraction = z.getHealth() / z.getMaxHealth();
@@ -2383,6 +2385,8 @@ public final class ModGameTests {
         register(event, environment, WHISTLE_NEEDS_BOND, 100);
         // Four horses spawned and seven interact events posted, all in one tick.
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
+        // Three horses and a donkey; waits a few ticks twice for the steering tick.
+        register(event, environment, THE_BRIDLE_GOES_ON_THE_HEAD, 100);
         register(event, environment, SHOES_FIT_THEIR_HOOVES, 100);
         register(event, environment, SHOES_ADD_THEIR_BONUS, 100);
         register(event, environment, A_SHOD_HORSE_STANDS_ON_POWDER_SNOW, 100);
@@ -2586,6 +2590,9 @@ public final class ModGameTests {
                             + " the genotype - see applyTraitsToEntity(.., true)."), 0);
         }
         ItemStack saddle = raised.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.SADDLE);
+        if (saddle.isEmpty()) {
+            saddle = com.example.horsegenetics.neoforge.entity.HorseTackSlot.HEADSTALL.on(raised);   // #73: the bridle
+        }
         if (!saddle.isEmpty()) {
             throw new GameTestAssertException(Component.literal(
                     name + " came back still wearing its saddle. It also dropped one when it"
@@ -4192,6 +4199,119 @@ public final class ModGameTests {
         assertHeld(helper, player, 1, "a braid was spent on an untamed horse");
 
         helper.succeed();
+    }
+
+    /**
+     * <b>On a horse the vanilla saddle is the bridle: it goes on the head, an old
+     * world's saddle moves there, and the bridle is what steers</b> (#73).
+     *
+     * <ul>
+     *   <li>A right-click puts it in the Headstall, never the saddle slot; a
+     *       second one on a bridled horse is claimed (you get on) and does not
+     *       slip into the empty saddle slot vanilla would otherwise fill.</li>
+     *   <li>The migration: a horse saved with a saddle in its saddle slot - every
+     *       saddled horse in a world from before the split - has it moved to the
+     *       Headstall by the steering tick, not left there.</li>
+     *   <li>A bridled horse at bond 0 is steered by its rider: a lent saddle,
+     *       and the rider is the controlling passenger. Bond 0 is the point - the
+     *       bareback rule alone would give nobody the reins. Take the bridle off
+     *       and the reins go with it.</li>
+     *   <li>A donkey keeps vanilla's saddle: its saddle slot takes it and its
+     *       Headstall does not.</li>
+     * </ul>
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> THE_BRIDLE_GOES_ON_THE_HEAD =
+            TEST_FUNCTIONS.register("the_bridle_goes_on_the_head",
+                    () -> ModGameTests::theBridleGoesOnTheHead);
+
+    private static void theBridleGoesOnTheHead(GameTestHelper helper) {
+        var headstall = com.example.horsegenetics.neoforge.entity.HorseTackSlot.HEADSTALL;
+        var saddleSlot = net.minecraft.world.entity.EquipmentSlot.SADDLE;
+        net.minecraft.world.entity.player.Player player =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+
+        // -- the click ---------------------------------------------------------
+        net.minecraft.world.entity.animal.equine.Horse clicked =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        clicked.setTamed(true);
+        clicked.setOwner(player);
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, new ItemStack(Items.SADDLE, 2));
+        assertClaimed(helper, player, clicked, true, "a bridle offered to a bare head");
+        if (!com.example.horsegenetics.neoforge.entity.HorseTackSlot.bridled(clicked)
+                || !clicked.getItemBySlot(saddleSlot).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "the click did not put the bridle in the Headstall (headstall "
+                            + headstall.on(clicked) + ", saddle slot " + clicked.getItemBySlot(saddleSlot) + ")"), 0);
+        }
+        assertHeld(helper, player, 1, "one bridle should have been spent on the head");
+        assertClaimed(helper, player, clicked, true, "a second bridle on a bridled horse");
+        assertHeld(helper, player, 1, "a second bridle was spent on a horse already wearing one");
+        if (!clicked.getItemBySlot(saddleSlot).isEmpty()) {
+            throw new GameTestAssertException(Component.literal(
+                    "a second bridle went into the saddle slot"), 0);
+        }
+        player.stopRiding();
+
+        // -- the migration: an old world's saddled horse ---------------------------
+        net.minecraft.world.entity.animal.equine.Horse old =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        old.setTamed(true);
+        old.setItemSlot(saddleSlot, new ItemStack(Items.SADDLE));
+
+        // -- steering by the bridle, at bond 0 -----------------------------------
+        net.minecraft.world.entity.animal.equine.Horse ridden =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        ridden.setTamed(true);
+        ridden.setOwner(player);
+        setBond(ridden, 0);
+        headstall.set(ridden, new ItemStack(Items.SADDLE));
+        player.startRiding(ridden, true, false);
+
+        // -- a donkey keeps vanilla's saddle --------------------------------------
+        net.minecraft.world.entity.animal.equine.Donkey donkey =
+                helper.spawn(net.minecraft.world.entity.EntityType.DONKEY, BlockPos.ZERO);
+        donkey.setTamed(true);
+        if (headstall.accepts(donkey, new ItemStack(Items.SADDLE))
+                || !com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLE.accepts(donkey, new ItemStack(Items.SADDLE))) {
+            throw new GameTestAssertException(Component.literal(
+                    "a donkey's saddle went to the head - donkeys keep vanilla's saddle"), 0);
+        }
+        if (com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLE.accepts(old, new ItemStack(Items.SADDLE))) {
+            throw new GameTestAssertException(Component.literal(
+                    "a horse's saddle slot still takes the vanilla saddle, which is its bridle"), 0);
+        }
+        donkey.setItemSlot(saddleSlot, new ItemStack(Items.SADDLE));
+
+        helper.runAfterDelay(5L, () -> {
+            if (!com.example.horsegenetics.neoforge.entity.HorseTackSlot.bridled(old)
+                    || !old.getItemBySlot(saddleSlot).isEmpty()) {
+                throw new GameTestAssertException(Component.literal(
+                        "an old world's saddle was not moved to the Headstall (headstall "
+                                + headstall.on(old) + ", saddle slot " + old.getItemBySlot(saddleSlot) + ")"), 0);
+            }
+            if (!donkey.getItemBySlot(saddleSlot).is(Items.SADDLE)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a donkey's saddle was moved off its back"), 0);
+            }
+            if (player.getVehicle() != ridden) {
+                throw new GameTestAssertException(Component.literal(
+                        "the mock rider fell off - the premise is broken, not the bridle"), 0);
+            }
+            if (!ridden.isSaddled() || ridden.getControllingPassenger() != player) {
+                throw new GameTestAssertException(Component.literal(
+                        "a bridled horse at bond 0 is not steered by its rider (saddled "
+                                + ridden.isSaddled() + ", controlling " + ridden.getControllingPassenger() + ")"), 0);
+            }
+            headstall.set(ridden, ItemStack.EMPTY);
+            helper.runAfterDelay(3L, () -> {
+                if (ridden.isSaddled() || ridden.getControllingPassenger() == player) {
+                    throw new GameTestAssertException(Component.literal(
+                            "the reins stayed with the rider after the bridle came off"), 0);
+                }
+                player.stopRiding();
+                helper.succeed();
+            });
+        });
     }
 
     /**

@@ -18,10 +18,10 @@ import org.jspecify.annotations.Nullable;
  * sat in the hotbar looking plain, and looked for all the world like the dye had
  * not been stored at all.
  *
- * <p><b>An icon can only show one colour</b>, and it shows the <b>seat</b>: it is
- * the largest area on the real saddle and the one a player means when they say
- * what colour a saddle is. The bridle and the fittings are in the tooltip
- * instead, which is the only place all three can be read.
+ * <p><b>An icon can only show one colour.</b> The saddle item's icon is a
+ * bridle since #73 (the item is the bridle on a horse), so it shows the
+ * <b>bridle</b> zone; leather armour's shows the blanket. The other zones are in
+ * the tooltip, which is the only place all three can be read.
  *
  * <p>Undyed falls back to the icon's own undyed constant rather than to white.
  * The icon's base was divided by that number, so returning it reproduces
@@ -46,7 +46,9 @@ public final class TackTintSource implements ItemTintSource {
     public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity owner) {
         SaddleTint tint = stack.get(ModDataComponents.TACK_TINT.get());
         if (tint != null) {
-            return ARGB.opaque(tint.seat());
+            // The vanilla saddle item is the bridle since #73, and its icon is a
+            // bridle, so it shows the bridle zone; leather armour shows its blanket.
+            return ARGB.opaque(stack.is(net.minecraft.world.item.Items.SADDLE) ? tint.bridle() : tint.seat());
         }
         if (stack.is(net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR)) {
             // Replacing vanilla's tint source must not cost vanilla its own

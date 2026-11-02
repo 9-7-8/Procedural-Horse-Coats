@@ -168,10 +168,10 @@ public enum ProgressTask {
     BOND_FOLLOWS(Group.HUSBANDRY, "Bond a horse to following",
             "Bond 81. It follows you at a walk and stops a few paces off. The top of the scale."),
     RIDE_BAREBACK(Group.HUSBANDRY, "Ride a horse bareback",
-            "Get on one of your own horses with no saddle on it. It is how you tamed it in the "
+            "Get on one of your own horses with no bridle or saddle on it. It is how you tamed it in the "
                     + "first place, and it earns bond at exactly the rate a saddled ride does - the "
                     + "horse does not care what you are sitting on."),
-    STEER_BAREBACK(Group.HUSBANDRY, "Steer a horse with no saddle",
+    STEER_BAREBACK(Group.HUSBANDRY, "Steer a horse with no bridle",
             "Ride a horse of yours that has reached bond 81 without tacking it up. Below that it "
                     + "carries you where it likes; at the top of the scale it takes direction bare, "
                     + "and no other horse in the world will do that for you."),
@@ -229,7 +229,7 @@ public enum ProgressTask {
                     + "wheels. Right-click the ground with it. Carts come in every wood you have, "
                     + "including any a mod added."),
     HITCH_CART(Group.FARMING, "Hitch a cart to a horse",
-            "Sit on a saddled horse, get close to a cart you have placed, and press R. Press it again "
+            "Sit on a bridled horse, get close to a cart you have placed, and press R. Press it again "
                     + "to unhitch. How much the cart slows the horse down is the horse's own business - "
                     + "see its pulling ability on its information screen."),
     DRIVE_WAGON(Group.FARMING, "Drive a wagon",

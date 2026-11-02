@@ -169,6 +169,24 @@ public final class DebugPhotoShoot {
     }
 
     /**
+     * Put a bridle in the Headstall (#73), its bridle leather and fittings coloured
+     * {@code bridle} and {@code metal} ({@code -1} leaves the piece undyed).
+     */
+    public static java.util.function.Consumer<Horse> bridled(int bridle, int metal) {
+        return horse -> {
+            net.minecraft.world.item.ItemStack stack =
+                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.SADDLE);
+            if (bridle >= 0) {
+                var undyed = com.example.horsegenetics.neoforge.data.SaddleTint.SADDLE_UNDYED;
+                stack.set(com.example.horsegenetics.neoforge.data.ModDataComponents.TACK_TINT.get(),
+                        new com.example.horsegenetics.neoforge.data.SaddleTint(undyed.seat(), bridle,
+                                metal >= 0 ? metal : undyed.metal()));
+            }
+            com.example.horsegenetics.neoforge.entity.HorseTackSlot.HEADSTALL.set(horse, stack);
+        };
+    }
+
+    /**
      * Stand the horse up on its hind legs and hold it there for the picture. A shot whose
      * name has {@code -walk} in it is held mid-stride instead, by the client half; one
      * with {@code boot} in it wears the debug test boot on its near fore and hind legs, and

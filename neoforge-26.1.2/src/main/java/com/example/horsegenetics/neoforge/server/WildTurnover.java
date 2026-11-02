@@ -128,7 +128,8 @@ public final class WildTurnover {
         if (horse.isLeashed() || horse.getTemper() > 0) {
             return true;
         }
-        if (!horse.getItemBySlot(EquipmentSlot.SADDLE).isEmpty() || !horse.getItemBySlot(EquipmentSlot.BODY).isEmpty()) {
+        if (!horse.getItemBySlot(EquipmentSlot.SADDLE).isEmpty() || !horse.getItemBySlot(EquipmentSlot.BODY).isEmpty()
+                || com.example.horsegenetics.neoforge.entity.HorseTackSlot.bridled(horse)) {   // #73: the bridle is on the head
             return true;
         }
         for (Entity rider : horse.getPassengers()) {

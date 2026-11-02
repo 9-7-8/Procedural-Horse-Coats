@@ -197,7 +197,7 @@ public final class TutorialPage {
         wild.add(new Step("Taming a wild horse",
                 List.of("The old way works. Find a wild horse and get on it with nothing in your hand. "
                                 + "It will throw you off. Get back on. Keep getting back on until hearts "
-                                + "appear. Feeding it first makes it quicker to convince, and a saddle "
+                                + "appear. Feeding it first makes it quicker to convince, and a bridle "
                                 + "lets you steer it once it is yours.",
                         "There is a quieter way that never involves being thrown at all. Crouch, hold "
                                 + "food the horse eats, look at it, and stand still. It will walk over "
@@ -640,7 +640,7 @@ public final class TutorialPage {
                 List.of(ProgressTask.PLACE_CART)));
 
         farming.add(new Step("Pulling ability: why one horse is better in harness",
-                List.of("Sit on a saddled horse, stand near a cart, and press R. That is the whole thing - "
+                List.of("Sit on a bridled horse, stand near a cart, and press R. That is the whole thing - "
                                 + "press R again to unhitch.",
                         "What happens next is the horse's business, not the cart's. Every horse has a "
                                 + "pulling ability scored from 1 to 10 - it is on its information screen, "

@@ -87,6 +87,21 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 2
             )
         );
+        // The bridle, worn in the Headstall (#73): the same saddle-shaped layer
+        // and model, through the bridle-only asset - see BridleDraw.
+        this.addLayer(
+            new SimpleEquipmentLayer<>(
+                this,
+                context.getEquipmentRenderer(),
+                EquipmentClientInfo.LayerType.HORSE_SADDLE,
+                state -> state instanceof GeneticHorseRenderState genetic
+                        ? genetic.bridle
+                        : net.minecraft.world.item.ItemStack.EMPTY,
+                new EquineSaddleModel(context.bakeLayer(ModelLayers.HORSE_SADDLE)),
+                null,
+                2
+            )
+        );
     }
 
     @Override
@@ -173,6 +188,8 @@ public class GeneticHorseRenderer extends AbstractHorseRenderer<Horse, HorseRend
                 geneticState.harnessLeather = 0;
                 geneticState.harnessMetal = 0;
             }
+            geneticState.bridle = com.example.horsegenetics.neoforge.client.gear.BridleDraw.of(
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.HEADSTALL.on(horse));
             // The chests on its flanks, as whatever items they are. NONE: no
             // display transform, so PackLayer places an untouched unit block.
             this.itemModelResolver.updateForLiving(geneticState.packLeft,

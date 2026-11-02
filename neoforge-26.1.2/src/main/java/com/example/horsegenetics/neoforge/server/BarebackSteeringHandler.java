@@ -1,7 +1,9 @@
 package com.example.horsegenetics.neoforge.server;
 
+import com.example.horsegenetics.common.gear.Reins;
 import com.example.horsegenetics.common.progress.ProgressTask;
 import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
+import com.example.horsegenetics.neoforge.entity.HorseTackSlot;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -23,11 +25,21 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
  * rider is a passenger and the horse goes where it likes - which is vanilla's
  * behaviour and stays the default.
  *
+ * <p><b>And a horse in a bridle steers for anyone</b> (#73). On a horse the
+ * vanilla saddle item is the bridle and is worn in the Headstall, a slot vanilla
+ * cannot see, so it reaches vanilla's steering the same way: a lent saddle. Who
+ * gets one is {@link Reins}, in {@code common/}; this class only reads the horse
+ * and does what it says. It is also where a bridle that lands in a horse's saddle
+ * slot is moved to the head ({@link #moveBridle}).
+ *
  * <h2>How, given vanilla will not be asked</h2>
  * Vanilla decides who may steer inside
  * {@code AbstractHorse.getControllingPassenger()}, which hands control to a
  * player passenger <b>only if {@code isSaddled()}</b>. There is no event on
- * that call and this module has no mixins.
+ * that call. (The module does have mixins - {@code CartHorseMixin} overrides
+ * that very method for a hitched horse - but one lent saddle keeps every part
+ * of vanilla's mounted path, client prediction included, without a second
+ * override racing the cart's.)
  *
  * <p>The first version of this drove the horse from outside on the entity tick
  * - read the rider's {@code zza}/{@code xxa}, point the animal, push it. It
@@ -71,9 +83,6 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 @EventBusSubscriber
 public final class BarebackSteeringHandler {
 
-    /** The bond tier at which a horse will take direction bare - the tier where it already follows you. */
-    private static final int TIER = 3;
-
     private BarebackSteeringHandler() {
     }
 
@@ -82,16 +91,25 @@ public final class BarebackSteeringHandler {
         if (!(event.getEntity() instanceof AbstractHorse horse) || horse.level().isClientSide()) {
             return;
         }
+        moveBridle(horse);
         boolean phantom = isPhantom(horse.getItemBySlot(EquipmentSlot.SADDLE));
-        Player rider = eligibleRider(horse);
+        Player rider = horse.isAlive() && horse.isVehicle()
+                && horse.getFirstPassenger() instanceof Player first ? first : null;
+        Reins.Who who = rider == null ? Reins.Who.NOBODY : steers(horse, rider);
+        if (who == Reins.Who.NOBODY) {
+            rider = null;
+        }
 
         if (rider != null && !horse.isSaddled()) {
             ItemStack saddle = new ItemStack(Items.SADDLE);
             saddle.set(ModDataComponents.PHANTOM_SADDLE.get(), true);
             horse.setItemSlot(EquipmentSlot.SADDLE, saddle);
             // The tick this fires on is the moment a horse first takes direction
-            // bare, which is the whole of what the task is asking for.
-            HorseProgress.complete(rider, ProgressTask.STEER_BAREBACK);
+            // bare, which is the whole of what the task is asking for. A bridled
+            // ride is not bare (owner, 2026-10-02).
+            if (who == Reins.Who.BAREBACK) {
+                HorseProgress.complete(rider, ProgressTask.STEER_BAREBACK);
+            }
             return;
         }
         if (phantom && rider == null) {
@@ -103,35 +121,59 @@ public final class BarebackSteeringHandler {
     }
 
     /**
-     * The owner, riding, with the bond for it - or {@code null}.
+     * Who steers, by {@link Reins}: anyone, when the horse wears a bridle; the
+     * owner, bare, at the top bond tier; else nobody.
      *
      * <p>{@code getFirstPassenger} rather than {@code getControllingPassenger},
      * because on the tick the saddle goes on there is by definition no
      * controlling passenger yet.
+     *
+     * <p><b>And not while it is running for its life.</b> HorseEscapeGoal takes
+     * the bridle off precisely to stop the rider steering, and this class
+     * re-lends a saddle every tick - so without the bolting check the
+     * best-bonded horses in the game would be exactly the ones the escape
+     * behaviour never worked for. It is asked last because it is the most
+     * expensive question, and only of a horse that would otherwise steer.
      */
-    private static Player eligibleRider(AbstractHorse horse) {
-        if (!horse.isAlive() || !horse.isVehicle() || !horse.isTamed()) {
-            return null;
-        }
-        if (!(horse.getFirstPassenger() instanceof Player rider)) {
-            return null;
-        }
+    private static Reins.Who steers(AbstractHorse horse, Player rider) {
         LivingEntity owner = horse.getOwner();
-        if (owner == null || !owner.getUUID().equals(rider.getUUID())) {
-            return null;
+        boolean isOwner = owner != null && owner.getUUID().equals(rider.getUUID());
+        int tier = horse.getData(ModAttachments.HORSE_CARE.get()).behaviourTier();
+        Reins.Who who = Reins.steers(true, horse.isTamed(), HorseTackSlot.bridled(horse), isOwner, tier, false);
+        if (who != Reins.Who.NOBODY && HorseEscapeGoal.bolting(horse)) {
+            return Reins.Who.NOBODY;
         }
-        HorseCareAttachment care = horse.getData(ModAttachments.HORSE_CARE.get());
-        if (care.behaviourTier() < TIER) {
-            return null;
+        return who;
+    }
+
+    /**
+     * <b>A bridle never stays in a horse's saddle slot</b> (#73). On a horse the
+     * vanilla saddle is the bridle, and it lives in the Headstall: this is the
+     * one place that puts it there, whatever put it in the saddle slot - a world
+     * saved before the split (the migration hard rule 10 asks for), a dispenser,
+     * vanilla's horse inventory, another mod. A right-click never gets here:
+     * {@code TackEquipHandler} puts it straight on the head.
+     *
+     * <p>No flag: it runs on every tick, and costs one slot read, because the
+     * rule is true forever - a bridle in a horse's saddle slot is always wrong.
+     * With the Headstall already taken the second bridle is dropped at the
+     * horse's feet, never deleted.
+     */
+    private static void moveBridle(AbstractHorse horse) {
+        if (!HorseTackSlot.wearsBridles(horse)) {
+            return;
         }
-        // AND NOT WHILE IT IS RUNNING FOR ITS LIFE. HorseEscapeGoal takes the
-        // saddle off precisely to stop the rider steering, and this class
-        // re-lends one every tick - so without this the best-bonded horses in
-        // the game, the only ones that get a phantom saddle at all, would be
-        // exactly the ones the escape behaviour never worked for. The check is
-        // last because it is the most expensive one here and the cheap
-        // eligibility tests have already ruled out almost every horse.
-        return HorseEscapeGoal.bolting(horse) ? null : rider;
+        ItemStack inSaddle = horse.getItemBySlot(EquipmentSlot.SADDLE);
+        if (!HorseTackSlot.isBridle(inSaddle)) {
+            return;
+        }
+        ItemStack bridle = inSaddle.copy();
+        horse.setItemSlot(EquipmentSlot.SADDLE, ItemStack.EMPTY);
+        if (HorseTackSlot.HEADSTALL.on(horse).isEmpty()) {
+            HorseTackSlot.HEADSTALL.set(horse, bridle);
+        } else if (horse.level() instanceof net.minecraft.server.level.ServerLevel level) {
+            horse.spawnAtLocation(level, bridle);
+        }
     }
 
     /**
@@ -166,7 +208,10 @@ public final class BarebackSteeringHandler {
      * gets the wrong answer for exactly the horses this mod is about.
      */
     static boolean bareback(AbstractHorse horse) {
-        return !horse.isSaddled() || isPhantom(horse.getItemBySlot(EquipmentSlot.SADDLE));
+        // A bridle-only ride is not bareback (owner, 2026-10-02): the phantom
+        // saddle under a bridled rider is lent for the bridle, not the bond.
+        return (!horse.isSaddled() || isPhantom(horse.getItemBySlot(EquipmentSlot.SADDLE)))
+                && !HorseTackSlot.bridled(horse);
     }
 
     private static boolean isPhantom(ItemStack stack) {

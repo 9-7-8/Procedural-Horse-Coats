@@ -32,6 +32,12 @@ import org.jspecify.annotations.Nullable;
  * {@code doPlayerRide}. It even refuses to swap already:
  * {@code equipOnTarget} requires {@code !target.hasItemInSlot(this.slot)}.
  *
+ * <p><b>Except on a horse, since #73.</b> There the vanilla saddle is the
+ * bridle, and the bridle is worn in the Headstall, one of this mod's slots
+ * ({@code gear/headstall}). So for a horse this handler claims it like any other
+ * gear piece, before vanilla's equip ever runs; donkeys and mules still get
+ * vanilla's saddle.
+ *
  * <p><b>The barding: also vanilla.</b> {@code AbstractHorse.mobInteract} ends
  * with {@code if (this.isEquippableInSlot(itemStack, EquipmentSlot.BODY) &&
  * !this.isWearingBodyArmor())}, and equips it. That predicate is
@@ -131,6 +137,20 @@ public final class TackEquipHandler {
         }
 
         HorseTackSlot target = firstEmptySlotFor(horse, player, stack);
+        if (target == null && HorseTackSlot.isBridle(stack)) {
+            // Already bridled. Falling through would let vanilla put this second
+            // bridle in the empty saddle slot (it only refuses a full one), and
+            // BarebackSteeringHandler would then drop it at the horse's feet. So
+            // the click does what a full slot means everywhere else: you get on.
+            // doPlayerRide's server half, which is protected.
+            if (!client && !horse.isVehicle()) {
+                player.setYRot(horse.getYRot());
+                player.setXRot(horse.getXRot());
+                player.startRiding(horse);
+            }
+            consume(event);
+            return;
+        }
         if (target == null) {
             return;     // nothing free that takes it - fall through, and let them mount
         }

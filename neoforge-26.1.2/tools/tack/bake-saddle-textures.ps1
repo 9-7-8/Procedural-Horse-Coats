@@ -168,6 +168,33 @@ foreach ($folder in $FOLDERS) {
   $stale = Join-Path $outDir 'saddle_overlay.png'
   if (Test-Path $stale) { Remove-Item $stale -Force }
 
+  # --- the bridle on its own (#73) ------------------------------------------
+  # On a horse the vanilla saddle is the bridle, worn in the Headstall and drawn
+  # through horsegenetics:bridle (assets/horsegenetics/equipment/bridle.json):
+  # the bridle leather whole, and only the hardware that is NOT on the seat cube
+  # - the bit and its rings, never the stirrups. Same geometry as the split above.
+  if ($folder -eq 'horse_saddle') {
+    $bridleDir = Join-Path $repo 'neoforge-26.1.2\src\main\resources\assets\horsegenetics\textures\entity\equipment\horse_saddle'
+    New-Item -ItemType Directory -Force -Path $bridleDir | Out-Null
+    $bridleMetal = New-Object System.Drawing.Bitmap($w,$h)
+    $headMetal = 0
+    for ($y = 0; $y -lt $h; $y++) {
+      for ($x = 0; $x -lt $w; $x++) {
+        $m = $img.METAL.GetPixel($x, $y)
+        if ($m.A -gt 0 -and $zoneOf["$x,$y"] -ne 'SEAT') {
+          $bridleMetal.SetPixel($x, $y, $m); $headMetal++
+        } else {
+          $bridleMetal.SetPixel($x, $y, $clear)
+        }
+      }
+    }
+    $img.BRIDLE.Save((Join-Path $bridleDir 'bridle.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+    $bridleMetal.Save((Join-Path $bridleDir 'bridle_metal.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+    $bridleMetal.Dispose()
+    if ($headMetal -le 0 -or $headMetal -ge $count.METAL) { $anyFailed = $true }
+    Write-Output ("{0,-24} bridle metal {1} of {2} (the rest is on the seat)" -f 'horsegenetics:bridle', $headMetal, $count.METAL)
+  }
+
   $ok = ($worst -le 1 -and $orphans -eq 0 -and $count.SEAT -gt 0 -and $count.BRIDLE -gt 0 -and $count.METAL -gt 0)
   if (-not $ok) { $anyFailed = $true }
   Write-Output ("{0,-24} seat {1,4}  bridle {2,4}  metal {3,3}  orphan {4,3}  worst undyed error {5}  {6}" -f `
@@ -206,6 +233,54 @@ for ($y = 0; $y -lt $src.Height; $y++) {
       $err = [Math]::Abs($back[$i] - @($c.R,$c.G,$c.B)[$i])
       if ($err -gt $worstItem) { $worstItem = $err }
     }
+  }
+}
+
+# --- the icon is a BRIDLE since #73 -------------------------------------------
+# The vanilla saddle item is the bridle on a horse, so its icon is redrawn as one.
+# A PLACEHOLDER (owner repaints; generated art first is her standing rule): a
+# headstall loop with browband and noseband, bit rings, and the reins. The
+# leather is painted in vanilla's own icon colours - its darkest, middle and
+# lightest - divided like the rest, so undyed it is vanilla's leather; the rings
+# are a neutral grey that tints with the leather (one zone, as before).
+$BRIDLE_ICON = @(
+  '................',
+  '.....DDDDDD.....',
+  '....DLLLLLLD....',
+  '...DL......MD...',
+  '..DDDDDDDDDDDD..',
+  '..DLMMMMMMMMLD..',
+  '...DL......MD...',
+  '...DL......MD...',
+  '...DL......MD...',
+  '..SDDMMMMMMDDS..',
+  '.S.SDL....MDS.S.',
+  '..S..DL..MD..S..',
+  '.....DL..MD.....',
+  '......DLMD......',
+  '.......DD.......',
+  '................'
+)
+$tones = @{}
+for ($y = 0; $y -lt $src.Height; $y++) {
+  for ($x = 0; $x -lt $src.Width; $x++) {
+    $c = $src.GetPixel($x, $y)
+    if ($c.A -ne 255 -or ($c.R -eq $c.G -and $c.G -eq $c.B)) { continue }
+    $key = $c.ToArgb(); if ($tones.ContainsKey($key)) { $tones[$key]++ } else { $tones[$key] = 1 }
+  }
+}
+$byLight = @($tones.Keys | Sort-Object { $cc = [System.Drawing.Color]::FromArgb($_); $cc.R + $cc.G + $cc.B })
+$paint = @{ D = [System.Drawing.Color]::FromArgb($byLight[0])
+            M = [System.Drawing.Color]::FromArgb($byLight[[int][Math]::Floor($byLight.Count / 2)])
+            L = [System.Drawing.Color]::FromArgb($byLight[-1])
+            S = [System.Drawing.Color]::FromArgb(255, 0xC8, 0xC8, 0xC8) }
+for ($y = 0; $y -lt 16; $y++) {
+  for ($x = 0; $x -lt 16; $x++) {
+    $ch = [string]$BRIDLE_ICON[$y][$x]
+    if ($ch -eq '.') { $base.SetPixel($x, $y, $clear); continue }
+    $c = $paint[$ch]
+    $base.SetPixel($x, $y, [System.Drawing.Color]::FromArgb(255,
+        (Split-Channel $c.R $ITEM_UNDYED.R), (Split-Channel $c.G $ITEM_UNDYED.G), (Split-Channel $c.B $ITEM_UNDYED.B)))
   }
 }
 

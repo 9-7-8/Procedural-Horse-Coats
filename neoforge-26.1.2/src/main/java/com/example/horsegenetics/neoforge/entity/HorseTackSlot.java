@@ -8,9 +8,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
+import com.example.horsegenetics.neoforge.data.ModDataComponents;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -72,8 +75,9 @@ public enum HorseTackSlot {
 
     // -- Body ---------------------------------------------------------------
     SADDLE_PAD(null, Zone.BODY, "Pad", "The pad that goes under the saddle.", 0.30f, 0.01f),
+    // A horse's saddle slot takes no bridle (#73); the mod's saddle comes in #75.
     SADDLE(EquipmentSlot.SADDLE, Zone.BODY, "Saddle",
-            "Put a saddle on it and it will take direction.", 0.42f, 0.01f),
+            "The saddle. On a horse it is the bridle that steers.", 0.42f, 0.01f),
     BARDING(EquipmentSlot.BODY, Zone.BODY, "Barding",
             "Leather, iron, gold or diamond barding.", 0.54f, 0.01f),
     BLANKET(null, Zone.BODY, "Blanket",
@@ -294,7 +298,10 @@ public enum HorseTackSlot {
             return false;
         }
         if (slot != null) {
-            return horse.isEquippableInSlot(stack, slot);
+            // On a horse the vanilla saddle is the bridle and goes on the head
+            // (#73); the saddle slot waits for the mod's own saddle (#75).
+            return horse.isEquippableInSlot(stack, slot)
+                    && !(this == SADDLE && wearsBridles(horse) && isBridle(stack));
         }
         if (isStorage() && !harnessed(horse)) {
             return false;   // nothing to hang it from
@@ -315,7 +322,34 @@ public enum HorseTackSlot {
         if (isStorage()) {
             return HorseStorage.slots(stack, horse.level(), horse.blockPosition()) > 0;
         }
-        return stack.is(tag);
+        if (isBridle(stack) && !wearsBridles(horse)) {
+            return false;   // a donkey or a mule keeps it as a vanilla saddle
+        }
+        return stack.is(tag) && !stack.has(ModDataComponents.PHANTOM_SADDLE.get());
+    }
+
+    // -- The bridle (#73) --------------------------------------------------------
+    // The vanilla saddle item IS the bridle: it keeps the id minecraft:saddle, so
+    // every saddle in an old world, a loot table, a trade or another mod reads as
+    // a bridle (owner, 2026-10-02). It goes in HEADSTALL through gear/headstall.
+
+    /** Whether this stack is a bridle a player owns - the vanilla saddle item, never a lent phantom. */
+    public static boolean isBridle(ItemStack stack) {
+        return stack.is(Items.SADDLE) && !stack.has(ModDataComponents.PHANTOM_SADDLE.get());
+    }
+
+    /**
+     * Whether this animal wears the vanilla saddle as a bridle. Horses only:
+     * donkeys, mules, llamas and the undead horses keep vanilla's saddle
+     * (owner, 2026-10-02), and this mod draws only the horse.
+     */
+    public static boolean wearsBridles(AbstractHorse horse) {
+        return horse instanceof Horse;
+    }
+
+    /** Whether this horse wears a bridle in its Headstall. */
+    public static boolean bridled(AbstractHorse horse) {
+        return wearsBridles(horse) && isBridle(HEADSTALL.on(horse));
     }
 
     /**

@@ -220,7 +220,10 @@ public final class HorseUndeadCommand {
             if (!horse.isTamed() || horse.getOwnerReference() == null) {
                 return "it lost its owner";
             }
-            if (!horse.getItemBySlot(EquipmentSlot.SADDLE).is(Items.SADDLE)) {
+            // The undead horse's saddle comes across in the saddle slot, and on a
+            // horse it is the bridle, moved to the Headstall on the next tick (#73).
+            if (!horse.getItemBySlot(EquipmentSlot.SADDLE).is(Items.SADDLE)
+                    && !com.example.horsegenetics.neoforge.entity.HorseTackSlot.bridled(horse)) {
                 return "it lost its saddle";
             }
         }

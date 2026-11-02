@@ -34,6 +34,12 @@ public final class TackClientExtensions implements IClientItemExtensions {
     public int getArmorLayerTintColor(ItemStack stack, EquipmentClientInfo.Layer layer,
                                       int layerIdx, int fallbackColor) {
         SaddleTint tint = stack.get(ModDataComponents.TACK_TINT.get());
+        if (tint != null && com.example.horsegenetics.neoforge.client.gear.BridleDraw.isDrawn(stack)) {
+            // A bridle on a horse's head (#73) is drawn with two layers, bridle
+            // leather then hardware - the seat zone has nothing to colour.
+            int colour = tint.forLayer(layerIdx == 0 ? SaddleTint.LAYER_BRIDLE : SaddleTint.LAYER_METAL);
+            return ARGB.opaque(colour);
+        }
         if (tint == null) {
             // Vanilla dyeing must keep working, and on leather horse armour it
             // would otherwise get WORSE than vanilla. A crafting-grid dye sets
