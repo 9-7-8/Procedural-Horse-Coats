@@ -3888,7 +3888,8 @@ public final class ModGameTests {
      * never sleeps, so ticks run anywhere from 0.4 to 6 a millisecond - 1202 ticks went by
      * in 207 ms once, and the test timed out with the holder already ENTITY_TICKING. So a
      * tick spent waiting is paced to a real one: the budget then buys about a minute.
-     * Only alone tests call this, so the sleep slows no other test.
+     * The sleep is only on a tick still waiting, which is a handful at the start of a test
+     * - though tests that share a batch (the shoes, the heat pair, #280) share it too.
      */
     private static final java.util.Map<BlockPos, long[]> FIELD_WAIT = new java.util.concurrent.ConcurrentHashMap<>();
 
@@ -5545,6 +5546,18 @@ public final class ModGameTests {
         return false;
     }
 
+    /** Each horse's chunk, whether it ticks, and whether the horse was founded: a frozen horse reads tickCount 0 (#280). */
+    private static String heatState(ServerLevel level, net.minecraft.world.entity.animal.equine.Horse[] pair) {
+        StringBuilder b = new StringBuilder(" [");
+        for (net.minecraft.world.entity.animal.equine.Horse h : pair) {
+            b.append(h == pair[0] ? "mare " : "; stallion ").append(h.chunkPosition())
+                    .append(" ticking ").append(level.areEntitiesActuallyLoadedAndTicking(h.chunkPosition()))
+                    .append(" tickCount ").append(h.tickCount)
+                    .append(" record ").append(com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(h));
+        }
+        return b.append("]").toString();
+    }
+
     private static void heatCell(GameTestHelper helper, int up, boolean fenced) {
         keepTicking(helper);
         ServerLevel level = helper.getLevel();
@@ -5574,23 +5587,35 @@ public final class ModGameTests {
                 }
             }
         }
-        net.minecraft.world.entity.animal.equine.Horse mare =
-                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(up).offset(0, 0, 1));
-        net.minecraft.world.entity.animal.equine.Horse stud =
-                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(up).offset(0, 0, 9));
+        // The pair: [0] the mare, [1] the stallion. Spawned only once the field ticks (#280): the cell runs
+        // twelve blocks north of the structure, so the stallion is in a neighbour chunk on some runs, and one
+        // spawned before that chunk ticks stood frozen and unfounded for the whole test ("watched 0").
+        net.minecraft.world.entity.animal.equine.Horse[] pair = new net.minecraft.world.entity.animal.equine.Horse[2];
         boolean[] ready = {false};
         boolean[] ran = {false};
         String[] firstRun = {""};
         int[] watched = {0};
         helper.onEachTick(() -> {
+            if (pair[0] == null) {
+                try {
+                    fieldTicks(helper);
+                } catch (GameTestAssertException waiting) {
+                    return;
+                }
+                pair[0] = helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(up).offset(0, 0, 1));
+                pair[1] = helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(up).offset(0, 0, 9));
+                return;
+            }
+            net.minecraft.world.entity.animal.equine.Horse mare = pair[0];
+            net.minecraft.world.entity.animal.equine.Horse stud = pair[1];
             if (!ready[0]) {
                 if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(mare)
                         || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(stud)) {
                     return;
                 }
-                Object[][] pair = {{mare, com.example.horsegenetics.common.horse.Sex.FEMALE, 1.5},
+                Object[][] sexes = {{mare, com.example.horsegenetics.common.horse.Sex.FEMALE, 1.5},
                         {stud, com.example.horsegenetics.common.horse.Sex.MALE, 9.5}};
-                for (Object[] p : pair) {
+                for (Object[] p : sexes) {
                     net.minecraft.world.entity.animal.equine.Horse h = (net.minecraft.world.entity.animal.equine.Horse) p[0];
                     com.example.horsegenetics.neoforge.server.HorseRecords.apply(h,
                             com.example.horsegenetics.neoforge.server.HorseRecords.newFounder(h,
@@ -5615,14 +5640,30 @@ public final class ModGameTests {
                         + ", path " + (p == null ? "null" : p.canReach() + " end "
                         + (p.getEndNode() == null ? "?" : p.getEndNode().asBlockPos().subtract(o).toShortString()));
                 net.minecraft.world.level.pathfinder.Path sp = stud.getNavigation().createPath(mare, 0);
-                net.minecraft.world.level.pathfinder.Path cur = stud.getNavigation().getPath();
                 firstRun[0] += "; stallion's path to her " + (sp == null ? "null" : sp.canReach() + " end "
                         + (sp.getEndNode() == null ? "?" : sp.getEndNode().asBlockPos().subtract(o).toShortString()))
-                        + ", walking " + (cur == null ? "nothing" : cur.canReach() + " to " + cur.getTarget().subtract(o).toShortString())
-                        + ", onGround " + stud.onGround() + ", tick " + helper.getTick();
+                        + ", tick " + helper.getTick();
+                // Who the goal chose: a horse from another test (#280) is a test fault, not a fence fault.
+                for (net.minecraft.world.entity.animal.equine.Horse who : pair) {
+                    for (net.minecraft.world.entity.ai.goal.WrappedGoal w : who.goalSelector.getAvailableGoals()) {
+                        if (w.isRunning() && w.getGoal() instanceof com.example.horsegenetics.neoforge.server.HerdGoals.HeatAttraction ha) {
+                            var pt = ha.partner();
+                            firstRun[0] += "; " + (who == mare ? "mare" : "stallion") + "'s partner "
+                                    + (pt == null ? "none" : (pt == mare || pt == stud ? "in this cell " : "from ANOTHER test ")
+                                    + pt.blockPosition().subtract(o).toShortString());
+                        }
+                    }
+                }
             }
         });
         Runnable clear = () -> {
+            // The horses go with the floor (#280): left standing on nothing, the open cell's pair fell through
+            // the fenced cell below, within the heat goal's reach, and the fenced pair walked toward them.
+            for (net.minecraft.world.entity.animal.equine.Horse h : pair) {
+                if (h != null) {
+                    h.discard();
+                }
+            }
             for (int x = -4; x <= 4; x++) {
                 for (int z = -1; z <= 11; z++) {
                     for (int y = -1; y <= 2; y++) {
@@ -5633,6 +5674,11 @@ public final class ModGameTests {
         };
         if (fenced) {
             helper.succeedWhen(() -> {
+                net.minecraft.world.entity.animal.equine.Horse mare = pair[0];
+                net.minecraft.world.entity.animal.equine.Horse stud = pair[1];
+                if (mare == null) {
+                    throw new GameTestAssertException(Component.literal("waiting for the field to tick before the pair is spawned"), 0);
+                }
                 if (ran[0]) {
                     net.minecraft.world.level.pathfinder.Path probe = mare.getNavigation().createPath(stud, 0);
                     throw new GameTestAssertException(Component.literal("a mare in heat went for a stallion behind a"
@@ -5644,21 +5690,28 @@ public final class ModGameTests {
                             + ", " + probe.getNodeCount() + " nodes") + "; " + firstRun[0]), 0);
                 }
                 if (!com.example.horsegenetics.neoforge.server.ReproHandler.receptive(mare)) {
-                    throw new GameTestAssertException(Component.literal("the mare is not in heat - the test proves nothing"), 0);
+                    throw new GameTestAssertException(Component.literal("the mare is not in heat - the test proves nothing"
+                            + heatState(level, pair)), 0);
                 }
                 if (watched[0] < HEAT_WATCH) {
                     throw new GameTestAssertException(Component.literal("watched " + watched[0] + " of " + HEAT_WATCH
-                            + " ticks"), 0);
+                            + " ticks" + heatState(level, pair)), 0);
                 }
                 clear.run();
             });
         } else {
             helper.succeedWhen(() -> {
+                net.minecraft.world.entity.animal.equine.Horse mare = pair[0];
+                net.minecraft.world.entity.animal.equine.Horse stud = pair[1];
+                if (mare == null) {
+                    throw new GameTestAssertException(Component.literal("waiting for the field to tick before the pair is spawned"), 0);
+                }
                 if (!ran[0] || mare.distanceTo(stud) > 4.0) {
                     throw new GameTestAssertException(Component.literal("with no fence the pair did not meet (heat goal "
                             + (ran[0] ? "ran" : "never ran") + ", " + String.format("%.1f", mare.distanceTo(stud))
                             + " blocks apart, mare " + (com.example.horsegenetics.neoforge.server.ReproHandler.receptive(mare)
-                            ? "in heat" : "NOT in heat") + ") - the fenced test is green for nothing"), 0);
+                            ? "in heat" : "NOT in heat") + ") - the fenced test is green for nothing"
+                            + heatState(level, pair)), 0);
                 }
                 clear.run();
             });

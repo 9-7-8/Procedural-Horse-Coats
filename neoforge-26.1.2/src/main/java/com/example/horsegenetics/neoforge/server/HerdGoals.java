@@ -717,6 +717,11 @@ public final class HerdGoals {
 
         private int repathCooldown;
 
+        /** The horse this goal is walking to, or null - read by the heat gametests' failure lines (#280). */
+        public Horse partner() {
+            return partner;
+        }
+
         @Override
         public void stop() {
             if (partner != null && !mareSide) {
