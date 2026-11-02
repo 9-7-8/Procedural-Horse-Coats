@@ -3171,6 +3171,8 @@ wiki/horse-dimension.html#the-watch	all	The watch — DebugWorldWatch
 wiki/horse-dimension.html#verified	all	Verified
 wiki/horse-gear.html#attachment	coding	Why an attachment and not a container
 wiki/horse-gear.html#barding-edged	coding	Barding is drawn edged: client/gear/BardingLayer
+wiki/horse-gear.html#bridle	gameplay	The saddle is a bridle now
+wiki/horse-gear.html#bridle-code	coding	The bridle: the vanilla saddle, worn on the head
 wiki/horse-gear.html#ceiling	coding	The two-slot ceiling
 wiki/horse-gear.html#click	coding	The click path
 wiki/horse-gear.html#doll	coding	The paper doll

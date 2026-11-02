@@ -92,13 +92,15 @@
 <table>
     <tr><th>Zone</th><th>Slots</th><th>What goes there</th></tr>
     <tr><td><strong>Head</strong></td><td>Headstall, Mask</td>
-        <td>A bridle or a halter &mdash; one or the other, never both &mdash; and
+        <td>A <a href="#bridle">bridle</a> or a halter &mdash; one or the other, never both &mdash; and
             a fly mask or something with more in mind than flies.</td></tr>
     <tr><td><strong>Mane and tail</strong></td><td>Mane, Tail</td>
         <td>Whatever is worked into the hair.</td></tr>
     <tr><td><strong>Body</strong></td><td>Pad, Saddle, Barding, Blanket</td>
         <td>The pad under the saddle, the saddle, armour, and a rug or sheet for
-            a horse that is not being ridden.</td></tr>
+            a horse that is not being ridden. On a horse the saddle slot takes
+            no bridle; it waits for the mod's own saddle
+            (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).</td></tr>
     <tr><td><strong>Chest</strong></td><td>Chest</td>
         <td>A martingale or a collar, across the chest.</td></tr>
     <tr><td><strong>Legs</strong></td><td>Boot &times; 4</td>
@@ -133,6 +135,40 @@
         leg and hoof slots is the price of being able to.
     </p>
 </div>
+
+<h2 id="bridle">The saddle is a bridle now</h2>
+<p>
+    <strong>On a horse, the item that used to be the saddle is the bridle</strong> (#73,
+    2026-11-01). It is the same item &mdash; every saddle in your chests, in loot and in
+    trades is now called a <em>Bridle</em> and has a bridle's picture &mdash; and on a horse
+    it goes on the <strong>head</strong>, in the Headstall slot, not on the back.
+</p>
+<ul>
+    <li><strong>A bridle is what steers.</strong> Anyone riding a horse in a bridle can
+        steer it, at any bond. With nothing on its head, only its owner steers it, and only
+        at the top bond tier (<a href="horse-care.html#bareback-steering">bareback
+        steering</a>); anyone else is a passenger.</li>
+    <li><strong>Right-click your horse with it</strong> and it goes on the head. If the
+        horse already wears one, the click just puts you on the horse.</li>
+    <li><strong>Old worlds keep working.</strong> A horse that was saddled before this
+        update has its saddle moved to the head the first time it is loaded, and rides as
+        it always did. A bridle that reaches a horse's back any other way &mdash; a
+        dispenser, the horse's own inventory screen &mdash; is moved to the head too; if the
+        head is taken, it is dropped beside the horse.</li>
+    <li><strong>It looks like a bridle.</strong> On the horse you see the headstall, the
+        bit and the reins, and no seat or stirrups. The Tack Dyeing Bench still colours it:
+        its <em>Bridle</em> and <em>Fittings</em> rows show on a horse.</li>
+    <li><strong>A horse that bolts</strong> throws the bridle, into your pack or at your
+        feet, and you lose the reins until it calms down.</li>
+    <li><strong>Donkeys and mules are unchanged.</strong> On them the same item is still a
+        saddle, on the back, with its seat, and it steers as it always did.</li>
+</ul>
+<p>
+    The mod's own saddle, which carries stats, and the rule that a saddle alone makes you a
+    passenger, are the next two pieces
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/74">#74</a>,
+    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).
+</p>
 
 <h2 id="using">Putting something on</h2>
 <ul>
@@ -827,6 +863,76 @@
             the journal empty.</td></tr>
 </table>
 
+<h2 id="bridle-code">The bridle: the vanilla saddle, worn on the head</h2>
+<p>
+    Piece 1 of the bridle and saddle split
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/72">#72</a>; built
+    2026-11-01 as <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/73">#73</a>).
+    <strong>The bridle keeps the id <code>minecraft:saddle</code></strong> (owner, 2026-10-02),
+    so no saved stack is rewritten: the lang key <code>item.minecraft.saddle</code> calls it a
+    Bridle and the icon is redrawn. What changes is where it is worn on a <code>Horse</code>.
+</p>
+<table>
+    <tr><th>What</th><th>Where</th></tr>
+    <tr><td>Which item is a bridle; which animals wear one</td>
+        <td><code>HorseTackSlot.isBridle</code> (the vanilla saddle, never a phantom),
+            <code>wearsBridles</code> (exactly <code>Horse</code>: donkeys, mules, llamas and the
+            vanilla undead keep vanilla's saddle), <code>bridled</code>.</td></tr>
+    <tr><td>The slot</td>
+        <td><code>gear/headstall</code> holds <code>minecraft:saddle</code>; <code>fits</code>
+            refuses it on anything that is not a horse, and <code>SADDLE.accepts</code> refuses it
+            on a horse. So the click, the picker and the Dress window all put it on the head
+            with nothing of their own changed.</td></tr>
+    <tr><td>Who steers</td>
+        <td><code>common/gear/Reins</code>, pinned by <code>ReinsTest</code>: a bridle steers for
+            any player rider; bare, the owner at tier 3; nobody while bolting or untamed.
+            <code>BarebackSteeringHandler</code> reads the horse, asks it, and lends the phantom
+            saddle for either answer but <code>NOBODY</code>. <code>steer_bareback</code> fires
+            only for <code>BAREBACK</code>, and <code>bareback()</code> is false for a bridled
+            horse, so <code>ride_bareback</code> does not count a bridled ride.</td></tr>
+    <tr><td>The migration</td>
+        <td><code>BarebackSteeringHandler.moveBridle</code>, first thing on every server tick
+            of a horse: a bridle in the saddle slot moves to the Headstall, or is dropped beside
+            the horse when the Headstall is taken. No flag, because the rule is true forever;
+            it is also what catches a dispenser, vanilla's horse inventory and another mod.
+            Hard rule 10's old-shape test is the gametest below.</td></tr>
+    <tr><td>The click</td>
+        <td><code>TackEquipHandler</code> claims it through the tag like any piece. A second
+            bridle on a bridled horse is claimed too and mounts the player, because vanilla
+            would otherwise put it in the empty saddle slot.</td></tr>
+    <tr><td>Bolting</td>
+        <td><code>HorseEscapeGoal.unsaddle</code> takes the bridle off a horse (into the rider's
+            pack, else at their feet) and the saddle off a donkey or mule; a phantom is
+            removed and never handed over.</td></tr>
+    <tr><td>Drawing</td>
+        <td><code>client/gear/BridleDraw</code> hands a second <code>SimpleEquipmentLayer</code>
+            (same <code>HORSE_SADDLE</code> layer and <code>EquineSaddleModel</code>) a
+            render-only copy whose <code>equippable</code> points at
+            <code>horsegenetics:bridle</code>: two layers, the bridle leather and the hardware
+            off the seat cube (bit and rings, not the stirrups). Both textures and the icon
+            come from <code>tools/tack/bake-saddle-textures.ps1</code>.
+            <code>TackClientExtensions</code> maps that asset's layer 0 to the bridle zone and
+            layer 1 to the fittings; <code>TackTintSource</code> tints the icon by the bridle
+            zone.</td></tr>
+</table>
+<p>
+    <strong>Left as it was, on purpose.</strong> The bench and the tooltip still show the
+    Seat row for this item, because on a donkey or a mule it is still a saddle with a seat;
+    piece 3 (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>)
+    gives the seat to the new saddle. The leatherworker's trades sell the same item and now
+    read as bridles with no data change. The treatment's line that a horse is
+    &ldquo;vanilla-saddled again&rdquo; if the mod is removed does not hold: the bridle sits in
+    the <code>HORSE_GEAR</code> attachment, which goes with the mod like every gear slot.
+</p>
+<p>
+    <strong>Tests.</strong> <code>ReinsTest</code>, and the gametest
+    <code>the_bridle_goes_on_the_head</code>: a click puts it on the head and a second one does
+    not reach the saddle slot; a horse given a saddle in its saddle slot (the old-world shape)
+    has it moved to the Headstall; a bridled horse at bond 0 is steered by its rider and stops
+    being when the bridle comes off; a donkey keeps its saddle on its back.
+    <code>undead_horses_convert</code> and the resurrection test accept the bridle on the head.
+</p>
+
 <h2 id="barding-edged">Barding is drawn edged: <code>client/gear/BardingLayer</code></h2>
 <p>
     Since 2026-10-10 (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/240">#240</a>,
@@ -1291,7 +1397,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <table>
 <thead><tr><th>Slot</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. <strong>The bridle is the minimum tack required to control a horse</strong> &mdash; which is a real gameplay rule and not a slot, and it has to reckon with <code>BarebackSteeringHandler</code>'s phantom saddle, which writes the saddle slot every tick.</td></tr>
+<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. The bridle shipped first (<a href="#bridle-code">the bridle</a>, #73); what is left is the passenger-only rule (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/74">#74</a>) and the mod's own saddle with its stats (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).</td></tr>
 <tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="horse-care.html#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
 <tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
 <tr><td><strong>Saddle pad</strong></td><td>See the dedicated <a href="saddle-pads.html">saddle-pad roadmap</a>.</td></tr>
@@ -1671,9 +1777,43 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         <strong>horse armour is drawn edged</strong>, photographed standing still and
         never seen moving, fading, glinting or on another mod&rsquo;s armour. The same day
         the braid moved into <strong>the worn-piece table</strong> and a debug boot was
-        photographed on a leg in three held poses; neither has been seen in play.
+        photographed on a leg in three held poses; neither has been seen in play. Since
+        2026-11-01 <strong>the saddle is a bridle on the head</strong>, and nobody has
+        ridden, dyed or loaded an old world with one yet.
     </p>
 </div>
+
+<h3 id="verify-bridle">The bridle on the head (2026-11-01, NOT played)</h3>
+<p>
+    The vanilla saddle is the bridle and is worn in the Headstall; see
+    <a href="#bridle-code">the Coding tab</a>. <code>ReinsTest</code> and the gametest
+    <code>the_bridle_goes_on_the_head</code> cover the rule, the click, the move and a mock
+    rider's reins. A photo shoot the same day (stills, standing, unridden) showed the bridle
+    on the head with a bare back on a chestnut, a red-and-gold dyed bridle in its own colours,
+    and a saddle put in a grey's saddle slot drawn on its head a few ticks later. What only a
+    game can show:
+</p>
+<ol>
+    <li><strong>An old world.</strong> Load a world saved before this jar with a saddled horse
+        in it: the horse wears a bridle on its head, nothing on its back, and rides and jumps
+        as before. Nothing is dropped.</li>
+    <li><strong>Riding.</strong> A bridled horse at low bond steers, jumps and gallops for its
+        owner and for a second player; take the bridle off mid-ride (Dress window) and the
+        rider becomes a passenger within a tick, with no rubber-banding.</li>
+    <li><strong>The look.</strong> On the horse: headstall, bit and reins, no seat and no
+        stirrups, following the head when it grazes and rears; on the HD model too. A bridle
+        dyed at the bench shows its Bridle and Fittings colours on the head, and the icon
+        takes the Bridle colour.</li>
+    <li><strong>Vanilla's horse inventory.</strong> Riding a bridled horse, its saddle slot
+        shows the lent saddle; taking it out must leave nothing in your inventory (the same
+        sweep as <a href="horse-care.html#bareback-steering">bareback</a>). Putting a bridle in
+        that slot on an unridden horse moves it to the head.</li>
+    <li><strong>A donkey and a mule</strong> still take the item on their backs, drawn as a
+        full saddle, and steer.</li>
+    <li><strong>Grown parts.</strong> A dorsal-spine or back-sail horse in a bridle shows its
+        whole back (no saddle covers it now); the gene pages' &ldquo;put a saddle on&rdquo;
+        wording describes the mod saddle of #75, not this.</li>
+</ol>
 
 <h3 id="verify-barding">Edged horse armour (2026-10-10, NOT played)</h3>
 <p>

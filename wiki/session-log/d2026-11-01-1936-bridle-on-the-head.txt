@@ -1,0 +1,93 @@
+2026-11-01 19:36 (end) - #73: the vanilla saddle is the bridle, worn on the head
+
+ASKED
+-----
+- "/next-release" - work on the next release. The next release is milestone v0.5.047
+  (the equipment release, interim v0.5.047.2 next). Every bug on it is fixed and waiting
+  on a check (#10, #31, #36, #257, #259, #279) and the server asks #272-#276 are built,
+  so the first unit was #73, the bridle, first piece of v0.5.047.2. Built and closed.
+
+DONE
+----
+- 59af8976 - #73, Bridle and saddle split piece 1 (process-intake Tier 2: M, owner-free,
+  unblocks #74/#75).
+  What: on a Horse the vanilla saddle item (id kept, minecraft:saddle) is the Bridle,
+  worn in the Headstall. Lang key item.minecraft.saddle = "Bridle"; placeholder bridle
+  icon painted by tools/tack/bake-saddle-textures.ps1 in vanilla's own leather tones.
+  - common/gear/Reins: the one "who steers" rule (bridle -> any player rider; bare ->
+    owner at tier 3; bolting/untamed/no player -> nobody).
+  - HorseTackSlot: isBridle / wearsBridles (exactly Horse) / bridled; gear/headstall
+    takes minecraft:saddle; SADDLE.accepts refuses it on a horse; fits refuses it on the
+    Headstall of anything not a horse.
+  - BarebackSteeringHandler: moveBridle (the migration, every tick, no flag: a bridle in
+    a horse's saddle slot goes to the Headstall, or drops beside the horse if the head is
+    taken), then lends the phantom saddle for BRIDLE or BAREBACK; STEER_BAREBACK only for
+    BAREBACK; bareback() false when bridled.
+  - TackEquipHandler: a second bridle on a bridled horse mounts the player instead of
+    falling through to vanilla, which would fill the empty saddle slot.
+  - HorseEscapeGoal.unsaddle sheds the bridle on a horse, the saddle on a donkey/mule.
+  - HorseUndeadCommand check, WildTurnover.touchedNow, two gametests accept the bridle.
+  - Drawing: client/gear/BridleDraw + a second SimpleEquipmentLayer on GeneticHorseRenderer,
+    asset horsegenetics:bridle (bridle leather + hardware not on the seat cube, baked);
+    TackClientExtensions maps its layers to the Bridle/Fittings zones; TackTintSource
+    tints the icon by the bridle zone.
+  - Wording: checklist ride/steer bareback and hitch cart, tutorial taming and carts;
+    advancements rebaked. Menu crawl now expects the Headstall.
+  Proof: ReinsTest 4/4, and seen red once with the bridle check moved under the bareback
+  check. Gametest the_bridle_goes_on_the_head (click to head; second click claimed and
+  saddle slot stays empty; a saddle in a horse's saddle slot moved to the Headstall in 5
+  ticks; bridled horse at bond 0 steered by its mock rider, reins gone when the bridle
+  comes off; donkey keeps its saddle) - 73/73 twice, and seen red with moveBridle removed.
+  :neoforge-26.1.2:build green; check-parity, check-designer-boots, check-progress-tasks,
+  check-duplicate-item-art, check-links green.
+  Pictures: photo shoot (temporary SHOTS, reverted; the bridled(bridle, metal) helper
+  kept in DebugPhotoShoot): bridle-side (chestnut, bridle on head, bare back),
+  bridle-face-dyed (red leather, gold bit), bridle-migrated-wide (grey given a saddle in
+  its saddle slot, drawn with the bridle on its head, back bare); the icon at 8x.
+  Issue #73 closed by the commit.
+
+DECIDED
+-------
+Calls made without the owner (recorded on horse-gear's Coding tab, #bridle-code):
+- The migration is a per-tick rule, not a flagged one-shot: a bridle in a horse's saddle
+  slot is always wrong, and the same move covers dispensers, vanilla's horse inventory
+  and other mods.
+- A second bridle offered to a bridled horse mounts the player (the "full slot means you
+  get on" rule) rather than being dropped.
+- Bridling a tamed horse is owner-only, like every piece of this mod's gear (vanilla let
+  anyone saddle a tamed horse).
+- The bench and tooltip keep the Seat row on this item: on a donkey or mule it is still
+  a saddle with a seat. #75 gives the seat to the new saddle.
+- The treatment's "vanilla-saddled again if the mod is removed" does not hold: the bridle
+  sits in the HORSE_GEAR attachment like all gear. Written on the Coding tab.
+
+FOUND ON THE WAY
+----------------
+- #280 filed (bug, v0.5.047): heat_stops_at_a_fence (#259's gametest) fails on a clean
+  HEAD in 2 of 3 runs; its log shows a walk target at y -110, so it may be a goal bug and
+  not only a chunk-border test bug.
+- The release-plan issue (#196) still said "Next is #277" after #277 and #279 closed;
+  updated with this unit.
+
+PROCEDURES
+----------
+None needed: next-release, process-intake, photograph-horses, launch-game, rebake and
+end-session all fit as written. (A first scripted replace on InfoScreenCrawl.java failed
+on line endings, as the scripted-replace memory warns; redone with the Edit tool.)
+
+NOT RUN / NOT CHECKED
+---------------------
+- Full :common:test not run (only ReinsTest); it would still check every other common/
+  class, none of which this touched apart from ProgressTask's strings.
+- Nobody has ridden a bridled horse, loaded an old world with a saddled horse, or seen the
+  bridle move (graze, rear, HD model). wiki/horse-gear.html#verify-bridle.
+- The gene pages' "put a saddle on" wording for spines/sail now describes #75's saddle.
+
+RELEASE
+-------
+Not offered: v0.5.047.2 has two pieces left (#74, #75).
+
+PICK UP FIRST
+-------------
+#74 (passenger-only below tier 3, the server switch), by /next-release - or #280 first if
+the owner wants green gametest runs, since bugs ride ahead of features.
