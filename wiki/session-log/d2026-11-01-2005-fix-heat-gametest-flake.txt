@@ -1,0 +1,72 @@
+2026-11-01 20:05 (start) - Fix #280: the heat gametests met strangers and frozen chunks
+
+ASKED
+- "/next-release". Ran procedures/next-release.txt. The next release is v0.5.047 (milestone
+  44). Every open issue already had a milestone. First unit: bug #280, since #257 waits on
+  the server manager and #279 waited on a tally. Handed to fix-bug.
+- (question tool) The harness stopped the tally for low memory, but the loop kept
+  running. Owner: "Stop it now". The remaining runs were skipped and the JVMs stopped via
+  tools/stop-dev-java.ps1; ./gradlew --stop.
+- "try it now, server should be down". It was (the server process gone, 7.1 GB free).
+  The tally was re-run, the cause named, the fix made, proven, and closed.
+
+DONE
+- c1c7e2c0 Fix #280 (ModGameTests.heatCell, HerdGoals.HeatAttraction.partner()).
+  What was wrong: two test faults, no goal fault.
+  1. The open control (heat_crosses_open_ground, +150, six blocks over) cleared its floor
+     on success but left its horses, which fell past the fenced cell (+110). Inside
+     HeatAttraction's 16-block RANGE but past ReachCheck.SURE (12), a short path counts
+     as "approaching", so the fenced mare or stallion picked a falling stranger, and the
+     test read that as leaning on the fence. The cell's horses are now discarded with
+     its floor.
+  2. The cell runs 12 blocks north of its 1x1 structure, so on some runs the stallion
+     spawned into a neighbour chunk that was not ticking: tickCount 0, never founded,
+     and a timeout at "watched 0". The pair is now spawned only after fieldTicks (#245's
+     pattern), from inside onEachTick.
+  The failure lines now print the goal's partner ("in this cell" or "from ANOTHER test")
+  and each horse's chunk, ticking state, tickCount and record (heatState).
+  Proof: before, 7 of 14 runGameTest runs were red on the heat pair. In the 6 runs with
+  diagnostics, 3 named a stranger as partner (traced by UUID to the control's tamed
+  feral_mixed horses, "survived fall") and 1 named a frozen stallion. After, 12 of 12 runs
+  were all green (73 tests each). Mutation (discard disabled): 4 of 4 green, but the
+  control's horses fell past 5 times in those 4 runs and 0 times in the 12 fixed runs.
+  The mutant was green by phase luck (the heat goal scans every 40 ticks), so the
+  precondition count is the proof. :neoforge-26.1.2:build green; check-parity OK.
+  No pictures (a test fault, nothing visible). #280 closed.
+- #279 closed on its owed tally: undead_test_command passed in 30 of 30 runs on code
+  containing 6020ba9b.
+
+DECIDED
+- Stop the memory-reaped tally (owner, question tool).
+- The fix stays test-side. The approaching rule choosing a horse 13-16 blocks away is
+  the designed behaviour, so ReachCheck and HeatAttraction are unchanged apart from the
+  read-only partner() accessor (my call; recorded in the c1c7e2c0 message and on #280).
+- Closing #279 on this session's tally (my call, per next-release step 3: a waiting
+  bug closes when its check passes).
+
+FOUND ON THE WAY
+- #281 filed: the undead_horses_convert gametest went red once in 30 runs ("the skeleton
+  horse has not been converted yet"). It is on v0.5.047 under "Bugs first".
+- A tally loop the harness stopped for low memory carried on into its next gradlew run.
+  Runs 3-6 were skipped by creating a directory at each log path. Now in fix-bug.
+- The first tally attempt failed to compile (ChunkPos has no BlockPos constructor in
+  26.1.2); fixed before any run counted.
+- `git commit -F -` fed by a PowerShell here-string committed nothing, as end-session 3d
+  already warns. Re-done with a message file.
+
+PROCEDURES
+- fix-bug.txt step 5: the mutant of a chance-driven flake may stay green, so count the
+  precondition instead; plus how to skip a reaped tally loop's remaining runs.
+- test-tiers.txt: horses left on a cleared floor fall through every cell below, in reach
+  of their goals (#280).
+
+NOT RUN / NOT CHECKED
+- The full :common:test suite (common/ untouched). No in-game check is needed (test-only).
+- No Verification-tab anchors added.
+
+RELEASE
+- Not offered: two flake fixes are below release step 1's bar.
+
+PICK UP FIRST
+- /next-release: the next v0.5.047 unit is bug #281 (undead_horses_convert flake), by
+  procedures/fix-bug.txt; after it, #74 (bridle piece 2) by process-intake.

@@ -144,7 +144,13 @@ STEPS
      - A fix that adds or changes a config key owes add-a-config-option steps 3, 4, 8
        and 9 too: the default once as a common/ constant, the safe accessor, a server
        boot, and the key on the feature's page.
-   - Break the fix on purpose once, and watch the test go red.
+   - Break the fix on purpose once, and watch the test go red. For a flake that hangs on
+     chance, the mutant may stay green by luck: count the precondition in the mutant runs
+     instead (#280: the strangers fell past 5 times in 4 mutant runs and 0 in 12 fixed
+     runs, while the mutant itself stayed green 4 of 4).
+   - A tally loop the harness stops for low memory can keep running its next gradlew. To
+     skip its remaining runs without a kill, create a directory at each remaining run's
+     log path: the redirect fails and bash skips the command (#280).
    - Run tests by name only. If a gametest goes red, run HEAD without your diff
      (`git stash`) before blaming the diff: gametests are sensitive to tick phase.
    - Run every rebake row the change touched.

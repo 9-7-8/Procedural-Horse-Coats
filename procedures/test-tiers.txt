@@ -92,6 +92,8 @@ STEPS
        The reverse holds too: a platform left standing becomes "the surface" for every
        later test whose ground search runs under it (a WildTopUp pack placed 1 of 4 on
        one), so a test that builds one clears it, and its horses, before it succeeds.
+       Horses left standing on a cleared floor fall through every cell below, in reach
+       of their goals (#280's heat control's pair, picked by the fenced mare while they fell).
        Two tests' horses within a goal's search range of each other interact, in the
        air too: inflate() searches up and down. Place cells further apart than the
        goal's range plus its give-up margin. #259's fenced mare went for the open
