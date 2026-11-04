@@ -411,13 +411,15 @@ public final class HorseBreedingHandler {
             childRecord = childRecord.withBredBy(bredBy);
         }
 
-        // Foals born to a tamed dam are tamed to the dam's owner.
+        // Foals born to a tamed dam are tamed to the dam's owner. The REFERENCE is
+        // copied, not getOwner(): that resolves the owner in this level, so it is
+        // null while they are offline or elsewhere, and the foal was born tame
+        // with no owner - unrecoverable, and every foal of hers the same (the
+        // live server had 455 of them, 23 generations deep).
         if (damHorse.isTamed()) {
             child.setTamed(true);
+            child.owner = damHorse.getOwnerReference();
             LivingEntity owner = damHorse.getOwner();
-            if (owner != null) {
-                child.setOwner(owner);
-            }
             if (owner instanceof Player ownerPlayer) {
                 childRecord = childRecord.withTamedBy(ownerPlayer.getGameProfile().name());
             }

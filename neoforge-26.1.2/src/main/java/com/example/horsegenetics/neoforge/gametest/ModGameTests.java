@@ -2372,6 +2372,8 @@ public final class ModGameTests {
         register(event, environment, JOCKEY_PASSES_ADD_UP, 100);
         // One horse spawned and three events posted, all inside a single tick.
         register(event, environment, MOUNTED_MINING_IS_EXEMPT, 100);
+        // Two horses founded, then bred in one tick against an owner nobody is logged in as.
+        register(event, environment, FOAL_OF_AN_ABSENT_OWNER_IS_OWNED, 200);
         // Alone: two horses ten blocks apart on a field of their own. The wait for the
         // field's forced chunks (#70), then 400 ticks of riding.
         registerAlone(event, UNTAMED_RIDDEN_HORSE_BUCKS, 1600);
@@ -2835,6 +2837,75 @@ public final class ModGameTests {
      * page's Verification tab to be timed in-game. What this test owns is that
      * given each posture, the handler does the right thing.
      */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> FOAL_OF_AN_ABSENT_OWNER_IS_OWNED =
+            TEST_FUNCTIONS.register("foal_of_an_absent_owner_is_owned", () -> ModGameTests::foalOfAnAbsentOwnerIsOwned);
+
+    /**
+     * <b>A foal of a tamed mare takes her owner even when the owner is not here.</b>
+     * The live server's foals were born tame with no owner whenever the dam's owner was
+     * offline (getOwner() resolves in the level, so it was null): 455 stuck horses, 23
+     * generations deep. The owner here is a UUID nobody is logged in as - the offline case.
+     */
+    private static void foalOfAnAbsentOwnerIsOwned(GameTestHelper helper) {
+        UUID absent = UUID.randomUUID();
+        net.minecraft.world.entity.animal.equine.Horse[] pair = new net.minecraft.world.entity.animal.equine.Horse[2];
+        boolean[] bred = {false};
+        helper.onEachTick(() -> {
+            if (pair[0] == null) {
+                pair[0] = helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(2));
+                pair[1] = helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO.above(2)); // the same block: a neighbour chunk may never tick
+                return;
+            }
+            if (bred[0]) {
+                return;
+            }
+            net.minecraft.world.entity.animal.equine.Horse mare = pair[0];
+            net.minecraft.world.entity.animal.equine.Horse stud = pair[1];
+            if (!com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(mare)
+                    || !com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(stud)) {
+                return;
+            }
+            Object[][] sexes = {{mare, com.example.horsegenetics.common.horse.Sex.FEMALE},
+                    {stud, com.example.horsegenetics.common.horse.Sex.MALE}};
+            for (Object[] p : sexes) {
+                net.minecraft.world.entity.animal.equine.Horse h = (net.minecraft.world.entity.animal.equine.Horse) p[0];
+                com.example.horsegenetics.neoforge.server.HorseRecords.apply(h,
+                        com.example.horsegenetics.neoforge.server.HorseRecords.newFounder(h,
+                                new com.example.horsegenetics.neoforge.NeoRng(h.getRandom()),
+                                (com.example.horsegenetics.common.horse.Sex) p[1],
+                                com.example.horsegenetics.common.genetics.Genotype.wildType()));
+                h.setTamed(true);
+                h.owner = net.minecraft.world.entity.EntityReference.of(absent);
+            }
+            bred[0] = true;
+            java.util.Set<UUID> before = new java.util.HashSet<>();
+            for (net.minecraft.world.entity.animal.equine.Horse h : helper.getLevel().getEntitiesOfClass(
+                    net.minecraft.world.entity.animal.equine.Horse.class, mare.getBoundingBox().inflate(8))) {
+                before.add(h.getUUID());
+            }
+            mare.spawnChildFromBreeding(helper.getLevel(), stud);
+            net.minecraft.world.entity.animal.equine.Horse foal = null;
+            for (net.minecraft.world.entity.animal.equine.Horse h : helper.getLevel().getEntitiesOfClass(
+                    net.minecraft.world.entity.animal.equine.Horse.class, mare.getBoundingBox().inflate(8))) {
+                if (!before.contains(h.getUUID()) && h.isBaby()) {
+                    foal = h;
+                }
+            }
+            if (foal == null) {
+                // An embryonic lethal cancels the birth; wild type x wild type has none.
+                helper.fail(Component.literal("no foal was born"));
+                return;
+            }
+            var ref = foal.getOwnerReference();
+            if (!foal.isTamed() || ref == null || !absent.equals(ref.getUUID())) {
+                helper.fail(Component.literal("foal tamed " + foal.isTamed() + ", owner "
+                        + (ref == null ? "NONE" : ref.getUUID()) + ", dam's owner " + absent));
+                return;
+            }
+            helper.succeed();
+        });
+    }
+
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> MOUNTED_MINING_IS_EXEMPT =
             TEST_FUNCTIONS.register("mounted_mining_is_exempt", () -> ModGameTests::mountedMiningIsExempt);
 

@@ -831,7 +831,14 @@ int     offspringCount(UUID a, UUID b);</code></pre>
     <li><code>bredBy</code> = the causing player&rsquo;s username, if any.</li>
     <li><strong>Auto-tame</strong>: if the dam is tamed, the foal is tamed to the
         dam&rsquo;s owner, and <code>tamedBy</code> is that owner&rsquo;s
-        username.</li>
+        username. The dam&rsquo;s owner <em>reference</em> is copied, not
+        <code>getOwner()</code>: that resolves the owner in the level, so with them offline
+        or in another dimension it was null and the foal was born tame with <em>no</em>
+        owner, stuck for good, and so was every foal she had after (#282, 2026-11-03: 455
+        such horses on the live server, 23 generations deep; gametest
+        <code>foal_of_an_absent_owner_is_owned</code>). <code>tamedBy</code> needs the
+        live player for the name, so an absent owner&rsquo;s foal gets it later from
+        <code>HorseOwnerTrackingHandler</code>.</li>
     <li><code>apply(child, record)</code> then
         <code>applyTraitsToEntity(child, childTraits, fullHeal=true)</code> so the
         foal spawns at the max health <em>its own</em> genotype gives it &mdash; which
