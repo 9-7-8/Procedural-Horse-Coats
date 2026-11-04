@@ -51,6 +51,12 @@ STEPS
    a. List the dated folders.
    b. Skip every folder name already in the record.
    c. Take the rest in chronological order: by date, then plain, then -run2, -run3.
+   d. A backlog of more than about a dozen folders is too much for one context. Split it
+      by date range across read-only subagents (plus one for step 3's raw logs), have each
+      return findings with evidence and file:line, and do every filing and comment from
+      the main session, so duplicates across ranges are merged first (2026-11-03: 52
+      folders, five agents). Write long issue bodies to scratchpad files with the Write
+      tool and pass --body-file: a long bash heredoc broke mid-batch.
    If nothing is new, say so and stop.
 
 2. For each new folder, in order:
@@ -98,6 +104,10 @@ STEPS
    g. Add the folder name to the record ONLY after the folder is finished, so an
       interrupted run retries it rather than silently skipping it.
 
+3. CRASHES ARE NOT IN THE EXPORTS. List the server's crash-reports folder (beside logs/)
+   for reports dated inside the windows, and grep each for horsegenetics frames. A
+   crash usually falls in a gap between export windows, so the exporter never sees it.
+   2026-10-23's server crash (#283, a lycan fallback kill) was found only there.
 3. If something is genuinely missing from the exports, the raw server logs folder
    (named in the memory) has more. debug-*.log.gz is not scanned by the exporter.
    Chunk-load traces are one thing only the raw logs hold. The server runs Cupboard,
@@ -153,7 +163,7 @@ STEPS
                 THIS FORM" marks a body like the strider; "horse SURVIVED" on a FORM DIED
                 line is #244 happening.
      dealer     "SHORT STRING": a cowboy or dealer who founded with fewer horses than he
-                wanted (seen with none, 2026-10-07).
+                wanted (seen with none, 2026-10-07). #286: tally them on it.
      corridor   #31. ENTER and TEARDOWN with the milliseconds each part of an F6 visit took
                 in its one tick. Read them beside the Cupboard traces and any Can't keep up.
      whistle    #36. One ORDER line per command-whistle order. "AIMED at one horse" is the

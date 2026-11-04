@@ -1,0 +1,80 @@
+2026-11-03 22:50 (start, approximate) - Ownerless foals (#282), and the server log backlog reviewed
+
+ASKED
+-----
+1. "Pull in the horse logs and fix the issue they found, it should have a suggested one
+   line fix" - the server's hand-written 08-FINDING-foals-born-tame-with-no-owner.txt in
+   PCH logs/2026-11-03-run2. Filed as #282, fixed, closed.
+2. (question tool, what next) "Review the backlog of logs" - all 52 unreviewed export
+   folders, 2026-10-09-run3 .. 2026-11-03-run2, plus the raw logs. Ten issues filed,
+   four commented on.
+3. "Pin all those issues to the patch after the nearest one" - #283-#292 put on
+   milestone v0.5.048 (nearest unreleased is v0.5.047). #282 left alone: closed, its
+   fix rides v0.5.047.
+4. "End session" - this.
+
+DONE
+----
+- fce9080f  Fix #282: a foal of a tamed mare was born tame with NO owner whenever the
+  dam's owner was offline or in another dimension. HorseBreedingHandler.populateFoal
+  copied the owner via getOwner(), which resolves in the level (null when absent), but
+  setTamed(true) ran regardless. Such a horse can never be claimed, and its foals inherit
+  the state: 455 on the live server, 23 generations deep (the operator freed them offline
+  as HorseRelease.makeWild does, so no migration is owed). The finding's suggested
+  one-liner, setOwnerReference, does not exist on 26.1.2's AbstractHorse (only
+  setOwner(LivingEntity); javap of the merged jar), so accesstransformer.cfg now opens the
+  private AbstractHorse.owner field and the foal takes damHorse.getOwnerReference().
+  Proof: new gametest foal_of_an_absent_owner_is_owned (dam owned by a UUID nobody is
+  logged in as); runGameTest all 74 green; with the old line restored it fails "foal
+  tamed true, owner NONE". :neoforge-26.1.2:build green, check-parity OK. wiki/breeding.html
+  Coding tab (Auto-tame bullet) updated. No pictures (nothing visible). #282 closed.
+- Server log review: five read-only subagents by date range plus one on raw logs;
+  filing done here. Builds 0.5.046 to 10-12, then 0.5.047.1. No watermark resets.
+  Archive zip PCH-logs-2026-10-09-run3_to_2026-11-03-run2.zip; the record in local
+  memory pch-server-logs updated.
+
+DECIDED
+-------
+- Copy the owner reference through an access transformer rather than wait for an
+  owner to load (made without the owner; the finding asked for the reference copy).
+- Whether a foal should be tamed at all when the dam's ownership cannot be established
+  (raised in the finding): not changed; with the reference copied it always can be.
+- Milestone v0.5.048 for #283-#292 (owner).
+
+FOUND ON THE WAY
+----------------
+Filed: #283 server CRASH 2026-10-23 (lycan fallback kill deals Float.MAX_VALUE; another
+mod's damage hook made it negative) - highest priority; #284 lycan shift/revert leaves
+horses in blocks; #285 stables place horses inside their walls; #286 arcane dealers
+found short (placement only at his own Y); #287 converted undead horses tame with no
+owner; #288 tamed horse stays on the seabed (needs-owner, cause unknown); #289 research
+shelf with no limit (enhancement, idea); #290 tuning: breeding outruns entity cramming
+(needs-owner); #291 idea: find the nearest wild herd of a breed; #292 lethal foal
+survives the night in lycan form. Commented #35 (six rescues, none with a clearance
+line; three are #284), #210 (table counts), #272, #276.
+Left alone: one "Rider of the Ben" mob killed 9 horses in 5 minutes (could not tell what
+it was); a few "killed by magic" deaths of unknown cause; deliberate culling by one player.
+Mistake: a long bash heredoc for the batch of issue bodies failed to parse; nothing was
+filed by it; redone with Write + --body-file.
+
+PROCEDURES
+----------
+review-server-logs.txt: crash-reports folder is now a required source (the exporter
+misses crashes; #283 was found only there); a backlog over ~a dozen folders splits
+across read-only subagents with filing kept in the main session; long issue bodies via
+Write and --body-file; the dealer topic now names #286. Others reviewed: none needed.
+
+NOT RUN / NOT CHECKED
+---------------------
+The full :common:test suite (no common/ change; it would recheck nothing this touched).
+#282's fix not seen in game; the gametest covers the offline case, the other-dimension
+case is the same code path. No Verification-tab anchors added. No raw log covers
+10-11..10-16 15:58, 10-17..10-23 18:27 or 10-23 23:40..10-30 18:14.
+
+RELEASE
+-------
+Not offered: one fix this session.
+
+PICK UP FIRST
+-------------
+#283, the lycan fallback-kill server crash - fix-bug.
