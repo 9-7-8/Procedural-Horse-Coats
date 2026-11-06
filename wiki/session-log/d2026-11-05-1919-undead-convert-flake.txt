@@ -1,0 +1,65 @@
+2026-11-05 19:19 (end time) - #281: the undead_horses_convert flake, fixed and waiting on a tally
+
+ASKED
+-----
+- "/next-release": work the next release milestone. The next release is v0.5.047 (the
+  equipment release; interim v0.5.047.1 is tagged). Every open issue already had a
+  milestone. The first unit was the bug #281, the only open bug with no fix commit:
+  #257 waits on the server manager's answer about terrain, and #10, #31, #36, #259
+  wait on checks. Handed to fix-bug.
+- Question tool: two players were on the live server, so no gametest could run. Owner
+  answered "Commit now, prove later".
+
+DONE
+----
+- dd93a079 "#281: the undead_horses_convert skeleton could stand in a chunk that never
+  ticked". ModGameTests.undeadHorsesConvert spawned its skeleton at BlockPos(2,0,0),
+  off the 1x1 structure. The failed run's origin x=-4660881 is local x 15 of its chunk,
+  so the skeleton stood in the neighbour chunk, which the harness does not force; its
+  entities never ticked, so UndeadHorseConverter never saw it within the unpaced 100
+  ticks. Same cause as #279 (6020ba9b). The test now calls keepTicking, waits on
+  fieldTicks inside succeedWhen, then spawns both horses (new helper spawnUndeadPair),
+  and is registered with registerAlone at 1100 ticks.
+  Proof: :neoforge-26.1.2:compileJava green; check-parity OK. No gametest ran. The red
+  was not reproduced; the cause is read off the failure line's coordinates.
+  No pictures (a test change).
+  #281 is OPEN, commented with the owed tally and mutant. Milestone v0.5.047's
+  description says so.
+
+DECIDED
+-------
+- Commit now and prove later, because players were on the live server (owner).
+- Use #279's fix shape rather than moving the skeleton onto the structure (made
+  without the owner): it is the established pattern and keeps the two subjects apart.
+
+FOUND ON THE WAY
+----------------
+- Other gametests may spawn off the 1x1 structure with no keepTicking; not swept this
+  session. fix-bug now says to do that sweep for this class of flake.
+- My own mistake: a Bash command began with a stray `cat > file` that waited on stdin
+  and timed out; nothing was written. Re-run from a scratchpad script.
+
+PROCEDURES
+----------
+- procedures/fix-bug.txt step 5: after a flake caused by a spawn in an unforced
+  neighbour chunk, grep the sibling tests for the same shape and list them on the issue.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The :neoforge-26.1.2:build (it runs this module's tests) and every gametest: players
+  were on the live server. Owed: runGameTest in a loop, more than 30 runs, with
+  undead_horses_convert green in all; and the mutant (no fieldTicks) counting spawns in
+  a non-ticking chunk.
+- A full :common:test run would still check the whole common/ suite; nothing in
+  common/ changed.
+- No Verification-tab anchors added.
+
+RELEASE
+-------
+Not offered: v0.5.047 still has open units (#74, #75 and the later stages).
+
+PICK UP FIRST
+-------------
+When the live server is empty: run the #281 tally and close it (fix-bug). Otherwise
+/next-release, whose next unit is #74 (bridle and saddle split, piece 2) by
+process-intake.
