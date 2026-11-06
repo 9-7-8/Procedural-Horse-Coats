@@ -469,6 +469,7 @@ public final class ServerConfig {
      * {@link #ownerOnlyRiding()}; enforced by {@code server/HorseRiding}.
      */
     public static final ModConfigSpec.BooleanValue OWNER_ONLY_RIDING;
+    public static final ModConfigSpec.BooleanValue SADDLE_NEEDS_BRIDLE;
 
     /**
      * <b>{@code behaviour.riding_allows_teams}</b> - does being on somebody's
@@ -1221,6 +1222,15 @@ public final class ServerConfig {
                         "Turn it off for vanilla's rule, where a tamed horse is a saddle",
                         "anybody can sit in.")
                 .define("behaviour.owner_only_riding", true);
+        SADDLE_NEEDS_BRIDLE = builder
+                .comment("Whether a saddle needs a bridle to steer. (default: true)",
+                        "On, a horse wearing a saddle and no bridle carries its rider as a",
+                        "passenger and walks where it likes, unless the rider is its owner at",
+                        "bond tier 3. Off, a saddle steers for anyone, as vanilla's did. A horse",
+                        "with nothing on is a passenger seat either way. Horses only: donkeys,",
+                        "mules and llamas keep vanilla's saddle. Takes effect at once. Server-side.")
+                .define("behaviour.saddle_needs_bridle",
+                        com.example.horsegenetics.common.gear.Reins.DEFAULT_SADDLE_NEEDS_BRIDLE);
         RIDING_ALLOWS_TEAMS = builder
                 .comment("Whether the owner's team may ride their horses too. (default: true)",
                         "Three things count, and this one flag switches all three:",
@@ -1812,6 +1822,14 @@ public final class ServerConfig {
     }
 
     /** {@code behaviour.owner_only_riding}, safely. */
+    public static boolean saddleNeedsBridle() {
+        try {
+            return SADDLE_NEEDS_BRIDLE.get();
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.gear.Reins.DEFAULT_SADDLE_NEEDS_BRIDLE;
+        }
+    }
+
     public static boolean ownerOnlyRiding() {
         try {
             return OWNER_ONLY_RIDING.get();

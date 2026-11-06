@@ -13,6 +13,7 @@
     "HorseTwoRidersMixin",
     "HorseInstantJumpMixin",
     "HorseAlwaysParentMixin",
+    "HorseReinsMixin",
     "HorseUndeadVoiceMixin",
     "LeashPlacerMixin",
     "LeashDropMixin",

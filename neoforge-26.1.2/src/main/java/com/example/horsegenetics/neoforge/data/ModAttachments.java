@@ -92,6 +92,19 @@ public final class ModAttachments {
                     .copyOnDeath()
                     .build());
 
+    // Whether this horse is keeping the reins from the player on its back (#74):
+    // it wears a real saddle, and Reins says nobody steers - no bridle, the bond
+    // too low, the saddle rule on, or it is bolting. SYNCED, because the rider's
+    // client decides for itself whether it is driving (getControllingPassenger,
+    // HorseReinsMixin) and must agree with the server. BarebackSteeringHandler
+    // sets it every tick; not serialized, so a reload starts it false and the
+    // first tick puts it right.
+    public static final Supplier<AttachmentType<Boolean>> REINS_WITHHELD =
+            ATTACHMENT_TYPES.register("reins_withheld", () -> AttachmentType
+                    .<Boolean>builder(() -> Boolean.FALSE)
+                    .sync(net.minecraft.network.codec.ByteBufCodecs.BOOL)
+                    .build());
+
     // Whether this mare is pregnant, and nothing else. SYNCED, so the client can
     // refuse a breeding food with the server instead of predicting a feed it then
     // takes back (known gap 226). HORSE_REPRO stays the truth; ReproHandler.set

@@ -6,6 +6,7 @@ import com.example.horsegenetics.neoforge.data.HorseCareAttachment;
 import com.example.horsegenetics.neoforge.entity.HorseTackSlot;
 import com.example.horsegenetics.neoforge.data.ModAttachments;
 import com.example.horsegenetics.neoforge.data.ModDataComponents;
+import com.example.horsegenetics.neoforge.ServerConfig;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.animal.equine.AbstractHorse;
@@ -96,6 +97,10 @@ public final class BarebackSteeringHandler {
         Player rider = horse.isAlive() && horse.isVehicle()
                 && horse.getFirstPassenger() instanceof Player first ? first : null;
         Reins.Who who = rider == null ? Reins.Who.NOBODY : steers(horse, rider);
+        // A real saddle hands vanilla the reins by itself, so the only way to
+        // keep them from a rider Reins says is a passenger is to say so where
+        // getControllingPassenger can read it, on both sides (#74).
+        withholdReins(horse, rider != null && who == Reins.Who.NOBODY && horse.isSaddled() && !phantom);
         if (who == Reins.Who.NOBODY) {
             rider = null;
         }
@@ -139,11 +144,50 @@ public final class BarebackSteeringHandler {
         LivingEntity owner = horse.getOwner();
         boolean isOwner = owner != null && owner.getUUID().equals(rider.getUUID());
         int tier = horse.getData(ModAttachments.HORSE_CARE.get()).behaviourTier();
-        Reins.Who who = Reins.steers(true, horse.isTamed(), HorseTackSlot.bridled(horse), isOwner, tier, false);
+        Reins.Who who = Reins.steers(true, horse.isTamed(), HorseTackSlot.bridled(horse), saddled(horse),
+                isOwner, tier, false, ServerConfig.saddleNeedsBridle());
         if (who != Reins.Who.NOBODY && HorseEscapeGoal.bolting(horse)) {
             return Reins.Who.NOBODY;
         }
         return who;
+    }
+
+    /**
+     * Whether the horse wears a real saddle: one in its saddle slot that is
+     * neither a bridle waiting to be moved nor a saddle this class lent.
+     * Donkeys and mules never get here asking - their saddle is their reins,
+     * vanilla's way - so it is false for anything that does not wear bridles.
+     */
+    private static boolean saddled(AbstractHorse horse) {
+        ItemStack inSaddle = horse.getItemBySlot(EquipmentSlot.SADDLE);
+        return HorseTackSlot.wearsBridles(horse) && !inSaddle.isEmpty()
+                && !isPhantom(inSaddle) && !HorseTackSlot.isBridle(inSaddle);
+    }
+
+    /**
+     * <b>Keep the reins from a passenger on a saddled horse</b> (#74). Set only
+     * when it changes: a synced attachment sends a packet on every set, and this
+     * runs on every horse every tick. Read by {@code HorseReinsMixin}.
+     */
+    private static void withholdReins(AbstractHorse horse, boolean withhold) {
+        if (horse.getData(ModAttachments.REINS_WITHHELD.get()) != withhold) {
+            horse.setData(ModAttachments.REINS_WITHHELD.get(), withhold);
+        }
+    }
+
+    /** Whether this horse is keeping the reins from its rider; true only on a saddled horse. */
+    public static boolean reinsWithheld(AbstractHorse horse) {
+        return horse.getData(ModAttachments.REINS_WITHHELD.get());
+    }
+
+    /**
+     * <b>Is the rider on this horse only a passenger?</b> A player on its back
+     * who is not driving it - nothing worn below the bond tier, a saddle with no
+     * bridle, or a horse bolting. Such a horse walks where it likes, and the
+     * peaceful band goals take it there ({@code HerdGoals}).
+     */
+    public static boolean carryingPassenger(AbstractHorse horse) {
+        return horse.getFirstPassenger() instanceof Player && horse.getControllingPassenger() == null;
     }
 
     /**

@@ -2410,6 +2410,8 @@ public final class ModGameTests {
         register(event, environment, RIGHT_CLICK_EQUIPS_TACK, 100);
         // Three horses and a donkey; waits a few ticks twice for the steering tick.
         register(event, environment, THE_BRIDLE_GOES_ON_THE_HEAD, 100);
+        // Two horses, two riders; waits for the steering tick twice.
+        register(event, environment, A_SADDLE_ALONE_CARRIES_A_PASSENGER, 100);
         register(event, environment, SHOES_FIT_THEIR_HOOVES, 100);
         register(event, environment, SHOES_ADD_THEIR_BONUS, 100);
         register(event, environment, A_SHOD_HORSE_STANDS_ON_POWDER_SNOW, 100);
@@ -4403,6 +4405,95 @@ public final class ModGameTests {
                             "the reins stayed with the rider after the bridle came off"), 0);
                 }
                 player.stopRiding();
+                helper.succeed();
+            });
+        });
+    }
+
+    /**
+     * <b>A saddle with no bridle carries a passenger; the owner at the top bond
+     * steers through it</b> (#74).
+     *
+     * <p>The mod's own saddle is #75, so the saddle here is any stack with an
+     * {@code Equippable} for the saddle slot that is not the vanilla saddle (which
+     * on a horse is the bridle) - exactly what another mod's saddle is today.
+     * <ul>
+     *   <li>At bond 0 the owner on it is a passenger: the horse is saddled, nobody
+     *       controls it, the synced flag the client reads is set, and the herd
+     *       goals count it as carrying.</li>
+     *   <li>At bond 90 (tier 3) the same owner steers, through the real saddle,
+     *       and the flag comes down.</li>
+     *   <li>A horse with nothing on is a passenger seat too, and never sets the
+     *       flag - vanilla already withholds its reins.</li>
+     * </ul>
+     * Needs {@code behaviour.saddle_needs_bridle} on, its default.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> A_SADDLE_ALONE_CARRIES_A_PASSENGER =
+            TEST_FUNCTIONS.register("a_saddle_alone_carries_a_passenger",
+                    () -> ModGameTests::aSaddleAloneCarriesAPassenger);
+
+    private static void aSaddleAloneCarriesAPassenger(GameTestHelper helper) {
+        if (!com.example.horsegenetics.neoforge.ServerConfig.saddleNeedsBridle()) {
+            throw new GameTestAssertException(Component.literal(
+                    "behaviour.saddle_needs_bridle is off in run-gametest/phc/server.toml - this test needs its default"), 0);
+        }
+        var saddleSlot = net.minecraft.world.entity.EquipmentSlot.SADDLE;
+        net.minecraft.world.entity.player.Player rider =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.player.Player other =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+
+        ItemStack saddle = new ItemStack(Items.LEATHER);
+        saddle.set(net.minecraft.core.component.DataComponents.EQUIPPABLE,
+                net.minecraft.world.item.equipment.Equippable.builder(saddleSlot).build());
+        net.minecraft.world.entity.animal.equine.Horse saddled =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        saddled.setTamed(true);
+        saddled.setOwner(rider);
+        setBond(saddled, 0);
+        saddled.setItemSlot(saddleSlot, saddle);
+        rider.startRiding(saddled, true, false);
+
+        net.minecraft.world.entity.animal.equine.Horse bare =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        bare.setTamed(true);
+        bare.setOwner(other);
+        setBond(bare, 0);
+        other.startRiding(bare, true, false);
+
+        helper.runAfterDelay(3L, () -> {
+            if (rider.getVehicle() != saddled || other.getVehicle() != bare) {
+                throw new GameTestAssertException(Component.literal(
+                        "a mock rider fell off - the premise is broken, not the saddle"), 0);
+            }
+            if (!saddled.isSaddled() || saddled.getControllingPassenger() != null
+                    || !com.example.horsegenetics.neoforge.server.BarebackSteeringHandler.reinsWithheld(saddled)
+                    || !com.example.horsegenetics.neoforge.server.BarebackSteeringHandler.carryingPassenger(saddled)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a saddle with no bridle at bond 0 was not a passenger seat (saddled " + saddled.isSaddled()
+                                + ", controlling " + saddled.getControllingPassenger() + ", withheld "
+                                + com.example.horsegenetics.neoforge.server.BarebackSteeringHandler.reinsWithheld(saddled) + ")"), 0);
+            }
+            if (bare.getControllingPassenger() != null
+                    || com.example.horsegenetics.neoforge.server.BarebackSteeringHandler.reinsWithheld(bare)
+                    || !com.example.horsegenetics.neoforge.server.BarebackSteeringHandler.carryingPassenger(bare)) {
+                throw new GameTestAssertException(Component.literal(
+                        "a horse with nothing on was not a plain passenger seat (controlling "
+                                + bare.getControllingPassenger() + ", withheld "
+                                + com.example.horsegenetics.neoforge.server.BarebackSteeringHandler.reinsWithheld(bare) + ")"), 0);
+            }
+            setBond(saddled, 90);
+            helper.runAfterDelay(3L, () -> {
+                if (saddled.getControllingPassenger() != rider
+                        || com.example.horsegenetics.neoforge.server.BarebackSteeringHandler.reinsWithheld(saddled)
+                        || !saddled.getItemBySlot(saddleSlot).is(Items.LEATHER)) {
+                    throw new GameTestAssertException(Component.literal(
+                            "the owner at bond 90 does not steer through the saddle (controlling "
+                                    + saddled.getControllingPassenger() + ", saddle slot "
+                                    + saddled.getItemBySlot(saddleSlot) + ")"), 0);
+                }
+                rider.stopRiding();
+                other.stopRiding();
                 helper.succeed();
             });
         });

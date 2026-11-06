@@ -95,6 +95,26 @@ public final class HerdGoals {
                 && !BandLife.inFight(horse) && !HorseInspectHold.isHeld(horse);
     }
 
+    /**
+     * {@link #free}, or a tamed horse carrying a rider who is only a passenger
+     * (#74): nothing worn below the bond tier, or a saddle with no bridle. Such a
+     * horse "walks on its own, herd-like" (owner, 2026-10-02), so the peaceful
+     * goals - a dam going back to her foal, resting with a friend - still take it
+     * where it was going, with the rider aboard. Sparring, guarding, displacing
+     * and courting stay off with anyone on its back. Untamed is left out: a horse
+     * being broken in is bucking, not grazing.
+     */
+    private static boolean calm(Horse horse) {
+        if (free(horse)) {
+            return true;
+        }
+        LivingEntity target = horse.getTarget();
+        return horse.isAlive() && horse.isTamed() && !horse.isLeashed()
+                && BarebackSteeringHandler.carryingPassenger(horse)
+                && (target == null || !target.isAlive())
+                && !BandLife.inFight(horse) && !HorseInspectHold.isHeld(horse);
+    }
+
     /** When each stallion last logged squaring up, so a penned intruder is one line a minute, not one a scan. */
     private static final Map<UUID, Long> GUARD_LOGGED = new HashMap<>();
 
@@ -257,7 +277,7 @@ public final class HerdGoals {
 
         @Override
         public boolean canUse() {
-            if (!free(horse) || !(horse.level() instanceof ServerLevel level) || --checkCooldown > 0) {
+            if (!calm(horse) || !(horse.level() instanceof ServerLevel level) || --checkCooldown > 0) {
                 return false;
             }
             checkCooldown = 20;
@@ -329,7 +349,7 @@ public final class HerdGoals {
 
         @Override
         public boolean canContinueToUse() {
-            return other != null && other.isAlive() && free(horse) && horse.distanceToSqr(other) > 9.0
+            return other != null && other.isAlive() && calm(horse) && horse.distanceToSqr(other) > 9.0
                     && reach.test(horse, other);
         }
 
@@ -757,7 +777,7 @@ public final class HerdGoals {
 
         @Override
         public boolean canUse() {
-            if (!free(horse) || --checkCooldown > 0) {
+            if (!calm(horse) || --checkCooldown > 0) {
                 return false;
             }
             checkCooldown = HerdSocialHandler.SCAN;
@@ -769,7 +789,7 @@ public final class HerdGoals {
                 return false;
             }
             Horse p = loaded(horse, r.get().other());
-            if (p == null || horse.distanceToSqr(p) > 144.0 || !free(p)) {
+            if (p == null || horse.distanceToSqr(p) > 144.0 || !calm(p)) {
                 return false;
             }
             reach.reset();
@@ -786,7 +806,7 @@ public final class HerdGoals {
 
         @Override
         public boolean canContinueToUse() {
-            return partner != null && partner.isAlive() && free(horse) && remaining > 0
+            return partner != null && partner.isAlive() && calm(horse) && remaining > 0
                     && horse.distanceToSqr(partner) < 196.0 && reach.test(horse, partner);
         }
 
