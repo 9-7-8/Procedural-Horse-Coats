@@ -1698,32 +1698,32 @@ public final class ModGameTests {
      * right breed; the zombie must keep its owner, its tame flag, its name (as the
      * barn name), its saddle and its health <i>fraction</i>, and arrive passified
      * for its owner so it never turns on them after dark (D25).
+     *
+     * <p>The skeleton stands two blocks east of the 1x1 structure, often in the next chunk
+     * over, which the harness does not force (issue #281: the structure at x=-4660881 is
+     * local x 15, so the skeleton stood in the neighbour, never ticked and never converted
+     * inside the unpaced 100 ticks). So the 3x3 field is forced and waited for before
+     * anything is spawned (issues #70, #150, #279), and the test runs alone because that
+     * wait sleeps.
      */
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> UNDEAD_HORSES_CONVERT =
             TEST_FUNCTIONS.register("undead_horses_convert", () -> ModGameTests::undeadHorsesConvert);
 
     private static void undeadHorsesConvert(GameTestHelper helper) {
+        keepTicking(helper);
         net.minecraft.world.entity.player.Player owner =
                 helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
-        net.minecraft.world.entity.animal.equine.ZombieHorse zombie =
-                helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE_HORSE, BlockPos.ZERO);
-        zombie.tameWithName(owner);
-        zombie.setCustomName(Component.literal("Mortimer"));
-        zombie.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
-        zombie.setHealth(zombie.getMaxHealth() / 2f);
-        // The test spot nicks a horse a point now and then; invulnerable (which the
-        // tag carries across too) so the fraction measured is the converter's alone.
-        zombie.setInvulnerable(true);
-        net.minecraft.world.entity.animal.equine.SkeletonHorse skeleton =
-                helper.spawn(net.minecraft.world.entity.EntityType.SKELETON_HORSE, new BlockPos(2, 0, 0));
-        // undead.convert ships off; the flag converts these two as /horseundead test's subjects are.
-        zombie.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
-        skeleton.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
-        UUID zombieId = zombie.getUUID();
-        UUID skeletonId = skeleton.getUUID();
+        // Spawned from inside the wait, once the field ticks: {zombie, skeleton}.
+        UUID[] ids = {null, null};
         UUID ownerId = owner.getUUID();
         ServerLevel level = helper.getLevel();
         helper.succeedWhen(() -> {
+            if (ids[0] == null) {
+                fieldTicks(helper);
+                spawnUndeadPair(helper, owner, ids);
+            }
+            UUID zombieId = ids[0];
+            UUID skeletonId = ids[1];
             net.minecraft.world.entity.animal.equine.Horse z = convertedOrFail(level, zombieId, "the zombie horse",
                     com.example.horsegenetics.common.genetics.Undeath.Kind.ZOMBIE, "graveborn_warmblood");
             convertedOrFail(level, skeletonId, "the skeleton horse",
@@ -1755,6 +1755,27 @@ public final class ModGameTests {
                         "a converted horse its owner already had is not passified toward them"), 0);
             }
         });
+    }
+
+    /** undead_horses_convert's two subjects; their UUIDs go into {@code ids} as {zombie, skeleton}. */
+    private static void spawnUndeadPair(GameTestHelper helper, net.minecraft.world.entity.player.Player owner,
+                                        UUID[] ids) {
+        net.minecraft.world.entity.animal.equine.ZombieHorse zombie =
+                helper.spawn(net.minecraft.world.entity.EntityType.ZOMBIE_HORSE, BlockPos.ZERO);
+        zombie.tameWithName(owner);
+        zombie.setCustomName(Component.literal("Mortimer"));
+        zombie.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE, new ItemStack(Items.SADDLE));
+        zombie.setHealth(zombie.getMaxHealth() / 2f);
+        // The test spot nicks a horse a point now and then; invulnerable (which the
+        // tag carries across too) so the fraction measured is the converter's alone.
+        zombie.setInvulnerable(true);
+        net.minecraft.world.entity.animal.equine.SkeletonHorse skeleton =
+                helper.spawn(net.minecraft.world.entity.EntityType.SKELETON_HORSE, new BlockPos(2, 0, 0));
+        // undead.convert ships off; the flag converts these two as /horseundead test's subjects are.
+        zombie.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
+        skeleton.getPersistentData().putBoolean(com.example.horsegenetics.neoforge.server.UndeadHorseConverter.CONVERT_ANYWAY, true);
+        ids[0] = zombie.getUUID();
+        ids[1] = skeleton.getUUID();
     }
 
     /** The entity under {@code id} is a converted horse of {@code kind} and {@code breed}, and the only one. */
@@ -2410,7 +2431,8 @@ public final class ModGameTests {
         // Two mock players and a dozen inventory reads, all inside one tick.
         register(event, environment, SEND_HOME_PAYMENT, 100);
         // A converted zombie and skeleton: one tick to convert, a few to settle.
-        register(event, environment, UNDEAD_HORSES_CONVERT, 100);
+        // Its own 100 ticks, after the wait for the field's forced chunks (issue #281).
+        registerAlone(event, UNDEAD_HORSES_CONVERT, 1100);
         // Twelve ticks armed, then disarmed and converted.
         register(event, environment, UNDEAD_TRAP_WAITS, 100);
         register(event, environment, UNDEAD_KEEP_VANILLA, 100);
