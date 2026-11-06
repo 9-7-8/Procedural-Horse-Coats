@@ -135,6 +135,7 @@ const HOME = {
     'behaviour.bond_decay_per_day': 'horse-care.html#bond-decay',
     'behaviour.bond_floor': 'horse-care.html#bond-decay',
     'behaviour.owner_only_riding': 'horse-care.html#riding',
+    'behaviour.saddle_needs_bridle': 'horse-gear.html#passenger-only',
     'behaviour.riding_allows_teams': 'horse-care.html#riding',
     'commands.horse_give': 'item-transfer-papers.html#horsegive',
     'commands.horse_jockey': 'item-jockey-passes.html#command',

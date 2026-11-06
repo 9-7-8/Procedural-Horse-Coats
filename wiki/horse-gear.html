@@ -148,6 +148,17 @@
         steer it, at any bond. With nothing on its head, only its owner steers it, and only
         at the top bond tier (<a href="horse-care.html#bareback-steering">bareback
         steering</a>); anyone else is a passenger.</li>
+    <li><strong>A saddle alone does not steer</strong> (#74). A horse wearing a saddle and no
+        bridle carries you as a passenger below the top bond tier, the same as a horse with
+        nothing on. Its owner at the top tier steers it through the saddle. A server can turn
+        this off with <code>behaviour.saddle_needs_bridle</code>, and then a saddle steers for
+        anyone, as vanilla's did. Until the mod's own saddle arrives, the only saddles a
+        horse can wear on its back are other mods'.</li>
+    <li><strong>A horse you cannot steer walks on its own</strong>, with you aboard. It
+        wanders and grazes as it would without you, a mare goes back to her foal, and a horse
+        goes to rest beside a friend from its band. It never spars, squares up, chases off
+        another horse or goes courting with a rider on its back. Tamed horses only: an
+        untamed one is still bucking.</li>
     <li><strong>Right-click your horse with it</strong> and it goes on the head. If the
         horse already wears one, the click just puts you on the horse.</li>
     <li><strong>Old worlds keep working.</strong> A horse that was saddled before this
@@ -164,10 +175,8 @@
         saddle, on the back, with its seat, and it steers as it always did.</li>
 </ul>
 <p>
-    The mod's own saddle, which carries stats, and the rule that a saddle alone makes you a
-    passenger, are the next two pieces
-    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/74">#74</a>,
-    <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).
+    The mod's own saddle, which carries stats, is the next piece
+    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).
 </p>
 
 <h2 id="using">Putting something on</h2>
@@ -885,7 +894,9 @@
             with nothing of their own changed.</td></tr>
     <tr><td>Who steers</td>
         <td><code>common/gear/Reins</code>, pinned by <code>ReinsTest</code>: a bridle steers for
-            any player rider; bare, the owner at tier 3; nobody while bolting or untamed.
+            any player rider; bare, the owner at tier 3; a saddle alone, nobody unless the
+            server turned the saddle rule off (<a href="#passenger-only">below</a>); nobody
+            while bolting or untamed.
             <code>BarebackSteeringHandler</code> reads the horse, asks it, and lends the phantom
             saddle for either answer but <code>NOBODY</code>. <code>steer_bareback</code> fires
             only for <code>BAREBACK</code>, and <code>bareback()</code> is false for a bridled
@@ -931,6 +942,61 @@
     has it moved to the Headstall; a bridled horse at bond 0 is steered by its rider and stops
     being when the bridle comes off; a donkey keeps its saddle on its back.
     <code>undead_horses_convert</code> and the resurrection test accept the bridle on the head.
+</p>
+
+<h2 id="passenger-only">A saddle alone carries a passenger</h2>
+<p>
+    Piece 2 of the split (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/74">#74</a>,
+    built 2026-11-05). Below bond tier 3 a horse that wears a real saddle and no bridle does
+    not hand its rider the reins. A horse with nothing on never did: vanilla's
+    <code>getControllingPassenger</code> needs <code>isSaddled()</code>.
+</p>
+<table>
+    <tr><th>What</th><th>Where</th></tr>
+    <tr><td>The rule</td>
+        <td><code>Reins.steers</code> takes two more inputs: <code>saddled</code> (a stack in the
+            saddle slot that is neither a bridle nor a lent phantom) and the server switch.
+            The order is bridle, then <code>SADDLE</code> when the switch is off, then the
+            owner at tier 3 (<code>BAREBACK</code>, which works through a saddle as well), else
+            <code>NOBODY</code>. Bolting and untamed still win over all of them.</td></tr>
+    <tr><td>The switch</td>
+        <td><code>behaviour.saddle_needs_bridle</code>, server, default <code>true</code>
+            (<code>Reins.DEFAULT_SADDLE_NEEDS_BRIDLE</code>), read live through
+            <code>ServerConfig.saddleNeedsBridle()</code>, so a change takes effect on the next
+            tick. Off, a saddle steers for any rider. A horse with nothing on is a passenger
+            seat either way, and donkeys, mules and llamas are never asked.</td></tr>
+    <tr><td>Taking the reins away</td>
+        <td>A lent saddle can add a steerer but cannot remove one, so a real saddle needs a
+            refusal: <code>mixin/HorseReinsMixin</code> answers
+            <code>getControllingPassenger</code> at HEAD with <code>null</code> for a horse with
+            a player first passenger whose <code>REINS_WITHHELD</code> attachment is set.
+            <code>BarebackSteeringHandler</code> sets that flag every tick, true only when the
+            horse wears a real saddle and <code>Reins</code> says <code>NOBODY</code> for the
+            rider. The flag is <strong>synced</strong> (the rider's client decides for itself
+            whether it is driving), set only when it changes (each set is a packet), and not
+            saved (the first tick after a load puts it right). A postilion is not a player, so
+            <code>CartHorseMixin</code>'s answer for a cart is untouched.</td></tr>
+    <tr><td>Bolting with a saddle on</td>
+        <td><code>HorseEscapeGoal</code> takes the bridle off and leaves the saddle on (owner,
+            2026-10-02). Before this piece a saddle left on would still have steered; now the
+            bolting answer withholds its reins like any other.</td></tr>
+    <tr><td>Walking on its own</td>
+        <td>With no controlling passenger, <code>Mob.updateControlFlags</code> leaves the MOVE
+            flag on and vanilla's stroll goal runs (it refuses only a controlling passenger).
+            <code>HerdGoals.calm</code> is <code>free</code>, or a tamed horse whose rider is a
+            passenger (<code>BarebackSteeringHandler.carryingPassenger</code>).
+            <code>DamAndFoal</code> and <code>GroomAndRest</code> use it. <code>Spar</code>,
+            <code>StallionGuard</code>, <code>Displace</code> and <code>HeatAttraction</code>
+            keep <code>free</code>, so they never start with a rider aboard.</td></tr>
+</table>
+<p>
+    <strong>Tests.</strong> <code>ReinsTest</code> (a saddle alone at low bond, the owner at
+    tier 3 through a saddle, the switch, bolting over a saddle) and the gametest
+    <code>a_saddle_alone_carries_a_passenger</code>. It uses a stack carrying a saddle-slot
+    <code>Equippable</code> that is not the vanilla saddle, which is what another mod's
+    saddle is until #75. At bond 0 the owner is a passenger, the flag is set and the horse
+    counts as carrying. At bond 90 the owner steers and the flag comes down. A horse with
+    nothing on is a passenger and never sets the flag.
 </p>
 
 <h2 id="barding-edged">Barding is drawn edged: <code>client/gear/BardingLayer</code></h2>
@@ -1397,7 +1463,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <table>
 <thead><tr><th>Slot</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. The bridle shipped first (<a href="#bridle-code">the bridle</a>, #73); what is left is the passenger-only rule (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/74">#74</a>) and the mod's own saddle with its stats (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).</td></tr>
+<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. The bridle shipped first (<a href="#bridle-code">the bridle</a>, #73); the passenger-only rule followed (<a href="#passenger-only">a saddle alone</a>, #74); what is left is the mod's own saddle with its stats (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).</td></tr>
 <tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="horse-care.html#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
 <tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
 <tr><td><strong>Saddle pad</strong></td><td>See the dedicated <a href="saddle-pads.html">saddle-pad roadmap</a>.</td></tr>
@@ -1779,9 +1845,32 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
         the braid moved into <strong>the worn-piece table</strong> and a debug boot was
         photographed on a leg in three held poses; neither has been seen in play. Since
         2026-11-01 <strong>the saddle is a bridle on the head</strong>, and nobody has
-        ridden, dyed or loaded an old world with one yet.
+        ridden, dyed or loaded an old world with one yet. Since 2026-11-05 <strong>a saddle alone carries a passenger</strong>, proved on the server only.
     </p>
 </div>
+
+<h3 id="verify-passenger-only">A saddle alone carries a passenger (2026-11-05, NOT played)</h3>
+<p>
+    See <a href="#passenger-only">the Coding tab</a>. The rule and the server side are proved by
+    <code>ReinsTest</code> and <code>a_saddle_alone_carries_a_passenger</code>. The client side
+    is not: the synced flag and the mixin have never met a real rider's client. Until #75 a test
+    needs another mod's saddle, or <code>/item replace entity @e[type=horse,limit=1,sort=nearest]
+    saddle with leather[equippable={slot:"saddle"}]</code>.
+</p>
+<ol>
+    <li><strong>The passenger.</strong> Mount a tamed horse at low bond wearing a saddle and no
+        bridle. W does nothing. The horse wanders off by itself, and you do not rubber-band
+        when it moves. Watch the first second after mounting closely: the client may believe
+        it drives for a tick or two before the flag arrives.</li>
+    <li><strong>Herd-like.</strong> Sit on a passenger-only mare near her foal, or near a
+        grooming friend, and see her walk over and stand. Near another stallion, a ridden
+        stallion does not spar.</li>
+    <li><strong>The switch.</strong> Set <code>behaviour.saddle_needs_bridle = false</code> in
+        <code>phc/server.toml</code> while the server runs: the next tick the same horse steers.
+        Set it back and the reins go.</li>
+    <li><strong>Tier 3.</strong> The owner of a tier-3 horse in a saddle steers it, and
+        <em>Steer bareback</em> does not complete for that ride.</li>
+</ol>
 
 <h3 id="verify-bridle">The bridle on the head (2026-11-01, NOT played)</h3>
 <p>

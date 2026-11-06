@@ -1,0 +1,101 @@
+2026-11-05 19:25 (start) - A saddle alone carries a passenger (#74)
+
+ASKED
+-----
+- "/next-release" (the next-release procedure). Next release: v0.5.047. Every bug on its
+  milestone was fixed and waiting on a check, or (#257) waiting on the server manager, so
+  the first buildable unit was #74. It was built by process-intake and closed.
+
+DONE
+----
+- d4bd2939 - #74, piece 2 of the bridle and saddle split (#72). Closed.
+  Missing: a horse wearing a real saddle in its saddle slot and no bridle still handed
+  vanilla the reins, because AbstractHorse.getControllingPassenger needs only
+  isSaddled(). A lent phantom saddle can add a steerer but cannot remove one.
+  Change:
+    common/gear/Reins.steers gains `saddled` and `saddleNeedsBridle`, and a new
+    Who.SADDLE. The order is bridle, then SADDLE when the switch is off, then the owner
+    at tier 3 (BAREBACK, which works through a saddle too), else NOBODY. Bolting and
+    untamed win over all of them.
+    The new config key behaviour.saddle_needs_bridle (server, default true, constant
+    Reins.DEFAULT_SADDLE_NEEDS_BRIDLE) has the accessor ServerConfig.saddleNeedsBridle().
+    The new synced, unsaved attachment ModAttachments.REINS_WITHHELD is set by
+    BarebackSteeringHandler, and only when it changes. It is true when a real saddle is
+    on and Reins says NOBODY for the rider.
+    The new mixin/HorseReinsMixin answers getControllingPassenger with null at HEAD for
+    a Horse whose first passenger is a player and whose flag is set. The flag is synced
+    so the rider's client agrees.
+    The same flag now also stops a bolting horse that kept its saddle (HorseEscapeGoal
+    sheds only the bridle) from being steered.
+    HerdGoals.calm(): either free(), or a tamed horse carrying a passenger-only rider
+    (BarebackSteeringHandler.carryingPassenger). DamAndFoal and GroomAndRest use it.
+    Spar, StallionGuard, Displace and HeatAttraction keep free(). Vanilla's stroll
+    already runs without a controlling passenger (Mob.updateControlFlags).
+  Proof:
+    - ReinsTest has four new cases. Mutated once (the saddle check made
+      unconditional): 2 of 8 failed. Restored, and green.
+    - The gametest a_saddle_alone_carries_a_passenger: at bond 0 the owner is a
+      passenger, the flag is set and the horse is carrying; at bond 90 the owner steers
+      and the flag is down; a bare horse is a passenger and never sets the flag. Green
+      in all 3 runGameTest runs.
+    - :neoforge-26.1.2:build green; check-parity OK; check-designer-boots OK.
+    - runServer booted to Done( with saddle_needs_bridle = true written into
+      run/phc/server.toml, HorseReinsMixin applied, and no ERROR lines. run/phc and
+      run/config were restored from a copy afterwards (diff clean).
+  Pictures: none. The change is behaviour while ridden, and a still cannot show it.
+  Wiki: horse-gear.html #bridle (Gameplay bullets), #passenger-only (Coding),
+  #verify-passenger-only (Verification), and the Roadmap gear table. config.html is
+  baked.
+
+DECIDED
+-------
+- Without the owner: "herd-like carrying" means vanilla's stroll plus the PEACEFUL band
+  goals (DamAndFoal, GroomAndRest). No sparring, guarding, displacing or courting with
+  a rider aboard, and untamed horses are excluded. Recorded on horse-gear #passenger-only
+  and in the #74 closing comment.
+- Without the owner: the key is named behaviour.saddle_needs_bridle, sitting beside
+  behaviour.owner_only_riding. The treatment fixed only "one server boolean, default ON".
+- Without the owner: the client is told through a synced flag, not by recomputing Reins
+  on the client, which knows neither the bond tier nor the bolting state.
+- Without the owner: the bareback tier works through a saddle (the treatment: tier 3
+  "steers freely with or without a bridle"). Steer bareback still fires only for a
+  ride with no real saddle.
+
+FOUND ON THE WAY
+----------------
+- #293 filed (bug, v0.5.047): the stasis_bank_ejects_empties gametest failed 1 run in 3
+  ("Expected item of type Advanced Horse Stasis Chamber at relative 1,1,1 on tick 5"),
+  then passed twice. The new test's ridden horses were about 8 blocks away, so they are
+  the first thing to rule out.
+- undead_horses_convert (#281) was green in all three runGameTest runs. That is far
+  short of the tally #281 is waiting on, so #281 stays open.
+- Mistakes: the first runServer was given --args=nogui and died with "main class
+  nogui". It was rerun bare, as add-a-config-option says. A long bash heredoc
+  truncated (a known trap), so the wiki patch was run from a scratchpad script.
+
+PROCEDURES
+----------
+None needed. All three end-session questions were asked: next-release,
+process-intake, add-a-config-option, rebake and test-tiers each held as written, and
+both mistakes above were mine, not the procedures'.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite was not run. It would still check every other common
+  class against the changed Reins signature, though grep found no other caller.
+- Nobody has seen the client side: a real rider on a saddle-only horse. The risk is a
+  tick or two of client-side driving before the flag arrives, then a snap back. The
+  herd walk, the live switch and a tier-3 ride are unseen too. The checks are at
+  wiki/horse-gear.html#verify-passenger-only.
+- Until #75 the only saddles a horse can wear are other mods'. In-game testing needs
+  `/item replace ... saddle with leather[equippable={slot:"saddle"}]`.
+
+RELEASE
+-------
+Not offered. v0.5.047 still has open units (#75 next), and the release bar for this
+themed release is the milestone finishing.
+
+PICK UP FIRST
+-------------
+#75, the mod's own saddle (tiers, rider-only speed and jump, bags), by /next-release
+(process-intake). Its Open line needs the owner: the bonus numbers and a trade for it.

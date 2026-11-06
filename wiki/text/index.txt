@@ -3190,6 +3190,7 @@ wiki/horse-gear.html#packs-lifecycle	coding	Every way a horse leaves
 wiki/horse-gear.html#packs-load	coding	The load: common/pack/PackLoad
 wiki/horse-gear.html#packs-rules	coding	Putting on and taking off go through the slot
 wiki/horse-gear.html#packs-store	coding	The store is mutable, on purpose
+wiki/horse-gear.html#passenger-only	coding	A saddle alone carries a passenger
 wiki/horse-gear.html#roster	coding	The roster is the layout
 wiki/horse-gear.html#slots	gameplay	The twenty slots
 wiki/horse-gear.html#tags	coding	What a slot accepts is a tag
