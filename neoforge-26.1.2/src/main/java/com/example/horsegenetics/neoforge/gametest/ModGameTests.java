@@ -1528,6 +1528,16 @@ public final class ModGameTests {
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_BANK_EJECTS_EMPTIES =
             TEST_FUNCTIONS.register("stasis_bank_ejects_empties", () -> ModGameTests::stasisBankEjectsEmpties);
 
+    /** Issue #293's trace: who removes an ejected Advanced chamber in its first second. */
+    private static void traceLostChamber(net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent ev) {
+        if (ev.getEntity() instanceof net.minecraft.world.entity.item.ItemEntity ie
+                && !ev.getLevel().isClientSide()
+                && ie.getItem().is(ModItems.ADVANCED_STASIS_CHAMBER.get()) && ie.getAge() < 20) {
+            HorseGenetics.LOGGER.warn("[293] chamber left at " + ie.position() + " age " + ie.getAge()
+                    + " reason " + ie.getRemovalReason(), new Throwable("[293] removed by"));
+        }
+    }
+
     private static void stasisBankEjectsEmpties(GameTestHelper helper) {
         BlockPos at = new BlockPos(1, 1, 1);
         helper.setBlock(at, com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_STASIS_BANK.get());
@@ -1593,7 +1603,27 @@ public final class ModGameTests {
             return;
         }
         // The pack was full, so the second empty is on the ground at the bank.
+        java.util.List<net.minecraft.world.entity.item.ItemEntity> dropped = helper.getLevel().getEntitiesOfClass(
+                net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(abs).inflate(4.0),
+                e -> e.getItem().is(ModItems.ADVANCED_STASIS_CHAMBER.get()));
+        String atDrop = dropped.isEmpty() ? "none found" : dropped.get(0).position() + " v " + dropped.get(0).getDeltaMovement();
+        long dropTick = helper.getTick();
         helper.runAfterDelay(5L, () -> {
+            if (helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                    new net.minecraft.world.phys.AABB(abs).inflate(2.5),
+                    e -> e.getItem().is(ModItems.ADVANCED_STASIS_CHAMBER.get())).isEmpty()) {
+                StringBuilder why = new StringBuilder("[293] bank ").append(abs).append(" dropped at tick ")
+                        .append(dropTick).append(": ").append(atDrop).append("; now tick ").append(helper.getTick());
+                for (var e : dropped) {
+                    why.append("; that item removed=").append(e.getRemovalReason()).append(" at ").append(e.position())
+                            .append(" chunkTicks=").append(helper.getLevel().isPositionEntityTicking(e.blockPosition()));
+                }
+                for (var e : helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.Entity.class,
+                        new net.minecraft.world.phys.AABB(abs).inflate(12.0))) {
+                    why.append("; near ").append(e.getType().toShortString()).append(" ").append(e.position());
+                }
+                HorseGenetics.LOGGER.warn(why.toString());
+            }
             helper.assertItemEntityPresent(ModItems.ADVANCED_STASIS_CHAMBER.get(), at, 2.0);
             helper.killAllEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class);
             helper.succeed();
@@ -2429,6 +2459,10 @@ public final class ModGameTests {
         // One bank filled and one button pressed twice, then five ticks for the
         // dropped chamber to be findable on the ground.
         register(event, environment, STASIS_BANK_EJECTS_EMPTIES, 100);
+        // Issue #293: the dropped chamber is sometimes DISCARDED on its first tick, where
+        // it landed, by something not yet named. Log who removes it, so the next red
+        // run carries the stack trace. Registered here, so only a gametest run has it.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ModGameTests::traceLostChamber);
         register(event, environment, STASIS_BANK_GRID_GROWS, 100);
         // Two mock players and a dozen inventory reads, all inside one tick.
         register(event, environment, SEND_HOME_PAYMENT, 100);
