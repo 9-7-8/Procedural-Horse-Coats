@@ -1528,16 +1528,6 @@ public final class ModGameTests {
     public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> STASIS_BANK_EJECTS_EMPTIES =
             TEST_FUNCTIONS.register("stasis_bank_ejects_empties", () -> ModGameTests::stasisBankEjectsEmpties);
 
-    /** Issue #293's trace: who removes an ejected Advanced chamber in its first second. */
-    private static void traceLostChamber(net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent ev) {
-        if (ev.getEntity() instanceof net.minecraft.world.entity.item.ItemEntity ie
-                && !ev.getLevel().isClientSide()
-                && ie.getItem().is(ModItems.ADVANCED_STASIS_CHAMBER.get()) && ie.getAge() < 20) {
-            HorseGenetics.LOGGER.warn("[293] chamber left at " + ie.position() + " age " + ie.getAge()
-                    + " reason " + ie.getRemovalReason(), new Throwable("[293] removed by"));
-        }
-    }
-
     private static void stasisBankEjectsEmpties(GameTestHelper helper) {
         BlockPos at = new BlockPos(1, 1, 1);
         helper.setBlock(at, com.example.horsegenetics.neoforge.block.ModBlocks.HORSE_STASIS_BANK.get());
@@ -1625,7 +1615,11 @@ public final class ModGameTests {
                 HorseGenetics.LOGGER.warn(why.toString());
             }
             helper.assertItemEntityPresent(ModItems.ADVANCED_STASIS_CHAMBER.get(), at, 2.0);
-            helper.killAllEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class);
+            // Not killAllEntitiesOfClass: that reaches the 1x1 cell plus a block, and a
+            // chamber that bounced further was left on the floor for the neighbours.
+            helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                    new net.minecraft.world.phys.AABB(abs).inflate(4.0),
+                    e -> e.getItem().is(ModItems.ADVANCED_STASIS_CHAMBER.get())).forEach(e -> e.discard());
             helper.succeed();
         });
     }
@@ -2459,10 +2453,6 @@ public final class ModGameTests {
         // One bank filled and one button pressed twice, then five ticks for the
         // dropped chamber to be findable on the ground.
         register(event, environment, STASIS_BANK_EJECTS_EMPTIES, 100);
-        // Issue #293: the dropped chamber is sometimes DISCARDED on its first tick, where
-        // it landed, by something not yet named. Log who removes it, so the next red
-        // run carries the stack trace. Registered here, so only a gametest run has it.
-        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(ModGameTests::traceLostChamber);
         register(event, environment, STASIS_BANK_GRID_GROWS, 100);
         // Two mock players and a dozen inventory reads, all inside one tick.
         register(event, environment, SEND_HOME_PAYMENT, 100);
@@ -2980,7 +2970,7 @@ public final class ModGameTests {
                 helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
         // force, and without the mount game event: a mock player is not in the
         // level's entity list, and only getVehicle() matters to the handler.
-        player.startRiding(horse, true, false);
+        seat(player, horse);
         if (player.getVehicle() != horse) {
             throw new GameTestAssertException(Component.literal(
                     "the mock player would not mount at all - this test's premise is broken,"
@@ -3114,7 +3104,7 @@ public final class ModGameTests {
                     } else {
                         // Thrown riders go back by force: a mock player never ticks, so its
                         // boarding cooldown never runs down.
-                        riders[i].startRiding(horse, true, false);
+                        seat(riders[i], horse);
                     }
                     mounted[i] = true;
                 }
@@ -4192,6 +4182,18 @@ public final class ModGameTests {
         });
     }
 
+    /**
+     * Puts a mock player on a mount, by force. The player is moved onto the mount first:
+     * {@code makeMockPlayer} leaves it at the world origin, and a passenger's pickup box
+     * is its own box {@code minmax} its vehicle's - so on its first tick, before
+     * {@code positionRider}, the box ran from (0, 0, 0) to the test cell and picked up
+     * neighbouring tests' items (#293: the stasis bank's ejected chamber).
+     */
+    private static void seat(net.minecraft.world.entity.player.Player rider, net.minecraft.world.entity.Entity mount) {
+        rider.setPos(mount.position());
+        rider.startRiding(mount, true, false);
+    }
+
     private static void setBond(net.minecraft.world.entity.animal.equine.Horse horse, int bond) {
         var attachment = com.example.horsegenetics.neoforge.data.ModAttachments.HORSE_CARE.get();
         horse.setData(attachment, horse.getData(attachment).withBond(bond));
@@ -4395,7 +4397,7 @@ public final class ModGameTests {
         ridden.setOwner(player);
         setBond(ridden, 0);
         headstall.set(ridden, new ItemStack(Items.SADDLE));
-        player.startRiding(ridden, true, false);
+        seat(player, ridden);
 
         // -- a donkey keeps vanilla's saddle --------------------------------------
         net.minecraft.world.entity.animal.equine.Donkey donkey =
@@ -4486,14 +4488,14 @@ public final class ModGameTests {
         saddled.setOwner(rider);
         setBond(saddled, 0);
         saddled.setItemSlot(saddleSlot, saddle);
-        rider.startRiding(saddled, true, false);
+        seat(rider, saddled);
 
         net.minecraft.world.entity.animal.equine.Horse bare =
                 helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
         bare.setTamed(true);
         bare.setOwner(other);
         setBond(bare, 0);
-        other.startRiding(bare, true, false);
+        seat(other, bare);
 
         helper.runAfterDelay(3L, () -> {
             if (rider.getVehicle() != saddled || other.getVehicle() != bare) {
