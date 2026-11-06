@@ -83,6 +83,9 @@ STEPS
        An attribute write (SCALE) reaches the hitbox only on the entity's NEXT tick:
        assert on getBbHeight(), never getScale(), or the test passes before it starts.
        helper.spawn at a test's origin puts a horse into the harness's barrier walls.
+       A mock player stands at the world origin until moved, and a passenger's pickup
+       box spans its own box and its vehicle's: seat one with ModGameTests.seat, never
+       a bare startRiding, or its first tick picks up items across the grid (#293).
        A mob with setNoAi(true) is never moved (LivingEntity.aiStep travels only when
        isEffectiveAi), so a shove or a slide tested on one proves nothing: clear its
        goals instead, goalSelector.removeAllGoals(g -> true) (#248).
