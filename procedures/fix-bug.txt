@@ -115,6 +115,10 @@ STEPS
      the genome, place the intruder) for a red/green that is not a matter of chance.
      Example: #40, 734 random cells green; then a forced Aae/Aae roll with a horse
      overhead failed 100 of 100 before the fix and passed 100 of 100 after.
+     A thing that vanishes (an item, a horse) is traced, not guessed at: log its removal
+     reason when the check fails, and register an EntityLeaveLevelEvent listener in
+     onRegisterGameTests (gametest runs only) that logs `new Throwable()` for it, so one
+     red run names the code that removed it (#293: DISCARDED on its first tick).
      A flake whose cause is a spawn off the 1x1 structure into an unforced neighbour
      chunk is rarely alone: grep the sibling tests for spawns at a non-zero BlockPos with
      no keepTicking, and list them on the issue. #281 was #279's cause, two tests along.

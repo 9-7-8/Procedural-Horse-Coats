@@ -1,0 +1,70 @@
+2026-11-05 19:45 (start) - #293: the stasis bank gametest's lost chamber, traced not fixed
+
+ASKED
+-----
+- "/next-release - you may ask me questions interactively using your tool": picked the next
+  unit of v0.5.047 (the next release after tag v0.5.047.1). Every open issue already had a
+  milestone; no NOT COMPILED commits since the tag. The first unit was #293, the only open
+  bug on the milestone with no fix commit (#281, #259, #10, #31, #36 wait on checks; #257
+  waits on the server manager). Handed to fix-bug.
+- Question-tool answer, after the harness stopped the wait for the live server to empty:
+  "Commit now, test later" (owner). The diagnostics were committed with the tests owed.
+
+DONE
+----
+- 79f0770f "#293: the stasis bank gametest now says who took its chamber".
+  What is known: one runGameTest with 15 temporary copies of stasis_bank_ejects_empties
+  (ModGameTests) went 5 red of 16, all in one grid row. In every red cell the Advanced
+  chamber that HorseStasisBankMenu.ejectEmpties drops with Containers.dropItemStack had
+  removal reason DISCARDED, at its spawn position, in an entity-ticking chunk: something
+  discarded it on or before its first tick. Not a pickup, not HungerFoodGoal (diet foods
+  only), not SupplyCartEntity.glean, and not vanilla StructureUtils.clearSpaceForStructure
+  for the next structure (padding 0: it clears only that test's 1x1x1 box).
+  The commit: the test logs drop position, removal reason and entities within 12 blocks
+  when the chamber is missing; ModGameTests.traceLostChamber (an EntityLeaveLevelEvent
+  listener registered only in onRegisterGameTests) logs a stack trace for any Advanced
+  chamber removed in its first second. The copies are deleted.
+  Proof: compileJava and check-parity green. No gametest after the commit.
+  No pictures (a gametest).
+  Issue #293: open, comment names the commit and the tests owed; the v0.5.047 milestone's
+  description updated to match.
+
+DECIDED
+-------
+- Commit the diagnostics now and run the tests later, while a player is on the live server
+  (owner, question tool). Recorded on #293.
+- The trace listener stays in the tree until the fix lands, registered only in gametest
+  runs (made without the owner). Recorded in the commit and on #293.
+
+FOUND ON THE WAY
+----------------
+- Mistake: one runGameTest (about 3.5 min) ran while axolotlwyvern was on the live server.
+  The player check and the run were chained in one command, and the join line it printed
+  was not read before the run started. No further Gradle test ran. test-tiers' NEVER entry
+  now says to run the check as its own command first.
+- The harness stopped two background shells for low memory (a disk-wide jar search and the
+  wait for the server to empty). Neither was restarted.
+
+PROCEDURES
+----------
+- procedures/test-tiers.txt NEVER: count joins against leaves, and never chain the player
+  check with the test (the mistake above).
+- procedures/fix-bug.txt step 5: a thing that vanishes is traced with a gametest-only
+  EntityLeaveLevelEvent listener that logs a Throwable, not guessed at.
+
+NOT RUN / NOT CHECKED
+---------------------
+- runGameTest until red, and the [293] stack trace read; then the fix, a tally and its
+  mutant.
+- The full :neoforge-26.1.2:build (it runs this module's tests; a player was on).
+- A full :common:test would check nothing new: common/ was not touched.
+- No Verification-tab anchors added (a test-only change).
+
+RELEASE
+-------
+Not offered: one diagnostic commit, below release step 1's bar.
+
+PICK UP FIRST
+-------------
+#293 by fix-bug, once the live server is empty: runGameTest until red, grep the log for
+"[293] removed by", fix what it names.

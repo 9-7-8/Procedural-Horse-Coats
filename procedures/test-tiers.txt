@@ -190,6 +190,10 @@ NEVER
   java.exe with nogui that does not name this
   repo, and the latest "There are N of a max" line in its run/console.log. (Owner,
   2026-10-09.) Do the work that needs no test meanwhile, and say the test is owed.
+  The hourly count line goes stale: also count "joined the game" against "left the game"
+  since it. Run the check as its own command and read it before the test starts; never
+  chain the check and the test in one command (#293, 2026-11-05: a join printed above a
+  run that went ahead anyway).
 - Never skip the release set before a release.
 - Never call a check green from a piped exit code.
 - Never treat a test that has never failed as proof. Mutate it once.
