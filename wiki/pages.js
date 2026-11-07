@@ -142,6 +142,7 @@ window.HG.pages = {
                 { href: "horse-browser.html", text: "The horse browser", kind: "core", views: ["gameplay","coding"] },
                 { href: "horsemanship.html", text: "Horsemanship", kind: "core", views: ["coding"] },
                 { href: "item-horse-shoes.html", text: "Horse shoes", kind: "core", views: ["gameplay","coding","science"] },
+                { href: "item-saddle.html", text: "Saddles", kind: "core", views: ["gameplay","coding","science"] },
                 { href: "lasso.html", text: "The lasso", kind: "core", views: ["coding"] },
                 { href: "magic-grab.html", text: "Magic grab", kind: "magical", views: ["coding"] },
                 { href: "magical-genes.html", text: "Magical genes still to build", kind: "magical", views: ["coding"] },

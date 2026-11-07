@@ -1,0 +1,73 @@
+Session 2026-11-07 10:35 - the mod saddle (#75) and the chestplate rule (#294)
+==========================================================================
+
+ASKED
+-----
+"/next-release". Mid-run, the owner added: "Can we use this chestplate rule to update the
+horse armor too? So that the horse armor and the saddles come in all the same materials.
+To note, all saddles require leather, you can't make a saddle without it." and "Can you
+have the art bake use the art from the chestplates they're matching to to inform the
+color palette?"
+
+DONE (committed UNTESTED on the owner's call - see NOT RUN)
+----
+- Next release v0.5.047: every bug on it fixed and waiting on a check, so the unit was
+  #75 (tier 3, L). Owner: this run builds item + tiers + rider-only stats; tiers are
+  every chestplate material, other mods' chestplate materials adapted in.
+- common/gear/Saddles (+ SaddlesTest): seven tiers, share of a 10% ceiling, NONE unless
+  a player rides. item/HorseSaddleItem: Equippable for the SADDLE slot, minecraft:horse
+  only, asset horsegenetics:saddle (seat + new saddle_fittings layer, the complement of
+  bridle_metal: 16 of 36 hardware texels). server/SaddleEffects: transient
+  ADD_MULTIPLIED_BASE modifiers on mount/dismount/equipment change/join;
+  withoutSaddle feeds HorseInfoScreen. Config saddles.enabled/top_speed/top_jump.
+- Recipes (leather saddle = 3 leather + hair; others = leather saddle + 2 metal;
+  netherite = diamond saddle + netherite ingot), leatherworker trades L1-L5,
+  HorseTackSlot.dressWithBasicTack on stable horses and dealer-bought horses.
+- #294 (filed and built here): chainmail horse armour; MaterialScan collects
+  <material>_chestplate items; modded armour and saddles only for those materials, in
+  their chestplate's averaged colour; dropped armours alias to iron; rules|5.
+  Shipped tier colours measured from vanilla's chestplate icons.
+- compat/ModdedSaddles, GeneratedSaddles; the synthetic compat mod gained chestplates
+  (tin's drawn blue) and a lead ingot with none.
+- Wiki: new item-saddle.html; horse-gear, items, compatibility, config updated.
+- Split off: #295 saddlebags (sub-issue of #72, v0.5.047.2).
+
+DECIDED (without the owner; also on item-saddle.html)
+-------
+- Ladder: leather .25, copper .40, chainmail .50, iron .60, gold .70, diamond .85,
+  netherite 1.0 of the top share. Gold above iron, as the shoes.
+- Modded saddles are craft-only (no generated leatherworker trade set).
+- Chainmail armour recipe: 6 iron chains + a horse hair.
+- Each leatherworker level shows one more trade (amount +1).
+- Shoes keep every modded metal and the ingots' colours.
+
+FOUND ON THE WAY
+----------------
+- items.html still said shoes "do not change how the horse moves yet"; fixed.
+
+PROCEDURES
+----------
+None changed.
+
+NOT RUN / NOT CHECKED
+---------------------
+A player (not the owner) was on the live server all session, so no Gradle test ran.
+The background watcher was stopped for low memory; the owner chose "Commit untested,
+test later". OWED before #75 and #294 close:
+- ./gradlew :common:test --tests '*SaddlesTest' (and mutate it once)
+- ./gradlew :neoforge-26.1.2:test --tests '*MaterialScanTest'
+- runGameTest: a_saddle_adds_only_while_ridden, plus the other tack gametests
+- a runServer boot to Done(, grepped for ERROR / Couldn't parse / Invalid
+- the compat test (procedures/compat-test.txt) with the updated fake mod
+- pictures of the saddles and the chainmail armour (photograph-horses)
+Compiles: both modules, main and test, green. Node checks green: check-recipes,
+check-duplicate-item-art, bake-item-art, check-links, check-roadmap-execution,
+check-designer-boots.
+
+RELEASE
+-------
+Not offered: #75 is not closed yet.
+
+PICK UP FIRST
+-------------
+The owed tests above, then close #75 and #294 on their evidence. Next unit: #295.

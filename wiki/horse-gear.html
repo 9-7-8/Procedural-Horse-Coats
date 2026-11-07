@@ -99,7 +99,7 @@
     <tr><td><strong>Body</strong></td><td>Pad, Saddle, Barding, Blanket</td>
         <td>The pad under the saddle, the saddle, armour, and a rug or sheet for
             a horse that is not being ridden. On a horse the saddle slot takes
-            no bridle; it waits for the mod's own saddle
+            no bridle; it takes the mod's own <a href="item-saddle.html">saddle</a>
             (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).</td></tr>
     <tr><td><strong>Chest</strong></td><td>Chest</td>
         <td>A martingale or a collar, across the chest.</td></tr>
@@ -152,8 +152,8 @@
         bridle carries you as a passenger below the top bond tier, the same as a horse with
         nothing on. Its owner at the top tier steers it through the saddle. A server can turn
         this off with <code>behaviour.saddle_needs_bridle</code>, and then a saddle steers for
-        anyone, as vanilla's did. Until the mod's own saddle arrives, the only saddles a
-        horse can wear on its back are other mods'.</li>
+        anyone, as vanilla's did. The saddle on its back is the mod's own
+        (<a href="item-saddle.html">saddles</a>, 2026-11-07), or another mod's.</li>
     <li><strong>A horse you cannot steer walks on its own</strong>, with you aboard. It
         wanders and grazes as it would without you, a mare goes back to her foal, and a horse
         goes to rest beside a friend from its band. It never spars, squares up, chases off
@@ -175,8 +175,8 @@
         saddle, on the back, with its seat, and it steers as it always did.</li>
 </ul>
 <p>
-    The mod's own saddle, which carries stats, is the next piece
-    (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).
+    The mod's own saddle, which carries stats, shipped on 2026-11-07: see
+    <a href="item-saddle.html">Saddles</a> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).
 </p>
 
 <h2 id="using">Putting something on</h2>
@@ -929,8 +929,8 @@
 <p>
     <strong>Left as it was, on purpose.</strong> The bench and the tooltip still show the
     Seat row for this item, because on a donkey or a mule it is still a saddle with a seat;
-    piece 3 (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>)
-    gives the seat to the new saddle. The leatherworker's trades sell the same item and now
+    the mod's own saddle (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>, <a href="item-saddle.html#drawing">drawing it</a>)
+    reads the Seat colour, though the bench does not take that saddle yet (#227). The leatherworker's trades sell the same item and now
     read as bridles with no data change. The treatment's line that a horse is
     &ldquo;vanilla-saddled again&rdquo; if the mod is removed does not hold: the bridle sits in
     the <code>HORSE_GEAR</code> attachment, which goes with the mod like every gear slot.
@@ -994,7 +994,7 @@
     tier 3 through a saddle, the switch, bolting over a saddle) and the gametest
     <code>a_saddle_alone_carries_a_passenger</code>. It uses a stack carrying a saddle-slot
     <code>Equippable</code> that is not the vanilla saddle, which is what another mod's
-    saddle is until #75. At bond 0 the owner is a passenger, the flag is set and the horse
+    saddle is; the mod's own (<a href="item-saddle.html">#75</a>) is the same kind of item. At bond 0 the owner is a passenger, the flag is set and the horse
     counts as carrying. At bond 90 the owner steers and the flag comes down. A horse with
     nothing on is a passenger and never sets the flag.
 </p>
@@ -1463,7 +1463,7 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <table>
 <thead><tr><th>Slot</th><th>Notes</th></tr></thead>
 <tbody>
-<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. The bridle shipped first (<a href="#bridle-code">the bridle</a>, #73); the passenger-only rule followed (<a href="#passenger-only">a saddle alone</a>, #74); what is left is the mod's own saddle with its stats (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>).</td></tr>
+<tr><td><strong>Saddle</strong>, <strong>bridle</strong></td><td>Split apart, where vanilla has one saddle. The bridle shipped first (<a href="#bridle-code">the bridle</a>, #73); the passenger-only rule followed (<a href="#passenger-only">a saddle alone</a>, #74); the mod's own saddle with its stats followed on 2026-11-07 (<a href="item-saddle.html">saddles</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/75">#75</a>); its saddlebags are what is left.</td></tr>
 <tr><td><strong>Halter</strong></td><td>Headgear with no bit &mdash; what you put on a horse you are <em>not</em> riding, and the prerequisite for <a href="horse-care.html#ground-work">ground work</a>. Deliberately distinct from the bridle above: a haltered horse can be led and lunged but not steered, so the two are not a tier and neither substitutes for the other. From <a href="https://www.curseforge.com/minecraft/mc-mods/simply-equine">Simply Equine</a>.</td></tr>
 <tr><td><strong>Barding</strong></td><td>Horse armour as it exists now, renamed to what it is.</td></tr>
 <tr><td><strong>Saddle pad</strong></td><td>See the dedicated <a href="saddle-pads.html">saddle-pad roadmap</a>.</td></tr>
@@ -1853,9 +1853,8 @@ public record HorseGearRenderSpec(String mesh, String sourcePart, float inflatio
 <p>
     See <a href="#passenger-only">the Coding tab</a>. The rule and the server side are proved by
     <code>ReinsTest</code> and <code>a_saddle_alone_carries_a_passenger</code>. The client side
-    is not: the synced flag and the mixin have never met a real rider's client. Until #75 a test
-    needs another mod's saddle, or <code>/item replace entity @e[type=horse,limit=1,sort=nearest]
-    saddle with leather[equippable={slot:"saddle"}]</code>.
+    is not: the synced flag and the mixin have never met a real rider's client. Any of the mod's
+    <a href="item-saddle.html">saddles</a> (2026-11-07) is a saddle to test it with.
 </p>
 <ol>
     <li><strong>The passenger.</strong> Mount a tamed horse at low bond wearing a saddle and no

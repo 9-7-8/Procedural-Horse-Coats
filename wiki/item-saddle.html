@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saddles &middot; Horse Genetics Wiki</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="styles.css">
+<script defer src="pages.js"></script>
+<script defer src="tabs.js"></script>
+<script defer src="nav.js"></script>
+<script defer src="search.js"></script>
+<script defer src="assets/item-art/names.js"></script>
+<script defer src="item-art.js"></script>
+</head>
+<body>
+<main class="content">
+<article class="doc">
+
+<p class="eyebrow core">Horse gear <span class="sep">/</span> the saddle slot</p>
+<h1>Saddles</h1>
+<p class="lede">
+    On a horse the vanilla saddle is the <a href="horse-gear.html#bridle">bridle</a>, and it steers.
+    The <strong>saddle</strong> is this mod's own item, worn in the Saddle slot beside it: it makes
+    the ride. While a player is aboard, a saddle adds a share of the horse's own speed and jump,
+    up to <strong>10% at the top tier</strong>. It comes in every material a chestplate is made of
+    (leather, copper, chainmail, iron, gold, diamond and netherite), and in every material another
+    mod makes a chestplate of. Horse armour now follows the same rule, which adds
+    <strong>chainmail horse armour</strong>.
+</p>
+
+<div class="item-art" data-items="saddle,chainmail_horse_armor"></div>
+
+<section class="tab-panel" data-tab="gameplay">
+
+<h2 id="what-it-is">What a saddle is</h2>
+<p>
+    A horse used to need one item to be ridden, and that item did everything. Now there are two.
+    The <strong>bridle</strong> (what vanilla calls a saddle) goes on the head and lets a rider
+    steer. The <strong>saddle</strong> goes on the back and carries the rider better. A horse can
+    wear either, both or neither:
+</p>
+<ul>
+    <li><strong>Bridle and saddle:</strong> you steer, and the saddle adds its bonus.</li>
+    <li><strong>Bridle only:</strong> you steer, at the horse's own speed and jump.</li>
+    <li><strong>Saddle only:</strong> below bond tier 3 you are a
+        <a href="horse-gear.html#passenger-only">passenger</a>; the horse walks where it likes,
+        and the saddle's bonus is still on while you sit there.</li>
+</ul>
+<p>Donkeys, mules and llamas keep vanilla's saddle; this one fits horses only.</p>
+
+<h2 id="tiers">The tiers</h2>
+<p>
+    Every saddle is leather first. A metal saddle is a leather saddle with that metal's fittings,
+    so you cannot make a saddle without leather. Its fittings are the colour of the matching
+    chestplate. The bonus is a share of the horse's own numbers,
+    so a saddle is worth the same proportion on a slow horse as on a fast one. With the default
+    settings:
+</p>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Saddle</th><th>While ridden</th><th>Made from</th><th>Leatherworker</th></tr></thead>
+<tbody>
+<tr><td>Leather</td><td>+2.5% speed and jump</td><td>3 leather, a horse hair</td><td>Novice, 6 emeralds</td></tr>
+<tr><td>Copper</td><td>+4%</td><td>a leather saddle, 2 copper ingots</td><td>Apprentice, 9</td></tr>
+<tr><td>Chainmail</td><td>+5%</td><td>a leather saddle, 2 iron chains</td><td>&mdash;</td></tr>
+<tr><td>Iron</td><td>+6%</td><td>a leather saddle, 2 iron ingots</td><td>Journeyman, 14</td></tr>
+<tr><td>Golden</td><td>+7%</td><td>a leather saddle, 2 gold ingots</td><td>Expert, 18</td></tr>
+<tr><td>Diamond</td><td>+8.5%</td><td>a leather saddle, 2 diamonds</td><td>Master, 26</td></tr>
+<tr><td>Netherite</td><td>+10%</td><td>a diamond saddle, a netherite ingot</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+<p>
+    Another mod's material gets a saddle of its own if that mod also makes a chestplate of it: a
+    gem saddle is worth what diamond is, an ingot saddle what iron is. It is made from a leather
+    saddle and two of the ingot or gem, and is not sold.
+</p>
+
+<h2 id="getting-one">Getting one</h2>
+<p>
+    Craft it, or buy the leather, copper, iron, golden or diamond one from the equestrian
+    leatherworker. Horses in a <a href="stables.html">generated stable</a>, and horses you buy from
+    a dealer with transfer papers, come already wearing a bridle and a leather saddle. When the
+    <a href="horse-gear.html">tack bench</a> is built, it will make every saddle instead.
+</p>
+
+<h2 id="wearing-one">Putting it on</h2>
+<p>
+    Right-click a tamed adult horse with the saddle, or put it in the Saddle slot of the horse's
+    Gear tab. Shears take it off, as they do vanilla's. The horse's own screen shows its speed and
+    jump <em>without</em> the saddle, because the bonus belongs to the ride, not to the horse.
+</p>
+
+<h2 id="armour-rule">Horse armour in the same materials</h2>
+<p>
+    Horse armour and saddles come in the same materials: every material a chestplate is made of.
+    Vanilla already makes horse armour in six of the seven; this mod adds
+    <strong>chainmail horse armour</strong> (6 iron chains and a horse hair), which protects as much
+    as chainmail does, between copper and iron. Another mod's metal gets a horse armour only if that
+    mod also makes a chestplate of it. If a metal used to have a horse armour and no longer
+    qualifies, an old copy in your world loads as iron horse armour.
+</p>
+
+</section>
+
+<section class="tab-panel" data-tab="coding">
+
+<h2 id="how-it-is-built">How it is built</h2>
+
+<h3 id="rule">The rule: <code>common/gear/Saddles</code></h3>
+<p>
+    <code>Saddles.Tier</code> is the seven shipped materials, each with its item id, its fittings
+    colour (what vanilla's chestplate icon of that material averages to, measured from the 26.1.2
+    jar with <code>MaterialScan.averageColour</code>; leather under vanilla's default dye) and its <code>share</code> of the top tier's bonus (leather 0.25, copper 0.40, chainmail
+    0.50, iron 0.60, gold 0.70, diamond 0.85, netherite 1.00). <code>Saddles.Rates</code> holds
+    the server's switch and the top tier's speed and jump, capped at
+    <code>MAX_TOP_BONUS</code>. <code>Saddles.bonus(rates, tier, ridden)</code> is the only place
+    the bonus is worked out, and it is <code>NONE</code> unless a player rides.
+    <code>tierOf(gem)</code> puts another mod's material on the diamond or the iron rung, as the
+    shoes and the armour do. Unit test: <code>SaddlesTest</code>.
+</p>
+
+<h3 id="items">The items: <code>item/HorseSaddleItem</code></h3>
+<p>
+    One item per material, registered from <code>Saddles.Tier</code> in
+    <code>ModItems.HORSE_SADDLES</code> and from <code>compat/ModdedSaddles</code> for other mods.
+    <code>HorseSaddleItem.properties</code> gives each one an <code>Equippable</code> for
+    <code>EquipmentSlot.SADDLE</code> built like vanilla's <code>Equippable.saddle()</code>, except
+    that its allowed entities are <code>minecraft:horse</code> alone and its asset is
+    <code>horsegenetics:saddle</code>. Because it is a real equippable for the vanilla slot,
+    <code>isSaddled()</code>, equip on right-click, shearing and the Gear tab's
+    <code>HorseTackSlot.SADDLE</code> all work with no new path. <code>Reins</code> already treats
+    anything real in that slot as "a saddle" (#74).
+</p>
+
+<h3 id="drawing">Drawing it</h3>
+<p>
+    The equipment asset <code>assets/horsegenetics/equipment/saddle.json</code> has two
+    <code>horse_saddle</code> layers: vanilla's seat leather (<code>minecraft:saddle</code>) and the
+    hardware that sits on the seat (<code>horsegenetics:saddle_fittings</code>, the stirrups and
+    their buckles). The bridle and the bit are not in it; they are the bridle's, drawn from the
+    Headstall. <code>saddle_fittings.png</code> is the complement of <code>bridle_metal.png</code>
+    within vanilla's hardware: 16 of its 36 texels, baked by
+    <code>tools/tack/bake-saddle-textures.ps1</code>. <code>client/TackClientExtensions</code>
+    tints layer 1 with the item's own colour and layer 0 with a bench-dyed seat colour if there is
+    one. The icon is <code>item/saddle</code> (leather, untinted) under
+    <code>item/saddle_fittings</code> (greys, tinted by <code>client/MetalTintSource</code>), drawn
+    in <code>tools/bake-drawn-items.mjs</code> as a placeholder.
+</p>
+
+<h3 id="effects">What it does: <code>server/SaddleEffects</code></h3>
+<p>
+    Two transient <code>ADD_MULTIPLIED_BASE</code> modifiers, <code>horsegenetics:saddle/speed</code>
+    and <code>saddle/jump</code>, held at <code>Saddles.bonus</code>'s answer. Nothing ticks: it
+    runs on <code>LivingEquipmentChangeEvent</code> for the saddle slot, on
+    <code>EntityMountEvent</code> (lowest priority, counting the player in or out by hand because
+    the event fires before the passenger list changes), and on join.
+    <code>SaddleEffects.withoutSaddle</code> takes the share back out, and
+    <code>HorseInfoScreen</code> shows that number.
+</p>
+
+<h3 id="dressing">Horses that come tacked up</h3>
+<p>
+    <code>HorseTackSlot.dressWithBasicTack</code> puts a bridle in an empty Headstall and a leather
+    saddle in an empty saddle slot, on adult horses only. <code>StablePopulator.spawnHorse</code>
+    calls it, and so does <code>TransferPaperHandler</code> when the paper's horse had no previous
+    owner (a dealer's stock), as decided while scoping #72.
+</p>
+
+<h3 id="chestplate-rule">The chestplate rule: <code>compat/MaterialScan</code></h3>
+<p>
+    <code>MaterialScan</code> also collects every material some jar ships a
+    <code>&lt;material&gt;_chestplate</code> item for (<code>assets/&lt;ns&gt;/items/</code> or the
+    older <code>models/item/</code>), into <code>Result.chestplates</code>.
+    It also averages each chestplate's own icon, and <code>chestplateMetals</code> is
+    <code>armourMetals</code> cut to those materials and recoloured to their chestplates (owner,
+    2026-11-07; a chestplate with no readable art keeps the ingot's colour). The shoes keep the
+    ingots' colours. <code>ModdedArmour</code>, <code>GeneratedArmour</code> and
+    <code>ModdedSaddles</code> read it, and
+    <code>ModdedShoes</code> still reads <code>armourMetals</code>, so every metal keeps its shoe. An
+    armour whose material has no chestplate goes into <code>droppedArmours</code>, which aliases
+    it to iron horse armour (and its would-be saddle to the iron saddle). The fingerprint's rules
+    number went to 5 and lists the chestplates, so packs generated before this are rebuilt.
+    Chainmail horse armour is <code>ModItems.CHAINMAIL_HORSE_ARMOR</code>: chainmail's
+    <code>ArmorMaterial</code> with its own asset, the shipped plate tinted chain grey, because
+    vanilla's chainmail asset has no horse layer.
+</p>
+
+<h3 id="saddle-config">The settings</h3>
+<ul>
+    <li><code>saddles.enabled</code> (server, default on): off, saddles are worn and drawn and add
+        nothing.</li>
+    <li><code>saddles.top_speed</code>, <code>saddles.top_jump</code> (server, default 0.1, range
+        0 to 0.25): what the netherite saddle adds. Every other tier is its fixed share of these.
+        A changed number reaches a horse the next time a player gets on.</li>
+</ul>
+
+<h3 id="tests">What is tested</h3>
+<ul>
+    <li><code>SaddlesTest</code>: the ceiling, nothing while unridden, the ladder climbs, the config
+        caps, and the ids.</li>
+    <li><code>MaterialScanTest</code>: only a material with a chestplate gets armour and a saddle,
+        the shoes keep every metal, the older model file counts and our own does not, and a new
+        chestplate moves the fingerprint.</li>
+    <li>Gametest <code>a_saddle_adds_only_while_ridden</code>: fits a horse and not a donkey,
+        chainmail armour fits the body slot, no bonus unridden, the top share while ridden, the
+        screen's number is the horse's own, gone after dismount, and
+        <code>dressWithBasicTack</code>.</li>
+</ul>
+
+</section>
+
+<section class="tab-panel" data-tab="science">
+
+<h2 id="design-reasoning">Design reasoning</h2>
+<p>
+    The bonus is small and capped, so breeding stays what makes a fast horse (owner, 2026-10-09:
+    10% at the top tier, set in config). It is a share rather than a flat amount so a good saddle
+    never matters more to a poor horse than to a good one. It applies only while a player rides,
+    because the treatment says the saddle's stats belong to the ride and not to the horse, and the
+    horse's screen leaves it out for the same reason.
+</p>
+<p>
+    The materials are the chestplate's (owner, 2026-11-07) because a saddle is armour-adjacent
+    leatherwork, and armour follows the same rule so the two never disagree about which metals
+    exist. Gold sits above iron as it does for the shoes: the gold-fitted saddle is the show
+    saddle.
+</p>
+
+</section>
+
+<section id="verification" class="tab-panel" data-tab="verification" data-tab-label="Verification"
+         data-tab-hint="Built, not yet seen in game">
+
+<div class="note verify-summary">
+    <span class="label">What needs verifying here</span>
+    <p>
+        Saddles and chainmail horse armour were built on 2026-11-07 with their fit, their
+        rider-only bonus and the chestplate scan covered by tests, and nobody has crafted, bought,
+        worn or ridden with one in a game, or run the chestplate rule beside a real mod.
+    </p>
+</div>
+
+<h3 id="verify-saddle-look">The look (2026-11-07, NOT played)</h3>
+<ul>
+    <li><strong>Seven saddles in the creative tab</strong>, a brown seat with fittings in each
+        material's colour, none purple-and-black.</li>
+    <li><strong>On a horse:</strong> the seat and stirrups, with no second bridle drawn over the
+        Headstall's. A leather saddle's fittings are brown; netherite's are dark.</li>
+    <li><strong>Chainmail horse armour</strong> shows as grey plate, edged like the rest.</li>
+</ul>
+
+<h3 id="verify-saddle-ride">The ride (2026-11-07, NOT played)</h3>
+<ul>
+    <li>Ride a bridled horse, then put a netherite saddle on it: the horse should be noticeably
+        but slightly faster (about a tenth) and jump a little higher, and its screen's Speed and
+        Jump should not change.</li>
+    <li>Get off: the horse's wandering speed should be its own.</li>
+    <li>A donkey should refuse the saddle on right-click.</li>
+</ul>
+
+<h3 id="verify-saddle-sources">Getting them (2026-11-07, NOT played)</h3>
+<ul>
+    <li>Each recipe crafts in a survival grid, and the Recipes tab shows a line for each.</li>
+    <li>A novice equestrian leatherworker shows four trades, one usually the leather saddle.</li>
+    <li>A horse in a freshly generated stable wears a bridle and a leather saddle; a horse bought
+        from the cowboy and redeemed does too.</li>
+</ul>
+
+<h3 id="verify-chestplate-rule">The chestplate rule beside a real mod (2026-11-07)</h3>
+<ul>
+    <li>In a pack with a mod that makes both an ingot and a chestplate of it, that metal has a
+        horse armour and a saddle; a metal with no chestplate has a shoe only. The
+        <code>compat:</code> log line counts how many have a chestplate. The synthetic mod
+        (<code>procedures/compat-test.txt</code>) does not yet ship a chestplate, so it would now
+        show no modded armour.</li>
+</ul>
+
+</section>
+
+<section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
+         data-tab-hint="Planned, not built">
+
+<div class="note roadmap-summary">
+    <span class="label">What is still planned here</span>
+    <p>
+        Saddlebags are the saddle's next piece, then the saddle is made at the tack bench, dyed
+        there by its seat, and repainted by the owner.
+    </p>
+</div>
+
+<h2 id="implementation-plan">What is left</h2>
+<ol>
+    <li><strong>Saddlebags</strong> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/295">#295</a>, split off #75): carry
+        capacity from the saddle, and how the bags slots and the pad slot read it.</li>
+    <li><strong>Made at the tack bench</strong> (#226), replacing the crafting recipes.</li>
+    <li><strong>Dyed seat</strong> (#227): the drawing already reads a <code>TACK_TINT</code>
+        seat colour; the bench does not yet take the mod's saddle.</li>
+    <li><strong>Art</strong>: the icon and the fittings are generated placeholders for the owner
+        to repaint.</li>
+</ol>
+
+</section>
+
+<div class="page-foot">
+    <div class="seealso">
+        <a href="horse-gear.html">Horse gear</a>
+        <a href="item-horse-shoes.html">Horse shoes</a>
+        <a href="compatibility.html">Compatibility</a>
+        <a href="items.html">Items &amp; recipes</a>
+    </div>
+    Source: <code>common/gear/Saddles</code>, <code>item/HorseSaddleItem</code>,
+    <code>server/SaddleEffects</code>, <code>entity/HorseTackSlot</code>,
+    <code>compat/ModdedSaddles</code>, <code>compat/GeneratedSaddles</code>,
+    <code>compat/MaterialScan</code>, <code>client/TackClientExtensions</code>.
+</div>
+
+</article>
+</main>
+</body>
+</html>

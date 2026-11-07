@@ -3426,6 +3426,21 @@ wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each
 wiki/item-research-shelf.html#storage	coding	Real slots, one paper per allele pair
 wiki/item-research-shelf.html#use	gameplay	What it does
 wiki/item-research-shelf.html#verified	coding	Verified
+wiki/item-saddle.html#armour-rule	gameplay	Horse armour in the same materials
+wiki/item-saddle.html#chestplate-rule	coding	The chestplate rule: compat/MaterialScan
+wiki/item-saddle.html#design-reasoning	science	Design reasoning
+wiki/item-saddle.html#drawing	coding	Drawing it
+wiki/item-saddle.html#dressing	coding	Horses that come tacked up
+wiki/item-saddle.html#effects	coding	What it does: server/SaddleEffects
+wiki/item-saddle.html#getting-one	gameplay	Getting one
+wiki/item-saddle.html#how-it-is-built	coding	How it is built
+wiki/item-saddle.html#items	coding	The items: item/HorseSaddleItem
+wiki/item-saddle.html#rule	coding	The rule: common/gear/Saddles
+wiki/item-saddle.html#saddle-config	coding	The settings
+wiki/item-saddle.html#tests	coding	What is tested
+wiki/item-saddle.html#tiers	gameplay	The tiers
+wiki/item-saddle.html#wearing-one	gameplay	Putting it on
+wiki/item-saddle.html#what-it-is	gameplay	What a saddle is
 wiki/item-seed-jars.html#gaps	coding	Known gaps
 wiki/item-seed-jars.html#storage	coding	What the jar stores
 wiki/item-seed-jars.html#use	gameplay	How to use one
