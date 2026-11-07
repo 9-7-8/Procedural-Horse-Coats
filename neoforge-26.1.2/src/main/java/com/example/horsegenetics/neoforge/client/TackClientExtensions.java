@@ -34,6 +34,19 @@ public final class TackClientExtensions implements IClientItemExtensions {
     public int getArmorLayerTintColor(ItemStack stack, EquipmentClientInfo.Layer layer,
                                       int layerIdx, int fallbackColor) {
         SaddleTint tint = stack.get(ModDataComponents.TACK_TINT.get());
+        int fittings = com.example.horsegenetics.neoforge.item.HorseSaddleItem.tintOf(stack);
+        if (fittings != 0) {
+            // The mod's saddle (#75): two layers, the seat then its own fittings.
+            // The fittings are the saddle's material - the item, not a dye - and
+            // the seat takes the bench's seat colour when it has one.
+            if (layerIdx == 1) {
+                return fittings;
+            }
+            if (tint != null && tint.forLayer(SaddleTint.LAYER_SEAT) != -1) {
+                return ARGB.opaque(tint.forLayer(SaddleTint.LAYER_SEAT));
+            }
+            return IClientItemExtensions.super.getArmorLayerTintColor(stack, layer, layerIdx, fallbackColor);
+        }
         if (tint != null && com.example.horsegenetics.neoforge.client.gear.BridleDraw.isDrawn(stack)) {
             // A bridle on a horse's head (#73) is drawn with two layers, bridle
             // leather then hardware - the seat zone has nothing to colour.

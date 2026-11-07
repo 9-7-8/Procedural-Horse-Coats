@@ -256,6 +256,57 @@ const ITEMS = [
       '................',
     ],
   },
+  {
+    id: 'saddle',
+    // The mod's saddle (#75), layer 0: the leather, which every saddle is made
+    // of (owner, 2026-11-07), so it is drawn in its own browns and never
+    // tinted. Side on: cantle, seat, pommel, flap and the stirrup leather.
+    // A placeholder for the owner to repaint.
+    palette: { L: 'a5714a', l: '8a5a3b', d: '5e3b25' },
+    map: [
+      '................',
+      '................',
+      '..LL........LL..',
+      '..lLl......lLl..',
+      '...lLLLLLLLLl...',
+      '...llLLLLLLll...',
+      '..dllllllllllld.',
+      '..ddlllllllldd..',
+      '....dddddddd....',
+      '......dl........',
+      '......dl........',
+      '......dl........',
+      '................',
+      '................',
+      '................',
+      '................',
+    ],
+  },
+  {
+    id: 'saddle_fittings',
+    // Layer 1: the fittings, in greys, so the saddle's material is a tint laid
+    // over them (client/MetalTintSource) - one sprite for every tier and every
+    // modded material, as the horse shoe is. A ring at the front, a stirrup.
+    palette: { h: 'ffffff', m: 'd9d9d9', d: '9a9a9a' },
+    map: [
+      '................',
+      '................',
+      '................',
+      '................',
+      '................',
+      '................',
+      '...h............',
+      '...d............',
+      '................',
+      '................',
+      '................',
+      '................',
+      '.....mmmm.......',
+      '.....m..d.......',
+      '.....hhhd.......',
+      '................',
+    ],
+  },
 ];
 
 let wrote = 0;

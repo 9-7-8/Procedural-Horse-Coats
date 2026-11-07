@@ -56,6 +56,12 @@ public final class MetalTintSource implements ItemTintSource {
         if (shoe != 0) {
             return shoe;
         }
+        // So does a saddle (#75): the fittings' colour, the same number the
+        // fittings on the horse are drawn in.
+        int saddle = com.example.horsegenetics.neoforge.item.HorseSaddleItem.tintOf(stack);
+        if (saddle != 0) {
+            return saddle;
+        }
         if (colours == null) {
             Map<String, Integer> built = new HashMap<>();
             for (ModdedArmour.Armour armour : ModdedArmour.armours()) {

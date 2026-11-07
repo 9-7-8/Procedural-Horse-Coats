@@ -29,6 +29,11 @@
 //   horsegenetics:ruby_horse_armor                     red, from c:gems/ruby
 //   horsegenetics:entro_horse_armor                    ONE, from a colliding pair
 //   horsegenetics:hellforged_horse_armor               NOT ingot_hellforged_*
+//   a tin, ruby, entro and hellforged SADDLE beside each armour (#75), and
+//   NO lead_horse_armor and NO lead_saddle - lead has an ingot and no
+//   chestplate (the chestplate rule, #294) - but a lead_horse_shoe
+//   a horse shoe for every one of the five metals
+//   the tin armour and saddle BLUE (tin's chestplate), the tin shoe near-white
 //
 // The two metals are deliberately different: tin is an INGOT drawn in near-grey
 // and ruby is a GEM drawn in saturated red, so the averaged colour and the
@@ -210,6 +215,22 @@ const entries = [
   ["data/c/tags/item/ingots/hellforged.json",
     JSON.stringify({ values: [`${MOD_ID}:ingot_hellforged`] }, null, 2)],
   [`assets/${MOD_ID}/textures/item/ingot_hellforged.png`, png(16, [0x3A, 0x1A, 0x14])],
+
+  // --- the chestplate rule (#294, #75) ------------------------------------
+  // Horse armour and the saddle come only in a material some mod makes a
+  // chestplate of. The four above each ship one, so they keep their armour;
+  // lead ships an ingot and no chestplate, so it gets a shoe and nothing else.
+  // Without these four files this jar would silently stop testing armour.
+  ...["tin", "ruby", "entro", "hellforged"].map(m => [`assets/${MOD_ID}/items/${m}_chestplate.json`,
+    JSON.stringify({ model: { type: "minecraft:model", model: `${MOD_ID}:item/${m}_chestplate` } }, null, 2)]),
+  // Tin's chestplate is drawn BLUE, unlike its near-white ingot: the tin armour
+  // and saddle should come out blue (their chestplate's colour) and the tin
+  // shoe near-white (its ingot's). The other three have no chestplate art, so
+  // they keep their ingots' colours.
+  [`assets/${MOD_ID}/textures/item/tin_chestplate.png`, png(16, [0x20, 0x40, 0xC0])],
+  ["data/c/tags/item/ingots/lead.json",
+    JSON.stringify({ values: [`${MOD_ID}:lead_ingot`] }, null, 2)],
+  [`assets/${MOD_ID}/textures/item/lead_ingot.png`, png(16, [0x5C, 0x5E, 0x72])],
 ];
 
 mkdirSync(MODS, { recursive: true });

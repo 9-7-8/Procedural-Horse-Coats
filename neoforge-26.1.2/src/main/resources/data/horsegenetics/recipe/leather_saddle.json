@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:leather",
+    "minecraft:leather",
+    "minecraft:leather",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "id": "horsegenetics:leather_saddle"
+  }
+}

@@ -453,6 +453,49 @@ public final class ModItems {
         return List.copyOf(shoes);
     }
 
+    // --- the mod's saddle (#75) --------------------------------------------
+    // One per material a chestplate is made of (owner, 2026-11-07); a material
+    // another mod makes a chestplate of gets its own from compat/ModdedSaddles.
+    // The ids, colours and bonuses are common.gear.Saddles.Tier's. Crafted:
+    // a leather saddle first, then that saddle and a metal (every saddle needs
+    // leather - owner), until the tack bench (#226) takes over all tack.
+    public static final List<DeferredItem<HorseSaddleItem>> HORSE_SADDLES = saddles();
+
+    private static List<DeferredItem<HorseSaddleItem>> saddles() {
+        List<DeferredItem<HorseSaddleItem>> saddles = new ArrayList<>();
+        for (com.example.horsegenetics.common.gear.Saddles.Tier tier
+                : com.example.horsegenetics.common.gear.Saddles.Tier.values()) {
+            saddles.add(register(tier.id(),
+                    properties -> new HorseSaddleItem(tier.rgb(), tier, HorseSaddleItem.properties(properties))));
+        }
+        return List.copyOf(saddles);
+    }
+
+    /** The cheapest saddle - what the cowboy's and the stables' horses wear (treatment #72, 4b). */
+    public static DeferredItem<HorseSaddleItem> basicSaddle() {
+        return HORSE_SADDLES.get(com.example.horsegenetics.common.gear.Saddles.Tier.LEATHER.ordinal());
+    }
+
+    // --- chainmail horse armour (#294) -----------------------------------
+    // Vanilla makes horse armour of every chestplate material but chainmail.
+    // Chainmail's own body value and repair tag; drawn as the shipped plate in
+    // the grey vanilla's chainmail chestplate icon averages to, 0x939393
+    // (assets/horsegenetics/equipment/chainmail_horse_armor.json),
+    // because vanilla's chainmail asset has no horse layer.
+    public static final DeferredItem<Item> CHAINMAIL_HORSE_ARMOR = register("chainmail_horse_armor",
+            properties -> new Item(properties.horseArmor(new net.minecraft.world.item.equipment.ArmorMaterial(
+                    net.minecraft.world.item.equipment.ArmorMaterials.CHAINMAIL.durability(),
+                    net.minecraft.world.item.equipment.ArmorMaterials.CHAINMAIL.defense(),
+                    net.minecraft.world.item.equipment.ArmorMaterials.CHAINMAIL.enchantmentValue(),
+                    net.minecraft.world.item.equipment.ArmorMaterials.CHAINMAIL.equipSound(),
+                    net.minecraft.world.item.equipment.ArmorMaterials.CHAINMAIL.toughness(),
+                    net.minecraft.world.item.equipment.ArmorMaterials.CHAINMAIL.knockbackResistance(),
+                    net.minecraft.world.item.equipment.ArmorMaterials.CHAINMAIL.repairIngredient(),
+                    net.minecraft.resources.ResourceKey.create(
+                            net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
+                            net.minecraft.resources.Identifier.fromNamespaceAndPath(HorseGenetics.MOD_ID,
+                                    "chainmail_horse_armor"))))));
+
     // --- transfer papers - how a horse changes hands --------------------
     // A blank is bound to whoever crafted it and can only be signed against a
     // horse that player currently owns; signing it produces a signed paper,

@@ -348,5 +348,21 @@
   "tooltip.horsegenetics.transfer_paper.issued_by": "Made out by %s",
   "tooltip.horsegenetics.transfer_paper.redeem": "Right-click this horse to claim it",
   "tooltip.horsegenetics.transfer_paper.unbound": "Unbound - it becomes yours when you sign it",
-  "tooltip.horsegenetics.transfer_paper.unwritten": "Blank - no horse named"
+  "tooltip.horsegenetics.transfer_paper.unwritten": "Blank - no horse named",
+  "item.horsegenetics.leather_saddle": "Leather Saddle",
+  "item.horsegenetics.copper_saddle": "Copper Saddle",
+  "item.horsegenetics.chainmail_saddle": "Chainmail Saddle",
+  "item.horsegenetics.iron_saddle": "Iron Saddle",
+  "item.horsegenetics.golden_saddle": "Golden Saddle",
+  "item.horsegenetics.diamond_saddle": "Diamond Saddle",
+  "item.horsegenetics.netherite_saddle": "Netherite Saddle",
+  "item.horsegenetics.chainmail_horse_armor": "Chainmail Horse Armor",
+  "recipe.horsegenetics.leather_saddle.desc": "The mod's saddle, in plain leather. It sits in the Saddle slot beside the bridle: the bridle steers, the saddle makes the ride - a little more speed and jump while you are on, nothing while you are not.",
+  "recipe.horsegenetics.copper_saddle.desc": "A leather saddle with copper fittings. More of a ride than plain leather, while you are on.",
+  "recipe.horsegenetics.chainmail_saddle.desc": "A leather saddle with chain fittings. Between copper and iron, while you are on.",
+  "recipe.horsegenetics.iron_saddle.desc": "A leather saddle with iron fittings - also what another mod's ingot saddles are worth.",
+  "recipe.horsegenetics.golden_saddle.desc": "A leather saddle with gold fittings: the show saddle, above iron, while you are on.",
+  "recipe.horsegenetics.diamond_saddle.desc": "A leather saddle set with diamond - also what another mod's gem saddles are worth.",
+  "recipe.horsegenetics.netherite_saddle.desc": "A diamond saddle reworked in netherite: the top saddle, the server's full saddle bonus while you are on.",
+  "recipe.horsegenetics.chainmail_horse_armor.desc": "Horse armour in every material a chestplate is made of: chainmail is the one vanilla left out. Between copper and iron."
 }

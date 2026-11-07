@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "horsegenetics:diamond_saddle",
+    "minecraft:netherite_ingot"
+  ],
+  "result": {
+    "id": "horsegenetics:netherite_saddle"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "layers": {
+    "horse_body": [
+      {
+        "dyeable": {
+          "color_when_undyed": -7105645
+        },
+        "texture": "horsegenetics:plate"
+      }
+    ]
+  }
+}

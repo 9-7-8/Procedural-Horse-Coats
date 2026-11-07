@@ -440,6 +440,32 @@
       "count": 1
     },
     {
+      "id": "chainmail_horse_armor",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:iron_chain",
+        "minecraft:iron_chain",
+        "minecraft:iron_chain",
+        "minecraft:iron_chain",
+        "minecraft:iron_chain",
+        "minecraft:iron_chain",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:chainmail_horse_armor",
+      "count": 1
+    },
+    {
+      "id": "chainmail_saddle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:leather_saddle",
+        "minecraft:iron_chain",
+        "minecraft:iron_chain"
+      ],
+      "out": "horsegenetics:chainmail_saddle",
+      "count": 1
+    },
+    {
       "id": "cherry_animal_cart",
       "kind": "shaped",
       "grid": [
@@ -560,6 +586,17 @@
         "minecraft:amethyst_shard"
       ],
       "out": "horsegenetics:command_whistle",
+      "count": 1
+    },
+    {
+      "id": "copper_saddle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:leather_saddle",
+        "minecraft:copper_ingot",
+        "minecraft:copper_ingot"
+      ],
+      "out": "horsegenetics:copper_saddle",
       "count": 1
     },
     {
@@ -815,6 +852,17 @@
       "count": 1
     },
     {
+      "id": "diamond_saddle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:leather_saddle",
+        "minecraft:diamond",
+        "minecraft:diamond"
+      ],
+      "out": "horsegenetics:diamond_saddle",
+      "count": 1
+    },
+    {
       "id": "dilution_gene_splice_carrot",
       "kind": "shapeless",
       "in": [
@@ -912,6 +960,17 @@
       "count": 1
     },
     {
+      "id": "golden_saddle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:leather_saddle",
+        "minecraft:gold_ingot",
+        "minecraft:gold_ingot"
+      ],
+      "out": "horsegenetics:golden_saddle",
+      "count": 1
+    },
+    {
       "id": "golden_storage_harness",
       "kind": "shapeless",
       "in": [
@@ -991,6 +1050,17 @@
         "minecraft:book"
       ],
       "out": "horsegenetics:intermediate_stasis_chamber",
+      "count": 1
+    },
+    {
+      "id": "iron_saddle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:leather_saddle",
+        "minecraft:iron_ingot",
+        "minecraft:iron_ingot"
+      ],
+      "out": "horsegenetics:iron_saddle",
       "count": 1
     },
     {
@@ -1279,6 +1349,18 @@
       "type": "horsegenetics:known_gene_splice"
     },
     {
+      "id": "leather_saddle",
+      "kind": "shapeless",
+      "in": [
+        "minecraft:leather",
+        "minecraft:leather",
+        "minecraft:leather",
+        "horsegenetics:horse_hair"
+      ],
+      "out": "horsegenetics:leather_saddle",
+      "count": 1
+    },
+    {
       "id": "leatherworkers_post",
       "kind": "shapeless",
       "in": [
@@ -1449,6 +1531,16 @@
         "minecraft:iron_ingot"
       ],
       "out": "horsegenetics:metalsmiths_post",
+      "count": 1
+    },
+    {
+      "id": "netherite_saddle",
+      "kind": "shapeless",
+      "in": [
+        "horsegenetics:diamond_saddle",
+        "minecraft:netherite_ingot"
+      ],
+      "out": "horsegenetics:netherite_saddle",
       "count": 1
     },
     {

@@ -347,6 +347,24 @@ public enum HorseTackSlot {
         return horse instanceof Horse;
     }
 
+    /**
+     * <b>Dress a horse that comes with its tack</b>: a bridle in the Headstall and
+     * the basic (leather) saddle in the saddle slot, each only where the slot is
+     * empty (owner, 2026-10-02: the cowboy's and the stables' horses wear both).
+     * Horses only, as the bridle is; donkeys keep vanilla's saddle.
+     */
+    public static void dressWithBasicTack(AbstractHorse horse) {
+        if (!wearsBridles(horse) || horse.isBaby()) {
+            return;
+        }
+        if (HEADSTALL.on(horse).isEmpty()) {
+            HEADSTALL.set(horse, new ItemStack(Items.SADDLE));
+        }
+        if (SADDLE.on(horse).isEmpty()) {
+            SADDLE.set(horse, new ItemStack(com.example.horsegenetics.neoforge.item.ModItems.basicSaddle().get()));
+        }
+    }
+
     /** Whether this horse wears a bridle in its Headstall. */
     public static boolean bridled(AbstractHorse horse) {
         return wearsBridles(horse) && isBridle(HEADSTALL.on(horse));

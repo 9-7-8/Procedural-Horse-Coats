@@ -226,6 +226,12 @@ public final class TransferPaperHandler {
         horse.setOwner(player);
         horse.setTamed(true);
         CowboyHandler.clearBrand(horse); // it has an owner now; it is not their stock any more
+        if (previousOwner == null) {
+            // Bought from a dealer: it comes tacked up, a bridle and a leather
+            // saddle (owner, 2026-10-02, #75). A horse handed over between
+            // players keeps whatever its last owner left on it.
+            com.example.horsegenetics.neoforge.entity.HorseTackSlot.dressWithBasicTack(horse);
+        }
         // And every jockey pass the previous owner lent out - see the note on
         // HorseGiveCommand.clearJockeyPasses. A redeemed paper is a sale, and a
         // sale should not come with riders attached.

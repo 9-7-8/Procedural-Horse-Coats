@@ -188,9 +188,21 @@ foreach ($folder in $FOLDERS) {
         }
       }
     }
+    # And its complement (#75): the hardware that IS on the seat - the
+    # stirrups and their buckles - which the mod's own saddle draws as its
+    # fittings (assets/horsegenetics/equipment/saddle.json), tinted to its material.
+    $seatMetal = New-Object System.Drawing.Bitmap($w,$h)
+    for ($y = 0; $y -lt $h; $y++) {
+      for ($x = 0; $x -lt $w; $x++) {
+        $m = $img.METAL.GetPixel($x, $y)
+        if ($m.A -gt 0 -and $zoneOf["$x,$y"] -eq 'SEAT') { $seatMetal.SetPixel($x, $y, $m) } else { $seatMetal.SetPixel($x, $y, $clear) }
+      }
+    }
     $img.BRIDLE.Save((Join-Path $bridleDir 'bridle.png'), [System.Drawing.Imaging.ImageFormat]::Png)
     $bridleMetal.Save((Join-Path $bridleDir 'bridle_metal.png'), [System.Drawing.Imaging.ImageFormat]::Png)
+    $seatMetal.Save((Join-Path $bridleDir 'saddle_fittings.png'), [System.Drawing.Imaging.ImageFormat]::Png)
     $bridleMetal.Dispose()
+    $seatMetal.Dispose()
     if ($headMetal -le 0 -or $headMetal -ge $count.METAL) { $anyFailed = $true }
     Write-Output ("{0,-24} bridle metal {1} of {2} (the rest is on the seat)" -f 'horsegenetics:bridle', $headMetal, $count.METAL)
   }

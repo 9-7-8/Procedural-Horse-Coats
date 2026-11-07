@@ -320,6 +320,8 @@ public final class StablePopulator {
         BreedFounderLog.founder(rolled.breed(), rolled.founder(), "stable");
         record = record.withBreed(rolled.breed().id());
         HorseRecords.apply(horse, record);
+        // A stable's horses are kept tacked up (owner, 2026-10-02, #75).
+        com.example.horsegenetics.neoforge.entity.HorseTackSlot.dressWithBasicTack(horse);
         level.addFreshEntity(horse);
         return true;
     }

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "horsegenetics:item/saddle",
+    "layer1": "horsegenetics:item/saddle_fittings"
+  }
+}

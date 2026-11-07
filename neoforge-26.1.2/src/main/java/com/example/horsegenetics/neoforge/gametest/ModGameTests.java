@@ -2436,6 +2436,8 @@ public final class ModGameTests {
         register(event, environment, THE_BRIDLE_GOES_ON_THE_HEAD, 100);
         // Two horses, two riders; waits for the steering tick twice.
         register(event, environment, A_SADDLE_ALONE_CARRIES_A_PASSENGER, 100);
+        // One horse, one rider, a donkey; mount, wait, dismount, wait.
+        register(event, environment, A_SADDLE_ADDS_ONLY_WHILE_RIDDEN, 100);
         register(event, environment, SHOES_FIT_THEIR_HOOVES, 100);
         register(event, environment, SHOES_ADD_THEIR_BONUS, 100);
         register(event, environment, A_SHOD_HORSE_STANDS_ON_POWDER_SNOW, 100);
@@ -4531,6 +4533,109 @@ public final class ModGameTests {
                 rider.stopRiding();
                 other.stopRiding();
                 helper.succeed();
+            });
+        });
+    }
+
+    /**
+     * <b>The mod's saddle (#75) goes on a horse, adds its share only while a
+     * player rides, and the horse's own screen never shows it.</b>
+     * <ul>
+     *   <li>The netherite saddle fits a tamed horse's saddle slot and not a
+     *       donkey's; chainmail horse armour (#294) fits the body slot.</li>
+     *   <li>Saddled and unridden: no modifier on speed or jump.</li>
+     *   <li>A player aboard: each carries the server's top share, and
+     *       {@code SaddleEffects.withoutSaddle} reads the horse's own number.</li>
+     *   <li>The player off: both modifiers gone.</li>
+     *   <li>{@code dressWithBasicTack} puts a bridle on the head and a leather
+     *       saddle in the slot, as the stables and the cowboy's sales do.</li>
+     * </ul>
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> A_SADDLE_ADDS_ONLY_WHILE_RIDDEN =
+            TEST_FUNCTIONS.register("a_saddle_adds_only_while_ridden",
+                    () -> ModGameTests::aSaddleAddsOnlyWhileRidden);
+
+    private static void aSaddleAddsOnlyWhileRidden(GameTestHelper helper) {
+        var saddleSlot = net.minecraft.world.entity.EquipmentSlot.SADDLE;
+        var speedAttr = net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+        var jumpAttr = net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH;
+        var speedId = com.example.horsegenetics.neoforge.server.SaddleEffects.SPEED_ID;
+        var jumpId = com.example.horsegenetics.neoforge.server.SaddleEffects.JUMP_ID;
+        com.example.horsegenetics.common.gear.Saddles.Bonus top = com.example.horsegenetics.neoforge.ServerConfig
+                .saddleRates().of(com.example.horsegenetics.common.gear.Saddles.Tier.NETHERITE);
+        if (top.isNone()) {
+            throw new GameTestAssertException(Component.literal(
+                    "saddles.* is off in run-gametest/phc/server.toml - this test needs a bonus to see"), 0);
+        }
+        ItemStack netherite = new ItemStack(com.example.horsegenetics.neoforge.item.ModItems.HORSE_SADDLES
+                .get(com.example.horsegenetics.common.gear.Saddles.Tier.NETHERITE.ordinal()).get());
+        net.minecraft.world.entity.player.Player rider =
+                helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        net.minecraft.world.entity.animal.equine.Horse horse =
+                helper.spawn(net.minecraft.world.entity.EntityType.HORSE, BlockPos.ZERO);
+        horse.setTamed(true);
+        horse.setOwner(rider);
+        var donkey = helper.spawn(net.minecraft.world.entity.EntityType.DONKEY, new BlockPos(2, 0, 0));
+        donkey.setTamed(true);
+        if (!com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLE.accepts(horse, netherite)
+                || donkey.isEquippableInSlot(netherite, saddleSlot)) {
+            throw new GameTestAssertException(Component.literal("the saddle should fit a horse ("
+                    + com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLE.accepts(horse, netherite)
+                    + ") and not a donkey (" + donkey.isEquippableInSlot(netherite, saddleSlot) + ")"), 0);
+        }
+        ItemStack chainmail = new ItemStack(com.example.horsegenetics.neoforge.item.ModItems.CHAINMAIL_HORSE_ARMOR.get());
+        if (!horse.isEquippableInSlot(chainmail, net.minecraft.world.entity.EquipmentSlot.BODY)) {
+            throw new GameTestAssertException(Component.literal("chainmail horse armour does not fit the body slot"), 0);
+        }
+        double ownSpeed = horse.getAttributeValue(speedAttr);
+        double ownJump = horse.getAttributeValue(jumpAttr);
+        com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLE.set(horse, netherite);
+
+        helper.runAfterDelay(3L, () -> {
+            if (horse.getAttribute(speedAttr).getModifier(speedId) != null
+                    || horse.getAttribute(jumpAttr).getModifier(jumpId) != null) {
+                throw new GameTestAssertException(Component.literal(
+                        "a saddled horse with nobody on it already carries the saddle's bonus"), 0);
+            }
+            seat(rider, horse);
+            helper.runAfterDelay(3L, () -> {
+                var speed = horse.getAttribute(speedAttr).getModifier(speedId);
+                var jump = horse.getAttribute(jumpAttr).getModifier(jumpId);
+                if (rider.getVehicle() != horse) {
+                    throw new GameTestAssertException(Component.literal(
+                            "the mock rider fell off - the premise is broken, not the saddle"), 0);
+                }
+                if (speed == null || jump == null || Math.abs(speed.amount() - top.speed()) > 1e-9
+                        || Math.abs(jump.amount() - top.jump()) > 1e-9) {
+                    throw new GameTestAssertException(Component.literal("ridden, the netherite saddle should add "
+                            + top + " (speed " + speed + ", jump " + jump + ")"), 0);
+                }
+                double shown = com.example.horsegenetics.neoforge.server.SaddleEffects.withoutSaddle(horse, speedAttr);
+                if (Math.abs(shown - ownSpeed) > 1e-9 || !(horse.getAttributeValue(speedAttr) > ownSpeed)) {
+                    throw new GameTestAssertException(Component.literal("the screen's speed " + shown
+                            + " is not the horse's own " + ownSpeed + " (ridden "
+                            + horse.getAttributeValue(speedAttr) + ")"), 0);
+                }
+                rider.stopRiding();
+                helper.runAfterDelay(3L, () -> {
+                    if (horse.getAttribute(speedAttr).getModifier(speedId) != null
+                            || horse.getAttribute(jumpAttr).getModifier(jumpId) != null
+                            || Math.abs(horse.getAttributeValue(jumpAttr) - ownJump) > 1e-9) {
+                        throw new GameTestAssertException(Component.literal(
+                                "the saddle's bonus stayed after the rider got off"), 0);
+                    }
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLE.set(horse, ItemStack.EMPTY);
+                    com.example.horsegenetics.neoforge.entity.HorseTackSlot.dressWithBasicTack(horse);
+                    if (!com.example.horsegenetics.neoforge.entity.HorseTackSlot.bridled(horse)
+                            || com.example.horsegenetics.neoforge.item.HorseSaddleItem.tierOf(
+                                    horse.getItemBySlot(saddleSlot))
+                                    != com.example.horsegenetics.common.gear.Saddles.Tier.LEATHER) {
+                        throw new GameTestAssertException(Component.literal("dressed, the horse wears "
+                                + com.example.horsegenetics.neoforge.entity.HorseTackSlot.HEADSTALL.on(horse)
+                                + " and " + horse.getItemBySlot(saddleSlot)), 0);
+                    }
+                    helper.succeed();
+                });
             });
         });
     }

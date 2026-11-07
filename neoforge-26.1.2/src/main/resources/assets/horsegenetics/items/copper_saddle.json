@@ -1,0 +1,15 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "horsegenetics:item/saddle",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      },
+      {
+        "type": "horsegenetics:metal_tint"
+      }
+    ]
+  }
+}

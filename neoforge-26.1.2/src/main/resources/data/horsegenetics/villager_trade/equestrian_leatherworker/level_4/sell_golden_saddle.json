@@ -1,0 +1,11 @@
+{
+  "wants": {
+    "id": "minecraft:emerald",
+    "count": 18
+  },
+  "gives": {
+    "id": "horsegenetics:golden_saddle"
+  },
+  "max_uses": 2,
+  "xp": 12
+}

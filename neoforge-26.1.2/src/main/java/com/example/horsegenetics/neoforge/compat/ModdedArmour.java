@@ -23,7 +23,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * <b>A horse armour for every ingot and gem another mod added.</b>
+ * <b>A horse armour for every ingot and gem another mod added</b> - of the
+ * materials some mod also makes a chestplate of (#294).
  *
  * <p>One registered item per <b>material name</b>, wearing the shipped greyscale
  * plate tinted to that metal's own colour - see {@link GeneratedArmour} for the
@@ -79,18 +80,20 @@ import java.util.Set;
  */
 public final class ModdedArmour {
 
-    /** One entry per <i>armour</i>, in {@link ModdedMaterials#armourMetals()} order. */
+    /** One entry per <i>armour</i>, in {@link ModdedMaterials#chestplateMetals()} order. */
     public record Armour(ModdedMaterials.Metal metal, DeferredItem<Item> item) {
     }
 
     private static final List<Armour> ARMOURS = new ArrayList<>();
 
     static {
-        // armourMetals(), not metals(): one armour per material name, however
-        // many mods brought that material. See that method for why, and for why
-        // every one of their ingots still forges it.
+        // chestplateMetals(), not metals(): one armour per material name, however
+        // many mods brought that material (see armourMetals for why, and for why
+        // every one of their ingots still forges it), and only for a material
+        // some mod makes a chestplate of (owner, 2026-11-07, #294). A metal with
+        // no chestplate has its armour id in droppedArmours, aliased below.
         Set<String> registered = new HashSet<>();
-        for (ModdedMaterials.Metal metal : ModdedMaterials.armourMetals()) {
+        for (ModdedMaterials.Metal metal : ModdedMaterials.chestplateMetals()) {
             String id = metal.armourId();
             // Belt and braces. The collapse above is what makes this unreachable,
             // and this is what makes it not matter if a later change to the

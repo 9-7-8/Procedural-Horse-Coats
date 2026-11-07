@@ -326,6 +326,16 @@ public final class ServerConfig {
      * each metal adds to speed and to jump, in the attributes' own units. Read
      * together, through {@link #shoeRates()}. See {@code common.gear.HorseShoes}.
      */
+    /**
+     * <b>The mod's saddle</b> (#75): the switch, and what the top tier adds to
+     * speed and to jump while a player rides, as a share of the horse's own.
+     * Every lower tier is a fixed share of these. Read together, through
+     * {@link #saddleRates()}. See {@code common.gear.Saddles}.
+     */
+    public static final ModConfigSpec.BooleanValue SADDLES_ENABLED;
+    public static final ModConfigSpec.DoubleValue SADDLES_TOP_SPEED;
+    public static final ModConfigSpec.DoubleValue SADDLES_TOP_JUMP;
+
     public static final ModConfigSpec.BooleanValue SHOES_ENABLED;
     public static final ModConfigSpec.DoubleValue SHOES_COPPER_SPEED;
     public static final ModConfigSpec.DoubleValue SHOES_COPPER_JUMP;
@@ -1191,6 +1201,29 @@ public final class ServerConfig {
                 .defineInRange("shoes.road_speed_per_level",
                         com.example.horsegenetics.common.gear.HorseShoes.DEFAULT_ROAD_SPEED_PER_LEVEL, 0.0,
                         com.example.horsegenetics.common.gear.HorseShoes.MAX_ROAD_SPEED_PER_LEVEL);
+        SADDLES_ENABLED = builder
+                .comment("Whether the mod's saddles add anything. (default: true)",
+                        "On, a saddle adds its tier's share of speed and jump while a player",
+                        "rides. Off, saddles are still made, worn and drawn, and change nothing.",
+                        "Server-side.")
+                .define("saddles.enabled", com.example.horsegenetics.common.gear.Saddles.DEFAULT_ENABLED);
+        SADDLES_TOP_SPEED = builder
+                .comment("What the top saddle (netherite) adds to speed while ridden. (default: 0.1)",
+                        "A share of the horse's own speed: 0.1 is +10%. Every other saddle is a",
+                        "fixed share of this (leather a quarter, iron 60%, diamond 85%), so this",
+                        "moves the whole ladder. Another mod's gem saddles stand with diamond, its",
+                        "ingot saddles with iron. 0 turns it off. Range 0 to 0.25. Reaches a horse",
+                        "the next time a player gets on it. Server-side.")
+                .defineInRange("saddles.top_speed",
+                        com.example.horsegenetics.common.gear.Saddles.DEFAULT_TOP_BONUS, 0.0,
+                        com.example.horsegenetics.common.gear.Saddles.MAX_TOP_BONUS);
+        SADDLES_TOP_JUMP = builder
+                .comment("What the top saddle (netherite) adds to jump strength while ridden. (default: 0.1)",
+                        "A share of the horse's own jump strength, laddered like saddles.top_speed.",
+                        "0 turns it off. Range 0 to 0.25. Server-side.")
+                .defineInRange("saddles.top_jump",
+                        com.example.horsegenetics.common.gear.Saddles.DEFAULT_TOP_BONUS, 0.0,
+                        com.example.horsegenetics.common.gear.Saddles.MAX_TOP_BONUS);
         BOND_DECAY_PER_DAY = builder
                 .comment("How much bond a horse loses per Minecraft day. (default: 1)",
                         "Charged for every whole day since the horse last decayed, so a horse",
@@ -2058,6 +2091,19 @@ public final class ServerConfig {
                     SHOES_GRIP_PER_LEVEL.get(), SHOES_ROAD_SPEED_PER_LEVEL.get());
         } catch (IllegalStateException notLoaded) {
             return com.example.horsegenetics.common.gear.HorseShoes.Rates.DEFAULT;
+        }
+    }
+
+    /**
+     * The {@code saddles.*} keys as the one object {@code Saddles} takes, safely:
+     * a client not yet sent the server's config gets the defaults.
+     */
+    public static com.example.horsegenetics.common.gear.Saddles.Rates saddleRates() {
+        try {
+            return new com.example.horsegenetics.common.gear.Saddles.Rates(SADDLES_ENABLED.get(),
+                    SADDLES_TOP_SPEED.get(), SADDLES_TOP_JUMP.get());
+        } catch (IllegalStateException notLoaded) {
+            return com.example.horsegenetics.common.gear.Saddles.Rates.DEFAULT;
         }
     }
 

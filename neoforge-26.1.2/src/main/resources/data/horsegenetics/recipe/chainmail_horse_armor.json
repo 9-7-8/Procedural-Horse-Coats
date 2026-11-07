@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:iron_chain",
+    "minecraft:iron_chain",
+    "minecraft:iron_chain",
+    "minecraft:iron_chain",
+    "minecraft:iron_chain",
+    "minecraft:iron_chain",
+    "horsegenetics:horse_hair"
+  ],
+  "result": {
+    "id": "horsegenetics:chainmail_horse_armor"
+  }
+}

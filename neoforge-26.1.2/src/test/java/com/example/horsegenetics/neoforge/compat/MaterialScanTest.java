@@ -559,7 +559,11 @@ class MaterialScanTest {
         FakeJar tagger = new FakeJar()
                 .put("data/c/tags/item/gems/black_quartz.json",
                         "{\"values\":[{\"id\":\"actuallyadditions:black_quartz\",\"required\":false}]}")
-                .put("data/c/tags/item/ingots/tin.json", "{\"values\":[\"othermod:tin_ingot\"]}");
+                .put("data/c/tags/item/ingots/tin.json", "{\"values\":[\"othermod:tin_ingot\"]}")
+                // Both make a chestplate, so the chestplate rule (#294) drops
+                // neither and only the missing mod is under test here.
+                .put("assets/actuallyadditions/items/black_quartz_chestplate.json", "{}")
+                .put("assets/othermod/items/tin_chestplate.json", "{}");
 
         MaterialScan.Result everything = MaterialScan.of(List.of(tagger), "horsegenetics");
         MaterialScan.Result installedOnly = MaterialScan.of(List.of(tagger), "horsegenetics",
@@ -576,6 +580,69 @@ class MaterialScanTest {
         assertEquals(List.of("black_quartz_horse_armor"), installedOnly.droppedArmours(),
                 "and the dropped armour is named, so a save holding one can be aliased");
         assertEquals(List.of(), everything.droppedArmours());
+    }
+
+    // ------------------------------------------------------------------
+    // The chestplate rule (#294, #75)
+    // ------------------------------------------------------------------
+
+    @Test
+    void armourAndSaddlesComeOnlyInAChestplatesMaterial() {
+        // Owner, 2026-11-07: horse armour and the saddle come in every material
+        // a chestplate is made of, and no other. Tin has a chestplate here;
+        // ruby does not.
+        FakeJar mod = aModWithAWoodAndAMetal()
+                .put("assets/testmod/items/tin_chestplate.json", "{}");
+        MaterialScan.Result result = scan(mod);
+
+        assertEquals(List.of("ruby", "tin"),
+                MaterialScan.armourMetals(result.metals()).stream().map(ModdedMaterials.Metal::material).toList(),
+                "the shoes keep every metal");
+        assertEquals(List.of("tin"),
+                MaterialScan.chestplateMetals(result.metals(), result.chestplates()).stream()
+                        .map(ModdedMaterials.Metal::material).toList(),
+                "armour and saddles only where there is a chestplate");
+        assertEquals(List.of("ruby_horse_armor"), result.droppedArmours(),
+                "ruby's armour from an older jar is named, so a save holding one loads as iron");
+    }
+
+    @Test
+    void theOlderModelFileCountsAndOurOwnChestplatesDoNot() {
+        FakeJar mod = aModWithAWoodAndAMetal()
+                .put("assets/testmod/models/item/ruby_chestplate.json", "{}")
+                .put("assets/" + OURS + "/items/tin_chestplate.json", "{}")
+                // Not an item at all: a texture with the same name.
+                .put("assets/testmod/textures/item/tin_chestplate.json", "{}");
+        assertEquals(java.util.Set.of("ruby"), scan(mod).chestplates().keySet());
+    }
+
+    @Test
+    void armourAndSaddlesTakeTheChestplatesColour() {
+        // Owner, 2026-11-07: the armour and the saddle are coloured from the
+        // chestplate they match, not the ingot. Tin's ingot is near-white; its
+        // chestplate here is drawn blue. Ruby's chestplate has no art at all, so
+        // ruby keeps its ingot's red.
+        FakeJar mod = aModWithAWoodAndAMetal()
+                .put("assets/testmod/items/tin_chestplate.json", "{}")
+                .put("assets/testmod/textures/item/tin_chestplate.png", png(16, 0x2040C0, 255))
+                .put("assets/testmod/items/ruby_chestplate.json", "{}");
+        MaterialScan.Result result = scan(mod);
+        java.util.Map<String, Integer> byMaterial = new java.util.HashMap<>();
+        for (ModdedMaterials.Metal metal : MaterialScan.chestplateMetals(result.metals(), result.chestplates())) {
+            byMaterial.put(metal.material(), metal.colour());
+        }
+        assertEquals(0x2040C0, byMaterial.get("tin"), "the chestplate's colour, not the ingot's");
+        assertEquals(0xC01A2B, byMaterial.get("ruby"), "no chestplate art: the ingot's colour");
+        assertEquals(0xD6D8DE, result.metals().stream().filter(m -> m.material().equals("tin"))
+                .findFirst().orElseThrow().colour(), "the shoe still takes the ingot's");
+    }
+
+    @Test
+    void aChestplateMovesTheFingerprint() {
+        String without = scan(aModWithAWoodAndAMetal()).fingerprint();
+        String with = scan(aModWithAWoodAndAMetal().put("assets/testmod/items/tin_chestplate.json", "{}"))
+                .fingerprint();
+        assertNotEquals(without, with, "a pack generated before the chestplate arrived has no tin armour");
     }
 
     @Test

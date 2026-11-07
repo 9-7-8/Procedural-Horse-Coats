@@ -68,12 +68,22 @@ public final class MaterialScan {
      *                       hold one - in a chest, or in a villager's offers - so
      *                       {@link ModdedArmour} aliases each to iron horse armour
      *                       rather than leave a save naming an id that is gone.
+     *                       An armour whose material has no chestplate in any
+     *                       jar is dropped the same way (#294)
+     * @param chestplates    every material name some jar ships a
+     *                       {@code <material>_chestplate} item for, sorted - the
+     *                       materials horse armour and the saddle come in
+     *                       (owner, 2026-11-07; see {@link #chestplateMetals}) -
+     *                       and the colour that chestplate's own icon averages
+     *                       to, which the armour and the saddle are tinted
+     *                       (owner, 2026-11-07)
      */
     public record Result(List<ModdedMaterials.Wood> woods,
                          List<ModdedMaterials.Metal> metals,
                          Map<String, Integer> dyes,
                          String fingerprint,
-                         List<String> droppedArmours) {
+                         List<String> droppedArmours,
+                         Map<String, Integer> chestplates) {
     }
 
     /** Namespaces that are never a source of modded material. */
@@ -129,10 +139,13 @@ public final class MaterialScan {
         Map<String, ModdedMaterials.Wood> woods = new TreeMap<>();
         Map<String, Boolean> metalIds = new TreeMap<>();
         Map<String, Boolean> dyeIds = new TreeMap<>();
+        // material -> every chestplate item id found for it, sorted.
+        Map<String, java.util.TreeSet<String>> chestplateIds = new TreeMap<>();
 
         for (Source source : sources) {
             try {
                 collectWoods(source, woods, ours);
+                collectChestplates(source, chestplateIds, ours);
                 collectTagged(source, "data/c/tags/item/ingots", metalIds, false);
                 collectTagged(source, "data/c/tags/item/gems", metalIds, true);
                 collectTagged(source, "data/c/tags/item/dyes", dyeIds, false);
@@ -167,12 +180,86 @@ public final class MaterialScan {
         List<ModdedMaterials.Wood> sortedWoods = List.copyOf(confirmWoods(sources, woods.values()));
         List<ModdedMaterials.Metal> sortedMetals = List.copyOf(metals);
         Map<String, Integer> sortedDyes = Map.copyOf(dyes);
-        // An armour another, installed, metal still makes is not dropped at all.
-        for (ModdedMaterials.Metal kept : metals) {
-            dropped.remove(kept.armourId());
+        // Each chestplate's colour off its own icon, once every jar has been read
+        // (its art may be in another jar). Two mods' steel chestplates: the
+        // lowest item id, so load order cannot matter.
+        Map<String, Integer> chestplates = new TreeMap<>();
+        for (Map.Entry<String, java.util.TreeSet<String>> found : chestplateIds.entrySet()) {
+            chestplates.put(found.getKey(), colourOf(sources, found.getValue().first()));
         }
+        // An armour another, installed, metal with a chestplate still makes is
+        // not dropped at all; one whose material has no chestplate is (#294).
+        for (ModdedMaterials.Metal kept : metals) {
+            if (chestplates.containsKey(kept.material())) {
+                dropped.remove(kept.armourId());
+            } else {
+                dropped.add(kept.armourId());
+            }
+        }
+        Map<String, Integer> sortedChestplates =
+                java.util.Collections.unmodifiableMap(new TreeMap<>(chestplates));
         return new Result(sortedWoods, sortedMetals, sortedDyes,
-                fingerprint(sortedWoods, metals, dyes), List.copyOf(dropped));
+                fingerprint(sortedWoods, metals, dyes, sortedChestplates), List.copyOf(dropped),
+                sortedChestplates);
+    }
+
+    // ------------------------------------------------------------------
+    // Chestplates
+    // ------------------------------------------------------------------
+
+    /**
+     * <b>Which materials some mod makes a chestplate of</b> (#294, #75). Horse
+     * armour and the saddle come in every material a chestplate does and in no
+     * other (owner, 2026-11-07), so a metal with no chestplate gets a shoe but
+     * neither of those.
+     *
+     * <p>Read as the wood gates are: the item's client definition,
+     * {@code assets/<ns>/items/<material>_chestplate.json}, or the older
+     * {@code models/item/} file, in any namespace but ours. The material is the
+     * path with {@code _chestplate} off the end, which is the spelling the
+     * metal's {@link ModdedMaterials.Metal#material()} is matched against. A
+     * mod that names its chestplate any other way loses that material's armour
+     * and saddle, which is the fail-soft direction.
+     */
+    private static void collectChestplates(Source source, Map<String, java.util.TreeSet<String>> out,
+                                           String ours) {
+        source.list("assets", path -> {
+            if (!path.endsWith("_chestplate.json")) {
+                return;
+            }
+            String[] parts = path.split("/");
+            boolean asItem = parts.length == 4 && "items".equals(parts[2]);
+            boolean asModel = parts.length == 5 && "models".equals(parts[2]) && "item".equals(parts[3]);
+            if (!"assets".equals(parts[0]) || !(asItem || asModel) || parts[1].equals(ours)) {
+                return;
+            }
+            String file = parts[parts.length - 1];
+            String material = file.substring(0, file.length() - "_chestplate.json".length());
+            if (!material.isEmpty()) {
+                out.computeIfAbsent(material, m -> new java.util.TreeSet<>())
+                        .add(parts[1] + ":" + material + "_chestplate");
+            }
+        });
+    }
+
+    /**
+     * The metals that get a horse armour and a saddle: {@link #armourMetals},
+     * keeping only the materials some jar makes a chestplate of, each <b>in its
+     * chestplate's colour</b> rather than its ingot's (owner, 2026-11-07): the
+     * armour and the saddle match the chestplate they are paired with. A
+     * chestplate whose art could not be read keeps the ingot's colour.
+     */
+    static List<ModdedMaterials.Metal> chestplateMetals(List<ModdedMaterials.Metal> metals,
+                                                        Map<String, Integer> chestplates) {
+        List<ModdedMaterials.Metal> out = new ArrayList<>();
+        for (ModdedMaterials.Metal metal : armourMetals(metals)) {
+            Integer colour = chestplates.get(metal.material());
+            if (colour != null) {
+                int rgb = colour == FALLBACK_COLOUR ? metal.colour() : colour;
+                out.add(new ModdedMaterials.Metal(metal.itemId(), rgb, metal.gem()));
+            }
+        }
+        return List.copyOf(out);
     }
 
     // ------------------------------------------------------------------
@@ -524,7 +611,8 @@ public final class MaterialScan {
      */
     static String fingerprint(List<ModdedMaterials.Wood> woods,
                               List<ModdedMaterials.Metal> metals,
-                              Map<String, Integer> dyes) {
+                              Map<String, Integer> dyes,
+                              Map<String, Integer> chestplates) {
         StringBuilder sb = new StringBuilder();
         // The rules that turn this material list into files, as a number to bump
         // when they change. Without it the fingerprint answers "same mods?" when
@@ -535,7 +623,13 @@ public final class MaterialScan {
         // an ingot_ prefix comes off. Bumped again for the planks rule: a pack
         // generated before it holds files for woods that no longer exist. And
         // for horse shoes: a pack from before them has no shoe files at all.
-        sb.append("rules|4\n");
+        // And for the chestplate rule (#294, #75): armour only for a material
+        // with a chestplate, and a saddle beside it.
+        sb.append("rules|5\n");
+        for (Map.Entry<String, Integer> chestplate : chestplates.entrySet()) {
+            sb.append("c|").append(chestplate.getKey()).append('|')
+                    .append(Integer.toHexString(chestplate.getValue())).append('\n');
+        }
         for (ModdedMaterials.Wood wood : woods) {
             sb.append("w|").append(wood.namespace()).append(':').append(wood.name())
                     .append('|').append(wood.plankTexture())

@@ -49,9 +49,9 @@ final class GeneratedArmour {
     }
 
     static void emit(Map<String, byte[]> files, JsonObject lang, MetalsmithTrades trades) {
-        // One armour per material name. Every ingot that shares the name still
-        // forges it - see the recipe block below.
-        List<ModdedMaterials.Metal> metals = ModdedMaterials.armourMetals();
+        // One armour per material name, for a material with a chestplate (#294).
+        // Every ingot that shares the name still forges it - see the recipe block below.
+        List<ModdedMaterials.Metal> metals = ModdedMaterials.chestplateMetals();
         if (metals.isEmpty()) {
             return;
         }

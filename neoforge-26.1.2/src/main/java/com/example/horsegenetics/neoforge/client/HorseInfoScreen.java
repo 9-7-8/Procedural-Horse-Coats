@@ -1503,10 +1503,13 @@ public final class HorseInfoScreen extends Screen {
             // high a block it can get onto. The raw attributes are what the
             // simulation uses and what the designer shows, but neither number
             // means anything on sight - 0.1875 is not a speed to anybody.
-            c.pair("Speed", String.format("%.1f m/s",
-                    HorseUnits.metresPerSecond(horse.getAttributeValue(Attributes.MOVEMENT_SPEED))));
-            c.pair("Jump", String.format("%.1f m",
-                    HorseUnits.jumpMetres(horse.getAttributeValue(Attributes.JUMP_STRENGTH))));
+            // Without the saddle's share (#75): that is the rider's, not the horse's.
+            c.pair("Speed", String.format("%.1f m/s", HorseUnits.metresPerSecond(
+                    com.example.horsegenetics.neoforge.server.SaddleEffects.withoutSaddle(
+                            horse, Attributes.MOVEMENT_SPEED))));
+            c.pair("Jump", String.format("%.1f m", HorseUnits.jumpMetres(
+                    com.example.horsegenetics.neoforge.server.SaddleEffects.withoutSaddle(
+                            horse, Attributes.JUMP_STRENGTH))));
             // Pull sits with the other four body numbers because it is one of
             // them - the fifth body stat, not a cart footnote. It reads off the
             // genotype rather than an attribute because there is no pull

@@ -1,0 +1,18 @@
+{
+  "layers": {
+    "horse_saddle": [
+      {
+        "dyeable": {
+          "color_when_undyed": -7711442
+        },
+        "texture": "minecraft:saddle"
+      },
+      {
+        "dyeable": {
+          "color_when_undyed": -9342607
+        },
+        "texture": "horsegenetics:saddle_fittings"
+      }
+    ]
+  }
+}

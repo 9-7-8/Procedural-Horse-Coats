@@ -136,7 +136,7 @@ public final class ModdedMaterials {
     }
 
     private static MaterialScan.Result result =
-            new MaterialScan.Result(List.of(), List.of(), Map.of(), "", List.of());
+            new MaterialScan.Result(List.of(), List.of(), Map.of(), "", List.of(), Map.of());
     private static boolean scanned;
 
     private ModdedMaterials() {
@@ -183,6 +183,16 @@ public final class ModdedMaterials {
 
     public static List<Metal> armourMetals() {
         return MaterialScan.armourMetals(metals());
+    }
+
+    /**
+     * <b>The metals that get a horse armour and a saddle</b>: {@link #armourMetals()}
+     * cut to the materials some mod makes a chestplate of (owner, 2026-11-07,
+     * #294 and #75), each in its chestplate's colour. The shoes keep the whole
+     * {@link #armourMetals()} list, in the ingots' colours.
+     */
+    public static List<Metal> chestplateMetals() {
+        return MaterialScan.chestplateMetals(metals(), result.chestplates());
     }
 
     /** Every metal that forges this armour, in {@link #metals()} order. */
@@ -241,8 +251,9 @@ public final class ModdedMaterials {
         result = MaterialScan.of(sources, HorseGenetics.MOD_ID,
                 namespace -> "minecraft".equals(namespace) || ModList.get().isLoaded(namespace));
 
-        HorseGenetics.LOGGER.info("compat: {} modded woods, {} modded metals, {} modded dyes, fingerprint {}",
-                woods().size(), metals().size(), dyes().size(), fingerprint());
+        HorseGenetics.LOGGER.info("compat: {} modded woods, {} modded metals ({} with a chestplate), "
+                        + "{} modded dyes, fingerprint {}",
+                woods().size(), metals().size(), chestplateMetals().size(), dyes().size(), fingerprint());
     }
 
     /**

@@ -107,9 +107,18 @@ public final class ClientSetup {
     @SubscribeEvent
     static void registerClientExtensions(
             net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent event) {
-        event.registerItem(new TackClientExtensions(),
-                net.minecraft.world.item.Items.SADDLE,
-                net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR);
+        java.util.List<net.minecraft.world.item.Item> tack = new java.util.ArrayList<>();
+        tack.add(net.minecraft.world.item.Items.SADDLE);
+        tack.add(net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR);
+        // The mod's saddles (#75), shipped and generated: a dyed seat, and
+        // fittings in the saddle's own material.
+        for (var saddle : com.example.horsegenetics.neoforge.item.ModItems.HORSE_SADDLES) {
+            tack.add(saddle.get());
+        }
+        for (var saddle : com.example.horsegenetics.neoforge.compat.ModdedSaddles.saddles()) {
+            tack.add(saddle.item().get());
+        }
+        event.registerItem(new TackClientExtensions(), tack.toArray(new net.minecraft.world.item.Item[0]));
     }
 
     /**

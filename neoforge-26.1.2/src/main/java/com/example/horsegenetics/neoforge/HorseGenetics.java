@@ -63,6 +63,8 @@ public final class HorseGenetics {
         com.example.horsegenetics.neoforge.compat.ModdedArmour.init();
         // And a horse shoe per modded ingot, by the same list and the same rule.
         com.example.horsegenetics.neoforge.compat.ModdedShoes.init();
+        // And a saddle per modded chestplate material (#75), by the armour's list.
+        com.example.horsegenetics.neoforge.compat.ModdedSaddles.init();
         // The double gates register themselves into ModBlocks.BLOCKS and
         // ModItems.ITEMS as this class loads, so it has to be touched before
         // either register is attached to the bus below - and after the scan

@@ -128,6 +128,7 @@ public final class GeneratedPack {
         GeneratedArmour.emit(files, lang, trades);
         GeneratedShoes.emit(files, lang, trades);
         trades.emit(files);
+        GeneratedSaddles.emit(files, lang);
         GeneratedCarts.emit(files, lang);
         GeneratedJumps.emit(files, lang);
         if (!lang.isEmpty()) {
