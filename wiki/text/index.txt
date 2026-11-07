@@ -3426,7 +3426,9 @@ wiki/item-research-shelf.html#menu	coding	Two tabs, one set of slots each
 wiki/item-research-shelf.html#storage	coding	Real slots, one paper per allele pair
 wiki/item-research-shelf.html#use	gameplay	What it does
 wiki/item-research-shelf.html#verified	coding	Verified
+wiki/item-saddle.html#armour-curve	coding	The curve: vanilla's plain rungs only (build-time call, 2026-11-07)
 wiki/item-saddle.html#armour-rule	gameplay	Horse armour in the same materials
+wiki/item-saddle.html#armour-value	coding	A modded armour's value: compat/ModdedArmourValue (#296)
 wiki/item-saddle.html#chestplate-rule	coding	The chestplate rule: compat/MaterialScan
 wiki/item-saddle.html#design-reasoning	science	Design reasoning
 wiki/item-saddle.html#drawing	coding	Drawing it

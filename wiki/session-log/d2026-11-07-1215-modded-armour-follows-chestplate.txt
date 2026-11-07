@@ -1,0 +1,77 @@
+2026-11-07 12:15 (start) - Modded horse armour follows its mod's chestplate (#296)
+==========================================================================
+
+ASKED
+-----
+"/next-release". Next release v0.5.047, stage v0.5.047.2. Every bug on it is waiting on
+a check. #75 and #294 are built but owe their tests, #296 and #295 depend on them, and
+a player (axolotlwyvern) was on the live server, so no test could run. Asked with the
+question tool. The owner chose "Build #296 untested".
+
+DONE (committed UNTESTED on the owner's call - see NOT RUN)
+----
+- e4f0bc57 (#296, open, waiting on its owed tests). Problem: a modded horse armour gave
+  iron's body value for any ingot and diamond's for any gem, because no other item's
+  armour can be read at registration (components are not bound; see
+  wiki/compatibility.html#components-not-bound). Fix:
+  neoforge compat/ModdedArmourValue handles ItemAttributeModifierEvent, which fires
+  whenever a stack's modifiers are read, by which point components are bound. For a
+  modded armour it replaces the body-slot minecraft:armor.body modifier with the value
+  of that mod's own <material>_chestplate (any namespace but ours, first by id). That
+  value is the chestplate's chest-slot ADD_VALUE armour, run through common/gear/
+  ArmourCurve. Each value is cached per armour and cleared on TagsUpdatedEvent. A read
+  that throws is not kept, and no chestplate means the registered guess stays. The
+  value is logged as "compat: <id> follows <chestplate> (chest N) - M on a horse".
+  ModdedArmour's class note and wiki/compatibility.html (generated-strength,
+  components-not-bound, the drift list, gap-282 narrowed to the metalsmith's flat
+  trade tier) now say this.
+- Proof: :neoforge-26.1.2:compileJava green (exit 0). check-parity OK,
+  check-designer-boots OK. Rebake rows b (no web reach: bake skipped), k and i run;
+  check-links OK.
+- No pictures: the change is a number, not a look.
+
+DECIDED
+-------
+- (owner) Build #296 on #294's untested code rather than wait for the server to empty.
+- (without the owner, build-time call the issue left open) The curve uses only
+  leather, copper, iron and diamond, read off ArmorMaterials. It is linear between
+  rungs, proportional below leather, and keeps diamond's slope above it, capped at
+  netherite's horse value (19). Gold (5->7), netherite (8->19) and our chainmail (5->4)
+  are one-material exceptions and stay out. Recorded at
+  wiki/item-saddle.html#armour-curve, with a pointer in wiki/decisions.html.
+- (without the owner) A worn armour keeps its old value until it is re-equipped after
+  a /reload, and the metalsmith's tier stays on the guess. Both are written on
+  item-saddle.html#armour-value.
+
+FOUND ON THE WAY
+----------------
+None filed. The synthetic compat mod registers no items, so it cannot drive this path.
+That was already noted on item-saddle.html#verify-chestplate-rule.
+
+PROCEDURES
+----------
+- next-release.txt step 3: what to do when a dependency is built but open only for
+  owed tests (it still blocks, so ask: wait, build on it untested, or next stage).
+  Today's run had no rule for this.
+- Nothing else: process-intake, rebake and end-session fit as written.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Owed, because a player was on the live server: ArmourCurveTest (mutate once), the
+  gametest a_chestplate_reads_as_its_horse_armour, the full :neoforge-26.1.2:build, and
+  everything #75/#294 already owed (SaddlesTest, MaterialScanTest,
+  a_saddle_adds_only_while_ridden, a runServer boot grepped for ERROR, the compat test).
+  A full :common:test would add CommonPortabilityTest's view of ArmourCurve.
+- Nobody has seen a modded armour's new value in game. Verification:
+  wiki/item-saddle.html#verify-chestplate-rule (new bullet: tooltip, /attribute,
+  client tooltip on a server, after /reload).
+
+RELEASE
+-------
+Not offered: v0.5.047.2 still has open units (#295, and the owed tests).
+
+PICK UP FIRST
+-------------
+With the live server empty: run every owed test above, then close #75, #294 and #296
+on the evidence (procedures/test-tiers.txt, then close-a-check). After that, #295
+saddlebags by /next-release, whose Open: line needs the owner when it is scoped.

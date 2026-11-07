@@ -98,7 +98,8 @@
     Vanilla already makes horse armour in six of the seven; this mod adds
     <strong>chainmail horse armour</strong> (6 iron chains and a horse hair), which protects as much
     as chainmail does, between copper and iron. Another mod's metal gets a horse armour only if that
-    mod also makes a chestplate of it. If a metal used to have a horse armour and no longer
+    mod also makes a chestplate of it, and that armour protects in proportion to the chestplate: a
+    mod's strong chestplate makes a strong horse armour. If a metal used to have a horse armour and no longer
     qualifies, an old copy in your world loads as iron horse armour.
 </p>
 
@@ -187,6 +188,36 @@
     vanilla's chainmail asset has no horse layer.
 </p>
 
+<h3 id="armour-value">A modded armour's value: <code>compat/ModdedArmourValue</code> (#296)</h3>
+<p>
+    A modded horse armour registers with <code>ModdedArmour.protectionFor</code>'s guess (iron's
+    body value for an ingot, diamond's for a gem), because no other item's armour is readable
+    until components are bound at the first datapack load
+    (<a href="compatibility.html#components-not-bound">why</a>). Once worn or shown,
+    <code>ItemAttributeModifierEvent</code>, fired whenever a stack's modifiers are read, replaces
+    the body slot's <code>minecraft:armor.body</code> modifier with the value of that mod's own
+    <code>&lt;material&gt;_chestplate</code> (any namespace but ours, the first by id, as
+    <code>MaterialScan</code> takes the colour): the chest-slot armour its stack adds, run through
+    <code>common/gear/ArmourCurve</code>. Each armour is worked out once, logged as
+    <code>compat: &lt;id&gt; follows &lt;chestplate&gt; (chest N) - M on a horse</code>, and
+    forgotten on a datapack reload (<code>TagsUpdatedEvent</code>). A chestplate that cannot be
+    found or reads as no armour leaves the guess, and a read that throws is not kept. A horse
+    already wearing the armour keeps its old value until the armour is taken off and put back.
+    The metalsmith's tier is still picked from the guess.
+</p>
+
+<h3 id="armour-curve">The curve: vanilla's plain rungs only (build-time call, 2026-11-07)</h3>
+<p>
+    Vanilla's chestplate-to-horse pairs are not a function: gold is chest 5 and horse 7, netherite
+    chest 8 and horse 19 (diamond is 8 and 11), and our chainmail is 5 and 4. So the curve uses
+    only leather, copper, iron and diamond (3&rarr;3, 4&rarr;4, 6&rarr;5, 8&rarr;11 in 26.1.2, read
+    off <code>ArmorMaterials</code> at run time): a straight line between rungs, in proportion
+    below leather, diamond's slope past it, and netherite's horse value as the cap. Gold and
+    netherite are one material's deliberate exception each, not a trend for a modded material to
+    follow. A modded chest 7 is 8 on a horse, 9 is 14, 10 is 17. Made without the owner; hers to
+    amend. Unit test: <code>ArmourCurveTest</code>.
+</p>
+
 <h3 id="saddle-config">The settings</h3>
 <ul>
     <li><code>saddles.enabled</code> (server, default on): off, saddles are worn and drawn and add
@@ -203,6 +234,13 @@
     <li><code>MaterialScanTest</code>: only a material with a chestplate gets armour and a saddle,
         the shoes keep every metal, the older model file counts and our own does not, and a new
         chestplate moves the fingerprint.</li>
+    <li><code>ArmourCurveTest</code> (#296): each rung maps to itself, straight lines between,
+        diamond's slope to the netherite cap, proportional below leather, never decreasing, and
+        refuses no reading or a non-function.</li>
+    <li>Gametest <code>a_chestplate_reads_as_its_horse_armour</code> (#296): vanilla leather,
+        copper, iron and diamond chestplates, read through <code>ModdedArmourValue</code>, give
+        back their own horse armour's value. The dev game has no modded metal, so the event's
+        swap itself is not driven.</li>
     <li>Gametest <code>a_saddle_adds_only_while_ridden</code>: fits a horse and not a donkey,
         chainmail armour fits the body slot, no bonus unridden, the top share while ridden, the
         screen's number is the horse's own, gone after dismount, and
@@ -275,6 +313,13 @@
         <code>compat:</code> log line counts how many have a chestplate. The synthetic mod
         (<code>procedures/compat-test.txt</code>) does not yet ship a chestplate, so it would now
         show no modded armour.</li>
+    <li><strong>The armour follows its chestplate (#296, built 2026-11-07, NOT run).</strong> In
+        that pack, the modded horse armour's tooltip shows the <code>compat: ... follows</code> log
+        line's value, not iron's or diamond's, and a horse wearing it has that much more armour
+        (F3 or <code>/attribute @e[type=horse,limit=1,sort=nearest] minecraft:armor get</code>).
+        Also: the tooltip on a client joined to a server (components bound client-side is
+        unverified), and the value after <code>/reload</code>. The unit and gametest are owed
+        with #75's: a player was on the live server.</li>
 </ul>
 
 </section>

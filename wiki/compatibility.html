@@ -601,12 +601,13 @@
 <h3 id="generated-strength">How strong a generated armour is</h3>
 
 <p>
-    A gem sits where diamond sits and an ingot sits where iron does, and that is the whole of
-    it. <code>ModdedArmour.protectionFor</code> is a pure function of the metal. Stated
-    plainly rather than dressed up: <strong>where an ore generates is not readable from a
-    jar</strong> &mdash; there is no depth to measure and no declaration to read &mdash; so
-    this is a guess about balance from the one signal there is, and it will sometimes be
-    wrong.
+    <strong>Registered</strong>, a gem sits where diamond sits and an ingot where iron does:
+    <code>ModdedArmour.protectionFor</code> is a pure function of the metal, because nothing
+    better is readable yet. <strong>Worn or shown</strong>, it follows the mod&rsquo;s own
+    chestplate (#296): <code>ModdedArmourValue</code> swaps the guess, per stack, for that
+    chestplate&rsquo;s armour on vanilla&rsquo;s chest-to-horse curve
+    (<a href="item-saddle.html#armour-value">how</a>). The guess stays for the
+    metalsmith&rsquo;s tier, and for an armour whose chestplate cannot be read.
 </p>
 
 <p>
@@ -649,10 +650,19 @@
 </ul>
 
 <p>
-    So the ladder is the only thing askable at a moment we can still answer, and it is now
-    asked directly, at registration. The same constraint is why the metalsmith&rsquo;s tier
-    and the armour&rsquo;s value cannot disagree: they are one pure function, called from
-    three places with three different amounts of game in existence.
+    So the ladder is the only thing askable at a moment we can still answer, and it is
+    asked directly, at registration, and for the metalsmith&rsquo;s tier.
+</p>
+
+<p>
+    <strong>What does work is asking later, per stack (#296).</strong>
+    <code>ItemAttributeModifierEvent</code> fires every time a stack&rsquo;s modifiers are
+    read &mdash; how a horse picks up its body armour and how a tooltip prints its number
+    &mdash; and by then a world is loaded and every component is bound. So the registered
+    value is the guess, and <code>ModdedArmourValue</code> replaces it there with the
+    chestplate&rsquo;s (<a href="item-saddle.html#armour-value">how</a>). A read that still
+    throws is caught and not kept. The armour&rsquo;s value and the metalsmith&rsquo;s tier
+    can now disagree: a strong chestplate&rsquo;s armour is sold at iron&rsquo;s tier.
 </p>
 
 <h3 id="generated-trades">The metalsmith&rsquo;s trades are rewritten, not appended to</h3>
@@ -1995,12 +2005,11 @@
         because &ldquo;Biomes You&rsquo;ll Go Maple Double Fence Gate&rdquo; is worse to read
         for the far commoner case where there is only one maple &mdash; but the clash has not
         been seen and nobody has judged how bad it looks.</li>
-    <li><strong>Every modded ingot is worth exactly iron and every modded gem exactly
-        diamond</strong>, with nothing in between and no way to tell a mod&rsquo;s endgame
-        alloy from its tier-one one. That is a real flattening and it is not an oversight
-        &mdash; <a href="#components-not-bound">nothing better is readable in time</a> &mdash;
-        but 167 metals at two values is a lot of sameness, and nobody has played with it to
-        say whether it reads as boring or as unobtrusive.</li>
+    <li><strong>The metalsmith still sells every modded ingot armour beside iron and every gem
+        beside diamond</strong>: the trade tier is picked before
+        <a href="#components-not-bound">anything is readable</a>. What the armour protects
+        follows its chestplate (#296, <a href="item-saddle.html#armour-value">how</a>), so only
+        the price ladder is flat now.</li>
 </ul>
 
 <section id="roadmap" class="tab-panel" data-tab="roadmap" data-tab-label="Roadmap"
@@ -2716,17 +2725,14 @@
 
 <h3 id="gap-282" data-check-kind="open-gap">Open check 282</h3>
 <div class="open-check">
-<strong>Open, accepted 2026-09-18: every modded ingot is worth exactly iron and
-    every modded gem exactly diamond.</strong> A mod's endgame alloy and its tier-one metal now
-    give a horse the same protection, because
-    <a href="compatibility.html#components-not-bound">nothing that distinguishes them is readable
-    at any moment the mod can still answer</a>. This is a closed technical question and an open
-    design one: 167 metals at two values is a lot of sameness, and nobody has played a pack with
-    it to say whether that reads as boring or as unobtrusive. The signals that <em>are</em>
-    readable in time are all presence-not-value &mdash; whether the mod registered a
-    <code>&lt;material&gt;_chestplate</code> or a full tool set at all &mdash; so a nudge from
-    those is possible and would be a guess on a guess. Not worth inventing before somebody has
-    noticed the flatness.
+<strong>Open, accepted 2026-09-18, narrowed 2026-11-07: the metalsmith sells every modded
+    ingot armour at iron&rsquo;s tier and every gem at diamond&rsquo;s.</strong> What the armour
+    protects now follows its mod&rsquo;s chestplate (#296,
+    <a href="item-saddle.html#armour-value">how</a>), so a mod&rsquo;s endgame alloy is stronger
+    on a horse than its tier-one metal; only the trade ladder is still two values, because
+    <a href="compatibility.html#components-not-bound">the tier is picked before anything is
+    readable</a>. Open design question: does a strong armour sold at iron&rsquo;s price read as
+    a bargain in a played pack? Not worth inventing a fix before somebody notices.
 </div>
 </section>
 

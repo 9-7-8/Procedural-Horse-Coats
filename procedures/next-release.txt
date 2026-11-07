@@ -105,6 +105,12 @@ STEPS
    routine's survey leaves out needs-owner issues).
    Re-check the order with `Depends on:` lines. The milestone list can be wrong, and
    the dependency wins.
+   A dependency that is BUILT but still open only because its tests are owed (committed
+   untested while a player was on the live server) still blocks by that rule. If it
+   leaves no unit, ask with the question tool: wait and run its tests first
+   (recommended), build on it untested, or start the next stage. On 2026-11-07 the owner
+   chose to build #296 on #294's untested code. The new unit's tests then join the owed
+   list, and both close together.
 
 4. Pick the first unit left and say in one line what it is, why it is first, and what
    comes after it.
