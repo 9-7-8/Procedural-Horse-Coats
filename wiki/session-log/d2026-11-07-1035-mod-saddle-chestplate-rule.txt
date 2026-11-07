@@ -31,6 +31,10 @@ DONE (committed UNTESTED on the owner's call - see NOT RUN)
   (tin's drawn blue) and a lead ingot with none.
 - Wiki: new item-saddle.html; horse-gear, items, compatibility, config updated.
 - Split off: #295 saddlebags (sub-issue of #72, v0.5.047.2).
+- Queued by the owner ("Queue: the armor provided should scale at the same rate the
+  chestplate does"): #296, asked and answered "Modded follows its chestplate" - modded
+  horse armour protection read from its mod's chestplate after load, vanilla unchanged.
+  Filed on v0.5.047 before #295; not built (one unit per run, and this one is untested).
 
 DECIDED (without the owner; also on item-saddle.html)
 -------
@@ -47,7 +51,9 @@ FOUND ON THE WAY
 
 PROCEDURES
 ----------
-None changed.
+None changed. Asked all three questions: the routines followed (next-release,
+process-intake, add-an-item, rebake, compat-test's "update the jar first") held; the
+untested commit was the owner's call, not a gap in test-tiers.
 
 NOT RUN / NOT CHECKED
 ---------------------
@@ -60,7 +66,9 @@ test later". OWED before #75 and #294 close:
 - a runServer boot to Done(, grepped for ERROR / Couldn't parse / Invalid
 - the compat test (procedures/compat-test.txt) with the updated fake mod
 - pictures of the saddles and the chainmail armour (photograph-horses)
-Compiles: both modules, main and test, green. Node checks green: check-recipes,
+The end-session :neoforge-26.1.2:build is owed too (it runs this module's tests).
+Compiles: both modules, main and test, green. check-parity green (7163 checks).
+No pictures: launching a client was held back with a player on the live server. Node checks green: check-recipes,
 check-duplicate-item-art, bake-item-art, check-links, check-roadmap-execution,
 check-designer-boots.
 
@@ -70,4 +78,5 @@ Not offered: #75 is not closed yet.
 
 PICK UP FIRST
 -------------
-The owed tests above, then close #75 and #294 on their evidence. Next unit: #295.
+The owed tests and build above (check the live server first), then close #75 and #294
+on their evidence. Next unit: #296 (queued by the owner), then #295.
