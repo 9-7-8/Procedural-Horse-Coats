@@ -2438,6 +2438,7 @@ public final class ModGameTests {
         register(event, environment, A_SADDLE_ALONE_CARRIES_A_PASSENGER, 100);
         // One horse, one rider, a donkey; mount, wait, dismount, wait.
         register(event, environment, A_SADDLE_ADDS_ONLY_WHILE_RIDDEN, 100);
+        register(event, environment, A_CHESTPLATE_READS_AS_ITS_HORSE_ARMOUR, 20);
         register(event, environment, SHOES_FIT_THEIR_HOOVES, 100);
         register(event, environment, SHOES_ADD_THEIR_BONUS, 100);
         register(event, environment, A_SHOD_HORSE_STANDS_ON_POWDER_SNOW, 100);
@@ -4638,6 +4639,48 @@ public final class ModGameTests {
                 });
             });
         });
+    }
+
+    /**
+     * <b>A chestplate read through {@code ModdedArmourValue} gives back its own
+     * material's horse armour (#296).</b> The dev game has no modded metals, so
+     * this drives the two halves a modded armour uses with vanilla chestplates:
+     * {@code chestArmour} reads each stack's bound modifiers, and
+     * {@code bodyFor} must land leather, copper, iron and diamond on their own
+     * horse armour's value. Gold and netherite are the curve's two deliberate
+     * exceptions and are not expected to round-trip.
+     */
+    public static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> A_CHESTPLATE_READS_AS_ITS_HORSE_ARMOUR =
+            TEST_FUNCTIONS.register("a_chestplate_reads_as_its_horse_armour",
+                    () -> ModGameTests::aChestplateReadsAsItsHorseArmour);
+
+    private static void aChestplateReadsAsItsHorseArmour(GameTestHelper helper) {
+        net.minecraft.world.item.Item[][] pairs = {
+                {net.minecraft.world.item.Items.LEATHER_CHESTPLATE, net.minecraft.world.item.Items.LEATHER_HORSE_ARMOR},
+                {net.minecraft.world.item.Items.COPPER_CHESTPLATE, net.minecraft.world.item.Items.COPPER_HORSE_ARMOR},
+                {net.minecraft.world.item.Items.IRON_CHESTPLATE, net.minecraft.world.item.Items.IRON_HORSE_ARMOR},
+                {net.minecraft.world.item.Items.DIAMOND_CHESTPLATE, net.minecraft.world.item.Items.DIAMOND_HORSE_ARMOR},
+        };
+        StringBuilder wrong = new StringBuilder();
+        for (net.minecraft.world.item.Item[] pair : pairs) {
+            double chest = com.example.horsegenetics.neoforge.compat.ModdedArmourValue.chestArmour(new ItemStack(pair[0]));
+            double[] horse = {0};
+            new ItemStack(pair[1]).getAttributeModifiers().forEach(net.minecraft.world.entity.EquipmentSlot.BODY,
+                    (attribute, modifier) -> {
+                        if (attribute.value() == net.minecraft.world.entity.ai.attributes.Attributes.ARMOR.value()) {
+                            horse[0] += modifier.amount();
+                        }
+                    });
+            int body = chest > 0 ? com.example.horsegenetics.neoforge.compat.ModdedArmourValue.bodyFor(chest) : -1;
+            if (body != (int) horse[0]) {
+                wrong.append(' ').append(pair[0]).append(": chest ").append(chest)
+                        .append(" -> ").append(body).append(", its horse armour is ").append(horse[0]).append(';');
+            }
+        }
+        if (!wrong.isEmpty()) {
+            throw new GameTestAssertException(Component.literal("chestplates off the curve:" + wrong), 0);
+        }
+        helper.succeed();
     }
 
     /**

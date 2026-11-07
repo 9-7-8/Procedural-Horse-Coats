@@ -38,11 +38,12 @@ import java.util.Set;
  * resolved that way.
  *
  * <h2>How strong it is</h2>
- * A gem sits where diamond sits and an ingot sits where iron does, and that is
- * the whole of it. Stated plainly rather than dressed up: <b>where an ore
- * generates is not readable from a jar</b> - there is no depth to measure and no
- * declaration to read - so this is a guess about balance from the one signal
- * there is, and it will sometimes be wrong.
+ * <b>Registered</b>, a gem sits where diamond sits and an ingot where iron does:
+ * a guess, because nothing else is askable yet (below). <b>Worn</b>, it follows
+ * the mod's own chestplate (#296): {@link ModdedArmourValue} swaps the guess for
+ * that chestplate's armour on vanilla's chest-to-horse curve once components are
+ * bound. The guess is still what the metalsmith's tier is picked from, and what
+ * an armour keeps whose chestplate cannot be read.
  *
  * <h2>Why it is not cleverer than that - and cannot be</h2>
  * It used to be. {@code protectionFor} asked their own chestplate what it was
@@ -65,7 +66,8 @@ import java.util.Set;
  * no item is bound either. Both were tried; see {@code wiki/api-notes.html}.
  *
  * <p>The consequence is that the ladder is the only thing askable at a moment
- * we can still answer, so it is now asked directly, at registration, and
+ * we can still answer, so it is asked directly, at registration (and the real
+ * value is applied later, per stack, by {@link ModdedArmourValue}), and
  * {@link #protectionFor} is a pure function of the metal. That is also what
  * makes it safe for {@code GeneratedArmour} to call while deciding which of the
  * metalsmith's tiers stocks the thing, which happens at pack-finder time -
