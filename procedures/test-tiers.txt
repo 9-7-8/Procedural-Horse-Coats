@@ -164,6 +164,8 @@ STEPS
      harness background task is stopped when free memory dips, and the full suite is
      long enough to meet that: the 0.5.047.1 run was stopped that way and had to be
      started again. Wait on the log for BUILD SUCCESSFUL or BUILD FAILED.
+     Gradle prints "BUILD FAILED" to STDERR, so watch both redirect files: a wait on the
+     stdout file alone sat an hour past a failed runGameTest (2026-11-09).
    - Read the real exit code from the log. Never trust a piped command's exit code.
    - Check the log says "> Task :common:test" with no UP-TO-DATE after it. When nothing
      under common/ changed since the last run, Gradle skips the task, exits 0 in under a

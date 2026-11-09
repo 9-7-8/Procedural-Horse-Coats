@@ -114,6 +114,12 @@ STEPS
 
 4. Pick the first unit left and say in one line what it is, why it is first, and what
    comes after it.
+   - First, is the nearest release (or interim stage) already worth shipping? If its
+     planned work is built and only a split-off remainder, an unscoped piece or units
+     waiting on checks are left, OFFER the release now (step 6) instead of starting that
+     remainder; on a yes, move the remainder to the next stage by step 5's rule. Owner,
+     2026-11-09, when a run began scoping #295 (saddlebags, split off #75) with the rest
+     of v0.5.047.2 built: "can you please just release the next release already?"
    - None left, because every issue on the milestone is closed or only tracking
      parents remain -> step 6.
    - Every remaining unit is blocked on the owner or on another session -> say which
@@ -164,6 +170,9 @@ NEVER
 -----
 - Never build a unit from a later milestone while the next one has a buildable unit.
   The plan's order is the owner's.
+- Never work on anything from a later release or a later interim stage until the nearest
+  one is out (owner, 2026-11-09: "Don't work on stuff from a future release, EVER, until
+  the nearest release is out").
 - Never build a feature before an open bug on the same milestone (owner, 2026-10-05).
 - Never build two units in one run. The routines this hands to forbid it.
 - Never cut a release without her yes. Finishing a milestone earns an OFFER.

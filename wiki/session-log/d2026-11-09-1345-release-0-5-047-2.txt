@@ -1,0 +1,116 @@
+2026-11-09 13:45 (end) - Release 0.5.047.2: the bridle and the saddle, and breeding switches
+
+ASKED
+-----
+- "/next-release" - next release found: v0.5.047, its .2 stage (riding tack). Every bug
+  on the milestone was waiting on a check, so the first unit was #295 (saddlebags). Its
+  scoping questions were asked (how a saddle adds carry capacity; how the Pad slot
+  interacts). The owner answered "something else" for capacity, with no detail, and had
+  no preference on the Pad. Then she redirected the session (next line).
+- "Wait, can you please just release the next release already?" - released v0.5.047.2
+  without #295, which slipped to the head of v0.5.047.3.
+- "DOn't work on stuff from a future release, EVER, until the nearest release is out." -
+  saved as memory nearest-release-first, and written into procedures/next-release.txt.
+- "List everything in the latest relese ... What all are you taking photos of for the
+  post?" - listed the whole range, and asked two questions (owner's answers below).
+- "Can you make sure the tests are still running and healthy?" - they were not:
+  runGameTest had failed an hour earlier, and the wait had missed it (FOUND ON THE WAY).
+- "end session. We'll do 295 at a later session" - this.
+
+DONE
+----
+- cbc4afc6, the release commit, tagged v0.5.047.2 and published with the jar
+  (horsegenetics-0.5.047.2.jar, 7755037 bytes):
+  https://github.com/9-7-8/Procedural-Horse-Coats/releases/tag/v0.5.047.2
+  - mod_version 0.5.047.1 -> 0.5.047.2.
+  - README.md: a new "Bridle and saddle" paragraph; /horsebank; a paragraph on natural
+    breeding being off by default (fertility.natural_breeding = false) and the breeding.*
+    switches; "Still being built" now lists saddlebags, pads, boots and the tack bench.
+  - The note was written from an audit of the whole range, v0.5.047.1..HEAD (72 commits),
+    done by a subagent. It leads with a warning box for the natural-breeding default.
+    The same note is on wiki/releases.html#v0-5-047-2.
+  - Photos in release-photos/v0.5.047.2/, all real in-game shots, cropped:
+    - bridle.png and bridle-dyed.png (the 2026-11-01 shots);
+    - saddles.png, the seven tiers on one sheet (the 2026-11-09 11:52 shots);
+    - chainmail-horse-armour.png;
+    - build-query-popup.png and bank-filter-build.png, new from this session's crawl.
+    discord-post.md holds four messages, each under 2000 characters.
+  - Gametest fix: a_saddle_adds_only_while_ridden read the horse's own speed on its
+    founding tick. The stats can still settle a few ticks later: 0.2426 was read, while
+    the screen showed 0.2862, which is exactly the ridden 0.3148 / 1.1. So the saddle maths
+    was right and the test was wrong. saddleRideChain (ModGameTests) now reads its own speed
+    and jump just before the rider mounts.
+  - Crawl.photo(name): when -PmenuCrawl contains "photos", the crawler saves
+    run/screenshots/crawl-<name>.png. It is called at the stasis bank's open, its Browse
+    tab, and every Build popup (QueryCrawl.buildInPopup). Dev-only; a plain crawl is
+    unchanged.
+- The release set, every part green:
+  - tier-0 node checks: all nine;
+  - :common:test --rerun, 1810 tests, 16m42s. Slowest: CoatTextureIdTest 196s,
+    CoatTextureComposerTest 107s, ArcaneStockTest 96s, UndeadBreedsTest 93s,
+    RimehartBreedTest 66s, DeadLayerTest 56s, GenotypeCatalogTest 54s. The same set as
+    test-tiers records, so that list was not edited;
+  - :neoforge-26.1.2:test;
+  - runGameTest: 1 red, then "All 77 required tests passed" after the fix above;
+  - all seven headless browser checks;
+  - the menu crawl with photos: 836 passed, 0 failed, 4 skipped;
+  - runServer to "Done (". The only WARNs were vanilla command ambiguity, offline mode
+    and the known stasis_chamber empty-ingredients line, and there was no /ERROR].
+- Milestones:
+  - v0.5.047 (#44) marks the .2 stage RELEASED; #295 is listed under v0.5.047.3.
+  - The release plan (#196) has the same two edits, and a dated line on the slip.
+  - #260-#265, #269, #278 and #282 (closed in the range, no milestone) are on v0.5.047.
+- #295 comment: it slipped, and its capacity call is still open.
+- No pictures beyond the release photos above.
+
+DECIDED
+-------
+- Release v0.5.047.2 now, without #295 (owner).
+- Title "the bridle and the saddle, and breeding switches for servers" (owner).
+- Take screen photos for the post (owner, "Launch the game for shots"). This was done by
+  the crawler's new photo mode, not by hand.
+- Nothing from a later release or stage is worked until the nearest is out (owner).
+  Recorded in procedures/next-release.txt and memory.
+- #295 capacity model: open. The owner answered "something else" without saying what.
+  The four options offered are on the issue.
+- Without the owner: the stasis bank's growing grid has no photo. The crawl's bank shot
+  opened on the Browse tab, so it is used as the Build-button picture instead.
+
+FOUND ON THE WAY
+----------------
+- The wait on the first gametest run grepped only the stdout file. Gradle writes "BUILD
+  FAILED" to stderr, so the failure sat unnoticed for about an hour, until the owner
+  asked. procedures/test-tiers.txt now says to watch both files.
+- The crawl's runClientTestWorld overwrote run/logs/latest.log before the server boot's
+  backup step, so the owner's last play log from before this session is gone. That log
+  was the crawl's own by the time the backup ran.
+- Placeholder art, named in the note's rough edges, not filed (they are on
+  item-saddle.html#verify-saddle-look): every saddle draws the same seat; iron and
+  chainmail look alike; chainmail horse armour shows a dark panel across the back.
+
+PROCEDURES
+----------
+- next-release.txt: step 4 now checks whether the nearest stage is already worth
+  shipping before starting a split-off or unscoped remainder, and a NEVER line was added
+  (owner's rule).
+- test-tiers.txt: "BUILD FAILED" goes to stderr; watch both redirect files.
+- crawl-the-menus.txt and release.txt (step 5c): the crawl's "photos" mode for screen
+  pictures.
+
+NOT RUN / NOT CHECKED
+---------------------
+- Nothing in 0.5.047.2 has been played by a person: the bridle, the saddles, the
+  passenger rule, modded armour's chestplate value, the breeding switches and /horsebank.
+  Their Verification tabs already hold these checks.
+- Nobody has loaded a 0.5.047.1 world with a saddled horse, or with modded armour whose
+  metal no longer qualifies (horse-gear #verify-bridle; the ModdedArmour alias comment).
+- No Verification-tab anchors were added this session.
+
+RELEASE
+-------
+v0.5.047.2 cut on the owner's ask ("just release the next release already").
+
+PICK UP FIRST
+-------------
+#295 saddlebags, by /next-release: scoping first. The owner's capacity answer is still
+needed. She said "something else", so ask what she has in mind.
