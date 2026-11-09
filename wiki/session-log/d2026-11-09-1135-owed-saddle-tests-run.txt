@@ -1,0 +1,79 @@
+2026-11-09 11:35 (start) - Owed saddle and chestplate-rule tests run; withoutSaddle fixed
+
+ASKED
+-----
+- "run all the tests you haven't been able to, the server is empty" - every test owed by
+  the 2026-11-07 sessions (#75, #294, #296), which had held off with a player on the live
+  server. All run; one gametest red, fixed; see DONE.
+- (question tool) Close #75/#294/#296 after a permission denial on the gh write? Owner:
+  "Comment and close". Take the owed pictures now? Owner: "Take them now".
+- "end session" - this.
+
+DONE
+----
+- 30b05d9b (#75). SaddleEffects.withoutSaddle, which the horse's own info screen reads,
+  took back base x share. But ADD_MULTIPLIED_BASE multiplies base plus every ADD_VALUE,
+  so a shod, saddled, ridden horse showed share x the shoes' bonus too much speed. It now
+  recomputes AttributeInstance's order (adds, then multiplied-base without the saddle's
+  modifier, then multiplied-total, then sanitizeValue).
+  The gametest a_saddle_adds_only_while_ridden had read the horse's speed at spawn, before
+  the founding tick re-rolls its stats, so it failed every run ("the screen's speed
+  0.2375 is not the horse's own 0.2249"). It now waits for HorseRecords.hasRealRecord
+  (new helper afterFounded in ModGameTests, chain moved to saddleRideChain) and puts a
+  shoe-like ADD_VALUE modifier on the horse.
+  Proof: runGameTest "All 77 required tests passed". Mutating withoutSaddle back to the
+  old formula turned it red (0.2877 vs 0.2827, exactly 0.1 x the 0.05 add).
+- Owed tests, all green on HEAD 26753e67 plus the fix:
+  SaddlesTest 5/5, ArmourCurveTest 7/7. Both were mutated once (Saddles.bonus's ridden
+  check inverted; ArmourCurve's cap clamp removed), went red with 3 failures, and were
+  reverted. MaterialScanTest 33/33 (:neoforge-26.1.2:test). :neoforge-26.1.2:build green.
+  check-parity OK (7163). runServer reached Done( with no /ERROR]. The WARNs were vanilla
+  command ambiguity, the server.toml top-up for the new [saddles] keys, and the known
+  stasis_chamber "empty ingredients" recipe-book warning (api-notes).
+- Compat test, three boots (e4c32054, wiki/compatibility.html#compat-run-2026-11-09).
+  Boot 1: 1 wood, 6 metals (4 with a chestplate), fingerprint 56a1d17ef4ff4ea7, 76
+  files, no lead armour/saddle. Boot 2: current. Boot 3: nothing to generate. Errors were
+  only the fake mod's six c: tags.
+- #75, #294, #296 closed, with the evidence as a comment on each.
+- Pictures (photograph-horses, SHOTS edit reverted, not committed): seven saddle tiers on
+  a bay, SIDE, bridled; chainmail armour on a chestnut, WIDE and SIDE. Every tier draws
+  the same seat. The material shows only in the girth buckle, and iron and chainmail look
+  identical. The chainmail armour shows a solid black panel across the back. Recorded on
+  wiki/item-saddle.html#verify-saddle-look, not as a pass. Sent to the owner.
+
+DECIDED
+-------
+- Close the three issues now, with in-game checks left on the saddle page's Verification
+  tab (owner).
+- withoutSaddle recomputes the vanilla formula rather than reading with the modifier
+  removed and put back, so it touches no attribute state on the client (without the
+  owner; in the commit message).
+
+FOUND ON THE WAY
+----------------
+- My own mistake: the compat boot 3 left an empty run/phc/generated/. My Bash shell had
+  cd'd into it, and Windows will not delete a folder a process sits in. The mod's wipe
+  emptied it correctly. The folder was removed by hand. No bug.
+- Oddities in the pictures above, left for the owner's eye.
+
+PROCEDURES
+----------
+None changed. Asked all three end-session 4a questions: the procedures followed
+(test-tiers, launch-game step 8, compat-test, photograph-horses) held. The cd trap is a
+shell slip, not a procedure gap.
+
+NOT RUN / NOT CHECKED
+---------------------
+- The full :common:test suite: it would add CommonPortabilityTest's view of ArmourCurve
+  and Saddles. Due at the next release.
+- Nobody has played the saddles or seen a modded armour's new value in game:
+  wiki/item-saddle.html#verify-saddle-look, #verify-saddle-ride, #verify-saddle-sources,
+  #verify-chestplate-rule.
+
+RELEASE
+-------
+Not offered: the v0.5.047 milestone still holds open bugs and #295 (saddlebags).
+
+PICK UP FIRST
+-------------
+The next unit of v0.5.047, bugs first (#281, #259, #257, #36, #31, #10), then #295 saddlebags: next-release.
