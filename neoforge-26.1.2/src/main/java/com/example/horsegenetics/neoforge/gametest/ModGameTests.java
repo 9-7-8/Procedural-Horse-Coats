@@ -4588,10 +4588,41 @@ public final class ModGameTests {
         if (!horse.isEquippableInSlot(chainmail, net.minecraft.world.entity.EquipmentSlot.BODY)) {
             throw new GameTestAssertException(Component.literal("chainmail horse armour does not fit the body slot"), 0);
         }
-        double ownSpeed = horse.getAttributeValue(speedAttr);
-        double ownJump = horse.getAttributeValue(jumpAttr);
         com.example.horsegenetics.neoforge.entity.HorseTackSlot.SADDLE.set(horse, netherite);
+        // Shoes on as well: an ADD_VALUE beside the saddle's share is what
+        // withoutSaddle once got wrong (it took back base x share).
+        horse.getAttribute(speedAttr).addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                Identifier.fromNamespaceAndPath(com.example.horsegenetics.neoforge.HorseGenetics.MOD_ID, "test/shoe_like"),
+                0.05, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+        // The founding tick rolls the horse's stats, so its own speed is read
+        // after it, never at spawn (the test once compared against vanilla's roll).
+        afterFounded(helper, horse, 100, () -> {
+            double ownSpeed = horse.getAttributeValue(speedAttr);
+            double ownJump = horse.getAttributeValue(jumpAttr);
+            saddleRideChain(helper, rider, horse, top, ownSpeed, ownJump);
+        });
+    }
 
+    /** Runs {@code then} on the first tick the horse has a real record, failing after {@code ticks}. */
+    private static void afterFounded(GameTestHelper helper, net.minecraft.world.entity.animal.equine.Horse horse,
+            int ticks, Runnable then) {
+        if (com.example.horsegenetics.neoforge.server.HorseRecords.hasRealRecord(horse)) {
+            then.run();
+        } else if (ticks <= 0) {
+            throw new GameTestAssertException(Component.literal("the horse was never founded"), 0);
+        } else {
+            helper.runAfterDelay(1L, () -> afterFounded(helper, horse, ticks - 1, then));
+        }
+    }
+
+    private static void saddleRideChain(GameTestHelper helper, net.minecraft.world.entity.player.Player rider,
+            net.minecraft.world.entity.animal.equine.Horse horse, com.example.horsegenetics.common.gear.Saddles.Bonus top,
+            double ownSpeed, double ownJump) {
+        var saddleSlot = net.minecraft.world.entity.EquipmentSlot.SADDLE;
+        var speedAttr = net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
+        var jumpAttr = net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH;
+        var speedId = com.example.horsegenetics.neoforge.server.SaddleEffects.SPEED_ID;
+        var jumpId = com.example.horsegenetics.neoforge.server.SaddleEffects.JUMP_ID;
         helper.runAfterDelay(3L, () -> {
             if (horse.getAttribute(speedAttr).getModifier(speedId) != null
                     || horse.getAttribute(jumpAttr).getModifier(jumpId) != null) {

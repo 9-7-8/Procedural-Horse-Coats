@@ -102,9 +102,30 @@ public final class SaddleEffects {
             return horse.getAttributeValue(attribute);
         }
         Identifier id = attribute == Attributes.MOVEMENT_SPEED ? SPEED_ID : JUMP_ID;
-        AttributeModifier saddle = instance.getModifier(id);
-        double value = instance.getValue();
-        return saddle == null ? value : value - instance.getBaseValue() * saddle.amount();
+        if (instance.getModifier(id) == null) {
+            return instance.getValue();
+        }
+        // AttributeInstance.calculateValue's order with the saddle's modifier
+        // left out. Subtracting base x share was off whenever an ADD_VALUE sat
+        // beside it (shoes): the share multiplies base plus the adds, not the base.
+        double added = instance.getBaseValue();
+        for (AttributeModifier m : instance.getModifiers()) {
+            if (m.operation() == AttributeModifier.Operation.ADD_VALUE) {
+                added += m.amount();
+            }
+        }
+        double value = added;
+        for (AttributeModifier m : instance.getModifiers()) {
+            if (m.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE && !m.id().equals(id)) {
+                value += added * m.amount();
+            }
+        }
+        for (AttributeModifier m : instance.getModifiers()) {
+            if (m.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
+                value *= 1.0 + m.amount();
+            }
+        }
+        return attribute.value().sanitizeValue(value);
     }
 
     @SubscribeEvent
