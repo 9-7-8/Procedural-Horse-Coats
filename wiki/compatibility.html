@@ -1957,6 +1957,21 @@
     short-circuit and wipe states were not re-run.
 </p>
 
+<p id="compat-run-2026-11-09">
+    <strong>Saddles and the chestplate rule, 2026-11-09</strong> (#75, #294, #296), all three
+    boots on a dedicated server. Boot 1: <code>1 modded woods, 6 modded metals (4 with a
+    chestplate)</code>, fingerprint <code>56a1d17ef4ff4ea7</code>, 76 files. It wrote one
+    entro armour for the colliding pair, hellforged with no <code>ingot_</code> prefix, tin and
+    ruby, a saddle beside each of those four, five shoes, and no lead armour or lead saddle
+    (lead has an ingot and no chestplate). Every recipe was skipped by name as uncraftable,
+    with no parse error. Boot 2: <code>generated pack is current (56a1d17ef4ff4ea7)</code>.
+    Boot 3, jar removed: <code>0 modded woods, 0 modded metals</code>, <code>nothing to
+    generate</code>, a clean error grep. The only errors were the fake mod's own six
+    <code>c:</code> tags. Not shown: what a modded armour is worth on a horse.
+    <code>ModdedArmourValue</code> reads a registered chestplate, and this jar registers
+    none (<a href="item-saddle.html#verify-chestplate-rule">the saddle page's check</a>).
+</p>
+
 <p><strong>Confirmed by that run:</strong></p>
 
 <ul>
