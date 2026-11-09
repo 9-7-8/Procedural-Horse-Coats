@@ -86,6 +86,96 @@
     </p>
 </div>
 
+<h2 id="v0-5-047-2">0.5.047.2 &mdash; the bridle and the saddle, and breeding switches for servers</h2>
+
+<p>The second stage of the equipment release: <strong>riding tack</strong>. On a horse, the vanilla saddle is now the bridle, and the saddle is a new piece that makes the ride better, in every chestplate material. Horse armour now follows the chestplate rule too, and chainmail horse armour has been added. This release also brings a set of server switches asked for by server operators: breeding can be turned off kind by kind, there is a one-command <code>/horsebank</code>, the stasis bank has no size limit, and there are new operator commands. About a dozen interface fixes ride along. 72 commits since 0.5.047.1.</p>
+<div class="note warn"><p><strong>Server owners, read this first.</strong> Natural breeding is now <strong>off by default</strong>. A stallion left with a mare no longer covers her on his own until <code>fertility.natural_breeding = true</code> is set in <code>server.toml</code>. Every horse you have already saddled has its saddle moved to its head as a bridle, and still rides as it did. Details are under "What this does to a world you already have". <strong>Update the server and every client together</strong>: this release adds items, so a 0.5.047.2 client cannot join a 0.5.047.1 server, or the other way round.</p></div>
+<h3 id="v0-5-047-2-the-bridle-and-the-saddle">The bridle and the saddle</h3>
+<p><strong>The bridle.</strong> On a horse, the item vanilla calls a saddle is now called a <strong>Bridle</strong>, with a bridle&rsquo;s picture, and it is worn on the head. A bridle is what steers: anyone riding a bridled horse can steer it. With nothing on its head, only the owner can steer, and only at the top bond tier. A horse that bolts throws its bridle. The Tack Dyeing Bench still colours it. Donkeys and mules keep it as a saddle on the back, as before.</p>
+<p><img src="../release-photos/v0.5.047.2/bridle.png" alt="A bridle worn on the head" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Headstall, bit and reins, with no seat or stirrups.</em></p>
+<p><img src="../release-photos/v0.5.047.2/bridle-dyed.png" alt="A dyed bridle" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Dyed at the Tack Dyeing Bench: the straps red, the fittings gold.</em></p>
+<p><strong>A saddle with no bridle makes you a passenger.</strong> Below the top bond tier, a saddled horse with no bridle carries you but goes where it likes. It wanders, grazes, goes back to its foal and rests beside its friends. It never spars or goes courting with you aboard. At the top bond tier, the owner steers anyway. Servers can turn this off with <code>behaviour.saddle_needs_bridle = false</code>.</p>
+<p><strong>The saddle.</strong> This is the mod&rsquo;s own item, worn in the Saddle slot of the Gear tab (or put on with a right-click). It works on horses only. While a player rides, it adds a share of the horse&rsquo;s own speed and jump. The more expensive the saddle, the bigger the share:</p>
+<table><tr><th>Saddle</th><th>While ridden</th><th>Made from</th></tr>
+<tr><td>Leather</td><td>+2.5%</td><td>3 leather, a horse hair</td></tr>
+<tr><td>Copper</td><td>+4%</td><td>a leather saddle, 2 copper ingots</td></tr>
+<tr><td>Chainmail</td><td>+5%</td><td>a leather saddle, 2 iron chains</td></tr>
+<tr><td>Iron</td><td>+6%</td><td>a leather saddle, 2 iron ingots</td></tr>
+<tr><td>Golden</td><td>+7%</td><td>a leather saddle, 2 gold ingots</td></tr>
+<tr><td>Diamond</td><td>+8.5%</td><td>a leather saddle, 2 diamonds</td></tr>
+<tr><td>Netherite</td><td>+10%</td><td>a diamond saddle, a netherite ingot</td></tr>
+</table>
+<p>The equestrian leatherworker sells the leather, copper, iron, golden and diamond saddles. Another mod&rsquo;s metal gets a saddle of its own if that mod also makes a chestplate of it. Horses in generated stables and horses bought from a dealer come wearing a bridle and a leather saddle. The horse&rsquo;s own screen shows its speed and jump without the saddle, because the bonus belongs to the ride. Config: <code>saddles.enabled</code>, <code>saddles.top_speed</code>, <code>saddles.top_jump</code> (0.1 each).</p>
+<p><img src="../release-photos/v0.5.047.2/saddles.png" alt="The seven saddles" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Leather, copper, chainmail, iron (top row); golden, diamond, netherite (bottom row). The fittings take the colour of the matching chestplate.</em></p>
+<p><strong>Horse armour in every chestplate material.</strong> <strong>Chainmail horse armour</strong> is new: 6 iron chains and a horse hair. It protects as much as chainmail does, between copper and iron. Another mod&rsquo;s metal gets a horse armour only if that mod also makes a chestplate of it. That armour now protects in proportion to its mod&rsquo;s chestplate, so a strong modded chestplate makes strong horse armour. Modded saddles and armour take their colours from the chestplate.</p>
+<p><img src="../release-photos/v0.5.047.2/chainmail-horse-armour.png" alt="Chainmail horse armour" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Chainmail horse armour, worn.</em></p>
+<p>Saddlebags (carry capacity from the saddle) did not make this stage. They move to the next one.</p>
+<h3 id="v0-5-047-2-for-server-operators">For server operators</h3>
+<ul>
+    <li><strong>Breeding switches.</strong> <code>breeding.enabled</code> is a master switch. There is also one switch for each kind of breeding: <code>breeding.realm_natural_cover</code> (FOLLOW / ON / OFF), <code>breeding.stasis_stud</code>, <code>breeding.golden_carrot</code> and <code>breeding.seed_jar</code>. Operators can flip any of them while the server runs with <code>/horsebreeding &lt;kind&gt; enable|disable</code>. Pregnancies already under way still foal.</li>
+    <li><strong>Natural breeding</strong> has its own key, <code>fertility.natural_breeding</code>. It now defaults to <strong>false</strong>.</li>
+    <li><strong><code>/horsebank</code>.</strong> This files your own loaded, unridden horses, oldest first, into the empty stasis chambers you carry and then into your nearest stasis bank.</li>
+    <li><code>horsebank.allow_non_op</code> (true) lets players use it. <code>horsebank.search_chunks</code> (1) sets how far it looks.</li>
+    <li>Each player picks the order chambers are used in with the client key <code>horsebank.chamber_order</code>.</li>
+    <li>Operators also get <code>/horsebank force [player]</code>, and <code>/horsebank new [player]</code>, which places a bank within <code>horsebank.place_radius</code>.</li>
+    <li><strong>The stasis bank grid grows.</strong> A bank always keeps one empty row and has no size limit.</li>
+    <li><strong>Operator commands</strong> (op level 2):</li>
+    <li><code>/horserealm send &lt;horses&gt;</code></li>
+    <li><code>/horsesweep &lt;wild|cowboy|all&gt; [despawn|realm]</code> (with no action, it only counts)</li>
+    <li><code>/horsesweep turnover [enable|disable]</code> (config <code>wild.turnover</code>)</li>
+</ul>
+<h3 id="v0-5-047-2-other-changes">Other changes</h3>
+<ul>
+    <li><strong>Turnout tickets</strong> now take an untamed horse to the realm, at no fee. Someone else&rsquo;s tamed horse is still refused.</li>
+    <li><strong>A layer horse lays when fed.</strong> Every meal you hand-feed it lays one item at once and restarts its timer (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/258">#258</a>).</li>
+    <li><strong>A Build button on every filter box.</strong> It is in the horse browser, the breeding preview, the stasis bank&rsquo;s Browse tab and the cowboy&rsquo;s counter. It builds a query for you, and you can now query by <code>sex</code> (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/265">#265</a>).</li>
+</ul>
+<p><img src="../release-photos/v0.5.047.2/build-query-popup.png" alt="The Build popup under the horse browser&#x27;s filter box" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>Build, under My horses&rsquo; filter box: one row per clause, and the query it makes underneath.</em></p>
+<p><img src="../release-photos/v0.5.047.2/bank-filter-build.png" alt="The stasis bank&#x27;s Browse tab with a query and the Build button" style="max-width:100%;height:auto;display:block;margin:0.5em 0" loading="lazy"><br><em>The same Build button on the stasis bank. Text too long for its space now ends in an ellipsis, with the full text in a tooltip.</em></p>
+<h3 id="v0-5-047-2-fixed">Fixed</h3>
+<ul>
+    <li><strong>Ownerless foals.</strong> A tamed mare&rsquo;s foal was born tame but with no owner when the owner was offline (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/282">#282</a>).</li>
+    <li><strong>A were-mooshroom lost its horse.</strong> Shearing one in lycan form lost the horse inside it (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/278">#278</a>).</li>
+    <li><strong>Sold out after an empty search.</strong> The cowboy said he was sold out after a search that matched nothing (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/269">#269</a>).</li>
+    <li><strong>Herd horses pressing on fences.</strong> They no longer press against a fence trying to reach a horse on the other side (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/259">#259</a>; waiting on a look in-game).</li>
+    <li><strong>Screens on a small window</strong>:</li>
+    <li>Wagon cargo slots no longer sit off the window (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/260">#260</a>).</li>
+    <li>Browser tabs work on a narrow window (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/261">#261</a>).</li>
+    <li>Saved... no longer sits on top of Refresh (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/262">#262</a>).</li>
+    <li>The Query tab&rsquo;s Save... menu stays open (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/263">#263</a>).</li>
+    <li>Breeding preview&rsquo;s Saved... can be pressed (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/264">#264</a>).</li>
+    <li>Query dropdowns flip or cap to fit (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/266">#266</a>).</li>
+    <li>Bank and shelf tabs stay on screen (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/267">#267</a>).</li>
+    <li>The bank title no longer overlaps its count (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/277">#277</a>).</li>
+    <li><strong>Text that is shrunk to fit</strong> stops at 70% scale. Past that it is cut with an ellipsis and shows the full text as a tooltip (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/268">#268</a>).</li>
+    <li><strong>Contrast.</strong> Dim hint text is a little darker on every screen, for contrast (<a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/267">#267</a>).</li>
+</ul>
+<h3 id="v0-5-047-2-what-this-does-to-a-world-you-already-have">What this does to a world you already have</h3>
+<ul>
+    <li><strong>Saddles become bridles.</strong> A horse wearing vanilla&rsquo;s saddle has it moved to its head the first time it loads. If the head is already taken, the bridle drops beside the horse. Donkeys and mules are untouched. The item is renamed "Bridle" everywhere, pigs and striders included.</li>
+    <li><strong>Natural breeding stops.</strong> It does so until <code>fertility.natural_breeding = true</code> is set. This was always on before.</li>
+    <li><strong>Saddled horses without a bridle</strong> carry you as a passenger below the top bond tier.</li>
+    <li><strong>Modded horse armour</strong> exists only for metals that have a chestplate. An armour whose metal no longer qualifies loads as iron horse armour, and a dropped modded saddle loads as an iron saddle. The protection of the modded armour that remains changes to match its chestplate.</li>
+    <li><strong>Stasis banks</strong> keep every chamber. Large banks save in a new format. Going back to an older jar would lose chambers past slot 255.</li>
+    <li><strong>Leatherworkers</strong> now offer saddles. Villagers that already have their trades may keep the old ones.</li>
+    <li>No breed or gene frequencies changed.</li>
+</ul>
+<h3 id="v0-5-047-2-not-played-yet-known-rough-edges">Not played yet / known rough edges</h3>
+<ul>
+    <li><strong>Open bugs:</strong></li>
+    <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/10">#10</a>, <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/31">#31</a> and <a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/36">#36</a> are fixed and waiting on a look.</li>
+    <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/259">#259</a> is fixed and waiting on a look at pens.</li>
+    <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/257">#257</a>: wild Rimeharts on the live server never buck. It is not reproduced and waits on the server manager.</li>
+    <li><a href="https://github.com/9-7-8/Procedural-Horse-Coats/issues/281">#281</a> is a test-only flake.</li>
+    <li><strong>Never played:</strong> the saddles, the bridle, modded armour&rsquo;s new protection, the breeding switches and <code>/horsebank</code> have passed their tests but have not been played yet.</li>
+    <li><strong>Placeholder art:</strong></li>
+    <li>Every saddle draws the same seat and differs only in its buckle.</li>
+    <li>The iron and chainmail saddles look alike.</li>
+    <li>Chainmail horse armour shows a dark panel across the back.</li>
+    <li><strong>The full list:</strong> <a href="https://9-7-8.github.io/Procedural-Horse-Coats/wiki/verification.html">the verification page</a>.</li>
+</ul>
+
+
 <h2 id="v0-5-047-1">0.5.047.1 &mdash; horse shoes, and gear drawn with depth</h2>
 
 <p>The first part of the equipment release. Horses can wear <strong>horse shoes</strong>: one on each hoof, bought from the equestrian metalsmith, each adding a little speed and jump, keeping a horse on top of powder snow, and able to carry one of the mod&rsquo;s first two enchantments. The gear horses already wear is now <strong>drawn with depth</strong>: horse armour and braids stand a little off the coat with a real edge. Three bugs are fixed.</p>

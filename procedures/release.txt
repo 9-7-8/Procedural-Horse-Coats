@@ -149,7 +149,9 @@ STEPS
    b. Run photograph-horses for horses and parts. Give a breed its own founder shot. For
       an item, block or screen, take an in-game screenshot the same way (DebugPhotoShoot
       has no item stage: extend it, or screenshot by hand with the owner's world closed
-      per launch-game). Name files plainly: <subject>.png, e.g. back-sail.png.
+      per launch-game). For a screen, run the release set's menu crawl with "photos" in
+      its value (crawl-the-menus): it saves crawl-*.png of the bank and the Build popups,
+      and Crawl.photo(name) adds a shot anywhere else a case reaches. Name files plainly: <subject>.png, e.g. back-sail.png.
       A shot one of the range's own sessions already took is as good as a new one, if
       the part's code has not changed since (`git log <shot's time>.. -- <its generator>`):
       list run/screenshots/photo-* by date, pick from a contact sheet, and shoot only what

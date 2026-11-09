@@ -4594,13 +4594,11 @@ public final class ModGameTests {
         horse.getAttribute(speedAttr).addOrUpdateTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
                 Identifier.fromNamespaceAndPath(com.example.horsegenetics.neoforge.HorseGenetics.MOD_ID, "test/shoe_like"),
                 0.05, net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
-        // The founding tick rolls the horse's stats, so its own speed is read
-        // after it, never at spawn (the test once compared against vanilla's roll).
-        afterFounded(helper, horse, 100, () -> {
-            double ownSpeed = horse.getAttributeValue(speedAttr);
-            double ownJump = horse.getAttributeValue(jumpAttr);
-            saddleRideChain(helper, rider, horse, top, ownSpeed, ownJump);
-        });
+        // The founding tick rolls the horse's stats, and they can still settle a
+        // few ticks after it (2026-11-09: own speed read on the founding tick was
+        // 0.2426, the screen's 0.2862 three ticks later, exactly ridden / 1.1), so
+        // saddleRideChain reads the horse's own numbers just before the rider gets on.
+        afterFounded(helper, horse, 100, () -> saddleRideChain(helper, rider, horse, top));
     }
 
     /** Runs {@code then} on the first tick the horse has a real record, failing after {@code ticks}. */
@@ -4616,8 +4614,7 @@ public final class ModGameTests {
     }
 
     private static void saddleRideChain(GameTestHelper helper, net.minecraft.world.entity.player.Player rider,
-            net.minecraft.world.entity.animal.equine.Horse horse, com.example.horsegenetics.common.gear.Saddles.Bonus top,
-            double ownSpeed, double ownJump) {
+            net.minecraft.world.entity.animal.equine.Horse horse, com.example.horsegenetics.common.gear.Saddles.Bonus top) {
         var saddleSlot = net.minecraft.world.entity.EquipmentSlot.SADDLE;
         var speedAttr = net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED;
         var jumpAttr = net.minecraft.world.entity.ai.attributes.Attributes.JUMP_STRENGTH;
@@ -4629,6 +4626,8 @@ public final class ModGameTests {
                 throw new GameTestAssertException(Component.literal(
                         "a saddled horse with nobody on it already carries the saddle's bonus"), 0);
             }
+            double ownSpeed = horse.getAttributeValue(speedAttr);
+            double ownJump = horse.getAttributeValue(jumpAttr);
             seat(rider, horse);
             helper.runAfterDelay(3L, () -> {
                 var speed = horse.getAttribute(speedAttr).getModifier(speedId);

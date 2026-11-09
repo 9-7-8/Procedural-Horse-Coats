@@ -594,6 +594,28 @@ final class Crawl {
         });
     }
 
+    /** Names already photographed this run: a case that repeats per query shoots once. */
+    private static final java.util.Set<String> photographed = new java.util.HashSet<>();
+
+    /**
+     * Save the screen as it stands to run/screenshots/crawl-{@code name}.png, when the
+     * crawl was started with "photos" in its value ({@code -PmenuCrawl=photos}). For the
+     * release notes' screen pictures (release step 5c); it checks nothing, and does nothing at all in a plain crawl. Ten
+     * ticks are drawn first so the state the case just set up has settled on screen.
+     */
+    static void photo(String name) {
+        if (!String.valueOf(System.getProperty(MenuCrawlClient.PROPERTY)).contains("photos")
+                || !photographed.add(name)) {
+            return;
+        }
+        pause(10);
+        then(() -> {
+            String file = "crawl-" + name + ".png";
+            net.minecraft.client.Screenshot.grab(mc().gameDirectory, file, mc().getMainRenderTarget(), 1,
+                    msg -> HorseGenetics.LOGGER.info("[crawl] photo saved {}", file));
+        });
+    }
+
     /** Wait {@code ticks} client ticks - frames render in between, which builds hit boxes. */
     static void pause(int ticks) {
         queue.add(() -> ticks);

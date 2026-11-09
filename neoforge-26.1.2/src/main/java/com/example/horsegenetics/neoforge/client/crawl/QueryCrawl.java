@@ -237,6 +237,7 @@ final class QueryCrawl {
             return null;
         });
         eventually(w + " Bank", "the bank opens", 60, () -> isScreen(HorseStasisBankScreen.class));
+        photo("bank-chambers");
         pressAt(w + " Bank", "the Browse tab", () -> {
             Screen s = Objects.requireNonNull(screen());
             Object browse = enumConstant(com.example.horsegenetics.neoforge.menu.HorseStasisBankMenu.class, "Tab", "BROWSE");
@@ -262,6 +263,7 @@ final class QueryCrawl {
             }
             return compare(want, got);
         });
+        photo("bank-browse");
         if (q.popup()) {
             then(() -> ((EditBox) get(Objects.requireNonNull(screen()), "filterBox")).setValue(""));
             buildInPopup(w + " Bank Build", q, () -> get(screen(), "buildButton"),
@@ -353,6 +355,7 @@ final class QueryCrawl {
                     popupOpen(w), call(builder(), "menuOpen"), call(builder(), "query"), name(screen())));
         }
         LayoutAudit.audit(w + " (popup filled in)");
+        photo("build-popup-" + w.replaceAll("[^A-Za-z]+", "-").toLowerCase(java.util.Locale.ROOT));
         then(() -> check(w, "the rows make \"" + q.text().get() + "\"",
                 same("the built query", q.text().get(), String.valueOf(call(builder(), "query")))));
         pressAt(w, "Done", () -> action(-3));

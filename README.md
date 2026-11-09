@@ -48,11 +48,19 @@ enough lets you ride it without a saddle. Wild horses form herds with a lead
 stallion.
 
 **Dress them.** Open a horse's screen (the small **i** button beside its inventory) and
-the Gear tab shows everything it can wear on a picture of the horse. The saddle,
-body armour and braids you can put on today, and you can dye saddles and armour
-colour by colour at the Tack Dyeing Bench - with any dye, ingot or gem, including
-ones from other mods. Right-click your horse holding a piece of tack and it goes on.
-Armour and braids are drawn with real depth, standing a little off the coat.
+the Gear tab shows everything it can wear on a picture of the horse. Right-click your
+horse holding a piece of tack and it goes on.
+
+**Bridle and saddle.** On a horse, vanilla's saddle is now the **bridle**: it goes on the
+head, and it is what steers. The **saddle** is a separate piece on the back that makes
+the ride better - while you sit in it, it adds a share of the horse's own speed and jump,
+from leather up to netherite (10%), and in other mods' metals too. A horse with a saddle
+and no bridle carries you as a passenger until it trusts you fully, and walks where it
+likes. Horses you already saddled get their saddle moved to the head, and ride as
+before. Horse armour comes in every material a chestplate does, chainmail included, and
+another mod's armour protects as well as its own chestplate. Armour and braids are drawn
+with real depth, and you can dye bridles and armour colour by colour at the Tack Dyeing
+Bench - with any dye, ingot or gem, including ones from other mods.
 
 **Shoe them.** The equestrian metalsmith sells horse shoes - copper, iron, golden,
 diamond and netherite, and one for every metal another mod adds. Each hoof takes its
@@ -85,7 +93,8 @@ an ender whistle bound to one horse - one horse from anywhere. A command whistle
 follow, graze nearby, go home, or, for a horse bred to fight, hunt monsters, guard a spot
 or defend you. Tickets send a horse to
 its stall. Stasis chambers store a horse cheaply, and a stasis bank holds many and can
-even breed a pair for you. Double gates, showjumping fences and stall signs
+even breed a pair for you - and `/horsebank` files your loose horses into it in one go.
+Double gates, showjumping fences and stall signs
 are there for building a yard.
 
 **Trade for horses.** A cowboy in a plains village sells horses as transfer papers
@@ -136,7 +145,7 @@ Everything is explained in depth on **[the wiki](https://9-7-8.github.io/Procedu
 which is the full guide to every gene, breed, item and rule, and is kept up to date as the
 mod grows.
 
-**Still being built:** better tack (pads, bridles, boots), feeding
+**Still being built:** more tack (saddlebags, pads, boots, a tack bench), feeding
 troughs, a lasso, and more fantasy breeds. The wiki's roadmap pages list what is planned.
 
 ---
@@ -181,8 +190,12 @@ has nothing it is allowed to be simply does not spawn, so turning off the shippe
 breeds and Feral Mixed leaves a world with only the breeds you made, living only
 where you put them.
 
-Two things in `server.toml` are worth knowing about, because
-they are the only two the mod turns off for you. `health.mode` decides how much of
+**Horses no longer breed on their own by default.** `fertility.natural_breeding` in
+`server.toml` is `false`; set it `true` to let a stallion and a mare cover each other
+without you. Every other kind of breeding has a switch under `breeding.*`, and an
+operator can flip any of them while the server runs with `/horsebreeding`.
+
+Two more things in `server.toml` are worth knowing about. `health.mode` decides how much of
 the disease layer a world plays with, and **`body.size` decides whether the size
 genes actually resize the horse** - on by default, but a Falabella and a Percheron
 have differently-sized *hitboxes*, so if you would rather every saddle, lead and
